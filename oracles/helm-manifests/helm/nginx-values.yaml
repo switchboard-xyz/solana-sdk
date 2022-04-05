@@ -1,0 +1,7 @@
+controller:
+  setAsDefaultIngress: true
+  service:
+    loadBalancerIP: $EXTERNAL_IP
+  wildcardTLS:
+    cert: $GRAFANA_TLS_CRT
+    key: $GRAFANA_TLS_KEY

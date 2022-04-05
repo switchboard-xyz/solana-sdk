@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strict": false,
+    "noImplicitReturns": false,
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
+    }
+  },
+  "include": ["src/**/*", "src/**/*.json"],
+  "exclude": ["esbuild.js", "./lib", "node_modules"],
+  "references": [{ "path": "../../libraries/ts" }],
+  "files": ["src/index.ts"]
+}

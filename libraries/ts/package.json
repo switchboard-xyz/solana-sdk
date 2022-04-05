@@ -1,0 +1,63 @@
+{
+  "name": "@switchboard-xyz/switchboard-v2",
+  "version": "0.0.72",
+  "description": "API wrapper for intergating with the Switchboardv2 program",
+  "keywords": [
+    "oracle",
+    "solana",
+    "Defi"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/switchboardv2-api"
+  },
+  "license": "MIT",
+  "author": "mitch@switchboard.xyz",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "docgen": "npx tsc && npx typedoc src/sbv2.ts",
+    "purge": "rimraf lib",
+    "compile": "./esbuild.js",
+    "build": "rimraf lib && ./esbuild.js",
+    "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
+    "publish": "npm version patch --force && npm publish"
+  },
+  "peerDependencies": {
+    "@project-serum/anchor": "0.22.1",
+    "@solana/spl-governance": "^0.0.34",
+    "@solana/web3.js": "1.37.1"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@switchboard-xyz/v2-task-library": "^0.0.1",
+    "assert": "^2.0.0",
+    "big.js": "^6.1.1",
+    "bs58": "^4.0.1",
+    "buffer-layout": "^1.2.0",
+    "chalk": "^4.1.2",
+    "chan": "^0.6.1",
+    "crypto-js": "^4.0.0",
+    "docgen": "^0.0.1",
+    "dotenv": "^16.0.0",
+    "long": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/big.js": "^6.0.2",
+    "@types/long": "^4.0.1",
+    "@types/mocha": "^9.0.0",
+    "esbuild-node-externals": "^1.4.1",
+    "estrella": "^1.4.1",
+    "mocha": "^9.1.1",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "typedoc": "^0.22.13",
+    "typescript": "^4.2.4"
+  }
+}

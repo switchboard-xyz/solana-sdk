@@ -1,0 +1,52 @@
+persistence:
+  enabled: true
+  storageClassName: standard-rwo
+adminUser: admin
+adminPassword: $GRAFANA_ADMIN_PASSWORD
+resources:
+  requests:
+    memory: "1024Mi"
+    cpu: "500m"
+  limits:
+    memory: "1024Mi"
+    cpu: "500m"
+service:
+  type: ClusterIP
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts: [$GRAFANA_HOSTNAME]
+  tls:
+    - hosts:
+        - $GRAFANA_HOSTNAME
+namespaceOverride: grafana
+sidecar:
+  dashboards:
+    enabled: true
+    labelValue: "1"
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: victoriametrics
+        type: $METRICS_EXPORTER
+        url: "http://vmsingle-victoria-metrics-single-server.default.svc:8428"
+        access: proxy
+        editable: true
+        isDefault: true
+        basicAuth: false
+
+notifiers:
+  name: PagerDuty
+  type: pagerduty
+  uid: pagerduty1
+  org_id: 1
+  is_default: true
+  send_reminder: true
+  frequency: 5m
+  disable_resolve_message: false
+  settings:
+    autoResolve: true
+  secure_settings:
+    integrationKey: $PAGERDUTY_EVENT_KEY

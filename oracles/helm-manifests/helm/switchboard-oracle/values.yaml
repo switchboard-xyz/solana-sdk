@@ -1,0 +1,17 @@
+cluster: $CLUSTER
+googlePayerSecretPath: $GOOGLE_PAYER_SECRET_PATH
+googleOracleSecretPath: $GOOGLE_PAYER_SECRET_PATH
+heartbeatInterval: $HEARTBEAT_INTERVAL
+metricsExporter: $METRICS_EXPORTER
+gcpConfigBucket: $GCP_CONFIG_BUCKET
+rpcUrl: $RPC_URL
+wsUrl: $WS_URL
+backupMainnetUrl: $BACKUP_MAINNET_RPC
+pagerdutyEventKey: $PAGERDUTY_EVENT_KEY
+image: "docker.io/switchboardlabs/node:dev-v2-4-5-22a"
+keyJson: $SERVICE_ACCOUNT_BASE64
+oracleKeys:
+  - name: idx-1
+    data: $ORACLE_KEY
+  # - name: idx-2
+  #   data: $ORACLE_KEY

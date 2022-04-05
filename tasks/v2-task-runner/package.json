@@ -1,0 +1,55 @@
+{
+  "name": "@switchboard-xyz/v2-task-runner",
+  "version": "0.0.1",
+  "description": "switchboard v2 task runner",
+  "author": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf lib && ./esbuild.js",
+    "publish": "npm version patch --force && npm publish"
+  },
+  "resolutions": {
+    "@solana/buffer-layout": "4.0.0",
+    "**/@saberhq/token-utils/**/@solana/buffer-layout": "^3.0.0",
+    "@solana/web3.js": "^1.37.1"
+  },
+  "dependencies": {
+    "@blockworks-foundation/mango-client": "^3.4.1",
+    "@drift-labs/sdk": "^0.1.29",
+    "@jup-ag/core": "^1.0.0-beta.19",
+    "@mercurial-finance/stable-swap-n-pool": "^0.2.5",
+    "@orca-so/sdk": "^1.2.23",
+    "@project-serum/anchor": "^0.22.1",
+    "@project-serum/serum": "^0.13.62",
+    "@pythnetwork/client": "^2.6.1",
+    "@raydium-io/raydium-sdk": "1.0.1-beta.17",
+    "@saberhq/stableswap-sdk": "^1.12.58",
+    "@saberhq/token-utils": "^1.12.58",
+    "@solana/web3.js": "^1.37.1",
+    "@switchboard-xyz/defi-yield-ts": "^1.0.4",
+    "@switchboard-xyz/switchboard-v2": "^0.0.72",
+    "@switchboard-xyz/v2-task-library": "^0.0.1",
+    "@zetamarkets/sdk": "^0.13.0",
+    "big.js": "^6.1.1",
+    "chalk": "^4.1.2",
+    "decimal.js": "^10.3.1",
+    "jsonpath-plus": "^6.0.1",
+    "long": "^5.2.0",
+    "neverthrow": "^4.3.1",
+    "node-fetch": "^2.6.1",
+    "ws-reconnect": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/long": "^4.0.1",
+    "esbuild-node-externals": "^1.4.1",
+    "estrella": "^1.4.1",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
+    "shx": "^0.3.4",
+    "ts-node": "^10.7.0"
+  }
+}

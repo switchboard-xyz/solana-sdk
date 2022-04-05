@@ -1,0 +1,47 @@
+import type * as anchor from "@project-serum/anchor";
+import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import fetch from "node-fetch";
+import { OracleContext, SwitchboardTask, SwitchboardTaskError } from "../types";
+
+export class AlephTaskError extends SwitchboardTaskError {
+  constructor(status: number) {
+    super(`Error (Status=${status})`, "Aleph");
+  }
+}
+
+export class AlephTask extends SwitchboardTask {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor() {
+    super();
+  }
+
+  async run(
+    alephTask: OracleJob.IHttpTask,
+    input: undefined,
+    program: anchor.Program,
+    context?: OracleContext
+  ): Promise<string> {
+    const url: string = this.variableExpand(alephTask.url ?? "", {});
+    const headers: Record<string, string> = {};
+    for (const header of alephTask.headers ?? []) {
+      headers[header.key ?? ""] = this.variableExpand(header.value ?? "", {});
+    }
+
+    const body: string = alephTask.body ?? "";
+
+    const isPost = alephTask.method === OracleJob.HttpTask.Method.METHOD_POST;
+    const requestSpec = {
+      method: isPost ? "POST" : "GET",
+      body: isPost ? body : undefined,
+      headers: headers,
+      timeout: 2 * 1000,
+    };
+
+    const response = await fetch(url, requestSpec);
+    if (!response.ok) {
+      throw new AlephTaskError(response.status);
+    }
+
+    return response.text();
+  }
+}

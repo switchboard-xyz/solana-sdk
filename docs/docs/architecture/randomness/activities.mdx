@@ -1,0 +1,94 @@
+---
+sidebar_position: 50
+title: Activities
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Typography } from "@mui/material";
+
+import VrfInit from "/api/idl/instructions/vrfInit.md";
+import VrfProve from "/api/idl/instructions/vrfProve.md";
+import VrfVerify from "/api/idl/instructions/vrfVerify.md";
+import VrfRequestRandomness from "/api/idl/instructions/vrfRequestRandomness.md";
+import RandomnessInstructions from "/api/idl/_randomness_instructions.mdx";
+
+## Create VRF Account
+
+Create and initialize a VRF Account.
+
+<MarkdownImage
+  img="/img/Activity_VRF_Create.png"
+  sx={{
+    maxHeight: ["100%", "700px"],
+  }}
+/>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  VrfInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfInit />
+
+</details>
+
+## Request Randomness
+
+Request a new randomness value for a VRF Account. Each VRF request will cost 0.1 wSOL. A new value can be requested once an open request has been verified or after 1 minute.
+
+<MarkdownImage img="/img/Activity_VRF_Request.png" />
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  VrfRequestRandomness
+</Typography>
+
+<b>Cost: </b>0.1 wSOL
+
+</summary>
+
+<VrfRequestRandomness />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  VrfProve
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfProve />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  VrfVerify
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfVerify />
+
+</details>
+
+## Developer Resources
+
+<RandomnessInstructions />

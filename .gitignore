@@ -1,0 +1,24 @@
+# Javascript
+node_modules
+dist
+lib
+build
+tsconfig.tsbuildinfo
+
+# Python
+__pycache__
+
+# Rust
+rust/**/target
+Cargo.lock
+.anchor
+
+# Misc
+.keypairs
+secrets
+*-keypairs.json
+bin
+
+# Docusaurus
+public
+.docusaurus

@@ -1,0 +1,12 @@
+{
+  "name": "Solend USDC Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "solend",
+        "assetMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "field": 0
+      }
+    }
+  ]
+}

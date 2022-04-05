@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "ES2019",
+      "alwaysStrict": true,
+      "strictNullChecks": true,
+      "strictFunctionTypes": true,
+      "noImplicitReturns": true,
+      "strictPropertyInitialization": true,
+      "noImplicitThis": true,
+      "resolveJsonModule": true,
+      "declarationMap": true
+    }
+  },
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": false,
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
+      "@switchboard-xyz/v2-utils-ts": ["../../tools/v2-utils-ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "../../libraries/ts" }, { "path": "../../tools/v2-utils-ts" }],
+  "files": ["src/main.ts"]
+}

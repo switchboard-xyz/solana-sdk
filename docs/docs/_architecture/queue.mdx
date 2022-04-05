@@ -1,0 +1,19 @@
+---
+sidebar_position: 4
+slug: /architecture/queue
+---
+
+import { MdClass } from "react-icons/md";
+
+import OracleQueueAccountData from "../../api/idl/accounts/OracleQueueAccountData.md";
+import OracleQueueBuffer from "../../api/idl/accounts/OracleQueueBuffer.md";
+
+# Queue
+
+An oracle queue is responsible for managing a set of oracles and how they get allocated to aggregator update request. Oracles are arranged in a round-robin fashion, where once requested, the next N oracles in the queue are assigned to a feed. Oracle positions are periodically swapped to mitigate oracles being assigned to the same feeds each update cycle.
+
+## Configuration
+
+### Authority
+
+### Size

@@ -1,0 +1,125 @@
+---
+sidebar_position: 1
+slug: .
+title: Overview
+---
+
+# switchboard-v2
+
+import {
+  Typography,
+  IconButton,
+  Link,
+  Box,
+  CardActionArea,
+  Card,
+  CardContent,
+} from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
+
+<!--- https://badgen.net/npm/v/@switchboard-xyz/switchboardv2-cli --->
+
+[![GitHub](https://img.shields.io/badge/--181717?logo=github&logoColor=ffffff)](https://github.com/switchboard-xyz/switchboardv2-api) [![GitHub last commit](https://img.shields.io/github/last-commit/switchboard-xyz/switchboardv2-api)](https://github.com/switchboard-xyz/switchboardv2-api/commit/) [![npm](https://img.shields.io/npm/v/@switchboard-xyz/switchboard-v2)](https://www.npmjs.com/package/@switchboard-xyz/switchboard-v2) ![Page Last Updated](./page-last-updated.svg)
+
+A library of utility functions to interact with the Switchboardv2 program
+
+You can view the full walk-through in the example repo:
+
+<Box
+  component="a"
+  href="https://github.com/switchboard-xyz/switchboard-v2-example"
+  target="_blank"
+>
+  <IconButton
+    component="span"
+    color="primary"
+    aria-label="example repo"
+    to="https://github.com/switchboard-xyz/switchboard-v2-example"
+  >
+    <GitHubIcon fontSize="large" />
+  </IconButton>
+  <Typography component="span">
+    @switchboard-xyz/switchboard-v2-example
+  </Typography>
+</Box>
+
+## Table of Contents
+
+### Enumerations
+
+- [SwitchboardPermission](enums/SwitchboardPermission.md)
+- [SwitchboardPermissionValue](enums/SwitchboardPermissionValue.md)
+
+### Classes
+
+- [AggregatorAccount](classes/AggregatorAccount.md)
+- [AggregatorHistoryRow](classes/AggregatorHistoryRow.md)
+- [CrankAccount](classes/CrankAccount.md)
+- [CrankRow](classes/CrankRow.md)
+- [JobAccount](classes/JobAccount.md)
+- [LeaseAccount](classes/LeaseAccount.md)
+- [OracleAccount](classes/OracleAccount.md)
+- [OracleQueueAccount](classes/OracleQueueAccount.md)
+- [PermissionAccount](classes/PermissionAccount.md)
+- [ProgramStateAccount](classes/ProgramStateAccount.md)
+- [SwitchboardDecimal](classes/SwitchboardDecimal.md)
+- [SwitchboardError](classes/SwitchboardError.md)
+- [VrfAccount](classes/VrfAccount.md)
+
+### Interfaces
+
+- [AccountParams](interfaces/AccountParams.md)
+- [AggregatorInitParams](interfaces/AggregatorInitParams.md)
+- [AggregatorOpenRoundParams](interfaces/AggregatorOpenRoundParams.md)
+- [AggregatorSaveResultParams](interfaces/AggregatorSaveResultParams.md)
+- [AggregatorSetBatchSizeParams](interfaces/AggregatorSetBatchSizeParams.md)
+- [AggregatorSetHistoryBufferParams](interfaces/AggregatorSetHistoryBufferParams.md)
+- [AggregatorSetMinJobsParams](interfaces/AggregatorSetMinJobsParams.md)
+- [AggregatorSetMinOraclesParams](interfaces/AggregatorSetMinOraclesParams.md)
+- [Callback](interfaces/Callback.md)
+- [CrankInitParams](interfaces/CrankInitParams.md)
+- [CrankPopParams](interfaces/CrankPopParams.md)
+- [CrankPushParams](interfaces/CrankPushParams.md)
+- [JobInitParams](interfaces/JobInitParams.md)
+- [LeaseExtendParams](interfaces/LeaseExtendParams.md)
+- [LeaseInitParams](interfaces/LeaseInitParams.md)
+- [LeaseWithdrawParams](interfaces/LeaseWithdrawParams.md)
+- [OracleInitParams](interfaces/OracleInitParams.md)
+- [OracleQueueInitParams](interfaces/OracleQueueInitParams.md)
+- [OracleQueueSetRewardsParams](interfaces/OracleQueueSetRewardsParams.md)
+- [OracleQueueSetVrfSettingsParams](interfaces/OracleQueueSetVrfSettingsParams.md)
+- [OracleWithdrawParams](interfaces/OracleWithdrawParams.md)
+- [PermissionInitParams](interfaces/PermissionInitParams.md)
+- [PermissionSetParams](interfaces/PermissionSetParams.md)
+- [ProgramInitParams](interfaces/ProgramInitParams.md)
+- [VaultTransferParams](interfaces/VaultTransferParams.md)
+- [VrfInitParams](interfaces/VrfInitParams.md)
+- [VrfProveAndVerifyParams](interfaces/VrfProveAndVerifyParams.md)
+- [VrfProveParams](interfaces/VrfProveParams.md)
+- [VrfRequestRandomnessParams](interfaces/VrfRequestRandomnessParams.md)
+- [VrfSetCallbackParams](interfaces/VrfSetCallbackParams.md)
+
+### Variables
+
+- [SBV2_DEVNET_PID](#sbv2_devnet_pid)
+- [SBV2_MAINNET_PID](#sbv2_mainnet_pid)
+
+## Variables
+
+### SBV2_DEVNET_PID
+
+• **SBV2_DEVNET_PID**: `PublicKey`
+
+#### Defined in
+
+[sbv2.ts:20](https://github.com/switchboard-xyz/switchboardv2-api/blob/2f913992/src/sbv2.ts#L20)
+
+---
+
+### SBV2_MAINNET_PID
+
+• **SBV2_MAINNET_PID**: `PublicKey`
+
+#### Defined in
+
+[sbv2.ts:23](https://github.com/switchboard-xyz/switchboardv2-api/blob/2f913992/src/sbv2.ts#L23)

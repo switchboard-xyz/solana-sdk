@@ -1,0 +1,75 @@
+---
+sidebar_position: 35
+slug: /architecture/lease
+title: Lease
+---
+
+Oracle queues have a finite amount of resources proportional to its number of oracles so the DAO may reject new feeds that could cause delays on existing feeds. The publisher is responsible for creating a lease contract to reserve a set amount of computer power from the oracle queue. Once a publisher’s feed is accepted by the DAO, the feed is added to the network and granted permissions to use the oracle queue resources.
+
+When creating a lease contract, the publisher specifies a withdrawal authority then funds the lease contract to reward oracle operators for processing any future updates. The withdrawal authority allows a publisher to cancel and refund their lease contract at any point in time and specifies where any remaining lease balance is sent. The lease fee is derived from the oracle rewards dictated by each oracle queue. If a data feed’s lease is low on funds, any update requests will fail and the feed will be removed from any scheduled updates. As a feed gains popularity, other dApp developers will be incentivized to extend the lease and keep it active. This creates a natural decay where unused feeds go unfunded to make room for new use cases.
+
+## Account
+
+import { MdClass } from "react-icons/md";
+
+import LeaseAccountData from "../../api/idl/accounts/LeaseAccountData.md";
+
+<details>
+<summary>
+
+### 📦LeaseAccountData
+
+<b>Rent Exemption: </b>0.004043760 SOL
+
+</summary>
+
+<LeaseAccountData />
+
+</details>
+
+## Instructions
+
+import { BsFillLightningChargeFill } from "react-icons/bs";
+
+import LeaseInit from "../../api/idl/instructions/leaseInit.md";
+import LeaseExtend from "../../api/idl/instructions/leaseExtend.md";
+import LeaseWithdraw from "../../api/idl/instructions/leaseWithdraw.md";
+
+<details>
+<summary>
+
+### ⚡LeaseInit
+
+<b>Cost: </b>10,000 lamports
+
+</summary>
+
+<LeaseInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡LeaseExtend
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseExtend />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡LeaseWithdraw
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseWithdraw />
+
+</details>

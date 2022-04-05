@@ -1,0 +1,29 @@
+[package]
+name = "switchboard-v2"
+version = "0.1.6"
+edition = "2021"
+description = "A Rust library to interact with Switchboard V2 data feeds."
+readme = "README.md"
+keywords = ["switchboard", "oracle", "solana"]
+homepage = "https://switchboard.xyz"
+repository = "https://github.com/switchboard-xyz/switchboardv2-rs"
+license = "MIT"
+documentation = "https://docs.rs/switchboard-v2/"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "switchboard_v2"
+
+[features]
+default = ["cpi"]
+no-entrypoint = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+anchor-lang = "0.22.0"
+anchor-spl = "0.22.0"
+# borsh = { version = "0.9.1", features = ["const-generics"] }
+rust_decimal = { version = "1.18.0" }
+solana-program = "1.8.2"
+bytemuck = "1.7.2"
+superslice = "1"
