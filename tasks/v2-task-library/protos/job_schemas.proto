@@ -310,6 +310,18 @@ message OracleJob {
     optional string account_address = 2;
   }
 
+  message DefiKingdomsTask {
+    message Token {
+      optional string address = 1;
+      optional int32 decimals = 2;
+    }
+    optional string provider = 1;
+    optional Token in_token = 2;
+    optional Token out_token = 3;
+  }
+
+  message TpsTask {}
+
   message Task {
     oneof Task {
       HttpTask http_task = 1;
@@ -337,6 +349,8 @@ message OracleJob {
       PerpMarketTask perp_market_task = 24;
       OracleTask oracle_task = 25;
       AnchorFetchTask anchor_fetch_task = 26;
+      DefiKingdomsTask defi_kingdoms_task = 27;
+      TpsTask tps_task = 28;
     }
   }
   // The chain of tasks to perform for this OracleJob.
