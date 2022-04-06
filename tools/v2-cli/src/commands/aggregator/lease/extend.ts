@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { AggregatorClass, ProgramStateClass } from "../../../accounts";
 import { chalkString } from "../../../accounts/utils";
 import BaseCommand from "../../../BaseCommand";

@@ -1,7 +1,7 @@
 import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import { Keypair } from "@solana/web3.js";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import {

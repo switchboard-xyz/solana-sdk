@@ -1,5 +1,5 @@
 import { Keypair } from "@solana/web3.js";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import { pubKeyConverter } from "../../accounts";

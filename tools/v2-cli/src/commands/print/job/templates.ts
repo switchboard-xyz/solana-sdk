@@ -1,5 +1,5 @@
 import { Command } from "@oclif/command";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { TEMPLATE_SOURCES } from "../../../accounts/job";
 
 export default class PrintJobTemplates extends Command {

@@ -4,7 +4,7 @@ import Command, { flags } from "@oclif/command";
 import { Input } from "@oclif/parser";
 import * as anchor from "@project-serum/anchor";
 import { Cluster, clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import { DEFAULT_KEYPAIR } from "./accounts";

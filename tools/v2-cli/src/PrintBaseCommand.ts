@@ -15,7 +15,7 @@ import {
   PermissionAccount,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import path from "path";
 import {
   AggregatorClass,

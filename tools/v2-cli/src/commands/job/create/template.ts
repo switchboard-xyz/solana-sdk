@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import fs from "fs";
 import { fromJobTemplate, pubKeyConverter } from "../../../accounts";
 import { JobClass } from "../../../accounts/job/job";

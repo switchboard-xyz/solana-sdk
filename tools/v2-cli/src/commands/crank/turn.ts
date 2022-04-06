@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { CrankAccount } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { CrankClass } from "../../accounts/crank/crank";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON } from "../../utils";

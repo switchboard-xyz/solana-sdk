@@ -5,7 +5,7 @@ import {
   OracleQueueAccount,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { fromPublicKey, fromQueueJSON } from "..";
 import { CommandContext } from "../../types/context";
 import { LogProvider } from "../../types/context/logging";

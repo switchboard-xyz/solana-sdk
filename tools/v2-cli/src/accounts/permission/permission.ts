@@ -7,7 +7,7 @@ import {
   PermissionAccount,
   SwitchboardPermission,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { CommandContext } from "../../types/context";
 import { LogProvider } from "../../types/context/logging";
 import { programHasPayer } from "../../utils";

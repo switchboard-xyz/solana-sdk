@@ -4,7 +4,7 @@ import {
   OracleAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import {
   anchorBNtoDateTimeString,
   buffer2string,

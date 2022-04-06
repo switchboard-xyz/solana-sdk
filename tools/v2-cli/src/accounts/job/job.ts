@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/switchboard-api";
 import { JobAccount } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { getUrlFromTask } from ".";
 import { buffer2string, chalkString, copyAccount, pubKeyConverter } from "../";
 import { CommandContext } from "../../types/context";

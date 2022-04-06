@@ -4,7 +4,7 @@ import {
   AggregatorAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { PermissionClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, getProgramPayer, loadKeypair } from "../../../utils";

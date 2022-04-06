@@ -5,7 +5,7 @@ import {
   CrankRow,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import chalk from "chalk";
+import * as chalk from "chalk";
 import { buffer2string, chalkString, pubKeyConverter } from "../";
 import { CommandContext } from "../../types/context";
 import { DEFAULT_CONTEXT } from "../../types/context/context";
