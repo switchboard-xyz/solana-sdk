@@ -8,7 +8,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf lib && ./esbuild.js",
-    "prepublish": "npm run build && npm version patch"
+    "prepublish": "npm run build && npm version patch --force"
   },
   "author": "",
   "license": "ISC",

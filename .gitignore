@@ -17,7 +17,7 @@ Cargo.lock
 .keypairs
 secrets
 *-keypairs.json
-bin
+
 
 # Docusaurus
 public

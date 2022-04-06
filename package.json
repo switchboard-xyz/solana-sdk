@@ -6,6 +6,7 @@
     "tasks/v2-task-library",
     "tools/v2-utils-ts",
     "libraries/ts",
+    "tools/v2-cli",
     "tasks/v2-task-runner",
     "examples/basic-feed-parser",
     "feeds/feed-observer",
