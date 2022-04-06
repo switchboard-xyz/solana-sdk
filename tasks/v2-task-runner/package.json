@@ -10,7 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf lib && ./esbuild.js",
-    "prepublishOnly": "npm version patch --force"
+    "prepublishOnly": "npm run build && npm version patch --force"
   },
   "resolutions": {
     "@solana/buffer-layout": "4.0.0",
@@ -31,8 +31,9 @@
     "@saberhq/token-utils": "^1.12.58",
     "@solana/web3.js": "^1.37.1",
     "@switchboard-xyz/defi-yield-ts": "^1.0.4",
+    "@switchboard-xyz/switchboard-api": "^0.2.191",
     "@switchboard-xyz/switchboard-v2": "^0.0.72",
-    "@switchboard-xyz/v2-task-library": "^0.0.1",
+    "@switchboard-xyz/v2-task-library": "^0.1.0",
     "@zetamarkets/sdk": "^0.13.0",
     "big.js": "^6.1.1",
     "chalk": "^4.1.2",

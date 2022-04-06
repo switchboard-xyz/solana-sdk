@@ -27,7 +27,7 @@
     "compile": "./esbuild.js",
     "build": "rimraf lib && ./esbuild.js",
     "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
-    "publish": "npm version patch --force && npm publish"
+    "prepublish": "npm run build && npm version patch"
   },
   "peerDependencies": {
     "@project-serum/anchor": "0.22.1",

@@ -1,6 +1,7 @@
 {
   "name": "@switchboard-xyz/v2-task-library",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "private": false,
   "description": "switchboard v2 task library",
   "main": "lib/index.js",
   "module": "lib/index.js",
@@ -8,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "pbjs -t static-module -w commonjs -o lib/index.js ./protos/*.proto && pbts -o lib/index.d.ts lib/index.js",
-    "publish": "npm version patch --force && npm publish"
+    "prepublish": "npm run build && npm version patch"
   },
   "author": "",
   "license": "ISC",
