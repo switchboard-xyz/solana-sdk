@@ -6,7 +6,7 @@ import {
   JobAccount,
   SBV2_DEVNET_PID,
 } from "@switchboard-xyz/switchboard-v2";
-import { OracleJob, IOracleJob } from "@switchboard-xyz/v2-task-library";
+import { IOracleJob, OracleJob } from "@switchboard-xyz/v2-task-library";
 import type Big from "big.js";
 import chalk from "chalk";
 import fs from "fs";

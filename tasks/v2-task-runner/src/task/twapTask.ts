@@ -1,10 +1,10 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import {
   AggregatorAccount,
   AggregatorHistoryRow,
 } from "@switchboard-xyz/switchboard-v2";
+import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import Big from "big.js";
 import { OracleContext, SwitchboardTask, SwitchboardTaskError } from "../types";
 import * as BigUtil from "../utils/big";

@@ -24,7 +24,8 @@ export type TASK_TYPE =
   | "MangoPerp"
   | "JupiterSwap"
   | "Oracle"
-  | "PerpMarket";
+  | "PerpMarket"
+  | "DefiKingdoms";
 
 export abstract class SwitchboardTaskError extends Error {
   task: TASK_TYPE;

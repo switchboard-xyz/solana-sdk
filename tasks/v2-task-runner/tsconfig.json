@@ -11,7 +11,7 @@
     }
   },
   "include": ["src/**/*", "src/**/*.json"],
-  "exclude": ["esbuild.js", "./lib", "node_modules"],
+  "exclude": ["esbuild.js", "./lib", "node_modules", "submodules/**/*"],
   "references": [{ "path": "../../libraries/ts" }],
   "files": ["src/index.ts"]
 }

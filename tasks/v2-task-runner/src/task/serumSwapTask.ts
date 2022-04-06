@@ -1,7 +1,7 @@
 import type * as anchor from "@project-serum/anchor";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
-import type Big from "big.js";
 import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import type Big from "big.js";
 import { SerumSwap } from "../clients";
 import { OracleContext, SwitchboardTask, SwitchboardTaskError } from "../types";
 

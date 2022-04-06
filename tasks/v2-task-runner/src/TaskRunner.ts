@@ -2,13 +2,14 @@
 /* eslint-disable @typescript-eslint/no-useless-constructor */
 /* eslint-disable complexity */
 import type * as anchor from "@project-serum/anchor";
+import type { OracleJob } from "@switchboard-xyz/v2-task-library";
 import Big from "big.js";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import type { OracleJob } from "@switchboard-xyz/v2-task-library";
 import {
   AddTask,
   AnchorFetchTask,
   ConditionalTask,
+  DefiKingdomsTask,
   DivideTask,
   HttpTask,
   JsonParseTask,
@@ -244,6 +245,15 @@ export default class TaskRunner {
     if (task.anchorFetchTask) {
       return new AnchorFetchTask().run(
         task.anchorFetchTask,
+        undefined,
+        program,
+        context
+      );
+    }
+
+    if (task.defiKingdomsTask) {
+      return new DefiKingdomsTask().run(
+        task.defiKingdomsTask,
         undefined,
         program,
         context

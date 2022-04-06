@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import type * as anchor from "@project-serum/anchor";
+import type { OracleJob } from "@switchboard-xyz/v2-task-library";
 import type Big from "big.js";
 import type { OracleContext } from ".";
-import type { OracleJob } from "@switchboard-xyz/v2-task-library";
 
 export type ALL_TASK_TYPES =
   | OracleJob.IHttpTask

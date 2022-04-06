@@ -1,6 +1,7 @@
 export * from "./addTask";
 export * from "./anchorFetchTask";
 export * from "./conditionalTask";
+export * from "./defiKingdomTask";
 export * from "./divideTask";
 export * from "./httpTask";
 export * from "./jsonParseTask";

@@ -1,0 +1,3 @@
+[submodule "tasks/v2-task-runner/submodules/defikingdoms-sdk"]
+	path = tasks/v2-task-runner/submodules/defikingdoms-sdk
+	url = https://github.com/DefiKingdoms/sdk.git

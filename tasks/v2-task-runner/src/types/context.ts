@@ -1,8 +1,8 @@
 import type * as anchor from "@project-serum/anchor";
 import type { Connection, PublicKey } from "@solana/web3.js";
 import { RateObserver } from "@switchboard-xyz/defi-yield-ts";
-import type Websocket from "ws-reconnect";
 import type { OracleJob } from "@switchboard-xyz/v2-task-library";
+import type Websocket from "ws-reconnect";
 import {
   ChainlinkClient,
   DriftClient,

@@ -1,7 +1,7 @@
 import type * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import Big from "big.js";
 import TaskRunner from "../";
 import { OracleContext, SwitchboardTask, SwitchboardTaskError } from "../types";
