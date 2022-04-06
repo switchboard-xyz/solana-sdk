@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
-import { buildContext, TaskSimulator } from "../tasks/v2-task-runner/src";
+import { buildContext, TaskSimulator } from "../tasks/v2-task-runner/lib";
 
 async function main(): Promise<void> {
   const argv = yargs(hideBin(process.argv))

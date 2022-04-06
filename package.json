@@ -24,7 +24,8 @@
     "@solana/web3.js": "1.37.1"
   },
   "dependencies": {
-    "yargs": "^17.4.0"
+    "yargs": "^17.4.0",
+    "@solana/web3.js": "1.37.1"
   },
   "devDependencies": {
     "@types/big.js": "^6.1.3",
