@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/v2-task-runner",
-  "version": "0.0.1",
+  "version": "0.1.31",
   "description": "switchboard v2 task runner",
   "author": "",
   "license": "ISC",
@@ -10,7 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf lib && ./esbuild.js",
-    "publish": "npm version patch --force && npm publish"
+    "prepublishOnly": "npm version patch --force"
   },
   "resolutions": {
     "@solana/buffer-layout": "4.0.0",
