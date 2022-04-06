@@ -3,5 +3,5 @@
     "source.fixAll.eslint": true
   },
   "files.eol": "\n",
-  "editor.formatOnSave": false
+  "editor.formatOnSave": true
 }
