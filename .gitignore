@@ -9,7 +9,7 @@ tsconfig.tsbuildinfo
 __pycache__
 
 # Rust
-rust/**/target
+programs/**/target
 Cargo.lock
 .anchor
 

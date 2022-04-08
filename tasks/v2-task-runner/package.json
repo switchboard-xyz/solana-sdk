@@ -16,11 +16,11 @@
   },
   "peerDependencies": {
     "@project-serum/anchor": "0.22.1",
-    "@solana/web3.js": "1.37.1"
+    "@solana/web3.js": "1.37.1",
+    "@solana/buffer-layout": "4.0.0"
   },
   "resolutions": {
     "@solana/buffer-layout": "4.0.0",
-    "**/@saberhq/token-utils/**/@solana/buffer-layout": "^3.0.0",
     "@solana/web3.js": "^1.37.1"
   },
   "dependencies": {

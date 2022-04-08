@@ -1,5 +1,6 @@
 {
   "name": "@switchboard-xyz/feed-observer",
+  "description": "receive pager duty alerts when a switchboard v2 lease crosses a provided threshold",
   "scripts": {
     "start": "ts-node main.ts",
     "build": "rimraf lib && ./esbuild.js"

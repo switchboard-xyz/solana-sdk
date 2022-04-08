@@ -1,7 +1,7 @@
 {
-  "name": "@switchboard-xyz/basic-feed-parser",
+  "name": "@switchboard-xyz/v2-feed-parser",
   "version": "1.0.0",
-  "description": "",
+  "description": "switchboard v2 example demonstrating how to parse a data feed",
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/main",

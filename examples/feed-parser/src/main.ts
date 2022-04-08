@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-process-exit */
-import { PublicKey, Connection, clusterApiUrl, Keypair } from "@solana/web3.js";
+import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
   loadSwitchboardProgram,

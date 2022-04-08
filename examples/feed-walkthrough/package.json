@@ -1,0 +1,15 @@
+{
+  "name": "@switchboard-xyz/v2-feed-walkthrough",
+  "version": "0.1.0",
+  "description": "switchboard v2 example demonstrating how to create a private queue, oracle, and data feed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@solana/web3.js": "^1.37.1",
+    "@switchboard-xyz/switchboard-v2": "^0.0.72"
+  }
+}
