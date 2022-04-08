@@ -1,11 +1,8 @@
 /* eslint-disable unicorn/require-number-to-fixed-digits-argument */
-import * as anchor from "@project-serum/anchor";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
-import {
-  AggregatorAccount,
-  JobAccount,
-  SBV2_DEVNET_PID,
-} from "@switchboard-xyz/switchboard-v2";
+import type * as anchor from "@project-serum/anchor";
+import { Cluster, PublicKey } from "@solana/web3.js";
+import * as sbv2 from "@switchboard-xyz/switchboard-v2";
+import { loadSwitchboardProgram } from "@switchboard-xyz/switchboard-v2";
 import { IOracleJob, OracleJob } from "@switchboard-xyz/v2-task-library";
 import type Big from "big.js";
 import chalk from "chalk";
@@ -19,28 +16,21 @@ export class TaskSimulator {
   static async getProgram(cliCluster?: string): Promise<anchor.Program> {
     const cluster = cliCluster ?? process.env.CLUSTER ?? "devnet";
     switch (cluster) {
-      case "devnet": {
-        const connection = new Connection(clusterApiUrl(cluster));
-        const dummyKeypair = anchor.web3.Keypair.generate();
-        const wallet = new anchor.Wallet(dummyKeypair);
-        const provider = new anchor.Provider(connection, wallet, {
-          commitment: "processed",
-          preflightCommitment: "processed",
-        });
-        const anchorIdl = await anchor.Program.fetchIdl(
-          SBV2_DEVNET_PID,
-          provider
-        );
-        return new anchor.Program(anchorIdl, SBV2_DEVNET_PID, provider);
-      }
+      case "devnet":
+      case "mainnet-beta":
+        return await loadSwitchboardProgram(cluster);
 
       default:
         throw new Error(`not implemented for cluster ${cluster}`);
     }
   }
 
-  async performJob(job: OracleJob, context?: OracleContext): Promise<Big> {
-    const program = await TaskSimulator.getProgram();
+  async performJob(
+    job: OracleJob,
+    cluster?: Cluster,
+    context?: OracleContext
+  ): Promise<Big> {
+    const program = await TaskSimulator.getProgram(cluster);
     const { tasks } = job;
     // console.log(`TASKS ${JSON.stringify(job.toJSON())}`);
     const result = await TaskRunner.performTasks(tasks, program, context);
@@ -50,10 +40,11 @@ export class TaskSimulator {
 
   async simulateAggregatorKey(
     aggregatorKey: PublicKey,
+    cluster?: Cluster,
     context?: OracleContext
   ) {
-    const program = await TaskSimulator.getProgram();
-    const aggregatorAccount = new AggregatorAccount({
+    const program = await TaskSimulator.getProgram(cluster);
+    const aggregatorAccount = new sbv2.AggregatorAccount({
       program,
       publicKey: new PublicKey(aggregatorKey),
     });
@@ -62,7 +53,7 @@ export class TaskSimulator {
     for await (const [index, job] of jobs.entries()) {
       try {
         const start = Date.now();
-        const result = await this.performJob(job, context);
+        const result = await this.performJob(job, cluster, context);
         const end = Date.now();
         const runTime = ((end - start) / 1000).toFixed(3);
         console.log(
@@ -84,9 +75,13 @@ export class TaskSimulator {
     );
   }
 
-  async simulateJobKey(jobKey: PublicKey, context?: OracleContext) {
-    const program = await TaskSimulator.getProgram();
-    const jobAccount = new JobAccount({
+  async simulateJobKey(
+    jobKey: PublicKey,
+    cluster?: Cluster,
+    context?: OracleContext
+  ) {
+    const program = await TaskSimulator.getProgram(cluster);
+    const jobAccount = new sbv2.JobAccount({
       program,
       publicKey: new PublicKey(jobKey),
     });
@@ -95,7 +90,7 @@ export class TaskSimulator {
     try {
       console.log(`simulating task for job account... ${jobKey}`);
       const start = Date.now();
-      const result = await this.performJob(job, context);
+      const result = await this.performJob(job, cluster, context);
       const end = Date.now();
       const runTime = ((end - start) / 1000).toFixed(3);
       console.log(
@@ -111,21 +106,26 @@ export class TaskSimulator {
 
   async simulateJobJsonDirectory(
     directoryPath: string,
+    cluster?: Cluster,
     context?: OracleContext
   ) {
     const directory = path.join(process.cwd(), directoryPath);
     const files = getAllJsonFiles(directory, []);
     for await (const file of files) {
       try {
-        await this.simulateJobJson(file, context);
+        await this.simulateJobJson(file, cluster, context);
       } catch (error) {
         console.error(error);
       }
     }
   }
 
-  async simulateJobJson(jsonPath: string, context?: OracleContext) {
-    const program = await TaskSimulator.getProgram();
+  async simulateJobJson(
+    jsonPath: string,
+    cluster?: Cluster,
+    context?: OracleContext
+  ) {
+    const program = await TaskSimulator.getProgram(cluster);
     if (!jsonPath) throw new Error(`failed to provide job file to run`);
     let job: OracleJob;
     try {
@@ -147,7 +147,7 @@ export class TaskSimulator {
         )} `
       );
       const start = Date.now();
-      const result = await this.performJob(job, context);
+      const result = await this.performJob(job, cluster, context);
       const end = Date.now();
       const runTime = ((end - start) / 1000).toFixed(3);
       console.log(
