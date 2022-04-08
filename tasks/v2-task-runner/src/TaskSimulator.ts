@@ -1,11 +1,8 @@
 /* eslint-disable unicorn/require-number-to-fixed-digits-argument */
-import * as anchor from "@project-serum/anchor";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
-import {
-  AggregatorAccount,
-  JobAccount,
-  SBV2_DEVNET_PID,
-} from "@switchboard-xyz/switchboard-v2";
+import type * as anchor from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
+import * as sbv2 from "@switchboard-xyz/switchboard-v2";
+import { loadSwitchboardProgram } from "@switchboard-xyz/switchboard-v2";
 import { IOracleJob, OracleJob } from "@switchboard-xyz/v2-task-library";
 import type Big from "big.js";
 import chalk from "chalk";
@@ -15,24 +12,21 @@ import { URL } from "url";
 import TaskRunner from "./TaskRunner";
 import type { OracleContext } from "./types";
 
+type SolCluster = "mainnet-beta" | "devnet";
+
 export class TaskSimulator {
-  static async getProgram(cliCluster?: string): Promise<anchor.Program> {
+  cluster: SolCluster;
+
+  constructor(cluster: SolCluster = "devnet") {
+    this.cluster = cluster;
+  }
+
+  static async getProgram(cliCluster?: SolCluster): Promise<anchor.Program> {
     const cluster = cliCluster ?? process.env.CLUSTER ?? "devnet";
     switch (cluster) {
-      case "devnet": {
-        const connection = new Connection(clusterApiUrl(cluster));
-        const dummyKeypair = anchor.web3.Keypair.generate();
-        const wallet = new anchor.Wallet(dummyKeypair);
-        const provider = new anchor.Provider(connection, wallet, {
-          commitment: "processed",
-          preflightCommitment: "processed",
-        });
-        const anchorIdl = await anchor.Program.fetchIdl(
-          SBV2_DEVNET_PID,
-          provider
-        );
-        return new anchor.Program(anchorIdl, SBV2_DEVNET_PID, provider);
-      }
+      case "devnet":
+      case "mainnet-beta":
+        return loadSwitchboardProgram(cluster);
 
       default:
         throw new Error(`not implemented for cluster ${cluster}`);
@@ -40,7 +34,7 @@ export class TaskSimulator {
   }
 
   async performJob(job: OracleJob, context?: OracleContext): Promise<Big> {
-    const program = await TaskSimulator.getProgram();
+    const program = await TaskSimulator.getProgram(this.cluster);
     const { tasks } = job;
     // console.log(`TASKS ${JSON.stringify(job.toJSON())}`);
     const result = await TaskRunner.performTasks(tasks, program, context);
@@ -52,8 +46,8 @@ export class TaskSimulator {
     aggregatorKey: PublicKey,
     context?: OracleContext
   ) {
-    const program = await TaskSimulator.getProgram();
-    const aggregatorAccount = new AggregatorAccount({
+    const program = await TaskSimulator.getProgram(this.cluster);
+    const aggregatorAccount = new sbv2.AggregatorAccount({
       program,
       publicKey: new PublicKey(aggregatorKey),
     });
@@ -85,8 +79,8 @@ export class TaskSimulator {
   }
 
   async simulateJobKey(jobKey: PublicKey, context?: OracleContext) {
-    const program = await TaskSimulator.getProgram();
-    const jobAccount = new JobAccount({
+    const program = await TaskSimulator.getProgram(this.cluster);
+    const jobAccount = new sbv2.JobAccount({
       program,
       publicKey: new PublicKey(jobKey),
     });
@@ -125,7 +119,7 @@ export class TaskSimulator {
   }
 
   async simulateJobJson(jsonPath: string, context?: OracleContext) {
-    const program = await TaskSimulator.getProgram();
+    const program = await TaskSimulator.getProgram(this.cluster);
     if (!jsonPath) throw new Error(`failed to provide job file to run`);
     let job: OracleJob;
     try {
