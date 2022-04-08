@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from "@solana/web3.js";
+import { buildContext, TaskSimulator } from "@switchboard-xyz/v2-task-runner";
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
-import { buildContext, TaskSimulator } from "../tasks/v2-task-runner/lib";
 
 async function main(): Promise<void> {
   const argv = yargs(hideBin(process.argv))
@@ -52,7 +52,7 @@ async function main(): Promise<void> {
 
   const { jobFile, jobKey, aggregatorKey, dir, rpcUrl, cluster } = argv;
 
-  const simulator = new TaskSimulator();
+  const simulator = new TaskSimulator("mainnet-beta");
 
   const mainnetConnection = new Connection(rpcUrl);
   const context = buildContext(mainnetConnection, console);
