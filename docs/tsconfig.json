@@ -6,11 +6,11 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"]
     }
   },
   "include": ["src/**/*", "src/**/*.json"],
   "exclude": ["static", "public", "node_modules"],
-  "references": [{ "path": "../../libraries/ts" }],
+  "references": [{ "path": "../libraries/ts" }],
   "files": ["src/pages/index.tsx"]
 }

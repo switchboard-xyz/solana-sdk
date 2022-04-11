@@ -8,7 +8,7 @@
     "build": "echo \"Use 'npm run build:site' to build the docusaurus project\" && exit 0",
     "build:site": "docusaurus build --out-dir public",
     "swizzle": "docusaurus swizzle",
-    "deploy": "cspell --config ./cSpell.json \"**/*.md*\" && docusaurus build --out-dir public && docusaurus deploy --out-dir public",
+    "deploy": "docusaurus build --out-dir public && docusaurus deploy --out-dir public",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve --dir public",
     "write-translations": "docusaurus write-translations",
