@@ -3,7 +3,7 @@ name: Test deployment
 on:
   pull_request:
     branches: [main]
-    paths: [docs/public/**]
+    paths: [docs/**]
 
 jobs:
   test-deploy:
@@ -14,8 +14,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 14.x
+          cache: npm
+          cache-dependency-path: "**/package-lock.json"
       - name: Test build
-        working-directory: public
+        working-directory: .
         run: |
           npm ci
-          npm build
+          npm run docs:build

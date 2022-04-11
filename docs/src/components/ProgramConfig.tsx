@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { PublicKey, Keypair, Connection, clusterApiUrl } from "@solana/web3.js";
+import { CircularProgress, Typography } from "@mui/material";
 import * as anchor from "@project-serum/anchor";
+import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
   CrankAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import { Typography, CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
 
 const DEFAULT_KEYPAIR = Keypair.fromSeed(new Uint8Array(32).fill(1));
 const DEFAULT_PUBKEY = new PublicKey("11111111111111111111111111111111");
@@ -164,12 +164,12 @@ interface ProgramConfigProps {
 const LABELS = [""];
 
 const ProgramConfig = (props: ProgramConfigProps) => {
-  const [anchor, setAnchor] = useState<AnchorData>();
+  const [anchorData, setAnchorData] = useState<AnchorData>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getAnchorData().then((anchorData) => {
-      setAnchor(anchorData);
+      setAnchorData(anchorData);
       setLoading(false);
     });
   }, []);
@@ -180,7 +180,7 @@ const ProgramConfig = (props: ProgramConfigProps) => {
       {loading === true ? (
         <CircularProgress />
       ) : (
-        <Typography>{JSON.stringify(anchor.mainnet, undefined, 2)}</Typography>
+        <Typography>{JSON.stringify(anchorData.mainnet, undefined, 2)}</Typography>
       )}
     </>
   );

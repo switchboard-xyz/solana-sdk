@@ -13,7 +13,7 @@
     "serve": "docusaurus serve --dir public",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "api:tasks": "protoc --proto_path=../../switchboard-core/protos --doc_out=api/tasks --doc_opt=markdown,_task.md ../../switchboard-core/protos/job_schemas.proto",
+    "update:tasks": "protoc --proto_path=../tasks/v2-task-library/protos --doc_out=api --doc_opt=markdown,_tasks.md ../tasks/v2-task-library/protos/job_schemas.proto",
     "api:cli": "shx ./scripts/cli.sh",
     "spellcheck": "cspell --config ./cSpell.json \"**/*.md*\"",
     "typecheck": "tsc"

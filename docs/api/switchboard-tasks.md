@@ -12,16 +12,18 @@ title: switchboard-tasks
 | ---------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | http_task              | [OracleJob.HttpTask](#httptask)                       | The adapter will report the text body of a successful HTTP request to the specified url, or return an error if the response status code is greater than or equal to 400. @return string representation of it&#39;s output. |
 | websocket_task         | [OracleJob.WebsocketTask](#websockettask)             | Opens and maintains a websocket for light speed data retrieval.                                                                                                                                                            |
+| anchor_fetch_task      | [OracleJob.AnchorFetchTask](#anchorfetchtask)         | Load a parse an Anchor based solana account.                                                                                                                                                                               |
+| oracle_task            | [OracleJob.OracleTask](#oracletask)                   | Fetch the current price of a Solana oracle protocol.                                                                                                                                                                       |
 | json_parse_task        | [OracleJob.JsonParseTask](#jsonparsetask)             | The adapter walks the path specified and returns the value found at that result. If returning JSON data from the HttpGet or HttpPost adapters, you must use this adapter to parse the response.                            |
 | regex_extract_task     | [OracleJob.RegexExtractTask](#regexextracttask)       | Find a pattern within a string of a previous task and extract a group number.                                                                                                                                              |
 | conditional_task       | [OracleJob.ConditionalTask](#conditionaltask)         | This task will run the `attempt` subtasks in an effort to produce a valid numerical result. If `attempt` fails to produce an acceptable result, `on_failure` subtasks will be run instead.                                 |
-| oracle_task            | [OracleJob.OracleTask](#oracletask)                   | Fetch the current price of a Solana oracle protocol.                                                                                                                                                                       |
 | lending_rate_task      | [OracleJob.LendingRateTask](#lendingratetask)         | Return the lending rates for various Solana protocols.                                                                                                                                                                     |
 | mango_perp_market_task | [OracleJob.MangoPerpMarketTask](#mangoperpmarkettask) | Return the current price for any Mango perpetual market.                                                                                                                                                                   |
 | lp_exchange_rate_task  | [OracleJob.LpExchangeRateTask](#lpexchangeratetask)   | Fetch the current swap price for a given liquidity pool.                                                                                                                                                                   |
 | lp_token_price_task    | [OracleJob.LpTokenPriceTask](#lptokenpricetask)       | Fetch LP token price info from a number of supported exchanges.                                                                                                                                                            |
 | serum_swap_task        | [OracleJob.SerumSwapTask](#serumswaptask)             | Fetch the latest swap price on Serum's orderbook.                                                                                                                                                                          |
 | jupiter_swap_task      | [OracleJob.JupiterSwapTask](#jupiterswaptask)         | Fetch the Jupiter swap price for a given input and output token.                                                                                                                                                           |
+| defi_kingdom_task      | [OracleJob.DefiKingdomTask](#defikingdomtask)         | Fetch the price of a Defi Kingdom swap for a given input and output token.                                                                                                                                                 |
 | max_task               | [OracleJob.MaxTask](#maxtask)                         | Returns the maximum value of all the results returned by the provided subtasks and subjobs.                                                                                                                                |
 | mean_task              | [OracleJob.MeanTask](#meantask)                       | Returns the mean of all the results returned by the provided subtasks and subjobs.                                                                                                                                         |
 | median_task            | [OracleJob.MedianTask](#mediantask)                   | Returns the median of all the results returned by the provided subtasks and subjobs. Nested tasks must return a Number.                                                                                                    |
@@ -83,6 +85,25 @@ Opens and maintains a websocket for light speed data retrieval.
 | max_data_age_seconds | int32  | optional | Minimum amount of time required between when the horses are taking out.                                                           |
 | filter               | string | optional | Incoming message JSONPath filter. Example: &#34;$[?(@.channel == &#39;ticker&#39; &amp;&amp; @.market == &#39;BTC/USD&#39;)]&#34; |
 
+## 🛠AnchorFetchTask
+
+Load a parse an Anchor based solana account.
+
+| Field           | Type              | Label    | Description                             |
+| --------------- | ----------------- | -------- | --------------------------------------- |
+| program_id      | [string](#string) | optional | Owning program of the account to parse. |
+| account_address | [string](#string) | optional | The account to parse.                   |
+
+## 🛠OracleTask
+
+Fetch the current price of a Solana oracle protocol
+
+| Field               | Type              | Label    | Description                                                                                                                                                                                   |
+| ------------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| switchboard_address | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
+| pyth_address        | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
+| chainlink_address   | [string](#string) | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
+
 ## 🛠JsonParseTask
 
 The adapter walks the path specified and returns the value found at that result. If returning JSON data from the HttpGet or HttpPost adapters, you must use this adapter to parse the response.
@@ -122,25 +143,15 @@ This task will run the `attempt` subtasks in an effort to produce a valid numeri
 | attempt    | [OracleJob.Task](#) | repeated | A list of subtasks to process in an attempt to produce a valid numerical result.                      |
 | on_failure | [OracleJob.Task](#) | repeated | A list of subtasks that will be run if `attempt` subtasks are unable to produce an acceptable result. |
 
-## 🛠OracleTask
-
-Fetch the current price of a Solana oracle protocol
-
-| Field               | Type              | Label    | Description                                                                                                                                                                                   |
-| ------------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| switchboard_address | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
-| pyth_address        | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
-| chainlink_address   | [string](#string) | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
-
 ## 🛠LendingRateTask
 
-| Field      | Type                                           | Label    | Description                                                   |
-| ---------- | ---------------------------------------------- | -------- | ------------------------------------------------------------- |
-| protocol   | [string](#string)                              | optional | 01, apricot, francium, jet, larix, mango, port, solend, tulip |
-| asset_mint | [string](#string)                              | optional | A token mint address supported by the chosen protocol.        |
-| field      | [LendingRateTask.Field](#lendingratetaskfield) | optional |                                                               |
+| Field      | Type                            | Label    | Description                                                   |
+| ---------- | ------------------------------- | -------- | ------------------------------------------------------------- |
+| protocol   | [string](#string)               | optional | 01, apricot, francium, jet, larix, mango, port, solend, tulip |
+| asset_mint | [string](#string)               | optional | A token mint address supported by the chosen protocol.        |
+| field      | [LendingRateTask.Field](#field) | optional |                                                               |
 
-### LendingRateTask.Field
+### Field
 
 | Name               | Number | Description |
 | ------------------ | ------ | ----------- |
@@ -193,6 +204,21 @@ Fetch the Jupiter swap price for a given input and output token.
 | ----------------- | ------ | -------- | ------------------------------ |
 | in_token_address  | string | optional | The input token mint address.  |
 | out_token_address | string | optional | The output token mint address. |
+
+## 🛠DefiKingdomTask
+
+| Field     | Type                                       | Label    | Description |
+| --------- | ------------------------------------------ | -------- | ----------- |
+| provider  | [string](#string)                          | optional |             |
+| in_token  | [OracleJob.DefiKingdomsTask.Token](#token) | optional |             |
+| out_token | [OracleJob.DefiKingdomsTask.Token](#token) | optional |             |
+
+### Token
+
+| Field    | Type              | Label    | Description |
+| -------- | ----------------- | -------- | ----------- |
+| address  | [string](#string) | optional |             |
+| decimals | [int32](#int32)   | optional |             |
 
 ## 🛠MaxTask
 

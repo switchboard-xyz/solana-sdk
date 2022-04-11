@@ -18,6 +18,9 @@
   "scripts": {
     "start": "echo \"Error: no start script specified\" && exit 1",
     "purge:deps": "find . -name \"node_modules\" -exec rm -rf {} \\;",
+    "docs:update:tasks": "npm run update:tasks -w ./docs",
+    "docs:build": "npm run build:site -w ./docs",
+    "docs:deploy": "npm run deploy -w ./docs",
     "simulate:jobs:all": "ts-node scripts/simulate run --dir job-directory",
     "simulate:jobs:exchanges": "ts-node scripts/simulate run --dir job-directory/exchanges",
     "simulate:jobs:lending": "ts-node scripts/simulate run --dir job-directory/lendingRate"
