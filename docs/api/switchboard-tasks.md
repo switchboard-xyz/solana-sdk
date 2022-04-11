@@ -98,11 +98,12 @@ Load a parse an Anchor based solana account.
 
 Fetch the current price of a Solana oracle protocol
 
-| Field               | Type              | Label    | Description                                                                                                                                                                                   |
-| ------------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| switchboard_address | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
-| pyth_address        | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
-| chainlink_address   | [string](#string) | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
+| Field                            | Type              | Label    | Description                                                                                                                                                                                   |
+| -------------------------------- | ----------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| switchboard_address              | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
+| pyth_address                     | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
+| chainlink_address                | [string](#string) | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
+| pyth_allowed_confidence_interval | [double](#double) | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected.                                |
 
 ## 🛠JsonParseTask
 

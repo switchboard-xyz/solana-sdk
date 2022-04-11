@@ -12,7 +12,7 @@ const config = {
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.svg",
+  favicon: "img/favicon.ico",
   organizationName: "switchboard-xyz", // Usually your GitHub org/user name.
   projectName: "switchboard-v2", // Usually your repo name.
   deploymentBranch: "gh-pages",

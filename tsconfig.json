@@ -6,9 +6,13 @@
       "rootDir": "./",
       "strict": false,
       "skipLibCheck": true,
-      "noImplicitReturns": false 
+      "noImplicitReturns": false,
+      "paths": {
+        "@switchboard-xyz/v2-task-runner": ["tasks/v2-task-runner"]
+      }
     }
   },
+  "references": [{ "path": "tasks/v2-task-runner" }],
   "exclude": ["scripts/**/*.ts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
