@@ -1,0 +1,10 @@
+{
+  "tasks": [
+    {
+      "oracleTask": {
+        "pythAddress": "78aTPvgWhfRzPcc94bNNdsbB3EiGJpsu1RJp22KbAz1N",
+        "pythAllowedConfidenceInterval": "11.5"
+      }
+    }
+  ]
+}

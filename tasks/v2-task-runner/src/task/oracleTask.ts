@@ -45,7 +45,10 @@ export class OracleTask extends SwitchboardTask {
 
     if (task.pythAddress) {
       const pyth = context?.pyth ?? new PythClient(mainnet);
-      return pyth.getOraclePrice(task.pythAddress);
+      return pyth.getOraclePrice(
+        task.pythAddress,
+        task.pythAllowedConfidenceInterval
+      );
     }
 
     if (task.chainlinkAddress) {

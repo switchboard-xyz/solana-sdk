@@ -7,6 +7,7 @@ import {
 } from "@pythnetwork/client";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
 import Big from "big.js";
+import * as BigUtil from "../utils/big";
 
 export class PythClient {
   static programId = new PublicKey(
@@ -38,6 +39,23 @@ export class PythClient {
     }
 
     const priceData = parsePriceData(accountInfo.data);
-    return new Big(priceData.price);
+    if (priceData === undefined) {
+      throw new Error(`PythError: Failed to fetch Pyth price account`);
+    }
+    const price = new Big(priceData.price);
+    const confidence = new Big(priceData.confidence);
+    const confidencePercent = BigUtil.safeMul(
+      BigUtil.safeDiv(confidence, price),
+      new Big(100)
+    );
+
+    if (
+      acceptedConfidence &&
+      confidencePercent.gt(new Big(acceptedConfidence))
+    ) {
+      throw new Error(`PythError: Acceptable confidence percent exceeded`);
+    }
+
+    return price;
   }
 }
