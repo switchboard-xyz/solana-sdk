@@ -5,7 +5,7 @@ A monorepo containing APIs, Utils, and type definitions for Switchboard V2.
 ## Install
 
 ```
-npm install
+npm ci
 ```
 
 ## Build

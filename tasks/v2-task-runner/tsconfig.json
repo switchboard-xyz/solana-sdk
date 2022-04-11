@@ -10,7 +10,7 @@
       "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
-  "include": ["src/**/*", "src/**/*.json"],
+  "include": ["src/**/*", "src/**/*.json", "submodules/**/*"],
   "exclude": ["esbuild.js", "./lib", "node_modules", "submodules/**/*"],
   "references": [{ "path": "../../libraries/ts" }],
   "files": ["src/index.ts"]
