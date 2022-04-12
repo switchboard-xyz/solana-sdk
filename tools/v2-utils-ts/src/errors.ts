@@ -4,3 +4,10 @@ export class NoPayerKeypairProvided extends Error {
     Object.setPrototypeOf(this, NoPayerKeypairProvided.prototype);
   }
 }
+
+export class InvalidSwitchboardAccount extends Error {
+  constructor(message = "failed to match account type by discriminator") {
+    super(message);
+    Object.setPrototypeOf(this, InvalidSwitchboardAccount.prototype);
+  }
+}
