@@ -512,6 +512,35 @@ Switchboard can fetch the price of any asset listed on Serum's decentralized exc
 
 </details>
 
+## OracleTask
+
+Switchboard can fetch the current price of a Solana oracle protocol
+
+<details>
+<summary>
+
+### Switchboard SOL/USDC
+
+</summary>
+
+```json title="Serum_MNGO_USD.json"
+{
+  "name": "JupiterSwap JSOL to USDC",
+  "tasks": [
+    {
+      "jupiterSwapTask": {
+        /* JSOL mint address */
+        "inTokenAddress": "7Q2afV64in6N6SeZsAAB81TJzwDoD6zpqmHkzi9Dcavn",
+        /* USDC mint address */
+        "outTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      }
+    }
+  ]
+}
+```
+
+</details>
+
 ## <JupiterIcon className="devicons" />JupiterSwap
 
 Switchboard can be used to fetch the best swap price using JupiterSwap.
