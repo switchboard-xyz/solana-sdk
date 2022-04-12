@@ -5,6 +5,13 @@ export class NoPayerKeypairProvided extends Error {
   }
 }
 
+export class AuthorityMismatch extends Error {
+  constructor(message = "authority keypair does not match expected authority") {
+    super(message);
+    Object.setPrototypeOf(this, AuthorityMismatch.prototype);
+  }
+}
+
 export class InvalidKeypairProvided extends Error {
   constructor(keypairPath: string) {
     super(`failed to load keypair resource ${keypairPath}`);
