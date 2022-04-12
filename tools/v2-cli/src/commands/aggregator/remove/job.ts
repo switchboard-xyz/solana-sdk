@@ -1,22 +1,15 @@
 import { flags } from "@oclif/command";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
+import { PublicKey } from "@solana/web3.js";
+import {
+  AggregatorAccount,
+  getPayer,
+  JobAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
-import fs from "fs";
-import { AggregatorClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
-import { OutputFileExistsNoForce } from "../../../types";
-import { CHECK_ICON, loadKeypair } from "../../../utils";
+import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorRemoveJob extends BaseCommand {
-  aggregatorAuthority?: Keypair | undefined = undefined;
-
-  aggregatorAccount: AggregatorAccount;
-
-  jobAccount?: JobAccount;
-
-  outputFile = "";
-
   static description = "remove a switchboard job account from an aggregator";
 
   static flags = {
@@ -24,11 +17,8 @@ export default class AggregatorRemoveJob extends BaseCommand {
     force: flags.boolean({
       description: "overwrite outputFile if existing",
     }),
-    outputFile: flags.string({
-      char: "f",
-      description: "output file to save aggregator definition to",
-    }),
-    aggregatorAuthority: flags.string({
+    authority: flags.string({
+      char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
   };
@@ -51,44 +41,25 @@ export default class AggregatorRemoveJob extends BaseCommand {
 
   static examples = ["$ sbv2 aggregator:remove:job"];
 
-  async init() {
-    await super.init();
+  async run() {
     const { args, flags } = this.parse(AggregatorRemoveJob);
+    verifyProgramHasPayer(this.program);
 
-    if (flags.aggregatorAuthority) {
-      this.aggregatorAuthority = await loadKeypair(flags.aggregatorAuthority);
-      this.context.logger.debug(
-        `using aggregator authority ${this.aggregatorAuthority.publicKey}`
-      );
-    }
-
-    this.aggregatorAccount = new AggregatorAccount({
+    const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
 
-    this.jobAccount = new JobAccount({
+    const jobAccount = new JobAccount({
       program: this.program,
       publicKey: new PublicKey(args.jobKey),
     });
 
-    if (flags.outputFile) {
-      if (fs.existsSync(flags.outputFile) && !flags.force) {
-        throw new OutputFileExistsNoForce(flags.outputFile);
-      }
-      this.outputFile = flags.outputFile;
-    }
-  }
+    const authority = flags.authority
+      ? await loadKeypair(flags.authority)
+      : getPayer(this.program);
 
-  async run() {
-    const txn = await this.aggregatorAccount.removeJob(
-      this.jobAccount,
-      this.aggregatorAuthority
-    );
-    const aggregator = await AggregatorClass.fromAccount(
-      this.context,
-      this.aggregatorAccount
-    );
+    const txn = await aggregatorAccount.removeJob(jobAccount, authority);
 
     if (this.silent) {
       console.log(txn);
@@ -99,10 +70,6 @@ export default class AggregatorRemoveJob extends BaseCommand {
         )}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
-    }
-
-    if (this.outputFile) {
-      this.context.fs.saveAccount(this.outputFile, aggregator);
     }
   }
 

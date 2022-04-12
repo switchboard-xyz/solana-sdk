@@ -5,8 +5,9 @@ import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
 
-export default class AggregatorSetBatchSize extends BaseCommand {
-  static description = "set an aggregator's batch size";
+export default class AggregatorSetMinOracleResults extends BaseCommand {
+  static description =
+    "set an aggregator's minimum number of oracles that must respond before a result is accepted on-chain";
 
   static flags = {
     ...BaseCommand.flags,
@@ -24,35 +25,36 @@ export default class AggregatorSetBatchSize extends BaseCommand {
       description: "public key of the aggregator account",
     },
     {
-      name: "batchSize",
+      name: "minOracleResults",
       required: true,
-      description: "number of oracles requested for each open round call",
+      description:
+        "number of oracles that must respond before a value is accepted on-chain",
     },
   ];
 
   //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetBatchSize);
+    const { args, flags } = this.parse(AggregatorSetMinOracleResults);
     verifyProgramHasPayer(this.program);
-
-    const batchSize = Number.parseInt(args.batchSize, 10);
-    if (batchSize <= 0 || batchSize > 16) {
-      throw new Error(`Invalid batch size (1 - 16), ${batchSize}`);
-    }
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
 
+    const minOracleResults = Number.parseInt(args.minOracleResults, 10);
+    if (minOracleResults <= 0 || minOracleResults > 16) {
+      throw new Error(`Invalid min oracle size (1 - 16), ${minOracleResults}`);
+    }
+
     const authority = flags.authority
       ? await loadKeypair(flags.authority)
       : getPayer(this.program);
 
-    const txn = await aggregatorAccount.setBatchSize({
+    const txn = await aggregatorAccount.setMinOracles({
       authority,
-      batchSize,
+      minOracleResults,
     });
 
     if (this.silent) {
@@ -60,7 +62,7 @@ export default class AggregatorSetBatchSize extends BaseCommand {
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON}Aggregator batch size set successfully\r\n`
+          `${CHECK_ICON}Aggregator minimum oracles set successfully\r\n`
         )}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
@@ -68,6 +70,6 @@ export default class AggregatorSetBatchSize extends BaseCommand {
   }
 
   async catch(error) {
-    super.catch(error, "failed to set aggregator batch size");
+    super.catch(error, "failed to set aggregator minimum oracles");
   }
 }
