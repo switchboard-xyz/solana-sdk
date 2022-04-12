@@ -93,6 +93,7 @@ export default class PermissionSet extends BaseCommand {
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Permissions set successfully`)}`
       );
+      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
     }
   }
 
