@@ -1,17 +1,18 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+import {
+  AggregatorAccount,
+  getPayer,
+  LeaseAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
+import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/v2-utils-ts";
 import * as chalk from "chalk";
-import { AggregatorClass, ProgramStateClass } from "../../../accounts";
 import { chalkString } from "../../../accounts/utils";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorLeaseExtend extends BaseCommand {
-  aggregatorAccount: AggregatorAccount;
-
-  amount: anchor.BN;
-
   static description = "fund and re-enable an aggregator lease";
 
   static flags = {
@@ -37,49 +38,68 @@ export default class AggregatorLeaseExtend extends BaseCommand {
     "$ sbv2 aggregator:lease:extend GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 2500 --keypair ../payer-keypair.json",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
+    const { args } = this.parse(AggregatorLeaseExtend);
     verifyProgramHasPayer(this.program);
 
-    const { args } = this.parse(AggregatorLeaseExtend);
-    this.amount = args.amount;
-    if (this.amount.lte(new anchor.BN(0)))
+    if (args.amount.lte(new anchor.BN(0))) {
       throw new Error("amount to deposit must be greater than 0");
+    }
 
-    this.aggregatorAccount = new AggregatorAccount({
+    const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
-  }
 
-  async run() {
-    const funderTokenAccount = await ProgramStateClass.getProgramTokenAddress(
+    const aggregator = await aggregatorAccount.loadData();
+
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: aggregator.queuePubkey,
+    });
+
+    const [leaseAccount] = LeaseAccount.fromSeed(
       this.program,
-      this.context
+      queueAccount,
+      aggregatorAccount
     );
 
-    const aggregator = await AggregatorClass.fromAccount(
-      this.context,
-      this.aggregatorAccount
+    const initialLeaseBalance = await leaseAccount.getBalance();
+    this.logger.log(
+      chalkString("Initial Aggregator Lease Balance", initialLeaseBalance)
     );
+
+    const funderTokenAccount = await getOrCreateSwitchboardMintTokenAccount(
+      this.program
+    );
+    const initialFunderBalance =
+      await this.program.provider.connection.getTokenAccountBalance(
+        funderTokenAccount
+      );
     this.logger.log(
       chalkString(
-        "Initial Aggregator Lease Balance",
-        aggregator.leaseAccount.escrowBalance
+        "Initial Funder Token Balance",
+        initialFunderBalance.value.uiAmountString
       )
     );
 
-    const tx = await aggregator.extendLease(funderTokenAccount, this.amount);
+    const funderAuthority = getPayer(this.program);
+
+    const txn = await leaseAccount.extend({
+      loadAmount: args.amount,
+      funder: funderTokenAccount,
+      funderAuthority,
+    });
 
     if (this.silent) {
-      console.log(tx);
+      console.log(txn);
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON} Deposited ${this.amount} tokens into aggregator lease`
+          `${CHECK_ICON} Deposited ${args.amount} tokens into aggregator lease`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${tx}?cluster=${this.cluster}`);
+      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
       const newBalance = await aggregator.leaseAccount.getBalance();
       this.logger.log(
         chalkString("Final Aggregator Lease Balance", newBalance)
