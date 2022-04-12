@@ -4,15 +4,13 @@ import {
   CrankAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
-import { AggregatorClass, CrankClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorAddCrank extends BaseCommand {
-  aggregatorAccount: AggregatorAccount;
-  crankAccount: CrankAccount;
-
   static description = "add the aggregator to a crank";
+
+  static aliases = ["crank:push", "crank:add:aggregator"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -37,43 +35,31 @@ export default class AggregatorAddCrank extends BaseCommand {
     "$ sbv2 aggregator:add:crank --keypair ../payer-keypair.json",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
+    const { args } = this.parse(AggregatorAddCrank);
     verifyProgramHasPayer(this.program);
 
-    const { args } = this.parse(AggregatorAddCrank);
-
-    this.aggregatorAccount = new AggregatorAccount({
+    const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
 
-    this.crankAccount = new CrankAccount({
+    const crankAccount = new CrankAccount({
       program: this.program,
       publicKey: args.crankKey,
     });
-  }
 
-  async run() {
-    const aggregator = await AggregatorClass.fromAccount(
-      this.context,
-      this.aggregatorAccount
-    );
-    const crank = await CrankClass.fromAccount(this.context, this.crankAccount);
-
-    const pushTxn = await crank.push(aggregator);
+    const txn = await crankAccount.push({ aggregatorAccount });
 
     if (this.silent) {
-      console.log(pushTxn);
+      console.log(txn);
     } else {
       this.logger.log(
         `\r\n${chalk.green(
           `${CHECK_ICON}Aggregator added to crank successfully`
         )}`
       );
-      this.logger.log(
-        `https://solscan.io/tx/${pushTxn}?cluster=${this.cluster}`
-      );
+      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
     }
   }
 
