@@ -1,6 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { NoPayerKeypairProvided } from "./errors";
 
 const DEFAULT_KEYPAIR = Keypair.fromSeed(new Uint8Array(32).fill(1));
 
@@ -37,4 +38,23 @@ export const getIdlAddress = async (
 ): Promise<PublicKey> => {
   const base = (await PublicKey.findProgramAddress([], programId))[0];
   return PublicKey.createWithSeed(base, "anchor:idl", programId);
+};
+
+export const programHasPayer = (program: anchor.Program): boolean => {
+  const payer = (program.provider.wallet as anchor.Wallet).payer;
+  return !payer.publicKey.equals(DEFAULT_KEYPAIR.publicKey);
+};
+
+export const getProgramPayer = (program: anchor.Program): Keypair => {
+  if (programHasPayer(program)) {
+    return (program.provider.wallet as anchor.Wallet).payer;
+  }
+  throw new NoPayerKeypairProvided();
+};
+
+export const verifyProgramHasPayer = (program: anchor.Program): void => {
+  if (programHasPayer(program)) {
+    return;
+  }
+  throw new NoPayerKeypairProvided();
 };
