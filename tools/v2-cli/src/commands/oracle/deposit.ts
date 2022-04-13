@@ -1,19 +1,16 @@
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { OracleAccount } from "@switchboard-xyz/switchboard-v2";
+import * as anchor from "@project-serum/anchor";
+import { PublicKey } from "@solana/web3.js";
+import {
+  getPayer,
+  OracleAccount,
+  ProgramStateAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
-import { ProgramStateClass } from "../../accounts";
-import { OracleClass } from "../../accounts/oracle/oracle";
 import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
 export default class OracleDeposit extends BaseCommand {
-  oracleAccount: OracleAccount;
-
-  oracleAuthority: Keypair | undefined = undefined;
-
-  amount: number;
-
   static description = "deposit tokens into an oracle's token wallet";
 
   static flags = {
@@ -30,6 +27,7 @@ export default class OracleDeposit extends BaseCommand {
     {
       name: "amount",
       required: true,
+      parse: (amount: string) => new anchor.BN(amount),
       description: "amount to deposit into oracle's token wallet",
     },
   ];
@@ -38,45 +36,73 @@ export default class OracleDeposit extends BaseCommand {
     "$ sbv2 oracle:deposit 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
     verifyProgramHasPayer(this.program);
-
     const { args } = this.parse(OracleDeposit);
-    this.amount = args.amount;
-    if (this.amount <= 0)
-      throw new Error("amount to deposit must be greater than 0");
 
-    this.oracleAccount = new OracleAccount({
+    const payer = getPayer(this.program);
+
+    if (args.amount.lte(new anchor.BN(0))) {
+      throw new Error("amount to deposit must be greater than 0");
+    }
+
+    const oracleAccount = new OracleAccount({
       program: this.program,
       publicKey: args.oracleKey,
     });
-  }
+    const oracle = await oracleAccount.loadData();
 
-  async run() {
-    const funderTokenAccount = await ProgramStateClass.getProgramTokenAddress(
-      this.oracleAccount.program,
-      this.context
+    const [programStateAccount] = ProgramStateAccount.fromSeed(this.program);
+    const switchboardMint = await programStateAccount.getTokenMint();
+
+    const initialTokenBalance =
+      await this.program.provider.connection.getTokenAccountBalance(
+        oracle.tokenAccount
+      );
+
+    const payerTokenAccountInfo =
+      await switchboardMint.getOrCreateAssociatedAccountInfo(payer.publicKey);
+    const payerTokenBalanceResponse =
+      await this.program.provider.connection.getTokenAccountBalance(
+        payerTokenAccountInfo.address
+      );
+    const payerTokenBalance = new anchor.BN(
+      payerTokenBalanceResponse.value.amount
     );
 
-    const tx = await OracleClass.depositTokens(
-      this.context,
-      this.oracleAccount,
-      this.amount,
-      funderTokenAccount
+    if (args.amount.gt(payerTokenBalance)) {
+      throw new Error(
+        `deposit amount ${args.amount} must be less than current token balance ${payerTokenBalance}`
+      );
+    }
+
+    const txn = await switchboardMint.transfer(
+      payerTokenAccountInfo.address,
+      oracle.tokenAccount,
+      payer,
+      [],
+      (args.amount as anchor.BN).toNumber()
     );
 
     if (this.silent) {
-      console.log(tx);
+      console.log(txn);
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON} Deposited ${this.amount} tokens into oracle account`
+          `${CHECK_ICON}Deposited ${args.amount} tokens into oracle account`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${tx}?cluster=${this.cluster}`);
-      const newBalance = await OracleClass.getBalance(this.oracleAccount);
-      this.logger.log(chalkString("New Oracle Token Balance", newBalance));
+      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      const finalTokenBalance =
+        await this.program.provider.connection.getTokenAccountBalance(
+          oracle.tokenAccount
+        );
+      this.logger.log(
+        chalkString(
+          "New Oracle Token Balance",
+          `${finalTokenBalance.value.amount} (${finalTokenBalance.value.uiAmountString})`
+        )
+      );
     }
   }
 
