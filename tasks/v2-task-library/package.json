@@ -14,8 +14,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "pbjs": "^0.0.14",
-    "pbts": "^2.0.2",
     "@types/long": "^4.0.1",
     "protobufjs": "^6.11.2"
   }
