@@ -55,7 +55,7 @@ async function main(): Promise<void> {
   const simulator = new TaskSimulator("mainnet-beta");
 
   const mainnetConnection = new Connection(rpcUrl);
-  const context = buildContext(mainnetConnection, console);
+  const context = await buildContext(mainnetConnection, console);
 
   if (aggregatorKey) {
     const aggregatorPubkey = new PublicKey(aggregatorKey);

@@ -18,7 +18,15 @@ export class JupiterSwap {
 
   public tokens: Promise<Token[]>;
 
-  constructor(mainnetConnection: Connection) {
+  static create = async (
+    mainnetConnection: Connection
+  ): Promise<JupiterSwap> => {
+    const jupiterSwap = new JupiterSwap(mainnetConnection);
+    await jupiterSwap.loadJupiterTokens();
+    return jupiterSwap;
+  };
+
+  private constructor(mainnetConnection: Connection) {
     this.connection = mainnetConnection;
     this.jupiter = Jupiter.load({
       connection: mainnetConnection,

@@ -84,11 +84,11 @@ export interface OracleContext {
   drift?: DriftClient;
 }
 
-export const buildContext = (
+export const buildContext = async (
   mainnetConnection: Connection,
   logger?: LoggerStrategy,
   cache?: CacheStrategy
-): OracleContext => {
+): Promise<OracleContext> => {
   return {
     mainnetConnection,
     logger: logger,
@@ -100,7 +100,7 @@ export const buildContext = (
     mercurial: new MercurialSwap(mainnetConnection),
     lendingRateObserver: new RateObserver(),
     mango: new MangoPerps(mainnetConnection),
-    jupiter: new JupiterSwap(mainnetConnection),
+    jupiter: await JupiterSwap.create(mainnetConnection),
     pyth: new PythClient(mainnetConnection),
     chainlink: new ChainlinkClient(),
     drift: new DriftClient(mainnetConnection),
