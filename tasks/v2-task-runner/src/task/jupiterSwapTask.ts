@@ -27,7 +27,7 @@ export class JupiterSwapTask extends SwitchboardTask {
     const mainnet =
       context?.mainnetConnection ??
       new Connection(clusterApiUrl("mainnet-beta"));
-    const jupiter = context?.jupiter ?? new JupiterSwap(mainnet);
+    const jupiter = context?.jupiter ?? (await JupiterSwap.create(mainnet));
 
     if (jupiterSwapTask.inTokenAddress && jupiterSwapTask.outTokenAddress) {
       return jupiter.calculateSwapPrice(
