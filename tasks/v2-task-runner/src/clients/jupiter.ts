@@ -12,34 +12,40 @@ export class JupiterSwap {
     "D8d7xsLgV3sHxXQacA1vQfCharFXQzVmSeyMcHEenP52"
   );
 
-  public connection: Connection;
+  public readonly connection: Connection;
 
-  public jupiter: Promise<Jupiter>;
+  public readonly jupiter: Jupiter;
 
-  public tokens: Promise<Token[]>;
+  public readonly tokens: Token[];
 
   static create = async (
     mainnetConnection: Connection
   ): Promise<JupiterSwap> => {
-    const jupiterSwap = new JupiterSwap(mainnetConnection);
-    await jupiterSwap.loadJupiterTokens();
-    return jupiterSwap;
+    const [jupiter, tokens] = await Promise.allSettled([
+      Jupiter.load({
+        connection: mainnetConnection,
+        cluster: "mainnet-beta",
+        user: JupiterSwap.simulatedUser,
+      }),
+      fetch(TOKEN_LIST_URL["mainnet-beta"]).then((resp) => resp.json()),
+    ]);
+
+    if (jupiter.status === "rejected")
+      throw new Error("Could not initialize Jupiter");
+    else if (tokens.status === "rejected")
+      throw new Error("Could not retrieve Jupiter tokens");
+
+    return new JupiterSwap(mainnetConnection, jupiter.value, tokens.value);
   };
 
-  private constructor(mainnetConnection: Connection) {
+  private constructor(
+    mainnetConnection: Connection,
+    jupiter: Jupiter,
+    tokens: Token[]
+  ) {
     this.connection = mainnetConnection;
-    this.jupiter = Jupiter.load({
-      connection: mainnetConnection,
-      cluster: "mainnet-beta",
-      user: JupiterSwap.simulatedUser,
-    });
-    this.loadJupiterTokens();
-  }
-
-  async loadJupiterTokens() {
-    this.tokens = <Promise<Token[]>>(
-      (await fetch(TOKEN_LIST_URL["mainnet-beta"])).json()
-    );
+    this.jupiter = jupiter;
+    this.tokens = tokens;
   }
 
   /** Calculate the jupiter swap price for a given input and output token */
@@ -47,14 +53,12 @@ export class JupiterSwap {
     inTokenAddress: string,
     outTokenAddress: string
   ): Promise<Big> {
-    const tokens = await this.tokens;
-
-    const inputToken = tokens.find((t) => t.address === inTokenAddress);
+    const inputToken = this.tokens.find((t) => t.address === inTokenAddress);
     if (!inputToken) {
       throw new Error(`failed to find jupiter input token ${inTokenAddress}`);
     }
 
-    const outputToken = tokens.find((t) => t.address === outTokenAddress);
+    const outputToken = this.tokens.find((t) => t.address === outTokenAddress);
     if (!outputToken) {
       throw new Error(`failed to find jupiter output token ${outTokenAddress}`);
     }
@@ -66,9 +70,7 @@ export class JupiterSwap {
     );
 
     // all of the routes to swap token A for token B
-    const routes = await (
-      await this.jupiter
-    ).computeRoutes({
+    const routes = await this.jupiter.computeRoutes({
       inputMint: new PublicKey(inputToken.address),
       outputMint: new PublicKey(outputToken.address),
       inputAmount: inputAmount.toNumber(),
