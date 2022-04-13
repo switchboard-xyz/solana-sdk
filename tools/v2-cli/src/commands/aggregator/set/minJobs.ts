@@ -1,9 +1,9 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, getPayer } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorSetMinJobResults extends BaseCommand {
   static description =
@@ -41,8 +41,11 @@ export default class AggregatorSetMinJobResults extends BaseCommand {
       program: this.program,
       publicKey: args.aggregatorKey,
     });
-
     const aggregator = await aggregatorAccount.loadData();
+    const authority = await this.loadAuthority(
+      flags.authority,
+      aggregator.authority
+    );
 
     const minJobResults = Number.parseInt(args.minJobResults, 10);
     if (minJobResults <= 0 || minJobResults > 16) {
@@ -53,10 +56,6 @@ export default class AggregatorSetMinJobResults extends BaseCommand {
         `Min jobs ${minJobResults} is greater than current number of jobs ${aggregator.jobPubkeysSize} `
       );
     }
-
-    const authority = flags.authority
-      ? await loadKeypair(flags.authority)
-      : getPayer(this.program);
 
     const txn = await aggregatorAccount.setMinJobs({
       authority,

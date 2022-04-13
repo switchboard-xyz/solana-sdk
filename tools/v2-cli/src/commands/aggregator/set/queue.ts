@@ -2,12 +2,11 @@ import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
-  getPayer,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorSetQueue extends BaseCommand {
   static description = "set an aggregator's oracle queue";
@@ -43,15 +42,17 @@ export default class AggregatorSetQueue extends BaseCommand {
       program: this.program,
       publicKey: args.aggregatorKey,
     });
+    const aggregator = await aggregatorAccount.loadData();
 
     const oracleQueue = new OracleQueueAccount({
       program: this.program,
       publicKey: args.queueKey,
     });
 
-    const authority = flags.authority
-      ? await loadKeypair(flags.authority)
-      : getPayer(this.program);
+    const authority = await this.loadAuthority(
+      flags.authority,
+      aggregator.authority
+    );
 
     const txn = await this.program.rpc.aggregatorSetQueue(
       {},

@@ -50,7 +50,6 @@ export default class AggregatorLeaseExtend extends BaseCommand {
       program: this.program,
       publicKey: args.aggregatorKey,
     });
-
     const aggregator = await aggregatorAccount.loadData();
 
     const queueAccount = new OracleQueueAccount({

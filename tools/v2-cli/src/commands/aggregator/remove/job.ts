@@ -1,13 +1,9 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import {
-  AggregatorAccount,
-  getPayer,
-  JobAccount,
-} from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorRemoveJob extends BaseCommand {
   static description = "remove a switchboard job account from an aggregator";
@@ -49,15 +45,16 @@ export default class AggregatorRemoveJob extends BaseCommand {
       program: this.program,
       publicKey: args.aggregatorKey,
     });
+    const aggregator = await aggregatorAccount.loadData();
+    const authority = await this.loadAuthority(
+      flags.authority,
+      aggregator.authority
+    );
 
     const jobAccount = new JobAccount({
       program: this.program,
       publicKey: new PublicKey(args.jobKey),
     });
-
-    const authority = flags.authority
-      ? await loadKeypair(flags.authority)
-      : getPayer(this.program);
 
     const txn = await aggregatorAccount.removeJob(jobAccount, authority);
 

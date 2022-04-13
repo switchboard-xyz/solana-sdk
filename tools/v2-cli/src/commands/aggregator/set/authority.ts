@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, getPayer } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, loadKeypair } from "../../../utils";
@@ -38,14 +38,15 @@ export default class AggregatorSetAuthority extends BaseCommand {
 
     const newAuthority = await loadKeypair(args.newAuthority);
 
-    const currentAuthority = flags.currentAuthority
-      ? await loadKeypair(flags.currentAuthority)
-      : getPayer(this.program);
-
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
+    const aggregator = await aggregatorAccount.loadData();
+    const currentAuthority = await this.loadAuthority(
+      flags.currentAuthority,
+      aggregator.authority
+    );
 
     const txn = await aggregatorAccount.setAuthority(
       newAuthority.publicKey,

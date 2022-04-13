@@ -1,9 +1,9 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, getPayer } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorSetBatchSize extends BaseCommand {
   static description = "set an aggregator's batch size";
@@ -45,10 +45,11 @@ export default class AggregatorSetBatchSize extends BaseCommand {
       program: this.program,
       publicKey: args.aggregatorKey,
     });
-
-    const authority = flags.authority
-      ? await loadKeypair(flags.authority)
-      : getPayer(this.program);
+    const aggregator = await aggregatorAccount.loadData();
+    const authority = await this.loadAuthority(
+      flags.authority,
+      aggregator.authority
+    );
 
     const txn = await aggregatorAccount.setBatchSize({
       authority,
