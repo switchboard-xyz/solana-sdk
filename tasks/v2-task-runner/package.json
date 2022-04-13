@@ -4,20 +4,28 @@
   "description": "switchboard v2 task runner",
   "author": "",
   "license": "ISC",
-  "main": "lib/index.js",
-  "module": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf lib && ./esbuild.js",
+    "build": "tsup src --format cjs,esm --dts --clean",
+    "oldbuild": "rimraf lib && ./esbuild.js",
     "prepublishOnly": "npm run build && npm version patch --force",
     "fmt": "prettier --write 'src/**/*.ts'",
     "lint": "eslint src/** --ext .ts --config ../../.eslintrc.json --fix"
   },
   "peerDependencies": {
     "@project-serum/anchor": "0.22.1",
-    "@solana/web3.js": "1.37.1",
-    "@solana/buffer-layout": "4.0.0"
+    "@solana/buffer-layout": "4.0.0",
+    "@solana/web3.js": "1.37.1"
   },
   "resolutions": {
     "@solana/buffer-layout": "4.0.0",
@@ -30,13 +38,13 @@
     "@jup-ag/core": "^1.0.0-beta.19",
     "@mercurial-finance/stable-swap-n-pool": "^0.2.5",
     "@orca-so/sdk": "^1.2.23",
-    "@project-serum/anchor": "^0.22.1",
+    "@project-serum/anchor": "0.22.1",
     "@project-serum/serum": "^0.13.62",
     "@pythnetwork/client": "^2.6.1",
     "@raydium-io/raydium-sdk": "1.0.1-beta.17",
     "@saberhq/stableswap-sdk": "^1.12.58",
     "@saberhq/token-utils": "^1.12.58",
-    "@solana/web3.js": "^1.37.1",
+    "@solana/web3.js": "1.37.1",
     "@switchboard-xyz/defi-yield-ts": "^1.0.4",
     "@switchboard-xyz/switchboard-api": "^0.2.191",
     "@switchboard-xyz/switchboard-v2": "^0.0.72",
@@ -60,6 +68,7 @@
     "rimraf": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.7.0",
-    "tsdx": "^0.12.3"
+    "tsdx": "^0.12.3",
+    "tsup": "^5.12.5"
   }
 }

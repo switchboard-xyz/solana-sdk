@@ -13,7 +13,7 @@
     }
   },
   "references": [{ "path": "tasks/v2-task-runner" }],
-  "exclude": ["scripts/**/*.ts"],
+  "exclude": ["scripts/**/*.ts", "node_modules"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
