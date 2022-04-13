@@ -3,13 +3,20 @@
 import Command, { flags } from "@oclif/command";
 import { Input } from "@oclif/parser";
 import * as anchor from "@project-serum/anchor";
-import { Cluster, clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
+import {
+  Cluster,
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  PublicKey,
+} from "@solana/web3.js";
+import { getPayer } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import { DEFAULT_KEYPAIR } from "./accounts";
 import { CliConfig, ConfigParameter, DEFAULT_CONFIG } from "./config";
-import { NoPayerKeypairProvided } from "./types";
+import { AuthorityMismatch, NoPayerKeypairProvided } from "./types";
 import { CommandContext } from "./types/context/context";
 import { FsProvider } from "./types/context/FsProvider";
 import { LoggerParameters, LogProvider } from "./types/context/logging";
@@ -165,6 +172,22 @@ abstract class BaseCommand extends Command {
     }
 
     this.exit(1); // causes unreadable errors
+  }
+
+  /** Load an authority from a CLI flag and optionally check if it matches the expected account authority */
+  async loadAuthority(
+    authorityPath?: string,
+    expectedAuthority?: PublicKey
+  ): Promise<Keypair> {
+    const authority = authorityPath
+      ? await loadKeypair(authorityPath)
+      : getPayer(this.program);
+
+    if (expectedAuthority && !expectedAuthority.equals(authority.publicKey)) {
+      throw new AuthorityMismatch();
+    }
+
+    return authority;
   }
 
   mainnetCheck(): void {

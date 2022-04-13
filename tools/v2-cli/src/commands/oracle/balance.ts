@@ -1,12 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 import { OracleAccount } from "@switchboard-xyz/switchboard-v2";
-import { OracleClass } from "../../accounts/oracle/oracle";
 import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 
 export default class OracleBalance extends BaseCommand {
-  oracleAccount: OracleAccount;
-
   static description = "check an oracles token balance";
 
   static flags = {
@@ -26,26 +23,30 @@ export default class OracleBalance extends BaseCommand {
     "$ sbv2 oracle:balance 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
     const { args } = this.parse(OracleBalance);
 
-    this.oracleAccount = new OracleAccount({
+    const oracleAccount = new OracleAccount({
       program: this.program,
       publicKey: args.oracleKey,
     });
-  }
+    const oracle = await oracleAccount.loadData();
 
-  async run() {
-    const oracle = await OracleClass.fromAccount(
-      this.context,
-      this.oracleAccount
-    );
+    const balance =
+      await this.program.provider.connection.getTokenAccountBalance(
+        oracle.tokenAccount
+      );
 
     if (this.silent) {
-      console.log(oracle.balance.toString());
+      console.log(balance.value.amount);
     } else {
-      this.logger.log(chalkString("Oracle Balance:", oracle.balance, 12));
+      this.logger.log(
+        chalkString(
+          "Oracle Balance:",
+          `${balance.value.amount} (${balance.value.uiAmountString})`,
+          12
+        )
+      );
     }
   }
 

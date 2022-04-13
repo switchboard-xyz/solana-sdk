@@ -1,19 +1,16 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON, loadKeypair } from "../../../utils";
 
-export default class AggregatorRemoveJob extends BaseCommand {
-  static description = "remove a switchboard job account from an aggregator";
+export default class AggregatorSetAuthority extends BaseCommand {
+  static description = "set an aggregator's authority";
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
-    authority: flags.string({
+    currentAuthority: flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -27,43 +24,41 @@ export default class AggregatorRemoveJob extends BaseCommand {
       description: "public key of the aggregator account",
     },
     {
-      name: "jobKey",
+      name: "newAuthority",
       required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description:
         "public key of an existing job account to remove from an aggregator",
     },
   ];
 
-  static examples = ["$ sbv2 aggregator:remove:job"];
+  //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorRemoveJob);
-    verifyProgramHasPayer(this.program);
+    const { args, flags } = this.parse(AggregatorSetAuthority);
+
+    const newAuthority = await loadKeypair(args.newAuthority);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
     const aggregator = await aggregatorAccount.loadData();
-    const authority = await this.loadAuthority(
-      flags.authority,
+    const currentAuthority = await this.loadAuthority(
+      flags.currentAuthority,
       aggregator.authority
     );
 
-    const jobAccount = new JobAccount({
-      program: this.program,
-      publicKey: new PublicKey(args.jobKey),
-    });
-
-    const txn = await aggregatorAccount.removeJob(jobAccount, authority);
+    const txn = await aggregatorAccount.setAuthority(
+      newAuthority.publicKey,
+      currentAuthority
+    );
 
     if (this.silent) {
       console.log(txn);
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON}Job succesfully removed from aggregator account\r\n`
+          `${CHECK_ICON}Aggregator authority set successfully\r\n`
         )}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
@@ -71,6 +66,6 @@ export default class AggregatorRemoveJob extends BaseCommand {
   }
 
   async catch(error) {
-    super.catch(error, "failed to remove job to aggregator account");
+    super.catch(error, "failed to set aggregator authority");
   }
 }

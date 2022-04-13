@@ -1,18 +1,16 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
-export default class AggregatorRemoveJob extends BaseCommand {
-  static description = "remove a switchboard job account from an aggregator";
+export default class AggregatorSetMinJobResults extends BaseCommand {
+  static description =
+    "set an aggregator's minimum number of jobs before an oracle responds";
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
     authority: flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
@@ -27,18 +25,16 @@ export default class AggregatorRemoveJob extends BaseCommand {
       description: "public key of the aggregator account",
     },
     {
-      name: "jobKey",
+      name: "minJobResults",
       required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
-      description:
-        "public key of an existing job account to remove from an aggregator",
+      description: "number of jobs that must respond before an oracle responds",
     },
   ];
 
-  static examples = ["$ sbv2 aggregator:remove:job"];
+  //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorRemoveJob);
+    const { args, flags } = this.parse(AggregatorSetMinJobResults);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
@@ -51,26 +47,32 @@ export default class AggregatorRemoveJob extends BaseCommand {
       aggregator.authority
     );
 
-    const jobAccount = new JobAccount({
-      program: this.program,
-      publicKey: new PublicKey(args.jobKey),
-    });
+    const minJobResults = Number.parseInt(args.minJobResults, 10);
+    if (minJobResults <= 0 || minJobResults > 16) {
+      throw new Error(`Invalid min job size (1 - 16), ${minJobResults}`);
+    }
+    if (minJobResults > aggregator.jobPubkeysSize) {
+      throw new Error(
+        `Min jobs ${minJobResults} is greater than current number of jobs ${aggregator.jobPubkeysSize} `
+      );
+    }
 
-    const txn = await aggregatorAccount.removeJob(jobAccount, authority);
+    const txn = await aggregatorAccount.setMinJobs({
+      authority,
+      minJobResults,
+    });
 
     if (this.silent) {
       console.log(txn);
     } else {
       this.logger.log(
-        `${chalk.green(
-          `${CHECK_ICON}Job succesfully removed from aggregator account\r\n`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Aggregator min job set successfully\r\n`)}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
     }
   }
 
   async catch(error) {
-    super.catch(error, "failed to remove job to aggregator account");
+    super.catch(error, "failed to set aggregator min jobs");
   }
 }

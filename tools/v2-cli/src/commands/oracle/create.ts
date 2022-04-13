@@ -1,24 +1,15 @@
 import { flags } from "@oclif/command";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
-import * as chalk from "chalk";
-import { OracleDefinition } from "../../accounts";
-import { OracleClass } from "../../accounts/oracle/oracle";
-import BaseCommand from "../../BaseCommand";
+import { PublicKey } from "@solana/web3.js";
 import {
-  CHECK_ICON,
-  getProgramPayer,
-  loadKeypair,
-  verifyProgramHasPayer,
-} from "../../utils";
+  OracleAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
+import * as chalk from "chalk";
+import { chalkString } from "../../accounts";
+import BaseCommand from "../../BaseCommand";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
 export default class OracleCreate extends BaseCommand {
-  queueAccount: OracleQueueAccount;
-
-  oracleDefinition: OracleDefinition;
-
-  oracleAuthority?: Keypair | undefined = undefined;
-
   static description = "create a new oracle account for a given queue";
 
   static flags = {
@@ -50,42 +41,33 @@ export default class OracleCreate extends BaseCommand {
     "$ sbv2 oracle:create GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --keypair ../payer-keypair.json --authority ../oracle-keypair.json",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
+    const { args, flags } = this.parse(OracleCreate);
     verifyProgramHasPayer(this.program);
 
-    const { args, flags } = this.parse(OracleCreate);
+    const authority = await this.loadAuthority(flags.authority);
 
-    this.queueAccount = new OracleQueueAccount({
+    const queueAccount = new OracleQueueAccount({
       program: this.program,
       publicKey: args.queueKey,
     });
 
-    if (flags.authority) {
-      this.oracleAuthority = await loadKeypair(flags.authority);
-    }
-
-    this.oracleDefinition = {
-      name: flags.name || "",
-      authorityKeypair: this.oracleAuthority ?? getProgramPayer(this.program),
-    };
-  }
-
-  async run() {
-    const oracle = await OracleClass.build(
-      this.context,
-      this.program,
-      this.oracleDefinition,
-      this.queueAccount
-    );
+    const oracleAccount = await OracleAccount.create(this.program, {
+      name: Buffer.from(flags.name ?? ""),
+      oracleAuthority: authority,
+      queueAccount,
+    });
+    const oracle = await oracleAccount.loadData();
 
     if (this.silent) {
-      console.log(oracle.account.publicKey.toString());
+      console.log(oracleAccount.publicKey);
     } else {
       this.logger.log(
-        `${chalk.green(`${CHECK_ICON} Oracle account created successfully`)}`
+        `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`
       );
-      this.logger.info(oracle.prettyPrint());
+      this.logger.info(
+        chalkString("Created Oracle", oracleAccount.publicKey.toString())
+      );
     }
   }
 

@@ -1,18 +1,16 @@
 import { flags } from "@oclif/command";
+import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
-export default class AggregatorRemoveJob extends BaseCommand {
-  static description = "remove a switchboard job account from an aggregator";
+export default class AggregatorSetVariance extends BaseCommand {
+  static description = "set an aggregator's variance threshold";
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
     authority: flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
@@ -24,21 +22,18 @@ export default class AggregatorRemoveJob extends BaseCommand {
       name: "aggregatorKey",
       required: true,
       parse: (pubkey: string) => new PublicKey(pubkey),
-      description: "public key of the aggregator account",
+      description: "public key of the aggregator",
     },
     {
-      name: "jobKey",
+      name: "varianceThreshold",
       required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
-      description:
-        "public key of an existing job account to remove from an aggregator",
+      parse: (variance: string) => new anchor.BN(variance),
+      description: "public key of the oracle queue",
     },
   ];
 
-  static examples = ["$ sbv2 aggregator:remove:job"];
-
   async run() {
-    const { args, flags } = this.parse(AggregatorRemoveJob);
+    const { args, flags } = this.parse(AggregatorSetVariance);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
@@ -51,19 +46,23 @@ export default class AggregatorRemoveJob extends BaseCommand {
       aggregator.authority
     );
 
-    const jobAccount = new JobAccount({
-      program: this.program,
-      publicKey: new PublicKey(args.jobKey),
-    });
-
-    const txn = await aggregatorAccount.removeJob(jobAccount, authority);
+    const txn = await this.program.rpc.aggregatorSetVarianceThreshold(
+      { varianceThreshold: args.varianceThreshold },
+      {
+        accounts: {
+          aggregator: aggregatorAccount.publicKey,
+          authority: authority.publicKey,
+        },
+        signers: [authority],
+      }
+    );
 
     if (this.silent) {
       console.log(txn);
     } else {
       this.logger.log(
-        `${chalk.green(
-          `${CHECK_ICON}Job succesfully removed from aggregator account\r\n`
+        `\r\n${chalk.green(
+          `${CHECK_ICON}Aggregator variance threshold set successfully`
         )}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
@@ -71,6 +70,6 @@ export default class AggregatorRemoveJob extends BaseCommand {
   }
 
   async catch(error) {
-    super.catch(error, "failed to remove job to aggregator account");
+    super.catch(error, "failed to set aggregator's variance threshold");
   }
 }

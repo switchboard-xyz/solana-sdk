@@ -1,22 +1,15 @@
 import { flags } from "@oclif/command";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import * as chalk from "chalk";
-import { AggregatorClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
-import {
-  CHECK_ICON,
-  getProgramPayer,
-  loadKeypair,
-  verifyProgramHasPayer,
-} from "../../../utils";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
-export default class AggregatorAddHistory extends BaseCommand {
-  aggregatorAccount: AggregatorAccount;
-  aggregatorAuthority?: Keypair = undefined;
-  size: number;
+export default class AggregatorSetHistoryBuffer extends BaseCommand {
+  static description =
+    "set an aggregator's history buffer account to record the last N accepted results";
 
-  static description = "add a history buffer to an aggregator";
+  static aliases = ["aggregator:add:history"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -45,41 +38,30 @@ export default class AggregatorAddHistory extends BaseCommand {
     "$ sbv2 aggregator:add:history --keypair ../payer-keypair.json GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
+    const { args, flags } = this.parse(AggregatorSetHistoryBuffer);
     verifyProgramHasPayer(this.program);
 
-    const { args, flags } = this.parse(AggregatorAddHistory);
-
-    this.aggregatorAccount = new AggregatorAccount({
+    const aggregatorAccount = new AggregatorAccount({
       program: this.program,
       publicKey: args.aggregatorKey,
     });
-
-    this.size = args.size;
-
-    if (flags.authority) {
-      this.aggregatorAuthority = await loadKeypair(flags.authority);
-    }
-  }
-
-  async run() {
-    const aggregator = await AggregatorClass.fromAccount(
-      this.context,
-      this.aggregatorAccount
+    const aggregator = await aggregatorAccount.loadData();
+    const authority = await this.loadAuthority(
+      flags.authority,
+      aggregator.authority
     );
 
-    const txn = await aggregator.addHistoryBuffer(
-      this.size,
-      this.aggregatorAuthority || getProgramPayer(this.program)
-    );
+    const size = Number.parseInt(args.size, 10);
+
+    const txn = await aggregatorAccount.setHistoryBuffer({ authority, size });
 
     if (this.silent) {
       console.log(txn);
     } else {
       this.logger.log(
         `\r\n${chalk.green(
-          `${CHECK_ICON}Added a history buffer of size ${this.size} to aggregator successfully`
+          `${CHECK_ICON}Added a history buffer of size ${size} to aggregator successfully`
         )}`
       );
       this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
