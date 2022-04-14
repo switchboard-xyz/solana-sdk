@@ -37,7 +37,7 @@ EXAMPLE
   $ sbv2 job:create:copy 7pdb5RVM6cVBU8XDfpGqakb1S4wX2i5QsZxT117tK4HS --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/job/create/copy.ts)_
+_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/job/create/copy.ts)_
 
 ## `sbv2 job:create:json DEFINITIONFILE`
 
@@ -80,7 +80,7 @@ EXAMPLE
   --aggregatorAuthority=../aggregator-keypair.json --outputFile=job.schema.json
 ```
 
-_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/job/create/json.ts)_
+_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/job/create/json.ts)_
 
 ## `sbv2 job:create:template TEMPLATE ID`
 
@@ -124,4 +124,4 @@ EXAMPLES
   $ sbv2 job:create:template ftxUs BTC_USD -k ../payer-keypair.json -n ftxUs_Btc -f ftx_us_btc_job.json
 ```
 
-_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/job/create/template.ts)_
+_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/job/create/template.ts)_

@@ -49,7 +49,7 @@
     "build": "rimraf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "prepublishOnly": "npm version patch --force",
     "doc": "oclif-dev readme",
-    "doc:out": "oclif-dev readme --multi --dir ../docs-v2/docs/developers/cli && cd ../docs-v2/docs/developers/cli/ && for f in *.md; do mv \"${f%.md}.md\" \"_${f%.md}.md\"; sed -i \"\" '1,2d' \"_${f%.md}.md\"; done",
+    "doc:out": "oclif-dev readme --multi --dir ../website/api/switchboardv2-cli/ && cd ../website/api/switchboardv2-cli/ && for f in *.md; do mv \"${f%.md}.md\" \"_${f%.md}.md\"; sed -i \"\" '1,2d' \"_${f%.md}.md\"; done",
     "test:old": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "test": "echo \"No test script for @switchboard-xyz/switchboardv2-cli\" && exit 0",
     "version": "oclif-dev readme && git add README.md",

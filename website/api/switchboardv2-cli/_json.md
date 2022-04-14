@@ -35,7 +35,7 @@ OPTIONS
   --sourceAggregator=sourceAggregator  public key of an existing aggregator account to copy
 ```
 
-_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/json/add/aggregator.ts)_
+_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/json/add/aggregator.ts)_
 
 ## `sbv2 json:add:crank SCHEMAFILE`
 
@@ -68,7 +68,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/json/add/crank.ts)_
+_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/json/add/crank.ts)_
 
 ## `sbv2 json:add:oracle SCHEMAFILE`
 
@@ -99,7 +99,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/json/add/oracle.ts)_
+_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/json/add/oracle.ts)_
 
 ## `sbv2 json:create:queue INPUTFILE OUTPUTFILE`
 
@@ -138,4 +138,4 @@ EXAMPLE
   $ sbv2 json:create:queue examples/queue.json queue-1.json -k ../authority-keypair.json
 ```
 
-_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.4/src/commands/json/create/queue.ts)_
+_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/json/create/queue.ts)_
