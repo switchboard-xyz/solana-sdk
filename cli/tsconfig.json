@@ -1,0 +1,25 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strict": false,
+    "importsNotUsedAsValues": "preserve",
+    "noImplicitOverride": false,
+    "noImplicitReturns": false,
+    "declaration": true,
+    "importHelpers": true,
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"],
+      "@switchboard-xyz/v2-utils-ts": ["../libraries/utils-ts"]
+    }
+  },
+  "types": ["node"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "bin", "lib", "test"],
+  "references": [
+    { "path": "../libraries/ts" },
+    { "path": "../libraries/utils-ts" }
+  ]
+}

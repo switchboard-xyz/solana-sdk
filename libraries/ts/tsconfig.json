@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    /* TODO: Fix undefined errors */
+    "strict": false,
+    "noImplicitReturns": false,
+    "strictNullChecks": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["tests/**/*", "lib", "node_modules"],
+  "files": ["src/index.ts"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "docs"
+  }
+}

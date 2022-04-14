@@ -1,0 +1,103 @@
+---
+sidebar_position: 10
+slug: /developers/rs
+title: Rust
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import { GoLinkExternal } from "react-icons/go";
+
+## Install
+
+Add the following line to your Cargo.toml file:
+
+```toml
+switchboard-v2 = "0.1.4"
+```
+
+**Documentation:** [crates.io <GoLinkExternal className="devicons" />](https://crates.io/crates/switchboard-v2), [docs.rs <GoLinkExternal className="devicons" />](https://docs.rs/switchboard-v2)
+
+## Reading Feeds
+
+```rust
+use switchboard_v2::AggregatorAccountData;
+use std::convert::TryInto;
+
+let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
+
+let decimal: f64 = feed_result.try_into()?;
+```
+
+[Docs <GoLinkExternal className="devicons" />](https://docs.rs/switchboard-v2/latest/switchboard_v2/aggregator/struct.AggregatorAccountData.html#method.get_result)
+
+## Examples
+
+<Tabs>
+<TabItem value="anchor" label="Anchor" default>
+
+```rust
+#[allow(unaligned_references)]
+use anchor_lang::prelude::*;
+use std::convert::TryInto;
+pub use switchboard_v2::AggregatorAccountData;
+
+declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+
+#[derive(Accounts)]
+#[instruction(params: ReadResultParams)]
+pub struct ReadResult<'info> {
+    pub aggregator: AccountInfo<'info>,
+}
+
+#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct ReadResultParams {}
+
+#[program]
+pub mod anchor_feed_parser {
+    use super::*;
+
+    pub fn read_result(ctx: Context<ReadResult>, _params: ReadResultParams) -> ProgramResult {
+        let aggregator = &ctx.accounts.aggregator;
+        let val: f64 = AggregatorAccountData::new(aggregator)?.get_result()?.try_into()?;
+
+        msg!("Current feed result is {}!", val);
+        Ok(())
+    }
+}
+```
+
+</TabItem>
+
+<TabItem value="solana" label="Solana" default>
+
+```rust
+pub use anchor_lang::prelude::*;
+pub use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    entrypoint,
+    entrypoint::ProgramResult,
+    msg,
+};
+use std::convert::TryInto;
+pub use switchboard_v2::AggregatorAccountData;
+
+entrypoint!(process_instruction);
+
+fn process_instruction<'a>(
+    _program_id: &'a Pubkey,
+    accounts: &'a [AccountInfo],
+    _instruction_data: &'a [u8],
+) -> ProgramResult {
+    let accounts_iter = &mut accounts.iter();
+    let aggregator = next_account_info(accounts_iter)?;
+
+    let val: f64 = AggregatorAccountData::new(aggregator)?.get_result()?.try_into()?;
+
+    msg!("Current feed result is {}!", val);
+    Ok(())
+}
+```
+
+</TabItem>
+</Tabs>

@@ -1,0 +1,12 @@
+{
+  "name": "Mango BNB Borrow Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "mango",
+        "assetMint": "9gP2kCy3wA1ctvYWQk75guqXuHfrEomqydHLtcTCqiLa",
+        "field": 1
+      }
+    }
+  ]
+}

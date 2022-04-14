@@ -1,0 +1,12 @@
+{
+  "name": "Solend SOL Borrow Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "solend",
+        "assetMint": "So11111111111111111111111111111111111111112",
+        "field": 1
+      }
+    }
+  ]
+}

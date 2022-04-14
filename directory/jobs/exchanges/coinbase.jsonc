@@ -1,0 +1,18 @@
+{
+  "name": "Coinbase BTC/USD",
+  "tasks": [
+    {
+      "websocketTask": {
+        "url": "wss://ws-feed.pro.coinbase.com",
+        "subscription": "{\"type\":\"subscribe\",\"product_ids\":[\"BTC-USD\"],\"channels\":[\"ticker\",{\"name\":\"ticker\",\"product_ids\":[\"BTC-USD\"]}]}",
+        "maxDataAgeSeconds": 15,
+        "filter": "$[?(@.type == 'ticker' && @.product_id == 'BTC-USD')]"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.price"
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "BinanceUs BTC/USD",
+  "tasks": [
+    {
+      "httpTask": {
+        "url": "https://www.binance.us/api/v3/ticker/price?symbol=BTCUSD"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.price"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@switchboard-xyz/switchboard-v2-monorepo",
+  "description": "switchboard v2 repo containing type definitions, libraries, and examples",
+  "private": true,
+  "workspaces": [
+    "libraries/ts",
+    "libraries/utils-ts",
+    "cli",
+    "feeds/packages/*",
+    "feeds/programs/*",
+    "vrf/packages/*",
+    "vrf/programs/*"
+  ],
+  "scripts": {
+    "start": "echo \"Error: no start script specified\" && exit 1",
+    "docs:build": "npm run build:site -w docs",
+    "docs:deploy": "npm run deploy -w docs"
+  },
+  "devDependencies": {
+    "@gallynaut/rawrtools": "^0.0.1",
+    "rimraf": "^3.0.2",
+    "shx": "^0.3.4",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  },
+  "engines": {
+    "node": ">=16",
+    "npm": ">=8"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  }
+}

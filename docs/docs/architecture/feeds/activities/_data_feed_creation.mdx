@@ -1,0 +1,147 @@
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Typography } from "@mui/material";
+import AggregatorInstructions from "/api/idl/_aggregator_instructions.mdx";
+
+import AggregatorAccountData from "/api/idl/accounts/AggregatorAccountData.md";
+import AggregatorHistoryBuffer from "/api/idl/accounts/AggregatorHistoryBuffer.md";
+import JobAccountData from "/api/idl/accounts/JobAccountData.md";
+import LeaseAccountData from "/api/idl/accounts/LeaseAccountData.md";
+
+import AggregatorInit from "/api/idl/instructions/aggregatorInit.md";
+import JobInit from "/api/idl/instructions/jobInit.md";
+import AggregatorAddJob from "/api/idl/instructions/aggregatorAddJob.md";
+import PermissionInit from "/api/idl/instructions/permissionInit.md";
+import PermissionSet from "/api/idl/instructions/permissionInit.md";
+import LeaseInit from "/api/idl/instructions/leaseInit.md";
+import LeaseExtend from "/api/idl/instructions/leaseExtend.md";
+import CrankPush from "/api/idl/instructions/crankPush.md";
+
+import JobInstructions from "/api/idl/_job_instructions.mdx";
+
+Depicts how a data feed is initialized. An aggregator must have the following accounts
+
+- Job Account
+- Permission Account
+- Lease Account
+
+<MarkdownImage img="/img/Activity_Aggregator_Create.png" />
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  AggregatorInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorInit />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  JobInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<JobInit />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  AggregatorAddJob
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorAddJob />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  PermissionInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionInit />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  PermissionSet
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionSet />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  LeaseInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseInit />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  LeaseExtend
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseExtend />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  CrankPush
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<CrankPush />
+
+</details>

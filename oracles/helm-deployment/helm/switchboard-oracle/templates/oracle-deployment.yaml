@@ -1,0 +1,102 @@
+{{- $values := .Values -}}
+{{- range $index, $key := .Values.oracleKeys }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: oracle
+  name: oracle-deployment-{{ $key.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: oracle
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - oracle
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - env:
+        - 
+          name: RPC_URL
+          value: {{ $values.rpcUrl }}
+        - 
+          name: WS_URL
+          value: {{ $values.wsUrl }}
+        - 
+          name: PAGERDUTY_EVENT_KEY
+          value: {{ $values.pagerdutyEventKey }}
+        - 
+          name: LIVE
+          value: "1"
+        - 
+          name: CLUSTER
+          value: {{ $values.cluster }}
+        - 
+          name: HEARTBEAT_INTERVAL
+          value: {{ $values.heartbeatInterval }}
+        - 
+          name: GOOGLE_PAYER_SECRET_PATH
+          value: {{ $values.googlePayerSecretPath }}
+        - 
+          name: GOOGLE_ORACLE_SECRET_PATH
+          value: {{ $values.googleOracleSecretPath }}
+        - 
+          name: METRICS_EXPORTER
+          value: {{ $values.metricsExporter }}
+        - 
+          name: GCP_CONFIG_BUCKET
+          value: {{ $values.gcpConfigBucket }}
+        - 
+          name: ORACLE_KEY
+          value: {{ $key.data }}
+        - 
+          name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /var/secrets/google/key.json
+        - 
+          name: BACKUP_MAINNET_RPC
+          value: {{ $values.backupMainnetUrl }}
+        image: {{ $values.image }}
+        imagePullPolicy: Always
+        name: oracle
+        ports:
+        - name: web
+          containerPort: 9090
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 3
+        resources:
+          limits:
+            cpu: 3000m
+            memory: 4092Mi
+          requests:
+            cpu: 3000m
+            memory: 4092Mi
+        volumeMounts:
+        - mountPath: /var/secrets/google
+          name: google-cloud-key
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: service-account
+---
+{{ end }}

@@ -1,0 +1,79 @@
+---
+sidebar_position: 10
+slug: /developers/js
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Javascript
+
+## Install
+
+Run the following command in your project:
+
+```bash npm2yarn
+npm install @switchboard-xyz/switchboard-v2
+```
+
+**Documentation:** [/api/switchboardv2-api](/api/switchboardv2-api)
+
+## Examples
+
+### Creating Feeds
+
+```ts
+import * as anchor from "@project-serum/anchor";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
+
+const program: anchor.Program;
+const queueAccount: OracleQueueAccount;
+
+const aggregatorAccount = await AggregatorAccount.create(program, {
+  name: Buffer.from("FeedName"),
+  batchSize: 6,
+  minRequiredJobResults: 1,
+  minRequiredOracleResults: 1,
+  minUpdateDelaySeconds: 30,
+  queueAccount,
+});
+```
+
+[Docs](/api/switchboardv2-api/classes/AggregatorAccount#create)
+
+### Updating Feeds
+
+```ts
+import * as anchor from "@project-serum/anchor";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
+
+const program: anchor.Program;
+const queueAccount: OracleQueueAccount;
+
+await aggregatorAccount.openRound({
+  oracleQueueAccount: queueAccount,
+  payoutWallet: tokenAccount,
+});
+```
+
+[Docs](/api/switchboardv2-api/classes/AggregatorAccount#openround)
+
+### Reading Feeds
+
+```ts
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+import { Big } from "big.js";
+
+const aggregatorAccount: AggregatorAccount;
+const result: Big = await aggregatorAccount.getLatestValue();
+
+console.log(result.toNumber());
+```
+
+[Docs](/api/switchboardv2-api/classes/AggregatorAccount#getlatestvalue)

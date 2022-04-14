@@ -1,0 +1,14 @@
+[features]
+seeds = false
+[programs.localnet]
+anchor_vrf_parser = "7PoPs442NYqZwfrFhMuVDTzpWfaZi8dCtRFwqydnj5Gt"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "https://solana--devnet.datahub.figment.io/apikey/e5ed598d4d2d63bc9ed352d0f8f7d8bf"
+wallet = "/Users/gally/dev/switchboardxyz/payer-keypair.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

@@ -1,0 +1,30 @@
+---
+sidebar_position: 30
+title: History
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import Link from "@docusaurus/Link";
+import { Typography, Box, Grid } from "@mui/material";
+
+import AggregatorHistoryBuffer from "/api/idl/accounts/AggregatorHistoryBuffer.md";
+
+import AggregatorSetHistoryBuffer from "/api/idl/instructions/aggregatorSetHistoryBuffer.md";
+
+A history buffer account stores a set number of accepted results for an aggregator, and given Solana’s maximum account size of 10MB, the maximum number of samples a single history buffer can support is 350,000 samples. An aggregator can only have a single history buffer associated with it. This feature allows Switchboard task to parse a history buffer for its calculations, such as the TwapTask.
+
+## Functions
+
+A history buffer account is responsible for the following functions:
+
+- [Historical Data](#historical-data): Define the number of historical samples to store.
+
+### 🚀Historical Data
+
+A history buffer has a static account size when it is initialized, equal to: `12 Bytes + (28 Bytes × Num Samples)`. Each time an aggregator value is updated on-chain, the associated history buffer is shifted to the right, and the last value is dropped.
+
+## Account Schema
+
+### 📦AggregatorHistoryBuffer
+
+<AggregatorHistoryBuffer />

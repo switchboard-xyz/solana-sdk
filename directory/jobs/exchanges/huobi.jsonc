@@ -1,0 +1,32 @@
+{
+  "name": "Huobi BTC/USD",
+  "tasks": [
+    {
+      "httpTask": {
+        "url": "https://api.huobi.pro/market/detail/merged?symbol=btcusdt"
+      }
+    },
+    {
+      "medianTask": {
+        "tasks": [
+          {
+            "jsonParseTask": {
+              "path": "$.tick.bid[0]"
+            }
+          },
+          {
+            "jsonParseTask": {
+              "path": "$.tick.ask[0]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "multiplyTask": {
+        /* Mainnet USDT/USD Feed */
+        "aggregatorPubkey": "ETAaeeuQBwsh9mC2gCov9WdhJENZuffRMXY2HgjCcSL9"
+      }
+    }
+  ]
+}

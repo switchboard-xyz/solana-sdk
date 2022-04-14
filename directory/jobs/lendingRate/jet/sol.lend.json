@@ -1,0 +1,12 @@
+{
+  "name": "JET SOL Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "jet",
+        "assetMint": "So11111111111111111111111111111111111111112",
+        "field": 0
+      }
+    }
+  ]
+}

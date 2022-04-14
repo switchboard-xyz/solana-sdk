@@ -1,0 +1,33 @@
+# Javascript
+node_modules
+dist
+lib
+build
+tsconfig.tsbuildinfo
+
+*.env
+start-local-validator.sh
+start-oracle.sh
+switchboard.json
+
+# Python
+__pycache__
+
+# Rust
+programs/**/target
+Cargo.lock
+.anchor
+target
+
+# Misc
+.keypairs
+secrets
+*-keypairs.json
+
+# Root level jsons ignored
+job-directory/*.json
+
+
+# Docusaurus
+public
+.docusaurus

@@ -1,0 +1,42 @@
+---
+sidebar_position: 80
+slug: /oracle/gcp/deploy
+---
+
+# Deploy
+
+## Build Helm Charts
+
+After completing the steps in the previous pages, you should have a `PROJECTNAME.env` file with each of the required variables defined. See [Google Cloud / Environment](./env) for a list of all required variables that must be set.
+
+Run the following command to build the helm charts with your environment variables injected into the manifests:
+
+```bash
+./build-helm.sh PROJECTNAME
+```
+
+## Deploy Helm Charts
+
+Run the command
+
+```bash
+./deploy-helm.sh PROJECTNAME
+```
+
+When complete, you should see your cluster running in the Google Cloud Console.
+
+[Google - Observing your GKE clusters](https://cloud.google.com/stackdriver/docs/solutions/gke/observing)
+
+## Update
+
+If necessary, rebuild the charts to update any environment variables:
+
+```bash
+./build-helm.sh PROJECTNAME
+```
+
+then redeploy the helm charts:
+
+```bash
+./deploy-helm.sh PROJECTNAME
+```
