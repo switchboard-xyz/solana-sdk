@@ -3,7 +3,7 @@ name: Test deployment
 on:
   pull_request:
     branches: [main]
-    paths: [docs/**, ".github/workflows/*", "idl/**"]
+    paths: [website/**, ".github/workflows/*", "idl/**"]
 
 jobs:
   test-deploy:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: docs
+        working-directory: website
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
