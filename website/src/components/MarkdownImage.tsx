@@ -1,7 +1,7 @@
-import React from "react";
-import { Box } from "@mui/material";
+import { useColorMode } from "@docusaurus/theme-common";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import useThemeContext from "@theme/hooks/useThemeContext";
+import { Box } from "@mui/material";
+import React from "react";
 
 interface MarkdownImageProps {
   img: string;
@@ -11,13 +11,13 @@ interface MarkdownImageProps {
 }
 
 const MarkdownImage = (props: MarkdownImageProps) => {
-  const { isDarkTheme } = useThemeContext();
+  const { colorMode } = useColorMode();
 
   let backgroundColor = "inherit";
-  if (props.lightBg && !isDarkTheme) {
+  if (props.lightBg && colorMode !== "dark") {
     backgroundColor = props.lightBg;
   }
-  if (props.darkBg && isDarkTheme) {
+  if (props.darkBg && colorMode === "dark") {
     backgroundColor = props.darkBg;
   }
 

@@ -1,11 +1,11 @@
-import React from "react";
+import { useColorMode } from "@docusaurus/theme-common";
 import { Grid, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/system";
+import React from "react";
 import FeatureCard from "./FeatureCard";
 import { FeatureList } from "./FeatureList";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import { useTheme } from "@mui/material/styles";
-import useThemeContext from "@theme/hooks/useThemeContext";
 
 const StyledHeader = styled("div")<{ dark: number }>(({ theme, dark }) => ({
   backgroundColor: dark ? theme.palette.footer.background : theme.palette.white,
@@ -41,13 +41,13 @@ export default function HomepageFeatures(): JSX.Element {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"), {
     defaultMatches: true,
   });
-  const { isDarkTheme } = useThemeContext();
+  const { colorMode } = useColorMode();
 
   return (
     <>
-      <StyledHeader dark={isDarkTheme ? 1 : 0}>
+      <StyledHeader dark={colorMode === "dark" ? 1 : 0}>
         <div style={{ maxWidth: "1024px", margin: "auto" }}>
-          <StyledHeaderTitle dark={isDarkTheme ? 1 : 0}>
+          <StyledHeaderTitle dark={colorMode === "dark" ? 1 : 0}>
             Welcome to Switchboard Documentation
           </StyledHeaderTitle>
           <Typography

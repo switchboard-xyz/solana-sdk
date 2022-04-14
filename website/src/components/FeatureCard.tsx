@@ -1,10 +1,10 @@
-import React from "react";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import Link from "@docusaurus/Link";
-import { Card, Typography, CardContent, Divider } from "@mui/material";
+import { useColorMode } from "@docusaurus/theme-common";
+import useBaseUrl from "@docusaurus/useBaseUrl";
+import { Card, CardContent, Divider, Typography } from "@mui/material";
 import { styled } from "@mui/system";
+import React from "react";
 import { FeatureItem } from "./FeatureList";
-import useThemeContext from "@theme/hooks/useThemeContext";
 
 const StyledCard = styled(Card)<{ dark: number }>(({ theme, dark }) => ({
   display: "flex",
@@ -61,10 +61,10 @@ export default function FeatureCard({
   description,
   linkTo,
 }: FeatureItem) {
-  const { isDarkTheme } = useThemeContext();
+  const { colorMode } = useColorMode();
 
   return (
-    <StyledCard dark={isDarkTheme ? 1 : 0}>
+    <StyledCard dark={colorMode === "dark" ? 1 : 0}>
       <StyledCardContent>
         <div style={{ display: "flex", alignItems: "center" }}>
           <div
@@ -85,13 +85,20 @@ export default function FeatureCard({
               width={26}
             />
           </div>
-          <StyledTitle sx={{ color: isDarkTheme ? "#dbdbdb" : "#0b3863" }}>
+          <StyledTitle
+            sx={{
+              color: colorMode === "dark" ? "#dbdbdb" : "#0b3863",
+            }} /* sx={{ color: isDarkTheme ? "#dbdbdb" : "#0b3863" }} */
+          >
             {title}
           </StyledTitle>
         </div>
         <StyledDescription
           variant="body2"
-          sx={{ color: isDarkTheme ? "#dbdbdb" : "#313e79" }}
+          sx={{
+            color: colorMode === "dark" ? "#dbdbdb" : "#313e79",
+          }}
+          /* sx={{ color: isDarkTheme ? "#dbdbdb" : "#313e79" }} */
         >
           {description}
         </StyledDescription>
@@ -106,7 +113,8 @@ export default function FeatureCard({
           <Divider
             sx={{
               margin: "0px -21px 15px",
-              borderColor: isDarkTheme ? "gray" : "Active Border",
+              borderColor: colorMode === "dark" ? "gray" : "Active Border",
+              /* borderColor: isDarkTheme ? "gray" : "Active Border", */
             }}
           />
           <Link

@@ -1,11 +1,11 @@
-import React from "react";
-import Layout from "@theme/Layout";
-import { SwitchboardApplication } from "@switchboard-xyz/sdl";
+import { useColorMode } from "@docusaurus/theme-common";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import HomepageFeatures from "../components/HomepageFeatures";
 import { Box } from "@mui/material";
 import { styled } from "@mui/system";
-import useThemeContext from "@theme/hooks/useThemeContext";
+import { SwitchboardApplication } from "@switchboard-xyz/sdl";
+import Layout from "@theme/Layout";
+import React from "react";
+import HomepageFeatures from "../components/HomepageFeatures";
 
 const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({
   backgroundColor: dark ? "#1f354b" : theme.palette.pageBackground.secondary,
@@ -21,10 +21,10 @@ const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({
 }));
 
 const Main = () => {
-  const { isDarkTheme } = useThemeContext();
+  const { colorMode } = useColorMode();
 
   return (
-    <StyledMain dark={isDarkTheme ? 1 : 0}>
+    <StyledMain dark={colorMode === "dark" ? 1 : 0}>
       <HomepageFeatures />
       <Box sx={{ height: 20 }} />
     </StyledMain>

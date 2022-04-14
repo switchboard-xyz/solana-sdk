@@ -20,9 +20,9 @@
     "test": "echo \"No test script for @switchboard-xyz/v2-docs\" && exit 0"
   },
   "dependencies": {
-    "@docusaurus/core": "2.0.0-beta.14",
-    "@docusaurus/preset-classic": "2.0.0-beta.14",
-    "@docusaurus/remark-plugin-npm2yarn": "2.0.0-beta.14",
+    "@docusaurus/core": "^2.0.0-beta.18",
+    "@docusaurus/preset-classic": "^2.0.0-beta.18",
+    "@docusaurus/remark-plugin-npm2yarn": "^2.0.0-beta.18",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fontsource/roboto": "^4.5.1",
@@ -43,8 +43,8 @@
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "2.0.0-beta.14",
-    "@docusaurus/types": "2.0.0-beta.14",
+    "@docusaurus/module-type-aliases": "^2.0.0-beta.18",
+    "@docusaurus/types": "^2.0.0-beta.18",
     "@tsconfig/docusaurus": "^1.0.4",
     "babel-plugin-import": "^1.13.3",
     "cspell": "^5.15.2",
