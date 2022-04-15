@@ -26,8 +26,7 @@ export default class AggregatorSetAuthority extends BaseCommand {
     {
       name: "newAuthority",
       required: true,
-      description:
-        "public key of an existing job account to remove from an aggregator",
+      description: "keypair path of new authority",
     },
   ];
 

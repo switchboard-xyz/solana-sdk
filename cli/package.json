@@ -1,7 +1,7 @@
 {
   "name": "@switchboard-xyz/switchboardv2-cli",
   "description": "command line tool to interact with switchboard v2",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "license": "MIT",
   "repository": "switchboard-xyz/switchboardv2-cli",
   "bugs": "https://github.com/switchboard-xyz/switchboardv2-cli/issues",
@@ -47,7 +47,6 @@
     "posttest1": "eslint . --ext .ts --config .eslintrc.json",
     "prepack": "npm run build",
     "build": "rimraf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "prepublishOnly": "npm version patch --force",
     "doc": "oclif-dev readme",
     "doc:out": "oclif-dev readme --multi --dir ../website/api/switchboardv2-cli/ && cd ../website/api/switchboardv2-cli/ && for f in *.md; do mv \"${f%.md}.md\" \"_${f%.md}.md\"; sed -i \"\" '1,2d' \"_${f%.md}.md\"; done",
     "test:old": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",

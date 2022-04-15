@@ -35,7 +35,7 @@ EXAMPLE
   $ sbv2 oracle:balance 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/oracle/balance.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/oracle/balance.ts)_
+_See code: [src/commands/oracle/balance.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/oracle/balance.ts)_
 
 ## `sbv2 oracle:create QUEUEKEY`
 
@@ -73,7 +73,7 @@ EXAMPLES
   ../oracle-keypair.json
 ```
 
-_See code: [src/commands/oracle/create.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/oracle/create.ts)_
+_See code: [src/commands/oracle/create.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/oracle/create.ts)_
 
 ## `sbv2 oracle:deposit ORACLEKEY AMOUNT`
 
@@ -105,7 +105,7 @@ EXAMPLE
   $ sbv2 oracle:deposit 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/oracle/deposit.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/oracle/deposit.ts)_
+_See code: [src/commands/oracle/deposit.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/oracle/deposit.ts)_
 
 ## `sbv2 oracle:withdraw ORACLEKEY AMOUNT`
 
@@ -144,4 +144,4 @@ EXAMPLES
   ../oracle-keypair.json -w ByJs8E29jxvqf2KFLwfyiE2gUh5fivaS7aShcRMAsnzg
 ```
 
-_See code: [src/commands/oracle/withdraw.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.6/src/commands/oracle/withdraw.ts)_
+_See code: [src/commands/oracle/withdraw.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/oracle/withdraw.ts)_

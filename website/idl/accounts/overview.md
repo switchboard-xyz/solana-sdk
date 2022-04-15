@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Overview
-slug: /program/accounts
+slug: /accounts
 ---
 
 - [AggregatorAccountData](/idl/accounts/AggregatorAccountData)

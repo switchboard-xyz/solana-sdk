@@ -28,7 +28,8 @@ export default class AggregatorSetVariance extends BaseCommand {
       name: "varianceThreshold",
       required: true,
       parse: (variance: string) => new anchor.BN(variance),
-      description: "public key of the oracle queue",
+      description:
+        "varianceThreshold between a previous accepted result before an oracle reports a value on-chain. Used to conserve lease cost during low volatility",
     },
   ];
 
