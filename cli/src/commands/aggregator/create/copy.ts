@@ -4,7 +4,7 @@ import {
   AggregatorAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as fs from "fs";
 import { copyAccount } from "../../../accounts";
 import { AggregatorClass } from "../../../accounts/aggregator/aggregator";

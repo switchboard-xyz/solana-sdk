@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prevent-abbreviations */
 /* eslint-disable unicorn/new-for-builtins */
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
@@ -10,7 +11,7 @@ import * as path from "path";
 import BaseCommand from "../../BaseCommand";
 import { verifyProgramHasPayer } from "../../utils";
 
-export default class LocalnetEnv extends BaseCommand {
+export default class LocalnetEnvironment extends BaseCommand {
   static description = "create a localnet switchboard environment";
 
   static flags = {
@@ -23,7 +24,7 @@ export default class LocalnetEnv extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { flags } = this.parse(LocalnetEnv);
+    const { flags } = this.parse(LocalnetEnvironment);
     const payerKeypair = getPayer(this.program);
 
     // TODO: Check paths and force flags
@@ -52,11 +53,16 @@ export default class LocalnetEnv extends BaseCommand {
 
     // TODO: Add silent flag
     // TODO: Pass keypair path and add as env variable
-    const testEnv = await SwitchboardTestEnvironment.create(payerKeypair, {
-      USDC_MINT: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
-    });
+    const testEnvironment = await SwitchboardTestEnvironment.create(
+      payerKeypair,
+      {
+        USDC_MINT: new PublicKey(
+          "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
+        ),
+      }
+    );
     // TODO: Add silent flag
-    testEnv.writeAll(flags.keypair, process.cwd());
+    testEnvironment.writeAll(flags.keypair, process.cwd());
   }
 
   async catch(error) {

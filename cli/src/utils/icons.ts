@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 
 export const CHECK_ICON = chalk.green("\u2714 ");
 

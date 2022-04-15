@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { AggregatorClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { AggregatorIllegalRoundOpenCall } from "../../types";

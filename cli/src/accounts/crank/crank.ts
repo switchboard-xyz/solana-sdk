@@ -5,7 +5,7 @@ import {
   CrankRow,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { buffer2string, chalkString, pubKeyConverter } from "../";
 import { CommandContext } from "../../types/context";
 import { DEFAULT_CONTEXT } from "../../types/context/context";
@@ -21,16 +21,23 @@ import {
 
 export class CrankClass implements ICrankClass {
   account: CrankAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   queuePublicKey: PublicKey;
+
   maxRows: number;
+
   metadata: string;
+
   name: string;
 
   aggregatorKeys: PublicKey[];
+
   dataBuffer: PublicKey;
+
   size: number;
 
   private constructor() {}

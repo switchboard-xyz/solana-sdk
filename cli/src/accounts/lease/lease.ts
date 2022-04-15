@@ -5,7 +5,7 @@ import {
   LeaseAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import {
   AggregatorAccountData,
   chalkString,
@@ -20,14 +20,21 @@ import { ILeaseClass, LeaseDefinition } from "./types";
 
 export class LeaseClass implements ILeaseClass {
   account: LeaseAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   aggregatorPublicKey: PublicKey;
+
   escrowPublicKey: PublicKey;
+
   isActive: boolean;
+
   tokenProgramPublicKey: PublicKey;
+
   queuePublicKey: PublicKey;
+
   withdrawAuthorityPublicKey: PublicKey;
 
   escrowBalance: number;
@@ -116,7 +123,7 @@ export class LeaseClass implements ILeaseClass {
         aggregatorAccount
       );
       await leaseAccount.loadData();
-      return LeaseClass.init(context, leaseAccount);
+      return await LeaseClass.init(context, leaseAccount);
     } catch {
       context.logger.debug(
         `no lease account found for ${aggregatorAccount.publicKey}`
@@ -164,7 +171,7 @@ export class LeaseClass implements ILeaseClass {
             withdrawAuthority: programTokenWallet,
           }
         );
-        return LeaseClass.init(context, leaseAccount);
+        return await LeaseClass.init(context, leaseAccount);
       } catch (error) {
         throw new Error(`failed to create lease account ${error.message}`);
       }

@@ -2,7 +2,7 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 

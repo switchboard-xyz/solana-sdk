@@ -1,4 +1,4 @@
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 

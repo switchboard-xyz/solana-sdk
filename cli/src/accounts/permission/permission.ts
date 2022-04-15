@@ -7,7 +7,7 @@ import {
   PermissionAccount,
   SwitchboardPermission,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { CommandContext } from "../../types/context";
 import { LogProvider } from "../../types/context/logging";
 import { programHasPayer } from "../../utils";
@@ -27,13 +27,19 @@ import {
 
 export class PermissionClass implements IPermissionClass {
   account: PermissionAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   authorityPublicKey: PublicKey;
+
   granterPublicKey: PublicKey;
+
   granteePublicKey: PublicKey;
+
   permission: string;
+
   expiration: anchor.BN;
 
   private constructor() {}
@@ -186,7 +192,7 @@ export class PermissionClass implements IPermissionClass {
       context.logger.debug(
         `loaded permission account ${permissionAccount.publicKey} from seed for ${granteeAccount.publicKey}`
       );
-      return PermissionClass.init(context, permissionAccount);
+      return await PermissionClass.init(context, permissionAccount);
     } catch {}
     context.logger.debug(
       `no permission account found for ${granteeAccount.publicKey}`
@@ -223,7 +229,7 @@ export class PermissionClass implements IPermissionClass {
       context.logger.debug(
         `loaded permission account ${permissionAccount.publicKey} from seed for ${granteeAccount.publicKey}`
       );
-      return PermissionClass.init(context, permissionAccount);
+      return await PermissionClass.init(context, permissionAccount);
     } catch {
       try {
         const permissionAccount = await PermissionAccount.create(

@@ -5,7 +5,7 @@ import {
   OracleQueueAccount,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { fromPublicKey, fromQueueJSON } from "..";
 import { CommandContext } from "../../types/context";
 import { LogProvider } from "../../types/context/logging";
@@ -26,28 +26,47 @@ import {
 
 export class OracleQueueClass implements IOracleQueueClass {
   account: OracleQueueAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   authorityPublicKey: PublicKey;
+
   consecutiveFeedFailureLimit: anchor.BN;
+
   consecutiveOracleFailureLimit: anchor.BN;
+
   feedProbationPeriod: number;
+
   metadata: string;
+
   minStake: anchor.BN;
+
   minUpdateDelaySeconds: number;
+
   name: string;
+
   oracleTimeout: anchor.BN;
+
   queueSize: number;
+
   reward: anchor.BN;
+
   slashingEnabled: boolean;
+
   unpermissionedFeedsEnabled: boolean;
+
   unpermissionedVrfEnabled: boolean;
+
   varianceToleranceMultiplier: SwitchboardDecimal;
 
   oracleBuffer: PublicKey;
+
   cranks: CrankClass[] = [];
+
   oracles: OracleClass[] = [];
+
   aggregators: AggregatorClass[] = [];
 
   private constructor() {}

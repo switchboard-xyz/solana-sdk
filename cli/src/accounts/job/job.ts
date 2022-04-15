@@ -2,7 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { JobAccount } from "@switchboard-xyz/switchboard-v2/src";
 import { OracleJob } from "@switchboard-xyz/v2-task-library";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { getUrlFromTask } from ".";
 import { buffer2string, chalkString, copyAccount, pubKeyConverter } from "../";
 import { CommandContext } from "../../types/context";
@@ -19,13 +19,19 @@ import {
 
 export class JobClass implements IJobClass {
   account: JobAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   authorWalletPublicKey: PublicKey;
+
   expiration: anchor.BN;
+
   metadata: string;
+
   name: string;
+
   tasks: OracleJob.ITask[];
 
   private constructor() {}

@@ -1,7 +1,7 @@
 import { flags } from "@oclif/command";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { fromCrankJSON, OracleQueueClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, getProgramPayer, loadKeypair } from "../../../utils";

@@ -5,7 +5,7 @@ import {
   SwitchboardPermission,
 } from "@switchboard-xyz/switchboard-v2/src";
 import { loadSwitchboardAccount } from "@switchboard-xyz/v2-utils-ts";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
@@ -49,12 +49,14 @@ export default class PermissionSet extends BaseCommand {
     );
     let authorityKey: PublicKey;
     switch (granteeAccountType) {
-      case "OracleQueueAccountData":
+      case "OracleQueueAccountData": {
         const data = await grantee.loadData();
         authorityKey = data.authority;
         break;
-      default:
+      }
+      default: {
         throw new Error("Grantee should be a OracleQueueAccount");
+      }
     }
     const authority = await this.loadAuthority(flags.authority, authorityKey);
 

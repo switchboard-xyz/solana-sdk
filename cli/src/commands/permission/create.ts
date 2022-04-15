@@ -3,7 +3,7 @@ import {
   OracleQueueAccount,
   PermissionAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { PermissionClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
@@ -77,8 +77,8 @@ export default class PermissionCreate extends BaseCommand {
         this.program,
         permissionAccount.publicKey
       );
-      const printStr = permission.prettyPrint();
-      this.logger.log(printStr);
+      const printString = permission.prettyPrint();
+      this.logger.log(printString);
     }
   }
 

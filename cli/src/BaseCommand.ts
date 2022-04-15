@@ -11,7 +11,7 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import { getPayer } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
 import { DEFAULT_KEYPAIR } from "./accounts";

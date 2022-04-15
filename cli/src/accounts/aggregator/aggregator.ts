@@ -6,7 +6,7 @@ import {
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2/src";
 import Big from "big.js";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { ProgramStateClass } from "..";
 import { AggregatorIllegalRoundOpenCall } from "../../types";
 import {
@@ -34,31 +34,51 @@ import {
 
 export class AggregatorClass implements IAggregatorClass {
   account: AggregatorAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   authorWalletPublicKey: PublicKey;
+
   authorityPublicKey: PublicKey;
+
   oracleRequestBatchSize: number; // REQ, will default to some value
+
   crankPublicKey?: PublicKey;
+
   historyBufferPublicKey?: PublicKey;
+
   expiration: anchor.BN;
+
   forceReportPeriod: anchor.BN;
+
   isLocked?: boolean;
+
   metadata: string;
+
   minRequiredJobResults: number; // REQ, will default to 75% of jobs
+
   minRequiredOracleResults: number; // REQ, will default to 1
+
   minUpdateDelaySeconds: number; // REQ, will default to 30s
+
   name: string;
+
   queuePublicKey: PublicKey;
+
   startAfter: number;
+
   varianceThreshold: SwitchboardDecimal;
 
   jobs: JobClass[];
+
   leaseAccount: LeaseClass;
+
   permissionAccount: PermissionClass;
 
   result: string;
+
   resultTimestamp: string;
 
   private constructor() {}

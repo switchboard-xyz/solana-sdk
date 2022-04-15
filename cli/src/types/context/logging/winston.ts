@@ -1,5 +1,5 @@
 import * as winston from "winston";
-import { LoggerParameters } from ".";
+import type { LoggerParameters } from ".";
 
 export class WinstonLogger {
   public logger: winston.Logger;

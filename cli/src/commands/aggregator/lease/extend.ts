@@ -7,7 +7,7 @@ import {
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
 import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/v2-utils-ts";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { chalkString } from "../../../accounts/utils";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";

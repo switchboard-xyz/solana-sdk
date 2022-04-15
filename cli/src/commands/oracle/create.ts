@@ -4,7 +4,7 @@ import {
   OracleAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { chalkString } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
@@ -60,7 +60,7 @@ export default class OracleCreate extends BaseCommand {
     const oracle = await oracleAccount.loadData();
 
     if (this.silent) {
-      console.log(oracleAccount.publicKey);
+      console.log(oracleAccount.publicKey.toString());
     } else {
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`

@@ -76,7 +76,6 @@
     "decimal.js": "^10.3.1",
     "node-fetch": "^2.6.6",
     "readline-sync": "^1.4.10",
-    "tslib": "^1.14.1",
     "winston": "^3.3.3"
   },
   "devDependencies": {
@@ -90,6 +89,7 @@
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^1.0.2",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-unicorn": "^39.0.0",
@@ -99,6 +99,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "rimraf": "^3.0.2",
     "ts-node": "^10.4.0",
+    "tslib": "^2.3.1",
     "typescript": "^4.4.4"
   },
   "engines": {
@@ -107,6 +108,8 @@
   "files": [
     "/bin",
     "/lib",
+    "/examples",
+    "/src",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],

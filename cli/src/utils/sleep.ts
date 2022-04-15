@@ -4,7 +4,7 @@ export const sleep = (ms: number): Promise<any> =>
 
 export const callWithRetry = async (function_, depth = 0) => {
   try {
-    return await function_();
+    return function_();
   } catch (error) {
     if (depth > 7) {
       throw error;

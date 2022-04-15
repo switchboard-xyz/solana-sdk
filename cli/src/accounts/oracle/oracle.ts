@@ -4,7 +4,7 @@ import {
   OracleAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2/src";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import {
   anchorBNtoDateTimeString,
   buffer2string,
@@ -26,18 +26,27 @@ import {
 
 export class OracleClass implements IOracleClass {
   account: OracleAccount;
+
   logger: LogProvider;
 
   publicKey: PublicKey;
+
   name: string;
+
   metadata: string;
+
   authorityPublicKey: PublicKey;
+
   tokenAccountPublicKey: PublicKey;
+
   queuePublicKey: PublicKey;
 
   balance: number;
+
   lastHeartbeat: string;
+
   numInUse: number;
+
   metrics: OracleMetricsData;
 
   permissionAccount?: PermissionClass;
