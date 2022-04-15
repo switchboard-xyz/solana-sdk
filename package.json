@@ -9,12 +9,15 @@
     "feeds/packages/*",
     "feeds/programs/*",
     "vrf/packages/*",
-    "vrf/programs/*"
+    "vrf/programs/*",
+    "website"
   ],
   "scripts": {
     "start": "echo \"Error: no start script specified\" && exit 1",
-    "docs:build": "npm run build:site -w docs",
-    "docs:deploy": "npm run deploy -w docs"
+    "docs": "cd website && npm start",
+    "docs:build": "npm run build:site -w website",
+    "docs:deploy": "npm run deploy -w website",
+    "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p /idl"
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",

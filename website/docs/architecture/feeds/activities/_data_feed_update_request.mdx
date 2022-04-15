@@ -1,7 +1,7 @@
 import MarkdownImage from "/src/components/MarkdownImage";
 import { Typography } from "@mui/material";
-import AggregatorOpenRound from "/api/idl/instructions/aggregatorOpenRound.md";
-import CrankPop from "/api/idl/instructions/crankPop.md";
+import AggregatorOpenRound from "/idl/instructions/aggregatorOpenRound.md";
+import CrankPop from "/idl/instructions/crankPop.md";
 
 The following diagram depicts how a data feed update request gets processed by Switchboard. First, any user turns the crank. The crank is a collection of aggregator pubkeys, ordered by their next available update time. If an aggregator is ready for an update, the crank turner gets rewarded with the queue's specified `reward`.
 

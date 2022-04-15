@@ -6,13 +6,13 @@ title: Lease
 import MarkdownImage from "/src/components/MarkdownImage";
 import Link from "@docusaurus/Link";
 import { Typography, Box, Grid } from "@mui/material";
-import LeaseInstructions from "/api/idl/_lease_instructions.mdx";
+import LeaseInstructions from "/idl/_lease_instructions.mdx";
 
-import LeaseAccountData from "/api/idl/accounts/LeaseAccountData.md";
+import LeaseAccountData from "/idl/accounts/LeaseAccountData.md";
 
-import LeaseInit from "/api/idl/instructions/leaseInit.md";
-import LeaseExtend from "/api/idl/instructions/leaseExtend.md";
-import LeaseWithdraw from "/api/idl/instructions/leaseWithdraw.md";
+import LeaseInit from "/idl/instructions/leaseInit.md";
+import LeaseExtend from "/idl/instructions/leaseExtend.md";
+import LeaseWithdraw from "/idl/instructions/leaseWithdraw.md";
 
 Oracle queues have a finite amount of resources proportional to its number of oracles so the DAO may reject new feeds that could cause delays on existing feeds. The publisher is responsible for creating a lease contract to reserve a set amount of computer power from the oracle queue. Once a publisher’s feed is accepted by the DAO, the feed is added to the network and granted permissions to use the oracle queue resources.
 

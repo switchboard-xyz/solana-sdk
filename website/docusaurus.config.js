@@ -54,6 +54,15 @@ const config = {
         sidebarPath: require.resolve("./sidebarsAPI.js"),
       },
     ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "idl",
+        path: "idl",
+        routeBasePath: "idl",
+        sidebarPath: require.resolve("./sidebarsAPI.js"),
+      },
+    ],
   ],
 
   themeConfig:
@@ -99,6 +108,12 @@ const config = {
             docId: "introduction",
             position: "left",
             label: "Docs",
+          },
+          {
+            to: "idl/",
+            position: "left",
+            label: "IDL",
+            // activeBaseRegex: "docs/(next|v8)",
           },
           {
             to: "api/",

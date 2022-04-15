@@ -8,9 +8,9 @@ import MarkdownImage from "/src/components/MarkdownImage";
 import Link from "@docusaurus/Link";
 import { Typography } from "@mui/material";
 
-import OracleInstructions from "/api/idl/_oracle_instructions.mdx";
+import OracleInstructions from "/idl/_oracle_instructions.mdx";
 
-import OracleAccountData from "/api/idl/accounts/OracleAccountData.md";
+import OracleAccountData from "/idl/accounts/OracleAccountData.md";
 
 A Switchboard oracle is a node.js container that sits between the Solana blockchain and the internet and waits for data feed update requests from an oracle queue. An oracle queue is responsible for managing realm permissions and assigning oracles to aggregator updates in a round robin fashion. When an oracle is assigned an update request, it reads in the aggregator job definitions, executes each job, takes the median of the job results, then publishes its result on-chain.
 
