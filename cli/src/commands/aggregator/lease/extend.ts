@@ -5,7 +5,7 @@ import {
   getPayer,
   LeaseAccount,
   OracleQueueAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/v2-utils-ts";
 import chalk from "chalk";
 import { chalkString } from "../../../accounts/utils";

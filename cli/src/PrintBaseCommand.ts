@@ -14,7 +14,7 @@ import {
   OracleQueueAccount,
   PermissionAccount,
   VrfAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as path from "path";
 import {

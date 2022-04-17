@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { CrankAccount, CrankRow } from "@switchboard-xyz/switchboard-v2/src";
+import { CrankAccount, CrankRow } from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
 import * as path from "path";
 import BaseCommand from "../../BaseCommand";

@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2/src";
+import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { fromCrankJSON } from "../../../accounts";
 import { CrankClass } from "../../../accounts/crank/crank";

@@ -4,7 +4,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   OracleQueueAccount,
   SwitchboardDecimal,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { fromPublicKey, fromQueueJSON } from "..";
 import { CommandContext } from "../../types/context";

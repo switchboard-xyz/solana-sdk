@@ -11,7 +11,7 @@ import {
   PermissionAccount,
   ProgramStateAccount,
   VrfAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 
 export class InvalidSwitchboardAccount extends Error {
   constructor(message = "failed to match account type by discriminator") {

@@ -6,7 +6,7 @@ import {
   OracleQueueAccount,
   PermissionAccount,
   SwitchboardPermission,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { CommandContext } from "../../types/context";
 import { LogProvider } from "../../types/context/logging";

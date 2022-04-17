@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2/src";
+import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
 import { OracleQueueClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";

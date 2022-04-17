@@ -5,7 +5,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   getPayer,
   SwitchboardTestEnvironment,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
 import * as path from "path";
 import BaseCommand from "../../BaseCommand";

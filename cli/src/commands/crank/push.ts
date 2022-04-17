@@ -2,7 +2,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
   CrankAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";

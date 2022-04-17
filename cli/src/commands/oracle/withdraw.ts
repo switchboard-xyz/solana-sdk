@@ -6,7 +6,7 @@ import {
   OracleAccount,
   OracleQueueAccount,
   ProgramStateAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";

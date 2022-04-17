@@ -3,7 +3,7 @@ import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
   SBV2_DEVNET_PID,
   SBV2_MAINNET_PID,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import { DEFAULT_KEYPAIR } from "../accounts";
 import { NoPayerKeypairProvided } from "../types";
 

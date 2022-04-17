@@ -2,7 +2,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   OracleQueueAccount,
   PermissionAccount,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { PermissionClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";

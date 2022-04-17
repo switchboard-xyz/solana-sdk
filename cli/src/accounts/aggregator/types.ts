@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { SwitchboardDecimal } from "@switchboard-xyz/switchboard-v2/src";
+import { SwitchboardDecimal } from "@switchboard-xyz/switchboard-v2";
 import {
   copyAccount,
   fromPublicKey,

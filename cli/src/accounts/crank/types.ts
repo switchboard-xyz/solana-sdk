@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { CrankRow } from "@switchboard-xyz/switchboard-v2/src";
+import { CrankRow } from "@switchboard-xyz/switchboard-v2";
 import { fromPublicKey, fromSwitchboardAccount } from "..";
 
 export interface CrankAccountData {

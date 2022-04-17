@@ -1,6 +1,6 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { JobAccount } from "@switchboard-xyz/switchboard-v2/src";
+import { JobAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as fs from "fs";
 import { JobClass, pubKeyConverter } from "../../../accounts";

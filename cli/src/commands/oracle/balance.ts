@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { OracleAccount } from "@switchboard-xyz/switchboard-v2/src";
+import { OracleAccount } from "@switchboard-xyz/switchboard-v2";
 import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 

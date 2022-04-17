@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { SwitchboardPermissionValue } from "@switchboard-xyz/switchboard-v2/src";
+import { SwitchboardPermissionValue } from "@switchboard-xyz/switchboard-v2";
 import { fromPublicKey, fromSwitchboardAccount } from "..";
 
 export interface PermissionAccountData {

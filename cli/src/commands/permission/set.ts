@@ -3,7 +3,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   PermissionAccount,
   SwitchboardPermission,
-} from "@switchboard-xyz/switchboard-v2/src";
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
 import {
