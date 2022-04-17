@@ -1,7 +1,6 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "lib",
     "rootDir": "src",
     "strict": false,
@@ -9,7 +8,6 @@
     "noImplicitOverride": false,
     "noImplicitReturns": false,
     "declaration": true,
-    "importHelpers": true,
     "esModuleInterop": true,
     "paths": {
       "@switchboard-xyz/switchboard-v2": ["../libraries/ts"]
