@@ -4,10 +4,13 @@ import {
   PermissionAccount,
   SwitchboardPermission,
 } from "@switchboard-xyz/switchboard-v2/src";
-import { loadSwitchboardAccount } from "@switchboard-xyz/v2-utils-ts";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
+import {
+  CHECK_ICON,
+  loadSwitchboardAccount,
+  verifyProgramHasPayer,
+} from "../../utils";
 
 export default class PermissionSet extends BaseCommand {
   static description = "permit a grantee to use a granters resources";

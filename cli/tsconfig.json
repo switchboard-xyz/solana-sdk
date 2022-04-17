@@ -12,15 +12,11 @@
     "importHelpers": true,
     "esModuleInterop": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"],
-      "@switchboard-xyz/v2-utils-ts": ["../libraries/utils-ts"]
+      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"]
     }
   },
   "types": ["node"],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "bin", "lib", "test/**/*", "dts"],
-  "references": [
-    { "path": "../libraries/ts" },
-    { "path": "../libraries/utils-ts" }
-  ]
+  "references": [{ "path": "../libraries/ts" }]
 }
