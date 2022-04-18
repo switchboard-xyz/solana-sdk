@@ -2,6 +2,7 @@
   "name": "@switchboard-xyz/v2-docs",
   "version": "0.1.0",
   "private": true,
+  "main": "src/pages/index.tsx",
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",

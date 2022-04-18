@@ -4,7 +4,7 @@
 
 SwitchboardPy is the Python client for [Switchboard](https://docs.switchboard.xyz/introduction). It provides wrappers to help you to interact with the Switchboard V2 program on-chain.
 
-Internally it uses [AnchorPy](https://kevinheavey.github.io/anchorpy/), an Anchor API implementation in Python. 
+Internally it uses [AnchorPy](https://kevinheavey.github.io/anchorpy/), an Anchor API implementation in Python.
 
 ## Installation
 
@@ -14,6 +14,7 @@ pip install switchboardpy
 ```
 
 ## Basic Usage
+
 ```python
 import asyncio
 from solana.keypair import Keypair

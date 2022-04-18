@@ -15,16 +15,21 @@
   "scripts": {
     "start": "echo \"Error: no start script specified\" && exit 1",
     "docs": "cd website && npm start",
-    "docs:build": "npm run build:site -w website",
+    "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/sbv2-py",
+    "docs:build:ts": "npm run docgen -w libraries/ts",
+    "docs:build:site": "npm run build:site -w website",
+    "docs:build": "run-s docs:build:ts docs:build:site",
     "docs:deploy": "npm run deploy -w website",
     "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p ./"
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",
     "eslint-config-airbnb-typescript": "^17.0.0",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.7.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.3"
   },
   "engines": {

@@ -38,7 +38,12 @@ const config = {
           remarkPlugins: [require("@docusaurus/remark-plugin-npm2yarn")],
         },
         theme: {
-          customCss: require.resolve("./src/css/custom.css"),
+          customCss: [
+            // require.resolve("./static/api/sbv2-api/assets/style.css"),
+            // require.resolve("./static/api/sbv2-api/assets/highlight.css"),
+            // require.resolve("./static/api/sbv2-api/assets/icons.css"),
+            require.resolve("./src/css/custom.css"),
+          ],
         },
       }),
     ],
@@ -60,7 +65,7 @@ const config = {
         id: "idl",
         path: "idl",
         routeBasePath: "idl",
-        sidebarPath: require.resolve("./sidebarsAPI.js"),
+        sidebarPath: require.resolve("./sidebars.js"),
       },
     ],
   ],
@@ -116,10 +121,33 @@ const config = {
             // activeBaseRegex: "docs/(next|v8)",
           },
           {
-            to: "api/",
-            position: "left",
+            type: "dropdown",
+            // to: "api",
             label: "API",
-            // activeBaseRegex: "docs/(next|v8)",
+            position: "left",
+            to: "api",
+            items: [
+              {
+                label: "Task Protobufs",
+                to: "api/tasks",
+              },
+              {
+                label: "Typescript",
+                to: "https://docs.switchboard.xyz/api/sbv2-api",
+              },
+              {
+                label: "Python",
+                to: "https://docs.switchboard.xyz/api/sbv2-py",
+              },
+              {
+                label: "Rust",
+                to: "https://docs.rs/switchboard-v2/latest/switchboard_v2/",
+              },
+              {
+                label: "CLI",
+                to: "api/switchboardv2-cli",
+              },
+            ],
           },
           {
             to: "https://switchboard.xyz/explorer",

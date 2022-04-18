@@ -22,7 +22,7 @@
     "lib/"
   ],
   "scripts": {
-    "docgen": "npx tsc && npx typedoc src/sbv2.ts",
+    "docgen": "npx tsc && npx typedoc",
     "purge": "rimraf lib",
     "compile": "./esbuild.js",
     "build": "rimraf lib && ./esbuild.js",
