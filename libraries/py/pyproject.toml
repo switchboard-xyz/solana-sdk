@@ -8,7 +8,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-anchorpy = "0.7.0"
+anchorpy = "^0.7.0"
 anyio = "3.4.0"
 apischema = "0.16.6"
 attrs = "21.2.0"
@@ -58,6 +58,7 @@ zstandard = "0.16.0"
 pytest = "6.2.5"
 pytest-xprocess = "0.18.1"
 pytest-asyncio = "^0.17.2"
+pdoc = "^11.0.0"
 
 
 [build-system]

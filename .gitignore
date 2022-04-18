@@ -31,3 +31,5 @@ job-directory/*.json
 # Docusaurus
 public
 .docusaurus
+# Auto generated
+website/static/api/sbv2-api
