@@ -24,13 +24,26 @@ npm install @switchboard-xyz/switchboard-v2
 
 ```ts
 import * as anchor from "@project-serum/anchor";
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
   OracleQueueAccount,
+  loadSwitchboardProgram,
 } from "@switchboard-xyz/switchboard-v2";
 
-const program: anchor.Program;
-const queueAccount: OracleQueueAccount;
+const payerKeypair = Keypair.fromSecretKey(
+  JSON.parse(fs.readFileSync("../keypair-path.json", "utf-8"))
+);
+const program = await loadSwitchboardProgram(
+  "devnet",
+  new Connection(clusterApiUrl("devnet")),
+  payerKeypair
+);
+const queueAccount = new OracleQueueAccount({
+  program: program,
+  // devnet permissionless queue
+  publicKey: new PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"),
+});
 
 const aggregatorAccount = await AggregatorAccount.create(program, {
   name: Buffer.from("FeedName"),

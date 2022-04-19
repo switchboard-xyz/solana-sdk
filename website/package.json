@@ -30,6 +30,7 @@
     "@mdx-js/react": "^1.6.21",
     "@mui/icons-material": "^5.1.1",
     "@mui/material": "^5.2.7",
+    "@mui/system": "^5.6.2",
     "@solana/web3.js": "^1.35.1",
     "@svgr/webpack": "^5.5.0",
     "@switchboard-xyz/sdl": "^0.0.75",
