@@ -14,6 +14,7 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 
 ```
 npm ci
+lerna bootstrap
 npm run build -ws
 npm link -w cli
 ```
@@ -29,8 +30,5 @@ npm run test -ws
 ## Website
 
 ```
-cd docs
-npm i
-npm run build:site
-npm run serve
+npm start -w website
 ```
