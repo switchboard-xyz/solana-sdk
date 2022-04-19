@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "description": "API wrapper for intergating with the Switchboardv2 program",
   "keywords": [
     "oracle",
@@ -36,6 +36,7 @@
     "@solana/spl-token": "^0.1.8"
   },
   "dependencies": {
+    "@switchboard-xyz/switchboard-api": "^0.2.191",
     "@switchboard-xyz/v2-task-library": "^0.1.1",
     "assert": "^2.0.0",
     "big.js": "^6.1.1",

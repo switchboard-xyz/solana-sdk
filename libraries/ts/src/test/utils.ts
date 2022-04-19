@@ -1,5 +1,5 @@
-import { PublicKey } from "@solana/web3.js";
 import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
+import { PublicKey } from "@solana/web3.js";
 
 export const DEFAULT_PUBKEY = new PublicKey("11111111111111111111111111111111");
 

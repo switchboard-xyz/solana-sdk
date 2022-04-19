@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/switchboard-api";
 import Big from "big.js";
-import * as sbv2 from "..";
+import * as sbv2 from "../";
 import { DEFAULT_PUBKEY, promiseWithTimeout } from "./utils";
 
 export interface ISwitchboardTestContext {
@@ -16,9 +18,13 @@ export interface ISwitchboardTestContext {
 
 export class SwitchboardTestContext implements ISwitchboardTestContext {
   program: anchor.Program;
+
   mint: spl.Token;
+
   tokenWallet: PublicKey;
+
   queue: sbv2.OracleQueueAccount;
+
   oracle: sbv2.OracleAccount;
 
   constructor(ctx: ISwitchboardTestContext) {
@@ -177,7 +183,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     // create and add job account
     const staticJob = await sbv2.JobAccount.create(this.program, {
       name: Buffer.from(`Value ${value}`),
-      authorWallet: this.tokenWallet,
+      authority: this.tokenWallet,
       data: Buffer.from(
         OracleJob.encodeDelimited(
           OracleJob.create({
@@ -240,6 +246,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     // add new static job
     const staticJob = await sbv2.JobAccount.create(this.program, {
       name: Buffer.from(`Value ${value}`),
+      authority: Keypair.generate().publicKey,
       data: Buffer.from(
         OracleJob.encodeDelimited(
           OracleJob.create({

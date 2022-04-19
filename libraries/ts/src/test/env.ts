@@ -1,10 +1,10 @@
 import * as anchor from "@project-serum/anchor";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
-import * as chalk from "chalk";
-import * as fs from "fs";
-import * as path from "path";
-import * as sbv2 from "..";
-import { loadSwitchboardProgram } from "..";
+import chalk from "chalk";
+import fs from "fs";
+import path from "path";
+import * as sbv2 from "../";
+import { loadSwitchboardProgram } from "../";
 import { getIdlAddress, getProgramDataAddress } from "./utils";
 
 export interface ISwitchboardTestEnvironment {
@@ -32,21 +32,37 @@ export interface ISwitchboardTestEnvironment {
 /** Contains all of the necessary devnet Switchboard accounts to clone to localnet */
 export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
   programId: PublicKey;
+
   programDataAddress: PublicKey;
+
   idlAddress: PublicKey;
+
   programState: PublicKey;
+
   switchboardVault: PublicKey;
+
   switchboardMint: PublicKey;
+
   tokenWallet: PublicKey;
+
   queue: PublicKey;
+
   queueAuthority: PublicKey;
+
   queueBuffer: PublicKey;
+
   crank: PublicKey;
+
   crankBuffer: PublicKey;
+
   oracle: PublicKey;
+
   oracleAuthority: PublicKey;
+
   oracleEscrow: PublicKey;
+
   oraclePermissions: PublicKey;
+
   additionalClonedAccounts?: Record<string, PublicKey>;
 
   constructor(ctx: ISwitchboardTestEnvironment) {
@@ -203,14 +219,14 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     additionalClonedAccounts?: Record<string, PublicKey>
   ): Promise<SwitchboardTestEnvironment> {
     const connection = new Connection(clusterApiUrl("devnet"), {
-      commitment: "finalized",
+      commitment: "confirmed",
     });
 
     const switchboardProgram = await loadSwitchboardProgram(
       "devnet",
       connection,
       payerKeypair,
-      { commitment: "finalized" }
+      { commitment: "confirmed" }
     );
     const programDataAddress = getProgramDataAddress(
       switchboardProgram.programId
