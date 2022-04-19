@@ -2,6 +2,7 @@ use crate::*;
 use anchor_lang::prelude::*;
 pub use switchboard_v2::{VrfAccountData, VrfRequestRandomness};
 use anchor_spl::token::Token;
+use anchor_lang::solana_program::clock;
 
 #[derive(Accounts)]
 #[instruction(params: RequestResultParams)] // rpc parameters hint
@@ -69,6 +70,7 @@ impl RequestResult<'_> {
     pub fn actuate(ctx: &Context<Self>, params: &RequestResultParams) -> Result<()> {
         let client_state = ctx.accounts.state.load()?;
         let bump = client_state.bump.clone();
+        let max_result = client_state.max_result.clone();
         drop(client_state);
 
         let switchboard_program = ctx.accounts.switchboard_program.to_account_info();
@@ -108,6 +110,12 @@ impl RequestResult<'_> {
             params.permission_bump,
             state_seeds,
         )?;
+
+        emit!(RequestingRandomness{
+            vrf_client: ctx.accounts.state.key(),
+            max_result: max_result,
+            timestamp: clock::Clock::get().unwrap().unix_timestamp
+        });
 
         msg!("randomness requested successfully");
         Ok(())

@@ -5,9 +5,9 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from "@metaplex-foundation/beet";
-import * as beetSolana from "@metaplex-foundation/beet-solana";
-import * as web3 from "@solana/web3.js";
+import * as beet from '@metaplex-foundation/beet'
+import * as beetSolana from '@metaplex-foundation/beet-solana'
+import * as web3 from '@solana/web3.js'
 
 /**
  * Arguments used to create {@link VrfClient}
@@ -15,16 +15,16 @@ import * as web3 from "@solana/web3.js";
  * @category generated
  */
 export type VrfClientArgs = {
-  bump: number;
-  maxResult: beet.bignum;
-  resultBuffer: number[] /* size: 32 */;
-  result: beet.bignum;
-  lastTimestamp: beet.bignum;
-  authority: web3.PublicKey;
-  vrf: web3.PublicKey;
-};
+  bump: number
+  maxResult: beet.bignum
+  resultBuffer: number[] /* size: 32 */
+  result: beet.bignum
+  lastTimestamp: beet.bignum
+  authority: web3.PublicKey
+  vrf: web3.PublicKey
+}
 
-const vrfClientDiscriminator = [230, 174, 157, 153, 51, 18, 230, 163];
+const vrfClientDiscriminator = [230, 174, 157, 153, 51, 18, 230, 163]
 /**
  * Holds the data for the {@link VrfClient} Account and provides de/serialization
  * functionality for that data
@@ -55,7 +55,7 @@ export class VrfClient implements VrfClientArgs {
       args.lastTimestamp,
       args.authority,
       args.vrf
-    );
+    )
   }
 
   /**
@@ -66,7 +66,7 @@ export class VrfClient implements VrfClientArgs {
     accountInfo: web3.AccountInfo<Buffer>,
     offset = 0
   ): [VrfClient, number] {
-    return VrfClient.deserialize(accountInfo.data, offset);
+    return VrfClient.deserialize(accountInfo.data, offset)
   }
 
   /**
@@ -79,11 +79,11 @@ export class VrfClient implements VrfClientArgs {
     connection: web3.Connection,
     address: web3.PublicKey
   ): Promise<VrfClient> {
-    const accountInfo = await connection.getAccountInfo(address);
+    const accountInfo = await connection.getAccountInfo(address)
     if (accountInfo == null) {
-      throw new Error(`Unable to find VrfClient account at ${address}`);
+      throw new Error(`Unable to find VrfClient account at ${address}`)
     }
-    return VrfClient.fromAccountInfo(accountInfo, 0)[0];
+    return VrfClient.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -91,7 +91,7 @@ export class VrfClient implements VrfClientArgs {
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static deserialize(buf: Buffer, offset = 0): [VrfClient, number] {
-    return vrfClientBeet.deserialize(buf, offset);
+    return vrfClientBeet.deserialize(buf, offset)
   }
 
   /**
@@ -102,7 +102,7 @@ export class VrfClient implements VrfClientArgs {
     return vrfClientBeet.serialize({
       accountDiscriminator: vrfClientDiscriminator,
       ...this,
-    });
+    })
   }
 
   /**
@@ -110,7 +110,7 @@ export class VrfClient implements VrfClientArgs {
    * {@link VrfClient}
    */
   static get byteSize() {
-    return vrfClientBeet.byteSize;
+    return vrfClientBeet.byteSize
   }
 
   /**
@@ -126,7 +126,7 @@ export class VrfClient implements VrfClientArgs {
     return connection.getMinimumBalanceForRentExemption(
       VrfClient.byteSize,
       commitment
-    );
+    )
   }
 
   /**
@@ -134,7 +134,7 @@ export class VrfClient implements VrfClientArgs {
    * hold {@link VrfClient} data.
    */
   static hasCorrectByteSize(buf: Buffer, offset = 0) {
-    return buf.byteLength - offset === VrfClient.byteSize;
+    return buf.byteLength - offset === VrfClient.byteSize
   }
 
   /**
@@ -150,7 +150,7 @@ export class VrfClient implements VrfClientArgs {
       lastTimestamp: this.lastTimestamp,
       authority: this.authority.toBase58(),
       vrf: this.vrf.toBase58(),
-    };
+    }
   }
 }
 
@@ -161,19 +161,19 @@ export class VrfClient implements VrfClientArgs {
 export const vrfClientBeet = new beet.BeetStruct<
   VrfClient,
   VrfClientArgs & {
-    accountDiscriminator: number[] /* size: 8 */;
+    accountDiscriminator: number[] /* size: 8 */
   }
 >(
   [
-    ["accountDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)],
-    ["bump", beet.u8],
-    ["maxResult", beet.u64],
-    ["resultBuffer", beet.uniformFixedSizeArray(beet.u8, 32)],
-    ["result", beet.u128],
-    ["lastTimestamp", beet.i64],
-    ["authority", beetSolana.publicKey],
-    ["vrf", beetSolana.publicKey],
+    ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['bump', beet.u8],
+    ['maxResult', beet.u64],
+    ['resultBuffer', beet.uniformFixedSizeArray(beet.u8, 32)],
+    ['result', beet.u128],
+    ['lastTimestamp', beet.i64],
+    ['authority', beetSolana.publicKey],
+    ['vrf', beetSolana.publicKey],
   ],
   VrfClient.fromArgs,
-  "VrfClient"
-);
+  'VrfClient'
+)

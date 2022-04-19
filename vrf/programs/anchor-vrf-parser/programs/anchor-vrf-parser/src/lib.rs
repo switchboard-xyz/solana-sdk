@@ -4,7 +4,7 @@ pub use actions::*;
 pub use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
-declare_id!("7PoPs442NYqZwfrFhMuVDTzpWfaZi8dCtRFwqydnj5Gt");
+declare_id!("25RhC9WBW4nV7ghS9r5tvqk4A5BRZTu22PhrKW1EmLyF");
 
 const MAX_RESULT: u64 = u64::MAX;
 
@@ -32,6 +32,7 @@ pub mod anchor_vrf_parser {
 
 #[repr(packed)]
 #[account(zero_copy)]
+#[derive(AnchorDeserialize, Debug)]
 pub struct VrfClient {
     pub bump: u8,
     pub max_result: u64,
@@ -45,6 +46,27 @@ impl Default for VrfClient {
     fn default() -> Self {
         unsafe { std::mem::zeroed() }
     }
+}
+
+#[event]
+pub struct RequestingRandomness {
+    pub vrf_client: Pubkey,
+    pub max_result: u64,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct VrfClientInvoked {
+    pub vrf_client: Pubkey,
+    pub timestamp: i64,
+}
+
+#[event]
+pub struct VrfClientResultUpdated {
+    pub vrf_client: Pubkey,
+    pub result: u128,
+    pub result_buffer: [u8; 32],
+    pub timestamp: i64,
 }
 
 #[error_code]

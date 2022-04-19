@@ -11,15 +11,19 @@ pub struct UpdateResult<'info> {
     pub vrf: AccountInfo<'info>,
 }
 
-// #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-// pub struct UpdateResultParams {}
-
 impl UpdateResult<'_> {
     pub fn validate(&self, _ctx: &Context<Self>) -> Result<()> {
         Ok(())
     }
 
     pub fn actuate(ctx: &Context<Self>) -> Result<()> {
+        let clock = clock::Clock::get().unwrap();
+
+        emit!(VrfClientInvoked {
+            vrf_client: ctx.accounts.state.key(),
+            timestamp: clock.unix_timestamp,
+        });
+
         let vrf_account_info = &ctx.accounts.vrf;
         let vrf = VrfAccountData::new(vrf_account_info)?;
         let result_buffer = vrf.get_result()?;
@@ -38,13 +42,20 @@ impl UpdateResult<'_> {
         msg!("Result buffer is {:?}", result_buffer);
         let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
         msg!("u128 buffer {:?}", value);
-        let result = value[0] % max_result as u128;
-        msg!("Current VRF Value [0 - {}) = {}!", max_result, result);
+        let result = value[0] % max_result as u128 + 1;
+        msg!("Current VRF Value [1 - {}) = {}!", max_result, result);
 
         if state.result != result {
             state.result_buffer = result_buffer;
             state.result = result;
-            state.last_timestamp = clock::Clock::get().unwrap().unix_timestamp;
+            state.last_timestamp = clock.unix_timestamp;
+
+            emit!(VrfClientResultUpdated {
+                vrf_client: ctx.accounts.state.key(),
+                result: state.result,
+                result_buffer: result_buffer,
+                timestamp: clock.unix_timestamp,
+            });
         }
 
         Ok(())

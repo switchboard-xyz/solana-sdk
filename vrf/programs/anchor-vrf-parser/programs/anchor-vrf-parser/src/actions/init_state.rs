@@ -1,6 +1,7 @@
 use crate::*;
 use anchor_lang::prelude::*;
 pub use switchboard_v2::VrfAccountData;
+use std::mem;
 
 #[derive(Accounts)]
 #[instruction(params: InitStateParams)]
@@ -13,7 +14,7 @@ pub struct InitState<'info> {
             authority.key().as_ref(),
         ],
         payer = payer,
-        space = 8 + 8,
+        space = 8 + mem::size_of::<VrfClient>(),
         bump,
     )]
     pub state: AccountLoader<'info, VrfClient>,
@@ -34,34 +35,40 @@ pub struct InitStateParams {
 }
 
 impl InitState<'_> {
-    pub fn validate(&self, ctx: &Context<Self>, params: &InitStateParams) -> Result<()> {
+    pub fn validate(&self, _ctx: &Context<Self>, params: &InitStateParams) -> Result<()> {
         msg!("Validate init");
         if params.max_result > MAX_RESULT {
             return Err(error!(VrfErrorCode::MaxResultExceedsMaximum));
         }
-
-        msg!("Checking VRF Account");
-        let vrf_account_info = &ctx.accounts.vrf;
-        let _vrf = VrfAccountData::new(vrf_account_info)
-            .map_err(|_| VrfErrorCode::InvalidSwitchboardVrfAccount)?;
 
         Ok(())
     }
 
     pub fn actuate(ctx: &Context<Self>, params: &InitStateParams) -> Result<()> {
         msg!("Actuate init");
-        let state = &mut ctx.accounts.state.load_init()?;
-        msg!("Setting max result");
+
+        msg!("Checking VRF Account");
+        let vrf_account_info = &ctx.accounts.vrf;
+        let vrf = VrfAccountData::new(vrf_account_info)
+            .map_err(|_| VrfErrorCode::InvalidSwitchboardVrfAccount)?;
+        // client state needs to be authority in order to sign request randomness instruction
+        if vrf.authority != ctx.accounts.state.key() {
+            return Err(error!(VrfErrorCode::InvalidSwitchboardVrfAccount));
+        }
+
+        msg!("Setting VrfClient state");
+        let mut state = ctx.accounts.state.load_init()?;
+        *state = VrfClient::default();
+        state.bump = ctx.bumps.get("state").unwrap().clone();
+        state.authority =  ctx.accounts.authority.key.clone();
+        state.vrf = ctx.accounts.vrf.key.clone();
+        
+        msg!("Setting VrfClient max_result");
         if params.max_result == 0 {
             state.max_result = MAX_RESULT;
         } else {
             state.max_result = params.max_result;
         }
-
-        msg!("Setting VRF Account");
-        state.vrf = ctx.accounts.vrf.key.clone();
-        state.authority = ctx.accounts.authority.key.clone();
-        state.bump = ctx.bumps.get("state").unwrap().clone();
 
         Ok(())
     }

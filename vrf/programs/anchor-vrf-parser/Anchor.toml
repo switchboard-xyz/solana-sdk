@@ -1,14 +1,14 @@
-[features]
-seeds = false
 [programs.localnet]
-anchor_vrf_parser = "7PoPs442NYqZwfrFhMuVDTzpWfaZi8dCtRFwqydnj5Gt"
+anchor_vrf_parser = "25RhC9WBW4nV7ghS9r5tvqk4A5BRZTu22PhrKW1EmLyF"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "https://solana--devnet.datahub.figment.io/apikey/e5ed598d4d2d63bc9ed352d0f8f7d8bf"
-wallet = "~./dev/switchboardxyz/payer-keypair.json"
+cluster = "localnet"
+wallet = "secrets/payer-keypair.json"
+# cluster = "devnet"
+# wallet = "secrets/payer-keypair.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.test.ts"

@@ -24,6 +24,7 @@
     "@docusaurus/core": "^2.0.0-beta.18",
     "@docusaurus/preset-classic": "^2.0.0-beta.18",
     "@docusaurus/remark-plugin-npm2yarn": "^2.0.0-beta.18",
+    "@docusaurus/theme-common": "^2.0.0-beta.18",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fontsource/roboto": "^4.5.1",

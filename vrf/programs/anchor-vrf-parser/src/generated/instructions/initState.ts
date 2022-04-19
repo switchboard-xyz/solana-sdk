@@ -98,7 +98,7 @@ export function createInitStateInstruction(
 
   const ix = new web3.TransactionInstruction({
     programId: new web3.PublicKey(
-      '7PoPs442NYqZwfrFhMuVDTzpWfaZi8dCtRFwqydnj5Gt'
+      '4rpoQjPdyhgJGG8RLna6w65ch5AdkYpRsULFCMuFaFyp'
     ),
     keys,
     data,
