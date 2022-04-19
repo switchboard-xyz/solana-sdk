@@ -2,7 +2,7 @@ version: "3.3"
 services:
   switchboard:
     build:
-      context: ../../../../switchboard-oracle-v2
+      context: ../../../switchboard-oracle-v2
     network_mode: host
     restart: always
     secrets:

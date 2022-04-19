@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs",
@@ -19,15 +19,15 @@
     "rootDir": "src",
     "strict": false,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../../libraries/ts"],
-      "@switchboard-xyz/v2-utils-ts": ["../../../libraries/utils-ts"]
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
+      "@switchboard-xyz/v2-utils-ts": ["../../libraries/utils-ts"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [
-    { "path": "../../../libraries/ts" },
-    { "path": "../../../libraries/utils-ts" }
+    { "path": "../../libraries/ts" },
+    { "path": "../../libraries/utils-ts" }
   ],
   "files": ["src/main.ts"]
 }

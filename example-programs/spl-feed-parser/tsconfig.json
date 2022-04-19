@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "types": ["mocha", "chai"],
     "typeRoots": ["./node_modules/@types"],
@@ -8,10 +8,10 @@
     "target": "es6",
     "esModuleInterop": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
   "include": ["tests/**/*"],
   "exclude": ["target"],
-  "references": [{ "path": "../../../libraries/ts" }]
+  "references": [{ "path": "../../libraries/ts" }]
 }

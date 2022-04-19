@@ -6,10 +6,8 @@
     "libraries/ts",
     "libraries/utils-ts",
     "cli",
-    "feeds/packages/*",
-    "feeds/programs/*",
-    "vrf/packages/*",
-    "vrf/programs/*",
+    "feeds/*",
+    "example-programs/*",
     "website"
   ],
   "scripts": {
@@ -20,12 +18,14 @@
     "docs:build:site": "npm run build:site -w website",
     "docs:build": "run-s docs:build:ts docs:build:site",
     "docs:deploy": "npm run deploy -w website",
-    "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p ./"
+    "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p ./",
+    "reset": "npx npkill && npm ci"
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "lerna": "^4.0.0",
+    "npkill": "^0.8.3",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "shx": "^0.3.4",

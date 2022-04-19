@@ -1,14 +1,14 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["esbuild.js", "dist"],
-  "references": [{ "path": "../../../libraries/ts" }],
+  "references": [{ "path": "../../libraries/ts" }],
   "files": ["src/main.ts"]
 }
