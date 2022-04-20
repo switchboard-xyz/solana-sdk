@@ -2,6 +2,7 @@
   "name": "@switchboard-xyz/sbv2-lite",
   "version": "0.1.0",
   "description": "",
+  "private": false,
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "files": [
@@ -9,8 +10,9 @@
     "src/"
   ],
   "scripts": {
+    "docgen": "npm run build && npx typedoc",
     "build": "rimraf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-    "prepublishOnly": "npm run build && npm test",
+    "prepublishOnly": "npm run build && npm test && npm version patch --force",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
   },
   "author": "",
@@ -28,6 +30,7 @@
     "mocha": "^9.2.2",
     "rimraf": "^3.0.2",
     "ts-node": "^10.7.0",
+    "typedoc": "^0.22.15",
     "typescript": "^4.6.3"
   }
 }

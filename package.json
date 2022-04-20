@@ -16,8 +16,9 @@
     "docs": "cd website && npm start",
     "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/sbv2-py",
     "docs:build:ts": "npm run docgen -w libraries/ts",
+    "docs:build:sbv2-lite": "npm run docgen -w libraries/sbv2-lite",
     "docs:build:site": "npm run build:site -w website",
-    "docs:build": "run-s docs:build:ts docs:build:site",
+    "docs:build": "run-s docs:build:ts docs:build:sbv2-lite docs:build:site",
     "docs:deploy": "npm run deploy -w website",
     "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p ./",
     "reset": "npx npkill && npm ci"

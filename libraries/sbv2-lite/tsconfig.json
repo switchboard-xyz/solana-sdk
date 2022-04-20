@@ -11,5 +11,9 @@
   },
   "include": ["src/**/*"],
   "exclude": ["tests/**/*", "lib", "node_modules"],
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "../../website/static/api/sbv2-lite"
+  }
 }

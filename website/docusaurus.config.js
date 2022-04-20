@@ -136,6 +136,10 @@ const config = {
                 to: "https://docs.switchboard.xyz/api/sbv2-api",
               },
               {
+                label: "Typescript Lite",
+                to: "https://docs.switchboard.xyz/api/sbv2-lite",
+              },
+              {
                 label: "Python",
                 to: "https://docs.switchboard.xyz/api/sbv2-py",
               },
