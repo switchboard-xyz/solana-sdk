@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import * as anchor from "@project-serum/anchor";
+import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { getGovernance } from "@solana/spl-governance";
 import * as spl from "@solana/spl-token";
 import {
@@ -84,9 +85,9 @@ export async function loadSwitchboardProgram(
 ): Promise<anchor.Program> {
   const DEFAULT_KEYPAIR = Keypair.fromSeed(new Uint8Array(32).fill(1));
   const programId = getSwitchboardPid(cluster);
-  const wallet: anchor.Wallet = payerKeypair
-    ? new anchor.Wallet(payerKeypair)
-    : new anchor.Wallet(DEFAULT_KEYPAIR);
+  const wallet: NodeWallet = payerKeypair
+    ? new NodeWallet(payerKeypair)
+    : new NodeWallet(DEFAULT_KEYPAIR);
   const provider = new anchor.Provider(connection, wallet, confirmOptions);
 
   const anchorIdl = await anchor.Program.fetchIdl(programId, provider);

@@ -4,14 +4,16 @@
     "types": ["mocha", "chai", "node"],
     "typeRoots": ["./node_modules/@types"],
     "lib": ["es2015"],
+    "outDir": "lib",
     "module": "commonjs",
     "target": "es6",
     "esModuleInterop": true,
+    "importsNotUsedAsValues": "remove",
     "paths": {
       "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
-  "include": ["tests/**/*"],
-  "exclude": ["target"],
+  "include": ["src/**/*"],
+  "exclude": ["target", "lib", "tests/**/*"],
   "references": [{ "path": "../../libraries/ts" }]
 }

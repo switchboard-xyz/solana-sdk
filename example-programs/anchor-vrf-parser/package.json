@@ -9,7 +9,7 @@
     "create:authority": "shx find secrets/payer-keypair.json || solana-keygen new -s --no-bip39-passphrase --outfile secrets/payer-keypair.json",
     "airdrop": "solana airdrop 1 secrets/payer-keypair.json",
     "airdrop:authority": "run-s airdrop && run-s airdrop && run-s airdrop && run-s airdrop || true",
-    "build": "tsc",
+    "build": "rm -rf lib && tsc -p tsconfig.json",
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
   },
   "dependencies": {

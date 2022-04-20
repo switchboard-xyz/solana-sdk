@@ -18,7 +18,7 @@
     "@project-serum/anchor": "^0.22.1",
     "@saberhq/token-utils": "^1.12.58",
     "@solana/web3.js": "^1.37.1",
-    "@switchboard-xyz/switchboard-v2": "^0.0.75",
+    "@switchboard-xyz/switchboard-v2": "^0.0.76",
     "big.js": "^6.1.1",
     "decimal.js": "^10.3.1",
     "toml": "^3.0.0"
