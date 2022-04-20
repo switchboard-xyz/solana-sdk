@@ -15,7 +15,6 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
 import "mocha";
-import path from "path";
 import { getVrfClientCallback, getVrfClientFromSeed } from "../src/api";
 import { VrfClient } from "../src/generated";
 import type { AnchorVrfParser } from "../target/types/anchor_vrf_parser";
@@ -53,8 +52,7 @@ describe("vrfClient test", async () => {
   before(async () => {
     // TODO: Add try catch block to check devnet environment accounts
     switchboard = await SwitchboardTestContext.loadFromEnv(
-      vrfClientProgram.provider,
-      path.join(process.cwd(), "./switchboard.env")
+      vrfClientProgram.provider
     );
   });
 

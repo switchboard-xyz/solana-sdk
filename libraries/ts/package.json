@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.76",
+  "version": "0.0.77",
   "description": "API wrapper for intergating with the Switchboardv2 program",
   "keywords": [
     "oracle",
@@ -23,9 +23,8 @@
   ],
   "scripts": {
     "docgen": "npm run build && npx typedoc",
-    "purge": "rimraf lib",
     "compile": "./esbuild.js",
-    "build": "rimraf lib && tsc -b",
+    "build": "rimraf lib && node esbuild.js",
     "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
     "prepublishOnly": "npm run build && npm version patch --force",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag sbv2-ts/v$PACKAGE_VERSION && git push --tags"

@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  },
   "compilerOptions": {
     "types": ["mocha", "chai", "node"],
     "typeRoots": ["./node_modules/@types"],
@@ -14,6 +19,6 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["target", "lib", "tests/**/*"],
+  "exclude": ["target", "lib"],
   "references": [{ "path": "../../libraries/ts" }]
 }

@@ -4,8 +4,9 @@ import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import * as sbv2 from "../";
-import { loadSwitchboardProgram } from "../";
 import { getIdlAddress, getProgramDataAddress } from "./utils";
+
+const LATEST_DOCKER_VERSION = "dev-v2-4-12-22h";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;
@@ -129,6 +130,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     this.writeEnv(filePath);
     this.writeJSON(filePath);
     this.writeScripts(payerKeypairPath, filePath);
+    this.writeDockerCompose(this.oracle, payerKeypairPath, filePath);
   }
 
   /** Write the env file to filesystem */
@@ -192,7 +194,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     const startValidatorCommand = `${baseValidatorCommand} ${cloneAccountsString}`;
     fs.writeFileSync(
       LOCAL_VALIDATOR_SCRIPT,
-      `#!/bin/bash\n\n${startValidatorCommand}`
+      `#!/bin/bash\n\nmkdir -p .anchor/test-ledger\n\n${startValidatorCommand}`
     );
     console.log(
       `${chalk.green("Bash script saved to:")} ${LOCAL_VALIDATOR_SCRIPT.replace(
@@ -203,13 +205,49 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
 
     // create bash script to start local oracle
     const ORACLE_SCRIPT = path.join(filePath, "start-oracle.sh");
-    const startOracleCommand = `ORACLE=${this.oracle.toBase58()} PAYER_KEYPAIR=${payerKeypairPath} docker-compose up`;
+    const startOracleCommand = `docker-compose -f docker-compose.switchboard.yml up`;
     fs.writeFileSync(ORACLE_SCRIPT, `#!/bin/bash\n\n${startOracleCommand}`);
     console.log(
       `${chalk.green("Bash script saved to:")} ${ORACLE_SCRIPT.replace(
         process.cwd(),
         "."
       )}`
+    );
+  }
+
+  public writeDockerCompose(
+    oracleKey: PublicKey,
+    payerKeypairPath: string,
+    filePath: string
+  ): void {
+    const DOCKER_COMPOSE_FILEPATH = path.join(
+      filePath,
+      "docker-compose.switchboard.yml"
+    );
+    const dockerComposeString = `version: "3.3"
+services:
+  oracle:
+    image: "switchboardlabs/node:\${SBV2_ORACLE_VERSION:-${LATEST_DOCKER_VERSION}}" # https://hub.docker.com/r/switchboardlabs/node/tags
+    network_mode: host
+    restart: always
+    secrets:
+      - PAYER_SECRETS
+    environment:
+      - VERBOSE=1
+      - LIVE=1
+      - CLUSTER=\${CLUSTER:-localnet}
+      - HEARTBEAT_INTERVAL=30 # Seconds
+      - ORACLE_KEY=${oracleKey.toBase58()}
+    #  - RPC_URL=\${RPC_URL}
+secrets:
+  PAYER_SECRETS:
+    file: ${payerKeypairPath}
+`;
+    fs.writeFileSync(DOCKER_COMPOSE_FILEPATH, dockerComposeString);
+    console.log(
+      `${chalk.green(
+        "Docker-Compose saved to:"
+      )} ${DOCKER_COMPOSE_FILEPATH.replace(process.cwd(), ".")}`
     );
   }
 
@@ -222,7 +260,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
       commitment: "confirmed",
     });
 
-    const switchboardProgram = await loadSwitchboardProgram(
+    const switchboardProgram = await sbv2.loadSwitchboardProgram(
       "devnet",
       connection,
       payerKeypair,

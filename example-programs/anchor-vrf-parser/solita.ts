@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable unicorn/prevent-abbreviations */
 /* eslint-disable unicorn/prefer-module */
-const PROGRAM_NAME = "anchor_vrf_example";
-const PROGRAM_ID = "25RhC9WBW4nV7ghS9r5tvqk4A5BRZTu22PhrKW1EmLyF";
+const PROGRAM_NAME = "anchor_vrf_parser";
+const PROGRAM_ID = "FAnbznqZvZ7eijxQ6mKPoyDdM33o8cdM6wsUZtv2dFib";
 
 import { Solita } from "@metaplex-foundation/solita";
 import { spawn } from "child_process";

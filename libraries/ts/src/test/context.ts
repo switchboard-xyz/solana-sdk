@@ -5,6 +5,8 @@ import * as spl from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/switchboard-api";
 import Big from "big.js";
+import fs from "fs";
+import path from "path";
 import * as sbv2 from "../";
 import { DEFAULT_PUBKEY, promiseWithTimeout } from "./utils";
 
@@ -65,13 +67,41 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
   //   // TODO: Figure out how to wrap from spl.Token
   // }
 
-  /** Load SwitchboardTestContext from an env file containing $SWITCHBOARD_PROGRAM_ID, $ORACLE_QUEUE, $AGGREGATOR, $ORACLE
+  /** Recursively loop through directories and return the filepath of switchboard.env
+   * @param envFileName alternative filename to search for. defaults to switchboard.env
+   * @returns the filepath for a switchboard env file to load
+   */
+  public static findSwitchboardEnv(envFileName = "switchboard.env"): string {
+    const NotFoundError = new Error(
+      "failed to find switchboard.env file in current directory recursively"
+    );
+    let retryCount = 5;
+
+    let currentDirectory = process.cwd();
+    while (retryCount > 0) {
+      const currentPath = path.join(currentDirectory, envFileName);
+      if (fs.existsSync(currentPath)) {
+        return currentPath;
+      }
+      try {
+        currentDirectory = path.join(currentDirectory, "../");
+      } catch {
+        throw NotFoundError;
+      }
+
+      retryCount--;
+    }
+
+    throw NotFoundError;
+  }
+
+  /** Load SwitchboardTestContext from an env file containing $SWITCHBOARD_PROGRAM_ID, $ORACLE_QUEUE, $AGGREGATOR
    * @param provider anchor Provider containing connection and payer Keypair
    * @param filePath filesystem path to env file
    */
   public static async loadFromEnv(
     provider: anchor.Provider,
-    filePath: string
+    filePath = SwitchboardTestContext.findSwitchboardEnv()
   ): Promise<SwitchboardTestContext> {
     require("dotenv").config({ path: filePath });
     if (!process.env.SWITCHBOARD_PROGRAM_ID) {
@@ -101,14 +131,14 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     });
 
     // TODO: Check oracle is heartbeating when context starts
-    if (!process.env.ORACLE) {
-      throw new Error(`your env file must have $ORACLE set`);
+    let oracle: sbv2.OracleAccount;
+    if (process.env.ORACLE) {
+      const SWITCHBOARD_ORACLE = new PublicKey(process.env.ORACLE);
+      oracle = new sbv2.OracleAccount({
+        program: switchboardProgram,
+        publicKey: SWITCHBOARD_ORACLE,
+      });
     }
-    const SWITCHBOARD_ORACLE = new PublicKey(process.env.ORACLE);
-    const oracle = new sbv2.OracleAccount({
-      program: switchboardProgram,
-      publicKey: SWITCHBOARD_ORACLE,
-    });
 
     const [switchboardProgramState] =
       sbv2.ProgramStateAccount.fromSeed(switchboardProgram);

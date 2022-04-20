@@ -1,12 +1,12 @@
 [programs.localnet]
-anchor_vrf_parser = "25RhC9WBW4nV7ghS9r5tvqk4A5BRZTu22PhrKW1EmLyF"
+anchor_vrf_parser = "FAnbznqZvZ7eijxQ6mKPoyDdM33o8cdM6wsUZtv2dFib"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [provider]
 cluster = "localnet"
-wallet = "secrets/payer-keypair.json"
+wallet = "../../../payer-keypair.json"
 # cluster = "devnet"
 # wallet = "secrets/payer-keypair.json"
 

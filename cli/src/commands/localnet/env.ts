@@ -49,6 +49,15 @@ export default class LocalnetEnvironment extends BaseCommand {
           "start-oracle.sh already exists, use --force to overwrite"
         );
       }
+      if (
+        fs.existsSync(
+          path.join(process.cwd(), "docker-compose.switchboard.yml")
+        )
+      ) {
+        throw new Error(
+          "start-oracle.sh already exists, use --force to overwrite"
+        );
+      }
     }
 
     // TODO: Add silent flag

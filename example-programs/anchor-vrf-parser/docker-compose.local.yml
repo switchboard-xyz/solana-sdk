@@ -13,7 +13,7 @@ services:
       - CLUSTER=localnet
       - HEARTBEAT_INTERVAL=15 # Seconds
       - ORACLE_KEY=DFJ2DyRCb7BfsMKnVag8qS4YFC6LvtGPCJzRJAYg3h2c
-      # - RPC_URL=${RPC_URL}
+      # - RPC_URL=${RPC_URL?err}
 secrets:
   PAYER_SECRETS:
     file: secrets/payer-keypair.json
