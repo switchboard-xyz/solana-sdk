@@ -5,9 +5,7 @@ use anchor_lang::prelude::*;
 use bytemuck::{try_cast_slice, try_from_bytes};
 use bytemuck::{Pod, Zeroable};
 use solana_program::account_info::AccountInfo;
-use solana_program::pubkey::Pubkey;
 use std::cell::Ref;
-use std::cell::RefCell;
 use superslice::*;
 
 #[zero_copy]
@@ -49,7 +47,10 @@ impl<'a> AggregatorHistoryBuffer<'a> {
             return None;
         }
         let lower = &self.rows[..self.insertion_idx + 1];
-        let lahr = lower.lower_bound_by(|x| x.timestamp.cmp(&timestamp));
+        let lahr = lower.lower_bound_by(|x| {
+            let other: i64 = x.timestamp;
+            other.cmp(&timestamp)
+        });
         if lahr < lower.len() && lower[lahr].timestamp == timestamp {
             return Some(lower[lahr]);
         }
@@ -61,7 +62,10 @@ impl<'a> AggregatorHistoryBuffer<'a> {
             && self.rows[self.insertion_idx + 1].timestamp != 0
         {
             let upper = &self.rows[self.insertion_idx + 1..];
-            let uahr = upper.lower_bound_by(|x| x.timestamp.cmp(&timestamp));
+            let uahr = upper.lower_bound_by(|x| {
+                let other: i64 = x.timestamp;
+                other.cmp(&timestamp)
+            });
             if uahr < upper.len() && upper[uahr].timestamp == timestamp {
                 return Some(upper[uahr]);
             }

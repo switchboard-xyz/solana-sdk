@@ -2,6 +2,9 @@
 
 A lightweight library to decode and parse aggregator accounts
 
+[![npm](https://img.shields.io/npm/v/@switchboard-xyz/sbv2-lite)](https://www.npmjs.com/package/@switchboard-xyz/sbv2-lite)&nbsp;&nbsp;
+[![twitter](https://badgen.net/twitter/follow/switchboardxyz)](https://twitter.com/switchboardxyz)&nbsp;&nbsp;
+
 ## Install
 
 ```

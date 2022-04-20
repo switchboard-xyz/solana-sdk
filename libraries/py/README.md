@@ -6,11 +6,13 @@ SwitchboardPy is the Python client for [Switchboard](https://docs.switchboard.xy
 
 Internally it uses [AnchorPy](https://kevinheavey.github.io/anchorpy/), an Anchor API implementation in Python.
 
+[![pypi](https://badgen.net/pypi/v/switchboardpy)](https://pypi.python.org/pypi/switchboardpy)&nbsp;&nbsp;
+[![twitter](https://badgen.net/twitter/follow/switchboardxyz)](https://twitter.com/switchboardxyz)&nbsp;&nbsp;
+
 ## Installation
 
 ```sh
 pip install switchboardpy
-
 ```
 
 ## Basic Usage

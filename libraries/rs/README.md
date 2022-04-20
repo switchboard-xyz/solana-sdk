@@ -2,6 +2,11 @@
 
 A Rust library to interact with Switchboard V2's hosted data feeds.
 
+<!-- https://badgen.net/crates/v/switchboard-v2 -->
+
+[![cargo](https://badgen.net/crates/v/switchboard-v2)](https://crates.io/crates/switchboard-v2)&nbsp;&nbsp;
+[![twitter](https://badgen.net/twitter/follow/switchboardxyz)](https://twitter.com/switchboardxyz)&nbsp;&nbsp;
+
 ## Description
 
 This package can be used to manage Switchboard data feed account parsing.

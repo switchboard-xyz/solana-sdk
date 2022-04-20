@@ -306,7 +306,6 @@ impl Default for CallbackZC {
     }
 }
 
-#[repr(packed)]
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct Callback {
     pub program_id: Pubkey,

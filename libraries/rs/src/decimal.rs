@@ -7,7 +7,7 @@ use std::convert::{From, TryInto};
 
 #[zero_copy]
 #[repr(packed)]
-#[derive(Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Default, Debug, Eq, PartialEq)]
 pub struct SwitchboardDecimal {
     pub mantissa: i128,
     pub scale: u32,
