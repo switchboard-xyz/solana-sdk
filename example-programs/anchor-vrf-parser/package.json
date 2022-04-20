@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "scripts": {
     "generate:api": "ts-node solita",
+    "pid": "shx echo \"\n\nPROGRAM ID: \"$(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json) \"\n\nUpdate Anchor.toml, src/lib.rs, and solita.ts with your PID above.\" || exit 0",
+    "anchor:test": "anchor test --skip-local-validator",
     "setup:authority": "run-s create:authority airdrop:authority",
     "setup:switchboard": "sbv2 localnet:env --keypair secrets/payer-keypair.json",
     "create:authority": "shx find secrets/payer-keypair.json || solana-keygen new -s --no-bip39-passphrase --outfile secrets/payer-keypair.json",

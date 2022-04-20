@@ -7,8 +7,8 @@ anchor_feed_parser = "3Y2v9gVaFAKTDqcxxs8oSRWV8K9ctkCB8yiC6KA4sFz5"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "https://solana--devnet.datahub.figment.io/apikey/e5ed598d4d2d63bc9ed352d0f8f7d8bf"
-wallet = "/Users/gally/dev/switchboardxyz/payer-keypair.json"
+cluster = "localnet"
+wallet = "../../../payer-keypair.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

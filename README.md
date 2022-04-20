@@ -22,8 +22,7 @@ npm link -w cli
 ## Test
 
 ```
-# Build test environment files
-sbv2 localnet:env --keypair ../payer-keypair.json --rpcUrl
+sbv2 localnet:env --keypair ../payer-keypair.json
 npm run test -ws
 ```
 
