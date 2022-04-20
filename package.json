@@ -3,6 +3,7 @@
   "description": "switchboard v2 repo containing type definitions, libraries, and examples",
   "private": true,
   "workspaces": [
+    "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/utils-ts",
     "cli",
