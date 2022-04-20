@@ -27,7 +27,8 @@
     "compile": "./esbuild.js",
     "build": "rimraf lib && ./esbuild.js",
     "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
-    "prepublishOnly": "npm run build && npm version patch --force"
+    "prepublishOnly": "npm run build && npm version patch --force",
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag sbv2-ts/v$PACKAGE_VERSION && git push --tags"
   },
   "peerDependencies": {
     "@project-serum/anchor": "0.22.1",

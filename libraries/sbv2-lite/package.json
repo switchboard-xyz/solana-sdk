@@ -12,8 +12,9 @@
   "scripts": {
     "docgen": "npm run build && npx typedoc",
     "build": "rimraf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
     "prepublishOnly": "npm run build && npm test && npm version patch --force",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag sbv2-lite/v$PACKAGE_VERSION && git push --tags"
   },
   "author": "",
   "license": "ISC",
