@@ -3,7 +3,14 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: [website/**, ".github/workflows/*", "idl/**", "libraries/ts"]
+    paths:
+      [
+        website/**,
+        ".github/workflows/*",
+        "idl/**",
+        "libraries/ts/src/**",
+        "libraries/sbv2-cli/src/**",
+      ]
 
 jobs:
   deploy:
