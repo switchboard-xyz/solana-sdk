@@ -154,8 +154,8 @@ const config = {
             ],
           },
           {
-            to: "https://switchboard.xyz/explorer",
-            label: "Feeds",
+            to: "https://publish.switchboard.xyz/",
+            label: "Publish",
             position: "left",
           },
           {

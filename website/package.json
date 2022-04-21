@@ -1,5 +1,5 @@
 {
-  "name": "@switchboard-xyz/v2-docs",
+  "name": "website",
   "version": "0.1.0",
   "private": true,
   "main": "src/pages/index.tsx",
@@ -43,7 +43,8 @@
     "react-dom": "^17.0.1",
     "react-icons": "^4.3.1",
     "react-player": "^2.9.0",
-    "url-loader": "^4.1.1"
+    "url-loader": "^4.1.1",
+    "react-spring": "^9.3.2"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^2.0.0-beta.18",

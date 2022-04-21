@@ -55,7 +55,7 @@ const StyledCardContent = styled(CardContent)(({ theme }) => ({
   },
 }));
 
-export default function FeatureCard({
+export  function FeatureCard({
   title,
   image,
   description,

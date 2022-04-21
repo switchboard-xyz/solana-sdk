@@ -5,7 +5,7 @@ import { styled } from "@mui/system";
 import { SwitchboardApplication } from "@switchboard-xyz/sdl";
 import Layout from "@theme/Layout";
 import React from "react";
-import HomepageFeatures from "../components/HomepageFeatures";
+import { HomepageFeatures } from "../components/HomepageFeatures";
 
 const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({
   backgroundColor: dark ? "#1f354b" : theme.palette.pageBackground.secondary,

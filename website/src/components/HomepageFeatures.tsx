@@ -4,7 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { styled } from "@mui/system";
 import React from "react";
-import FeatureCard from "./FeatureCard";
+import { FeatureCard } from "./FeatureCard";
 import { FeatureList } from "./FeatureList";
 
 const StyledHeader = styled("div")<{ dark: number }>(({ theme, dark }) => ({
@@ -36,7 +36,7 @@ export type FeatureItem = {
   linkTo: string;
 };
 
-export default function HomepageFeatures(): JSX.Element {
+export function HomepageFeatures(): JSX.Element {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"), {
     defaultMatches: true,

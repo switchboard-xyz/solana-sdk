@@ -13,10 +13,9 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 ## Setup
 
 ```
-npm ci
-lerna bootstrap
-npm run build -ws
-npm link -w cli
+yarn install
+yarn workspaces run build
+yarn workspace @switchboard-xyz/switchboardv2-cli run link
 ```
 
 ## Test
