@@ -22,8 +22,10 @@ jobs:
           node-version: 16.x
           cache: yarn
           cache-dependency-path: "yarn.lock"
+      - name: Setup npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_AUTH_TOKEN}}" > .npmrc
       - name: Setup yarnrc
-        run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_AUTH_TOKEN}}" > .yarnrc
+        run: echo "registry \"https://registry.npmjs.org\"" > .yarnrc
       - name: Build website
         run: |
           yarn install --frozen-lockfile

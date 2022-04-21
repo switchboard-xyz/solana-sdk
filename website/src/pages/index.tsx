@@ -5,6 +5,7 @@ import { styled } from "@mui/system";
 import { SwitchboardApplication } from "@switchboard-xyz/sdl";
 import Layout from "@theme/Layout";
 import React from "react";
+/* eslint-disable import/extensions */
 import { HomepageFeatures } from "../components/HomepageFeatures";
 
 const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({

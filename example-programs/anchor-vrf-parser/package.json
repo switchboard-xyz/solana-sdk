@@ -1,18 +1,19 @@
 {
-  "name": "@switchboard-xyz/v2-anchor-vrf-parser",
+  "name": "anchor-vrf-parser",
   "private": true,
   "version": "0.1.0",
   "scripts": {
     "generate:api": "ts-node solita",
     "pid": "shx echo \"\n\nPROGRAM ID: \"$(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json) \"\n\nUpdate Anchor.toml, src/lib.rs, and solita.ts with your PID above.\" || exit 0",
-    "anchor:test": "anchor test --skip-local-validator",
     "setup:authority": "run-s create:authority airdrop:authority",
     "setup:switchboard": "sbv2 localnet:env --keypair secrets/payer-keypair.json",
     "create:authority": "shx find secrets/payer-keypair.json || solana-keygen new -s --no-bip39-passphrase --outfile secrets/payer-keypair.json",
     "airdrop": "solana airdrop 1 secrets/payer-keypair.json",
     "airdrop:authority": "run-s airdrop && run-s airdrop && run-s airdrop && run-s airdrop || true",
     "build": "rm -rf lib && tsc -p tsconfig.json",
-    "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
+    "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
+    "anchor:test": "anchor test --skip-local-validator",
+    "test": "echo \"For workspace anchor-vrf-parser, use the anchor:test script\" && exit 0"
   },
   "dependencies": {
     "@metaplex-foundation/beet": "^0.1.0",

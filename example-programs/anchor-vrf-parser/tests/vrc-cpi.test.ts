@@ -174,18 +174,7 @@ describe("vrfClient test", async () => {
 
             const vrf = await vrfAccount.loadData();
             const round = vrf.builders[0];
-            // console.log(
-            //   JSON.stringify(
-            //     round,
-            //     (key, value) => {
-            //       if (Array.isArray(value)) {
-            //         return `[${value.map((el) => el.toString()).join(",")}]`;
-            //       }
-            //       return value;
-            //     },
-            //     2
-            //   )
-            // );
+
             if (round.status.statusVerifying) {
               console.log(`Ready to turn the crank`);
               const oracle = new OracleAccount({
@@ -200,31 +189,10 @@ describe("vrfClient test", async () => {
       }
     );
 
-    // const resultPromise = new Promise(
-    //   (resolve: (result: anchor.BN) => void) => {
-    //     ws = vrfClientProgram.provider.connection.onAccountChange(
-    //       vrfClientKey,
-    //       (accountInfo) => {
-    //         const accountData = vrfClientAccountDecoder.decode(
-    //           "VrfClient",
-    //           accountInfo.data
-    //         );
-    //         const result: anchor.BN = accountData.result;
-    //         if (!result.eq(new anchor.BN(0))) {
-    //           vrfClientProgram.provider.connection.removeAccountChangeListener(
-    //             ws
-    //           );
-    //           resolve(accountData.result);
-    //         }
-    //       }
-    //     );
-    //   }
-    // );
-
     const awaitResult = await promiseWithTimeout(
       20_000,
       waitToCrankPromise
-    ).catch(() => {
+    ).finally(() => {
       try {
         vrfClientProgram.provider.connection.removeAccountChangeListener(ws);
       } catch {}

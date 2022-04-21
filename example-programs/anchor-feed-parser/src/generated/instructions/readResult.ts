@@ -5,8 +5,8 @@
  * See: https://github.com/metaplex-foundation/solita
  */
 
-import * as beet from '@metaplex-foundation/beet'
-import * as web3 from '@solana/web3.js'
+import * as beet from "@metaplex-foundation/beet";
+import * as web3 from "@solana/web3.js";
 
 /**
  * @category Instructions
@@ -14,11 +14,11 @@ import * as web3 from '@solana/web3.js'
  * @category generated
  */
 const readResultStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */
+  instructionDiscriminator: number[] /* size: 8 */;
 }>(
-  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'ReadResultInstructionArgs'
-)
+  [["instructionDiscriminator", beet.uniformFixedSizeArray(beet.u8, 8)]],
+  "ReadResultInstructionArgs"
+);
 /**
  * Accounts required by the _readResult_ instruction
  * @category Instructions
@@ -26,12 +26,12 @@ const readResultStruct = new beet.BeetArgsStruct<{
  * @category generated
  */
 export type ReadResultInstructionAccounts = {
-  aggregator: web3.PublicKey
-}
+  aggregator: web3.PublicKey;
+};
 
 const readResultInstructionDiscriminator = [
   130, 229, 115, 203, 180, 191, 240, 90,
-]
+];
 
 /**
  * Creates a _ReadResult_ instruction.
@@ -45,25 +45,25 @@ const readResultInstructionDiscriminator = [
 export function createReadResultInstruction(
   accounts: ReadResultInstructionAccounts
 ) {
-  const { aggregator } = accounts
+  const { aggregator } = accounts;
 
   const [data] = readResultStruct.serialize({
     instructionDiscriminator: readResultInstructionDiscriminator,
-  })
+  });
   const keys: web3.AccountMeta[] = [
     {
       pubkey: aggregator,
       isWritable: false,
       isSigner: false,
     },
-  ]
+  ];
 
   const ix = new web3.TransactionInstruction({
     programId: new web3.PublicKey(
-      '3Y2v9gVaFAKTDqcxxs8oSRWV8K9ctkCB8yiC6KA4sFz5'
+      "3Y2v9gVaFAKTDqcxxs8oSRWV8K9ctkCB8yiC6KA4sFz5"
     ),
     keys,
     data,
-  })
-  return ix
+  });
+  return ix;
 }

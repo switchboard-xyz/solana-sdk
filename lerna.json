@@ -1,12 +1,11 @@
 {
   "packages": [
+    "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/utils-ts",
     "cli",
-    "feeds/packages/*",
-    "feeds/programs/*",
-    "vrf/packages/*",
-    "vrf/programs/*",
+    "feeds/*",
+    "example-programs/*",
     "website"
   ],
   "version": "independent",

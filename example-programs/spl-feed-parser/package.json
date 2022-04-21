@@ -1,10 +1,12 @@
 {
-  "name": "@switchboard-xyz/v2-spl-feed-parser",
+  "name": "spl-feed-parser",
+  "private": true,
   "version": "0.1.0",
   "scripts": {
     "build": "cargo build-bpf --manifest-path=Cargo.toml",
     "deploy": "solana program deploy target/deploy/spl_feed_parser.so",
-    "test": "echo \"No test script for @switchboard-xyz/v2-spl-feed-parser\" && exit 0"
+    "anchor:test": "echo \"No anchor:test script for spl-feed-parser\" && exit 0",
+    "test": "echo \"For workspace spl-feed-parser, use the anchor:test script\" && exit 0"
   },
   "dependencies": {
     "@solana/web3.js": "^1.37.1"

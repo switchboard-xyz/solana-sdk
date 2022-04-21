@@ -18,7 +18,7 @@
     "api:cli": "shx ./scripts/cli.sh",
     "spellcheck": "cspell --config ./cSpell.json \"**/*.md*\"",
     "typecheck": "tsc",
-    "test": "echo \"No test script for @switchboard-xyz/v2-docs\" && exit 0"
+    "test": "echo \"No test script for website\" && exit 0"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0-beta.18",

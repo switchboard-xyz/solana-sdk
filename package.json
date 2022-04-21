@@ -13,6 +13,11 @@
   ],
   "scripts": {
     "start": "echo \"Error: no start script specified\" && exit 1",
+    "test:anchor": "yarn workspace anchor-feed-parser anchor:test && yarn workspace spl-feed-parser anchor:test && yarn workspace anchor-vrf-parser anchor:test",
+    "test:libraries:ts": "yarn workspace @switchboard-xyz/sbv2-lite test && yarn workspace @switchboard-xyz/switchboard-v2 test",
+    "test:libraries:py": "cd libraries/py && poetry run pytest",
+    "test:libraries:rs": "cd libraries/rs && cargo test",
+    "test:libraries": "yarn test:libraries:ts & yarn test:libraries:rs",
     "docs": "yarn workspace website start",
     "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/sbv2-py",
     "docs:build:ts": "yarn workspace @switchboard-xyz/switchboard-v2 docgen",
@@ -25,7 +30,6 @@
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",
-    "eslint-config-airbnb-typescript": "^17.0.0",
     "lerna": "^4.0.0",
     "npkill": "^0.8.3",
     "npm-run-all": "^4.1.5",
