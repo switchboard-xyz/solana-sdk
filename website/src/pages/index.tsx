@@ -1,12 +1,12 @@
 import { useColorMode } from "@docusaurus/theme-common";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import { Box } from "@mui/material";
-import { styled } from "@mui/system";
-import { SwitchboardApplication } from "@switchboard-xyz/sdl";
+import { Box, CssBaseline } from "@mui/material";
+import { styled, ThemeProvider } from "@mui/system";
 import Layout from "@theme/Layout";
 import React from "react";
 /* eslint-disable import/extensions */
 import { HomepageFeatures } from "../components/HomepageFeatures";
+import theme from "../components/theme";
 
 const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({
   backgroundColor: dark ? "#1f354b" : theme.palette.pageBackground.secondary,
@@ -36,13 +36,15 @@ export default function Home(): JSX.Element {
   const { siteConfig } = useDocusaurusContext();
 
   return (
-    <SwitchboardApplication>
-      <Layout
-        title="Documentation"
-        description="Documentation for Switchboard V2"
-      >
-        <Main />
-      </Layout>
-    </SwitchboardApplication>
+    <ThemeProvider theme={theme}>
+      <CssBaseline>
+        <Layout
+          title="Documentation"
+          description="Documentation for Switchboard V2"
+        >
+          <Main />
+        </Layout>
+      </CssBaseline>
+    </ThemeProvider>
   );
 }

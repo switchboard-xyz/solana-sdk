@@ -4135,11 +4135,6 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
-"@switchboard-xyz/sdl@^0.0.75":
-  version "0.0.75"
-  resolved "https://registry.yarnpkg.com/@switchboard-xyz/sdl/-/sdl-0.0.75.tgz#c1b64e3178fb651a2cf95b441a70648d40bdd878"
-  integrity sha512-BhUuQ4JXbL8F8RDq91EjANXeZ7kVx1KYDdfQA0toKS1I4/lDZSJMZLmAi3Mk/2r3+ivhRphIvfhHqsEUMOTVlg==
-
 "@switchboard-xyz/switchboard-api@^0.2.190", "@switchboard-xyz/switchboard-api@^0.2.61":
   version "0.2.191"
   resolved "https://registry.yarnpkg.com/@switchboard-xyz/switchboard-api/-/switchboard-api-0.2.191.tgz#f233eec0b03b7728f741087121cb18175ba41634"
