@@ -11,7 +11,7 @@ import theme from "../components/theme";
 const StyledMain = styled("main")<{ dark: number }>(({ theme, dark }) => ({
   backgroundColor: dark ? "#1f354b" : theme.palette.pageBackground.secondary,
   padding: "50px 32px 90px",
-  minHeight: "calc(100vh - 334px)", // 100vh - footer/padding
+  minHeight: "calc(100vh - 324px)", // 100vh - footer/padding
   width: "100vw",
   display: "flex",
   flexDirection: "column",
