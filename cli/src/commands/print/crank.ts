@@ -1,9 +1,7 @@
-import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import * as fs from "fs";
-import { CrankClass } from "../../accounts/crank/crank";
+import { prettyPrintCrank } from "@switchboard-xyz/sbv2-utils";
+import { CrankAccount } from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../BaseCommand";
-import { OutputFileExistsNoForce } from "../../types";
 
 export default class CrankPrint extends BaseCommand {
   outputFile?: string;
@@ -14,13 +12,6 @@ export default class CrankPrint extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
-    outputFile: flags.string({
-      char: "f",
-      description: "output aggregator schema to json file",
-    }),
   };
 
   static args = [
@@ -39,24 +30,12 @@ export default class CrankPrint extends BaseCommand {
   async run() {
     const { args, flags } = this.parse(CrankPrint);
 
-    if (flags.outputFile) {
-      if (fs.existsSync(flags.outputFile) && !flags.force) {
-        throw new OutputFileExistsNoForce(flags.outputFile);
-      }
-      this.outputFile = flags.outputFile;
-    }
+    const crankAccount = new CrankAccount({
+      program: this.program,
+      publicKey: args.crankKey,
+    });
 
-    const crank = await CrankClass.fromPublicKey(
-      this.context,
-      this.program,
-      args.crankKey
-    );
-
-    this.logger.log(crank.prettyPrint(true));
-
-    if (this.outputFile) {
-      this.context.fs.saveAccount(this.outputFile, crank);
-    }
+    this.logger.log(await prettyPrintCrank(crankAccount, undefined, true));
   }
 
   async catch(error) {

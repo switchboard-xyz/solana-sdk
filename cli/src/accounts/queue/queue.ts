@@ -1,8 +1,10 @@
 /* eslint-disable max-depth */
 import * as anchor from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import {
   OracleQueueAccount,
+  programWallet,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -190,9 +192,9 @@ export class OracleQueueClass implements IOracleQueueClass {
     program: anchor.Program,
     definition: fromQueueJSON
   ) {
+    const payer = programWallet(program);
     const queueAccount = await OracleQueueAccount.create(program, {
-      authority:
-        definition.authorityPublicKey ?? program.provider.wallet.publicKey,
+      authority: definition.authorityPublicKey ?? payer.publicKey,
       name: definition.name ? Buffer.from(definition.name) : undefined,
       metadata: definition.metadata
         ? Buffer.from(definition.metadata)
@@ -217,6 +219,7 @@ export class OracleQueueClass implements IOracleQueueClass {
         ? new anchor.BN(definition.consecutiveOracleFailureLimit)
         : undefined,
       varianceToleranceMultiplier: definition.varianceToleranceMultiplier,
+      mint: spl.NATIVE_MINT,
     });
 
     context.logger.info(`created queue ${queueAccount.publicKey}`);

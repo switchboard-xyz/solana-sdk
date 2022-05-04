@@ -43,7 +43,7 @@ export default class OracleBalance extends BaseCommand {
       this.logger.log(
         chalkString(
           "Oracle Balance:",
-          `${balance.value.amount} (${balance.value.uiAmountString})`,
+          `${balance.value.uiAmountString} (${balance.value.amount})`,
           12
         )
       );

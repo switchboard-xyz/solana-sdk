@@ -2,10 +2,10 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
-  getPayer,
   OracleAccount,
   OracleQueueAccount,
-  ProgramStateAccount,
+  PermissionAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { chalkString } from "../../accounts/utils";
@@ -33,6 +33,11 @@ export default class OracleWithdraw extends BaseCommand {
       description:
         "keypair delegated as the authority for managing the oracle account",
     }),
+    amount: flags.string({
+      required: true,
+      description:
+        "token amount to withdraw from oracle escrow. If decimals provided, amount will be normalized to raw tokenAmount",
+    }),
   };
 
   static args = [
@@ -41,12 +46,6 @@ export default class OracleWithdraw extends BaseCommand {
       required: true,
       parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle to withdraw from",
-    },
-    {
-      name: "amount",
-      required: true,
-      parse: (amount: string) => new anchor.BN(amount),
-      description: "amount to withdraw from oracle's token wallet",
     },
   ];
 
@@ -58,7 +57,9 @@ export default class OracleWithdraw extends BaseCommand {
   async run() {
     verifyProgramHasPayer(this.program);
     const { args, flags } = this.parse(OracleWithdraw);
-    const payer = getPayer(this.program);
+    const payer = programWallet(this.program);
+
+    const amount = this.getTokenAmount(flags.amount);
 
     // get oracle account
     const oracleAccount = new OracleAccount({
@@ -79,20 +80,33 @@ export default class OracleWithdraw extends BaseCommand {
       publicKey: oracle.queuePubkey,
     });
     const queue = await queueAccount.loadData();
+    const mint = await queueAccount.loadMint();
 
-    // load switchboard mint
-    const [programStateAccount] = ProgramStateAccount.fromSeed(this.program);
-    const switchboardMint = await programStateAccount.getTokenMint();
-
-    const initialTokenBalanceResponse =
-      await this.program.provider.connection.getTokenAccountBalance(
-        oracle.tokenAccount
-      );
-    const initialTokenBalance = new anchor.BN(
-      initialTokenBalanceResponse.value.amount
+    // check permission account has been initialized
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      queue.authority,
+      queueAccount.publicKey,
+      oracleAccount.publicKey
     );
-    const finalTokenBalance = initialTokenBalance.sub(args.amount);
+    try {
+      const permissions = await permissionAccount.loadData();
+    } catch {
+      this.logger.error(
+        `Need to create a permission account before withdrawing`
+      );
+      return;
+    }
 
+    // check final token balance isnt less than queue's minStake
+    const initialTokenBalance = new anchor.BN(
+      (
+        await this.program.provider.connection.getTokenAccountBalance(
+          oracle.tokenAccount
+        )
+      ).value.amount
+    );
+    const finalTokenBalance = initialTokenBalance.sub(amount);
     if (!flags.force && finalTokenBalance.lt(queue.minStake)) {
       throw new Error(
         `Final oracle token balance is less than the queue's minStake`
@@ -106,7 +120,11 @@ export default class OracleWithdraw extends BaseCommand {
       } catch {
         try {
           const withdrawKeypair = await loadKeypair(flags.withdrawAccount);
-          withdrawAccount = withdrawKeypair.publicKey;
+          withdrawAccount = (
+            await mint.getOrCreateAssociatedAccountInfo(
+              withdrawKeypair.publicKey
+            )
+          ).address;
         } catch {
           throw new Error(
             `failed to parse withdrawAccount flag ${flags.withdrawAccount}`
@@ -114,11 +132,15 @@ export default class OracleWithdraw extends BaseCommand {
         }
       }
     } else {
-      withdrawAccount = this.program.provider.wallet.publicKey;
+      withdrawAccount = (
+        await mint.getOrCreateAssociatedAccountInfo(
+          programWallet(this.program).publicKey
+        )
+      ).address;
     }
 
     const txn = await oracleAccount.withdraw({
-      amount: args.amount,
+      amount,
       oracleAuthority: authority,
       withdrawAccount,
     });
@@ -128,18 +150,21 @@ export default class OracleWithdraw extends BaseCommand {
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON}Withdrew ${args.amount} tokens from oracle account`
+          `${CHECK_ICON}Withdrew ${amount} tokens from oracle account`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
-      const newTokenBalance =
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
+      const finalTokenBalance = (
         await this.program.provider.connection.getTokenAccountBalance(
           oracle.tokenAccount
-        );
+        )
+      ).value;
       this.logger.log(
         chalkString(
           "New Oracle Token Balance",
-          `${newTokenBalance.value.amount} (${newTokenBalance.value.uiAmountString})`
+          `${finalTokenBalance.uiAmountString} (${finalTokenBalance.amount})`
         )
       );
     }

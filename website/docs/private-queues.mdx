@@ -16,16 +16,23 @@ Oracles can embed API Keys on a per job basis by specifying the jobAccount publi
 ```json title="configs.json"
 {
   "jobVariables": {
-    // Pubkey of the OracleJob account for which this variable expansion applies or *.
+    // Pubkey of the Job account for which this variable expansion applies
     "HtB62K71H49RJbATYpmB6UCMBXLK6G3Q5JtGveTMR8Mt": {
       "VARIABLE_NAME": "abc123"
     },
+    // Global variable expansion that applies to any Job account. SEE CAUTION BELOW
     "*": {
       "GLOBAL_VARIABLE_NAME": "abc123"
     }
   }
 }
 ```
+
+:::caution
+
+Private queue's should **_ALWAYS_** have `unpermissionedFeedsEnabled` set to false. Allowing unpermitted feeds could result in a malicous actor creating a job definition that leaks your sensitive API keys.
+
+:::
 
 ## Example
 

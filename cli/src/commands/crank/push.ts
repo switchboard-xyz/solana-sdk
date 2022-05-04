@@ -51,11 +51,13 @@ export default class CrankPush extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `\r\n${chalk.green(
+        `${chalk.green(
           `${CHECK_ICON}Aggregator pushed to crank successfully`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

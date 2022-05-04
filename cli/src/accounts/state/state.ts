@@ -1,7 +1,10 @@
 import * as anchor from "@project-serum/anchor";
 import { MintInfo, Token } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { ProgramStateAccount } from "@switchboard-xyz/switchboard-v2";
+import {
+  ProgramStateAccount,
+  programWallet,
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { DEFAULT_CONTEXT } from "../../types/context/context";
 import { LogProvider } from "../../types/context/logging";
@@ -72,8 +75,9 @@ export class ProgramStateClass implements IProgramStateClass {
     context = DEFAULT_CONTEXT
   ): Promise<PublicKey> {
     const state = await ProgramStateClass.build(program, context);
+    const wallet = programWallet(program);
     const account = await state.token.getOrCreateAssociatedAccountInfo(
-      program.provider.wallet.publicKey
+      wallet.publicKey
     );
     return account.address;
   }

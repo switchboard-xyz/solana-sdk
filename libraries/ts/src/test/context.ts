@@ -42,7 +42,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     program: anchor.Program,
     amount = 1_000_000
   ): Promise<PublicKey> {
-    const payerKeypair = sbv2.getPayer(program);
+    const payerKeypair = sbv2.programWallet(program);
     return spl.Token.createWrappedNativeAccount(
       program.provider.connection,
       spl.TOKEN_PROGRAM_ID,
@@ -57,7 +57,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
   //   wallet: PublicKey,
   //   amount: number
   // ) {
-  //   const payerKeypair = sbv2.getPayer(program);
+  //   const payerKeypair = sbv2.programWallet(program);
 
   //   const requestTxn = await program.provider.connection.requestAirdrop(
   //     wallet,
@@ -79,11 +79,23 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
 
     let currentDirectory = process.cwd();
     while (retryCount > 0) {
-      const currentPath = path.join(currentDirectory, envFileName);
-      if (fs.existsSync(currentPath)) {
-        return currentPath;
-      }
+      // look for .switchboard directory
       try {
+        const localSbvPath = path.join(currentDirectory, ".switchboard");
+        if (fs.existsSync(localSbvPath)) {
+          const localSbvEnvPath = path.join(localSbvPath, envFileName);
+          if (fs.existsSync(localSbvEnvPath)) {
+            return localSbvEnvPath;
+          }
+        }
+      } catch {}
+
+      // look for switchboard.env
+      try {
+        const currentPath = path.join(currentDirectory, envFileName);
+        if (fs.existsSync(currentPath)) {
+          return currentPath;
+        }
         currentDirectory = path.join(currentDirectory, "../");
       } catch {
         throw NotFoundError;
@@ -100,7 +112,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
    * @param filePath filesystem path to env file
    */
   public static async loadFromEnv(
-    provider: anchor.Provider,
+    provider: anchor.AnchorProvider,
     filePath = SwitchboardTestContext.findSwitchboardEnv()
   ): Promise<SwitchboardTestContext> {
     require("dotenv").config({ path: filePath });
@@ -164,7 +176,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     value: number
   ): Promise<sbv2.AggregatorAccount> {
     const queue = await this.queue.loadData();
-    const payerKeypair = sbv2.getPayer(this.program);
+    const payerKeypair = sbv2.programWallet(this.program);
 
     // create aggregator
     const aggregatorAccount = await sbv2.AggregatorAccount.create(

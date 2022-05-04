@@ -64,10 +64,12 @@ export default class AggregatorSetMinOracleResults extends BaseCommand {
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON}Aggregator minimum oracles set successfully\r\n`
+          `${CHECK_ICON}Aggregator minimum oracles set successfully`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

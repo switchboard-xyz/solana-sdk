@@ -2,12 +2,13 @@
   "packages": [
     "libraries/sbv2-lite",
     "libraries/ts",
-    "libraries/utils-ts",
+    "libraries/sbv2-utils",
     "cli",
-    "feeds/*",
-    "example-programs/*",
+    "packages/*",
+    "programs/*",
     "website"
   ],
+  "npmClient": "yarn",
   "version": "independent",
   "useWorkspaces": true
 }

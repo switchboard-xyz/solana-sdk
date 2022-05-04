@@ -1,6 +1,6 @@
-import { ProgramStateClass } from "../../accounts/state/state";
+import { prettyPrintProgramState } from "@switchboard-xyz/sbv2-utils";
+import { ProgramStateAccount } from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../BaseCommand";
-import { loadAnchor } from "../../utils";
 
 export default class ProgramPrint extends BaseCommand {
   static description =
@@ -15,9 +15,9 @@ export default class ProgramPrint extends BaseCommand {
   static examples = ["$ sbv2 program:print"];
 
   async run() {
-    const program = await loadAnchor(this.cluster, this.connection);
-    const state = await ProgramStateClass.build(program);
-    this.logger.log(state.prettyPrint());
+    const [programState] = ProgramStateAccount.fromSeed(this.program);
+
+    this.logger.log(await prettyPrintProgramState(programState));
   }
 
   async catch(error) {

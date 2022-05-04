@@ -4,6 +4,7 @@ import {
   AggregatorAccount,
   LeaseAccount,
   OracleQueueAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import {
@@ -166,8 +167,7 @@ export class LeaseClass implements ILeaseClass {
             oracleQueueAccount: queueAccount,
             loadAmount: new anchor.BN(0),
             funder: programTokenWallet,
-            funderAuthority: (aggregatorAccount.program.provider.wallet as any)
-              .payer,
+            funderAuthority: programWallet(aggregatorAccount.program),
             withdrawAuthority: programTokenWallet,
           }
         );

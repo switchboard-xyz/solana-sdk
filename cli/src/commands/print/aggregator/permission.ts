@@ -1,13 +1,20 @@
 import { PublicKey } from "@solana/web3.js";
-import chalk from "chalk";
-import { AggregatorClass } from "../../../accounts/aggregator/aggregator";
+import { prettyPrintPermissions } from "@switchboard-xyz/sbv2-utils";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+  PermissionAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../../BaseCommand";
 
 export default class AggregatorPermissionPrint extends BaseCommand {
   static description =
     "Print the permission account associated with a Switchboard aggregator account";
 
-  static aliases = ["aggregator:permission:print"];
+  static aliases = [
+    "aggregator:permission:print",
+    "aggregator:print:permission",
+  ];
 
   static flags = {
     ...BaseCommand.flags,
@@ -30,25 +37,33 @@ export default class AggregatorPermissionPrint extends BaseCommand {
   async run() {
     const { args } = this.parse(AggregatorPermissionPrint);
 
-    const aggregator = await AggregatorClass.fromPublicKey(
-      this.context,
+    const aggregatorAccount = new AggregatorAccount({
+      program: this.program,
+      publicKey: args.aggregatorKey,
+    });
+    const aggregator = await aggregatorAccount.loadData();
+
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: aggregator.queuePubkey,
+    });
+    const queue = await queueAccount.loadData();
+
+    const [permissionAccount] = PermissionAccount.fromSeed(
       this.program,
-      args.aggregatorKey
+      queue.authority,
+      queueAccount.publicKey,
+      aggregatorAccount.publicKey
     );
 
-    this.logger.debug(
-      `${chalk.yellow("aggregator:")} ${chalk.blue(
-        aggregator.publicKey.toString()
-      )}`
-    );
-
-    if (!aggregator.permissionAccount) {
-      throw new Error(
-        `failed to find permission account for aggregator ${aggregator.publicKey}`
+    try {
+      const permission = await permissionAccount.loadData();
+      this.logger.log(
+        await prettyPrintPermissions(permissionAccount, permission)
       );
+    } catch {
+      this.logger.error(`failed to find a permission account`);
     }
-
-    this.logger.log(aggregator.permissionAccount.prettyPrint());
   }
 
   async catch(error) {

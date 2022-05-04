@@ -1,12 +1,13 @@
+import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
-  getPayer,
   LeaseAccount,
   OracleQueueAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
-import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/v2-utils-ts";
 import chalk from "chalk";
 import { chalkString } from "../../../accounts/utils";
 import BaseCommand from "../../../BaseCommand";
@@ -17,6 +18,11 @@ export default class AggregatorLeaseExtend extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
+    amount: flags.string({
+      required: true,
+      description:
+        "token amount to load into the lease escrow. If decimals provided, amount will be normalized to raw tokenAmount",
+    }),
   };
 
   static args = [
@@ -26,23 +32,18 @@ export default class AggregatorLeaseExtend extends BaseCommand {
       parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator to extend a lease for",
     },
-    {
-      name: "amount",
-      required: true,
-      parse: (amount: string) => new anchor.BN(amount),
-      description: "amount to deposit into aggregator lease",
-    },
   ];
 
   static examples = [
-    "$ sbv2 aggregator:lease:extend GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 2500 --keypair ../payer-keypair.json",
+    "$ sbv2 aggregator:lease:extend GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.1 --keypair ../payer-keypair.json",
   ];
 
   async run() {
-    const { args } = this.parse(AggregatorLeaseExtend);
+    const { args, flags } = this.parse(AggregatorLeaseExtend);
     verifyProgramHasPayer(this.program);
 
-    if (args.amount.lte(new anchor.BN(0))) {
+    let amount = this.getTokenAmount(flags.amount);
+    if (amount.lte(new anchor.BN(0))) {
       throw new Error("amount to deposit must be greater than 0");
     }
 
@@ -62,6 +63,11 @@ export default class AggregatorLeaseExtend extends BaseCommand {
       queueAccount,
       aggregatorAccount
     );
+    try {
+      const lease = await leaseAccount.loadData();
+    } catch {
+      throw new Error(`Failed to load lease account. Has it been created yet?`);
+    }
 
     const initialLeaseBalance = await leaseAccount.getBalance();
     this.logger.log(
@@ -82,7 +88,7 @@ export default class AggregatorLeaseExtend extends BaseCommand {
       )
     );
 
-    const funderAuthority = getPayer(this.program);
+    const funderAuthority = programWallet(this.program);
 
     const txn = await leaseAccount.extend({
       loadAmount: args.amount,
@@ -98,7 +104,9 @@ export default class AggregatorLeaseExtend extends BaseCommand {
           `${CHECK_ICON} Deposited ${args.amount} tokens into aggregator lease`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
       const newBalance = await aggregator.leaseAccount.getBalance();
       this.logger.log(
         chalkString("Final Aggregator Lease Balance", newBalance)

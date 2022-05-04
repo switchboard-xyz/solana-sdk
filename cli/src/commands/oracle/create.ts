@@ -1,11 +1,11 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
+import { prettyPrintOracle } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
@@ -51,13 +51,13 @@ export default class OracleCreate extends BaseCommand {
       program: this.program,
       publicKey: args.queueKey,
     });
+    const queue = await queueAccount.loadData();
 
     const oracleAccount = await OracleAccount.create(this.program, {
       name: Buffer.from(flags.name ?? ""),
       oracleAuthority: authority,
       queueAccount,
     });
-    const oracle = await oracleAccount.loadData();
 
     if (this.silent) {
       console.log(oracleAccount.publicKey.toString());
@@ -65,9 +65,7 @@ export default class OracleCreate extends BaseCommand {
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`
       );
-      this.logger.info(
-        chalkString("Created Oracle", oracleAccount.publicKey.toString())
-      );
+      this.logger.info(await prettyPrintOracle(oracleAccount));
     }
   }
 

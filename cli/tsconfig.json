@@ -10,11 +10,15 @@
     "declaration": true,
     "esModuleInterop": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"],
+      "@switchboard-xyz/sbv2-utils": ["../libraries/sbv2-utils"]
     }
   },
   "types": ["node"],
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "bin", "lib", "test/**/*", "dts"],
-  "references": [{ "path": "../libraries/ts" }]
+  "exclude": ["node_modules", "bin", "lib", "test/**/*"],
+  "references": [
+    { "path": "../libraries/ts" },
+    { "path": "../libraries/sbv2-utils" }
+  ]
 }

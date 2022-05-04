@@ -62,7 +62,7 @@ interface AnchorData {
 
 async function getAnchorData(): Promise<AnchorData> {
   // mainnet program
-  const provider = new anchor.Provider(
+  const provider = new anchor.AnchorProvider(
     new Connection(clusterApiUrl("mainnet-beta")),
     new anchor.Wallet(DEFAULT_KEYPAIR),
     {}
@@ -110,7 +110,7 @@ async function getAnchorData(): Promise<AnchorData> {
   // const devnetProgram = new anchor.Program(
   //   anchorIdl,
   //   MAINNET_PID,
-  //   new anchor.Provider(
+  //   new anchor.AnchorProvider(
   //     new Connection(clusterApiUrl("devnet")),
   //     new anchor.Wallet(DEFAULT_KEYPAIR),
   //     {}
@@ -180,7 +180,9 @@ const ProgramConfig = (props: ProgramConfigProps) => {
       {loading === true ? (
         <CircularProgress />
       ) : (
-        <Typography>{JSON.stringify(anchorData.mainnet, undefined, 2)}</Typography>
+        <Typography>
+          {JSON.stringify(anchorData.mainnet, undefined, 2)}
+        </Typography>
       )}
     </>
   );

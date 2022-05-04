@@ -44,17 +44,17 @@ module.exports = {
         {
           type: "link",
           label: "Typescript",
-          href: "https://docs.switchboard.xyz/api/sbv2-api",
+          href: "https://docs.switchboard.xyz/api/ts",
         },
         {
           type: "link",
           label: "Typescript Lite",
-          href: "https://docs.switchboard.xyz/api/sbv2-lite",
+          href: "https://docs.switchboard.xyz/api/ts-lite",
         },
         {
           type: "link",
           label: "Python",
-          href: "https://docs.switchboard.xyz/api/sbv2-py",
+          href: "https://docs.switchboard.xyz/api/py",
         },
         {
           type: "link",

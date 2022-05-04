@@ -66,7 +66,9 @@ export default class AggregatorRemoveJob extends BaseCommand {
           `${CHECK_ICON}Job succesfully removed from aggregator account\r\n`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

@@ -1,13 +1,17 @@
 import { PublicKey } from "@solana/web3.js";
-import chalk from "chalk";
-import { OracleClass } from "../../../accounts/oracle/oracle";
+import { prettyPrintPermissions } from "@switchboard-xyz/sbv2-utils";
+import {
+  OracleAccount,
+  OracleQueueAccount,
+  PermissionAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../../BaseCommand";
 
 export default class OraclePermissionPrint extends BaseCommand {
   static description =
     "Print the permission account associated with a Switchboard oracle account";
 
-  static aliases = ["oracle:permission:print"];
+  static aliases = ["oracle:permission:print", "oracle:print:permission"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -30,23 +34,33 @@ export default class OraclePermissionPrint extends BaseCommand {
   async run() {
     const { args } = this.parse(OraclePermissionPrint);
 
-    const oracle = await OracleClass.fromPublicKey(
-      this.context,
+    const oracleAccount = new OracleAccount({
+      program: this.program,
+      publicKey: args.oracleKey,
+    });
+    const oracle = await oracleAccount.loadData();
+
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: oracle.queuePubkey,
+    });
+    const queue = await queueAccount.loadData();
+
+    const [permissionAccount] = PermissionAccount.fromSeed(
       this.program,
-      args.oracleKey
+      queue.authority,
+      queueAccount.publicKey,
+      oracleAccount.publicKey
     );
 
-    this.logger.debug(
-      `${chalk.yellow("oracle:")} ${chalk.blue(oracle.publicKey.toString())}`
-    );
-
-    if (!oracle.permissionAccount) {
-      throw new Error(
-        `failed to find permission account for oracle ${oracle.publicKey}`
+    try {
+      const permission = await permissionAccount.loadData();
+      this.logger.log(
+        await prettyPrintPermissions(permissionAccount, permission)
       );
+    } catch {
+      this.logger.error(`failed to find a permission account`);
     }
-
-    this.logger.log(oracle.permissionAccount.prettyPrint());
   }
 
   async catch(error) {

@@ -168,14 +168,14 @@ export const chalkString = (
   value: string | number | boolean | PublicKey | Big | anchor.BN,
   padding = 16
 ): string => {
-  return `${chalk.blue(label.padEnd(padding, " "))} ${chalk.yellow(
-    value.toString()
+  return `${chalk.blue(label.padEnd(padding, " "))}${chalk.yellow(
+    value ? value.toString() : "undefined"
   )}`;
 };
 
 /* eslint-disable no-control-regex */
 export const buffer2string = (buf: Buffer | string | ArrayBuffer): string => {
-  return Buffer.from(buf)
+  return Buffer.from(buf as any)
     .toString("utf8")
     .replace(/\u0000/g, ""); // removes padding from onchain fixed sized buffers
 };

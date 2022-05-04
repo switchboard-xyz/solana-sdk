@@ -1,19 +1,30 @@
 {
   "name": "@switchboard-xyz/sbv2-lite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "private": false,
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/switchboard-v2",
+    "directory": "libraries/sbv2-lite"
+  },
   "files": [
-    "lib/",
-    "src/"
+    "./lib",
+    "./src"
   ],
+  "main": "lib/cjs/index.js",
+  "module": "lib/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/index.js",
+      "require": "./lib/cjs/index.js"
+    }
+  },
   "scripts": {
-    "docgen": "npm run build && npx typedoc",
-    "build": "rimraf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "docgen": "yarn build && npx typedoc",
+    "build": "shx rm -rf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
-    "prepublishOnly": "npm run build && npm test && npm version patch --force",
+    "prepublishOnly": "yarn build && yarn test",
     "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag sbv2-lite/v$PACKAGE_VERSION && git push --tags"
   },
   "author": "",
@@ -29,7 +40,7 @@
     "assert": "^2.0.0",
     "chai": "^4.3.6",
     "mocha": "^9.2.2",
-    "rimraf": "^3.0.2",
+    "shx": "^0.3.4",
     "ts-node": "^10.7.0",
     "typedoc": "^0.22.15",
     "typescript": "^4.6.3"

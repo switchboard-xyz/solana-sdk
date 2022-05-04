@@ -11,7 +11,7 @@ import {
 export interface JobAccountData {
   name: Buffer; // Uint8Array
   metadata: Buffer;
-  authorWallet: PublicKey;
+  authority: PublicKey;
   expiration: anchor.BN;
   hash: Buffer;
   data: Buffer; // ??
@@ -54,7 +54,7 @@ export interface fromJobTemplate {
 /** JSON interface to construct a new Job Account */
 export interface fromJobJSON {
   aggregator?: string | PublicKey; // add by agg name (BTC_USD)
-  authorWalletPublicKey?: PublicKey; // Defaults to authority who created
+  authorityWalletPublicKey?: PublicKey; // Defaults to authority who created
   existingKeypair?: Keypair;
   expiration?: number;
   metadata?: string;
@@ -74,7 +74,7 @@ export type JobDefinition =
 /** Object representing a loaded onchain Job Account */
 export interface IJobClass {
   publicKey: PublicKey;
-  authorWalletPublicKey: PublicKey;
+  authorityWalletPublicKey: PublicKey;
   expiration: anchor.BN;
   metadata: string;
   name: string;

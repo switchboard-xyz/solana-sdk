@@ -1,13 +1,14 @@
 import { PublicKey } from "@solana/web3.js";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+import chalk from "chalk";
 import { anchorBNtoDateTimeString, chalkString } from "../../../accounts";
-import { AggregatorClass } from "../../../accounts/aggregator/aggregator";
 import BaseCommand from "../../../BaseCommand";
 
 export default class AggregatorHistoryPrint extends BaseCommand {
   static description =
     "Print the history buffer associated with an aggregator account";
 
-  static aliases = ["aggregator:history:print"];
+  static aliases = ["aggregator:history:print", "aggregator:print:history"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -24,29 +25,32 @@ export default class AggregatorHistoryPrint extends BaseCommand {
   ];
 
   static examples = [
-    "$ sbv2 aggregator:history:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4",
+    "$ sbv2 aggregator:print:history 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4",
   ];
 
   async run() {
     const { args } = this.parse(AggregatorHistoryPrint);
 
-    const aggregator = await AggregatorClass.fromPublicKey(
-      this.context,
-      this.program,
-      args.aggregatorKey
+    const aggregatorAccount = new AggregatorAccount({
+      program: this.program,
+      publicKey: args.aggregatorKey,
+    });
+    const aggregator = await aggregatorAccount.loadData();
+
+    const history = await aggregatorAccount.loadHistory();
+    const historySize = history.length ?? 0;
+    this.logger.info(
+      chalk.underline(
+        chalkString("## History", historySize.toString().padEnd(8), 24)
+      )
     );
-
-    this.logger.log(aggregator.permissionAccount.prettyPrint());
-
-    const history = await aggregator.account.loadHistory();
-    this.logger.info(chalkString("## History", history.length));
     for (const row of history)
       this.logger.info(
-        chalkString(anchorBNtoDateTimeString(row.timestamp), row.value)
+        chalkString(anchorBNtoDateTimeString(row.timestamp), row.value, 24)
       );
   }
 
   async catch(error) {
-    super.catch(error, "failed to print aggregator permission account");
+    super.catch(error, "failed to print aggregator history");
   }
 }

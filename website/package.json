@@ -2,6 +2,11 @@
   "name": "website",
   "version": "0.1.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/switchboard-v2",
+    "directory": "website"
+  },
   "main": "src/pages/index.tsx",
   "scripts": {
     "docusaurus": "docusaurus",

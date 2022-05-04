@@ -6,6 +6,17 @@ import * as anchor from "@project-serum/anchor";
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@project-serum/anchor/dist/cjs/coder";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import {
+  prettyPrintAggregator,
+  prettyPrintCrank,
+  prettyPrintJob,
+  prettyPrintLease,
+  prettyPrintOracle,
+  prettyPrintPermissions,
+  prettyPrintProgramState,
+  prettyPrintQueue,
+  prettyPrintVrf,
+} from "@switchboard-xyz/sbv2-utils";
+import {
   AggregatorAccount,
   CrankAccount,
   JobAccount,
@@ -13,23 +24,15 @@ import {
   OracleAccount,
   OracleQueueAccount,
   PermissionAccount,
+  ProgramStateAccount,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as path from "path";
 import {
-  AggregatorClass,
-  CrankClass,
   DEFAULT_KEYPAIR,
-  JobClass,
-  LeaseClass,
-  OracleClass,
-  OracleQueueClass,
-  PermissionClass,
-  ProgramStateClass,
   SwitchboardAccountType,
   SWITCHBOARD_DISCRIMINATOR_MAP,
-  toVrfStatus,
 } from "./accounts";
 import { CliConfig } from "./config";
 import { FsProvider } from "./types";
@@ -107,84 +110,51 @@ abstract class PrintBaseCommand extends Command {
   ) {
     switch (accountType) {
       case "JobAccountData": {
-        const job = await JobClass.fromAccount(
-          this.context,
-          new JobAccount({ program, publicKey })
-        );
-        this.logger.log(job.prettyPrint());
+        const job = new JobAccount({ program, publicKey });
+        this.logger.log(await prettyPrintJob(job));
         break;
       }
       case "AggregatorAccountData": {
-        const aggregator = await AggregatorClass.fromAccount(
-          this.context,
-          new AggregatorAccount({ program, publicKey })
+        const aggregator = new AggregatorAccount({ program, publicKey });
+        this.logger.log(
+          await prettyPrintAggregator(aggregator, undefined, true, true)
         );
-        this.logger.log(aggregator.prettyPrint());
         break;
       }
       case "OracleAccountData": {
-        const oracle = await OracleClass.fromAccount(
-          this.context,
-          new OracleAccount({ program, publicKey })
-        );
-        this.logger.log(oracle.prettyPrint());
+        const oracle = new OracleAccount({ program, publicKey });
+        this.logger.log(await prettyPrintOracle(oracle, undefined, true));
         break;
       }
       case "PermissionAccountData": {
-        const permission = await PermissionClass.fromAccount(
-          this.context,
-          new PermissionAccount({ program, publicKey })
-        );
-        this.logger.log(permission.prettyPrint());
+        const permission = new PermissionAccount({ program, publicKey });
+        this.logger.log(await prettyPrintPermissions(permission, undefined));
         break;
       }
       case "LeaseAccountData": {
-        const lease = await LeaseClass.fromAccount(
-          this.context,
-          new LeaseAccount({ program, publicKey })
-        );
-        this.logger.log(lease.prettyPrint());
+        const lease = new LeaseAccount({ program, publicKey });
+        this.logger.log(await prettyPrintLease(lease, undefined));
         break;
       }
       case "OracleQueueAccountData": {
-        const queue = await OracleQueueClass.fromAccount(
-          this.context,
-          new OracleQueueAccount({ program, publicKey })
-        );
-        this.logger.log(queue.prettyPrint());
+        const queue = new OracleQueueAccount({ program, publicKey });
+        this.logger.log(await prettyPrintQueue(queue));
         break;
       }
       case "CrankAccountData": {
-        const crank = await CrankClass.fromAccount(
-          this.context,
-          new CrankAccount({ program, publicKey })
-        );
-        this.logger.log(crank.prettyPrint());
+        const crank = new CrankAccount({ program, publicKey });
+        this.logger.log(await prettyPrintCrank(crank));
         break;
       }
       case "SbState":
       case "ProgramStateAccountData": {
-        const state = await ProgramStateClass.build(program);
-        this.logger.log(state.prettyPrint());
+        const [programState] = ProgramStateAccount.fromSeed(program);
+        this.logger.log(await prettyPrintProgramState(programState));
         break;
       }
       case "VrfAccountData": {
         const vrfAccount = new VrfAccount({ program, publicKey });
-        const vrf = await vrfAccount.loadData();
-        const data = {
-          status: toVrfStatus(vrf.status),
-          authority: vrf.authority?.toString() ?? "",
-          counter: vrf.counter.toString(),
-          producer: vrf.builders[0]?.producer ?? "",
-          result: vrf.currentRound.result
-            ? `[${(vrf.currentRound.result as number[]).join(",")}]`
-            : "",
-          alpha: vrf.currentRound.alpha
-            ? `[${(vrf.currentRound.alpha as number[]).join(",")}]`
-            : "",
-          txRemaining: vrf.builders[0]?.txRemaining ?? "",
-        };
-        console.log(JSON.stringify(data, undefined, 2));
+        this.logger.log(await prettyPrintVrf(vrfAccount));
         break;
       }
       case "BUFFERxx": {
@@ -208,7 +178,7 @@ abstract class PrintBaseCommand extends Command {
       ACCOUNT_DISCRIMINATOR_SIZE
     );
 
-    console.log(`[${Uint8Array.from(accountDiscriminator)}]`);
+    // console.log(`[${Uint8Array.from(accountDiscriminator)}]`);
 
     for await (const [
       accountType,

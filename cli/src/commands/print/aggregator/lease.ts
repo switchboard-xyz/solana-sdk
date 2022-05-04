@@ -1,13 +1,17 @@
 import { PublicKey } from "@solana/web3.js";
-import chalk from "chalk";
-import { AggregatorClass } from "../../../accounts";
+import { prettyPrintLease } from "@switchboard-xyz/sbv2-utils";
+import {
+  AggregatorAccount,
+  LeaseAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../../BaseCommand";
 
 export default class AggregatorLeasePrint extends BaseCommand {
   static description =
     "Print the lease account associated with a Switchboard aggregator account";
 
-  static aliases = ["aggregator:lease:print"];
+  static aliases = ["aggregator:lease:print", "aggregator:print:lease"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -30,25 +34,29 @@ export default class AggregatorLeasePrint extends BaseCommand {
   async run() {
     const { args } = this.parse(AggregatorLeasePrint);
 
-    const aggregator = await AggregatorClass.fromPublicKey(
-      this.context,
+    const aggregatorAccount = new AggregatorAccount({
+      program: this.program,
+      publicKey: args.aggregatorKey,
+    });
+    const aggregator = await aggregatorAccount.loadData();
+
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: aggregator.queuePubkey,
+    });
+    const queue = await queueAccount.loadData();
+
+    const [leaseAccount] = LeaseAccount.fromSeed(
       this.program,
-      args.aggregatorKey
+      queueAccount,
+      aggregatorAccount
     );
-
-    this.logger.debug(
-      `${chalk.yellow("aggregator:")} ${chalk.blue(
-        aggregator.publicKey.toString()
-      )}`
-    );
-
-    if (!aggregator.leaseAccount) {
-      throw new Error(
-        `failed to find lease account for aggregator ${aggregator.publicKey}`
-      );
+    try {
+      const lease = await leaseAccount.loadData();
+      this.logger.log(await prettyPrintLease(leaseAccount, lease));
+    } catch {
+      this.logger.error(`failed to find a lease account`);
     }
-
-    this.logger.log(aggregator.leaseAccount.prettyPrint());
   }
 
   async catch(error) {

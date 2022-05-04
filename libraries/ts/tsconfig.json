@@ -1,10 +1,42 @@
 {
-  "extends": "../../tsconfig.json",
+  // "extends": "../../tsconfig.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "ES2019",
+      "strictFunctionTypes": true,
+      "noImplicitReturns": true,
+      "noImplicitAny": true
+    }
+  },
   "compilerOptions": {
+    // from initial repo
+    "declaration": true,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "ES2019",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["mocha", "node", "long"],
+    "sourceMap": true,
+    // new
     "composite": true,
+    "baseUrl": "src",
     "outDir": "lib",
     "rootDir": "src",
     "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+ 
+    "inlineSources": true,
+    "lib": ["esnext"],
+    "listEmittedFiles": false,
+    "listFiles": false,
+    "noFallthroughCasesInSwitch": true,
+    "pretty": true,
+    "resolveJsonModule": true,
+    "traceResolution": false,
+    "downlevelIteration": true,
     /* TODO: Fix undefined errors */
     "strict": false,
     "noImplicitReturns": false,
@@ -15,6 +47,6 @@
   "files": ["src/index.ts"],
   "typedocOptions": {
     "entryPoints": ["src/index.ts"],
-    "out": "../../website/static/api/sbv2-api"
+    "out": "../../website/static/api/ts"
   }
 }

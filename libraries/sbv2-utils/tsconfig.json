@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2015",
+    "module": "ES2020",
+    "rootDir": "src",
+    "noImplicitAny": false,
+    "outDir": "lib/esm",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "noImplicitReturns": false,
+    "strict": false,
+    "emitDeclarationOnly": false,
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["esbuild.js", "../ts"],
+  "references": [{ "path": "../ts" }],
+  "files": ["src/index.ts"]
+}

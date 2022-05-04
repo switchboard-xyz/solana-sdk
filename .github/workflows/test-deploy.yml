@@ -9,19 +9,18 @@ jobs:
   test-deploy:
     name: Test deployment
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: website
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: 16.x
-          cache: npm
-          cache-dependency-path: "package-lock.json"
+          cache: yarn
+          cache-dependency-path: "yarn.lock"
       - name: Setup npmrc
         run: echo "//registry.npmjs.org/:_authToken=${{secrets.NPM_AUTH_TOKEN}}" > .npmrc
+      - name: Setup yarnrc
+        run: echo "registry \"https://registry.npmjs.org\"" > .yarnrc
       - name: Test build
         run: |
-          npm ci
-          npm run build:site
+          yarn install --frozen-lockfile
+          yarn docs:build

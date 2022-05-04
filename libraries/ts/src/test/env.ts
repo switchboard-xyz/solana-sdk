@@ -1,4 +1,6 @@
 import * as anchor from "@project-serum/anchor";
+import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
+import * as spl from "@solana/spl-token";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import chalk from "chalk";
 import fs from "fs";
@@ -254,18 +256,28 @@ secrets:
   /** Build a devnet environment to later clone to localnet */
   static async create(
     payerKeypair: Keypair,
-    additionalClonedAccounts?: Record<string, PublicKey>
+    additionalClonedAccounts?: Record<string, PublicKey>,
+    alternateProgramId?: PublicKey
   ): Promise<SwitchboardTestEnvironment> {
     const connection = new Connection(clusterApiUrl("devnet"), {
       commitment: "confirmed",
     });
 
-    const switchboardProgram = await sbv2.loadSwitchboardProgram(
-      "devnet",
-      connection,
-      payerKeypair,
-      { commitment: "confirmed" }
+    const programId = alternateProgramId ?? sbv2.getSwitchboardPid("devnet");
+    const wallet = new NodeWallet(payerKeypair);
+    const provider = new anchor.AnchorProvider(connection, wallet, {});
+
+    const anchorIdl = await anchor.Program.fetchIdl(programId, provider);
+    if (!anchorIdl) {
+      throw new Error(`failed to read idl for ${programId}`);
+    }
+
+    const switchboardProgram = new anchor.Program(
+      anchorIdl,
+      programId,
+      provider
     );
+
     const programDataAddress = getProgramDataAddress(
       switchboardProgram.programId
     );
@@ -273,6 +285,16 @@ secrets:
 
     const [switchboardProgramState] =
       sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
+    let programState: any;
+    try {
+      programState = await switchboardProgramState.loadData();
+    } catch {
+      await sbv2.ProgramStateAccount.create(switchboardProgram, {
+        mint: spl.NATIVE_MINT,
+        daoMint: spl.NATIVE_MINT,
+      });
+      programState = await switchboardProgramState.loadData();
+    }
 
     const switchboardMint = await switchboardProgramState.getTokenMint();
 
@@ -282,13 +304,12 @@ secrets:
       )
     ).address;
 
-    const programState = await switchboardProgramState.loadData();
-
     // create queue with unpermissioned VRF accounts enabled
     const queueAccount = await sbv2.OracleQueueAccount.create(
       switchboardProgram,
       {
         name: Buffer.from("My Test Queue"),
+        mint: spl.NATIVE_MINT,
         authority: payerKeypair.publicKey, // Approve new participants
         minStake: new anchor.BN(0), // Oracle minStake to heartbeat
         reward: new anchor.BN(0), // Oracle rewards per request (non-VRF)

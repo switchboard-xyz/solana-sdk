@@ -35,7 +35,7 @@ export default class AggregatorSetHistoryBuffer extends BaseCommand {
   ];
 
   static examples = [
-    "$ sbv2 aggregator:add:history --keypair ../payer-keypair.json GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000",
+    "$ sbv2 aggregator:set:history GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000 --keypair ../payer-keypair.json",
   ];
 
   async run() {
@@ -60,11 +60,13 @@ export default class AggregatorSetHistoryBuffer extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `\r\n${chalk.green(
+        `${chalk.green(
           `${CHECK_ICON}Added a history buffer of size ${size} to aggregator successfully`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

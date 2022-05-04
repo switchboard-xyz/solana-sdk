@@ -94,7 +94,7 @@ export default class SchemaAddCrank extends BaseCommand {
     } else {
       this.logger.log(queue.cranks[newCrankIndex].prettyPrint());
       this.logger.log(
-        `\r\n${chalk.green(`${CHECK_ICON}Crank added to queue successfully`)}`
+        `${chalk.green(`${CHECK_ICON}Crank added to queue successfully`)}`
       );
     }
 

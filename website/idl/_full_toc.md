@@ -1,4 +1,4 @@
-- [Accounts](/idl/accounts/)
+- [Accounts](/program/accounts/)
   - [AggregatorAccountData](/idl/accounts/AggregatorAccountData)
   - [CrankAccountData](/idl/accounts/CrankAccountData)
   - [JobAccountData](/idl/accounts/JobAccountData)
@@ -8,7 +8,7 @@
   - [PermissionAccountData](/idl/accounts/PermissionAccountData)
   - [SbState](/idl/accounts/SbState)
   - [VrfAccountData](/idl/accounts/VrfAccountData)
-- [Instructions](/idl/instructions)
+- [Instructions](/program/instructions)
   - [aggregatorAddJob](/idl/instructions/aggregatorAddJob)
   - [aggregatorInit](/idl/instructions/aggregatorInit)
   - [aggregatorLock](/idl/instructions/aggregatorLock)
@@ -47,7 +47,7 @@
   - [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify)
   - [vrfRequestRandomness](/idl/instructions/vrfRequestRandomness)
   - [vrfVerify](/idl/instructions/vrfVerify)
-- [Events](/idl/events)
+- [Events](/program/events)
   - [AggregatorInitEvent](/idl/events/AggregatorInitEvent)
   - [AggregatorOpenRoundEvent](/idl/events/AggregatorOpenRoundEvent)
   - [AggregatorValueUpdateEvent](/idl/events/AggregatorValueUpdateEvent)
@@ -67,7 +67,7 @@
   - [VrfRequestEvent](/idl/events/VrfRequestEvent)
   - [VrfRequestRandomnessEvent](/idl/events/VrfRequestRandomnessEvent)
   - [VrfVerifyEvent](/idl/events/VrfVerifyEvent)
-- [Types](/idl/types)
+- [Types](/program/types)
   - [AccountMetaBorsh](/idl/types/AccountMetaBorsh)
   - [AccountMetaZC](/idl/types/AccountMetaZC)
   - AggregatorAddJobParams
@@ -134,4 +134,4 @@
   - [VrfRound](/idl/types/VrfRound)
   - [VrfStatus](/idl/types/VrfStatus)
   - VrfVerifyParams
-- [Errors](/idl/errors)
+- [Errors](/program/errors)

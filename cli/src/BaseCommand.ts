@@ -10,7 +10,9 @@ import {
   Keypair,
   PublicKey,
 } from "@solana/web3.js";
-import { getPayer } from "@switchboard-xyz/switchboard-v2";
+import { BigUtils } from "@switchboard-xyz/sbv2-utils";
+import { programWallet } from "@switchboard-xyz/switchboard-v2";
+import Big from "big.js";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
@@ -166,6 +168,9 @@ abstract class BaseCommand extends Command {
       const messageLines = error.message.split("\n");
       logger.error(messageLines[0]);
     }
+    if (this.verbose) {
+      console.error(error);
+    }
     // if (error.stack) {
     //   logger.error(error);
     // } else {
@@ -182,7 +187,7 @@ abstract class BaseCommand extends Command {
   ): Promise<Keypair> {
     const authority = authorityPath
       ? await loadKeypair(authorityPath)
-      : getPayer(this.program);
+      : programWallet(this.program);
 
     if (expectedAuthority && !expectedAuthority.equals(authority.publicKey)) {
       throw new AuthorityMismatch();
@@ -262,6 +267,21 @@ abstract class BaseCommand extends Command {
           clusterApiUrl(toCluster("mainnet-beta"))
         );
     }
+  }
+
+  // Converts a string to a tokenAmount
+  // If a decimal is found, it will be normalized using 9 decimal places
+  getTokenAmount(value: string, decimals = 9): anchor.BN {
+    if (isNaN(Number(value))) {
+      throw new Error("tokenAmount must be an integer or decimal");
+    }
+    if (value.split(".").length > 1) {
+      const float = new Big(value);
+      const scale = BigUtils.safePow(new Big(10), decimals);
+      const tokenAmount = BigUtils.safeMul(float, scale);
+      return new anchor.BN(tokenAmount.toFixed(0));
+    }
+    return new anchor.BN(value);
   }
 }
 

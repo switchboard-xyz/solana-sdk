@@ -3,6 +3,7 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import {
   OracleAccount,
   OracleQueueAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import {
@@ -60,7 +61,6 @@ export class OracleClass implements IOracleClass {
   ): Promise<OracleClass> {
     const oracle = new OracleClass();
     oracle.logger = context.logger;
-
     oracle.account = account;
     oracle.publicKey = oracle.account.publicKey;
 
@@ -71,14 +71,16 @@ export class OracleClass implements IOracleClass {
       publicKey: oracle.queuePublicKey,
     });
 
-    oracle.permissionAccount = await PermissionClass.build(
-      context,
-      oracle.account,
-      queueAccount,
-      definition && "permissionAccount" in definition
-        ? definition.permissionAccount
-        : undefined
-    );
+    try {
+      oracle.permissionAccount = await PermissionClass.build(
+        context,
+        oracle.account,
+        queueAccount,
+        definition && "permissionAccount" in definition
+          ? definition.permissionAccount
+          : undefined
+      );
+    } catch {}
 
     await oracle.loadData();
 
@@ -87,8 +89,7 @@ export class OracleClass implements IOracleClass {
 
   async grantPermission(
     context: CommandContext,
-    queueAuthority = (this.account.program.provider.wallet as anchor.Wallet)
-      .payer
+    queueAuthority = programWallet(this.account.program)
   ): Promise<string> {
     const queueAccount = new OracleQueueAccount({
       program: this.account.program,
@@ -101,9 +102,7 @@ export class OracleClass implements IOracleClass {
       this.permissionAccount.permission === "NONE" &&
       queueAuthority.publicKey.equals(authority)
     ) {
-      const anchorWallet = (
-        this.account.program.provider.wallet as anchor.Wallet
-      ).payer;
+      const anchorWallet = programWallet(this.account.program);
       this.permissionAccount = await PermissionClass.grantPermission(
         context,
         this.account,
@@ -286,7 +285,7 @@ export class OracleClass implements IOracleClass {
     return state.token.transfer(
       payerTokenAccount,
       oracleTokenAccount,
-      (oracleAccount.program.provider.wallet as anchor.Wallet).payer,
+      programWallet(oracleAccount.program),
       [],
       amount
     );
@@ -342,18 +341,20 @@ export class OracleClass implements IOracleClass {
       chalkString("tokenAccount", this.tokenAccountPublicKey, SPACING) + "\r\n";
     outputString +=
       chalkString("queuePubkey", this.queuePublicKey, SPACING) + "\r\n";
-    outputString +=
-      chalkString(
-        "permissionAccount",
-        this.permissionAccount.publicKey || "N/A",
-        SPACING
-      ) + "\r\n";
-    outputString +=
-      chalkString(
-        "permissions",
-        this.permissionAccount.permission || "",
-        SPACING
-      ) + "\r\n";
+    if (this.permissionAccount) {
+      outputString +=
+        chalkString(
+          "permissionAccount",
+          this.permissionAccount.publicKey || "N/A",
+          SPACING
+        ) + "\r\n";
+      outputString +=
+        chalkString(
+          "permissions",
+          this.permissionAccount.permission || "",
+          SPACING
+        ) + "\r\n";
+    }
     outputString +=
       chalkString("lastHeartbeat", this.lastHeartbeat, SPACING) + "\r\n";
     outputString += chalkString("numInUse", this.numInUse, SPACING) + "\r\n";

@@ -1,10 +1,8 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
+import { prettyPrintQueue } from "@switchboard-xyz/sbv2-utils";
 import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
-import * as fs from "fs";
-import { OracleQueueClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
-import { OutputFileExistsNoForce } from "../../types";
 
 export default class QueuePrint extends BaseCommand {
   outputFile?: string;
@@ -15,12 +13,9 @@ export default class QueuePrint extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
-    outputFile: flags.string({
-      char: "f",
-      description: "output queue json file",
+    oracles: flags.boolean({
+      description: "output oracles that are heartbeating on the queue",
+      default: false,
     }),
   };
 
@@ -40,28 +35,13 @@ export default class QueuePrint extends BaseCommand {
   async run() {
     const { args, flags } = this.parse(QueuePrint);
 
-    if (flags.outputFile) {
-      if (fs.existsSync(flags.outputFile) && !flags.force) {
-        throw new OutputFileExistsNoForce(flags.outputFile);
-      }
-      this.outputFile = flags.outputFile;
-    }
-
     const queueAccount = new OracleQueueAccount({
       program: this.program,
       publicKey: args.queueKey,
     });
+    const data = await queueAccount.loadData();
 
-    const queue = await OracleQueueClass.fromAccount(
-      this.context,
-      queueAccount
-    );
-
-    this.logger.log(queue.prettyPrint(true));
-
-    if (this.outputFile) {
-      this.context.fs.saveAccount(this.outputFile, queue);
-    }
+    this.logger.log(await prettyPrintQueue(queueAccount, data, flags.oracles));
   }
 
   async catch(error) {

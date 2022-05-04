@@ -3,6 +3,7 @@ import { Keypair, PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
   OracleQueueAccount,
+  programWallet,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
@@ -89,6 +90,7 @@ export class AggregatorClass implements IAggregatorClass {
     definition?: AggregatorDefinition
   ) {
     const aggregator = new AggregatorClass();
+    const wallet = programWallet(aggregatorAccount.program);
     aggregator.account = aggregatorAccount;
     aggregator.publicKey = aggregator.account.publicKey;
     aggregator.logger = context.logger;
@@ -125,15 +127,12 @@ export class AggregatorClass implements IAggregatorClass {
       const { authority } = await queueAccount.loadData();
       if (
         aggregator.permissionAccount.permission === "NONE" &&
-        authority.equals(aggregator.account.program.provider.wallet.publicKey)
+        authority.equals(wallet.publicKey)
       ) {
-        const anchorWallet = (
-          aggregator.account.program.provider.wallet as anchor.Wallet
-        ).payer;
         aggregator.permissionAccount = await PermissionClass.grantPermission(
           context,
           aggregator.account,
-          anchorWallet
+          wallet
         );
       }
     } catch {}
@@ -267,6 +266,7 @@ export class AggregatorClass implements IAggregatorClass {
     queueAccount: OracleQueueAccount,
     definition: copyAccount
   ) {
+    const wallet = programWallet(queueAccount.program);
     const sourceAggregator = new AggregatorAccount({
       program: queueAccount.program,
       publicKey: definition.sourcePublicKey,
@@ -280,8 +280,7 @@ export class AggregatorClass implements IAggregatorClass {
     const targetDefinition: fromAggregatorJSON = {
       ...source.toJSON(),
       authorityPublicKey:
-        definition.authorityKeypair?.publicKey ||
-        queueAccount.program.provider.wallet.publicKey,
+        definition.authorityKeypair?.publicKey || wallet.publicKey,
       crank: undefined,
       expiration: source.expiration.toString(),
       forceReportPeriod: source.forceReportPeriod.toString(),
@@ -374,13 +373,12 @@ export class AggregatorClass implements IAggregatorClass {
 
   async grantPermission(
     context: CommandContext,
-    queueAuthority = (this.account.program.provider.wallet as anchor.Wallet)
-      .payer
+    queueAuthority = programWallet(this.account.program)
   ): Promise<string> {
     if (
       this.permissionAccount.permission === "NONE" &&
       this.authorityPublicKey.equals(
-        this.account.program.provider.wallet.publicKey
+        programWallet(this.account.program).publicKey
       )
     ) {
       this.permissionAccount = await PermissionClass.grantPermission(
@@ -456,12 +454,16 @@ export class AggregatorClass implements IAggregatorClass {
     this.jobs = await AggregatorClass.getJobs(this.account, dataPromise);
     const data = await dataPromise;
 
-    this.result = new SwitchboardDecimal(
-      data.latestConfirmedRound.result.mantissa,
-      data.latestConfirmedRound.result.scale
-    )
-      .toBig()
-      .toString();
+    this.result = "";
+    try {
+      this.result = new SwitchboardDecimal(
+        data.latestConfirmedRound.result.mantissa ?? new anchor.BN(0),
+        data.latestConfirmedRound.result.scale ?? 0
+      )
+        .toBig()
+        .toString();
+    } catch {}
+
     this.resultTimestamp = anchorBNtoDateTimeString(
       data.latestConfirmedRound.roundOpenTimestamp
     );
@@ -481,7 +483,7 @@ export class AggregatorClass implements IAggregatorClass {
     this.name = buffer2string(data.name as any);
     this.queuePublicKey = data.queuePubkey;
     this.startAfter = data.startAfter.toNumber();
-    this.varianceThreshold = data.varianceThreshold;
+    this.varianceThreshold = data.varianceThreshold as SwitchboardDecimal;
   }
 
   toJSON(): IAggregatorClass {
@@ -557,12 +559,13 @@ export class AggregatorClass implements IAggregatorClass {
     outputString +=
       chalkString("minOracleResults", this.minRequiredOracleResults, SPACING) +
       "\r\n";
-    // outputString +=
-    //   chalkString(
-    //     "varianceThreshold",
-    //     this.varianceThreshold.toBig().toString(),
-    //     SPACING
-    //   ) + "\r\n";
+
+    outputString +=
+      chalkString(
+        "varianceThreshold",
+        SwitchboardDecimal.from(this.varianceThreshold).toBig().toString(),
+        SPACING
+      ) + "\r\n";
     outputString +=
       chalkString(
         "minUpdateDelaySeconds",

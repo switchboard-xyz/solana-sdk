@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Overview
-slug: /events
+slug: .
 ---
 
 - [AggregatorInitEvent](/idl/events/AggregatorInitEvent)

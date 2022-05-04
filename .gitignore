@@ -6,6 +6,7 @@ build
 tsconfig.tsbuildinfo
 
 *.env
+.switchboard
 start-local-validator.sh
 start-oracle.sh
 switchboard.json
@@ -13,6 +14,7 @@ docker-compose.switchboard.yml
 
 # Python
 __pycache__
+.pytest_cache
 
 # Rust
 programs/**/target
@@ -23,7 +25,8 @@ target
 # Misc
 .keypairs
 secrets
-*-keypairs.json
+*-keypair*.json
+.archive
 
 # Root level jsons ignored
 job-directory/*.json
@@ -33,5 +36,5 @@ job-directory/*.json
 public
 .docusaurus
 # Auto generated
-website/static/api/sbv2-api
-website/static/api/sbv2-lite
+website/static/api/ts
+website/static/api/ts-lite

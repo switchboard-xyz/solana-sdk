@@ -90,9 +90,7 @@ export default class SchemaAddAggregator extends JsonBaseCommand {
     } else {
       this.logger.log(queue.aggregators[newAggregatorIndex].prettyPrint());
       this.logger.log(
-        `\r\n${chalk.green(
-          `${CHECK_ICON}Aggregator added to queue successfully`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Aggregator added to queue successfully`)}`
       );
     }
 

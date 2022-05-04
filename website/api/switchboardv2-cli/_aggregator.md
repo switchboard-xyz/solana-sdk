@@ -1,20 +1,22 @@
-
 interact with a switchboard aggregator account
 
-* [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
-* [`sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`](#sbv2-aggregatorcreatecopy-aggregatorsource-queuekey)
-* [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
-* [`sbv2 aggregator:lease:extend AGGREGATORKEY AMOUNT`](#sbv2-aggregatorleaseextend-aggregatorkey-amount)
-* [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
-* [`sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`](#sbv2-aggregatorremovejob-aggregatorkey-jobkey)
-* [`sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`](#sbv2-aggregatorsetauthority-aggregatorkey-newauthority)
-* [`sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`](#sbv2-aggregatorsetbatchsize-aggregatorkey-batchsize)
-* [`sbv2 aggregator:set:history AGGREGATORKEY SIZE`](#sbv2-aggregatorsethistory-aggregatorkey-size)
-* [`sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`](#sbv2-aggregatorsetminjobs-aggregatorkey-minjobresults)
-* [`sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`](#sbv2-aggregatorsetminoracles-aggregatorkey-minoracleresults)
-* [`sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`](#sbv2-aggregatorsetqueue-aggregatorkey-queuekey)
-* [`sbv2 aggregator:set:variance AGGREGATORKEY VARIANCETHRESHOLD`](#sbv2-aggregatorsetvariance-aggregatorkey-variancethreshold)
-* [`sbv2 aggregator:update AGGREGATORKEY`](#sbv2-aggregatorupdate-aggregatorkey)
+- [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
+- [`sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`](#sbv2-aggregatorcreatecopy-aggregatorsource-queuekey)
+- [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
+- [`sbv2 aggregator:lease:create AGGREGATORKEY`](#sbv2-aggregatorleasecreate-aggregatorkey)
+- [`sbv2 aggregator:lease:extend AGGREGATORKEY`](#sbv2-aggregatorleaseextend-aggregatorkey)
+- [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
+- [`sbv2 aggregator:permission:create AGGREGATORKEY`](#sbv2-aggregatorpermissioncreate-aggregatorkey)
+- [`sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`](#sbv2-aggregatorremovejob-aggregatorkey-jobkey)
+- [`sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`](#sbv2-aggregatorsetauthority-aggregatorkey-newauthority)
+- [`sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`](#sbv2-aggregatorsetbatchsize-aggregatorkey-batchsize)
+- [`sbv2 aggregator:set:history AGGREGATORKEY SIZE`](#sbv2-aggregatorsethistory-aggregatorkey-size)
+- [`sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`](#sbv2-aggregatorsetminjobs-aggregatorkey-minjobresults)
+- [`sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`](#sbv2-aggregatorsetminoracles-aggregatorkey-minoracleresults)
+- [`sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`](#sbv2-aggregatorsetqueue-aggregatorkey-queuekey)
+- [`sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`](#sbv2-aggregatorsetupdateinterval-aggregatorkey-updateinterval)
+- [`sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`](#sbv2-aggregatorsetvariancethreshold-aggregatorkey-variancethreshold)
+- [`sbv2 aggregator:update AGGREGATORKEY`](#sbv2-aggregatorupdate-aggregatorkey)
 
 ## `sbv2 aggregator:add:job AGGREGATORKEY`
 
@@ -53,7 +55,7 @@ EXAMPLE
   $ sbv2 aggregator:add:job
 ```
 
-_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/add/job.ts)_
+_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/add/job.ts)_
 
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`
 
@@ -91,11 +93,11 @@ OPTIONS
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
 
 EXAMPLE
-  $ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee 
+  $ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee
   AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/create/copy.ts)_
+_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/create/copy.ts)_
 
 ## `sbv2 aggregator:create:json DEFINITIONFILE`
 
@@ -132,23 +134,22 @@ ALIASES
   $ sbv2 json:create:aggregator
 
 EXAMPLE
-  $ sbv2 aggregator:create:json examples/aggregator.json --keypair ../payer-keypair.json --queueKey 
+  $ sbv2 aggregator:create:json examples/aggregator.json --keypair ../payer-keypair.json --queueKey
   GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --outputFile aggregator.schema.json
 ```
 
-_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/create/json.ts)_
+_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/create/json.ts)_
 
-## `sbv2 aggregator:lease:extend AGGREGATORKEY AMOUNT`
+## `sbv2 aggregator:lease:create AGGREGATORKEY`
 
 fund and re-enable an aggregator lease
 
 ```
 USAGE
-  $ sbv2 aggregator:lease:extend AGGREGATORKEY AMOUNT
+  $ sbv2 aggregator:lease:create AGGREGATORKEY
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator to extend a lease for
-  AMOUNT         amount to deposit into aggregator lease
 
 OPTIONS
   -h, --help             show CLI help
@@ -162,13 +163,52 @@ OPTIONS
 
   -v, --verbose          log everything
 
+  --amount=amount        token amount to load into the lease escrow. If decimals provided, amount will be normalized to
+                         raw tokenAmount
+
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
 EXAMPLE
-  $ sbv2 aggregator:lease:extend GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 2500 --keypair ../payer-keypair.json
+  $ sbv2 aggregator:lease:create GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.5 --keypair
+  ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/lease/extend.ts)_
+_See code: [src/commands/aggregator/lease/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/lease/create.ts)_
+
+## `sbv2 aggregator:lease:extend AGGREGATORKEY`
+
+fund and re-enable an aggregator lease
+
+```
+USAGE
+  $ sbv2 aggregator:lease:extend AGGREGATORKEY
+
+ARGUMENTS
+  AGGREGATORKEY  public key of the aggregator to extend a lease for
+
+OPTIONS
+  -h, --help             show CLI help
+
+  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+
+  -s, --silent           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl    alternate RPC url
+
+  -v, --verbose          log everything
+
+  --amount=amount        (required) token amount to load into the lease escrow. If decimals provided, amount will be
+                         normalized to raw tokenAmount
+
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+EXAMPLE
+  $ sbv2 aggregator:lease:extend GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.1 --keypair
+  ../payer-keypair.json
+```
+
+_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/lease/extend.ts)_
 
 ## `sbv2 aggregator:lock AGGREGATORKEY`
 
@@ -197,7 +237,35 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/lock.ts)_
+_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/lock.ts)_
+
+## `sbv2 aggregator:permission:create AGGREGATORKEY`
+
+create a permission account for an aggregator
+
+```
+USAGE
+  $ sbv2 aggregator:permission:create AGGREGATORKEY
+
+ARGUMENTS
+  AGGREGATORKEY  public key of the aggregator account
+
+OPTIONS
+  -h, --help             show CLI help
+
+  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+
+  -s, --silent           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl    alternate RPC url
+
+  -v, --verbose          log everything
+
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+```
+
+_See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/permission/create.ts)_
 
 ## `sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`
 
@@ -232,7 +300,7 @@ EXAMPLE
   $ sbv2 aggregator:remove:job
 ```
 
-_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/remove/job.ts)_
+_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/remove/job.ts)_
 
 ## `sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`
 
@@ -262,7 +330,7 @@ OPTIONS
   --mainnetBeta                            WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/authority.ts)_
+_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/authority.ts)_
 
 ## `sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`
 
@@ -292,7 +360,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/batchSize.ts)_
+_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/batchSize.ts)_
 
 ## `sbv2 aggregator:set:history AGGREGATORKEY SIZE`
 
@@ -325,10 +393,10 @@ ALIASES
   $ sbv2 aggregator:add:history
 
 EXAMPLE
-  $ sbv2 aggregator:add:history --keypair ../payer-keypair.json GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000
+  $ sbv2 aggregator:set:history GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/history.ts)_
+_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/history.ts)_
 
 ## `sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`
 
@@ -358,7 +426,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/minJobs.ts)_
+_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/minJobs.ts)_
 
 ## `sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`
 
@@ -388,7 +456,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/minOracles.ts)_
+_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/minOracles.ts)_
 
 ## `sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`
 
@@ -418,21 +486,21 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/queue.ts)_
+_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/queue.ts)_
 
-## `sbv2 aggregator:set:variance AGGREGATORKEY VARIANCETHRESHOLD`
+## `sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`
 
-set an aggregator's variance threshold
+set an aggregator's minimum number of oracles that must respond before a result is accepted on-chain
 
 ```
 USAGE
-  $ sbv2 aggregator:set:variance AGGREGATORKEY VARIANCETHRESHOLD
+  $ sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL
 
 ARGUMENTS
-  AGGREGATORKEY      public key of the aggregator
+  AGGREGATORKEY   public key of the aggregator account
 
-  VARIANCETHRESHOLD  varianceThreshold between a previous accepted result before an oracle reports a value on-chain.
-                     Used to conserve lease cost during low volatility
+  UPDATEINTERVAL  percentage change between a previous accepted result and the next round before an oracle reports a
+                  value on-chain. Used to conserve lease cost during low volatility
 
 OPTIONS
   -a, --authority=authority  alternate keypair that is the authority for the aggregator
@@ -448,9 +516,48 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+EXAMPLE
+  $ sbv2 aggregator:set:updateinterval GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 60 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/variance.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/set/variance.ts)_
+_See code: [src/commands/aggregator/set/updateInterval.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/updateInterval.ts)_
+
+## `sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`
+
+set an aggregator's variance threshold
+
+```
+USAGE
+  $ sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD
+
+ARGUMENTS
+  AGGREGATORKEY      public key of the aggregator
+
+  VARIANCETHRESHOLD  percentage change between a previous accepted result and the next round before an oracle reports a
+                     value on-chain. Used to conserve lease cost during low volatility
+
+OPTIONS
+  -a, --authority=authority  alternate keypair that is the authority for the aggregator
+  -h, --help                 show CLI help
+
+  -k, --keypair=keypair      keypair that will pay for onchain transactions. defaults to new account authority if no
+                             alternate authority provided
+
+  -s, --silent               suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl        alternate RPC url
+
+  -v, --verbose              log everything
+
+  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+EXAMPLE
+  $ sbv2 aggregator:set:variance GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 0.1 --keypair ../payer-keypair.json # 0.1%
+   varianceThreshold
+```
+
+_See code: [src/commands/aggregator/set/varianceThreshold.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/varianceThreshold.ts)_
 
 ## `sbv2 aggregator:update AGGREGATORKEY`
 
@@ -481,4 +588,4 @@ EXAMPLE
   $ sbv2 aggregator:update J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboardv2-cli/blob/v0.1.8/src/commands/aggregator/update.ts)_
+_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/update.ts)_

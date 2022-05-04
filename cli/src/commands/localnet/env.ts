@@ -2,9 +2,10 @@
 /* eslint-disable unicorn/new-for-builtins */
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
+import { SwitchboardTestEnvironment } from "@switchboard-xyz/sbv2-utils";
 import {
-  getPayer,
-  SwitchboardTestEnvironment,
+  programWallet,
+  SBV2_DEVNET_PID,
 } from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
 import * as path from "path";
@@ -20,12 +21,16 @@ export default class LocalnetEnvironment extends BaseCommand {
       description: "overwrite output file if existing",
       default: false,
     }),
+    programId: flags.string({
+      description: "alternate devnet programId to create accounts for",
+      default: SBV2_DEVNET_PID.toString(),
+    }),
   };
 
   async run() {
     verifyProgramHasPayer(this.program);
     const { flags } = this.parse(LocalnetEnvironment);
-    const payerKeypair = getPayer(this.program);
+    const payerKeypair = programWallet(this.program);
 
     // TODO: Check paths and force flags
     if (!flags.force) {
@@ -68,7 +73,8 @@ export default class LocalnetEnvironment extends BaseCommand {
         USDC_MINT: new PublicKey(
           "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
         ),
-      }
+      },
+      new PublicKey(flags.programId)
     );
     // TODO: Add silent flag
     testEnvironment.writeAll(flags.keypair, process.cwd());

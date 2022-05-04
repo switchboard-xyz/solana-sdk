@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/new-for-builtins */
 import { flags } from "@oclif/command";
-import * as anchor from "@project-serum/anchor";
 import { Keypair } from "@solana/web3.js";
+import { programWallet } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
@@ -95,7 +95,7 @@ export default class QueueCreate extends BaseCommand {
 
     this.queueAuthority = flags.authority
       ? await loadKeypair(flags.authority)
-      : (this.program.provider.wallet as anchor.Wallet).payer;
+      : programWallet(this.program);
 
     this.definition = {
       name: flags.name || "",

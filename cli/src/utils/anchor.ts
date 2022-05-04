@@ -1,6 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
+  programWallet,
   SBV2_DEVNET_PID,
   SBV2_MAINNET_PID,
 } from "@switchboard-xyz/switchboard-v2";
@@ -34,7 +35,7 @@ export const loadAnchor = async (
     : anchor.web3.Keypair.generate(); // no keypair provided, defaulting to dummy keypair
 
   const wallet = new anchor.Wallet(keypair);
-  const provider = new anchor.Provider(connection, wallet, {
+  const provider = new anchor.AnchorProvider(connection, wallet, {
     commitment: "finalized",
     // preflightCommitment: "finalized",
   });
@@ -56,10 +57,14 @@ export const getNewProgram = (
   keypair: Keypair
 ): anchor.Program => {
   const wallet = new anchor.Wallet(keypair);
-  const provider = new anchor.Provider(program.provider.connection, wallet, {
-    commitment: "finalized",
-    // preflightCommitment: "finalized",
-  });
+  const provider = new anchor.AnchorProvider(
+    program.provider.connection,
+    wallet,
+    {
+      commitment: "finalized",
+      // preflightCommitment: "finalized",
+    }
+  );
   const programId = program.programId;
 
   const anchorIdl = program.idl;
@@ -69,13 +74,12 @@ export const getNewProgram = (
 };
 
 export const programHasPayer = (program: anchor.Program): boolean => {
-  const payer = (program.provider.wallet as anchor.Wallet).payer;
+  const payer = programWallet(program);
   return !payer.publicKey.equals(DEFAULT_KEYPAIR.publicKey);
 };
 
 export const getProgramPayer = (program: anchor.Program): Keypair => {
-  if (programHasPayer(program))
-    return (program.provider.wallet as anchor.Wallet).payer;
+  if (programHasPayer(program)) return programWallet(program);
   throw new NoPayerKeypairProvided();
 };
 

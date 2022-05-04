@@ -1,9 +1,10 @@
+import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
-  getPayer,
   OracleAccount,
-  ProgramStateAccount,
+  OracleQueueAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import { chalkString } from "../../accounts/utils";
@@ -15,6 +16,11 @@ export default class OracleDeposit extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
+    amount: flags.string({
+      required: true,
+      description:
+        "token amount to load into the oracle escrow. If decimals provided, amount will be normalized to raw tokenAmount",
+    }),
   };
 
   static args = [
@@ -24,12 +30,6 @@ export default class OracleDeposit extends BaseCommand {
       parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle to deposit funds into",
     },
-    {
-      name: "amount",
-      required: true,
-      parse: (amount: string) => new anchor.BN(amount),
-      description: "amount to deposit into oracle's token wallet",
-    },
   ];
 
   static examples = [
@@ -38,11 +38,13 @@ export default class OracleDeposit extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args } = this.parse(OracleDeposit);
+    const { args, flags } = this.parse(OracleDeposit);
 
-    const payer = getPayer(this.program);
+    const payer = programWallet(this.program);
 
-    if (args.amount.lte(new anchor.BN(0))) {
+    const amount = this.getTokenAmount(flags.amount);
+
+    if (amount.lte(new anchor.BN(0))) {
       throw new Error("amount to deposit must be greater than 0");
     }
 
@@ -52,36 +54,45 @@ export default class OracleDeposit extends BaseCommand {
     });
     const oracle = await oracleAccount.loadData();
 
-    const [programStateAccount] = ProgramStateAccount.fromSeed(this.program);
-    const switchboardMint = await programStateAccount.getTokenMint();
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: oracle.queuePubkey,
+    });
 
-    const initialTokenBalance =
-      await this.program.provider.connection.getTokenAccountBalance(
-        oracle.tokenAccount
-      );
+    const mint = await queueAccount.loadMint();
 
-    const payerTokenAccountInfo =
-      await switchboardMint.getOrCreateAssociatedAccountInfo(payer.publicKey);
-    const payerTokenBalanceResponse =
-      await this.program.provider.connection.getTokenAccountBalance(
-        payerTokenAccountInfo.address
-      );
-    const payerTokenBalance = new anchor.BN(
-      payerTokenBalanceResponse.value.amount
+    const initialTokenBalance = new anchor.BN(
+      (
+        await this.program.provider.connection.getTokenAccountBalance(
+          oracle.tokenAccount
+        )
+      ).value.amount
     );
 
-    if (args.amount.gt(payerTokenBalance)) {
+    const funderTokenAccount = (
+      await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
+    ).address;
+
+    const funderTokenBalance = new anchor.BN(
+      (
+        await this.program.provider.connection.getTokenAccountBalance(
+          funderTokenAccount
+        )
+      ).value.amount
+    );
+
+    if (amount.gt(funderTokenBalance)) {
       throw new Error(
-        `deposit amount ${args.amount} must be less than current token balance ${payerTokenBalance}`
+        `deposit amount ${amount} must be less than current token balance ${funderTokenBalance}`
       );
     }
 
-    const txn = await switchboardMint.transfer(
-      payerTokenAccountInfo.address,
+    const txn = await mint.transfer(
+      funderTokenAccount,
       oracle.tokenAccount,
       payer,
       [],
-      (args.amount as anchor.BN).toNumber()
+      amount.toNumber()
     );
 
     if (this.silent) {
@@ -89,18 +100,22 @@ export default class OracleDeposit extends BaseCommand {
     } else {
       this.logger.log(
         `${chalk.green(
-          `${CHECK_ICON}Deposited ${args.amount} tokens into oracle account`
+          `${CHECK_ICON}Deposited ${amount} tokens into oracle account`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
-      const finalTokenBalance =
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
+      const finalTokenBalance = (
         await this.program.provider.connection.getTokenAccountBalance(
           oracle.tokenAccount
-        );
+        )
+      ).value;
+
       this.logger.log(
         chalkString(
           "New Oracle Token Balance",
-          `${finalTokenBalance.value.amount} (${finalTokenBalance.value.uiAmountString})`
+          `${finalTokenBalance.uiAmountString} (${finalTokenBalance.amount})`
         )
       );
     }

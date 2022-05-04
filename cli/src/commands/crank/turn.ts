@@ -1,9 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 import {
   CrankAccount,
-  getPayer,
   OracleQueueAccount,
   ProgramStateAccount,
+  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
@@ -35,7 +35,7 @@ export default class CrankTurn extends BaseCommand {
   async run() {
     const { args } = this.parse(CrankTurn);
     verifyProgramHasPayer(this.program);
-    const payer = getPayer(this.program);
+    const payer = programWallet(this.program);
 
     // load crank
     const crankAccount = new CrankAccount({
@@ -73,9 +73,11 @@ export default class CrankTurn extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `\r\n${chalk.green(`${CHECK_ICON}Crank turned successfully`)}`
+        `${chalk.green(`${CHECK_ICON}Crank turned successfully`)}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

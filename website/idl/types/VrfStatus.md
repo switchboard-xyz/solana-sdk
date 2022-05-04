@@ -1,9 +1,8 @@
-
-| Name | Value | Description |
-|--|--|--|
-| StatusNone | 1 |  |
-| StatusRequesting | 2 |  |
-| StatusVerifying | 3 |  |
-| StatusVerified | 4 |  |
-| StatusCallbackSuccess | 5 |  |
-| StatusVerifyFailure | 6 |  |
+| Name                  | Value | Description |
+| --------------------- | ----- | ----------- |
+| StatusNone            | 0     |             |
+| StatusRequesting      | 1     |             |
+| StatusVerifying       | 2     |             |
+| StatusVerified        | 3     |             |
+| StatusCallbackSuccess | 4     |             |
+| StatusVerifyFailure   | 5     |             |

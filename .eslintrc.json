@@ -33,6 +33,7 @@
     "unicorn/no-array-for-each": "off",
     "unicorn/prefer-array-some": "off",
     "unicorn/no-object-as-default-parameter": "off",
-    "unicorn/filename-case": "off"
+    "unicorn/filename-case": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   }
 }

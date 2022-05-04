@@ -91,7 +91,7 @@ export default class SchemaAddOracle extends BaseCommand {
     } else {
       this.logger.log(queue.oracles[newOracleIndex].prettyPrint());
       this.logger.log(
-        `\r\n${chalk.green(`${CHECK_ICON}Oracle added to queue successfully`)}`
+        `${chalk.green(`${CHECK_ICON}Oracle added to queue successfully`)}`
       );
     }
 

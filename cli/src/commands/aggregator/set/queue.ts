@@ -70,11 +70,13 @@ export default class AggregatorSetQueue extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `\r\n${chalk.green(
+        `${chalk.green(
           `${CHECK_ICON}Aggregator oracle queue set successfully`
         )}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

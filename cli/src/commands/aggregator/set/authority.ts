@@ -56,11 +56,11 @@ export default class AggregatorSetAuthority extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `${chalk.green(
-          `${CHECK_ICON}Aggregator authority set successfully\r\n`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Aggregator authority set successfully`)}`
       );
-      this.logger.log(`https://solscan.io/tx/${txn}?cluster=${this.cluster}`);
+      this.logger.log(
+        `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
+      );
     }
   }
 

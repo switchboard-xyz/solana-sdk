@@ -3,5 +3,6 @@
     "source.fixAll.eslint": true
   },
   "files.eol": "\n",
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "editor.wordWrap": "on"
 }

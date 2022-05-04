@@ -5,10 +5,10 @@
   "workspaces": [
     "libraries/sbv2-lite",
     "libraries/ts",
-    "libraries/utils-ts",
+    "libraries/sbv2-utils",
     "cli",
-    "feeds/*",
-    "example-programs/*",
+    "packages/*",
+    "programs/*",
     "website"
   ],
   "scripts": {
@@ -19,21 +19,20 @@
     "test:libraries:rs": "cd libraries/rs && cargo test",
     "test:libraries": "yarn test:libraries:ts & yarn test:libraries:rs",
     "docs": "yarn workspace website start",
-    "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/sbv2-py",
+    "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/py",
     "docs:build:ts": "yarn workspace @switchboard-xyz/switchboard-v2 docgen",
     "docs:build:sbv2-lite": "yarn workspace @switchboard-xyz/sbv2-lite docgen",
+    "docs:build:cli": "cd cli && oclif-dev readme --multi --dir ../website/api/switchboardv2-cli",
     "docs:build:site": "yarn workspace website build:site",
     "docs:build": "run-s docs:build:ts docs:build:sbv2-lite docs:build:site",
     "docs:deploy": "yarn workspace website deploy",
-    "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p ./",
-    "reset": "npx npkill && yarn install --frozen-lockfile"
+    "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p /idl",
+    "nuke": "shx rm -rf {./programs/*,./packages/*,./website,./libraries/*,.}/{node_modules,yarn*.log,build,dist,lib,.anchor,target,Cargo.lock,.docusaurus}"
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",
     "lerna": "^4.0.0",
-    "npkill": "^0.8.3",
     "npm-run-all": "^4.1.5",
-    "rimraf": "^3.0.2",
     "shx": "^0.3.4",
     "ts-node": "^10.7.0",
     "typedoc": "^0.22.15",

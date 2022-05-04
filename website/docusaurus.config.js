@@ -133,15 +133,15 @@ const config = {
               },
               {
                 label: "Typescript",
-                to: "https://docs.switchboard.xyz/api/sbv2-api",
+                to: "https://docs.switchboard.xyz/api/ts",
               },
               {
                 label: "Typescript Lite",
-                to: "https://docs.switchboard.xyz/api/sbv2-lite",
+                to: "https://docs.switchboard.xyz/api/ts-lite",
               },
               {
                 label: "Python",
-                to: "https://docs.switchboard.xyz/api/sbv2-py",
+                to: "https://docs.switchboard.xyz/api/py",
               },
               {
                 label: "Rust",
@@ -190,11 +190,11 @@ const config = {
               },
               {
                 label: "Rust API Docs",
-                href: "https://docs.rs/switchboard-program/0.1.52/switchboard_program/",
+                href: "https://docs.rs/switchboard-v2/latest/switchboard_v2/",
               },
               {
                 label: "Client API Docs",
-                href: "https://switchboard-xyz.github.io/switchboard-api/",
+                href: "https://docs.switchboard.xyz/api/ts",
               },
             ],
           },

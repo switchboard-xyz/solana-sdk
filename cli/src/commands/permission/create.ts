@@ -68,9 +68,7 @@ export default class PermissionCreate extends BaseCommand {
       console.log(permissionAccount.publicKey.toString());
     } else {
       this.logger.log(
-        `\r\n${chalk.green(
-          `${CHECK_ICON}Permission account created successfully`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Permission account created successfully`)}`
       );
       const permission = await PermissionClass.fromPublicKey(
         this.context,

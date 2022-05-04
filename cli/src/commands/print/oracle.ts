@@ -1,9 +1,7 @@
-import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import * as fs from "fs";
-import { OracleClass } from "../../accounts/oracle/oracle";
+import { prettyPrintOracle } from "@switchboard-xyz/sbv2-utils";
+import { OracleAccount } from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../BaseCommand";
-import { OutputFileExistsNoForce } from "../../types";
 
 export default class OraclePrint extends BaseCommand {
   outputFile?: string;
@@ -14,13 +12,6 @@ export default class OraclePrint extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
-    outputFile: flags.string({
-      char: "f",
-      description: "output aggregator schema to json file",
-    }),
   };
 
   static args = [
@@ -39,24 +30,13 @@ export default class OraclePrint extends BaseCommand {
   async run() {
     const { args, flags } = this.parse(OraclePrint);
 
-    if (flags.outputFile) {
-      if (fs.existsSync(flags.outputFile) && !flags.force) {
-        throw new OutputFileExistsNoForce(flags.outputFile);
-      }
-      this.outputFile = flags.outputFile;
-    }
+    const oracleAccount = new OracleAccount({
+      program: this.program,
+      publicKey: args.oracleKey,
+    });
+    const data = await oracleAccount.loadData();
 
-    const oracle = await OracleClass.fromPublicKey(
-      this.context,
-      this.program,
-      args.oracleKey
-    );
-
-    this.logger.log(oracle.prettyPrint(true));
-
-    if (this.outputFile) {
-      this.context.fs.saveAccount(this.outputFile, oracle);
-    }
+    this.logger.log(await prettyPrintOracle(oracleAccount, data, true));
   }
 
   async catch(error) {

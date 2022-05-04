@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { JobAccount } from "@switchboard-xyz/switchboard-v2";
+import { JobAccount, programWallet } from "@switchboard-xyz/switchboard-v2";
 import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import chalk from "chalk";
 import { getUrlFromTask } from ".";
@@ -24,7 +24,7 @@ export class JobClass implements IJobClass {
 
   publicKey: PublicKey;
 
-  authorWalletPublicKey: PublicKey;
+  authorityWalletPublicKey: PublicKey;
 
   expiration: anchor.BN;
 
@@ -100,9 +100,11 @@ export class JobClass implements IJobClass {
     const job = OracleJob.create({ tasks });
     const data = Buffer.from(OracleJob.encodeDelimited(job).finish());
     const jobUrl = getUrlFromTask(job);
+    const wallet = programWallet(program);
     const account = await JobAccount.create(program, {
       data,
       name: Buffer.from(`${jobUrl} ${definition.id}`),
+      authority: wallet.publicKey,
     });
     return JobClass.init(context, account);
   }
@@ -112,8 +114,13 @@ export class JobClass implements IJobClass {
     program: anchor.Program,
     definition: fromJobJSON
   ) {
-    const { name, tasks, expiration, authorWalletPublicKey, existingKeypair } =
-      definition;
+    const {
+      name,
+      tasks,
+      expiration,
+      authorityWalletPublicKey,
+      existingKeypair,
+    } = definition;
     const data = Buffer.from(
       OracleJob.encodeDelimited(
         OracleJob.create({
@@ -127,8 +134,8 @@ export class JobClass implements IJobClass {
       data: data,
       name: name ? Buffer.from(name) : Buffer.from(""),
       expiration: expiration ? new anchor.BN(expiration) : undefined,
-      authorWallet:
-        authorWalletPublicKey ??
+      authority:
+        authorityWalletPublicKey ??
         (await ProgramStateClass.getProgramTokenAddress(program)),
       keypair,
     });
@@ -156,7 +163,7 @@ export class JobClass implements IJobClass {
       expiration: jobData.expiration
         ? new anchor.BN(jobData.expiration)
         : undefined,
-      authorWallet: jobData.authorWallet ?? undefined,
+      authority: jobData.authority ?? undefined,
     });
     return JobClass.init(context, account);
   }
@@ -165,7 +172,7 @@ export class JobClass implements IJobClass {
   async loadData() {
     const data: JobAccountData = await this.account.loadData();
 
-    this.authorWalletPublicKey = data.authorWallet;
+    this.authorityWalletPublicKey = data.authority;
     this.expiration = data.expiration;
     this.metadata = buffer2string(data.metadata as any);
     this.name = buffer2string(data.name as any);
@@ -177,7 +184,7 @@ export class JobClass implements IJobClass {
       name: this.name,
       metadata: this.metadata,
       publicKey: this.publicKey,
-      authorWalletPublicKey: this.authorWalletPublicKey,
+      authorityWalletPublicKey: this.authorityWalletPublicKey,
       expiration: this.expiration,
       tasks: this.tasks,
     };
@@ -195,7 +202,7 @@ export class JobClass implements IJobClass {
     );
     outputString += chalkString("name", this.name) + "\r\n";
     outputString +=
-      chalkString("authorWallet", this.authorWalletPublicKey) + "\r\n";
+      chalkString("authority", this.authorityWalletPublicKey) + "\r\n";
     outputString +=
       chalkString("expiration", this.expiration.toString()) + "\r\n";
     outputString +=

@@ -1,6 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+  programWallet,
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { AggregatorClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { AggregatorIllegalRoundOpenCall } from "../../types";
 import { CHECK_ICON } from "../../utils";
@@ -28,13 +32,30 @@ export default class AggregatorUpdate extends BaseCommand {
   async run() {
     const { args } = this.parse(AggregatorUpdate);
 
-    const aggregator = await AggregatorClass.fromPublicKey(
-      this.context,
-      this.program,
-      args.aggregatorKey
-    );
+    const aggregatorAccount = new AggregatorAccount({
+      program: this.program,
+      publicKey: args.aggregatorKey,
+    });
+    const aggregator = await aggregatorAccount.loadData();
 
-    const aggregatorUpdateTxn = await aggregator.update();
+    const oracleQueueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: aggregator.queuePubkey,
+    });
+    const queue = await oracleQueueAccount.loadData();
+
+    const mint = await oracleQueueAccount.loadMint();
+
+    const payoutWallet = (
+      await mint.getOrCreateAssociatedAccountInfo(
+        programWallet(this.program).publicKey
+      )
+    ).address;
+
+    const aggregatorUpdateTxn = await aggregatorAccount.openRound({
+      oracleQueueAccount,
+      payoutWallet,
+    });
 
     if (this.silent) {
       console.log(aggregatorUpdateTxn);
