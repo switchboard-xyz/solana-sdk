@@ -17,6 +17,7 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 * [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
 * [`sbv2 aggregator:lease:create AGGREGATORKEY`](#sbv2-aggregatorleasecreate-aggregatorkey)
 * [`sbv2 aggregator:lease:extend AGGREGATORKEY`](#sbv2-aggregatorleaseextend-aggregatorkey)
+* [`sbv2 aggregator:lease:withdraw AGGREGATORKEY`](#sbv2-aggregatorleasewithdraw-aggregatorkey)
 * [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
 * [`sbv2 aggregator:permission:create AGGREGATORKEY`](#sbv2-aggregatorpermissioncreate-aggregatorkey)
 * [`sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`](#sbv2-aggregatorremovejob-aggregatorkey-jobkey)
@@ -110,7 +111,7 @@ EXAMPLE
   $ sbv2 aggregator:add:job
 ```
 
-_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/add/job.ts)_
+_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/add/job.ts)_
 
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`
 
@@ -152,7 +153,7 @@ EXAMPLE
   AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/create/copy.ts)_
+_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/create/copy.ts)_
 
 ## `sbv2 aggregator:create:json DEFINITIONFILE`
 
@@ -193,7 +194,7 @@ EXAMPLE
   GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --outputFile aggregator.schema.json
 ```
 
-_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/create/json.ts)_
+_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/create/json.ts)_
 
 ## `sbv2 aggregator:lease:create AGGREGATORKEY`
 
@@ -228,7 +229,7 @@ EXAMPLE
   ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lease/create.ts)_
+_See code: [src/commands/aggregator/lease/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/create.ts)_
 
 ## `sbv2 aggregator:lease:extend AGGREGATORKEY`
 
@@ -263,7 +264,46 @@ EXAMPLE
   ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lease/extend.ts)_
+_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/extend.ts)_
+
+## `sbv2 aggregator:lease:withdraw AGGREGATORKEY`
+
+withdraw funds from an aggregator lease
+
+```
+USAGE
+  $ sbv2 aggregator:lease:withdraw AGGREGATORKEY
+
+ARGUMENTS
+  AGGREGATORKEY  public key of the aggregator to extend a lease for
+
+OPTIONS
+  -a, --authority=authority          keypair delegated as the authority for managing the oracle account
+  -h, --help                         show CLI help
+
+  -k, --keypair=keypair              keypair that will pay for onchain transactions. defaults to new account authority
+                                     if no alternate authority provided
+
+  -s, --silent                       suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl                alternate RPC url
+
+  -v, --verbose                      log everything
+
+  --amount=amount                    token amount to withdraw from lease account. If decimals provided, amount will be
+                                     normalized to raw tokenAmount
+
+  --mainnetBeta                      WARNING: use mainnet-beta solana cluster
+
+  --withdrawAddress=withdrawAddress  tokenAccount to withdraw to. If not provided, payer associated token account will
+                                     be used
+
+EXAMPLE
+  $ sbv2 aggregator:lease:withdraw GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.1 --keypair 
+  ../payer-keypair.json
+```
+
+_See code: [src/commands/aggregator/lease/withdraw.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/withdraw.ts)_
 
 ## `sbv2 aggregator:lock AGGREGATORKEY`
 
@@ -292,7 +332,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lock.ts)_
+_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lock.ts)_
 
 ## `sbv2 aggregator:permission:create AGGREGATORKEY`
 
@@ -320,7 +360,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/permission/create.ts)_
+_See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/permission/create.ts)_
 
 ## `sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`
 
@@ -355,7 +395,7 @@ EXAMPLE
   $ sbv2 aggregator:remove:job
 ```
 
-_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/remove/job.ts)_
+_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/remove/job.ts)_
 
 ## `sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`
 
@@ -385,7 +425,7 @@ OPTIONS
   --mainnetBeta                            WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/authority.ts)_
+_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/authority.ts)_
 
 ## `sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`
 
@@ -415,7 +455,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/batchSize.ts)_
+_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/batchSize.ts)_
 
 ## `sbv2 aggregator:set:history AGGREGATORKEY SIZE`
 
@@ -451,7 +491,7 @@ EXAMPLE
   $ sbv2 aggregator:set:history GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/history.ts)_
+_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/history.ts)_
 
 ## `sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`
 
@@ -481,7 +521,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/minJobs.ts)_
+_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/minJobs.ts)_
 
 ## `sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`
 
@@ -511,7 +551,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/minOracles.ts)_
+_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/minOracles.ts)_
 
 ## `sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`
 
@@ -541,7 +581,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/queue.ts)_
+_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/queue.ts)_
 
 ## `sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`
 
@@ -576,7 +616,7 @@ EXAMPLE
   $ sbv2 aggregator:set:updateinterval GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 60 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/updateInterval.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/updateInterval.ts)_
+_See code: [src/commands/aggregator/set/updateInterval.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/updateInterval.ts)_
 
 ## `sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`
 
@@ -612,7 +652,7 @@ EXAMPLE
    varianceThreshold
 ```
 
-_See code: [src/commands/aggregator/set/varianceThreshold.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/varianceThreshold.ts)_
+_See code: [src/commands/aggregator/set/varianceThreshold.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/varianceThreshold.ts)_
 
 ## `sbv2 aggregator:update AGGREGATORKEY`
 
@@ -643,7 +683,7 @@ EXAMPLE
   $ sbv2 aggregator:update J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/update.ts)_
+_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/update.ts)_
 
 ## `sbv2 config:print`
 
@@ -671,7 +711,7 @@ EXAMPLE
   $ sbv2 config:print
 ```
 
-_See code: [src/commands/config/print.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/config/print.ts)_
+_See code: [src/commands/config/print.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/config/print.ts)_
 
 ## `sbv2 config:set PARAM [VALUE]`
 
@@ -702,7 +742,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/config/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/config/set.ts)_
+_See code: [src/commands/config/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/config/set.ts)_
 
 ## `sbv2 crank:list CRANKKEY`
 
@@ -733,7 +773,7 @@ OPTIONS
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/list.ts)_
+_See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/crank/list.ts)_
 
 ## `sbv2 crank:push CRANKKEY AGGREGATORKEY`
 
@@ -766,7 +806,7 @@ ALIASES
   $ sbv2 crank:add:aggregator
 ```
 
-_See code: [src/commands/crank/push.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/push.ts)_
+_See code: [src/commands/crank/push.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/crank/push.ts)_
 
 ## `sbv2 crank:turn CRANKKEY`
 
@@ -797,7 +837,7 @@ EXAMPLE
   $ sbv2 crank:turn 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/crank/turn.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/turn.ts)_
+_See code: [src/commands/crank/turn.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/crank/turn.ts)_
 
 ## `sbv2 help [COMMAND]`
 
@@ -848,7 +888,7 @@ EXAMPLE
   $ sbv2 job:create:copy 7pdb5RVM6cVBU8XDfpGqakb1S4wX2i5QsZxT117tK4HS --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/copy.ts)_
+_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/job/create/copy.ts)_
 
 ## `sbv2 job:create:json DEFINITIONFILE`
 
@@ -891,7 +931,7 @@ EXAMPLE
   --aggregatorAuthority=../aggregator-keypair.json --outputFile=job.schema.json
 ```
 
-_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/json.ts)_
+_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/job/create/json.ts)_
 
 ## `sbv2 job:create:template TEMPLATE ID`
 
@@ -935,7 +975,7 @@ EXAMPLES
   $ sbv2 job:create:template ftxUs BTC_USD -k ../payer-keypair.json -n ftxUs_Btc -f ftx_us_btc_job.json
 ```
 
-_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/template.ts)_
+_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/job/create/template.ts)_
 
 ## `sbv2 json:add:aggregator`
 
@@ -966,7 +1006,7 @@ OPTIONS
   --sourceAggregator=sourceAggregator  public key of an existing aggregator account to copy
 ```
 
-_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/aggregator.ts)_
+_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/json/add/aggregator.ts)_
 
 ## `sbv2 json:add:crank SCHEMAFILE`
 
@@ -999,7 +1039,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/crank.ts)_
+_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/json/add/crank.ts)_
 
 ## `sbv2 json:add:oracle SCHEMAFILE`
 
@@ -1030,7 +1070,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/oracle.ts)_
+_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/json/add/oracle.ts)_
 
 ## `sbv2 json:create:queue INPUTFILE OUTPUTFILE`
 
@@ -1069,7 +1109,7 @@ EXAMPLE
   $ sbv2 json:create:queue examples/queue.json queue-1.json -k ../authority-keypair.json
 ```
 
-_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/create/queue.ts)_
+_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/json/create/queue.ts)_
 
 ## `sbv2 localnet:env`
 
@@ -1099,7 +1139,7 @@ OPTIONS
                          accounts for
 ```
 
-_See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/localnet/env.ts)_
+_See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/localnet/env.ts)_
 
 ## `sbv2 oracle:balance ORACLEKEY`
 
@@ -1130,7 +1170,7 @@ EXAMPLE
   $ sbv2 oracle:balance 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/oracle/balance.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/oracle/balance.ts)_
+_See code: [src/commands/oracle/balance.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/oracle/balance.ts)_
 
 ## `sbv2 oracle:create QUEUEKEY`
 
@@ -1168,7 +1208,7 @@ EXAMPLES
   ../oracle-keypair.json
 ```
 
-_See code: [src/commands/oracle/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/oracle/create.ts)_
+_See code: [src/commands/oracle/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/oracle/create.ts)_
 
 ## `sbv2 oracle:deposit ORACLEKEY`
 
@@ -1202,7 +1242,7 @@ EXAMPLE
   $ sbv2 oracle:deposit 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/oracle/deposit.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/oracle/deposit.ts)_
+_See code: [src/commands/oracle/deposit.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/oracle/deposit.ts)_
 
 ## `sbv2 oracle:permission:create ORACLEKEY`
 
@@ -1230,7 +1270,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/oracle/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/oracle/permission/create.ts)_
+_See code: [src/commands/oracle/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/oracle/permission/create.ts)_
 
 ## `sbv2 oracle:withdraw ORACLEKEY`
 
@@ -1271,7 +1311,7 @@ EXAMPLES
   ../oracle-keypair.json -w ByJs8E29jxvqf2KFLwfyiE2gUh5fivaS7aShcRMAsnzg
 ```
 
-_See code: [src/commands/oracle/withdraw.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/oracle/withdraw.ts)_
+_See code: [src/commands/oracle/withdraw.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/oracle/withdraw.ts)_
 
 ## `sbv2 permission:create GRANTER GRANTEE`
 
@@ -1300,7 +1340,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/permission/create.ts)_
+_See code: [src/commands/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/permission/create.ts)_
 
 ## `sbv2 permission:set PERMISSIONKEY`
 
@@ -1331,7 +1371,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/permission/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/permission/set.ts)_
+_See code: [src/commands/permission/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/permission/set.ts)_
 
 ## `sbv2 print PUBLICKEY`
 
@@ -1352,7 +1392,7 @@ EXAMPLE
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [src/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/index.ts)_
+_See code: [src/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/index.ts)_
 
 ## `sbv2 print:aggregator AGGREGATORKEY`
 
@@ -1388,7 +1428,7 @@ EXAMPLE
   $ sbv2 aggregator:print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 ```
 
-_See code: [src/commands/print/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator.ts)_
+_See code: [src/commands/print/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator.ts)_
 
 ## `sbv2 print:aggregator:history AGGREGATORKEY`
 
@@ -1423,7 +1463,7 @@ EXAMPLE
   $ sbv2 aggregator:print:history 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/aggregator/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/history.ts)_
+_See code: [src/commands/print/aggregator/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/history.ts)_
 
 ## `sbv2 print:aggregator:lease AGGREGATORKEY`
 
@@ -1458,7 +1498,7 @@ EXAMPLE
   $ sbv2 aggregator:lease:print 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee
 ```
 
-_See code: [src/commands/print/aggregator/lease.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/lease.ts)_
+_See code: [src/commands/print/aggregator/lease.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/lease.ts)_
 
 ## `sbv2 print:aggregator:permission AGGREGATORKEY`
 
@@ -1493,7 +1533,7 @@ EXAMPLE
   $ sbv2 aggregator:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/aggregator/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/permission.ts)_
+_See code: [src/commands/print/aggregator/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/permission.ts)_
 
 ## `sbv2 print:crank CRANKKEY`
 
@@ -1527,7 +1567,7 @@ EXAMPLE
   $ sbv2 crank:print 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr
 ```
 
-_See code: [src/commands/print/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/crank.ts)_
+_See code: [src/commands/print/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/crank.ts)_
 
 ## `sbv2 print:job JOBKEY`
 
@@ -1561,7 +1601,7 @@ EXAMPLE
   $ sbv2 job:print SzTvFZLz3hwjZFMwVWzuEnr1oUF6qyvXwXCvsqf7qeA
 ```
 
-_See code: [src/commands/print/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/job.ts)_
+_See code: [src/commands/print/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/job.ts)_
 
 ## `sbv2 print:job:templates`
 
@@ -1575,7 +1615,7 @@ ALIASES
   $ sbv2 job:print:templates
 ```
 
-_See code: [src/commands/print/job/templates.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/job/templates.ts)_
+_See code: [src/commands/print/job/templates.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/job/templates.ts)_
 
 ## `sbv2 print:json:samples OUTPUTDIRECTORY`
 
@@ -1612,7 +1652,7 @@ EXAMPLES
   $ sbv2 write:json:samples ~/switchboard_json_samples
 ```
 
-_See code: [src/commands/print/json/samples.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/json/samples.ts)_
+_See code: [src/commands/print/json/samples.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/json/samples.ts)_
 
 ## `sbv2 print:oracle ORACLEKEY`
 
@@ -1646,7 +1686,7 @@ EXAMPLE
   $ sbv2 oracle:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/oracle.ts)_
+_See code: [src/commands/print/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/oracle.ts)_
 
 ## `sbv2 print:oracle:permission ORACLEKEY`
 
@@ -1681,7 +1721,7 @@ EXAMPLE
   $ sbv2 oracle:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/oracle/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/oracle/permission.ts)_
+_See code: [src/commands/print/oracle/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/oracle/permission.ts)_
 
 ## `sbv2 print:program`
 
@@ -1712,7 +1752,7 @@ EXAMPLE
   $ sbv2 program:print
 ```
 
-_See code: [src/commands/print/program.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/program.ts)_
+_See code: [src/commands/print/program.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/program.ts)_
 
 ## `sbv2 print:queue QUEUEKEY`
 
@@ -1748,7 +1788,7 @@ EXAMPLE
   $ sbv2 queue:print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [src/commands/print/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/queue.ts)_
+_See code: [src/commands/print/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/queue.ts)_
 
 ## `sbv2 queue:add:crank QUEUEKEY`
 
@@ -1783,7 +1823,7 @@ EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1
 ```
 
-_See code: [src/commands/queue/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/add/crank.ts)_
+_See code: [src/commands/queue/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/add/crank.ts)_
 
 ## `sbv2 queue:create`
 
@@ -1829,7 +1869,7 @@ EXAMPLES
   new-queue.json
 ```
 
-_See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/create.ts)_
+_See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/create.ts)_
 
 ## `sbv2 queue:permit:aggregator AGGREGATORKEY`
 
@@ -1861,7 +1901,7 @@ EXAMPLE
   $ sbv2 queue:permit:aggregator 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
 
-_See code: [src/commands/queue/permit/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/permit/aggregator.ts)_
+_See code: [src/commands/queue/permit/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/permit/aggregator.ts)_
 
 ## `sbv2 queue:permit:oracle ORACLEKEY`
 
@@ -1893,7 +1933,7 @@ EXAMPLE
   $ sbv2 queue:permit:oracle 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
 
-_See code: [src/commands/queue/permit/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/permit/oracle.ts)_
+_See code: [src/commands/queue/permit/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/permit/oracle.ts)_
 
 ## `sbv2 queue:set:rewards QUEUEKEY REWARDS`
 
@@ -1923,7 +1963,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/set/rewards.ts)_
+_See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/set/rewards.ts)_
 
 ## `sbv2 queue:set:vrf QUEUEKEY`
 
@@ -1954,7 +1994,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/queue/set/vrf.ts)_
+_See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/set/vrf.ts)_
 
 ## `sbv2 sandbox [PLACEHOLDER]`
 
@@ -1981,7 +2021,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/sandbox.ts)_
+_See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/sandbox.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
@@ -2029,5 +2069,5 @@ EXAMPLE
   $ sbv2 watch:aggregator J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa
 ```
 
-_See code: [src/commands/watch/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/watch/aggregator.ts)_
+_See code: [src/commands/watch/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/watch/aggregator.ts)_
 <!-- commandsstop -->

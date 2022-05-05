@@ -1,6 +1,7 @@
+
 create a localnet switchboard environment
 
-- [`sbv2 localnet:env`](#sbv2-localnetenv)
+* [`sbv2 localnet:env`](#sbv2-localnetenv)
 
 ## `sbv2 localnet:env`
 
@@ -30,4 +31,4 @@ OPTIONS
                          accounts for
 ```
 
-_See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/localnet/env.ts)_
+_See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/localnet/env.ts)_

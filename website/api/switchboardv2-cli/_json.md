@@ -1,9 +1,10 @@
+
 create and manage an oracle queue from a json file
 
-- [`sbv2 json:add:aggregator`](#sbv2-jsonaddaggregator)
-- [`sbv2 json:add:crank SCHEMAFILE`](#sbv2-jsonaddcrank-schemafile)
-- [`sbv2 json:add:oracle SCHEMAFILE`](#sbv2-jsonaddoracle-schemafile)
-- [`sbv2 json:create:queue INPUTFILE OUTPUTFILE`](#sbv2-jsoncreatequeue-inputfile-outputfile)
+* [`sbv2 json:add:aggregator`](#sbv2-jsonaddaggregator)
+* [`sbv2 json:add:crank SCHEMAFILE`](#sbv2-jsonaddcrank-schemafile)
+* [`sbv2 json:add:oracle SCHEMAFILE`](#sbv2-jsonaddoracle-schemafile)
+* [`sbv2 json:create:queue INPUTFILE OUTPUTFILE`](#sbv2-jsoncreatequeue-inputfile-outputfile)
 
 ## `sbv2 json:add:aggregator`
 
@@ -34,7 +35,7 @@ OPTIONS
   --sourceAggregator=sourceAggregator  public key of an existing aggregator account to copy
 ```
 
-_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/add/aggregator.ts)_
+_See code: [src/commands/json/add/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/aggregator.ts)_
 
 ## `sbv2 json:add:crank SCHEMAFILE`
 
@@ -67,7 +68,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/add/crank.ts)_
+_See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/crank.ts)_
 
 ## `sbv2 json:add:oracle SCHEMAFILE`
 
@@ -98,7 +99,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/add/oracle.ts)_
+_See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/add/oracle.ts)_
 
 ## `sbv2 json:create:queue INPUTFILE OUTPUTFILE`
 
@@ -137,4 +138,4 @@ EXAMPLE
   $ sbv2 json:create:queue examples/queue.json queue-1.json -k ../authority-keypair.json
 ```
 
-_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/create/queue.ts)_
+_See code: [src/commands/json/create/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/json/create/queue.ts)_

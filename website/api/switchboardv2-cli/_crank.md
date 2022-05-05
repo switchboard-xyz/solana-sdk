@@ -1,8 +1,9 @@
+
 interact with a switchboard crank account
 
-- [`sbv2 crank:list CRANKKEY`](#sbv2-cranklist-crankkey)
-- [`sbv2 crank:push CRANKKEY AGGREGATORKEY`](#sbv2-crankpush-crankkey-aggregatorkey)
-- [`sbv2 crank:turn CRANKKEY`](#sbv2-crankturn-crankkey)
+* [`sbv2 crank:list CRANKKEY`](#sbv2-cranklist-crankkey)
+* [`sbv2 crank:push CRANKKEY AGGREGATORKEY`](#sbv2-crankpush-crankkey-aggregatorkey)
+* [`sbv2 crank:turn CRANKKEY`](#sbv2-crankturn-crankkey)
 
 ## `sbv2 crank:list CRANKKEY`
 
@@ -33,7 +34,7 @@ OPTIONS
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/crank/list.ts)_
+_See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/list.ts)_
 
 ## `sbv2 crank:push CRANKKEY AGGREGATORKEY`
 
@@ -66,7 +67,7 @@ ALIASES
   $ sbv2 crank:add:aggregator
 ```
 
-_See code: [src/commands/crank/push.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/crank/push.ts)_
+_See code: [src/commands/crank/push.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/push.ts)_
 
 ## `sbv2 crank:turn CRANKKEY`
 
@@ -97,4 +98,4 @@ EXAMPLE
   $ sbv2 crank:turn 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/crank/turn.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/crank/turn.ts)_
+_See code: [src/commands/crank/turn.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/crank/turn.ts)_

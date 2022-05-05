@@ -1,8 +1,9 @@
+
 interact with a switchboard job account
 
-- [`sbv2 job:create:copy JOBSOURCE`](#sbv2-jobcreatecopy-jobsource)
-- [`sbv2 job:create:json DEFINITIONFILE`](#sbv2-jobcreatejson-definitionfile)
-- [`sbv2 job:create:template TEMPLATE ID`](#sbv2-jobcreatetemplate-template-id)
+* [`sbv2 job:create:copy JOBSOURCE`](#sbv2-jobcreatecopy-jobsource)
+* [`sbv2 job:create:json DEFINITIONFILE`](#sbv2-jobcreatejson-definitionfile)
+* [`sbv2 job:create:template TEMPLATE ID`](#sbv2-jobcreatetemplate-template-id)
 
 ## `sbv2 job:create:copy JOBSOURCE`
 
@@ -36,7 +37,7 @@ EXAMPLE
   $ sbv2 job:create:copy 7pdb5RVM6cVBU8XDfpGqakb1S4wX2i5QsZxT117tK4HS --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/job/create/copy.ts)_
+_See code: [src/commands/job/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/copy.ts)_
 
 ## `sbv2 job:create:json DEFINITIONFILE`
 
@@ -75,11 +76,11 @@ ALIASES
   $ sbv2 json:create:job
 
 EXAMPLE
-  $ sbv2 job:create:json examples/job.json --keypair ../payer-keypair.json
+  $ sbv2 job:create:json examples/job.json --keypair ../payer-keypair.json 
   --aggregatorAuthority=../aggregator-keypair.json --outputFile=job.schema.json
 ```
 
-_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/job/create/json.ts)_
+_See code: [src/commands/job/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/json.ts)_
 
 ## `sbv2 job:create:template TEMPLATE ID`
 
@@ -123,4 +124,4 @@ EXAMPLES
   $ sbv2 job:create:template ftxUs BTC_USD -k ../payer-keypair.json -n ftxUs_Btc -f ftx_us_btc_job.json
 ```
 
-_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/job/create/template.ts)_
+_See code: [src/commands/job/create/template.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/job/create/template.ts)_

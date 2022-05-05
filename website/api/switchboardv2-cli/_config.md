@@ -1,7 +1,8 @@
+
 print cli config
 
-- [`sbv2 config:print`](#sbv2-configprint)
-- [`sbv2 config:set PARAM [VALUE]`](#sbv2-configset-param-value)
+* [`sbv2 config:print`](#sbv2-configprint)
+* [`sbv2 config:set PARAM [VALUE]`](#sbv2-configset-param-value)
 
 ## `sbv2 config:print`
 
@@ -29,7 +30,7 @@ EXAMPLE
   $ sbv2 config:print
 ```
 
-_See code: [src/commands/config/print.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/config/print.ts)_
+_See code: [src/commands/config/print.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/config/print.ts)_
 
 ## `sbv2 config:set PARAM [VALUE]`
 
@@ -60,4 +61,4 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/config/set.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/config/set.ts)_
+_See code: [src/commands/config/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/config/set.ts)_

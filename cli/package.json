@@ -1,7 +1,7 @@
 {
   "name": "@switchboard-xyz/switchboardv2-cli",
   "description": "command line tool to interact with switchboard v2",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "MIT",
   "repository": {
     "type": "git",
