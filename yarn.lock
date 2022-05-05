@@ -4144,6 +4144,23 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
+"@switchboard-xyz/sbv2-utils@^0.0.4":
+  version "0.0.5"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/sbv2-utils/-/sbv2-utils-0.0.4.tgz#978dc176628fff0549dea804ea04f451911cbc41"
+  integrity sha512-QZD9xU3pTZTAioYLLrYdXuGDzgSKwI7dHvfvbaCGnC0qQgYJIenT4Y2RZIC62mQwNwpy8PL+g8vCVn61J8/FwQ==
+  dependencies:
+    "@orca-so/sdk" "^1.2.24"
+    "@project-serum/anchor" "^0.24.2"
+    "@saberhq/token-utils" "^1.12.68"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/web3.js" "^1.37.1"
+    "@switchboard-xyz/switchboard-v2" "^0.0.87"
+    big.js "^6.1.1"
+    chalk "4"
+    decimal.js "^10.3.1"
+    dotenv "^16.0.0"
+    toml "^3.0.0"
+
 "@switchboard-xyz/switchboard-api@^0.2.193":
   version "0.2.194"
   resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-api/-/switchboard-api-0.2.194.tgz#ae66e5bbde185047450c41e51d39bbccf45bd3a5"
