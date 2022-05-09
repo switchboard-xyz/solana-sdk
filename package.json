@@ -22,7 +22,7 @@
     "docs:build:py": "pip install poetry && cd libraries/py && poetry install && poetry run python -m pdoc switchboardpy -o ../../website/static/api/py",
     "docs:build:ts": "yarn workspace @switchboard-xyz/switchboard-v2 docgen",
     "docs:build:sbv2-lite": "yarn workspace @switchboard-xyz/sbv2-lite docgen",
-    "docs:build:cli": "cd cli && oclif-dev readme --multi --dir ../website/api/switchboardv2-cli",
+    "docs:build:cli": "./website/scripts/cli.sh",
     "docs:build:site": "yarn workspace website build:site",
     "docs:build": "run-s docs:build:ts docs:build:sbv2-lite docs:build:site",
     "docs:deploy": "yarn workspace website deploy",

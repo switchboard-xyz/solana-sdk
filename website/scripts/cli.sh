@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cli_dir_path="../cli"
+cli_dir_path="./cli"
 
 cli_output_rel_path="../website/api/switchboardv2-cli"
 

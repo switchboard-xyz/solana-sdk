@@ -34,7 +34,7 @@ EXAMPLE
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [src/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/index.ts)_
+_See code: [src/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/index.ts)_
 
 ## `sbv2 print:aggregator AGGREGATORKEY`
 
@@ -70,7 +70,7 @@ EXAMPLE
   $ sbv2 aggregator:print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 ```
 
-_See code: [src/commands/print/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator.ts)_
+_See code: [src/commands/print/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator.ts)_
 
 ## `sbv2 print:aggregator:history AGGREGATORKEY`
 
@@ -105,7 +105,7 @@ EXAMPLE
   $ sbv2 aggregator:print:history 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/aggregator/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/history.ts)_
+_See code: [src/commands/print/aggregator/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/history.ts)_
 
 ## `sbv2 print:aggregator:lease AGGREGATORKEY`
 
@@ -140,7 +140,7 @@ EXAMPLE
   $ sbv2 aggregator:lease:print 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee
 ```
 
-_See code: [src/commands/print/aggregator/lease.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/lease.ts)_
+_See code: [src/commands/print/aggregator/lease.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/lease.ts)_
 
 ## `sbv2 print:aggregator:permission AGGREGATORKEY`
 
@@ -175,7 +175,7 @@ EXAMPLE
   $ sbv2 aggregator:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/aggregator/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/aggregator/permission.ts)_
+_See code: [src/commands/print/aggregator/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/aggregator/permission.ts)_
 
 ## `sbv2 print:crank CRANKKEY`
 
@@ -209,7 +209,7 @@ EXAMPLE
   $ sbv2 crank:print 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr
 ```
 
-_See code: [src/commands/print/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/crank.ts)_
+_See code: [src/commands/print/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/crank.ts)_
 
 ## `sbv2 print:job JOBKEY`
 
@@ -243,7 +243,7 @@ EXAMPLE
   $ sbv2 job:print SzTvFZLz3hwjZFMwVWzuEnr1oUF6qyvXwXCvsqf7qeA
 ```
 
-_See code: [src/commands/print/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/job.ts)_
+_See code: [src/commands/print/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/job.ts)_
 
 ## `sbv2 print:job:templates`
 
@@ -257,7 +257,7 @@ ALIASES
   $ sbv2 job:print:templates
 ```
 
-_See code: [src/commands/print/job/templates.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/job/templates.ts)_
+_See code: [src/commands/print/job/templates.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/job/templates.ts)_
 
 ## `sbv2 print:json:samples OUTPUTDIRECTORY`
 
@@ -294,7 +294,7 @@ EXAMPLES
   $ sbv2 write:json:samples ~/switchboard_json_samples
 ```
 
-_See code: [src/commands/print/json/samples.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/json/samples.ts)_
+_See code: [src/commands/print/json/samples.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/json/samples.ts)_
 
 ## `sbv2 print:oracle ORACLEKEY`
 
@@ -328,7 +328,7 @@ EXAMPLE
   $ sbv2 oracle:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/oracle.ts)_
+_See code: [src/commands/print/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/oracle.ts)_
 
 ## `sbv2 print:oracle:permission ORACLEKEY`
 
@@ -363,7 +363,7 @@ EXAMPLE
   $ sbv2 oracle:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
 
-_See code: [src/commands/print/oracle/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/oracle/permission.ts)_
+_See code: [src/commands/print/oracle/permission.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/oracle/permission.ts)_
 
 ## `sbv2 print:program`
 
@@ -394,7 +394,7 @@ EXAMPLE
   $ sbv2 program:print
 ```
 
-_See code: [src/commands/print/program.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/program.ts)_
+_See code: [src/commands/print/program.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/program.ts)_
 
 ## `sbv2 print:queue QUEUEKEY`
 
@@ -430,4 +430,4 @@ EXAMPLE
   $ sbv2 queue:print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [src/commands/print/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/print/queue.ts)_
+_See code: [src/commands/print/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/print/queue.ts)_

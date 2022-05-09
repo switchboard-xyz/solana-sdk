@@ -57,7 +57,7 @@ EXAMPLE
   $ sbv2 aggregator:add:job
 ```
 
-_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/add/job.ts)_
+_See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/add/job.ts)_
 
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`
 
@@ -99,7 +99,7 @@ EXAMPLE
   AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/create/copy.ts)_
+_See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/create/copy.ts)_
 
 ## `sbv2 aggregator:create:json DEFINITIONFILE`
 
@@ -140,7 +140,7 @@ EXAMPLE
   GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --outputFile aggregator.schema.json
 ```
 
-_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/create/json.ts)_
+_See code: [src/commands/aggregator/create/json.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/create/json.ts)_
 
 ## `sbv2 aggregator:lease:create AGGREGATORKEY`
 
@@ -175,7 +175,7 @@ EXAMPLE
   ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lease/create.ts)_
+_See code: [src/commands/aggregator/lease/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/create.ts)_
 
 ## `sbv2 aggregator:lease:extend AGGREGATORKEY`
 
@@ -210,7 +210,7 @@ EXAMPLE
   ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lease/extend.ts)_
+_See code: [src/commands/aggregator/lease/extend.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/extend.ts)_
 
 ## `sbv2 aggregator:lease:withdraw AGGREGATORKEY`
 
@@ -249,7 +249,7 @@ EXAMPLE
   ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/lease/withdraw.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lease/withdraw.ts)_
+_See code: [src/commands/aggregator/lease/withdraw.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lease/withdraw.ts)_
 
 ## `sbv2 aggregator:lock AGGREGATORKEY`
 
@@ -278,7 +278,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/lock.ts)_
+_See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/lock.ts)_
 
 ## `sbv2 aggregator:permission:create AGGREGATORKEY`
 
@@ -306,7 +306,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/permission/create.ts)_
+_See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/permission/create.ts)_
 
 ## `sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`
 
@@ -341,7 +341,7 @@ EXAMPLE
   $ sbv2 aggregator:remove:job
 ```
 
-_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/remove/job.ts)_
+_See code: [src/commands/aggregator/remove/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/remove/job.ts)_
 
 ## `sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`
 
@@ -371,7 +371,7 @@ OPTIONS
   --mainnetBeta                            WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/authority.ts)_
+_See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/authority.ts)_
 
 ## `sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`
 
@@ -401,7 +401,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/batchSize.ts)_
+_See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/batchSize.ts)_
 
 ## `sbv2 aggregator:set:history AGGREGATORKEY SIZE`
 
@@ -437,7 +437,7 @@ EXAMPLE
   $ sbv2 aggregator:set:history GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 10000 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/history.ts)_
+_See code: [src/commands/aggregator/set/history.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/history.ts)_
 
 ## `sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`
 
@@ -467,7 +467,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/minJobs.ts)_
+_See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/minJobs.ts)_
 
 ## `sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`
 
@@ -497,7 +497,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/minOracles.ts)_
+_See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/minOracles.ts)_
 
 ## `sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`
 
@@ -527,7 +527,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/queue.ts)_
+_See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/queue.ts)_
 
 ## `sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`
 
@@ -562,7 +562,7 @@ EXAMPLE
   $ sbv2 aggregator:set:updateinterval GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 60 --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/set/updateInterval.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/updateInterval.ts)_
+_See code: [src/commands/aggregator/set/updateInterval.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/updateInterval.ts)_
 
 ## `sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`
 
@@ -598,7 +598,7 @@ EXAMPLE
    varianceThreshold
 ```
 
-_See code: [src/commands/aggregator/set/varianceThreshold.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/set/varianceThreshold.ts)_
+_See code: [src/commands/aggregator/set/varianceThreshold.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/varianceThreshold.ts)_
 
 ## `sbv2 aggregator:update AGGREGATORKEY`
 
@@ -629,4 +629,4 @@ EXAMPLE
   $ sbv2 aggregator:update J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa --keypair ../payer-keypair.json
 ```
 
-_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/aggregator/update.ts)_
+_See code: [src/commands/aggregator/update.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/update.ts)_

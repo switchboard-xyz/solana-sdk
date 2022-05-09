@@ -35,4 +35,4 @@ EXAMPLE
   $ sbv2 watch:aggregator J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa
 ```
 
-_See code: [src/commands/watch/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.14/src/commands/watch/aggregator.ts)_
+_See code: [src/commands/watch/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/watch/aggregator.ts)_

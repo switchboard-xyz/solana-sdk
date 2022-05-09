@@ -16,14 +16,19 @@ You **_must_** have the following dependencies:
 
 First, we need to create a Switchboard environment on devnet so we can easily copy it to localnet when running any test.
 
-```js
+```bash
+npm i -g @switchboard-xyz/switchboardv2-cli
+sbv2 localnet:env --keypair ../payer-keypair.json -v
+```
+
+<!-- ```js
 import { SwitchboardTestContext } from "@switchboard-xyz/switchboard-v2";
 
 const testEnv = await SwitchboardTestEnvironment.create(payerKeypair, {
   USDC_MINT: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
 });
 testEnv.writeAll(walletPath, process.cwd());
-```
+``` -->
 
 This will create your own Switchboard queue and oracle and grant it permission to fulfill aggregator update request. It will also aggregate the necessary Switchboard devnet accounts such as the program ID program data address, and the switchboard state including its token mint and vault. The second arguement allows you to pass in additional devnet accounts you wish to copy.
 
