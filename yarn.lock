@@ -4144,10 +4144,10 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
-"@switchboard-xyz/sbv2-utils@^0.0.4":
-  version "0.0.5"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/sbv2-utils/-/sbv2-utils-0.0.4.tgz#978dc176628fff0549dea804ea04f451911cbc41"
-  integrity sha512-QZD9xU3pTZTAioYLLrYdXuGDzgSKwI7dHvfvbaCGnC0qQgYJIenT4Y2RZIC62mQwNwpy8PL+g8vCVn61J8/FwQ==
+"@switchboard-xyz/sbv2-utils@^0.0.7":
+  version "0.0.8"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/sbv2-utils/-/sbv2-utils-0.0.7.tgz#50b548d56b0f324e92867d6f3563488877632e00"
+  integrity sha512-8ZX7vqYftA9YBtgMGK4Vk91hlpoXfvzsPqgJ+Ny39D0AtC29dF4OlTZL3sX78XEDu4bSJFQNf38TyITmUo9ajw==
   dependencies:
     "@orca-so/sdk" "^1.2.24"
     "@project-serum/anchor" "^0.24.2"
