@@ -22,7 +22,7 @@ import type { SwitchboardAccountType } from "./switchboard";
 
 export const chalkString = (
   label: string,
-  value: string | number | boolean | PublicKey | Big | BN | SwitchboardDecimal,
+  value: string | number | boolean | PublicKey | Big | BN,
   padding = 16
 ): string => {
   let valueString = "";
@@ -38,9 +38,7 @@ export const chalkString = (
     } else {
       valueString = value.toString();
     }
-  } else if ("mantissa" in value && "scale" in value) {
-    valueString = SwitchboardDecimal.from(value).toBig().toString();
-  } else {
+  } else if (value !== undefined) {
     valueString = value.toString();
   }
   return `${chalk.blue(label.padEnd(padding, " "))}${chalk.yellow(
@@ -218,6 +216,10 @@ export async function prettyPrintQueue(
 ): Promise<string> {
   const data = accountData ?? (await queueAccount.loadData());
 
+  const varianceToleranceMultiplier = SwitchboardDecimal.from(
+    data.varianceToleranceMultiplier
+  ).toBig();
+
   let outputString = "";
 
   outputString += chalk.underline(
@@ -252,7 +254,7 @@ export async function prettyPrintQueue(
   outputString +=
     chalkString(
       "varianceToleranceMultiplier",
-      data.varianceToleranceMultiplier,
+      varianceToleranceMultiplier,
       SPACING
     ) + "\r\n";
   outputString +=
@@ -361,15 +363,17 @@ export async function prettyPrintAggregator(
 ): Promise<string> {
   const data = accountData ?? (await aggregatorAccount.loadData());
 
-  const result = new SwitchboardDecimal(
-    data.latestConfirmedRound.result.mantissa ?? new BN(0),
-    data.latestConfirmedRound.result.scale ?? 0
-  )
+  const result = SwitchboardDecimal.from(data.latestConfirmedRound.result)
     .toBig()
     .toString();
+
   const resultTimestamp = anchorBNtoDateTimeString(
     data.latestConfirmedRound.roundOpenTimestamp ?? new BN(0)
   );
+
+  const varianceThreshold = parseFloat(
+    SwitchboardDecimal.from(data.varianceThreshold).toBig().toString()
+  ).toFixed(2);
 
   let outputString = "";
   outputString += chalk.underline(
@@ -395,7 +399,11 @@ export async function prettyPrintAggregator(
   outputString +=
     chalkString("historyBufferPublicKey", data.historyBuffer, SPACING) + "\r\n";
   outputString +=
-    chalkString("authorWallet", data.authorWallet, SPACING) + "\r\n";
+    chalkString(
+      "authorWallet",
+      data.authorWallet ?? PublicKey.default,
+      SPACING
+    ) + "\r\n";
   outputString +=
     chalkString("minUpdateDelaySeconds", data.minUpdateDelaySeconds, SPACING) +
     "\r\n";
@@ -412,7 +420,8 @@ export async function prettyPrintAggregator(
   outputString +=
     chalkString("minOracleResults", data.minOracleResults, SPACING) + "\r\n";
   outputString +=
-    chalkString("varianceThreshold", data.varianceThreshold, SPACING) + "\r\n";
+    chalkString("varianceThreshold", `${varianceThreshold} %`, SPACING) +
+    "\r\n";
   outputString +=
     chalkString("forceReportPeriod", data.forceReportPeriod, SPACING) + "\r\n";
   outputString += chalkString("isLocked", data.isLocked, SPACING);

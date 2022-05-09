@@ -4192,6 +4192,11 @@
   resolved "https://registry.npmjs.org/@switchboard-xyz/v2-task-library/-/v2-task-library-0.1.5.tgz"
   integrity sha512-jMjjpRdBEccU5hI0LaceWe68cxazGi6QX0CRevAWidO3n8tAKn3IXcvbD4rRWfZGuoSrhDpNN1Dq4lc/3K4syA==
 
+"@switchboard-xyz/v2-task-library@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/v2-task-library/-/v2-task-library-0.1.9.tgz#09c0fe5c550093bd388612691cbfc367095596a9"
+  integrity sha512-ncRoRT6rJr1FMD7BMgM/U6R0/bON7EWOWrd9PndIJJgvYm8LJna+OxXOjbyufDjoi0mEgz6js27M75LCHJgr+g==
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@szmarczak/http-timer/-/http-timer-1.1.2.tgz"
