@@ -54,6 +54,8 @@ export default class AggregatorSetVarianceThreshold extends BaseCommand {
       aggregator.authority
     );
 
+    // const t = await aggregatorAccount.
+
     const txn = await this.program.rpc.aggregatorSetVarianceThreshold(
       { varianceThreshold: SwitchboardDecimal.fromBig(args.varianceThreshold) },
       {
