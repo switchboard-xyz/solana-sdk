@@ -22,6 +22,12 @@ Switchboard tasks can be divided into the following categories:
 - [**Logic**](#logic): Perform some logical operation like if..else clauses
 - [**Math**](#math): Perform a mathmatical operation like taking the maximum value of a list or raising a value to an exponent.
 
+:::tip
+
+Check out the [**Job Directory**](/job-directory) for examples!
+
+:::
+
 ## 📦Web2 Fetch
 
 ### 🛠HttpTask
