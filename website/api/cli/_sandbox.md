@@ -28,4 +28,4 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/sandbox.ts)_
+_See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/sandbox.ts)_

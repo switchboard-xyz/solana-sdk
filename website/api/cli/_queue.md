@@ -41,7 +41,7 @@ EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1
 ```
 
-_See code: [src/commands/queue/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/add/crank.ts)_
+_See code: [src/commands/queue/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/add/crank.ts)_
 
 ## `sbv2 queue:create`
 
@@ -87,7 +87,7 @@ EXAMPLES
   new-queue.json
 ```
 
-_See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/create.ts)_
+_See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/create.ts)_
 
 ## `sbv2 queue:permit:aggregator AGGREGATORKEY`
 
@@ -119,7 +119,7 @@ EXAMPLE
   $ sbv2 queue:permit:aggregator 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
 
-_See code: [src/commands/queue/permit/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/permit/aggregator.ts)_
+_See code: [src/commands/queue/permit/aggregator.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/permit/aggregator.ts)_
 
 ## `sbv2 queue:permit:oracle ORACLEKEY`
 
@@ -151,7 +151,7 @@ EXAMPLE
   $ sbv2 queue:permit:oracle 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
 
-_See code: [src/commands/queue/permit/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/permit/oracle.ts)_
+_See code: [src/commands/queue/permit/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/permit/oracle.ts)_
 
 ## `sbv2 queue:set:rewards QUEUEKEY REWARDS`
 
@@ -181,7 +181,7 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/set/rewards.ts)_
+_See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/set/rewards.ts)_
 
 ## `sbv2 queue:set:vrf QUEUEKEY`
 
@@ -212,4 +212,4 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/queue/set/vrf.ts)_
+_See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/set/vrf.ts)_

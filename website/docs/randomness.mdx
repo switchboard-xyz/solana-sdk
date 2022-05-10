@@ -45,13 +45,13 @@ You can view the full VRF walk-through in the example repo:
 
 ### Create Account
 
-- [VrfAccount.create [typescript]](/api/switchboardv2-api/classes/VrfAccount#create): Create a VRF Account to hold your personal randomness value. You must specify an oracle queue to create your VRF Account for, which determines which oracles get allocated to update requests.
+- [VrfAccount.create [typescript]](/api/ts/classes/VrfAccount#create): Create a VRF Account to hold your personal randomness value. You must specify an oracle queue to create your VRF Account for, which determines which oracles get allocated to update requests.
 
 ### Create & Approve Permissions
 
-- [PermissionAccount.create [typescript]](/api/switchboardv2-api/classes/PermissionAccount#create): Create a Permission Account for your VRF Account to use a queue's resources.
-- [PermissionAccount.set [typescript]](/api/switchboardv2-api/classes/PermissionAccount#set): The queue authority must approve a VRF Account before it can use its queues resources
+- [PermissionAccount.create [typescript]](/api/ts/classes/PermissionAccount#create): Create a Permission Account for your VRF Account to use a queue's resources.
+- [PermissionAccount.set [typescript]](/api/ts/classes/PermissionAccount#set): The queue authority must approve a VRF Account before it can use its queues resources
 
 ### Request Randomness
 
-- [VrfAccount.requestRandomness](/api/switchboardv2-api/classes/VrfAccount#requestrandomness): Request randomness once that previous request has resolved, or after 1 Minute. Assumes the payer has 0.1 wSOL in a wallet already.
+- [VrfAccount.requestRandomness](/api/ts/classes/VrfAccount#requestrandomness): Request randomness once that previous request has resolved, or after 1 Minute. Assumes the payer has 0.1 wSOL in a wallet already.

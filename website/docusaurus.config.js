@@ -149,7 +149,7 @@ const config = {
               },
               {
                 label: "CLI",
-                to: "api/switchboardv2-cli",
+                to: "api/cli",
               },
             ],
           },

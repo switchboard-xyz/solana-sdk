@@ -31,7 +31,7 @@ OPTIONS
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/permission/create.ts)_
+_See code: [src/commands/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/permission/create.ts)_
 
 ## `sbv2 permission:set PERMISSIONKEY`
 
@@ -62,4 +62,4 @@ OPTIONS
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 ```
 
-_See code: [src/commands/permission/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/permission/set.ts)_
+_See code: [src/commands/permission/set.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/permission/set.ts)_

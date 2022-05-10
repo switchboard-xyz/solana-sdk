@@ -16,7 +16,7 @@ Run the following command in your project:
 npm install @switchboard-xyz/switchboard-v2
 ```
 
-**Documentation:** [/api/switchboardv2-api](/api/switchboardv2-api)
+**Documentation:** [/api/ts/](/api/ts/)
 
 ## Examples
 
@@ -55,7 +55,7 @@ const aggregatorAccount = await AggregatorAccount.create(program, {
 });
 ```
 
-[Docs](/api/switchboardv2-api/classes/AggregatorAccount#create)
+[Docs](/api/ts/classes/AggregatorAccount#create)
 
 ### Updating Feeds
 
@@ -75,7 +75,7 @@ await aggregatorAccount.openRound({
 });
 ```
 
-[Docs](/api/switchboardv2-api/classes/AggregatorAccount#openround)
+[Docs](/api/ts/classes/AggregatorAccount#openround)
 
 ### Reading Feeds
 
@@ -89,4 +89,4 @@ const result: Big = await aggregatorAccount.getLatestValue();
 console.log(result.toNumber());
 ```
 
-[Docs](/api/switchboardv2-api/classes/AggregatorAccount#getlatestvalue)
+[Docs](/api/ts/classes/AggregatorAccount#getlatestvalue)
