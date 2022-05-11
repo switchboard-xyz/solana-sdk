@@ -168,7 +168,8 @@ export class LeaseClass implements ILeaseClass {
             loadAmount: new anchor.BN(0),
             funder: programTokenWallet,
             funderAuthority: programWallet(aggregatorAccount.program),
-            withdrawAuthority: programTokenWallet,
+            withdrawAuthority: programWallet(aggregatorAccount.program)
+              .publicKey,
           }
         );
         return await LeaseClass.init(context, leaseAccount);

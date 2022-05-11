@@ -9,11 +9,13 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
+import BaseCommand from "../../BaseCommand";
+import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
-export default class AggregatorLeaseCreate extends BaseCommand {
+export default class LeaseCreate extends BaseCommand {
   static description = "fund and re-enable an aggregator lease";
+
+  static aliases = ["aggregator:lease:create"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -34,11 +36,11 @@ export default class AggregatorLeaseCreate extends BaseCommand {
   ];
 
   static examples = [
-    "$ sbv2 aggregator:lease:create GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.5 --keypair ../payer-keypair.json",
+    "$ sbv2 lease:create GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --amount 1.5 --keypair ../payer-keypair.json",
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorLeaseCreate);
+    const { args, flags } = this.parse(LeaseCreate);
     verifyProgramHasPayer(this.program);
 
     const payer = programWallet(this.program);

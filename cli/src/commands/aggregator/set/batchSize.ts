@@ -46,6 +46,13 @@ export default class AggregatorSetBatchSize extends BaseCommand {
       publicKey: args.aggregatorKey,
     });
     const aggregator = await aggregatorAccount.loadData();
+
+    if (aggregator.minOracleResults > batchSize) {
+      throw new Error(
+        `Batch size ${batchSize} must be greater than minOracleResults ${aggregator.minOracleResults}`
+      );
+    }
+
     const authority = await this.loadAuthority(
       flags.authority,
       aggregator.authority

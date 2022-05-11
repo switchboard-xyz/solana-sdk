@@ -126,7 +126,7 @@ export const toPermission = (
 // JSON.stringify: Object => String
 export const pubKeyConverter = (key: any, value: any): any => {
   if (value instanceof PublicKey || key.toLowerCase().endsWith("publickey")) {
-    return value.toString();
+    return value.toString() ?? "";
   }
   if (value instanceof Uint8Array) {
     return `[${value.toString()}]`;

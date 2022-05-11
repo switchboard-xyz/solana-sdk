@@ -1,9 +1,6 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import {
-  AggregatorAccount,
-  SwitchboardDecimal,
-} from "@switchboard-xyz/switchboard-v2";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
@@ -11,6 +8,8 @@ import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
 
 export default class AggregatorSetVarianceThreshold extends BaseCommand {
   static description = "set an aggregator's variance threshold";
+
+  static aliases = ["aggregator:set:variance"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -37,7 +36,7 @@ export default class AggregatorSetVarianceThreshold extends BaseCommand {
   ];
 
   static examples = [
-    "$ sbv2 aggregator:set:variance GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 0.1 --keypair ../payer-keypair.json # 0.1% varianceThreshold",
+    "$ sbv2 aggregator:set:varianceThreshold GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 0.1 --keypair ../payer-keypair.json",
   ];
 
   async run() {
@@ -54,18 +53,10 @@ export default class AggregatorSetVarianceThreshold extends BaseCommand {
       aggregator.authority
     );
 
-    // const t = await aggregatorAccount.
-
-    const txn = await this.program.rpc.aggregatorSetVarianceThreshold(
-      { varianceThreshold: SwitchboardDecimal.fromBig(args.varianceThreshold) },
-      {
-        accounts: {
-          aggregator: aggregatorAccount.publicKey,
-          authority: authority.publicKey,
-        },
-        signers: [authority],
-      }
-    );
+    const txn = await aggregatorAccount.setVarianceThreshold({
+      authority,
+      threshold: args.varianceThreshold,
+    });
 
     if (this.silent) {
       console.log(txn);

@@ -8,12 +8,14 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../../accounts/utils";
-import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+import { chalkString } from "../../accounts/utils";
+import BaseCommand from "../../BaseCommand";
+import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../utils";
 
 export default class AggregatorLeaseWithdraw extends BaseCommand {
   static description = "withdraw funds from an aggregator lease";
+
+  static aliases = ["aggregator:lease:withdraw"];
 
   static flags = {
     ...BaseCommand.flags,
@@ -23,7 +25,7 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
         "tokenAccount to withdraw to. If not provided, payer associated token account will be used",
     }),
     amount: flags.string({
-      required: false,
+      required: true,
       description:
         "token amount to withdraw from lease account. If decimals provided, amount will be normalized to raw tokenAmount",
     }),
@@ -102,13 +104,14 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
       queueAccount,
       aggregatorAccount
     );
-    let lease: any;
+
     try {
-      lease = await leaseAccount.loadData();
+      const lease = await leaseAccount.loadData();
     } catch {
       throw new Error(`Failed to load lease account. Has it been created yet?`);
     }
 
+    const lease = await leaseAccount.loadData();
     const escrow: PublicKey = lease.escrow;
     let amount: anchor.BN;
     if (flags.amount) {
@@ -127,6 +130,14 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
       withdrawWallet: withdrawAddress,
     });
 
+    if (!this.silent) {
+      const newBalance =
+        await this.program.provider.connection.getTokenAccountBalance(escrow);
+      this.logger.log(
+        chalkString("Final Lease Balance", newBalance.value.uiAmountString, 30)
+      );
+    }
+
     if (this.silent) {
       console.log(txn);
     } else {
@@ -137,14 +148,6 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
       );
       this.logger.log(
         `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`
-      );
-      const newBalance = new anchor.BN(
-        (
-          await this.program.provider.connection.getTokenAccountBalance(escrow)
-        ).value.amount
-      );
-      this.logger.log(
-        chalkString("Final Aggregator Lease Balance", newBalance)
       );
     }
   }
