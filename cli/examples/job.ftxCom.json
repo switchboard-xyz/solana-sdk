@@ -1,0 +1,15 @@
+{
+  "name": "FtxCom MNGO/USD",
+  "tasks": [
+    {
+      "httpTask": {
+        "url": "https://ftx.com/api/markets/mngo/usd"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.result.price"
+      }
+    }
+  ]
+}

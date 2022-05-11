@@ -1,0 +1,20 @@
+[features]
+seeds = false
+[programs.localnet]
+anchor_feed_parser = "3Y2v9gVaFAKTDqcxxs8oSRWV8K9ctkCB8yiC6KA4sFz5"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "../../../payer-keypair.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+# Clone devnet SOL/USD feed
+[test.validator]
+url = "https://api.devnet.solana.com"
+[[test.validator.clone]]
+address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"

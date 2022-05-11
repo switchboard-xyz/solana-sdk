@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  },
+  "compilerOptions": {
+    "types": ["mocha", "chai", "node"],
+    "typeRoots": ["./node_modules/@types"],
+    "lib": ["es2015"],
+    "outDir": "lib",
+    "module": "commonjs",
+    "target": "es6",
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "remove",
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["target", "lib"],
+  "references": [{ "path": "../../libraries/ts" }]
+}

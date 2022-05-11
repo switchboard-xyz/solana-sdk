@@ -1,0 +1,132 @@
+import { FiType } from "react-icons/fi";
+import { SiTypescript } from "react-icons/si";
+import { SiJavascript } from "react-icons/si";
+import { SiPython } from "react-icons/si";
+import { SiRust } from "react-icons/si";
+import { SiPowershell } from "react-icons/si";
+import { VscJson } from "react-icons/vsc";
+import { GoLinkExternal } from "react-icons/go";
+import { SerumIcon } from "/src/components/icons/SerumIcon";
+import { FaBook } from "react-icons/fa";
+import { Typography } from "@mui/material";
+
+<table>
+  <thead>
+    <tr>
+      <th>Instruction</th>
+      <th>API Resource(s)</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <b>OracleInit</b>
+      </td>
+      <td>
+        <a className="nowrap" href="/api/ts/classes/OracleAccount#create">
+          <SiTypescript className="devicons__nowrap" /> Typescript
+        </a>
+        <br />
+        <a
+          className="nowrap"
+          href="/api/py/switchboardpy.html#OracleInitParams"
+        >
+          <SiPython className="devicons__nowrap" /> Python
+        </a>
+        <br />
+        <a className="nowrap" href="/api/cli/oracle#sbv2-oraclecreate-queuekey">
+          <SiPowershell className="devicons__nowrap" /> CLI
+        </a>
+      </td>
+      <td>
+        <Typography>
+          Create a new OracleAccount with a specified configuration
+        </Typography>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>PermissionInit</b>
+      </td>
+      <td>
+        <a className="nowrap" href="/api/ts/classes/PermissionAccount#create">
+          <SiTypescript className="devicons__nowrap" /> Typescript
+        </a>
+        <br />
+        <a
+          className="nowrap"
+          href="/api/py/switchboardpy.html#PermissionInitParams"
+        >
+          <SiPython className="devicons__nowrap" /> Python
+        </a>
+      </td>
+      <td>
+        <Typography>
+          Create a new PermissionAccount with an oracle queue as the grantee
+        </Typography>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>OracleHeartbeat</b>
+      </td>
+      <td>
+        <a className="nowrap" href="/api/ts/classes/OracleAccount#heartbeat">
+          <SiTypescript className="devicons__nowrap" /> Typescript
+        </a>
+      </td>
+      <td>
+        <Typography>
+          Heartbeat on-chain and signal an oracle is ready for update request
+        </Typography>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>OracleWithdraw</b>
+      </td>
+      <td>
+        <a className="nowrap" href="/api/ts/classes/OracleAccount#withdraw">
+          <SiTypescript className="devicons__nowrap" /> Typescript
+        </a>
+        <br />
+        <a
+          className="nowrap"
+          href="/api/py/switchboardpy.html#OracleWithdrawParams"
+        >
+          <SiPython className="devicons__nowrap" /> Python
+        </a>
+        <br />
+        <a
+          className="nowrap"
+          href="/api/cli/oracle#sbv2-oraclewithdraw-oraclekey-amount"
+        >
+          <SiPowershell className="devicons__nowrap" /> CLI
+        </a>
+      </td>
+      <td>
+        <Typography>Withdraw from an oracle's tokenAccount</Typography>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>AggregatorSaveResult</b>
+      </td>
+      <td>
+        <a
+          className="nowrap"
+          href="/api/ts/classes/AggregatorAccount#saveresult"
+        >
+          <SiTypescript className="devicons__nowrap" /> Typescript
+        </a>
+      </td>
+      <td>
+        <Typography>
+          Respond to an aggregator update request after executing the assigned
+          job accounts
+        </Typography>
+      </td>
+    </tr>
+  </tbody>
+</table>

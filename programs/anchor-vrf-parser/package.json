@@ -1,0 +1,58 @@
+{
+  "name": "anchor-vrf-parser",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/switchboard-v2",
+    "directory": "programs/anchor-vrf-parser"
+  },
+  "scripts": {
+    "generate:api": "ts-node solita",
+    "pid": "shx echo \"\n\nPROGRAM ID: \"$(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json) \"\n\nUpdate Anchor.toml, src/lib.rs, and solita.ts with your PID above.\" || exit 0",
+    "setup:authority": "run-s create:authority airdrop:authority",
+    "setup:switchboard": "sbv2 localnet:env --keypair secrets/payer-keypair.json",
+    "create:authority": "shx find secrets/payer-keypair.json || solana-keygen new -s --no-bip39-passphrase --outfile secrets/payer-keypair.json",
+    "airdrop": "solana airdrop 1 secrets/payer-keypair.json",
+    "airdrop:authority": "run-s airdrop && run-s airdrop && run-s airdrop && run-s airdrop || true",
+    "build": "rm -rf lib && tsc -p tsconfig.json",
+    "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
+    "anchor:test": "anchor test --skip-local-validator",
+    "test": "echo \"For workspace anchor-vrf-parser, use the anchor:test script\" && exit 0"
+  },
+  "dependencies": {
+    "@metaplex-foundation/beet": "^0.1.0",
+    "@metaplex-foundation/beet-solana": "^0.1.1",
+    "@metaplex-foundation/solita": "^0.2.1",
+    "@project-serum/anchor": "^0.24.2",
+    "@solana/spl-token": "^0.1.8",
+    "@solana/web3.js": "^1.33.0",
+    "@switchboard-xyz/switchboard-v2": "^0.0.95",
+    "chalk": "^4.1.2",
+    "child_process": "^1.0.2",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "@switchboard-xyz/switchboardv2-cli": "^0.1.11",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "chai": "^4.3.6",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^14.0.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-unicorn": "^37.0.1",
+    "mocha": "^9.0.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.4.1",
+    "prettier-plugin-organize-imports": "^2.3.4",
+    "shx": "^0.3.4",
+    "ts-mocha": "^9.0.2",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.3.5"
+  }
+}

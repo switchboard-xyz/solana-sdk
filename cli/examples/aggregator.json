@@ -1,0 +1,30 @@
+{
+  "name": "WHEAT",
+  "metadata": "",
+  "oracleRequestBatchSize": 1,
+  "minOracleResults": 1,
+  "minJobResults": 1,
+  "minUpdateDelaySeconds": 300,
+  "jobs": [
+    {
+      "name": "commodities-api WHEAT",
+      "tasks": [
+        {
+          "httpTask": {
+            "url": "https://www.commodities-api.com/api/latest?access_key=ke9lwg53l34qis22zr2t568f8k32agaewndr3j8mvzr33ys9wixhrudh73fj&base=USD&symbols=WHEAT"
+          }
+        },
+        {
+          "jsonParseTask": {
+            "path": "$.data.rates.WHEAT"
+          }
+        },
+        {
+          "powTask": {
+            "scalar": -1
+          }
+        }
+      ]
+    }
+  ]
+}

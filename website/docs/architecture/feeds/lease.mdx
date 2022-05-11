@@ -1,0 +1,35 @@
+---
+sidebar_position: 40
+title: Lease
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import Link from "@docusaurus/Link";
+import { Typography, Box, Grid } from "@mui/material";
+import LeaseInstructions from "/idl/_lease_instructions.mdx";
+
+import LeaseAccountData from "/idl/accounts/LeaseAccountData.md";
+
+import LeaseInit from "/idl/instructions/leaseInit.md";
+import LeaseExtend from "/idl/instructions/leaseExtend.md";
+import LeaseWithdraw from "/idl/instructions/leaseWithdraw.md";
+
+Oracle queues have a finite amount of resources proportional to its number of oracles so the DAO may reject new feeds that could cause delays on existing feeds. The publisher is responsible for creating a lease contract to reserve a set amount of computer power from the oracle queue. Once a publisher’s feed is accepted by the DAO, the feed is added to the network and granted permissions to use the oracle queue resources.
+
+When creating a lease contract, the publisher specifies a `withdrawAuthority` then funds the lease contract to reward oracle operators for processing any future updates. The `withdrawAuthority` allows a publisher to cancel and refund their lease contract at any point in time and specifies where any remaining lease balance is sent. The lease fee is derived from the oracle rewards dictated by each oracle queue. If a data feed’s lease is low on funds, any update requests will fail and if the feed is on a crank, it will be automatically removed. As a feed gains popularity, other dApp developers will be incentivized to extend the lease and keep it active. This creates a natural decay where unused feeds go unfunded to make room for new use cases.
+
+## Functions
+
+A lease is responsible for the following functions:
+
+- [Reward Oracles](#reward-oracles): Reward oracles when an aggregator result is accepted on-chain.
+
+### 🚀Reward Oracles
+
+A lease contract stores oracle rewards in an `escrow` wallet. When an aggregator's result gets updated on-chain, the oracle's fulfilling the update request are rewarded from the lease contract's `escrow` wallet.
+
+## Account Schema
+
+### 📦LeaseAccountData
+
+<LeaseAccountData />

@@ -1,0 +1,92 @@
+---
+sidebar_position: 10
+slug: /developers/js
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+# Javascript
+
+## Install
+
+Run the following command in your project:
+
+```bash npm2yarn
+npm install @switchboard-xyz/switchboard-v2
+```
+
+**Documentation:** [/api/ts/](/api/ts/)
+
+## Examples
+
+### Creating Feeds
+
+```ts
+import * as anchor from "@project-serum/anchor";
+import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+  loadSwitchboardProgram,
+} from "@switchboard-xyz/switchboard-v2";
+
+const payerKeypair = Keypair.fromSecretKey(
+  JSON.parse(fs.readFileSync("../keypair-path.json", "utf-8"))
+);
+const program = await loadSwitchboardProgram(
+  "devnet",
+  new Connection(clusterApiUrl("devnet")),
+  payerKeypair
+);
+const queueAccount = new OracleQueueAccount({
+  program: program,
+  // devnet permissionless queue
+  publicKey: new PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"),
+});
+
+const aggregatorAccount = await AggregatorAccount.create(program, {
+  name: Buffer.from("FeedName"),
+  batchSize: 6,
+  minRequiredJobResults: 1,
+  minRequiredOracleResults: 1,
+  minUpdateDelaySeconds: 30,
+  queueAccount,
+});
+```
+
+[Docs](/api/ts/classes/AggregatorAccount#create)
+
+### Updating Feeds
+
+```ts
+import * as anchor from "@project-serum/anchor";
+import {
+  AggregatorAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
+
+const program: anchor.Program;
+const queueAccount: OracleQueueAccount;
+
+await aggregatorAccount.openRound({
+  oracleQueueAccount: queueAccount,
+  payoutWallet: tokenAccount,
+});
+```
+
+[Docs](/api/ts/classes/AggregatorAccount#openround)
+
+### Reading Feeds
+
+```ts
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+import { Big } from "big.js";
+
+const aggregatorAccount: AggregatorAccount;
+const result: Big = await aggregatorAccount.getLatestValue();
+
+console.log(result.toNumber());
+```
+
+[Docs](/api/ts/classes/AggregatorAccount#getlatestvalue)

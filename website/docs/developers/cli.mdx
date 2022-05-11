@@ -1,0 +1,68 @@
+---
+sidebar_position: 80
+slug: /developers/cli
+title: CLI
+---
+
+# sbv2 CLI
+
+The Switchboard V2 CLI provides an easy to use interface to setup and manage Switchboard onchain accounts.
+
+## Install
+
+Run the following command:
+
+```bash npm2yarn
+npm install -g @switchboard-xyz/cli
+```
+
+**Documentation:** [/api/cli](/api/cli)
+
+## Overview
+
+**Keypairs** The Switchboard V2 CLI lets you specify a keypair from an absolute or relative filesystem path as well as a Google Secret Manager secret. The following flags are common among most commands, with the exception of the print commands that require no keypairs:
+
+- `--authority` is the keypair that is or will be the authority for a given account. The authority is responsible for authorizing new permissions, changing an account, or withdrawing from a token account.
+- `--keypair` is required for any command that submits an onchain transaction such as creating accounts, turning the crank, or updating an account config. This keypair will default as the authority if the authority flag is not provided.
+
+**Token Amounts**
+Any commands that specify a token amount will be in integer format with no decimal. For instance, 1.5 wSOL would be normalized to 15000000, where wSOL has 8 decimals specified by the token mint.
+
+**Logging** Most commands will have a `--silent`, `-s` flag that will suppress console output and only output a new account public key to assist in scripting. A `--verbose`, `-v` flag will do the opposite and log any debug or configuration information to help debug.
+
+**Help** All commands can be run with the `--help` flag to print the available arguments and flags for a given command.
+
+## Examples
+
+### Print
+
+```bash
+# check account discriminator and print account information if found
+sbv2 print PUBLICKEY
+# print an oracle account by its public key
+sbv2 print:oracle ORACLEKEY
+# print an aggregator account and save to a JSON file
+sbv2 print:aggregator AGGREGATORKEY --outputFile outputFile.json
+```
+
+### Create Aggregator
+
+```bash
+# write sample json files to outputDirectory
+sbv2 print:json:samples outputDirectory
+# create aggregator from json
+sbv2 aggregator:create:json aggregator.json \
+--keypair ../dev/switchboardxyz/payer-keypair.json \
+--queueKey GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U \
+--outputFile aggregator.schema.json
+```
+
+<!-- ### Create Oracle
+
+### Create Queue
+
+#### Permit an Aggregator
+
+### Create Queue from JSON
+
+#### Adding Aggregators -->

@@ -1,0 +1,109 @@
+---
+sidebar_position: 50
+title: Activities
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Typography } from "@mui/material";
+import OracleInstructions from "/idl/_oracle_instructions.mdx";
+
+import OracleInit from "/idl/instructions/oracleInit.md";
+import PermissionInit from "/idl/instructions/permissionInit.md";
+import OracleHeartbeat from "/idl/instructions/oracleHeartbeat.md";
+import AggregatorSaveResult from "/idl/instructions/aggregatorSaveResult.md";
+import OracleWithdraw from "/idl/instructions/oracleWithdraw.md";
+
+## Create an Oracle
+
+Create and initialize an OracleAccount & PermissionAccount.
+
+<MarkdownImage img="/img/Activity_Oracle_Create.png" />
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  OracleInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleInit />
+
+</details>
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  PermissionInit
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionInit />
+
+</details>
+
+## Heartbeat
+
+Heartbeat on-chain and signal to the queue the oracle is ready for update request.
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  OracleHeartbeat
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleHeartbeat />
+
+</details>
+
+## Fulfill Update Request
+
+Respond to an update request and receive the reward specified by the oracle queue.
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  AggregatorSaveResult
+</Typography>
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSaveResult />
+
+</details>
+
+## Withdraw
+
+<details>
+<summary>
+
+<Typography sx={{ fontWeight: "bold" }} variant="h6">
+  OracleWithdraw
+</Typography>
+
+<b>Cost: </b>10,000 lamports
+
+</summary>
+
+<OracleWithdraw />
+
+</details>
+
+## Developer Resources
+
+<OracleInstructions />

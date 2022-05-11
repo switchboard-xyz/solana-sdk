@@ -1,0 +1,22 @@
+Create and initialize the LeaseAccount.
+
+## Accounts
+|Name|isMut|isSigner|Description|
+|--|--|--|--|
+| lease | true | false |  |
+| queue | true | false |  |
+| aggregator | false | false |  |
+| funder | true | false |  |
+| payer | true | true |  |
+| systemProgram | false | false |  |
+| tokenProgram | false | false |  |
+| owner | true | true |  |
+| escrow | true | false |  |
+| programState | false | false |  |
+## Args
+|Field|Type|Description|
+|--|--|--|
+| loadAmount |  u64 | Token amount to load into the lease escrow |
+| withdrawAuthority |  publicKey | This authority will be permitted to withdraw funds from this lease. |
+| leaseBump |  u8 |  |
+| stateBump |  u8 |  |

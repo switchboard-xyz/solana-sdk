@@ -1,0 +1,40 @@
+# Javascript
+node_modules
+dist
+lib
+build
+tsconfig.tsbuildinfo
+
+*.env
+.switchboard
+start-local-validator.sh
+start-oracle.sh
+switchboard.json
+docker-compose.switchboard.yml
+
+# Python
+__pycache__
+.pytest_cache
+
+# Rust
+programs/**/target
+Cargo.lock
+.anchor
+target
+
+# Misc
+.keypairs
+secrets
+*-keypair*.json
+.archive
+
+# Root level jsons ignored
+job-directory/*.json
+
+
+# Docusaurus
+public
+.docusaurus
+# Auto generated
+website/static/api/ts
+website/static/api/ts-lite

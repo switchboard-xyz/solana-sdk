@@ -1,0 +1,12 @@
+{
+  "name": "JET BTC Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "jet",
+        "assetMint": "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E",
+        "field": 0
+      }
+    }
+  ]
+}

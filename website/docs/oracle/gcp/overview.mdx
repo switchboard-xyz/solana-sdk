@@ -1,0 +1,41 @@
+---
+sidebar_position: 1
+slug: /oracle/gcp
+---
+
+# Overview
+
+Before deploying the application, you must first provision a kubernetes cluster with the relevant credentials. There are no exotic requirements for this cluster and to date, it has be able to run on an auto pilot GKE cluster without issue.
+
+A Switchboard oracle can be run on any cloud provider who offers kubernetes services but this guide will currently be focused on Google Cloud. Feel free to contribute to our documentation if you are running an oracle on another provider. Here's some extra reading to learn more about kubernetes:
+
+- [What is Kubernetes?](https://cloud.google.com/learn/what-is-kubernetes)
+- [Kubernetes Engine Quickstart](https://cloud.google.com/kubernetes-engine/docs/quickstart)
+
+## Requirements
+
+### Switchboard Helm Charts
+
+The repo below contains the kubernetes manifest to streamline the deployment. Clone the repo below to get started:
+
+```bash
+git clone https://github.com/switchboard-xyz/helm-manifests.git switchboard-helm-charts
+cd switchboard-helm-charts
+```
+
+### gcloud SDK
+
+You will need to install the google cloud SDK and have a Google Cloud Platform account
+
+- [Install gcloud SDK](https://cloud.google.com/sdk/docs/install)
+- [Google Cloud Platform Registration](https://console.cloud.google.com/freetrial/signup/tos)
+
+Verify it installed correctly with the following command:
+
+```bash
+gcloud --version
+```
+
+### Grafana Domain Name
+
+You will need a domain name to point your grafana instance at to monitor your oracle's metrics. During setup, you will create an external IP, which you will need to add to your domains DNS records. Finally we will provision a TLS certificate for your domain for enhanced security.

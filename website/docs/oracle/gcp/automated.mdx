@@ -1,0 +1,46 @@
+---
+sidebar_position: 20
+slug: /oracle/gcp/automated-setup
+---
+
+# Automated Setup
+
+## Setup
+
+The helm-manifests repo contains a bash script to walk through the GCP setup and output the required variables to an env file. This script is provided as a convenience tool, you should understand all of the commands in the script before running. To automate the GCP setup, run the following command:
+
+```bash
+./setup-gcloud.sh PROJECTNAME
+
+# ./setup-gcloud.sh Sbv-Devnet-Oracle
+```
+
+- `PROJECTNAME` will be the name of your GCP project and must contain no spaces or special characters
+
+The script will walk-through the google cloud setup, create your gcp project, add your oracle keypair as a secret, create a service account and give it access to your keypair, then spin up a kubernetes cluster. The script will periodically prompt you for more information.
+
+## Wrapping Up
+
+Upon completion you will have a file `PROJECTNAME.env` containing:
+
+- PROJECT
+- DEFAULT_REGION
+- DEFAULT_ZONE
+- CLUSTER_NAME
+- EXTERNAL_IP
+- SECRET_NAME
+- GOOGLE_PAYER_SECRET_PATH
+- GCP_CONFIG_BUCKET
+- SERVICE_ACCOUNT_EMAIL
+- SERVICE_ACCOUNT_BASE64
+
+You will need to manually add:
+
+- CLUSTER
+- RPC_URL
+- BACKUP_MAINNET_RPC
+- ORACLE_KEY
+- GRAFANA_HOSTNAME
+- GRAFANA_PASSWORD
+- GRAFANA_TLS_CRT
+- GRAFANA_TLS_KEY

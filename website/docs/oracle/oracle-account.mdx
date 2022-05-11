@@ -1,0 +1,78 @@
+---
+sidebar_position: 10
+slug: /oracle/account
+title: Oracle Account
+---
+
+import CodeBlock from "@theme/CodeBlock";
+
+# Oracle Account
+
+## Create Oracle
+
+With the [Switchboard V2 CLI](../developers/cli/) installed, run the following command, where
+
+- `QUEUEKEY` is the oracle queue you will be joining. See [Program](../program) for a list of available queues.
+- `PAYERKEYPAIR` is the filesystem path to your wallet that will pay for the new account. Keypair will default to the oracle authority if authority flag is not provided.
+<!-- - `AUTHORITYKEYPAIR` OPTIONAL, is the filesystem path to your wallet that will be the authority for the oracle and necessary for heartbeating and withdrawing tokens.-->
+
+```bash
+sbv2 oracle:create QUEUEKEY --keypair PAYERKEYPAIR
+
+# sbv2 oracle:create GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U \
+# --keypair ../payer-and-authority-keypair.json
+```
+
+:::note
+
+You can print your oracle account with the command `sbv2 oracle:print ORACLEKEY` to view your oracle metrics, token account, and current permissions
+
+:::
+
+## Fund Oracle
+
+You will need to provide the minimum stake before being permitted to an oracle queue. Switchboard V2 currently uses wrapped SOL for any staking and rewards. First you will need to create a token account for your wallet that will provide the funds. **NOTE:** You can skip this step if you have a wallet that has wrapped SOL
+
+```bash
+spl-token wrap 12 PAYERKEYPAIR
+```
+
+Then we will send the tokens to your oracle account token wallet, where
+
+- `ORACLEKEY` is the public key of your oracle account that was created above
+- `AMOUNT` is the number of tokens you wish to deposit
+- `PAYERKEYPAIR` is the filesystem path to your wallet that contains the tokens
+
+```bash
+sbv2 oracle:deposit ORACLEKEY AMOUNT --keypair PAYERKEYPAIR
+# sbv2 oracle:deposit 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 100000000 --keypair ../payer-keypair.json
+```
+
+:::note
+
+The spl-token command accepts a decimal number such as 1.5 while the oracle deposit command accepts the raw integer such as 150000000
+
+:::
+
+## Withdrawing
+
+Run the following command to withdraw tokens from your oracle account. If you withdraw more than the minimum stake, your oracle will be automatically removed from the oracle queue.
+
+```bash
+sbv2 oracle:withdraw ORACLEKEY AMOUNT --keypair AUTHORITYKEYPAIR
+```
+
+## DAO Approval
+
+Oracles must first be approved by the DAO before receiving any aggregator update request.
+
+- **Oracle Account** - Create oracle account using the oracleQueue public key
+- **Stake Account** - Fund the staking account
+- **Submit DAO Approval** - Submit DAO approval to the discord for community voting.
+
+import MarkdownImage from "../../src/components/MarkdownImage";
+
+<!-- TO DO: Update this with activities like create oracle account, stake , etc-->
+
+<MarkdownImage img="/img/adding_new_oracles.png" />
+```

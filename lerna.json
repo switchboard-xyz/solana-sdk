@@ -1,0 +1,14 @@
+{
+  "packages": [
+    "libraries/sbv2-lite",
+    "libraries/ts",
+    "libraries/sbv2-utils",
+    "cli",
+    "packages/*",
+    "programs/*",
+    "website"
+  ],
+  "npmClient": "yarn",
+  "version": "independent",
+  "useWorkspaces": true
+}

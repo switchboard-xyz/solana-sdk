@@ -1,0 +1,16 @@
+{
+  // This file is not used in compilation. It is here just for a nice editor experience.
+  "extends": "@tsconfig/docusaurus/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "paths": {
+      "@switchboard-xyz/switchboard-v2": ["../libraries/ts"]
+    }
+  },
+  "include": ["src/**/*", "src/**/*.json"],
+  "exclude": ["static", "public", "node_modules"],
+  "references": [{ "path": "../libraries/ts" }],
+  "files": ["src/pages/index.tsx"]
+}

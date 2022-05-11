@@ -1,0 +1,87 @@
+---
+sidebar_position: 8
+slug: /developers/localnet
+title: Localnet Integration
+---
+
+Switchboard provides some javascript functions to copy and load a devnet environment on your local Solana cluster. This guide will assume you're using the Anchor framework but in reality will work with the standard Solana toolchain.
+
+You **_must_** have the following dependencies:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Solana](https://docs.solana.com/cli/install-solana-cli-tools)
+- [Docker Compose](https://docs.docker.com/compose/install)
+
+## Environment
+
+First, we need to create a Switchboard environment on devnet so we can easily copy it to localnet when running any test.
+
+```bash
+npm i -g @switchboard-xyz/cli
+sbv2 localnet:env --keypair ../payer-keypair.json -v
+```
+
+<!-- ```js
+import { SwitchboardTestContext } from "@switchboard-xyz/switchboard-v2";
+
+const testEnv = await SwitchboardTestEnvironment.create(payerKeypair, {
+  USDC_MINT: new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"),
+});
+testEnv.writeAll(walletPath, process.cwd());
+``` -->
+
+This will create your own Switchboard queue and oracle and grant it permission to fulfill aggregator update request. It will also aggregate the necessary Switchboard devnet accounts such as the program ID program data address, and the switchboard state including its token mint and vault. The second arguement allows you to pass in additional devnet accounts you wish to copy.
+
+It will then write the environment to the filesystem and output the following files:
+
+- start-local-validator.sh - to start a local Solana cluster with the necessary accounts copied
+- start-oracle.sh - to start a Switchboard oracle that connects to your local cluster
+- switchboard.env - stores the Switchboard environment in an env file for convienent scripting
+- switchboard.json - stores the Switchboard environment in a json file
+
+You should also have a docker-compose file pointing to the local cluster which will look something like:
+
+```yaml title="docker-compose.yml"
+version: "3.3"
+services:
+  oracle:
+    image: "switchboardlabs/node:dev-v2-3-11-22"
+    network_mode: host
+    restart: always
+    secrets:
+      - PAYER_SECRETS
+    environment:
+      - CLUSTER=localnet
+      - HEARTBEAT_INTERVAL=15 # Seconds
+      - ORACLE_KEY=${ORACLE}
+secrets:
+  PAYER_SECRETS:
+    file: ${PAYER_KEYPAIR}
+```
+
+## Context
+
+The context provides some helper functions to load a Switchboard environment in your test and manually set an aggregator. This is useful to see how a Switchboard update will effect your program state.
+
+```js
+import { SwitchboardTestContext } from "@switchboard-xyz/switchboard-v2";
+
+const switchboard = await SwitchboardTestContext.loadFromEnv(
+  program.provider,
+  "./switchboard.env"
+);
+
+// create a static feed with a value of 100
+let staticFeed = await switchboard.createStaticFeed(100);
+await staticFeed.openRound({
+  oracleQueueAccount: switchboard.queue,
+  payoutWallet: switchboard.tokenWallet,
+});
+
+// updating the static feed value to 101
+await switchboard.updateStaticFeed(staticFeed, 101);
+await staticFeed.openRound({
+  oracleQueueAccount: switchboard.queue,
+  payoutWallet: switchboard.tokenWallet,
+});
+```

@@ -1,0 +1,12 @@
+{
+  "name": "Mango ETH Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "mango",
+        "assetMint": "2FPyTwcZLUg1MDrwsyoP4D6s1tM7hAkHYRjkNb5w6Pxk",
+        "field": 0
+      }
+    }
+  ]
+}

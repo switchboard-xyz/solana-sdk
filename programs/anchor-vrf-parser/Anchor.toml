@@ -1,0 +1,14 @@
+[programs.localnet]
+anchor_vrf_parser = "FAnbznqZvZ7eijxQ6mKPoyDdM33o8cdM6wsUZtv2dFib"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "devnet"
+wallet = "../../../payer-keypair.json"
+# cluster = "devnet"
+# wallet = "secrets/payer-keypair.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.test.ts"

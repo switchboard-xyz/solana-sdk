@@ -1,0 +1,91 @@
+---
+sidebar_position: 1
+slug: /architecture
+---
+
+import MarkdownImage from "../../src/components/MarkdownImage";
+import { MdClass } from "react-icons/md";
+import OracleQueueAccountData from "../../idl/accounts/OracleQueueAccountData.md";
+import OracleQueueBuffer from "../../idl/accounts/OracleQueueBuffer.md";
+import PermissionAccountData from "../../idl/accounts/PermissionAccountData.md";
+
+# Accounts
+
+The following diagram depicts the breakdown of the different Switchboard accounts and their relationship with each other. An oracle queue governs a set of resources and controls how oracles get allocated to data feed update requests. The crank is a queue resource that allows anyone to turn and check for aggregators ready for updates based on their update interval.
+
+<MarkdownImage img="/img/account_decomposition.png" />
+
+## [Oracle Queue Account](/architecture/queue)
+
+An oracle queue is responsible for managing a set of oracles and how they get allocated to update request. Oracle queue's store the list of oracles in a data buffer account, which is configurable up to Solana's maximum account size of 10MB.
+
+<details>
+<summary>
+
+### 📦OracleQueueAccountData
+
+<b>Rent Exemption: </b>0.009723120 SOL
+
+</summary>
+
+<OracleQueueAccountData />
+
+</details>
+
+<details>
+<summary>
+
+### 📦OracleQueueBuffer
+
+<b>Rent Exemption: </b>Varies by size.
+
+</summary>
+
+<OracleQueueBuffer />
+
+</details>
+
+## [Permission Account](/architecture/permission)
+
+A permission account is a program derived account that permits one entity to use another entity's resources. Permission accounts are used by a queue to:
+
+- Permit oracles to join its network.
+- Permit data feeds to request updates from its oracles. If a queue has the unpermissionedFeedsEnabled flag, this check is ignored.
+- Permit VRF accounts to request updates from its oracles. If a queue has the unpermissionedVrfEnabled flag, this check is ignored.
+
+<details>
+<summary>
+
+### 📦PermissionAccountData
+
+<b>Rent Exemption: </b>0.00348 SOL
+
+</summary>
+
+<PermissionAccountData />
+
+</details>
+
+## [Verifiable Randomness Account](/architecture/vrf)
+
+Stores a random result and proof for a Verifiable Randomness Function (VRF).
+
+## [Oracle Account](/architecture/oracle)
+
+Node between the internet and the solana blockchain responsible for fulfilling data feed updates from external sources.
+
+## [Crank Account](/architecture/crank)
+
+Contains a collection of aggregators and provides the mechanism to jump start the system and look for any available updates. An oracle queue can have multiple cranks but an aggregator can only be assigned to a single crank.
+
+## [Aggregator Account](/architecture/aggregator)
+
+An aggregator or data feed is used by on-chain developers to build smart contracts. An aggregator contains a collection of job accounts as well as a configuration dictating how often a feed should be updated and the minimum number of jobs or oracles that must respond before accepting a result. The publisher is ultimately responsible for building a data feed and making the necessary trade-offs as it’s a careful balance between cost and update interval. The publisher is usually the on-chain consumer of the data and will have the most familiarity with how the data may be used to make these considerations.
+
+## [Job Account](/architecture/job)
+
+The job account is the blueprint for how data gets fetched from off-chain sources and contains a collection of tasks that get executed in sequential order to produce a deterministic result. Typically the first task in a job will fetch external data, with subsequent tasks responsible for parsing the response and transforming the value into a single data type, like an integer or decimal.
+
+## [Lease Account](/architecture/lease)
+
+The lease contract is an escrow contract between an oracle queue and an aggregator which contains the up-front capital to reward oracles for processing update request. If a lease falls below the minimum balance, the aggregator will be removed from the queue until it has enough funds. Lease contracts are owned by the program and can be funded by anyone using the data feed.
