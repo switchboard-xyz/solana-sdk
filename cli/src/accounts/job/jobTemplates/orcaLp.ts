@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import { OracleJob } from "@switchboard-xyz/switchboard-v2";
 
 export async function buildOrcaLpTask(
   key: string,

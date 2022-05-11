@@ -314,8 +314,6 @@ OPTIONS
 
   -v, --verbose                          log everything
 
-  --batchSize=batchSize                  number of oracles requested for each open round call
-
   --forceReportPeriod=forceReportPeriod  Number of seconds for which, even if the variance threshold is not passed,
                                          accept new responses from oracles.
 
@@ -337,8 +335,8 @@ ALIASES
   $ sbv2 set:aggregator
 
 EXAMPLE
-  $ sbv2 aggregator:set GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --updateInterval 300 --batchSize 5 --minOracles 3 
-  --keypair ../payer-keypair.json
+  $ sbv2 aggregator:set GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --updateInterval 300 --minOracles 3 --keypair 
+  ../payer-keypair.json
 ```
 
 _See code: [src/commands/aggregator/set/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.15/src/commands/aggregator/set/index.ts)_
@@ -1196,8 +1194,8 @@ OPTIONS
 
   -v, --verbose                      log everything
 
-  --amount=amount                    token amount to withdraw from lease account. If decimals provided, amount will be
-                                     normalized to raw tokenAmount
+  --amount=amount                    (required) token amount to withdraw from lease account. If decimals provided,
+                                     amount will be normalized to raw tokenAmount
 
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
 

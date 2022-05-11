@@ -1,4 +1,4 @@
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import { OracleJob } from "@switchboard-xyz/switchboard-v2";
 import AbstractJobTemplate from "./template";
 
 export class Coinbase extends AbstractJobTemplate {

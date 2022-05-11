@@ -1,4 +1,4 @@
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
+import { OracleJob } from "@switchboard-xyz/switchboard-v2";
 
 abstract class AbstractJobTemplate {
   public id: string;

@@ -4161,11 +4161,6 @@
   resolved "https://registry.npmjs.org/@switchboard-xyz/v2-task-library/-/v2-task-library-0.1.5.tgz"
   integrity sha512-jMjjpRdBEccU5hI0LaceWe68cxazGi6QX0CRevAWidO3n8tAKn3IXcvbD4rRWfZGuoSrhDpNN1Dq4lc/3K4syA==
 
-"@switchboard-xyz/v2-task-library@^0.1.9":
-  version "0.1.9"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/v2-task-library/-/v2-task-library-0.1.9.tgz#09c0fe5c550093bd388612691cbfc367095596a9"
-  integrity sha512-ncRoRT6rJr1FMD7BMgM/U6R0/bON7EWOWrd9PndIJJgvYm8LJna+OxXOjbyufDjoi0mEgz6js27M75LCHJgr+g==
-
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.npmjs.org/@szmarczak/http-timer/-/http-timer-1.1.2.tgz"
@@ -6160,7 +6155,7 @@ cli-table3@^0.6.0, cli-table3@^0.6.1:
   optionalDependencies:
     "@colors/colors" "1.5.0"
 
-cli-ux@5.6.7, cli-ux@^5.5.1, cli-ux@^5.6.4:
+cli-ux@5.6.7, cli-ux@^5.5.1:
   version "5.6.7"
   resolved "https://registry.npmjs.org/cli-ux/-/cli-ux-5.6.7.tgz"
   integrity sha512-dsKAurMNyFDnO6X1TiiRNiVbL90XReLKcvIq4H777NMqXGBxBws23ag8ubCJE97vVZEgWG2eSUhsyLf63Jv8+g==
