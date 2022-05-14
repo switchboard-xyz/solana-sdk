@@ -1,13 +1,18 @@
 import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
 import {
+  AccountInfo,
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
-import { prettyPrintAggregator } from "@switchboard-xyz/sbv2-utils";
+import {
+  prettyPrintAggregator,
+  promiseWithTimeout,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   CrankAccount,
@@ -195,6 +200,43 @@ export default class AggregatorCreateCopy extends BaseCommand {
       queueAccount.publicKey,
       aggregatorKeypair.publicKey
     );
+
+    const aggregatorAccount = new AggregatorAccount({
+      program: this.program,
+      publicKey: aggregatorKeypair.publicKey,
+    });
+
+    // Create lease and push to crank
+    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+      this.program,
+      queueAccount,
+      aggregatorAccount
+    );
+    const leaseEscrow = await spl.Token.getAssociatedTokenAddress(
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+      spl.TOKEN_PROGRAM_ID,
+      tokenMint.publicKey,
+      leaseAccount.publicKey,
+      true
+    );
+
+    const jobPubkeys: Array<PublicKey> = [];
+    const jobWallets: Array<PublicKey> = [];
+    const walletBumps: Array<number> = [];
+    for (let idx in jobAccounts) {
+      const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
+        [
+          payerKeypair.publicKey.toBuffer(),
+          spl.TOKEN_PROGRAM_ID.toBuffer(),
+          tokenMint.publicKey.toBuffer(),
+        ],
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      jobPubkeys.push(jobAccounts[idx].publicKey);
+      jobWallets.push(jobWallet);
+      walletBumps.push(bump);
+    }
+
     createAccountInstructions.push(
       [
         // allocate aggregator space
@@ -259,20 +301,74 @@ export default class AggregatorCreateCopy extends BaseCommand {
               })
               .instruction()
           : undefined,
+        spl.Token.createAssociatedTokenAccountInstruction(
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+          spl.TOKEN_PROGRAM_ID,
+          tokenMint.publicKey,
+          leaseEscrow,
+          leaseAccount.publicKey,
+          payerKeypair.publicKey
+        ),
+        await this.program.methods
+          .leaseInit({
+            loadAmount: new anchor.BN(0),
+            stateBump,
+            leaseBump,
+            withdrawAuthority: payerKeypair.publicKey,
+            walletBumps: Buffer.from([]),
+          })
+          .accounts({
+            programState: programStateAccount.publicKey,
+            lease: leaseAccount.publicKey,
+            queue: queueAccount.publicKey,
+            aggregator: aggregatorAccount.publicKey,
+            systemProgram: SystemProgram.programId,
+            funder: tokenWallet,
+            payer: payerKeypair.publicKey,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            escrow: leaseEscrow,
+            owner: payerKeypair.publicKey,
+            mint: tokenMint.publicKey,
+          })
+          // .remainingAccounts(
+          //   jobPubkeys.concat(jobWallets).map((pubkey: PublicKey) => {
+          //     return { isSigner: false, isWritable: true, pubkey };
+          //   })
+          // )
+          .instruction(),
+        flags.crankKey
+          ? await this.program.methods
+              .crankPush({
+                stateBump,
+                permissionBump,
+              })
+              .accounts({
+                crank: new PublicKey(flags.crankKey),
+                aggregator: aggregatorAccount.publicKey,
+                oracleQueue: queueAccount.publicKey,
+                queueAuthority: queue.authority,
+                permission: permissionAccount.publicKey,
+                lease: leaseAccount.publicKey,
+                escrow: leaseEscrow,
+                programState: programStateAccount.publicKey,
+                dataBuffer: (
+                  await new CrankAccount({
+                    program: this.program,
+                    publicKey: new PublicKey(flags.crankKey),
+                  }).loadData()
+                ).dataBuffer,
+              })
+              .instruction()
+          : undefined,
       ].filter((item) => item)
     );
 
-    const aggregatorAccount = new AggregatorAccount({
-      program: this.program,
-      publicKey: aggregatorKeypair.publicKey,
-    });
+    // const finalInstructions: (
+    //   | TransactionInstruction
+    //   | TransactionInstruction[]
+    // )[] = [];
 
-    const finalInstructions: (
-      | TransactionInstruction
-      | TransactionInstruction[]
-    )[] = [];
-
-    finalInstructions.push(
+    createAccountInstructions.push(
       ...(await Promise.all(
         jobAccounts.map(async (jobAccount) => {
           return this.program.methods
@@ -289,54 +385,53 @@ export default class AggregatorCreateCopy extends BaseCommand {
       ))
     );
 
-    const createAccountSignatures = await packAndSend(
+    const createAccountSignatures = packAndSend(
       this.program,
       createAccountInstructions,
-      finalInstructions,
+      // finalInstructions,
       createAccountSigners,
       payerKeypair.publicKey
     );
 
-    // TODO: Create lease account
-
-    let retryCount = 5;
-    let aggregator: any;
-    while (retryCount) {
-      try {
-        aggregator = await aggregatorAccount.loadData();
-        break;
-      } catch {
-        await sleep(1000 * retryCount);
-        retryCount--;
-      }
-    }
-
-    await LeaseAccount.create(this.program, {
-      aggregatorAccount,
-      oracleQueueAccount: queueAccount,
-      funder: tokenWallet,
-      funderAuthority: payerKeypair,
-      loadAmount: new anchor.BN(0),
-      withdrawAuthority: payerKeypair.publicKey,
+    let aggInitWs: number;
+    const aggInitPromise = new Promise((resolve: (result: boolean) => void) => {
+      aggInitWs = this.program.provider.connection.onAccountChange(
+        aggregatorAccount.publicKey,
+        (accountInfo: AccountInfo<Buffer>, slot) => {
+          try {
+            if (aggInitWs) {
+              this.program.provider.connection.removeAccountChangeListener(
+                aggInitWs
+              );
+            }
+          } catch {}
+          resolve(true);
+        }
+      );
     });
 
-    if (flags.crankKey) {
-      const crankAccount = new CrankAccount({
-        program: this.program,
-        publicKey: new PublicKey(flags.crankKey),
-      });
-      await crankAccount.push({ aggregatorAccount });
-    }
+    const awaitResult = await promiseWithTimeout(20_000, aggInitPromise).catch(
+      () => {
+        try {
+          if (aggInitWs) {
+            this.program.provider.connection.removeAccountChangeListener(
+              aggInitWs
+            );
+          }
+        } catch {}
+      }
+    );
 
     if (this.silent) {
       console.log(aggregatorAccount.publicKey.toString());
       return;
     }
 
+    await sleep(1000); // give lease time to finish
     this.logger.info(
       await prettyPrintAggregator(
         aggregatorAccount,
-        aggregator,
+        undefined,
         true,
         true,
         true
@@ -351,42 +446,24 @@ export default class AggregatorCreateCopy extends BaseCommand {
 
 async function packAndSend(
   program: anchor.Program,
-  ixnsBatch1: (TransactionInstruction | TransactionInstruction[])[],
-  ixnsBatch2: (TransactionInstruction | TransactionInstruction[])[],
+  ixnsBatch: (TransactionInstruction | TransactionInstruction[])[],
   signers: Keypair[],
   feePayer: PublicKey
 ): Promise<TransactionSignature[]> {
-  const signatures: Promise<TransactionSignature>[] = [];
+  const signatures: TransactionSignature[] = [];
   const { blockhash } = await program.provider.connection.getLatestBlockhash();
 
-  const packedTransactions1 = packInstructions(ixnsBatch1, feePayer, blockhash);
-  const signedTransactions1 = signTransactions(packedTransactions1, signers);
-  const signedTxs1 = await (
+  const packedTransactions = packInstructions(ixnsBatch, feePayer, blockhash);
+  const signedTransactions = signTransactions(packedTransactions, signers);
+  const signedTxs = await (
     program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions1);
-  for (let k = 0; k < packedTransactions1.length; k += 1) {
-    const tx = signedTxs1[k];
+  ).wallet.signAllTransactions(signedTransactions);
+
+  for (let k = 0; k < packedTransactions.length; k += 1) {
+    const tx = signedTxs[k];
     const rawTx = tx.serialize();
     signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
-        skipPreflight: true,
-        maxRetries: 10,
-      })
-    );
-  }
-
-  await Promise.all(signatures);
-
-  const packedTransactions2 = packInstructions(ixnsBatch2, feePayer, blockhash);
-  const signedTransactions2 = signTransactions(packedTransactions2, signers);
-  const signedTxs2 = await (
-    program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions2);
-  for (let k = 0; k < packedTransactions2.length; k += 1) {
-    const tx = signedTxs2[k];
-    const rawTx = tx.serialize();
-    signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
+      await program.provider.connection.sendRawTransaction(rawTx, {
         skipPreflight: true,
         maxRetries: 10,
       })
