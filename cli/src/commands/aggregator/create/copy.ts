@@ -363,12 +363,12 @@ export default class AggregatorCreateCopy extends BaseCommand {
       ].filter((item) => item)
     );
 
-    // const finalInstructions: (
-    //   | TransactionInstruction
-    //   | TransactionInstruction[]
-    // )[] = [];
+    const finalInstructions: (
+      | TransactionInstruction
+      | TransactionInstruction[]
+    )[] = [];
 
-    createAccountInstructions.push(
+    finalInstructions.push(
       ...(await Promise.all(
         jobAccounts.map(async (jobAccount) => {
           return this.program.methods
@@ -388,7 +388,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const createAccountSignatures = packAndSend(
       this.program,
       createAccountInstructions,
-      // finalInstructions,
+      finalInstructions,
       createAccountSigners,
       payerKeypair.publicKey
     );
@@ -411,7 +411,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
     });
 
     const awaitResult = await promiseWithTimeout(20_000, aggInitPromise).catch(
-      () => {
+      (error) => {
         try {
           if (aggInitWs) {
             this.program.provider.connection.removeAccountChangeListener(
@@ -419,6 +419,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
             );
           }
         } catch {}
+        throw error;
       }
     );
 
@@ -447,10 +448,11 @@ export default class AggregatorCreateCopy extends BaseCommand {
 async function packAndSend(
   program: anchor.Program,
   ixnsBatch: (TransactionInstruction | TransactionInstruction[])[],
+  ixnsBatch2: (TransactionInstruction | TransactionInstruction[])[],
   signers: Keypair[],
   feePayer: PublicKey
 ): Promise<TransactionSignature[]> {
-  const signatures: TransactionSignature[] = [];
+  const signatures: Promise<TransactionSignature>[] = [];
   const { blockhash } = await program.provider.connection.getLatestBlockhash();
 
   const packedTransactions = packInstructions(ixnsBatch, feePayer, blockhash);
@@ -463,7 +465,26 @@ async function packAndSend(
     const tx = signedTxs[k];
     const rawTx = tx.serialize();
     signatures.push(
-      await program.provider.connection.sendRawTransaction(rawTx, {
+      program.provider.connection.sendRawTransaction(rawTx, {
+        skipPreflight: true,
+        maxRetries: 10,
+      })
+    );
+  }
+
+  await Promise.all(signatures);
+
+  const packedTransactions2 = packInstructions(ixnsBatch2, feePayer, blockhash);
+  const signedTransactions2 = signTransactions(packedTransactions2, signers);
+  const signedTxs2 = await (
+    program.provider as anchor.AnchorProvider
+  ).wallet.signAllTransactions(signedTransactions2);
+
+  for (let k = 0; k < packedTransactions2.length; k += 1) {
+    const tx = signedTxs2[k];
+    const rawTx = tx.serialize();
+    signatures.push(
+      program.provider.connection.sendRawTransaction(rawTx, {
         skipPreflight: true,
         maxRetries: 10,
       })
