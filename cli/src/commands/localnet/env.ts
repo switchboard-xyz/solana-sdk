@@ -3,10 +3,7 @@
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestEnvironment } from "@switchboard-xyz/sbv2-utils";
-import {
-  programWallet,
-  SBV2_DEVNET_PID,
-} from "@switchboard-xyz/switchboard-v2";
+import { programWallet } from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
 import * as path from "path";
 import BaseCommand from "../../BaseCommand";
@@ -20,10 +17,6 @@ export default class LocalnetEnvironment extends BaseCommand {
     force: flags.boolean({
       description: "overwrite output file if existing",
       default: false,
-    }),
-    programId: flags.string({
-      description: "alternate devnet programId to create accounts for",
-      default: SBV2_DEVNET_PID.toString(),
     }),
   };
 

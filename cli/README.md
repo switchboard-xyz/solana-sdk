@@ -69,6 +69,7 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 * [`sbv2 print:vrf VRFKEY`](#sbv2-printvrf-vrfkey)
 * [`sbv2 queue:add:crank QUEUEKEY`](#sbv2-queueaddcrank-queuekey)
 * [`sbv2 queue:create`](#sbv2-queuecreate)
+* [`sbv2 queue:custom`](#sbv2-queuecustom)
 * [`sbv2 queue:permit:aggregator AGGREGATORKEY`](#sbv2-queuepermitaggregator-aggregatorkey)
 * [`sbv2 queue:permit:oracle ORACLEKEY`](#sbv2-queuepermitoracle-oraclekey)
 * [`sbv2 queue:set:rewards QUEUEKEY REWARDS`](#sbv2-queuesetrewards-queuekey-rewards)
@@ -111,6 +112,8 @@ OPTIONS
   --jobKey=jobKey                                public key of an existing job account to add to an aggregator
 
   --mainnetBeta                                  WARNING: use mainnet-beta solana cluster
+
+  --programId=programId                          alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:add:job
@@ -159,6 +162,8 @@ OPTIONS
 
   --minUpdateDelay=minUpdateDelay        override source aggregator's minUpdateDelaySeconds
 
+  --programId=programId                  alternative Switchboard program ID to interact with
+
   --queueKey=queueKey                    (required) public key of the queue to create aggregator for
 
   --varianceThreshold=varianceThreshold  override source aggregator's varianceThreshold
@@ -201,6 +206,8 @@ OPTIONS
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 json:create:aggregator
 
@@ -236,6 +243,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/lock.ts)_
@@ -264,6 +273,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/permission/create.ts)_
@@ -296,6 +307,8 @@ OPTIONS
   --force                    overwrite outputFile if existing
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:remove:job
@@ -337,6 +350,8 @@ OPTIONS
   --minOracles=minOracles                number of oracles that must respond before a value is accepted on-chain
 
   --newQueue=newQueue                    public key of the new oracle queue
+
+  --programId=programId                  alternative Switchboard program ID to interact with
 
   --updateInterval=updateInterval        set an aggregator's minimum update delay
 
@@ -380,6 +395,8 @@ OPTIONS
   -v, --verbose                            log everything
 
   --mainnetBeta                            WARNING: use mainnet-beta solana cluster
+
+  --programId=programId                    alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/set/authority.ts)_
@@ -410,6 +427,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/set/batchSize.ts)_
@@ -442,6 +461,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:set:forceReport
@@ -480,6 +501,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:add:history
 
@@ -515,6 +538,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/set/minJobs.ts)_
@@ -545,6 +570,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/set/minOracles.ts)_
@@ -575,6 +602,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/aggregator/set/queue.ts)_
@@ -605,6 +634,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:set:updateInterval GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 60 --keypair ../payer-keypair.json
@@ -641,6 +672,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:set:variance
 
@@ -676,6 +709,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 aggregator:update J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa --keypair ../payer-keypair.json
 ```
@@ -703,6 +738,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 config:print
@@ -737,6 +774,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/config/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/config/set.ts)_
@@ -768,6 +807,8 @@ OPTIONS
   --force                      overwrite output file if exists
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
+
+  --programId=programId        alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/crank/list.ts)_
@@ -797,6 +838,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:add:crank
@@ -829,6 +872,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 crank:turn 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr --keypair ../payer-keypair.json
@@ -881,6 +926,8 @@ OPTIONS
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 job:create:copy 7pdb5RVM6cVBU8XDfpGqakb1S4wX2i5QsZxT117tK4HS --keypair ../payer-keypair.json
 ```
@@ -919,6 +966,8 @@ OPTIONS
   --mainnetBeta                              WARNING: use mainnet-beta solana cluster
 
   --outputFile=outputFile                    output job schema to a json file
+
+  --programId=programId                      alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 json:create:job
@@ -966,6 +1015,8 @@ OPTIONS
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
 EXAMPLES
   $ sbv2 job:create:template ftxUs BTC_USD --keypair ../payer-keypair.json
   $ sbv2 job:create:template ftxUs BTC_USD --keypair ../payer-keypair.json --name=ftxUs_Btc
@@ -999,6 +1050,8 @@ OPTIONS
   --aggregatorFile=aggregatorFile      filesystem path of job json definition file
 
   --mainnetBeta                        WARNING: use mainnet-beta solana cluster
+
+  --programId=programId                alternative Switchboard program ID to interact with
 
   --sourceAggregator=sourceAggregator  public key of an existing aggregator account to copy
 ```
@@ -1034,6 +1087,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/json/add/crank.ts)_
@@ -1065,6 +1120,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/json/add/oracle.ts)_
@@ -1098,6 +1155,8 @@ OPTIONS
   --force                overwrite output file
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 queue:create:json
@@ -1136,6 +1195,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:lease:create
 
@@ -1172,6 +1233,8 @@ OPTIONS
                          normalized to raw tokenAmount
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:lease:extend
@@ -1212,6 +1275,8 @@ OPTIONS
 
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
 
+  --programId=programId              alternative Switchboard program ID to interact with
+
   --withdrawAddress=withdrawAddress  tokenAccount to withdraw to. If not provided, payer associated token account will
                                      be used
 
@@ -1249,8 +1314,7 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
-  --programId=programId  [default: 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG] alternate devnet programId to create
-                         accounts for
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/localnet/env.ts)_
@@ -1279,6 +1343,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 oracle:balance 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
@@ -1313,6 +1379,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLES
   $ sbv2 oracle:create GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --keypair ../payer-and-authority-keypair.json
@@ -1352,6 +1420,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 oracle:deposit 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json
 ```
@@ -1382,6 +1452,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/oracle/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/oracle/permission/create.ts)_
@@ -1419,6 +1491,8 @@ OPTIONS
 
   --mainnetBeta                          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId                  alternative Switchboard program ID to interact with
+
 EXAMPLES
   $ sbv2 oracle:withdraw 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../oracle-keypair.json
   $ sbv2 oracle:withdraw 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json --authority 
@@ -1452,6 +1526,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/permission/create.ts)_
@@ -1483,6 +1559,8 @@ OPTIONS
   --disable                  disable permissions
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/permission/set.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/permission/set.ts)_
@@ -1535,6 +1613,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:print
 
@@ -1568,6 +1648,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:history:print
@@ -1604,6 +1686,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:lease:print
   $ sbv2 aggregator:print:lease
@@ -1638,6 +1722,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:permission:print
@@ -1674,6 +1760,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 crank:print
 
@@ -1707,6 +1795,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 job:print
@@ -1756,6 +1846,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 json:samples
   $ sbv2 write:json:samples
@@ -1793,6 +1885,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 oracle:print
 
@@ -1827,6 +1921,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 oracle:permission:print
   $ sbv2 oracle:print:permission
@@ -1858,6 +1954,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 program:print
@@ -1895,6 +1993,8 @@ OPTIONS
 
   --oracles              output oracles that are heartbeating on the queue
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 queue:print
 
@@ -1928,6 +2028,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 vrf:print
@@ -1966,6 +2068,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1
@@ -2008,6 +2112,8 @@ OPTIONS
 
   --minStake=minStake          [default: 0] minimum stake required by an oracle to join the queue
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
   --queueSize=queueSize        maximum number of oracles the queue can support
 
 EXAMPLES
@@ -2018,6 +2124,51 @@ EXAMPLES
 ```
 
 _See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/queue/create.ts)_
+
+## `sbv2 queue:custom`
+
+create a custom queue
+
+```
+USAGE
+  $ sbv2 queue:custom
+
+OPTIONS
+  -a, --authority=authority          keypair to delegate authority to for creating permissions targeted at the queue
+  -c, --crankSize=crankSize          [default: 100] size of the crank
+  -h, --help                         show CLI help
+
+  -k, --keypair=keypair              keypair that will pay for onchain transactions. defaults to new account authority
+                                     if no alternate authority provided
+
+  -n, --name=name                    [default: Custom Queue] name of the queue for easier identification
+
+  -o, --numOracles=numOracles        number of oracles to add to the queue
+
+  -o, --oracleTimeout=oracleTimeout  [default: 180] number of oracles to add to the queue
+
+  -r, --reward=reward                [default: 0] oracle rewards for successfully responding to an update request
+
+  -s, --silent                       suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl                alternate RPC url
+
+  -v, --verbose                      log everything
+
+  --force                            overwrite output file if existing
+
+  --mainnetBeta                      WARNING: use mainnet-beta solana cluster
+
+  --minStake=minStake                [default: 0] minimum stake required by an oracle to join the queue
+
+  --programId=programId              alternative Switchboard program ID to interact with
+
+  --queueSize=queueSize              [default: 100] maximum number of oracles the queue can support
+
+  --unpermissionedFeeds              permit unpermissioned feeds
+```
+
+_See code: [src/commands/queue/custom.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/queue/custom.ts)_
 
 ## `sbv2 queue:permit:aggregator AGGREGATORKEY`
 
@@ -2044,6 +2195,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 queue:permit:aggregator 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
@@ -2077,6 +2230,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 queue:permit:oracle 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
@@ -2109,6 +2264,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/queue/set/rewards.ts)_
@@ -2140,6 +2297,8 @@ OPTIONS
   --disable                  disable unpermissionedVrfEnabled
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/queue/set/vrf.ts)_
@@ -2167,6 +2326,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/sandbox.ts)_
@@ -2195,6 +2356,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.16/src/commands/test.ts)_
@@ -2238,6 +2401,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:watch
 
@@ -2271,6 +2436,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 vrf:watch

@@ -7,7 +7,6 @@ import {
   PublicKey,
   SystemProgram,
   TransactionInstruction,
-  TransactionSignature,
 } from "@solana/web3.js";
 import {
   prettyPrintAggregator,
@@ -20,16 +19,15 @@ import {
   LeaseAccount,
   OracleJob,
   OracleQueueAccount,
-  packInstructions,
   PermissionAccount,
   ProgramStateAccount,
   programWallet,
-  signTransactions,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import BaseCommand from "../../../BaseCommand";
-import { sleep, verifyProgramHasPayer } from "../../../utils";
+import { verifyProgramHasPayer } from "../../../utils";
+import { packAndSend } from "../../../utils/transaction";
 
 export default class AggregatorCreateCopy extends BaseCommand {
   static description = "copy an aggregator account to a new oracle queue";
@@ -398,37 +396,25 @@ export default class AggregatorCreateCopy extends BaseCommand {
       aggInitWs = this.program.provider.connection.onAccountChange(
         aggregatorAccount.publicKey,
         (accountInfo: AccountInfo<Buffer>, slot) => {
-          try {
-            if (aggInitWs) {
-              this.program.provider.connection.removeAccountChangeListener(
-                aggInitWs
-              );
-            }
-          } catch {}
           resolve(true);
         }
       );
     });
 
-    const awaitResult = await promiseWithTimeout(20_000, aggInitPromise).catch(
-      (error) => {
-        try {
-          if (aggInitWs) {
-            this.program.provider.connection.removeAccountChangeListener(
-              aggInitWs
-            );
-          }
-        } catch {}
-        throw error;
-      }
-    );
+    const awaitResult = await promiseWithTimeout(
+      22_000,
+      aggInitPromise
+    ).finally(() => {
+      try {
+        this.program.provider.connection.removeAccountChangeListener(aggInitWs);
+      } catch {}
+    });
 
     if (this.silent) {
       console.log(aggregatorAccount.publicKey.toString());
       return;
     }
 
-    await sleep(1000); // give lease time to finish
     this.logger.info(
       await prettyPrintAggregator(
         aggregatorAccount,
@@ -443,53 +429,4 @@ export default class AggregatorCreateCopy extends BaseCommand {
   async catch(error) {
     super.catch(error, "Failed to copy aggregator account to new queue");
   }
-}
-
-async function packAndSend(
-  program: anchor.Program,
-  ixnsBatch: (TransactionInstruction | TransactionInstruction[])[],
-  ixnsBatch2: (TransactionInstruction | TransactionInstruction[])[],
-  signers: Keypair[],
-  feePayer: PublicKey
-): Promise<TransactionSignature[]> {
-  const signatures: Promise<TransactionSignature>[] = [];
-  const { blockhash } = await program.provider.connection.getLatestBlockhash();
-
-  const packedTransactions = packInstructions(ixnsBatch, feePayer, blockhash);
-  const signedTransactions = signTransactions(packedTransactions, signers);
-  const signedTxs = await (
-    program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions);
-
-  for (let k = 0; k < packedTransactions.length; k += 1) {
-    const tx = signedTxs[k];
-    const rawTx = tx.serialize();
-    signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
-        skipPreflight: true,
-        maxRetries: 10,
-      })
-    );
-  }
-
-  await Promise.all(signatures);
-
-  const packedTransactions2 = packInstructions(ixnsBatch2, feePayer, blockhash);
-  const signedTransactions2 = signTransactions(packedTransactions2, signers);
-  const signedTxs2 = await (
-    program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions2);
-
-  for (let k = 0; k < packedTransactions2.length; k += 1) {
-    const tx = signedTxs2[k];
-    const rawTx = tx.serialize();
-    signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
-        skipPreflight: true,
-        maxRetries: 10,
-      })
-    );
-  }
-
-  return Promise.all(signatures);
 }

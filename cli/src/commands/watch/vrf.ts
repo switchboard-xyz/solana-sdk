@@ -65,6 +65,6 @@ function printVrf(vrf: any) {
   process.stdout.write(
     `${chalk.green("#", counter.toString().padEnd(3, " "))}: ${chalk.blue(
       "["
-    )}${chalk.yellow(result.toString())}${chalk.blue("]")}` + "\r\n"
+    )}${chalk.yellow(result.toString())}${chalk.blue("]")}\n`
   );
 }
