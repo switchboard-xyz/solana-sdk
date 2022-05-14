@@ -39,21 +39,27 @@ export async function packAndSend(
 
   await Promise.all(signatures);
 
-  const packedTransactions2 = packInstructions(ixnsBatch2, feePayer, blockhash);
-  const signedTransactions2 = signTransactions(packedTransactions2, signers);
-  const signedTxs2 = await (
-    program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions2);
-
-  for (let k = 0; k < packedTransactions2.length; k += 1) {
-    const tx = signedTxs2[k];
-    const rawTx = tx.serialize();
-    signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
-        skipPreflight: true,
-        maxRetries: 10,
-      })
+  if (ixnsBatch2 && ixnsBatch2.length > 0) {
+    const packedTransactions2 = packInstructions(
+      ixnsBatch2,
+      feePayer,
+      blockhash
     );
+    const signedTransactions2 = signTransactions(packedTransactions2, signers);
+    const signedTxs2 = await (
+      program.provider as anchor.AnchorProvider
+    ).wallet.signAllTransactions(signedTransactions2);
+
+    for (let k = 0; k < packedTransactions2.length; k += 1) {
+      const tx = signedTxs2[k];
+      const rawTx = tx.serialize();
+      signatures.push(
+        program.provider.connection.sendRawTransaction(rawTx, {
+          skipPreflight: true,
+          maxRetries: 10,
+        })
+      );
+    }
   }
 
   return Promise.all(signatures);

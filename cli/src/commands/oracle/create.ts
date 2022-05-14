@@ -1,13 +1,28 @@
 import { flags } from "@oclif/command";
-import { PublicKey } from "@solana/web3.js";
-import { prettyPrintOracle } from "@switchboard-xyz/sbv2-utils";
+import * as anchor from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
+import {
+  AccountInfo,
+  PublicKey,
+  SystemProgram,
+  TransactionInstruction,
+} from "@solana/web3.js";
+import {
+  chalkString,
+  prettyPrintOracle,
+  programWallet,
+  promiseWithTimeout,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
+  PermissionAccount,
+  ProgramStateAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
+import { packAndSend } from "../../utils/transaction";
 
 export default class OracleCreate extends BaseCommand {
   static description = "create a new oracle account for a given queue";
@@ -44,29 +59,130 @@ export default class OracleCreate extends BaseCommand {
   async run() {
     const { args, flags } = this.parse(OracleCreate);
     verifyProgramHasPayer(this.program);
+    const payerKeypair = programWallet(this.program);
 
-    const authority = await this.loadAuthority(flags.authority);
+    const authorityKeypair = await this.loadAuthority(flags.authority);
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
       publicKey: args.queueKey,
     });
     const queue = await queueAccount.loadData();
+    const tokenMint = await queueAccount.loadMint();
 
-    const oracleAccount = await OracleAccount.create(this.program, {
-      name: Buffer.from(flags.name ?? ""),
-      oracleAuthority: authority,
+    const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
+      this.program
+    );
+
+    const tokenWalletKeypair = anchor.web3.Keypair.generate();
+    const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
+      this.program,
       queueAccount,
+      tokenWalletKeypair.publicKey
+    );
+
+    this.logger.debug(chalkString("Oracle", oracleAccount.publicKey));
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      authorityKeypair.publicKey,
+      queueAccount.publicKey,
+      oracleAccount.publicKey
+    );
+    this.logger.debug(chalkString(`Permission`, permissionAccount.publicKey));
+
+    const oracleCreateInstructions: (
+      | TransactionInstruction
+      | TransactionInstruction[]
+    )[] = [];
+
+    oracleCreateInstructions.push([
+      SystemProgram.createAccount({
+        fromPubkey: payerKeypair.publicKey,
+        newAccountPubkey: tokenWalletKeypair.publicKey,
+        lamports:
+          await this.program.provider.connection.getMinimumBalanceForRentExemption(
+            spl.AccountLayout.span
+          ),
+        space: spl.AccountLayout.span,
+        programId: spl.TOKEN_PROGRAM_ID,
+      }),
+      spl.Token.createInitAccountInstruction(
+        spl.TOKEN_PROGRAM_ID,
+        tokenMint.publicKey,
+        tokenWalletKeypair.publicKey,
+        programStateAccount.publicKey
+      ),
+      await this.program.methods
+        .oracleInit({
+          name: Buffer.from(flags.name ?? "").slice(0, 32),
+          metadata: Buffer.from("").slice(0, 128),
+          stateBump,
+          oracleBump,
+        })
+        .accounts({
+          oracle: oracleAccount.publicKey,
+          oracleAuthority: authorityKeypair.publicKey,
+          queue: queueAccount.publicKey,
+          wallet: tokenWalletKeypair.publicKey,
+          programState: programStateAccount.publicKey,
+          systemProgram: SystemProgram.programId,
+          payer: payerKeypair.publicKey,
+        })
+        .instruction(),
+      await this.program.methods
+        .permissionInit({})
+        .accounts({
+          permission: permissionAccount.publicKey,
+          authority: authorityKeypair.publicKey,
+          granter: queueAccount.publicKey,
+          grantee: oracleAccount.publicKey,
+          payer: payerKeypair.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .instruction(),
+    ]);
+
+    const createAccountSignatures = packAndSend(
+      this.program,
+      oracleCreateInstructions,
+      [],
+      [payerKeypair, authorityKeypair, tokenWalletKeypair],
+      payerKeypair.publicKey
+    );
+
+    let oracleWs: number;
+    const createOraclePromise = new Promise(
+      (resolve: (result: any) => void) => {
+        oracleWs = this.program.provider.connection.onAccountChange(
+          oracleAccount.publicKey,
+          (accountInfo: AccountInfo<Buffer>, slot) => {
+            const accountCoder = new anchor.BorshAccountsCoder(
+              this.program.idl
+            );
+            resolve(accountCoder.decode("OracleAccountData", accountInfo.data));
+          }
+        );
+      }
+    );
+
+    const oracleData = await promiseWithTimeout(
+      25_000,
+      createOraclePromise
+    ).finally(() => {
+      try {
+        this.program.provider.connection.removeAccountChangeListener(oracleWs);
+      } catch {}
     });
 
     if (this.silent) {
       console.log(oracleAccount.publicKey.toString());
-    } else {
-      this.logger.log(
-        `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`
-      );
-      this.logger.info(await prettyPrintOracle(oracleAccount));
+      return;
     }
+    this.logger.log(
+      `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`
+    );
+    this.logger.info(await prettyPrintOracle(oracleAccount, oracleData, true));
   }
 
   async catch(error) {
