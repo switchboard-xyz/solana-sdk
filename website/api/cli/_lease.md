@@ -33,6 +33,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:lease:create
 
@@ -69,6 +71,8 @@ OPTIONS
                          normalized to raw tokenAmount
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:lease:extend
@@ -108,6 +112,8 @@ OPTIONS
                                      amount will be normalized to raw tokenAmount
 
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
+
+  --programId=programId              alternative Switchboard program ID to interact with
 
   --withdrawAddress=withdrawAddress  tokenAccount to withdraw to. If not provided, payer associated token account will
                                      be used

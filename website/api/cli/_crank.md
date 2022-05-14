@@ -32,6 +32,8 @@ OPTIONS
   --force                      overwrite output file if exists
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
+
+  --programId=programId        alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/crank/list.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/crank/list.ts)_
@@ -61,6 +63,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:add:crank
@@ -93,6 +97,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 crank:turn 85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr --keypair ../payer-keypair.json

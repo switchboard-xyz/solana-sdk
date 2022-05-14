@@ -37,6 +37,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1
 ```
@@ -45,46 +47,49 @@ _See code: [src/commands/queue/add/crank.ts](https://github.com/switchboard-xyz/
 
 ## `sbv2 queue:create`
 
-create an oracle queue
+create a custom queue
 
 ```
 USAGE
   $ sbv2 queue:create
 
 OPTIONS
-  -a, --authority=authority    keypair to delegate authority to for creating permissions targeted at the queue
-  -c, --numCranks=numCranks    number of cranks to add to the queue
-  -f, --outputFile=outputFile  output queue schema to a json file
-  -h, --help                   show CLI help
+  -a, --authority=authority          keypair to delegate authority to for creating permissions targeted at the queue
+  -c, --crankSize=crankSize          [default: 100] size of the crank
+  -f, --outputFile=outputFile        output queue schema to a json file
+  -h, --help                         show CLI help
 
-  -k, --keypair=keypair        keypair that will pay for onchain transactions. defaults to new account authority if no
-                               alternate authority provided
+  -k, --keypair=keypair              keypair that will pay for onchain transactions. defaults to new account authority
+                                     if no alternate authority provided
 
-  -n, --name=name              name of the queue for easier identification
+  -n, --name=name                    [default: Custom Queue] name of the queue for easier identification
 
-  -o, --numOracles=numOracles  number of oracles to add to the queue
+  -o, --numOracles=numOracles        number of oracles to add to the queue
 
-  -r, --reward=reward          oracle rewards for successfully responding to an update request
+  -o, --oracleTimeout=oracleTimeout  [default: 180] number of oracles to add to the queue
 
-  -s, --silent                 suppress cli prompts
+  -r, --reward=reward                [default: 0] oracle rewards for successfully responding to an update request
 
-  -u, --rpcUrl=rpcUrl          alternate RPC url
+  -s, --silent                       suppress cli prompts
 
-  -v, --verbose                log everything
+  -u, --rpcUrl=rpcUrl                alternate RPC url
 
-  --force                      overwrite output file if existing
+  -v, --verbose                      log everything
 
-  --mainnetBeta                WARNING: use mainnet-beta solana cluster
+  --force                            overwrite output file if existing
 
-  --minStake=minStake          minimum stake required by an oracle to join the queue
+  --mainnetBeta                      WARNING: use mainnet-beta solana cluster
 
-  --queueSize=queueSize        maximum number of oracles the queue can support
+  --minStake=minStake                [default: 0] minimum stake required by an oracle to join the queue
 
-EXAMPLES
-  $ sbv2 queue:create --keypair ../authority-keypair.json --name queue-1
-  $ sbv2 queue:create --keypair ../payer-keypair.json --name queue-1 --authority ../authority-keypair.json
-  $ sbv2 queue:create --keypair ../authority-keypair.json --name queue-1 --numCranks 1 --numOracles 1 --outputFile 
-  new-queue.json
+  --programId=programId              alternative Switchboard program ID to interact with
+
+  --queueSize=queueSize              [default: 100] maximum number of oracles the queue can support
+
+  --unpermissionedFeeds              permit unpermissioned feeds
+
+ALIASES
+  $ sbv2 custom:queue
 ```
 
 _See code: [src/commands/queue/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/create.ts)_
@@ -114,6 +119,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 queue:permit:aggregator 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
@@ -147,6 +154,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 queue:permit:oracle 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4 --keypair ../queue-authority.json
 ```
@@ -179,6 +188,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/queue/set/rewards.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/set/rewards.ts)_
@@ -210,6 +221,8 @@ OPTIONS
   --disable                  disable unpermissionedVrfEnabled
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/queue/set/vrf.ts)_

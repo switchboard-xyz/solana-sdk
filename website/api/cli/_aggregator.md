@@ -2,7 +2,7 @@
 interact with a switchboard aggregator account
 
 * [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
-* [`sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`](#sbv2-aggregatorcreatecopy-aggregatorsource-queuekey)
+* [`sbv2 aggregator:create:copy AGGREGATORSOURCE`](#sbv2-aggregatorcreatecopy-aggregatorsource)
 * [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
 * [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
 * [`sbv2 aggregator:permission:create AGGREGATORKEY`](#sbv2-aggregatorpermissioncreate-aggregatorkey)
@@ -52,46 +52,60 @@ OPTIONS
 
   --mainnetBeta                                  WARNING: use mainnet-beta solana cluster
 
+  --programId=programId                          alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 aggregator:add:job
 ```
 
 _See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/add/job.ts)_
 
-## `sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY`
+## `sbv2 aggregator:create:copy AGGREGATORSOURCE`
 
 copy an aggregator account to a new oracle queue
 
 ```
 USAGE
-  $ sbv2 aggregator:create:copy AGGREGATORSOURCE QUEUEKEY
+  $ sbv2 aggregator:create:copy AGGREGATORSOURCE
 
 ARGUMENTS
   AGGREGATORSOURCE  public key of the aggregator account to copy
-  QUEUEKEY          public key of the queue to create aggregator for
 
 OPTIONS
-  -a, --authority=authority          alternate keypair that will be the aggregator authority
-  -f, --outputFile=outputFile        output file to save aggregator definition to
-  -h, --help                         show CLI help
+  -a, --authority=authority              alternate keypair that will be the aggregator authority
+  -f, --outputFile=outputFile            output file to save aggregator definition to
+  -h, --help                             show CLI help
 
-  -k, --keypair=keypair              keypair that will pay for onchain transactions. defaults to new account authority
-                                     if no alternate authority provided
+  -k, --keypair=keypair                  keypair that will pay for onchain transactions. defaults to new account
+                                         authority if no alternate authority provided
 
-  -s, --silent                       suppress cli prompts
+  -s, --silent                           suppress cli prompts
 
-  -u, --rpcUrl=rpcUrl                alternate RPC url
+  -u, --rpcUrl=rpcUrl                    alternate RPC url
 
-  -v, --verbose                      log everything
+  -v, --verbose                          log everything
 
-  --existingKeypair=existingKeypair  existing keypair file to store new account. useful for using the same public key on
-                                     different clusters
+  --batchSize=batchSize                  override source aggregator's oracleRequestBatchSize
 
-  --force                            skip job confirmation
+  --crankKey=crankKey                    public key of the crank to push aggregator to
 
-  --history=history                  optional, initialize a history buffer of given size
+  --force                                skip job confirmation
 
-  --mainnetBeta                      WARNING: use mainnet-beta solana cluster
+  --forceReportPeriod=forceReportPeriod  override source aggregator's forceReportPeriod
+
+  --mainnetBeta                          WARNING: use mainnet-beta solana cluster
+
+  --minJobs=minJobs                      override source aggregator's minJobResults
+
+  --minOracles=minOracles                override source aggregator's minOracleResults
+
+  --minUpdateDelay=minUpdateDelay        override source aggregator's minUpdateDelaySeconds
+
+  --programId=programId                  alternative Switchboard program ID to interact with
+
+  --queueKey=queueKey                    (required) public key of the queue to create aggregator for
+
+  --varianceThreshold=varianceThreshold  override source aggregator's varianceThreshold
 
 EXAMPLE
   $ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee 
@@ -131,6 +145,8 @@ OPTIONS
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 json:create:aggregator
 
@@ -166,6 +182,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/lock.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/lock.ts)_
@@ -194,6 +212,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/permission/create.ts)_
@@ -226,6 +246,8 @@ OPTIONS
   --force                    overwrite outputFile if existing
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:remove:job
@@ -267,6 +289,8 @@ OPTIONS
   --minOracles=minOracles                number of oracles that must respond before a value is accepted on-chain
 
   --newQueue=newQueue                    public key of the new oracle queue
+
+  --programId=programId                  alternative Switchboard program ID to interact with
 
   --updateInterval=updateInterval        set an aggregator's minimum update delay
 
@@ -310,6 +334,8 @@ OPTIONS
   -v, --verbose                            log everything
 
   --mainnetBeta                            WARNING: use mainnet-beta solana cluster
+
+  --programId=programId                    alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/authority.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/authority.ts)_
@@ -340,6 +366,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/batchSize.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/batchSize.ts)_
@@ -372,6 +400,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:set:forceReport
@@ -410,6 +440,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:add:history
 
@@ -445,6 +477,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/minJobs.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/minJobs.ts)_
@@ -475,6 +509,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/minOracles.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/minOracles.ts)_
@@ -505,6 +541,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/aggregator/set/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/set/queue.ts)_
@@ -535,6 +573,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:set:updateInterval GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 60 --keypair ../payer-keypair.json
@@ -571,6 +611,8 @@ OPTIONS
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
 
+  --programId=programId      alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:set:variance
 
@@ -605,6 +647,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 EXAMPLE
   $ sbv2 aggregator:update J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa --keypair ../payer-keypair.json

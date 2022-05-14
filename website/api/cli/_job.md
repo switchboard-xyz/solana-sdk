@@ -33,6 +33,8 @@ OPTIONS
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
 
+  --programId=programId        alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 job:create:copy 7pdb5RVM6cVBU8XDfpGqakb1S4wX2i5QsZxT117tK4HS --keypair ../payer-keypair.json
 ```
@@ -71,6 +73,8 @@ OPTIONS
   --mainnetBeta                              WARNING: use mainnet-beta solana cluster
 
   --outputFile=outputFile                    output job schema to a json file
+
+  --programId=programId                      alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 json:create:job
@@ -117,6 +121,8 @@ OPTIONS
   --force                      skip job confirmation
 
   --mainnetBeta                WARNING: use mainnet-beta solana cluster
+
+  --programId=programId        alternative Switchboard program ID to interact with
 
 EXAMPLES
   $ sbv2 job:create:template ftxUs BTC_USD --keypair ../payer-keypair.json

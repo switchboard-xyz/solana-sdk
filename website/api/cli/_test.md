@@ -1,15 +1,18 @@
 
-create a localnet switchboard environment
+sandbox
 
-* [`sbv2 localnet:env`](#sbv2-localnetenv)
+* [`sbv2 test ORACLEKEY`](#sbv2-test-oraclekey)
 
-## `sbv2 localnet:env`
+## `sbv2 test ORACLEKEY`
 
-create a localnet switchboard environment
+sandbox
 
 ```
 USAGE
-  $ sbv2 localnet:env
+  $ sbv2 test ORACLEKEY
+
+ARGUMENTS
+  ORACLEKEY  public key of the oracle to deposit funds into
 
 OPTIONS
   -h, --help             show CLI help
@@ -23,11 +26,9 @@ OPTIONS
 
   -v, --verbose          log everything
 
-  --force                overwrite output file if existing
-
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
   --programId=programId  alternative Switchboard program ID to interact with
 ```
 
-_See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/localnet/env.ts)_
+_See code: [src/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/test.ts)_

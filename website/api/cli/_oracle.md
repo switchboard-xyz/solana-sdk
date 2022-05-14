@@ -32,6 +32,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 oracle:balance 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
 ```
@@ -65,6 +67,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 
 EXAMPLES
   $ sbv2 oracle:create GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --keypair ../payer-and-authority-keypair.json
@@ -104,6 +108,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 EXAMPLE
   $ sbv2 oracle:deposit 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../payer-keypair.json
 ```
@@ -134,6 +140,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/oracle/permission/create.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/oracle/permission/create.ts)_
@@ -170,6 +178,8 @@ OPTIONS
                                          amount will be normalized to raw tokenAmount
 
   --mainnetBeta                          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId                  alternative Switchboard program ID to interact with
 
 EXAMPLES
   $ sbv2 oracle:withdraw 6kPsQoufdugtHLjM4fH7Z2fNv7jLt5pgvwKHt5JvRhQ6 2500 --keypair ../oracle-keypair.json

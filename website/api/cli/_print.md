@@ -14,6 +14,7 @@ find and print a switchboard account by public key for a given cluster
 * [`sbv2 print:oracle:permission ORACLEKEY`](#sbv2-printoraclepermission-oraclekey)
 * [`sbv2 print:program`](#sbv2-printprogram)
 * [`sbv2 print:queue QUEUEKEY`](#sbv2-printqueue-queuekey)
+* [`sbv2 print:vrf VRFKEY`](#sbv2-printvrf-vrfkey)
 
 ## `sbv2 print PUBLICKEY`
 
@@ -63,6 +64,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:print
 
@@ -96,6 +99,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:history:print
@@ -132,6 +137,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 aggregator:lease:print
   $ sbv2 aggregator:print:lease
@@ -166,6 +173,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:permission:print
@@ -202,6 +211,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 crank:print
 
@@ -235,6 +246,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 job:print
@@ -284,6 +297,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 json:samples
   $ sbv2 write:json:samples
@@ -321,6 +336,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 oracle:print
 
@@ -355,6 +372,8 @@ OPTIONS
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 oracle:permission:print
   $ sbv2 oracle:print:permission
@@ -386,6 +405,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 program:print
@@ -423,6 +444,8 @@ OPTIONS
 
   --oracles              output oracles that are heartbeating on the queue
 
+  --programId=programId  alternative Switchboard program ID to interact with
+
 ALIASES
   $ sbv2 queue:print
 
@@ -431,3 +454,39 @@ EXAMPLE
 ```
 
 _See code: [src/commands/print/queue.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/print/queue.ts)_
+
+## `sbv2 print:vrf VRFKEY`
+
+Print the deserialized Switchboard VRF account
+
+```
+USAGE
+  $ sbv2 print:vrf VRFKEY
+
+ARGUMENTS
+  VRFKEY  public key of the vrf account to deserialize
+
+OPTIONS
+  -h, --help             show CLI help
+
+  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+
+  -s, --silent           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl    alternate RPC url
+
+  -v, --verbose          log everything
+
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
+
+ALIASES
+  $ sbv2 vrf:print
+
+EXAMPLE
+  $ sbv2 vrf:print SzTvFZLz3hwjZFMwVWzuEnr1oUF6qyvXwXCvsqf7qeA
+```
+
+_See code: [src/commands/print/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/print/vrf.ts)_

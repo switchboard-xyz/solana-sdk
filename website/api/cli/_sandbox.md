@@ -26,6 +26,8 @@ OPTIONS
   -v, --verbose          log everything
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/sandbox.ts)_

@@ -32,6 +32,8 @@ OPTIONS
 
   --mainnetBeta                        WARNING: use mainnet-beta solana cluster
 
+  --programId=programId                alternative Switchboard program ID to interact with
+
   --sourceAggregator=sourceAggregator  public key of an existing aggregator account to copy
 ```
 
@@ -66,6 +68,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/json/add/crank.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/add/crank.ts)_
@@ -97,6 +101,8 @@ OPTIONS
   -v, --verbose              log everything
 
   --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/json/add/oracle.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/json/add/oracle.ts)_
@@ -130,6 +136,8 @@ OPTIONS
   --force                overwrite output file
 
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 queue:create:json
