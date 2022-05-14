@@ -517,7 +517,21 @@ export async function prettyPrintVrf(
   outputString +=
     chalkString(
       "callback",
-      JSON.stringify(data.callback, undefined, 2),
+      JSON.stringify(
+        data.callback,
+        (key, value) => {
+          if (Array.isArray(value)) {
+            return `[${value
+              .map((v) =>
+                typeof v === "object" ? JSON.stringify(v) : v.toString()
+              )
+              .join(",")}]`;
+          }
+
+          return value;
+        },
+        2
+      ),
       SPACING
     ) + "\r\n";
   outputString += chalkString("counter", data.counter, SPACING) + "\r\n";
@@ -538,7 +552,7 @@ export async function prettyPrintVrf(
           alpha: `[${data.currentRound.alpha.map((value) =>
             value.toString()
           )}]`,
-          requestSlot: data.currentRound.requstSlot.toString(),
+          requestSlot: data.currentRound?.requestSlot?.toString() ?? "",
           requestTimestamp: anchorBNtoDateTimeString(
             data.currentRound.requestTimestamp
           ),
@@ -601,7 +615,9 @@ export async function prettyPrintCrank(
   outputString +=
     chalkString(
       "Size",
-      `${data.pqSize.padStart(4)} / ${data.maxRows.padEnd(4)}`,
+      `${(data.pqData as CrankRow[]).length
+        .toString()
+        .padStart(4)} / ${data.maxRows.toString().padEnd(4)}`,
       SPACING
     ) + "\r\n";
 

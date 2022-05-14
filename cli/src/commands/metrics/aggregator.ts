@@ -305,11 +305,15 @@ async function buildJobMap(
       pubKeyBatch
     );
     for (const [index, jobAccount] of jobAccountInfos.entries()) {
-      const publicKey = pubKeyBatch[index];
-      const oracleJob = OracleJob.decodeDelimited(jobAccount["data"]);
-      const job = new Job(publicKey, jobAccount, oracleJob.tasks);
-      //   console.log(`jobKey: ${publicKey}, ${JSON.stringify(job)}`);
-      jobMap.set(publicKey.toString(), job);
+      try {
+        const publicKey = pubKeyBatch[index];
+        const oracleJob = OracleJob.decodeDelimited(jobAccount["data"]);
+        const job = new Job(publicKey, jobAccount, oracleJob.tasks);
+        //   console.log(`jobKey: ${publicKey}, ${JSON.stringify(job)}`);
+        jobMap.set(publicKey.toString(), job);
+      } catch (error) {
+        this.logger.debug(`JobDecodeError: ${error}`);
+      }
     }
   }
 

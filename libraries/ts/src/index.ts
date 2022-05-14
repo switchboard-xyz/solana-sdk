@@ -128,6 +128,8 @@ export class SwitchboardDecimal {
    * @return a SwitchboardDecimal
    */
   public static fromBig(big: Big): SwitchboardDecimal {
+    // Round to fit in Switchboard Decimal
+    // TODO: smarter logic.
     big = big.round(20);
     let mantissa: anchor.BN = new anchor.BN(big.c.join(""), 10);
     // Set the scale. Big.exponenet sets scale from the opposite side
@@ -3959,6 +3961,16 @@ export class BufferRelayerAccount {
       publicKey: queue,
     });
     const switchTokenMint = await queueAccount.loadMint();
+    await switchTokenMint.getOrCreateAssociatedAccountInfo(
+      programWallet(this.program).publicKey
+    );
+    const source = await spl.Token.getAssociatedTokenAddress(
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+      spl.TOKEN_PROGRAM_ID,
+      switchTokenMint.publicKey,
+      programWallet(this.program).publicKey,
+      true
+    );
     const bufferRelayer = this.publicKey;
     const escrow = relayerData.escrow;
     const queueData = await queueAccount.loadData();
@@ -3970,7 +3982,15 @@ export class BufferRelayerAccount {
       this.publicKey
     );
     const payer = programWallet(this.program);
-    return await this.program.rpc.bufferRelayerOpenRound(
+    const transferIx = spl.Token.createTransferInstruction(
+      spl.TOKEN_PROGRAM_ID,
+      source,
+      escrow,
+      programWallet(this.program).publicKey,
+      [],
+      queueData.reward.toNumber()
+    );
+    const openRoundIx = this.program.instruction.bufferRelayerOpenRound(
       {
         stateBump,
         permissionBump,
@@ -3988,6 +4008,14 @@ export class BufferRelayerAccount {
         },
       }
     );
+    const tx = new Transaction();
+    tx.add(transferIx);
+    tx.add(openRoundIx);
+    const connection = (this.program.provider as anchor.AnchorProvider)
+      .connection;
+    return await sendAndConfirmTransaction(connection, tx, [
+      programWallet(this.program),
+    ]);
   }
 
   async saveResult(params: {
@@ -4019,6 +4047,7 @@ export class BufferRelayerAccount {
       publicKey: relayerData.currentRound.oraclePubkey,
     });
     const oracleData = await oracleAccount.loadData();
+    console.log("!!!!");
     return await this.program.rpc.bufferRelayerSaveResult(
       {
         stateBump,
@@ -4038,6 +4067,7 @@ export class BufferRelayerAccount {
           escrow,
           programState: programStateAccount.publicKey,
           oracleWallet: oracleData.tokenAccount,
+          tokenProgram: spl.TOKEN_PROGRAM_ID,
         },
       }
     );

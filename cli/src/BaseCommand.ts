@@ -11,18 +11,21 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import { BigUtils } from "@switchboard-xyz/sbv2-utils";
-import { programWallet } from "@switchboard-xyz/switchboard-v2";
+import {
+  getSwitchboardPid,
+  programWallet,
+} from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
 import { DEFAULT_KEYPAIR } from "./accounts";
 import { CliConfig, ConfigParameter, DEFAULT_CONFIG } from "./config";
-import { AuthorityMismatch, NoPayerKeypairProvided } from "./types";
+import { AuthorityMismatch } from "./types";
 import { CommandContext } from "./types/context/context";
 import { FsProvider } from "./types/context/FsProvider";
 import { LoggerParameters, LogProvider } from "./types/context/logging";
-import { FAILED_ICON, loadAnchor, loadKeypair, toCluster } from "./utils";
+import { FAILED_ICON, loadKeypair, toCluster } from "./utils";
 
 abstract class BaseCommand extends Command {
   static flags = {
@@ -43,6 +46,9 @@ abstract class BaseCommand extends Command {
     rpcUrl: flags.string({
       char: "u",
       description: "alternate RPC url",
+    }),
+    programId: flags.string({
+      description: "alternative Switchboard program ID to interact with",
     }),
     keypair: flags.string({
       char: "k",
@@ -116,30 +122,26 @@ abstract class BaseCommand extends Command {
       );
     }
 
-    if (flags.keypair) {
-      this.payerKeypair = await loadKeypair(flags.keypair);
-      if (this.payerKeypair === undefined) {
-        throw new NoPayerKeypairProvided();
-      }
-      this.program = await loadAnchor(
-        this.cluster,
-        this.connection,
-        this.payerKeypair
-      );
-    } else {
-      this.logger.debug(`no keypair provided, using dummy keypair`);
-      this.program = await loadAnchor(
-        this.cluster,
-        this.connection,
-        DEFAULT_KEYPAIR // set to dummy keypair
-      );
+    this.payerKeypair = flags.keypair
+      ? await loadKeypair(flags.keypair)
+      : DEFAULT_KEYPAIR;
+
+    const programId = flags.programId
+      ? new anchor.web3.PublicKey(flags.programId)
+      : getSwitchboardPid(this.cluster as "mainnet-beta" | "devnet");
+
+    const wallet = new anchor.Wallet(this.payerKeypair);
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      commitment: "finalized",
+      // preflightCommitment: "finalized",
+    });
+
+    const anchorIdl = await anchor.Program.fetchIdl(programId, provider);
+    if (!anchorIdl) {
+      throw new Error(`failed to read idl for ${programId}`);
     }
 
-    this.program = await loadAnchor(
-      this.cluster,
-      this.connection,
-      this.payerKeypair ?? DEFAULT_KEYPAIR // set to dummy keypair
-    );
+    this.program = new anchor.Program(anchorIdl, programId, provider);
 
     if (this.verbose) {
       this.logger.log("verbose logging enabled");

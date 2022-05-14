@@ -46,30 +46,32 @@ export default class PermissionSet extends BaseCommand {
     const permission = await permissionAccount.loadData();
 
     // check and load granters account type
-    const [granteeAccountType, grantee] = await loadSwitchboardAccount(
+    const [granterAccountType, granter] = await loadSwitchboardAccount(
       this.program,
-      permission.grantee
+      permission.granter
     );
     let authorityKey: PublicKey;
-    switch (granteeAccountType) {
+    switch (granterAccountType) {
       case "OracleQueueAccountData": {
-        const data = await grantee.loadData();
+        const data = await granter.loadData();
         authorityKey = data.authority;
         break;
       }
       default: {
-        throw new Error("Grantee should be a OracleQueueAccount");
+        throw new Error(
+          `Granter should be a OracleQueueAccount, received ${granterAccountType}`
+        );
       }
     }
     const authority = await this.loadAuthority(flags.authority, authorityKey);
 
     // check and load grantees account type, and assign permissions based on type
     let assignedPermission: SwitchboardPermission;
-    const [granterAccountType, granter] = await loadSwitchboardAccount(
+    const [granteeAccountType, grantee] = await loadSwitchboardAccount(
       this.program,
-      permission.granter
+      permission.grantee
     );
-    switch (granterAccountType) {
+    switch (granteeAccountType) {
       case "OracleAccountData":
         assignedPermission = SwitchboardPermission.PERMIT_ORACLE_HEARTBEAT;
         break;
@@ -81,7 +83,7 @@ export default class PermissionSet extends BaseCommand {
         break;
       default:
         throw new Error(
-          "Granter must be an AggregatorAccount, OracleAccount, or VrfAccount"
+          `Grantee must be an AggregatorAccount, OracleAccount, or VrfAccount, received ${granteeAccountType}`
         );
     }
 

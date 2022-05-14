@@ -49,11 +49,13 @@ export default class QueueCreate extends BaseCommand {
     }),
     minStake: flags.string({
       description: "minimum stake required by an oracle to join the queue",
+      default: "0",
     }),
     reward: flags.string({
       char: "r",
       description:
         "oracle rewards for successfully responding to an update request",
+      default: "0",
     }),
     numCranks: flags.integer({
       char: "c",
@@ -147,6 +149,8 @@ export default class QueueCreate extends BaseCommand {
     }
 
     if (this.outputFile) {
+      const outDir = path.dirname(fs.realpathSync(this.outputFile));
+      fs.mkdirSync(outDir, { recursive: true });
       fs.writeFileSync(
         this.outputFile,
         JSON.stringify(queue, pubKeyConverter, 2)
