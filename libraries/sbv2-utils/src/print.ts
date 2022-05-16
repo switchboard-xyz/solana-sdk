@@ -1,5 +1,5 @@
 import { BN, Program } from "@project-serum/anchor";
-import { PublicKey, TokenAmount } from "@solana/web3.js";
+import { AccountMeta, PublicKey, TokenAmount } from "@solana/web3.js";
 import {
   AggregatorAccount,
   CrankAccount,
@@ -71,6 +71,9 @@ export const toPermissionString = (
 };
 
 export const toVrfStatusString = (status: Record<string, unknown>): string => {
+  if (status === undefined) {
+    return "";
+  }
   if ("statusNone" in status) {
     return "StatusNone";
   }
@@ -518,18 +521,28 @@ export async function prettyPrintVrf(
     chalkString(
       "callback",
       JSON.stringify(
-        data.callback,
-        (key, value) => {
-          if (Array.isArray(value)) {
-            return `[${value
-              .map((v) =>
-                typeof v === "object" ? JSON.stringify(v) : v.toString()
-              )
-              .join(",")}]`;
-          }
-
-          return value;
+        {
+          ...data.callback,
+          accounts: data.callback.accounts.filter(
+            (a: AccountMeta) => !a.pubkey.equals(PublicKey.default)
+          ),
+          ixData: `[${data.callback.ixData
+            .slice(0, data.callback.ixDataLen)
+            .map((n) => n.toString())
+            .join(",")}]`,
         },
+        undefined,
+        // (key, value) => {
+        //   if (Array.isArray(value)) {
+        //     return `[${value
+        //       .map((v) =>
+        //         typeof v === "object" ? JSON.stringify(v) : v.toString()
+        //       )
+        //       .join(",")}]`;
+        //   }
+
+        //   return value;
+        // },
         2
       ),
       SPACING
@@ -541,10 +554,10 @@ export async function prettyPrintVrf(
     "latestResult",
     JSON.stringify(
       {
-        producer: data.builders[0].producer.toString(),
-        status: toVrfStatusString(data.builders[0].status),
-        verified: data.builders[0].verified,
-        txRemaining: data.builders[0].txRemaining,
+        producer: data.builders[0]?.producer.toString() ?? "",
+        status: toVrfStatusString(data.builders[0]?.status) ?? "",
+        verified: data.builders[0]?.verified ?? "",
+        txRemaining: data.builders[0]?.txRemaining ?? "",
         currentRound: {
           result: `[${data.currentRound.result.map((value) =>
             value.toString()
