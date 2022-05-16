@@ -2,16 +2,15 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
+  Keypair,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
+  Transaction,
 } from "@solana/web3.js";
 import {
   chalkString,
   prettyPrintOracle,
   programWallet,
-  promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
@@ -21,8 +20,7 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
-import { packAndSend } from "../../utils/transaction";
+import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../utils";
 
 export default class OracleCreate extends BaseCommand {
   static description = "create a new oracle account for a given queue";
@@ -38,6 +36,12 @@ export default class OracleCreate extends BaseCommand {
       char: "a",
       description:
         "keypair to delegate authority to for managing the oracle account",
+    }),
+    enable: flags.boolean({
+      description: "enable oracle heartbeat permissions",
+    }),
+    queueAuthority: flags.string({
+      description: "alternative keypair to use for queue authority",
     }),
   };
 
@@ -62,6 +66,9 @@ export default class OracleCreate extends BaseCommand {
     const payerKeypair = programWallet(this.program);
 
     const authorityKeypair = await this.loadAuthority(flags.authority);
+    const queueAuthority: Keypair = flags.queueAuthority
+      ? await loadKeypair(flags.queueAuthority)
+      : payerKeypair;
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
@@ -91,12 +98,8 @@ export default class OracleCreate extends BaseCommand {
     );
     this.logger.debug(chalkString(`Permission`, permissionAccount.publicKey));
 
-    const oracleCreateInstructions: (
-      | TransactionInstruction
-      | TransactionInstruction[]
-    )[] = [];
-
-    oracleCreateInstructions.push([
+    const createOracleTxn = new Transaction();
+    createOracleTxn.add(
       SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,
         newAccountPubkey: tokenWalletKeypair.publicKey,
@@ -140,40 +143,34 @@ export default class OracleCreate extends BaseCommand {
           payer: payerKeypair.publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .instruction(),
-    ]);
-
-    const createAccountSignatures = packAndSend(
-      this.program,
-      oracleCreateInstructions,
-      [],
-      [payerKeypair, authorityKeypair, tokenWalletKeypair],
-      payerKeypair.publicKey
+        .instruction()
     );
 
-    let oracleWs: number;
-    const createOraclePromise = new Promise(
-      (resolve: (result: any) => void) => {
-        oracleWs = this.program.provider.connection.onAccountChange(
-          oracleAccount.publicKey,
-          (accountInfo: AccountInfo<Buffer>, slot) => {
-            const accountCoder = new anchor.BorshAccountsCoder(
-              this.program.idl
-            );
-            resolve(accountCoder.decode("OracleAccountData", accountInfo.data));
-          }
+    if (flags.enable) {
+      if (!queueAuthority.publicKey.equals(queue.authority)) {
+        throw new Error(
+          `Invalid queue authority, received ${queueAuthority.publicKey}, expected ${queue.authority}`
         );
       }
-    );
+      createOracleTxn.add(
+        await this.program.methods
+          .permissionSet({
+            permission: { permitOracleHeartbeat: null },
+            enable: true,
+          })
+          .accounts({
+            permission: permissionAccount.publicKey,
+            authority: queue.authority,
+          })
+          .instruction()
+      );
+    }
 
-    const oracleData = await promiseWithTimeout(
-      25_000,
-      createOraclePromise
-    ).finally(() => {
-      try {
-        this.program.provider.connection.removeAccountChangeListener(oracleWs);
-      } catch {}
-    });
+    const signature = await this.program.provider.sendAndConfirm(
+      createOracleTxn,
+      [payerKeypair, authorityKeypair, tokenWalletKeypair]
+    );
+    const oracleData = await oracleAccount.loadData();
 
     if (this.silent) {
       console.log(oracleAccount.publicKey.toString());
