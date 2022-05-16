@@ -73,7 +73,6 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 * [`sbv2 queue:permit:oracle ORACLEKEY`](#sbv2-queuepermitoracle-oraclekey)
 * [`sbv2 queue:set:rewards QUEUEKEY REWARDS`](#sbv2-queuesetrewards-queuekey-rewards)
 * [`sbv2 queue:set:vrf QUEUEKEY`](#sbv2-queuesetvrf-queuekey)
-* [`sbv2 rand`](#sbv2-rand)
 * [`sbv2 sandbox [PLACEHOLDER]`](#sbv2-sandbox-placeholder)
 * [`sbv2 test ORACLEKEY`](#sbv2-test-oraclekey)
 * [`sbv2 update [CHANNEL]`](#sbv2-update-channel)
@@ -2262,33 +2261,6 @@ OPTIONS
 
 _See code: [src/commands/queue/set/vrf.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.17/src/commands/queue/set/vrf.ts)_
 
-## `sbv2 rand`
-
-rand
-
-```
-USAGE
-  $ sbv2 rand
-
-OPTIONS
-  -h, --help             show CLI help
-
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
-
-  -s, --silent           suppress cli prompts
-
-  -u, --rpcUrl=rpcUrl    alternate RPC url
-
-  -v, --verbose          log everything
-
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
-
-  --programId=programId  alternative Switchboard program ID to interact with
-```
-
-_See code: [src/commands/rand.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.17/src/commands/rand.ts)_
-
 ## `sbv2 sandbox [PLACEHOLDER]`
 
 sandbox
@@ -2407,7 +2379,7 @@ _See code: [src/commands/vrf/create/index.ts](https://github.com/switchboard-xyz
 
 ## `sbv2 vrf:create:example QUEUEKEY`
 
-rand
+create a VRF account for the client example program
 
 ```
 USAGE
@@ -2441,6 +2413,11 @@ OPTIONS
   --vrfKeypair=vrfKeypair          filesystem path of existing keypair to use for VRF Account
 
   --vrfPid=vrfPid                  (required) program ID for the VRF example program
+
+EXAMPLE
+  sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid 
+  6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority 
+  queue-authority-keypair.json
 ```
 
 _See code: [src/commands/vrf/create/example.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.17/src/commands/vrf/create/example.ts)_
@@ -2475,6 +2452,13 @@ OPTIONS
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
 
   --programId=programId              alternative Switchboard program ID to interact with
+
+EXAMPLE
+  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
+  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
+  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": 
+  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": 
+  false,"isWritable": false}"
 ```
 
 _See code: [src/commands/vrf/request.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.17/src/commands/vrf/request.ts)_

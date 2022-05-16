@@ -14,6 +14,10 @@ import { loadKeypair, sleep, verifyProgramHasPayer } from "../../utils";
 export default class VrfRequest extends BaseCommand {
   static description = "request a new value for a VRF";
 
+  static examples = [
+    'sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": false,"isWritable": false}"',
+  ];
+
   static flags = {
     ...BaseCommand.flags,
     funderAuthority: flags.string({

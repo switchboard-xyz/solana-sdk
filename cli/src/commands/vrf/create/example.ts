@@ -20,7 +20,11 @@ import BaseCommand from "../../../BaseCommand";
 import { loadKeypair, sleep, verifyProgramHasPayer } from "../../../utils";
 
 export default class VrfCreateExample extends BaseCommand {
-  static description = "rand";
+  static description = "create a VRF account for the client example program";
+
+  static examples = [
+    "sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority queue-authority-keypair.json",
+  ];
 
   static flags = {
     ...BaseCommand.flags,
