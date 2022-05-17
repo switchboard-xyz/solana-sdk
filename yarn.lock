@@ -4188,6 +4188,52 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
+"@switchboard-xyz/sbv2-utils@^0.0.7":
+  version "0.0.8"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/sbv2-utils/-/sbv2-utils-0.0.7.tgz#50b548d56b0f324e92867d6f3563488877632e00"
+  integrity sha512-8ZX7vqYftA9YBtgMGK4Vk91hlpoXfvzsPqgJ+Ny39D0AtC29dF4OlTZL3sX78XEDu4bSJFQNf38TyITmUo9ajw==
+  dependencies:
+    "@orca-so/sdk" "^1.2.24"
+    "@project-serum/anchor" "^0.24.2"
+    "@saberhq/token-utils" "^1.12.68"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/web3.js" "^1.37.1"
+    "@switchboard-xyz/switchboard-v2" "^0.0.87"
+    big.js "^6.1.1"
+    chalk "4"
+    decimal.js "^10.3.1"
+    dotenv "^16.0.0"
+    toml "^3.0.0"
+
+"@switchboard-xyz/sbv2-utils@^0.0.9":
+  version "0.0.10"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/sbv2-utils/-/sbv2-utils-0.0.9.tgz#02dc58a078996d13e8583e16623cb4401f5a1611"
+  integrity sha512-aVKoK0FNoTbuq/AYK/sNnqNKIW2ebY6E8bwB927hqY7sJZ/Xwu82aN4zL9BO6ttiXyRBtyE+Zu2IGVuRfLHbkA==
+  dependencies:
+    "@orca-so/sdk" "^1.2.24"
+    "@project-serum/anchor" "^0.24.2"
+    "@saberhq/token-utils" "^1.12.68"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/web3.js" "^1.37.1"
+    "@switchboard-xyz/switchboard-v2" "^0.0.97"
+    big.js "^6.1.1"
+    chalk "4"
+    decimal.js "^10.3.1"
+    dotenv "^16.0.0"
+    toml "^3.0.0"
+
+"@switchboard-xyz/switchboard-api@^0.2.193":
+  version "0.2.200"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-api/-/switchboard-api-0.2.200.tgz#16c7d95390693e5992a7f96287143361b4d38cc9"
+  integrity sha512-JvH1HMB809GauOVdD4AhriFSVAq5yAlDtnyqEQhmr0r5WgcVinEZdY56c3fpUFN2DcFH4Gl3/PH3N73ektcmKQ==
+  dependencies:
+    "@solana/web3.js" "^1.17.0"
+    form-data "^4.0.0"
+    protobufjs "^6.10.2"
+    rpc-websockets "^7.4.12"
+    typedoc "^0.22.15"
+    ws "^7.4.6"
+
 "@switchboard-xyz/switchboard-api@^0.2.199":
   version "0.2.199"
   resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-api/-/switchboard-api-0.2.199.tgz#3eb73ed9fe6c2cb161c240b1828df9b2b606bdc7"
@@ -4210,6 +4256,30 @@
     "@solana/spl-token" "^0.1.8"
     "@solana/web3.js" "^1.39.1"
     "@switchboard-xyz/switchboard-api" "^0.2.199"
+    assert "^2.0.0"
+    big.js "^6.1.1"
+    bs58 "^4.0.1"
+    buffer-layout "^1.2.0"
+    chalk "^4.1.2"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    dotenv "^16.0.0"
+    long "^4.0.0"
+    node-fetch "^3.2.3"
+    protobufjs "^6.10.2"
+    ts-proto "^1.79.0"
+    typescript "^4.6.3"
+
+"@switchboard-xyz/switchboard-v2@^0.0.87":
+  version "0.0.87"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.87.tgz#4061b1a1ad90227ab9108652993bafbd93ef925f"
+  integrity sha512-sVj2is4/5x1UyNkhAYgGSE9/L2Yv21ywqxhmmj/N50xacuD/Zf+BEeaaWU4WJ1Ls4wtU00LmDLvRRshpqN2gwQ==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/web3.js" "^1.39.1"
+    "@switchboard-xyz/switchboard-api" "^0.2.193"
     assert "^2.0.0"
     big.js "^6.1.1"
     bs58 "^4.0.1"
