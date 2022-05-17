@@ -1,0 +1,14 @@
+[package]
+name = "spl-feed-parser"
+version = "0.1.0"
+edition = "2018"
+
+[features]
+no-entrypoint = []
+
+[dependencies]
+switchboard-v2 = "^0.1.10"
+solana-program = "~1.9.13"
+
+[lib]
+crate-type = ["cdylib", "lib"]

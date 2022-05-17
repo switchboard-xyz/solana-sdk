@@ -1,0 +1,12 @@
+{
+  "name": "Mango USDC Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "mango",
+        "assetMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "field": 0
+      }
+    }
+  ]
+}

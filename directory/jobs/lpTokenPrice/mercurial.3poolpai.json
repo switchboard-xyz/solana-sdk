@@ -1,0 +1,16 @@
+{
+  "name": "Mercurial Finance PAI-3Pool",
+  "tasks": [
+    {
+      "lpTokenPriceTask": {
+        "useFairPrice": true,
+        "mercurialPoolAddress": "SWABtvDnJwWwAb9CbSA3nv7nTnrtYjrACAVtuP3gyBB",
+        "priceFeedAddresses": [
+          "BjUgj6YCnFBZ49wF54ddBVA9qu8TeqkFtkbqmZcee8uW",
+          "ETAaeeuQBwsh9mC2gCov9WdhJENZuffRMXY2HgjCcSL9",
+          "DKayKbGmnby8XUagUL3bVLcN7NZKy6j5ugyBmHzwpqc8"
+        ]
+      }
+    }
+  ]
+}

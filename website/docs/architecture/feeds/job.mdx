@@ -1,0 +1,77 @@
+---
+sidebar_position: 20
+title: Job
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import Link from "@docusaurus/Link";
+import { Typography, Box, Grid } from "@mui/material";
+
+import JobInstructions from "/idl/_job_instructions.mdx";
+
+import JobAccountData from "/idl/accounts/JobAccountData.md";
+
+import JobInit from "/idl/instructions/jobInit.md";
+
+When building data feeds, it is important to have a diverse set of jobs so a single failure doesn’t cause unintended consequences. A Switchboard aggregator can support up to 16 different job definitions.
+
+A job is typically associated with a single data source and contains the blueprints for parsing and transforming the data to a single result. The steps to parse and transform that data are broken down into a Switchboard task. You can find the full task list and their protocol buffer definitions on the [switchboard-tasks API page](/api/tasks). If you have a new use case that requires a new task definition, please don't hesitate to reach out.
+
+## Functions
+
+A job is responsible for the following functions:
+
+- [Task Definitions](#task-definitions): Define how a result is returned for a particular data source.
+
+### 🚀Task Definitions
+
+Define how a result is calculated for a given data source.
+
+#### External Request
+
+The [HttpTask](/api/tasks#HttpTask) and [WebsocketTask](/api/tasks#WebsocketTask) can be used to fetch API data from any public endpoint. Private endpoints can be supported if you run your own infrastructure and provide the API keys to the oracles.
+
+#### On-Chain Request
+
+A task can also be used to fetch on-chain data. The [SerumSwapTask](/api/tasks#SerumSwapTask) allows you to fetch the median of the highest bid, lowest ask, and last fill price from any serum market. The [LpTokenPriceTask](/api/tasks#LpTokenPriceTask) and [LpExchangeRateTask](/api/tasks#LpExchangeRateTask) can be used to fetch prices for various liquidity pools on Solana such as Mercurial, Saber, Orca, and Raydium.
+
+#### Control Flow
+
+The [ConditionalTask](/api/tasks#ConditionalTask) allows you to incorporate if..else logic for complex feeds. A good example of this is if you wanted to return the result of a sporting event. You could have the feed return -1 if the endpoint failed to parse a result, indicating the event is still on-going.
+
+#### Parse
+
+The [JsonParseTask](/api/tasks#JsonParseTask) and [RegexExtractTask](/api/tasks#RegexExtractTask) are used to extract information from an API response or webpage. Jsonpath.com is a great resource to test your logic vs the expected API response. When using these, it’s best to be as explicit as possible. For example, if you’re parsing an http response for a list of assets and you filter by MNGO/USD, you may unexpectedly receive multiple values if the endpoint response changes. But if you filter by a unique key such as a public key, there is less room for error. You may also specify an [aggregationMethod](/api/tasks#aggregationMethod) to handle multiple results.
+
+#### Transform
+
+[MaxTask](/api/tasks#MaxTask), [MeanTask](/api/tasks#MeanTask), and [MedianTask](/api/tasks#MedianTask) are used to transform a grouping of values to yield a single result.
+
+The [AddTask](/api/tasks#AddTask), [SubtractionTask](/api/tasks#SubtractionTask), [MultiplyTask](/api/tasks#MultiplyTask), and [DivideTask](/api/tasks#DivideTask) are used to transform a single value. The multiply and divide tasks let you specify an on-chain aggregator value as the scalar and are commonly used to convert between USD and SOL based results using the current on-chain value.
+
+#### Historical Data
+
+The [TwapTask](/api/tasks#TwapTask) lets you parse an aggregator’s history buffer for a set time period and return the time weighted average price. Note: This requires a history buffer to be initialized and funded for the given aggregator and have the capacity to store enough results for a reliable result.
+
+#### Other
+
+The [ValueTask](/api/tasks#ValueTask) is used to return a static value. This is useful if you want to return a certain value on errors, like an on-going event. This could also be useful during testing to simulate an aggregator’s result.
+
+## Account Schema
+
+### 📦JobAccountData
+
+<JobAccountData />
+
+## Developer Resources
+
+<JobInstructions />
+
+## More Info
+
+- <Link className="link__nocolor" to="/api/tasks">
+    ℹ️ Task Definitions
+  </Link>
+- <Link className="link__nocolor" to="/job-directory">
+    ℹ️ Job Directory
+  </Link>

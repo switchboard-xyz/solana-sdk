@@ -1,0 +1,12 @@
+{
+  "name": "Solend stSOL Lend Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "solend",
+        "assetMint": "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj",
+        "field": 0
+      }
+    }
+  ]
+}

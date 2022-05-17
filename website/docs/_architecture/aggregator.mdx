@@ -1,0 +1,222 @@
+---
+sidebar_position: 25
+slug: /architecture/aggregator
+---
+
+# Aggregator
+
+## What is a Data Feed?
+
+An aggregator or data feed is what on-chain developers use when building smart contracts. A data feed is a collection of jobs that get aggregated to produce some deterministic result. Each job is associated with an endpoint and has a number of tasks that get executed in sequential order in order to produce a single value. Typically the first task in a job will fetch external data with subsequent tasks responsible for parsing the response and transforming the value into a single data type, like an integer or decimal. When an oracle is assigned to process a data feed update, the oracle executes the defined jobs and publishes the median result on-chain. The data feed then computes the final value as the median response among the assigned oracles. In summary, the data feed is the blueprint for how data gets fetched from off-chain sources.
+
+Along with the jobs, a data feed also includes a configuration dictating how often a feed should be updated and the minimum number of jobs or oracles that must respond before accepting a result. The publisher is ultimately responsible for building a data feed and making the necessary trade-offs as it’s a careful balance between cost and update interval. The publisher is usually the on-chain consumer of the data and will have the most familiarity with how the data may be used to make these considerations.
+
+## Types of Data Feeds
+
+Once a data feed has been configured, it needs to be assigned an oracle queue to process updates. Data feeds can be public, where they are approved by the DAO and have access to its oracle queue, or private, where the publisher has their own oracle infrastructure or agreements with oracle operators to process their updates. A private feed has the added benefit of embedding API keys within a job for any endpoints that require authentication, meaning a greater level of trust is needed between publishers and oracles. These keys will need to be created by individual oracle operators or provided by the private feed creator.
+
+## Account
+
+import { MdClass } from "react-icons/md";
+
+import AggregatorAccountData from "../../idl/accounts/AggregatorAccountData.md";
+import AggregatorHistoryBuffer from "../../idl/accounts/AggregatorHistoryBuffer.md";
+
+<details>
+<summary>
+
+### 📦AggregatorAccountData
+
+<b>Rent Exemption: </b>0.027693840 SOL
+
+</summary>
+
+<AggregatorAccountData />
+
+</details>
+
+<details>
+<summary>
+
+### 📦AggregatorHistoryBuffer
+
+<b>Rent Exemption: </b>Varies by size.
+
+</summary>
+
+<AggregatorHistoryBuffer />
+
+</details>
+
+## Instructions
+
+import { BsFillLightningChargeFill } from "react-icons/bs";
+
+import AggregatorAddJob from "../../idl/instructions/aggregatorAddJob.md";
+import AggregatorInit from "../../idl/instructions/aggregatorInit.md";
+import AggregatorLock from "../../idl/instructions/aggregatorLock.md";
+import AggregatorOpenRound from "../../idl/instructions/aggregatorOpenRound.md";
+import AggregatorRemoveJob from "../../idl/instructions/aggregatorRemoveJob.md";
+import AggregatorSetAuthority from "../../idl/instructions/aggregatorSetAuthority.md";
+import AggregatorSetBatchSize from "../../idl/instructions/aggregatorSetBatchSize.md";
+import AggregatorSetHistoryBuffer from "../../idl/instructions/aggregatorSetHistoryBuffer.md";
+import AggregatorSetMinJobs from "../../idl/instructions/aggregatorSetMinJobs.md";
+import AggregatorSetMinOracles from "../../idl/instructions/aggregatorSetMinOracles.md";
+import AggregatorSetQueue from "../../idl/instructions/aggregatorSetQueue.md";
+import AggregatorSetVarianceThreshold from "../../idl/instructions/aggregatorSetVarianceThreshold.md";
+
+<details>
+<summary>
+
+### ⚡AggregatorInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorAddJob
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorAddJob />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorRemoveJob
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorRemoveJob />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorOpenRound
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorOpenRound />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetAuthority
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetAuthority />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetBatchSize
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetBatchSize />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetHistoryBuffer
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetHistoryBuffer />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetMinJobs
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetMinJobs />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetMinOracles
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetMinOracles />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetQueue
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetQueue />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetVarianceThreshold
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetVarianceThreshold />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorLock
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorLock />
+
+</details>

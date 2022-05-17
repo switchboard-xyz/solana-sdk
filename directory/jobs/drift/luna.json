@@ -1,0 +1,9 @@
+{
+  "tasks": [
+    {
+      "perpMarketTask": {
+        "driftMarketAddress": "LUNA-PERP"
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+---
+sidebar_position: 40
+slug: /oracle/gcp/grafana
+---
+
+# Grafana
+
+Grafana is a visualization tool to view your cluster's metrics. While this step is optional, it is recommended if you have no other monitoring or metric suite in place.
+
+## Domain Name
+
+You will need a domain name to host your grafana instance. In your domain management tool, add a DNS A record with a value of `$EXTERNAL_IP`.
+
+This value will be your `$GRAFANA_HOSTNAME` (i.e. grafana.switchboard.com) and will be used to provision a TLS certificate.
+
+## TLS Certificate
+
+The following steps will walk you through provisioning a TLS certificate for your domain from letsencrypt. The [helm-manifest repo](https://github.com/switchboard-xyz/helm-manifests) contains a script to walk through creating the neccessary keys and certificate signing request (CSR).
+
+```bash
+./setup-grafana.sh PROJECTNAME DOMAIN EMAIL
+```
+
+- PROJECTNAME is the name of the env file to store variables
+- DOMAIN is your $GRAFANA_HOSTNAME from above
+- EMAIL is the email you will use for your certificate signing request
+
+When the necessary keys and CSR are generated, head over to [gethttpsforfree.com](https://gethttpsforfree.com.com) and walk through their steps to sign your certificate. Save the final output to the filename given by the script, then rerun the script. The script will save the env variables to `PROJECTNAME.env` and also output them to the console.
+
+## Wrapping Up
+
+Your `PROJECTNAME.env` file should now contain
+
+- GRAFANA_HOSTNAME
+- GRAFANA_PASSWORD (You can set this to whatever value you want)
+- GRAFANA_TLS_CRT
+- GRAFANA_TLS_KEY

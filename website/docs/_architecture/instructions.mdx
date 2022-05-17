@@ -1,0 +1,467 @@
+---
+sidebar_position: 1
+slug: /architecture/instructions
+title: Instructions
+---
+
+| Instruction                         | Typescript API                                                          | Python API                                                          | Command Line                                    | Description                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------- |
+| [OracleQueueInit](#oraclequeueinit) | [OracleQueueAccount. create](/api/ts/classes/OracleQueueAccount#create) | [OracleQueueInit](/api/py/switchboardpy.html#OracleQueueInitParams) | [queue:create](/api/cli/queue#sbv2-queuecreate) | Create a new oracle queue with the specified configuration. |
+
+import { BsFillLightningChargeFill } from "react-icons/bs";
+
+## Queue
+
+import OracleQueueInit from "../../idl/instructions/oracleQueueInit.md";
+import OracleQueueSetRewards from "../../idl/instructions/oracleQueueSetRewards.md";
+
+<details>
+<summary>
+
+### ⚡OracleQueueInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleQueueInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡OracleQueueSetRewards
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleQueueSetRewards />
+
+</details>
+
+## Permissions
+
+import PermissionInit from "../../idl/instructions/permissionInit.md";
+import PermissionSet from "../../idl/instructions/permissionSet.md";
+
+<details>
+<summary>
+
+### ⚡PermissionInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡PermissionSet
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionSet />
+
+</details>
+
+## Oracle
+
+import OracleInit from "../../idl/instructions/oracleInit.md";
+import OracleHeartbeat from "../../idl/instructions/oracleHeartbeat.md";
+import AggregatorSaveResult from "../../idl/instructions/aggregatorSaveResult.md";
+import OracleWithdraw from "../../idl/instructions/oracleWithdraw.md";
+
+<details>
+<summary>
+
+### ⚡OracleInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡OracleHeartbeat
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<OracleHeartbeat />
+
+</details>
+<details>
+<summary>
+
+### ⚡AggregatorSaveResult
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSaveResult />
+
+</details>
+<details>
+<summary>
+
+### ⚡OracleWithdraw
+
+<b>Cost: </b>10,000 lamports
+
+</summary>
+
+<OracleWithdraw />
+
+</details>
+
+## Crank
+
+import CrankInit from "../../idl/instructions/crankInit.md";
+import CrankPop from "../../idl/instructions/crankPop.md";
+import CrankPush from "../../idl/instructions/crankPush.md";
+
+<details>
+<summary>
+
+### ⚡CrankInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<CrankInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡CrankPush
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<CrankPush />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡CrankPop
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<CrankPop />
+
+</details>
+
+## Aggregator
+
+import AggregatorAddJob from "../../idl/instructions/aggregatorAddJob.md";
+import AggregatorInit from "../../idl/instructions/aggregatorInit.md";
+import AggregatorLock from "../../idl/instructions/aggregatorLock.md";
+import AggregatorOpenRound from "../../idl/instructions/aggregatorOpenRound.md";
+import AggregatorRemoveJob from "../../idl/instructions/aggregatorRemoveJob.md";
+import AggregatorSetAuthority from "../../idl/instructions/aggregatorSetAuthority.md";
+import AggregatorSetBatchSize from "../../idl/instructions/aggregatorSetBatchSize.md";
+import AggregatorSetHistoryBuffer from "../../idl/instructions/aggregatorSetHistoryBuffer.md";
+import AggregatorSetMinJobs from "../../idl/instructions/aggregatorSetMinJobs.md";
+import AggregatorSetMinOracles from "../../idl/instructions/aggregatorSetMinOracles.md";
+import AggregatorSetQueue from "../../idl/instructions/aggregatorSetQueue.md";
+import AggregatorSetVarianceThreshold from "../../idl/instructions/aggregatorSetVarianceThreshold.md";
+
+<details>
+<summary>
+
+### ⚡AggregatorInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorAddJob
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorAddJob />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorRemoveJob
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorRemoveJob />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorOpenRound
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorOpenRound />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetAuthority
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetAuthority />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetBatchSize
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetBatchSize />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetHistoryBuffer
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetHistoryBuffer />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetMinJobs
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetMinJobs />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetMinOracles
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetMinOracles />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetQueue
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetQueue />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorSetVarianceThreshold
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorSetVarianceThreshold />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡AggregatorLock
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<AggregatorLock />
+
+</details>
+
+## Lease
+
+import LeaseInit from "../../idl/instructions/leaseInit.md";
+import LeaseExtend from "../../idl/instructions/leaseExtend.md";
+import LeaseWithdraw from "../../idl/instructions/leaseWithdraw.md";
+
+<details>
+<summary>
+
+### ⚡LeaseInit
+
+<b>Cost: </b>10,000 lamports
+
+</summary>
+
+<LeaseInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡LeaseExtend
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseExtend />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡LeaseWithdraw
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<LeaseWithdraw />
+
+</details>
+
+## Job
+
+import JobInit from "../../idl/instructions/jobInit.md";
+
+<details>
+<summary>
+
+### ⚡JobInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<JobInit />
+
+</details>
+
+## VRF
+
+import VrfInit from "../../idl/instructions/vrfInit.md";
+import VrfProve from "../../idl/instructions/vrfProve.md";
+import VrfVerify from "../../idl/instructions/vrfVerify.md";
+import VrfRequestRandomness from "../../idl/instructions/vrfRequestRandomness.md";
+
+<details>
+<summary>
+
+### ⚡VrfInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡VrfProve
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfProve />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡VrfVerify
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<VrfVerify />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡VrfRequestRandomness
+
+<b>Cost: </b>0.1 wSOL
+
+</summary>
+
+<VrfRequestRandomness />
+
+</details>

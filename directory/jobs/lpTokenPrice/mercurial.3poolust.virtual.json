@@ -1,0 +1,10 @@
+{
+  "name": "LP MERCURIAL USDC USDT wUST",
+  "tasks": [
+    {
+      "lpTokenPriceTask": {
+        "mercurialPoolAddress": "UST3iPxDFwUUiToMyLF7DYqSP9uaoz7Mzs2LxRYxVJG"
+      }
+    }
+  ]
+}

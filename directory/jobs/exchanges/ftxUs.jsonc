@@ -1,0 +1,15 @@
+{
+  "name": "FtxUs BTC/USD",
+  "tasks": [
+    {
+      "httpTask": {
+        "url": "https://ftx.us/api/markets/btc/usd"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.result.price"
+      }
+    }
+  ]
+}

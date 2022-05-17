@@ -1,0 +1,12 @@
+{
+  "name": "JET USDC Borrow Rate",
+  "tasks": [
+    {
+      "lendingRateTask": {
+        "protocol": "jet",
+        "assetMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "field": 1
+      }
+    }
+  ]
+}

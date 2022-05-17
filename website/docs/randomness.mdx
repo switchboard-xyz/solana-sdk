@@ -1,0 +1,57 @@
+---
+sidebar_position: 60
+slug: /randomness
+title: Randomness
+---
+
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardActionArea from "@mui/material/CardActionArea";
+import CardContent from "@mui/material/CardContent";
+import GitHubIcon from "@mui/icons-material/GitHub";
+
+:::caution
+
+While Switchboard V2's oracle network is fully audited, the VRF implementation is currently unaudited software. Please use at your own risk.
+
+:::
+
+Switchboard V2’s VRF allows developers to request and use a pseudo-random value on-chain. The V2 implementation is written in anchor and provides a callback interface to invoke your program when an update request is finalized by an oracle.
+
+## Architecture
+
+A VRF account is an on-chain account that holds the latest VRF value, as well as its owners specified callback function. When a VRF account owner requests a new randomness value, the oracle queue delegates the update request to an oracle based on its round robin ordering of oracles heartbeating on-chain. The oracle submits its VRF seed on-chain, then must submit 276 transactions to turn the state machine, which computes the proof. When the proof is computed and successfully validates the pseudo-random value, the oracle invokes the account owner’s callback instruction. The callback instruction must consume less than 160k compute units or it may fail to complete. If the callback fails, the oracle who completed the request is rewarded 90% of the specified reward. If the callback succeeds, the oracle is rewarded 100% of its reward.
+
+You can view the full VRF walk-through in the example repo:
+
+<Box
+  component="a"
+  href="https://github.com/switchboard-xyz/vrf-cpi-example"
+  target="_blank"
+>
+  <IconButton
+    component="span"
+    color="primary"
+    aria-label="example repo"
+    to="https://github.com/switchboard-xyz/vrf-cpi-example"
+  >
+    <GitHubIcon fontSize="large" />
+  </IconButton>
+  <Typography component="span">@switchboard-xyz/VRF-CPI-Example</Typography>
+</Box>
+
+### Create Account
+
+- [VrfAccount.create [typescript]](/api/ts/classes/VrfAccount#create): Create a VRF Account to hold your personal randomness value. You must specify an oracle queue to create your VRF Account for, which determines which oracles get allocated to update requests.
+
+### Create & Approve Permissions
+
+- [PermissionAccount.create [typescript]](/api/ts/classes/PermissionAccount#create): Create a Permission Account for your VRF Account to use a queue's resources.
+- [PermissionAccount.set [typescript]](/api/ts/classes/PermissionAccount#set): The queue authority must approve a VRF Account before it can use its queues resources
+
+### Request Randomness
+
+- [VrfAccount.requestRandomness](/api/ts/classes/VrfAccount#requestrandomness): Request randomness once that previous request has resolved, or after 1 Minute. Assumes the payer has 0.1 wSOL in a wallet already.

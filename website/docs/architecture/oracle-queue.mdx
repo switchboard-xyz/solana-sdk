@@ -1,0 +1,88 @@
+---
+sidebar_position: 2
+slug: .
+title: Oracle Queue
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Box, Typography, Grid, List, ListItem } from "@mui/material";
+import Link from "@docusaurus/Link";
+import TOCInline from "@theme/TOCInline";
+
+import QueueInstructions from "/idl/_queue_instructions.mdx";
+
+import OracleQueueAccountData from "/idl/accounts/OracleQueueAccountData.md";
+import OracleQueueBuffer from "/idl/accounts/OracleQueueBuffer.md";
+
+import OracleQueueInit from "/idl/instructions/oracleQueueInit.md";
+import OracleQueueSetRewards from "/idl/instructions/oracleQueueSetRewards.md";
+import PermissionSet from "/idl/instructions/permissionSet.md";
+import SwitchboardPermission from "/idl/types/SwitchboardPermission.md";
+
+<MarkdownImage img="/img/L1_L2_Queue_Functional_Updates.png" />
+
+An oracle queue governs a _realm_ of oracles, data feeds, and randomness accounts. An oracle queue, and most of the other Switchboard accounts, have an `authority` field which specifies which keypair is permitted to make account changes. The `authority` could be controlled by a DAO to make the queue governed by its network participants.
+
+An oracle queue can be divided into the following domains:
+
+- [**Queue Permissions**](/architecture/permissions): Controls how an oracle queues resources get allocated.
+- [**Oracles**](/architecture/oracles): Maintains the list of active oracles and how they get allocated to update request.
+- [**Randomness**](/architecture/randomness): Allows developers to request a verifiable random value on-chain.
+- [**Data Feeds**](/architecture/feeds): Allows developers to build data feeds and publish on-chain.
+
+## Functions
+
+An oracle queue is responsible for the following functions:
+
+- [**Configuration**](#configuration): Dictates the queue's configuration such as it' `maxSize` or the number of cranks attached
+- [**Permission**](#permission): Dictates how new entities can join and use its resources
+- [**Update Requests**](#update-requests): Controls how update requests get allocated to oracles, whether manual or via a crank
+- [**Oracle Incentives**](#oracle-incentives): Sets the oracle rewards and slashing mechanisms, which influences queue security
+
+### 🚀Configuration
+
+#### maxSize
+
+When creating a queue with the OracleQueueInit instruction, an [OracleQueueBuffer](#oraclequeuebuffer) account must be initialized with a size of 8 Bytes + (32 Bytes × `maxSize`), where `maxSize` is the maximum number of oracles the queue can support. Once a buffer is full, oracles must be removed before new oracles can join the network.
+
+#### Crank Account(s)
+
+A queue `authority` can choose to create one or many cranks, allowing an aggregator with sufficient permissions to join. The crank is a scheduling mechanism that tracks a collection of aggregators and their next available update time. The crank can be turned by anyone, and if successful, the crank turner will be rewarded for jump starting the system.
+
+Aggregators on a crank are ordered by their next available update time with some level of jitter, providing a maximum update interval of 2 × an aggregator's `minUpdateDelaySeconds`. This is to mitigate oracles being assigned to the same aggregator update request, making a feed vulnerable to a malicious oracle.
+
+### 🚀Permission
+
+See [/architecture/permissions](/architecture/permissions) for more information on how a queue manages access to its resources.
+
+### 🚀Update Requests
+
+The OracleQueueBuffer account stores a list of oracle public keys in a round robin fashion, using `currIdx` to track its position upon subsequent openRound calls. Oracle positions are periodically swapped in the buffer account to mitigate oracles being assigned the same data feeds each update cycle.
+
+An aggregator with sufficient queue permissions can manually request a new value by calling the openRound instruction. If the aggregator's configuration permits it, the next N oracles will be assigned to the data feed update request. A queue's primary function is to allocate oracles to data feed update requests and keep the round robin queue cycling. The queue will periodically swap oracle positions to mitigate oracles being assigned the same data feed update request each cycle.
+
+### 🚀Oracle Incentives
+
+Switchboard is an open network allowing anyone to run an oracle but there are many reasons an oracle may be incentivized to game the system. For example, if we know a smart contract is using a particular feed to calculate a collateral ratio, an oracle could under-report the asset price and cause a liquidation or cause someone to not get the fair market rate for a trade. There’s a myriad of reasons an oracle could try and cheat so careful consideration was given to incentivize honest oracle behavior.
+
+#### minStake
+
+Oracles are required to provide the queue's `minStake` to the oracle's tokenAccount, which acts as an insurance policy to entice oracle operators to report honest results. Each oracle queue can have different staking requirements to influence its security. If the staking requirement is set too low it could attract dishonest oracles, but if set too high oracles may find a better use of their capital elsewhere.
+
+#### Oracle Rewards
+
+An oracle’s reward for a given round is determined by the queue's `reward`. Oracles are rewarded each time they submit a result and then reevaluated when an accepted result has been accepted. When a result has been accepted, the oracle rewards are redistributed to the oracles that responded within the acceptable range. The median result filters the outliers and means an attacker needs to control the majority of the assigned oracles in order to skew a result. This is why increasing the queue's `minStake` requirements increases the security of the network because the attacker will need more up-front capital to fund the attack. Oracle’s get assigned to data feeds in a round robin fashion with feeds scheduled at varying intervals and oracle batchSize's, so even if an attacker controls a large number of the queue's oracles, there is no guarantee their oracles will get assigned to the same feed.
+
+#### Slashing
+
+Switchboard uses the median oracle response to determine the accepted result. When initializing a queue, the queue `authority` specifies a `varianceToleranceMultiplier` which determines the range oracle responses may differ. An oracle queue defaults to two standard deviations. If a queue has `slashingEnabled`, any oracle who responded outside the acceptable range will be slashed and lose a portion of their staked capital. The slashing amount can be changed by the DAO to further incentivize honest oracle behavior.
+
+## Account Schema
+
+### 📦OracleQueueAccountData
+
+<OracleQueueAccountData />
+
+## Developer Resources
+
+<QueueInstructions />

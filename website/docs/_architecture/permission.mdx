@@ -1,0 +1,61 @@
+---
+sidebar_position: 15
+slug: /architecture/permission
+title: Permission
+---
+
+A permission account is a program derived address between a granter and grantee public key, and dictates whether the grantee has permissions to use an on-chain resource from a granter.
+
+An oracle queue manages how its resources get allocated by using permission accounts. Any oracle or aggregator that wants to use a feed must be approved by the queue's authority. The Switchboard DAO oracle queue's will use on-chain voting to control how permission accounts are created and revoked.
+
+## Account
+
+import { MdClass } from "react-icons/md";
+
+import PermissionAccountData from "../../idl/accounts/PermissionAccountData.md";
+
+<details>
+<summary>
+
+### 📦PermissionAccountData
+
+<b>Rent Exemption: </b>0.00348 SOL
+
+</summary>
+
+<PermissionAccountData />
+
+</details>
+
+## Instructions
+
+import { BsFillLightningChargeFill } from "react-icons/bs";
+
+import PermissionInit from "../../idl/instructions/permissionInit.md";
+import PermissionSet from "../../idl/instructions/permissionSet.md";
+
+<details>
+<summary>
+
+### ⚡PermissionInit
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionInit />
+
+</details>
+
+<details>
+<summary>
+
+### ⚡PermissionSet
+
+<b>Cost: </b>5000 lamports
+
+</summary>
+
+<PermissionSet />
+
+</details>

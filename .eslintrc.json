@@ -1,0 +1,39 @@
+{
+  "env": {
+    "es2020": true,
+    "node": true
+  },
+  "root": true,
+  "extends": [
+    "airbnb-typescript/base",
+    "plugin:@typescript-eslint/recommended",
+    // "plugin:unicorn/recommended",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
+  "plugins": ["@typescript-eslint", "prettier", "unicorn", "import"],
+  "rules": {
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-throw-literal": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/prevent-abbreviations": "off",
+    "unicorn/no-await-expression-member": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/no-null": "off",
+    "unicorn/prefer-module": "off",
+    "unicorn/no-array-for-each": "off",
+    "unicorn/prefer-array-some": "off",
+    "unicorn/no-object-as-default-parameter": "off",
+    "unicorn/filename-case": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  }
+}
