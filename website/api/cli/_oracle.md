@@ -4,6 +4,7 @@ interact with a switchboard oracle account
 * [`sbv2 oracle:balance ORACLEKEY`](#sbv2-oraclebalance-oraclekey)
 * [`sbv2 oracle:create QUEUEKEY`](#sbv2-oraclecreate-queuekey)
 * [`sbv2 oracle:deposit ORACLEKEY`](#sbv2-oracledeposit-oraclekey)
+* [`sbv2 oracle:nonce ORACLEKEY`](#sbv2-oraclenonce-oraclekey)
 * [`sbv2 oracle:permission:create ORACLEKEY`](#sbv2-oraclepermissioncreate-oraclekey)
 * [`sbv2 oracle:withdraw ORACLEKEY`](#sbv2-oraclewithdraw-oraclekey)
 
@@ -115,6 +116,36 @@ EXAMPLE
 ```
 
 _See code: [src/commands/oracle/deposit.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/oracle/deposit.ts)_
+
+## `sbv2 oracle:nonce ORACLEKEY`
+
+view an oracles nonce accounts
+
+```
+USAGE
+  $ sbv2 oracle:nonce ORACLEKEY
+
+ARGUMENTS
+  ORACLEKEY  public key of the oracle to check token balance
+
+OPTIONS
+  -h, --help             show CLI help
+
+  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+
+  -s, --silent           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl    alternate RPC url
+
+  -v, --verbose          log everything
+
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+
+  --programId=programId  alternative Switchboard program ID to interact with
+```
+
+_See code: [src/commands/oracle/nonce/index.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/oracle/nonce/index.ts)_
 
 ## `sbv2 oracle:permission:create ORACLEKEY`
 
