@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
+import type NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
@@ -13,9 +14,9 @@ import { DEFAULT_PUBKEY, promiseWithTimeout } from "../";
 export interface ISwitchboardTestContext {
   program: anchor.Program;
   mint: spl.Token;
-  tokenWallet: PublicKey;
+  payerTokenWallet: PublicKey;
   queue: sbv2.OracleQueueAccount;
-  oracle: sbv2.OracleAccount;
+  oracle?: sbv2.OracleAccount;
 }
 
 export class SwitchboardTestContext implements ISwitchboardTestContext {
@@ -23,16 +24,16 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
 
   mint: spl.Token;
 
-  tokenWallet: PublicKey;
+  payerTokenWallet: PublicKey;
 
   queue: sbv2.OracleQueueAccount;
 
-  oracle: sbv2.OracleAccount;
+  oracle?: sbv2.OracleAccount;
 
   constructor(ctx: ISwitchboardTestContext) {
     this.program = ctx.program;
     this.mint = ctx.mint;
-    this.tokenWallet = ctx.tokenWallet;
+    this.payerTokenWallet = ctx.payerTokenWallet;
     this.queue = ctx.queue;
     this.oracle = ctx.oracle;
   }
@@ -50,6 +51,65 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       payerKeypair,
       amount
     );
+  }
+
+  static async loadDevnetQueue(
+    provider: anchor.AnchorProvider,
+    queueKey = "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+  ) {
+    const payerKeypair = (provider.wallet as NodeWallet).payer;
+    let program: anchor.Program;
+    try {
+      program = await sbv2.loadSwitchboardProgram(
+        "devnet",
+        provider.connection,
+        payerKeypair
+      );
+    } catch (error) {
+      throw new Error(
+        `Failed to load the SBV2 program for the given cluster, ${error.message}`
+      );
+    }
+    let queue: sbv2.OracleQueueAccount;
+    let queueData: any;
+    try {
+      queue = new sbv2.OracleQueueAccount({
+        program,
+        publicKey: new PublicKey(queueKey),
+      });
+      queueData = await queue.loadData();
+      if (queueData.queue.length < 1) {
+        throw new Error(`OracleQueue has no active oracles heartbeating`);
+      }
+    } catch (error) {
+      throw new Error(
+        `Failed to load the SBV2 queue for the given cluster, ${error.message}`
+      );
+    }
+    let mint: spl.Token;
+    try {
+      mint = await queue.loadMint();
+    } catch (error) {
+      throw new Error(
+        `Failed to load the SBV2 mint for the given cluster, ${error.message}`
+      );
+    }
+    let payerTokenWallet: PublicKey;
+    try {
+      payerTokenWallet = (
+        await mint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
+      ).address;
+    } catch (error) {
+      throw new Error(
+        `Failed to load the SBV2 mint for the given cluster, ${error.message}`
+      );
+    }
+    return new SwitchboardTestContext({
+      program,
+      queue,
+      mint,
+      payerTokenWallet,
+    });
   }
 
   // public static async depositSwitchboardWallet(
@@ -141,8 +201,11 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       program: switchboardProgram,
       publicKey: SWITCHBOARD_QUEUE,
     });
+    const queueData = await queue.loadData();
+    if (queueData.queue.length < 1) {
+      throw new Error(`OracleQueue has no active oracles heartbeating`);
+    }
 
-    // TODO: Check oracle is heartbeating when context starts
     let oracle: sbv2.OracleAccount;
     if (process.env.ORACLE) {
       const SWITCHBOARD_ORACLE = new PublicKey(process.env.ORACLE);
@@ -156,14 +219,13 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
     const switchboardMint = await switchboardProgramState.getTokenMint();
 
-    const tokenWallet = await SwitchboardTestContext.createSwitchboardWallet(
-      switchboardProgram
-    );
+    const payerTokenWallet =
+      await SwitchboardTestContext.createSwitchboardWallet(switchboardProgram);
 
     const context: ISwitchboardTestContext = {
       program: switchboardProgram,
       mint: switchboardMint,
-      tokenWallet,
+      payerTokenWallet,
       queue,
       oracle,
     };
@@ -187,7 +249,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         minRequiredOracleResults: 1,
         minUpdateDelaySeconds: 5,
         queueAccount: this.queue,
-        authorWallet: this.tokenWallet,
+        authorWallet: this.payerTokenWallet,
       }
     );
 
@@ -216,7 +278,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     // create lease contract
     const leaseAccount = await sbv2.LeaseAccount.create(this.program, {
       aggregatorAccount,
-      funder: this.tokenWallet,
+      funder: this.payerTokenWallet,
       funderAuthority: payerKeypair,
       loadAmount: new anchor.BN(0),
       oracleQueueAccount: this.queue,
@@ -225,7 +287,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     // create and add job account
     const staticJob = await sbv2.JobAccount.create(this.program, {
       name: Buffer.from(`Value ${value}`),
-      authority: this.tokenWallet,
+      authority: this.payerTokenWallet,
       data: Buffer.from(
         sbv2.OracleJob.encodeDelimited(
           sbv2.OracleJob.create({
@@ -245,7 +307,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     // open new round and request new result
     await aggregatorAccount.openRound({
       oracleQueueAccount: this.queue,
-      payoutWallet: this.tokenWallet,
+      payoutWallet: this.payerTokenWallet,
     });
 
     return aggregatorAccount;
@@ -339,7 +401,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
 
     await aggregatorAccount.openRound({
       oracleQueueAccount: this.queue,
-      payoutWallet: this.tokenWallet,
+      payoutWallet: this.payerTokenWallet,
     });
 
     await updatedValuePromise;

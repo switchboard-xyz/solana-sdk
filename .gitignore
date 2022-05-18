@@ -21,12 +21,14 @@ programs/**/target
 Cargo.lock
 .anchor
 target
+.crates
 
 # Misc
 .keypairs
 secrets
 *-keypair*.json
 .archive
+*-error.log
 
 # Root level jsons ignored
 job-directory/*.json

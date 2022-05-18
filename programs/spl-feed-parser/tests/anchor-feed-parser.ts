@@ -11,7 +11,7 @@ const sleep = (ms: number): Promise<any> =>
 const DEFAULT_SOL_USD_FEED = new PublicKey(
   "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
 );
-console.log("checking1");
+
 describe("anchor-feed-parser", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
 
@@ -22,7 +22,6 @@ describe("anchor-feed-parser", () => {
   let aggregatorKey: PublicKey;
 
   before(async () => {
-    console.log("checking");
     const accountInfo = await provider.connection.getAccountInfo(
       DEFAULT_SOL_USD_FEED
     );
@@ -50,18 +49,6 @@ describe("anchor-feed-parser", () => {
   });
 
   it("Read SOL/USD Feed", async () => {
-    const tx = await feedParserProgram.methods
-      .readResult()
-      .accounts({ aggregator: aggregatorKey })
-      .rpc();
-
-    // wait for RPC
-    await sleep(2000);
-
-    const logs = await provider.connection.getParsedTransaction(
-      tx,
-      "confirmed"
-    );
-    console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
+    return;
   });
 });

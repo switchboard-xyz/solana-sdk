@@ -65,6 +65,8 @@ export const toPermissionString = (
       return "PERMIT_ORACLE_HEARTBEAT";
     case SwitchboardPermissionValue.PERMIT_ORACLE_QUEUE_USAGE:
       return "PERMIT_ORACLE_QUEUE_USAGE";
+    case SwitchboardPermissionValue.PERMIT_VRF_REQUESTS:
+      return "PERMIT_VRF_REQUESTS";
     default:
       return "NONE";
   }

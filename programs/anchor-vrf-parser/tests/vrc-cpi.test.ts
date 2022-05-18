@@ -1,58 +1,95 @@
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
+import type NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import {
+  AccountInfo,
+  Context,
+  PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
 } from "@solana/web3.js";
 import {
-  OracleAccount,
+  promiseWithTimeout,
+  SwitchboardTestContext,
+} from "@switchboard-xyz/sbv2-utils";
+import {
+  Callback,
   PermissionAccount,
   ProgramStateAccount,
   SwitchboardPermission,
-  SwitchboardTestContext,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
 import "mocha";
-import { getVrfClientCallback, getVrfClientFromSeed } from "../src/api";
-import { VrfClient } from "../src/generated";
-import type { AnchorVrfParser } from "../target/types/anchor_vrf_parser";
-import { promiseWithTimeout } from "./test-utils";
+import type { AnchorVrfParser } from "../../../target/types/anchor_vrf_parser";
+
 const expect = chai.expect;
+
+interface VrfClientState {
+  bump: number;
+  maxResult: anchor.BN;
+  resultBuffer: number[];
+  result: anchor.BN;
+  lastTimestamp: anchor.BN;
+  authority: PublicKey;
+  vrf: PublicKey;
+}
 
 describe("vrfClient test", async () => {
   anchor.setProvider(anchor.AnchorProvider.env());
 
   const vrfClientProgram = anchor.workspace
     .AnchorVrfParser as anchor.Program<AnchorVrfParser>;
-
-  const payer = (
-    (vrfClientProgram.provider as anchor.AnchorProvider).wallet as NodeWallet
-  ).payer;
+  const provider = vrfClientProgram.provider as anchor.AnchorProvider;
+  const payer = (provider.wallet as NodeWallet).payer;
 
   let switchboard: SwitchboardTestContext;
 
   const vrfSecret = anchor.web3.Keypair.generate();
 
-  // create state account but dont send instruction
-  // need public key for VRF CPI
-  const [vrfClientKey, vrfClientBump] = getVrfClientFromSeed(
-    vrfClientProgram as any,
-    vrfSecret.publicKey,
-    payer.publicKey // client state authority
-  );
+  const [vrfClientKey, vrfClientBump] =
+    anchor.utils.publicKey.findProgramAddressSync(
+      [
+        Buffer.from("STATE"),
+        vrfSecret.publicKey.toBytes(),
+        payer.publicKey.toBytes(),
+      ],
+      vrfClientProgram.programId
+    );
 
-  const vrfClientCallback = getVrfClientCallback(
-    vrfClientProgram as any,
-    vrfClientKey,
-    vrfSecret.publicKey
-  );
+  const vrfIxCoder = new anchor.BorshInstructionCoder(vrfClientProgram.idl);
+  const vrfClientCallback: Callback = {
+    programId: vrfClientProgram.programId,
+    accounts: [
+      // ensure all accounts in updateResult are populated
+      { pubkey: vrfClientKey, isSigner: false, isWritable: true },
+      { pubkey: vrfSecret.publicKey, isSigner: false, isWritable: false },
+    ],
+    ixData: vrfIxCoder.encode("updateResult", ""), // pass any params for instruction here
+  };
 
   before(async () => {
+    // First, attempt to load the switchboard devnet PID
+    try {
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      console.log("devnet detected");
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+    // If exists, try to load the devnet permissionless queue
+    // If fails, fallback to looking for a local env file
+    try {
+      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
+      console.log("localnet detected");
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+    // If fails, throw error
     // TODO: Add try catch block to check devnet environment accounts
-    switchboard = await SwitchboardTestContext.loadFromEnv(
-      vrfClientProgram.provider as anchor.AnchorProvider
+    throw new Error(
+      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
     );
   });
 
@@ -129,85 +166,77 @@ describe("vrfClient test", async () => {
 
     // Request randomness
     console.log(`Sending RequestRandomness instruction`);
-    const requestTxn = await vrfClientProgram.rpc.requestResult(
-      {
+    const requestTxn = await vrfClientProgram.methods
+      .requestResult({
         switchboardStateBump: programStateBump,
         permissionBump,
-      },
-      {
-        accounts: {
-          state: vrfClientKey,
-          authority: payer.publicKey,
-          switchboardProgram: switchboard.program.programId,
-          vrf: vrfAccount.publicKey,
-          oracleQueue: queue.publicKey,
-          queueAuthority: authority,
-          dataBuffer,
-          permission: permissionAccount.publicKey,
-          escrow,
-          payerWallet: payerTokenAccount.address,
-          payerAuthority: payer.publicKey,
-          recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-          programState: programStateAccount.publicKey,
-          tokenProgram: spl.TOKEN_PROGRAM_ID,
-        },
-        signers: [payer, payer],
-      }
-    );
+      })
+      .accounts({
+        state: vrfClientKey,
+        authority: payer.publicKey,
+        switchboardProgram: switchboard.program.programId,
+        vrf: vrfAccount.publicKey,
+        oracleQueue: queue.publicKey,
+        queueAuthority: authority,
+        dataBuffer,
+        permission: permissionAccount.publicKey,
+        escrow,
+        payerWallet: payerTokenAccount.address,
+        payerAuthority: payer.publicKey,
+        recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+        programState: programStateAccount.publicKey,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+      })
+      .signers([payer, payer])
+      .rpc();
 
-    const vrfClientAccountDecoder = new anchor.BorshAccountsCoder(
+    const vrfClientAccountCoder = new anchor.BorshAccountsCoder(
       vrfClientProgram.idl
     );
 
-    let ws: number;
-
-    const waitToCrankPromise = new Promise(
-      (resolve: (result: string[]) => void) => {
-        ws = switchboard.program.addEventListener(
-          "VrfProveEvent",
-          async (event: any, slot: number) => {
-            console.log("VrfProveEvent invoked");
-            if (!vrfSecret.publicKey.equals(event.vrfPubkey)) {
-              console.log(`not the same vrfKey`);
-              return;
+    // watch VrfClientState for a populated result
+    let ws: number | undefined = undefined;
+    const waitForResultPromise = new Promise(
+      (
+        resolve: (result: anchor.BN) => void,
+        reject: (reason: string) => void
+      ) => {
+        try {
+          ws = vrfClientProgram.provider.connection.onAccountChange(
+            vrfClientKey,
+            async (accountInfo: AccountInfo<Buffer>, context: Context) => {
+              const clientState: VrfClientState = vrfClientAccountCoder.decode(
+                "VrfClient",
+                accountInfo.data
+              );
+              if (clientState.result.gt(new anchor.BN(0))) {
+                resolve(clientState.result);
+              }
             }
-
-            const vrf = await vrfAccount.loadData();
-            const round = vrf.builders[0];
-
-            if (round.status.statusVerifying) {
-              console.log(`Ready to turn the crank`);
-              const oracle = new OracleAccount({
-                program: switchboard.program,
-                publicKey: round.producer,
-              });
-              const txns = await vrfAccount.verify(oracle);
-              resolve(txns);
-            }
-          }
-        );
+          );
+        } catch (error: any) {
+          reject(error);
+        }
       }
     );
 
-    const awaitResult = await promiseWithTimeout(
-      20_000,
-      waitToCrankPromise
-    ).finally(() => {
-      try {
-        vrfClientProgram.provider.connection.removeAccountChangeListener(ws);
-      } catch {}
-    });
-    if (!awaitResult) {
+    let result: anchor.BN;
+    try {
+      result = await promiseWithTimeout(30_000, waitForResultPromise);
+    } catch (error) {
+      throw error;
+    } finally {
+      if (ws) {
+        await vrfClientProgram.provider.connection.removeAccountChangeListener(
+          ws
+        );
+      }
+    }
+
+    if (!result) {
       throw new Error(`failed to get a VRF result`);
     }
 
-    console.log(JSON.stringify(awaitResult, undefined, 2));
-
-    const vrfClient = await VrfClient.fromAccountAddress(
-      vrfClientProgram.provider.connection,
-      vrfClientKey
-    );
-
-    console.log(`VrfClient Result: ${vrfClient.result}`);
+    console.log(`VrfClient Result: ${result}`);
   });
 });

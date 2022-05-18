@@ -1,0 +1,27 @@
+[provider]
+cluster = "devnet"
+wallet = "../payer-keypair.json"
+# wallet = "~/.config/solana/id.json"
+
+
+[programs.localnet]
+anchor_feed_parser = "H7frfaL4ZjRW6NAyBvuGgsi9P2G1CgVgqFqzFSDS521f"
+anchor_vrf_parser = "HWCUJF1GgCrS1fWNyJdWSBEVNXtdjRwQy7HohdQ5n31o"
+# spl_feed_parser = "9dqf4Z9oKRJ6TDGHWyfArV7VtcFNsZWz1wZwWWQmWPHW"
+[programs.devnet]
+anchor_feed_parser = "H7frfaL4ZjRW6NAyBvuGgsi9P2G1CgVgqFqzFSDS521f"
+anchor_vrf_parser = "HWCUJF1GgCrS1fWNyJdWSBEVNXtdjRwQy7HohdQ5n31o"
+# spl_feed_parser = "9dqf4Z9oKRJ6TDGHWyfArV7VtcFNsZWz1wZwWWQmWPHW"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 programs/*/tests/**/*.test.ts"
+
+
+[test.validator]
+url="https://api.devnet.solana.com"
+
+[[testnet.validator.clone]]
+address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed

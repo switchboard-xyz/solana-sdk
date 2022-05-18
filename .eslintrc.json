@@ -3,6 +3,7 @@
     "es2020": true,
     "node": true
   },
+  "ignorePatterns": ["**/*/node_modules", "**/*/lib", "**/*/dist"],
   "root": true,
   "extends": [
     "airbnb-typescript/base",

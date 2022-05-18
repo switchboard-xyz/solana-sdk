@@ -11,7 +11,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "echo \"Use 'npm run build:site' to build the docusaurus project\" && exit 0",
+    "build": "For workspace website, run 'yarn docs:build' from the project root",
     "build:site": "docusaurus build --out-dir public",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus build --out-dir public && docusaurus deploy --out-dir public",

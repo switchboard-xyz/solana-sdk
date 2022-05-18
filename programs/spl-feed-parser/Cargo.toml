@@ -3,12 +3,15 @@ name = "spl-feed-parser"
 version = "0.1.0"
 edition = "2018"
 
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "spl_feed_parser"
+
 [features]
 no-entrypoint = []
 
 [dependencies]
-switchboard-v2 = "^0.1.10"
+switchboard-v2 = { path = "../../libraries/rs" }
+# switchboard-v2 = "^0.1.10"
 solana-program = "~1.9.13"
 
-[lib]
-crate-type = ["cdylib", "lib"]
