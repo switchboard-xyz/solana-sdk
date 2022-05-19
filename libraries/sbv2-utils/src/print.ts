@@ -274,9 +274,15 @@ export async function prettyPrintQueue(
       data.unpermissionedFeedsEnabled.toString(),
       SPACING
     ) + "\r\n";
+  outputString +=
+    chalkString(
+      "unpermissionedVrfEnabled",
+      data.unpermissionedVrfEnabled.toString(),
+      SPACING
+    ) + "\r\n";
   outputString += chalkString(
     "unpermissionedVrfEnabled",
-    data.unpermissionedVrfEnabled.toString(),
+    data.enableBufferRelayers?.toString() ?? "",
     SPACING
   );
 

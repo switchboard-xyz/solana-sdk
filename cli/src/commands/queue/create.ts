@@ -4,7 +4,6 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Keypair,
   SystemProgram,
   TransactionInstruction,
@@ -15,7 +14,6 @@ import {
   prettyPrintCrank,
   prettyPrintOracle,
   prettyPrintQueue,
-  promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   CrankAccount,
@@ -30,7 +28,7 @@ import Big from "big.js";
 import fs from "fs";
 import path from "path";
 import BaseCommand from "../../BaseCommand";
-import { sleep, verifyProgramHasPayer } from "../../utils";
+import { verifyProgramHasPayer } from "../../utils";
 
 export default class QueueCreate extends BaseCommand {
   static description = "create a custom queue";
@@ -361,40 +359,23 @@ export default class QueueCreate extends BaseCommand {
       })
     );
 
-    let queueWs: number;
-    const customQueuePromise = new Promise((resolve: (result: any) => void) => {
-      queueWs = this.program.provider.connection.onAccountChange(
-        queueAccount.publicKey,
-        (accountInfo: AccountInfo<Buffer>, slot) => {
-          const accountCoder = new anchor.BorshAccountsCoder(this.program.idl);
-          resolve(
-            accountCoder.decode("OracleQueueAccountData", accountInfo.data)
-          );
-        }
-      );
-    });
-
-    const createAccountSignatures = packAndSend(
+    const createAccountSignatures = await packAndSend(
       this.program,
       [setupQueueTxns, finalTransactions],
       signers,
       payerKeypair.publicKey
     ).catch((error) => {
       this.logger.error(error);
-      this.exit(1);
+      throw error;
     });
 
-    const queueData = await promiseWithTimeout(
-      25_000,
-      customQueuePromise
-    ).finally(() => {
-      try {
-        if (queueWs) {
-          this.logger.debug(`closing ws ${queueWs}`);
-          this.program.provider.connection.removeAccountChangeListener(queueWs);
-        }
-      } catch {}
-    });
+    let queueData: any;
+    try {
+      queueData = await queueAccount.loadData();
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
 
     if (outputPath) {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -450,14 +431,7 @@ export default class QueueCreate extends BaseCommand {
         this.logger.info(
           await prettyPrintOracle(oracle.oracleAccount, undefined, true, 30)
         );
-      } catch {
-        await sleep(1000);
-        try {
-          this.logger.info(
-            await prettyPrintOracle(oracle.oracleAccount, undefined, true, 30)
-          );
-        } catch {}
-      }
+      } catch {}
     }
   }
 
