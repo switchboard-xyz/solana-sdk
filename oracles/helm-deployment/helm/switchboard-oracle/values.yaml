@@ -8,7 +8,7 @@ rpcUrl: $RPC_URL
 wsUrl: $WS_URL
 backupMainnetUrl: $BACKUP_MAINNET_RPC
 pagerdutyEventKey: $PAGERDUTY_EVENT_KEY
-image: "docker.io/switchboardlabs/node:dev-v2-4-5-22a"
+image: "docker.io/switchboardlabs/node:dev-v2-5-3-22"
 keyJson: $SERVICE_ACCOUNT_BASE64
 oracleKeys:
   - name: idx-1

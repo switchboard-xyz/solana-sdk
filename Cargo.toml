@@ -1,6 +1,4 @@
 [workspace]
 members = [
-    "programs/anchor-feed-parser",
-    "programs/anchor-vrf-parser",
-    "programs/spl-feed-parser",
+    "programs/*",
 ]

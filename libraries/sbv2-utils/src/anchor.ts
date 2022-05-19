@@ -95,6 +95,25 @@ export function getAnchorWalletPath(parsedToml?: any): string {
   return walletPath;
 }
 
+export function getAnchorCluster(parsedToml?: any): string {
+  let tomlData: any;
+  if (parsedToml) {
+    tomlData = parsedToml;
+  } else {
+    const tomlPath = path.join(process.cwd(), "Anchor.toml");
+    if (!fs.existsSync(tomlPath)) {
+      throw new Error(`failed to find Anchor.toml`);
+    }
+    tomlData = toml.parse(fs.readFileSync(tomlPath, "utf8"));
+  }
+
+  const cluster = tomlData.provider.cluster;
+  if (!cluster) {
+    throw new Error(`Failed to read Anchor.toml cluster`);
+  }
+  return cluster;
+}
+
 export function loadPid(programKeypairPath: string): PublicKey {
   if (!fs.existsSync(programKeypairPath)) {
     console.log(programKeypairPath);

@@ -12,7 +12,7 @@
       "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
-  "include": ["oldtests/**/**/*"],
+  // "include": ["oldtests/**/**/*"],
   "exclude": ["target"],
   "references": [{ "path": "../../libraries/ts" }]
 }

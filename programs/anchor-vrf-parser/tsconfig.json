@@ -19,7 +19,7 @@
       "@switchboard-xyz/sbv2-utils": ["../../libraries/sbv2-utils"]
     }
   },
-  "include": ["client/**/*"],
+  // "include": ["client/**/*"],
   "exclude": ["target", "lib"],
   "references": [
     { "path": "../../libraries/ts" },

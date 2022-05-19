@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable import/no-extraneous-dependencies */
+
+/**
+ * This script will
+ *  - Build any anchor projects if missing
+ *  - Grab anchor project IDs
+ *  - Update project IDs in Anchor.toml and lib.rs
+ */
+
 const shell = require("shelljs");
 const { exec, spawn, execSync, spawnSync } = require("child_process");
 const web3 = require("@solana/web3.js");

@@ -35,7 +35,7 @@ interface VrfClientState {
   vrf: PublicKey;
 }
 
-describe("vrfClient test", async () => {
+describe("anchor-vrf-parser test", async () => {
   anchor.setProvider(anchor.AnchorProvider.env());
 
   const vrfClientProgram = anchor.workspace
@@ -77,7 +77,6 @@ describe("vrfClient test", async () => {
     } catch (error) {
       console.log(error);
     }
-    // If exists, try to load the devnet permissionless queue
     // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
@@ -87,7 +86,6 @@ describe("vrfClient test", async () => {
       console.log(error);
     }
     // If fails, throw error
-    // TODO: Add try catch block to check devnet environment accounts
     throw new Error(
       `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
     );

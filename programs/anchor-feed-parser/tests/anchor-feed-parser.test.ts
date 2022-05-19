@@ -1,7 +1,7 @@
 import type { Program } from "@project-serum/anchor";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { SwitchboardTestContext } from "@switchboard-xyz/switchboard-v2";
+import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorFeedParser } from "../../../target/types/anchor_feed_parser";
 
 const sleep = (ms: number): Promise<any> =>
@@ -11,46 +11,45 @@ const sleep = (ms: number): Promise<any> =>
 const DEFAULT_SOL_USD_FEED = new PublicKey(
   "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
 );
-console.log("checking1");
-describe("anchor-feed-parser", () => {
+
+describe("anchor-feed-parser test", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
 
   const feedParserProgram = anchor.workspace
     .AnchorFeedParser as Program<AnchorFeedParser>;
   const provider = feedParserProgram.provider as anchor.AnchorProvider;
 
+  let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
 
   before(async () => {
-    console.log("checking");
-    const accountInfo = await provider.connection.getAccountInfo(
-      DEFAULT_SOL_USD_FEED
-    );
-    if (accountInfo) {
-      aggregatorKey = DEFAULT_SOL_USD_FEED;
-      return;
-    }
-
-    // create an aggregator
+    // First, attempt to load the switchboard devnet PID
     try {
-      const switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      const staticFeed = await switchboard.createStaticFeed(100);
-      if (!staticFeed.publicKey) {
-        throw new Error("failed to read aggregatorKey");
-      }
-      aggregatorKey = staticFeed.publicKey;
-      console.log(`created aggregator ${aggregatorKey}`);
-      await sleep(2000);
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      aggregatorKey = DEFAULT_SOL_USD_FEED;
+      console.log("devnet detected");
+      return;
     } catch (error) {
-      console.error(error);
-      throw new Error(
-        `failed to load switchboard aggregator or switchboard.env`
-      );
+      console.log(error);
     }
+    // If fails, fallback to looking for a local env file
+    try {
+      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
+      const aggregatorAccount = await switchboard.createStaticFeed(100);
+      aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
+      console.log("localnet detected");
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+    // If fails, throw error
+    throw new Error(
+      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
+    );
   });
 
   it("Read SOL/USD Feed", async () => {
-    const tx = await feedParserProgram.methods
+    const signature = await feedParserProgram.methods
       .readResult()
       .accounts({ aggregator: aggregatorKey })
       .rpc();
@@ -59,9 +58,10 @@ describe("anchor-feed-parser", () => {
     await sleep(2000);
 
     const logs = await provider.connection.getParsedTransaction(
-      tx,
+      signature,
       "confirmed"
     );
+
     console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
   });
 });
