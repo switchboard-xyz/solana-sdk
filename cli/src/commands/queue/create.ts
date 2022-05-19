@@ -4,17 +4,16 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Keypair,
   SystemProgram,
   TransactionInstruction,
 } from "@solana/web3.js";
 import {
   chalkString,
+  packAndSend,
   prettyPrintCrank,
   prettyPrintOracle,
   prettyPrintQueue,
-  promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   CrankAccount,
@@ -29,8 +28,7 @@ import Big from "big.js";
 import fs from "fs";
 import path from "path";
 import BaseCommand from "../../BaseCommand";
-import { sleep, verifyProgramHasPayer } from "../../utils";
-import { packAndSend } from "../../utils/transaction";
+import { verifyProgramHasPayer } from "../../utils";
 
 export default class QueueCreate extends BaseCommand {
   static description = "create a custom queue";
@@ -85,6 +83,14 @@ export default class QueueCreate extends BaseCommand {
       description: "permit unpermissioned feeds",
       default: false,
     }),
+    unpermissionedVrf: flags.boolean({
+      description: "permit unpermissioned VRF accounts",
+      default: false,
+    }),
+    enableBufferRelayers: flags.boolean({
+      description: "enable oracles to fulfill buffer relayer requests",
+      default: false,
+    }),
     outputFile: flags.string({
       char: "f",
       description: "output queue schema to a json file",
@@ -96,6 +102,7 @@ export default class QueueCreate extends BaseCommand {
     verifyProgramHasPayer(this.program);
     const { flags, args } = this.parse(QueueCreate);
     const payerKeypair = programWallet(this.program);
+    const signers: Keypair[] = [];
 
     const outputPath =
       flags.outputFile === undefined
@@ -104,11 +111,14 @@ export default class QueueCreate extends BaseCommand {
         ? flags.outputFile
         : path.join(process.cwd(), flags.outputFile);
 
-    if (outputPath && fs.existsSync(outputPath) && args.force === false) {
+    if (outputPath && fs.existsSync(outputPath) && flags.force === false) {
       throw new Error(`output json file already exists: ${outputPath}`);
     }
 
     const authorityKeypair = await this.loadAuthority(flags.authority);
+    if (!authorityKeypair.publicKey.equals(payerKeypair.publicKey)) {
+      signers.push(authorityKeypair);
+    }
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
     );
@@ -119,14 +129,16 @@ export default class QueueCreate extends BaseCommand {
       payerKeypair
     );
 
-    const ixns: (TransactionInstruction | TransactionInstruction[])[] = [];
-    const signers: Keypair[] = [payerKeypair, authorityKeypair];
+    const setupQueueTxns: (
+      | TransactionInstruction
+      | TransactionInstruction[]
+    )[] = [];
 
     try {
       await programStateAccount.loadData();
     } catch {
       const vaultKeypair = anchor.web3.Keypair.generate();
-      ixns.push([
+      setupQueueTxns.push([
         SystemProgram.createAccount({
           fromPubkey: payerKeypair.publicKey,
           newAccountPubkey: vaultKeypair.publicKey,
@@ -186,7 +198,7 @@ export default class QueueCreate extends BaseCommand {
       publicKey: crankKeypair.publicKey,
     });
 
-    ixns.push(
+    setupQueueTxns.push(
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,
         newAccountPubkey: queueBuffer.publicKey,
@@ -215,6 +227,8 @@ export default class QueueCreate extends BaseCommand {
           minimumDelaySeconds: 5,
           queueSize: flags.queueSize,
           unpermissionedFeeds: flags.unpermissionedFeeds ?? false,
+          unpermissionedVrf: flags.unpermissionedVrf ?? false,
+          enableBufferRelayers: flags.enableBufferRelayers ?? false,
         })
         .accounts({
           oracleQueue: queueKeypair.publicKey,
@@ -345,35 +359,23 @@ export default class QueueCreate extends BaseCommand {
       })
     );
 
-    const createAccountSignatures = packAndSend(
+    const createAccountSignatures = await packAndSend(
       this.program,
-      ixns,
-      finalTransactions,
+      [setupQueueTxns, finalTransactions],
       signers,
       payerKeypair.publicKey
-    );
-
-    let queueWs: number;
-    const customQueuePromise = new Promise((resolve: (result: any) => void) => {
-      queueWs = this.program.provider.connection.onAccountChange(
-        queueAccount.publicKey,
-        (accountInfo: AccountInfo<Buffer>, slot) => {
-          const accountCoder = new anchor.BorshAccountsCoder(this.program.idl);
-          resolve(
-            accountCoder.decode("OracleQueueAccountData", accountInfo.data)
-          );
-        }
-      );
+    ).catch((error) => {
+      this.logger.error(error);
+      throw error;
     });
 
-    const queueData = await promiseWithTimeout(
-      22_000,
-      customQueuePromise
-    ).finally(() => {
-      try {
-        this.program.provider.connection.removeAccountChangeListener(queueWs);
-      } catch {}
-    });
+    let queueData: any;
+    try {
+      queueData = await queueAccount.loadData();
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
 
     if (outputPath) {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -429,14 +431,7 @@ export default class QueueCreate extends BaseCommand {
         this.logger.info(
           await prettyPrintOracle(oracle.oracleAccount, undefined, true, 30)
         );
-      } catch {
-        await sleep(1000);
-        try {
-          this.logger.info(
-            await prettyPrintOracle(oracle.oracleAccount, undefined, true, 30)
-          );
-        } catch {}
-      }
+      } catch {}
     }
   }
 

@@ -35,7 +35,7 @@ export default class VrfPrint extends BaseCommand {
       publicKey: args.vrfKey,
     });
 
-    this.logger.log(await prettyPrintVrf(vrfAccount));
+    this.logger.log(await prettyPrintVrf(vrfAccount, undefined, true));
   }
 
   async catch(error) {

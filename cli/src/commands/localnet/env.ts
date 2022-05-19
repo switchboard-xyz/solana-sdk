@@ -18,6 +18,10 @@ export default class LocalnetEnvironment extends BaseCommand {
       description: "overwrite output file if existing",
       default: false,
     }),
+    outputDir: flags.string({
+      char: "o",
+      description: "output directory for scripts",
+    }),
   };
 
   async run() {
@@ -25,24 +29,28 @@ export default class LocalnetEnvironment extends BaseCommand {
     const { flags } = this.parse(LocalnetEnvironment);
     const payerKeypair = programWallet(this.program);
 
+    const outputDir = flags.outputDir
+      ? path.join(process.cwd(), flags.outputDir)
+      : process.cwd();
+
     // TODO: Check paths and force flags
     if (!flags.force) {
-      if (fs.existsSync(path.join(process.cwd(), "switchboard.env"))) {
+      if (fs.existsSync(path.join(outputDir, "switchboard.env"))) {
         throw new Error(
           "switchboard.env already exists, use --force to overwrite"
         );
       }
-      if (fs.existsSync(path.join(process.cwd(), "switchboard.json"))) {
+      if (fs.existsSync(path.join(outputDir, "switchboard.json"))) {
         throw new Error(
           "switchboard.json already exists, use --force to overwrite"
         );
       }
-      if (fs.existsSync(path.join(process.cwd(), "start-local-validator.sh"))) {
+      if (fs.existsSync(path.join(outputDir, "start-local-validator.sh"))) {
         throw new Error(
           "start-local-validator.sh already exists, use --force to overwrite"
         );
       }
-      if (fs.existsSync(path.join(process.cwd(), "start-oracle.sh"))) {
+      if (fs.existsSync(path.join(outputDir, "start-oracle.sh"))) {
         throw new Error(
           "start-oracle.sh already exists, use --force to overwrite"
         );
@@ -70,7 +78,8 @@ export default class LocalnetEnvironment extends BaseCommand {
       new PublicKey(flags.programId)
     );
     // TODO: Add silent flag
-    testEnvironment.writeAll(flags.keypair, process.cwd());
+    fs.mkdirSync(outputDir, { recursive: true });
+    testEnvironment.writeAll(flags.keypair, outputDir);
   }
 
   async catch(error) {

@@ -1,7 +1,10 @@
 /* eslint-disable unicorn/import-style */
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
-import { prettyPrintAggregator } from "@switchboard-xyz/sbv2-utils";
+import {
+  chalkString,
+  prettyPrintAggregator,
+} from "@switchboard-xyz/sbv2-utils";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import BaseCommand from "../../BaseCommand";
 
@@ -15,6 +18,10 @@ export default class AggregatorPrint extends BaseCommand {
     jobs: flags.boolean({
       description: "output job definitions",
       default: false,
+    }),
+    oraclePubkeysData: flags.boolean({
+      char: "o",
+      description: "print the assigned oracles for the current round",
     }),
   };
 
@@ -49,6 +56,19 @@ export default class AggregatorPrint extends BaseCommand {
         flags.jobs
       )
     );
+
+    if (flags.oraclePubkeysData) {
+      this.logger.log(
+        chalkString(
+          "oraclePubkeyData",
+          "\n" +
+            (aggregator.currentRound.oraclePubkeysData as PublicKey[])
+              .filter((pubkey) => !PublicKey.default.equals(pubkey))
+              .map((pubkey) => pubkey.toString())
+              .join("\n")
+        )
+      );
+    }
   }
 
   async catch(error) {

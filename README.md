@@ -49,6 +49,16 @@ yarn workspaces run build
 yarn workspace @switchboard-xyz/switchboardv2-cli link
 ```
 
+### Rust Setup
+
+The following command will build the anchor projects and update the program IDs
+
+```
+anchor build
+node scripts/setup-example-programs
+anchor test
+```
+
 ### Python Setup
 
 ```
@@ -57,10 +67,13 @@ cd libraries/py
 poetry install
 ```
 
-### Build
+### Localnet Testing Setup
+
+You may wish to run your own oracle for integration test. The following command will create a devnet Switchboard environment and output a `Switchboard.env` file to assist copying
 
 ```
-yarn workspaces run build
+sbv2 localnet:env --keypair ../payer-keypair.json
+chmod +x ./start-local-validator.sh && chmod +x ./start-oracle.sh
 ```
 
 ## Test

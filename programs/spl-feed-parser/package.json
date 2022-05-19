@@ -8,13 +8,15 @@
     "directory": "programs/spl-feed-parser"
   },
   "scripts": {
-    "build": "cargo build-bpf --manifest-path=Cargo.toml",
+    "build": "echo \"For workspace spl-feed-parser, run 'anchor build' from the project root\" && exit 0",
+    "build:bpf": "cargo build-bpf --manifest-path=Cargo.toml",
     "deploy": "solana program deploy target/deploy/spl_feed_parser.so",
-    "anchor:test": "echo \"No anchor:test script for spl-feed-parser\" && exit 0",
     "test": "echo \"For workspace spl-feed-parser, use the anchor:test script\" && exit 0"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.37.1"
+    "@project-serum/anchor": "^0.24.2",
+    "@solana/web3.js": "^1.37.1",
+    "@switchboard-xyz/switchboard-v2": "^0.0.97"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

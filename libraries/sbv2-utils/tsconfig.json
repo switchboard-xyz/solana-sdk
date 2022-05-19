@@ -10,7 +10,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitReturns": false,
+    "importsNotUsedAsValues": "preserve",
     "strict": false,
+    "noEmit": false,
     "emitDeclarationOnly": false,
     "paths": {
       "@switchboard-xyz/switchboard-v2": ["../ts"]

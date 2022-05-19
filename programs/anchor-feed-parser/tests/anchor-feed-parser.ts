@@ -2,32 +2,30 @@ import type { Program } from "@project-serum/anchor";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestContext } from "@switchboard-xyz/switchboard-v2";
-import { createReadResultInstruction } from "../src";
-import type { AnchorFeedParser } from "../target/types/anchor_feed_parser";
+import type { AnchorFeedParser } from "../../../target/types/anchor_feed_parser";
 
 const sleep = (ms: number): Promise<any> =>
   new Promise((s) => setTimeout(s, ms));
 
+// Anchor.toml will copy this to localnet when we start our tests
 const DEFAULT_SOL_USD_FEED = new PublicKey(
   "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
 );
-
+console.log("checking1");
 describe("anchor-feed-parser", () => {
-  const provider = anchor.AnchorProvider.env();
-  anchor.setProvider(provider);
+  anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace
+  const feedParserProgram = anchor.workspace
     .AnchorFeedParser as Program<AnchorFeedParser>;
+  const provider = feedParserProgram.provider as anchor.AnchorProvider;
 
   let aggregatorKey: PublicKey;
 
-  const connection = new anchor.web3.Connection(
-    provider.connection.rpcEndpoint,
-    { commitment: "finalized" }
-  );
-
   before(async () => {
-    const accountInfo = await connection.getAccountInfo(DEFAULT_SOL_USD_FEED);
+    console.log("checking");
+    const accountInfo = await provider.connection.getAccountInfo(
+      DEFAULT_SOL_USD_FEED
+    );
     if (accountInfo) {
       aggregatorKey = DEFAULT_SOL_USD_FEED;
       return;
@@ -52,21 +50,10 @@ describe("anchor-feed-parser", () => {
   });
 
   it("Read SOL/USD Feed", async () => {
-    const instruction = createReadResultInstruction({
-      aggregator: aggregatorKey,
-    });
-
-    const transaction = new anchor.web3.Transaction();
-    transaction.add(instruction);
-
-    const tx = await provider.sendAndConfirm(transaction);
-
-    // // Using Anchor Program to send transaction
-    // const tx = await program.rpc.readResult({
-    //   accounts: {
-    //     aggregator: aggregatorKey,
-    //   },
-    // });
+    const tx = await feedParserProgram.methods
+      .readResult()
+      .accounts({ aggregator: aggregatorKey })
+      .rpc();
 
     // wait for RPC
     await sleep(2000);

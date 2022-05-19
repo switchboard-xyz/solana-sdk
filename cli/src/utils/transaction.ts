@@ -22,15 +22,14 @@ export async function packAndSend(
 
   const packedTransactions = packInstructions(ixnsBatch, feePayer, blockhash);
   const signedTransactions = signTransactions(packedTransactions, signers);
-  const signedTxs = await (
-    program.provider as anchor.AnchorProvider
-  ).wallet.signAllTransactions(signedTransactions);
+  // const signedTxs = await (
+  //   program.provider as anchor.AnchorProvider
+  // ).wallet.signAllTransactions(signedTransactions);
 
   for (let k = 0; k < packedTransactions.length; k += 1) {
-    const tx = signedTxs[k];
-    const rawTx = tx.serialize();
+    const tx = signedTransactions[k];
     signatures.push(
-      program.provider.connection.sendRawTransaction(rawTx, {
+      program.provider.connection.sendTransaction(tx, signers, {
         skipPreflight: true,
         maxRetries: 10,
       })

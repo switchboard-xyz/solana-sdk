@@ -65,6 +65,8 @@ export const toPermissionString = (
       return "PERMIT_ORACLE_HEARTBEAT";
     case SwitchboardPermissionValue.PERMIT_ORACLE_QUEUE_USAGE:
       return "PERMIT_ORACLE_QUEUE_USAGE";
+    case SwitchboardPermissionValue.PERMIT_VRF_REQUESTS:
+      return "PERMIT_VRF_REQUESTS";
     default:
       return "NONE";
   }
@@ -272,9 +274,15 @@ export async function prettyPrintQueue(
       data.unpermissionedFeedsEnabled.toString(),
       SPACING
     ) + "\r\n";
+  outputString +=
+    chalkString(
+      "unpermissionedVrfEnabled",
+      data.unpermissionedVrfEnabled.toString(),
+      SPACING
+    ) + "\r\n";
   outputString += chalkString(
     "unpermissionedVrfEnabled",
-    data.unpermissionedVrfEnabled.toString(),
+    data.enableBufferRelayers?.toString() ?? "",
     SPACING
   );
 
@@ -282,11 +290,16 @@ export async function prettyPrintQueue(
     outputString += chalk.underline(
       chalkString("\r\n## Oracles", " ".repeat(32), SPACING) + "\r\n"
     );
-    data.queue.forEach(
-      (row: PublicKey, index) =>
-        (outputString +=
-          chalkString(`# ${index + 1}`, row.toString(), SPACING) + "\r\n")
-    );
+    outputString += (data.queue as PublicKey[])
+      .filter((pubkey) => !PublicKey.default.equals(pubkey))
+      .map((pubkey) => pubkey.toString())
+      .join("\n");
+
+    // (data.queue as PublicKey[]).forEach(
+    //   (row, index) =>
+    //     (outputString +=
+    //       chalkString(`# ${index + 1},`, row.toString(), SPACING) + "\r\n")
+    // );
   }
 
   return outputString;

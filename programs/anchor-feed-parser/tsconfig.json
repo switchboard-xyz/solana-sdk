@@ -6,12 +6,11 @@
     "lib": ["es2015"],
     "module": "commonjs",
     "target": "es6",
+    "noEmit": true,
     "esModuleInterop": true,
     "paths": {
       "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
     }
   },
-  "include": ["tests/**/*"],
-  "exclude": ["target"],
   "references": [{ "path": "../../libraries/ts" }]
 }
