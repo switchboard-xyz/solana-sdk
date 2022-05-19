@@ -17,6 +17,7 @@ import {
   CrankAccount,
   JobAccount,
   LeaseAccount,
+  loadSwitchboardProgram,
   OracleJob,
   OracleQueueAccount,
   PermissionAccount,
@@ -69,6 +70,11 @@ export default class AggregatorCreateCopy extends BaseCommand {
       description: "public key of the crank to push aggregator to",
       required: false,
     }),
+    sourceCluster: flags.string({
+      description: "alternative solana cluster to copy source aggregator from",
+      required: false,
+      options: ["devnet", "mainnet-beta"],
+    }),
   };
 
   static args = [
@@ -81,7 +87,9 @@ export default class AggregatorCreateCopy extends BaseCommand {
   ];
 
   static examples = [
-    "$ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json",
+    "$ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json",
+    "$ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta",
+    "$ sbv2 aggregator:create:copy FcSmdsdWks75YdyCGegRqXdt5BiNGQKxZywyzb8ckD7D --queueKey 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta",
   ];
 
   async run() {
@@ -89,6 +97,42 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const { args, flags } = this.parse(AggregatorCreateCopy);
 
     const payerKeypair = programWallet(this.program);
+
+    const sourceProgram = !flags.sourceCluster
+      ? this.program
+      : flags.sourceCluster === "devnet" ||
+        flags.sourceCluster === "mainnet-beta"
+      ? await loadSwitchboardProgram(
+          flags.sourceCluster,
+          undefined,
+          payerKeypair
+        )
+      : undefined;
+    if (sourceProgram === undefined) {
+      throw new Error(`Invalid sourceAggregatorCluster ${flags.sourceCluster}`);
+    }
+    const sourceAggregatorAccount = new AggregatorAccount({
+      program: sourceProgram,
+      publicKey: args.aggregatorSource,
+    });
+
+    const sourceAggregator = await sourceAggregatorAccount.loadData();
+    const sourceJobPubkeys: PublicKey[] = sourceAggregator.jobPubkeysData.slice(
+      0,
+      sourceAggregator.jobPubkeysSize
+    );
+
+    const sourceJobAccounts = sourceJobPubkeys.map((publicKey) => {
+      return new JobAccount({ program: sourceProgram, publicKey: publicKey });
+    });
+
+    const sourceJobs = await Promise.all(
+      sourceJobAccounts.map(async (jobAccount) => {
+        const data = await jobAccount.loadData();
+        const job = OracleJob.decodeDelimited(data.data);
+        return { job, data };
+      })
+    );
 
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
@@ -104,28 +148,6 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const tokenWallet = (
       await tokenMint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
     ).address;
-
-    const sourceAggregatorAccount = new AggregatorAccount({
-      program: this.program,
-      publicKey: args.aggregatorSource,
-    });
-    const sourceAggregator = await sourceAggregatorAccount.loadData();
-    const sourceJobPubkeys: PublicKey[] = sourceAggregator.jobPubkeysData.slice(
-      0,
-      sourceAggregator.jobPubkeysSize
-    );
-
-    const sourceJobAccounts = sourceJobPubkeys.map((publicKey) => {
-      return new JobAccount({ program: this.program, publicKey: publicKey });
-    });
-
-    const sourceJobs = await Promise.all(
-      sourceJobAccounts.map(async (jobAccount) => {
-        const data = await jobAccount.loadData();
-        const job = OracleJob.decodeDelimited(data.data);
-        return { job, data };
-      })
-    );
 
     const createAccountInstructions: (
       | TransactionInstruction

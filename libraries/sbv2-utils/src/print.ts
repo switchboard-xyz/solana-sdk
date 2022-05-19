@@ -284,11 +284,16 @@ export async function prettyPrintQueue(
     outputString += chalk.underline(
       chalkString("\r\n## Oracles", " ".repeat(32), SPACING) + "\r\n"
     );
-    data.queue.forEach(
-      (row: PublicKey, index) =>
-        (outputString +=
-          chalkString(`# ${index + 1}`, row.toString(), SPACING) + "\r\n")
-    );
+    outputString += (data.queue as PublicKey[])
+      .filter((pubkey) => !PublicKey.default.equals(pubkey))
+      .map((pubkey) => pubkey.toString())
+      .join("\n");
+
+    // (data.queue as PublicKey[]).forEach(
+    //   (row, index) =>
+    //     (outputString +=
+    //       chalkString(`# ${index + 1},`, row.toString(), SPACING) + "\r\n")
+    // );
   }
 
   return outputString;

@@ -169,11 +169,17 @@ OPTIONS
 
   --queueKey=queueKey                    (required) public key of the queue to create aggregator for
 
+  --sourceCluster=devnet|mainnet-beta    alternative solana cluster to copy source aggregator from
+
   --varianceThreshold=varianceThreshold  override source aggregator's varianceThreshold
 
-EXAMPLE
-  $ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee 
-  AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json
+EXAMPLES
+  $ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json
+  $ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta
+  $ sbv2 aggregator:create:copy FcSmdsdWks75YdyCGegRqXdt5BiNGQKxZywyzb8ckD7D --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta
 ```
 
 _See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.18/src/commands/aggregator/create/copy.ts)_
@@ -1302,22 +1308,24 @@ USAGE
   $ sbv2 localnet:env
 
 OPTIONS
-  -h, --help             show CLI help
+  -h, --help                 show CLI help
 
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
+  -k, --keypair=keypair      keypair that will pay for onchain transactions. defaults to new account authority if no
+                             alternate authority provided
 
-  -s, --silent           suppress cli prompts
+  -o, --outputDir=outputDir  output directory for scripts
 
-  -u, --rpcUrl=rpcUrl    alternate RPC url
+  -s, --silent               suppress cli prompts
 
-  -v, --verbose          log everything
+  -u, --rpcUrl=rpcUrl        alternate RPC url
 
-  --force                overwrite output file if existing
+  -v, --verbose              log everything
 
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --force                    overwrite output file if existing
 
-  --programId=programId  alternative Switchboard program ID to interact with
+  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
 ```
 
 _See code: [src/commands/localnet/env.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.18/src/commands/localnet/env.ts)_
@@ -1635,22 +1643,24 @@ ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
 
 OPTIONS
-  -h, --help             show CLI help
+  -h, --help               show CLI help
 
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
+  -k, --keypair=keypair    keypair that will pay for onchain transactions. defaults to new account authority if no
+                           alternate authority provided
 
-  -s, --silent           suppress cli prompts
+  -o, --oraclePubkeysData  print the assigned oracles for the current round
 
-  -u, --rpcUrl=rpcUrl    alternate RPC url
+  -s, --silent             suppress cli prompts
 
-  -v, --verbose          log everything
+  -u, --rpcUrl=rpcUrl      alternate RPC url
 
-  --jobs                 output job definitions
+  -v, --verbose            log everything
 
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --jobs                   output job definitions
 
-  --programId=programId  alternative Switchboard program ID to interact with
+  --mainnetBeta            WARNING: use mainnet-beta solana cluster
+
+  --programId=programId    alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:print
@@ -2145,6 +2155,8 @@ OPTIONS
 
   -v, --verbose                      log everything
 
+  --enableBufferRelayers             enable oracles to fulfill buffer relayer requests
+
   --force                            overwrite output file if existing
 
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
@@ -2156,6 +2168,8 @@ OPTIONS
   --queueSize=queueSize              [default: 100] maximum number of oracles the queue can support
 
   --unpermissionedFeeds              permit unpermissioned feeds
+
+  --unpermissionedVrf                permit unpermissioned VRF accounts
 
 ALIASES
   $ sbv2 custom:queue
