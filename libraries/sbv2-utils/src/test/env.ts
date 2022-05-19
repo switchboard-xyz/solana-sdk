@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 import { getIdlAddress, getProgramDataAddress } from "../anchor";
 
-const LATEST_DOCKER_VERSION = "dev-v2-4-26-22c";
+const LATEST_DOCKER_VERSION = "dev-v2-5-3-22";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;
@@ -189,7 +189,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
       "start-local-validator.sh"
     );
     // create bash script to startup local validator with appropriate accounts cloned
-    const baseValidatorCommand = `solana-test-validator -r --ledger .anchor/test-ledger --mint ${this.oracleAuthority.toBase58()} --deactivate-feature 5ekBxc8itEnPv4NzGJtr8BVVQLNMQuLMNQQj7pHoLNZ9 --bind-address 0.0.0.0 --url ${clusterApiUrl(
+    const baseValidatorCommand = `solana-test-validator -r --ledger .anchor/test-ledger --mint ${this.oracleAuthority.toBase58()} --bind-address 0.0.0.0 --url ${clusterApiUrl(
       "devnet"
     )} --rpc-port 8899 `;
     const cloneAccountsString = this.getAccountCloneString();

@@ -1,5 +1,6 @@
 [provider]
-cluster = "devnet"
+# cluster = "devnet"
+cluster = "localnet"
 wallet = "../payer-keypair.json"
 # wallet = "~/.config/solana/id.json"
 

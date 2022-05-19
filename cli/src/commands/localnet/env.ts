@@ -75,7 +75,7 @@ export default class LocalnetEnvironment extends BaseCommand {
           "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
         ),
       },
-      new PublicKey(flags.programId)
+      flags.programId ? this.program.programId : undefined
     );
     // TODO: Add silent flag
     fs.mkdirSync(outputDir, { recursive: true });
