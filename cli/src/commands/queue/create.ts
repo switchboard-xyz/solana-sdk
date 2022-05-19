@@ -4,6 +4,7 @@ import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
+  AccountInfo,
   Keypair,
   SystemProgram,
   TransactionInstruction,
@@ -14,6 +15,7 @@ import {
   prettyPrintCrank,
   prettyPrintOracle,
   prettyPrintQueue,
+  promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   CrankAccount,
@@ -111,7 +113,7 @@ export default class QueueCreate extends BaseCommand {
         ? flags.outputFile
         : path.join(process.cwd(), flags.outputFile);
 
-    if (outputPath && fs.existsSync(outputPath) && args.force === false) {
+    if (outputPath && fs.existsSync(outputPath) && flags.force === false) {
       throw new Error(`output json file already exists: ${outputPath}`);
     }
 
@@ -129,14 +131,16 @@ export default class QueueCreate extends BaseCommand {
       payerKeypair
     );
 
-    const ixns: (TransactionInstruction | TransactionInstruction[])[] = [];
-    // const signers: Keypair[] = [payerKeypair, authorityKeypair];
+    const setupQueueTxns: (
+      | TransactionInstruction
+      | TransactionInstruction[]
+    )[] = [];
 
     try {
       await programStateAccount.loadData();
     } catch {
       const vaultKeypair = anchor.web3.Keypair.generate();
-      ixns.push([
+      setupQueueTxns.push([
         SystemProgram.createAccount({
           fromPubkey: payerKeypair.publicKey,
           newAccountPubkey: vaultKeypair.publicKey,
@@ -196,7 +200,7 @@ export default class QueueCreate extends BaseCommand {
       publicKey: crankKeypair.publicKey,
     });
 
-    ixns.push(
+    setupQueueTxns.push(
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,
         newAccountPubkey: queueBuffer.publicKey,
@@ -357,16 +361,40 @@ export default class QueueCreate extends BaseCommand {
       })
     );
 
-    // console.log(`${signers.map((s) => s.publicKey.toString()).join("\n")}`);
+    let queueWs: number;
+    const customQueuePromise = new Promise((resolve: (result: any) => void) => {
+      queueWs = this.program.provider.connection.onAccountChange(
+        queueAccount.publicKey,
+        (accountInfo: AccountInfo<Buffer>, slot) => {
+          const accountCoder = new anchor.BorshAccountsCoder(this.program.idl);
+          resolve(
+            accountCoder.decode("OracleQueueAccountData", accountInfo.data)
+          );
+        }
+      );
+    });
 
-    const createAccountSignatures = await packAndSend(
+    const createAccountSignatures = packAndSend(
       this.program,
-      [ixns, finalTransactions],
+      [setupQueueTxns, finalTransactions],
       signers,
       payerKeypair.publicKey
-    );
+    ).catch((error) => {
+      this.logger.error(error);
+      this.exit(1);
+    });
 
-    const queueData = await queueAccount.loadData();
+    const queueData = await promiseWithTimeout(
+      25_000,
+      customQueuePromise
+    ).finally(() => {
+      try {
+        if (queueWs) {
+          this.logger.debug(`closing ws ${queueWs}`);
+          this.program.provider.connection.removeAccountChangeListener(queueWs);
+        }
+      } catch {}
+    });
 
     if (outputPath) {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });

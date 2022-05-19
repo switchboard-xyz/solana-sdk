@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.97",
+  "version": "0.0.96",
   "private": true,
   "description": "API wrapper for intergating with the Switchboardv2 program",
   "keywords": [

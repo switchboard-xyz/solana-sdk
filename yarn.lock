@@ -3862,26 +3862,6 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@solana/web3.js@1.39.1":
-  version "1.39.1"
-  resolved "https://registry.npmjs.org/@solana/web3.js/-/web3.js-1.39.1.tgz#858ecd42ff2a5bcba3a4bb642a50194d77e2a578"
-  integrity sha512-Q7XnWTAiU7n7GcoINDAAMLO7CJHpm5kPK46HKwJi2x0cusHQ3WFa7QEp6aPzH7tuf7yl/Kw1lYitcwTVOvqARA==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    "@ethersproject/sha2" "^5.5.0"
-    "@solana/buffer-layout" "^4.0.0"
-    bn.js "^5.0.0"
-    borsh "^0.7.0"
-    bs58 "^4.0.1"
-    buffer "6.0.1"
-    cross-fetch "^3.1.4"
-    jayson "^3.4.4"
-    js-sha3 "^0.8.0"
-    rpc-websockets "^7.4.2"
-    secp256k1 "^4.0.2"
-    superstruct "^0.14.2"
-    tweetnacl "^1.0.0"
-
 "@solana/web3.js@^0.86.1":
   version "0.86.4"
   resolved "https://registry.npmjs.org/@solana/web3.js/-/web3.js-0.86.4.tgz"
@@ -4216,6 +4196,30 @@
     rpc-websockets "^7.4.12"
     typedoc "^0.22.15"
     ws "^7.4.6"
+
+"@switchboard-xyz/switchboard-v2@0.0.97", "@switchboard-xyz/switchboard-v2@^0.0.97":
+  version "0.0.97"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.97.tgz#72a963baf3423287d47ee3dbb347325f5b2dc0ec"
+  integrity sha512-3tqjj29+4T/71DBggiUhAV4uVSEgIWhBqRR16fwL7PdjX7kWcMLkOwlcqz78KqfXhU/UA7HkoWtDdsOj/HoaGQ==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@solana/spl-token" "^0.1.8"
+    "@solana/web3.js" "^1.39.1"
+    "@switchboard-xyz/switchboard-api" "^0.2.199"
+    assert "^2.0.0"
+    big.js "^6.1.1"
+    bs58 "^4.0.1"
+    buffer-layout "^1.2.0"
+    chalk "^4.1.2"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    dotenv "^16.0.0"
+    long "^4.0.0"
+    node-fetch "^3.2.3"
+    protobufjs "^6.10.2"
+    ts-proto "^1.79.0"
+    typescript "^4.6.3"
 
 "@switchboard-xyz/switchboard-v2@^0.0.95":
   version "0.0.95"

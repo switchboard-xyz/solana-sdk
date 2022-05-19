@@ -33,25 +33,18 @@ export async function packAndSend(
     for (let k = 0; k < packedTransactions.length; k += 1) {
       const tx = signedTxs[k];
       const rawTx = tx.serialize();
-      // signatures.push(
-      //   program.provider.connection.sendRawTransaction(rawTx, {
-      //     skipPreflight: true,
-      //     maxRetries: 10,
-      //   })
-      // );
       signatures.push(
         sendAndConfirmRawTransaction(program.provider.connection, rawTx, {
-          skipPreflight: true,
           maxRetries: 10,
-          commitment: "confirmed",
         })
+          .then((sig) => {
+            return sig;
+          })
+          .catch((error) => {
+            console.error(error);
+            throw error;
+          })
       );
-      // signatures.push(
-      //   program.provider.connection.sendTransaction(tx, signers, {
-      //     skipPreflight: true,
-      //     maxRetries: 10,
-      //   })
-      // );
     }
 
     await Promise.all(signatures);
