@@ -1,6 +1,0 @@
-{
-  "tasks": [
-    { "httpTask": { "url": "https://api.metals.live/v1/spot/silver" } },
-    { "jsonParseTask": { "path": "$[(@.length-1)].price" } }
-  ]
-}

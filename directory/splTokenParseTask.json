@@ -1,0 +1,15 @@
+{
+  "name": "DaoSOL decimals",
+  "tasks": [
+    {
+      "splTokenParseTask": {
+        "tokenAccountAddress": "7xJRVi15yFB67vovu3f6Wai9EaQ8XDss6SCWB4FnSzDc"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.uiAmount"
+      }
+    }
+  ]
+}

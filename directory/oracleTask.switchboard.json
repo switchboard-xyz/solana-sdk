@@ -1,0 +1,10 @@
+{
+  "name": "Switchboard SOL/USD Price",
+  "tasks": [
+    {
+      "oracleTask": {
+        "switchboardAddress": "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
+      }
+    }
+  ]
+}

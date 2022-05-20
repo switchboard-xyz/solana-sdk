@@ -6,11 +6,7 @@ title: Overview
 
 # sbv2
 
-<!--- https://badgen.net/npm/v/@switchboard-xyz/cli --->
-
-<!---  [![GitHub last commit](https://img.shields.io/github/last-commit/switchboard-xyz/cli)](https://github.com/switchboard-xyz/cli/commit/) --->
-
-[![GitHub](https://img.shields.io/badge/--181717?logo=github&logoColor=ffffff)](https://github.com/switchboard-xyz/cli) [![npm](https://img.shields.io/npm/v/@switchboard-xyz/cli)](https://www.npmjs.com/package/@switchboard-xyz/cli) ![Page Last Updated](./page-last-updated.svg)
+[![GitHub](https://img.shields.io/badge/--181717?logo=github&logoColor=ffffff)](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli) [![npm](https://img.shields.io/npm/v/@switchboard-xyz/switchboardv2-cli)](https://www.npmjs.com/package/@switchboard-xyz/switchboardv2-cli) ![Page Last Updated](./page-last-updated.svg)
 
 The Switchboard V2 CLI provides an easy to use interface to setup and manage Switchboard onchain accounts.
 
@@ -19,7 +15,7 @@ The Switchboard V2 CLI provides an easy to use interface to setup and manage Swi
 Run the following command:
 
 ```bash npm2yarn
-npm install -g @switchboard-xyz/cli
+npm install -g @switchboard-xyz/switchboardv2-cli
 ```
 
 ## Overview
@@ -30,7 +26,7 @@ npm install -g @switchboard-xyz/cli
 - `--keypair` is required for any command that submits an onchain transaction such as creating accounts, turning the crank, or updating an account config. This keypair will default as the authority if the authority flag is not provided.
 
 **Token Amounts**
-Any commands that specify a token amount will be in integer format with no decimal. For instance, 1.5 wSOL would be normalized to 15000000, where wSOL has 8 decimals specified by the token mint.
+Any commands that specify a token amount will be converted to the raw token amount if it contains a decimal. For example, wSOL has 9 decimal places so a CLI arguement of 1.5 would be interpretted as 1_500_000_000 tokens whereas 1 would be interpretted as 1 token.
 
 **Logging** Most commands will have a `--silent`, `-s` flag that will suppress console output and only output a new account public key to assist in scripting. A `--verbose`, `-v` flag will do the opposite and log any debug or configuration information to help debug.
 
@@ -47,6 +43,17 @@ sbv2 print PUBLICKEY
 sbv2 print:oracle ORACLEKEY
 # print an aggregator account and save to a JSON file
 sbv2 print:aggregator AGGREGATORKEY --outputFile outputFile.json
+```
+
+### Create a Queue
+
+```bash
+sbv2 queue:create \
+    --keypair payer-keypair.json \
+    -f queue-schema.json \
+    -n "My New Queue" \
+    --numOracles 1 \
+    -v
 ```
 
 ### Create Aggregator

@@ -1,0 +1,39 @@
+{
+  "name": "xStep",
+  "tasks": [
+    {
+      "xstepPriceTask": {
+        "stepJob": {
+          "jobs": [
+            {
+              "tasks": [
+                {
+                  "httpTask": { "url": "https://ftx.com/api/markets/step/usd" }
+                },
+                { "jsonParseTask": { "path": "$.result.price" } }
+              ]
+            },
+            {
+              "tasks": [
+                {
+                  "httpTask": {
+                    "url": "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=STEP_USDT"
+                  }
+                },
+                {
+                  "medianTask": {
+                    "tasks": [
+                      { "jsonParseTask": { "path": "$[0].lowest_ask" } },
+                      { "jsonParseTask": { "path": "$[0].highest_bid" } },
+                      { "jsonParseTask": { "path": "$[0].last" } }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,9 +1,0 @@
-{
-  "tasks": [
-    {
-      "perpMarketTask": {
-        "driftMarketAddress": "ALGO-PERP"
-      }
-    }
-  ]
-}

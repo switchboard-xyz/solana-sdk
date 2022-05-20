@@ -1,0 +1,15 @@
+{
+  "name": "ASG Gold Price",
+  "tasks": [
+    {
+      "httpTask": {
+        "url": "https://data-asg.goldprice.org/dbXRates/USD"
+      }
+    },
+    {
+      "jsonParseTask": {
+        "path": "$.items[?(@.curr == \"USD\")].xauPrice"
+      }
+    }
+  ]
+}
