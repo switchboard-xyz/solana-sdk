@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    { "valueTask": { "value": 10 } },
+    {
+      "addTask": {
+        "job": {
+          "tasks": [{ "valueTask": { "value": 15 } }]
+        }
+      }
+    }
+  ]
+}

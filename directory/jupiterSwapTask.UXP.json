@@ -1,0 +1,16 @@
+{
+  "name": "UXP/USD",
+  "tasks": [
+    {
+      "jupiterSwapTask": {
+        "inTokenAddress": "UXPhBoR3qG4UCiGNJfV7MqhHyFqKN68g45GoYvAeL2M",
+        "outTokenAddress": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+      }
+    },
+    {
+      "multiplyTask": {
+        "aggregatorPubkey": "BjUgj6YCnFBZ49wF54ddBVA9qu8TeqkFtkbqmZcee8uW"
+      }
+    }
+  ]
+}

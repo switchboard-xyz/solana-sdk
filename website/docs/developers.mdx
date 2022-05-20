@@ -1,0 +1,74 @@
+---
+sidebar_position: 70
+slug: /developers
+title: Developers
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Box, Typography, Grid } from "@mui/material";
+import Link from "@docusaurus/Link";
+import { VscGithubInverted } from "react-icons/vsc";
+
+# Developer Resources
+
+<MarkdownImage
+  img="/img/Switchboard_v2_Live.png"
+  sx={{ borderWidth: "thin", border: "1px solid #D3D3D3", borderRadius: 3 }}
+/>
+
+<br />
+
+## SDK
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  The Switchboard-V2 repository contains all of the libraries, examples, and
+  documentation to help you get started integrating Switchboard.
+</Typography>
+
+<br />
+
+<Link to="https://github.com/switchboard-xyz/switchboard-v2">
+
+<Typography variant="h5" sx={{ textAlign: "center" }}>
+  <VscGithubInverted />
+  &nbsp;@switchboard-xyz/switchboard-v2&nbsp;
+  <VscGithubInverted />
+</Typography>
+
+</Link>
+
+<hr />
+
+## Anchor IDL
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  Switchboard's Anchor IDL contains a detailed description of the program
+  interfaces and schemas.
+</Typography>
+
+<Link to="/idl">
+
+<Typography variant="h5" sx={{ textAlign: "center" }}>
+  ⚓ Anchor IDL ⚓
+</Typography>
+
+</Link>
+
+<hr />
+
+## APIs
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  Switchboard's APIs provide a client interface to interact with Switchboard V2
+  on-chain.
+</Typography>
+
+| Package                                                           | Description                                                   |
+| ----------------------------------------------------------------- | ------------------------------------------------------------- |
+| [Typescript](https://docs.switchboard.xyz/api/ts)                 | Typescript client to interact with Switchboard V2.            |
+| [Typescript **_Lite_**](https://docs.switchboard.xyz/api/ts-lite) | Typescript "Lite" client to deserialize aggregator accounts   |
+| [Python](https://docs.switchboard.xyz/api/py)                     | Python client to interact with Switchboard V2.                |
+| [Rust](https://docs.rs/switchboard-v2/latest/switchboard_v2/)     | Rust client to interact with Switchboard V2.                  |
+| [CLI](/api/cli)                                                   | Command Line Interface (CLI) to interact with Switchboard V2. |
+
+<hr />

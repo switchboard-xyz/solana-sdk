@@ -65,7 +65,7 @@ const config = {
         id: "idl",
         path: "idl",
         routeBasePath: "idl",
-        sidebarPath: require.resolve("./sidebars.js"),
+        sidebarPath: require.resolve("./sidebarsIDL.js"),
       },
     ],
   ],
