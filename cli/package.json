@@ -84,8 +84,7 @@
     "test": "echo \"No test script for @switchboard-xyz/switchboardv2-cli\" && exit 0",
     "version": "oclif-dev readme && git add README.md",
     "fmt": "prettier --write 'src/**/*.ts'",
-    "lint": "eslint . --ext .ts --config .eslintrc.json --fix",
-    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag \"sbv2-cli/v$PACKAGE_VERSION\" && git push --tags"
+    "lint": "eslint . --ext .ts --config .eslintrc.json --fix"
   },
   "dependencies": {
     "@google-cloud/secret-manager": "^3.10.1",
