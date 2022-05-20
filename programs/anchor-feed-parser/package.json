@@ -1,6 +1,6 @@
 {
   "name": "anchor-feed-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
     "@solana/web3.js": "^1.42.0",
-    "@switchboard-xyz/sbv2-utils": "^0.0.12",
+    "@switchboard-xyz/sbv2-utils": "^0.0.13",
     "@switchboard-xyz/switchboard-v2": "^0.0.97"
   },
   "devDependencies": {
