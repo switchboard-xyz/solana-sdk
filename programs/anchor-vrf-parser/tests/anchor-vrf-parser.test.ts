@@ -74,16 +74,16 @@ describe("anchor-vrf-parser test", async () => {
       switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
       console.log("devnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Devnet - ${error.message}`);
     }
     // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       console.log("localnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Localnet - ${error.message}`);
     }
     // If fails, throw error
     throw new Error(

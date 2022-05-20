@@ -69,7 +69,7 @@ export default class LocalnetEnvironment extends BaseCommand {
     // TODO: Add silent flag
     // TODO: Pass keypair path and add as env variable
     const testEnvironment = await SwitchboardTestEnvironment.create(
-      payerKeypair,
+      flags.keypair,
       {
         USDC_MINT: new PublicKey(
           "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
@@ -77,9 +77,7 @@ export default class LocalnetEnvironment extends BaseCommand {
       },
       flags.programId ? this.program.programId : undefined
     );
-    // TODO: Add silent flag
-    fs.mkdirSync(outputDir, { recursive: true });
-    testEnvironment.writeAll(flags.keypair, outputDir);
+    testEnvironment.writeAll(outputDir);
   }
 
   async catch(error) {

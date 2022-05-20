@@ -27,6 +27,7 @@ export interface ISwitchboardTestEnvironment {
   oracleAuthority: PublicKey;
   oracleEscrow: PublicKey;
   oraclePermissions: PublicKey;
+  payerKeypairPath: string;
 
   // allow a map of public keys to include in clone script
   additionalClonedAccounts?: Record<string, PublicKey>;
@@ -66,6 +67,8 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
 
   oraclePermissions: PublicKey;
 
+  payerKeypairPath: string;
+
   additionalClonedAccounts?: Record<string, PublicKey>;
 
   constructor(ctx: ISwitchboardTestEnvironment) {
@@ -85,24 +88,28 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     this.oracleAuthority = ctx.oracleAuthority;
     this.oracleEscrow = ctx.oracleEscrow;
     this.oraclePermissions = ctx.oraclePermissions;
+    this.payerKeypairPath = ctx.payerKeypairPath;
     this.additionalClonedAccounts = ctx.additionalClonedAccounts;
   }
 
   private getAccountCloneString(): string {
     const accounts: string[] = Object.keys(this).map((key) => {
       // iterate over additionalClonedAccounts and collect pubkeys
+      if (typeof this[key] === "string") {
+        return;
+      }
       if (key === "additionalClonedAccounts" && this[key]) {
         const additionalPubkeys = Object.values(this.additionalClonedAccounts);
         const cloneStrings = additionalPubkeys.map(
-          (pubkey) => `--clone ${pubkey.toBase58()}`
+          (pubkey) => `--clone ${pubkey.toBase58()} \`# ${key}\``
         );
-        return cloneStrings.join(" ");
+        return cloneStrings.join(`\\\n`);
       }
 
-      return `--clone ${(this[key] as PublicKey).toBase58()}`;
+      return `--clone ${(this[key] as PublicKey).toBase58()} \`# ${key}\` `;
     });
 
-    return accounts.join(" ");
+    return accounts.filter((i) => i).join(`\\\n`);
   }
 
   public toJSON(): ISwitchboardTestEnvironment {
@@ -123,16 +130,18 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
       oracleAuthority: this.oracleAuthority,
       oracleEscrow: this.oracleEscrow,
       oraclePermissions: this.oraclePermissions,
+      payerKeypairPath: this.payerKeypairPath,
       additionalClonedAccounts: this.additionalClonedAccounts,
     };
   }
 
   /** Write switchboard test environment to filesystem */
-  public writeAll(payerKeypairPath: string, filePath: string): void {
-    this.writeEnv(filePath);
-    this.writeJSON(filePath);
-    this.writeScripts(payerKeypairPath, filePath);
-    this.writeDockerCompose(this.oracle, payerKeypairPath, filePath);
+  public writeAll(outputDir: string): void {
+    fs.mkdirSync(outputDir, { recursive: true });
+    this.writeEnv(outputDir);
+    this.writeJSON(outputDir);
+    this.writeScripts(outputDir);
+    this.writeDockerCompose(this.oracle, outputDir);
   }
 
   /** Write the env file to filesystem */
@@ -155,7 +164,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     fileStr += `ORACLE_AUTHORITY="${this.oracleAuthority.toBase58()}"\n`;
     fileStr += `ORACLE_ESCROW="${this.oracleEscrow.toBase58()}"\n`;
     fileStr += `ORACLE_PERMISSIONS="${this.oraclePermissions.toBase58()}"\n`;
-    fileStr += `SWITCHBOARD_ACCOUNTS="${this.getAccountCloneString()}"\n`;
+    // fileStr += `SWITCHBOARD_ACCOUNTS="${this.getAccountCloneString()}"\n`;
     // TODO: Write additionalClonedAccounts to env file
     fs.writeFileSync(ENV_FILE_PATH, fileStr);
     console.log(
@@ -166,8 +175,8 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     );
   }
 
-  public writeJSON(filePath: string): void {
-    const JSON_FILE_PATH = path.join(filePath, "switchboard.json");
+  public writeJSON(outputDir: string): void {
+    const JSON_FILE_PATH = path.join(outputDir, "switchboard.json");
     fs.writeFileSync(
       JSON_FILE_PATH,
       JSON.stringify(
@@ -183,9 +192,9 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     );
   }
 
-  public writeScripts(payerKeypairPath: string, filePath: string): void {
+  public writeScripts(outputDir: string): void {
     const LOCAL_VALIDATOR_SCRIPT = path.join(
-      filePath,
+      outputDir,
       "start-local-validator.sh"
     );
     // create bash script to startup local validator with appropriate accounts cloned
@@ -196,8 +205,10 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     const startValidatorCommand = `${baseValidatorCommand} ${cloneAccountsString}`;
     fs.writeFileSync(
       LOCAL_VALIDATOR_SCRIPT,
+
       `#!/bin/bash\n\nmkdir -p .anchor/test-ledger\n\n${startValidatorCommand}`
     );
+    fs.chmodSync(LOCAL_VALIDATOR_SCRIPT, "755");
     console.log(
       `${chalk.green("Bash script saved to:")} ${LOCAL_VALIDATOR_SCRIPT.replace(
         process.cwd(),
@@ -206,9 +217,19 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     );
 
     // create bash script to start local oracle
-    const ORACLE_SCRIPT = path.join(filePath, "start-oracle.sh");
-    const startOracleCommand = `docker-compose -f docker-compose.switchboard.yml up`;
-    fs.writeFileSync(ORACLE_SCRIPT, `#!/bin/bash\n\n${startOracleCommand}`);
+    const ORACLE_SCRIPT = path.join(outputDir, "start-oracle.sh");
+    // const startOracleCommand = `docker-compose -f docker-compose.switchboard.yml up`;
+    fs.writeFileSync(
+      ORACLE_SCRIPT,
+      `#!/usr/bin/env bash
+
+script_dir=$( cd -- "$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+docker-compose -f  "$script_dir"/docker-compose.switchboard.yml up
+      `
+      // `#!/bin/bash\n\n${startOracleCommand}`
+    );
+    fs.chmodSync(ORACLE_SCRIPT, "755");
     console.log(
       `${chalk.green("Bash script saved to:")} ${ORACLE_SCRIPT.replace(
         process.cwd(),
@@ -217,13 +238,9 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     );
   }
 
-  public writeDockerCompose(
-    oracleKey: PublicKey,
-    payerKeypairPath: string,
-    filePath: string
-  ): void {
+  public writeDockerCompose(oracleKey: PublicKey, outputDir: string): void {
     const DOCKER_COMPOSE_FILEPATH = path.join(
-      filePath,
+      outputDir,
       "docker-compose.switchboard.yml"
     );
     const dockerComposeString = `version: "3.3"
@@ -243,7 +260,7 @@ services:
     #  - RPC_URL=\${RPC_URL}
 secrets:
   PAYER_SECRETS:
-    file: ${payerKeypairPath}
+    file: ${this.payerKeypairPath}
 `;
     fs.writeFileSync(DOCKER_COMPOSE_FILEPATH, dockerComposeString);
     console.log(
@@ -255,10 +272,26 @@ secrets:
 
   /** Build a devnet environment to later clone to localnet */
   static async create(
-    payerKeypair: Keypair,
+    payerKeypairPath: string,
     additionalClonedAccounts?: Record<string, PublicKey>,
     alternateProgramId?: PublicKey
   ): Promise<SwitchboardTestEnvironment> {
+    const fullKeypairPath =
+      payerKeypairPath.charAt(0) === "/"
+        ? payerKeypairPath
+        : path.join(process.cwd(), payerKeypairPath);
+    if (!fs.existsSync(fullKeypairPath)) {
+      throw new Error("Failed to find payer keypair path");
+    }
+    const payerKeypair = Keypair.fromSecretKey(
+      new Uint8Array(
+        JSON.parse(
+          fs.readFileSync(fullKeypairPath, {
+            encoding: "utf-8",
+          })
+        )
+      )
+    );
     const connection = new Connection(clusterApiUrl("devnet"), {
       commitment: "confirmed",
     });
@@ -372,6 +405,7 @@ secrets:
       oracleAuthority: oracle.oracleAuthority,
       oracleEscrow: oracle.tokenAccount,
       oraclePermissions: oraclePermissionAccount.publicKey,
+      payerKeypairPath: fullKeypairPath,
       additionalClonedAccounts,
     };
 

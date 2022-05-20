@@ -4,6 +4,7 @@ export * from "./big";
 export * from "./const";
 export * from "./date";
 export * from "./errors";
+export * from "./feed";
 export * from "./nonce";
 export * from "./print";
 export * from "./state";

@@ -40,6 +40,7 @@ describe("spl-feed-parser test", () => {
 
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
+  let localnet = false;
 
   before(async () => {
     // First, attempt to load the switchboard devnet PID
@@ -48,18 +49,19 @@ describe("spl-feed-parser test", () => {
       aggregatorKey = DEFAULT_SOL_USD_FEED;
       console.log("devnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Devnet - ${error.message}`);
     }
     // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       const aggregatorAccount = await switchboard.createStaticFeed(100);
       aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
+      localnet = true;
       console.log("localnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Localnet - ${error.message}`);
     }
     // If fails, throw error
     throw new Error(
@@ -87,6 +89,9 @@ describe("spl-feed-parser test", () => {
     const signature = await provider.sendAndConfirm(
       readSwitchboardAggregatorTxn
     );
+
+    // wait for RPC
+    await sleep(2000);
 
     const confirmedTxn = await provider.connection.getParsedTransaction(
       signature,

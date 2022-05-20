@@ -30,9 +30,24 @@ export const loadKeypairFs = (keypairPath: string): Keypair => {
   }
 
   try {
-    const keypairString = fs.readFileSync(fullPath, "utf-8");
-    const keypairBuffer = new Uint8Array(JSON.parse(keypairString));
-    const walletKeypair = Keypair.fromSecretKey(keypairBuffer);
+    // const walletKeypair = Keypair.fromSecretKey(
+    //   Buffer.from(
+    //     JSON.parse(
+    //       fs.readFileSync(process.env.ANCHOR_WALLET, {
+    //         encoding: "utf-8",
+    //       })
+    //     )
+    //   )
+    // );
+    const walletKeypair = Keypair.fromSecretKey(
+      new Uint8Array(
+        JSON.parse(
+          fs.readFileSync(fullPath, {
+            encoding: "utf-8",
+          })
+        )
+      )
+    );
     return walletKeypair;
   } catch (error) {
     throw new Error(`failed to load keypair from ${fullPath}: ${error}`);

@@ -5,11 +5,10 @@ import type NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
-// import { sbv2.OracleJob } from "@switchboard-xyz/v2-task-library";
 import Big from "big.js";
 import fs from "fs";
 import path from "path";
-import { DEFAULT_PUBKEY, promiseWithTimeout } from "../";
+import { awaitOpenRound, createAggregator } from "../feed";
 
 export interface ISwitchboardTestContext {
   program: anchor.Program;
@@ -235,56 +234,12 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
 
   /** Create a static data feed that resolves to an expected value */
   public async createStaticFeed(
-    value: number
+    value: number,
+    timeout = 30
   ): Promise<sbv2.AggregatorAccount> {
     const queue = await this.queue.loadData();
     const payerKeypair = sbv2.programWallet(this.program);
 
-    // create aggregator
-    const aggregatorAccount = await sbv2.AggregatorAccount.create(
-      this.program,
-      {
-        batchSize: 1,
-        minRequiredJobResults: 1,
-        minRequiredOracleResults: 1,
-        minUpdateDelaySeconds: 5,
-        queueAccount: this.queue,
-        authorWallet: this.payerTokenWallet,
-      }
-    );
-
-    // create permission account and approve if necessary
-    const permissionAccount = await sbv2.PermissionAccount.create(
-      this.program,
-      {
-        authority: queue.authority,
-        granter: this.queue.publicKey,
-        grantee: aggregatorAccount.publicKey,
-      }
-    );
-    if (!queue.unpermissionedFeedsEnabled) {
-      if (queue.authority.equals(payerKeypair.publicKey)) {
-        await permissionAccount.set({
-          authority: payerKeypair,
-          enable: true,
-          permission: sbv2.SwitchboardPermission.PERMIT_ORACLE_QUEUE_USAGE,
-        });
-      }
-      throw new Error(
-        `must provide queue authority to permit data feeds to join`
-      );
-    }
-
-    // create lease contract
-    const leaseAccount = await sbv2.LeaseAccount.create(this.program, {
-      aggregatorAccount,
-      funder: this.payerTokenWallet,
-      funderAuthority: payerKeypair,
-      loadAmount: new anchor.BN(0),
-      oracleQueueAccount: this.queue,
-    });
-
-    // create and add job account
     const staticJob = await sbv2.JobAccount.create(this.program, {
       name: Buffer.from(`Value ${value}`),
       authority: this.payerTokenWallet,
@@ -302,13 +257,29 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         ).finish()
       ),
     });
-    await aggregatorAccount.addJob(staticJob);
 
-    // open new round and request new result
-    await aggregatorAccount.openRound({
-      oracleQueueAccount: this.queue,
-      payoutWallet: this.payerTokenWallet,
-    });
+    const aggregatorAccount = await createAggregator(
+      this.program,
+      this.queue,
+      {
+        batchSize: 1,
+        minRequiredJobResults: 1,
+        minRequiredOracleResults: 1,
+        minUpdateDelaySeconds: 5,
+        queueAccount: this.queue,
+        authorWallet: this.payerTokenWallet,
+        authority: payerKeypair.publicKey,
+      },
+      [[staticJob, 1]]
+    );
+
+    const aggValue = await awaitOpenRound(
+      aggregatorAccount,
+      this.queue,
+      this.payerTokenWallet,
+      new Big(value),
+      timeout
+    );
 
     return aggregatorAccount;
   }
@@ -323,6 +294,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     value: number,
     timeout = 30
   ): Promise<void> {
+    const payerKeypair = sbv2.programWallet(this.program);
     const aggregator = await aggregatorAccount.loadData();
     const expectedValue = new Big(value);
 
@@ -332,7 +304,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     const existingJobs: sbv2.JobAccount[] = aggregator.jobPubkeysData
       // eslint-disable-next-line array-callback-return
       .filter((jobKey: PublicKey) => {
-        if (!jobKey.equals(DEFAULT_PUBKEY)) {
+        if (!jobKey.equals(PublicKey.default)) {
           return jobKey;
         }
       })
@@ -344,7 +316,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
           })
       );
     await Promise.all(
-      existingJobs.map((job) => aggregatorAccount.removeJob(job))
+      existingJobs.map((job) => aggregatorAccount.removeJob(job, payerKeypair))
     );
 
     // add new static job
@@ -365,49 +337,14 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         ).finish()
       ),
     });
-    await aggregatorAccount.addJob(staticJob);
+    await aggregatorAccount.addJob(staticJob, payerKeypair);
 
-    // call open round and wait for new value
-    const accountsCoder = new anchor.BorshAccountsCoder(this.program.idl);
-
-    let accountWs: number;
-    const awaitUpdatePromise = new Promise((resolve: (value: Big) => void) => {
-      accountWs = this.program.provider.connection.onAccountChange(
-        aggregatorAccount.publicKey,
-        async (accountInfo) => {
-          const aggregator = accountsCoder.decode(
-            "AggregatorAccountData",
-            accountInfo.data
-          );
-          const latestResult = await aggregatorAccount.getLatestValue(
-            aggregator
-          );
-          if (latestResult.eq(expectedValue)) {
-            resolve(latestResult);
-          }
-        }
-      );
-    });
-
-    const updatedValuePromise = promiseWithTimeout(
-      timeout * 1000,
-      awaitUpdatePromise,
-      new Error(`aggregator failed to update in ${timeout} seconds`)
-    ).finally(() => {
-      if (accountWs) {
-        this.program.provider.connection.removeAccountChangeListener(accountWs);
-      }
-    });
-
-    await aggregatorAccount.openRound({
-      oracleQueueAccount: this.queue,
-      payoutWallet: this.payerTokenWallet,
-    });
-
-    await updatedValuePromise;
-
-    if (!updatedValuePromise) {
-      throw new Error(`failed to update aggregator`);
-    }
+    const aggValue = await awaitOpenRound(
+      aggregatorAccount,
+      this.queue,
+      this.payerTokenWallet,
+      expectedValue,
+      timeout
+    );
   }
 }

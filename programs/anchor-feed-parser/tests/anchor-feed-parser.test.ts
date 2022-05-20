@@ -13,14 +13,15 @@ const DEFAULT_SOL_USD_FEED = new PublicKey(
 );
 
 describe("anchor-feed-parser test", () => {
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const feedParserProgram = anchor.workspace
     .AnchorFeedParser as Program<AnchorFeedParser>;
-  const provider = feedParserProgram.provider as anchor.AnchorProvider;
 
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
+  let localnet = false;
 
   before(async () => {
     // First, attempt to load the switchboard devnet PID
@@ -29,18 +30,19 @@ describe("anchor-feed-parser test", () => {
       aggregatorKey = DEFAULT_SOL_USD_FEED;
       console.log("devnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Devnet - ${error.message}`);
     }
     // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       const aggregatorAccount = await switchboard.createStaticFeed(100);
       aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
+      localnet = true;
       console.log("localnet detected");
       return;
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(`Error: SBV2 Localnet - ${error.message}`);
     }
     // If fails, throw error
     throw new Error(
