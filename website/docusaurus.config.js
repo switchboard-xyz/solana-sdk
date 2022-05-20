@@ -122,11 +122,14 @@ const config = {
           },
           {
             type: "dropdown",
-            // to: "api",
-            label: "API",
+            label: "Developers",
             position: "left",
             to: "api",
             items: [
+              {
+                label: "Overview",
+                to: "api/",
+              },
               {
                 label: "Task Protobufs",
                 to: "api/tasks",
