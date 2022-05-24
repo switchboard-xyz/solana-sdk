@@ -13,7 +13,7 @@ Switchboard provides the ability to create your own queue with your own set of o
 
 Oracles can be provided a `configs.json` file to store various configurations needed to execute job definitions. If an oracle encounters a job definition with a variable, it will parse the `configs.json` and embed the value in the job definition.
 
-Oracles can embed API Keys on a per job basis by specifying the jobAccount public key or by using an asterik character to use the variable for multiple job definitions. **_Wildcard variables should use a unique name to prevent incorrect substitution._**
+Oracles can embed API Keys on a per job basis by specifying the jobAccount public key or by using an asterisk character to use the variable for multiple job definitions. **_Wildcard variables should use a unique name to prevent incorrect substitution._**
 
 ```json title="configs.json"
 {
@@ -32,7 +32,7 @@ Oracles can embed API Keys on a per job basis by specifying the jobAccount publi
 
 :::caution
 
-Private queue's should **_ALWAYS_** have `unpermissionedFeedsEnabled` set to false. Allowing unpermitted feeds could result in a malicous actor creating a job definition that leaks your sensitive API keys.
+Private queue's should **_ALWAYS_** have `unpermissionedFeedsEnabled` set to false. Allowing unpermitted feeds could result in a malicious actor creating a job definition that leaks your sensitive API keys.
 
 :::
 

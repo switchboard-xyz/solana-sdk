@@ -20,7 +20,7 @@ Switchboard tasks can be divided into the following categories:
 - [**Web3 Fetch**](#web3-fetch): Retrieve on-chain data
 - [**Parse**](#parse): Extract a value from a response
 - [**Logic**](#logic): Perform some logical operation like if..else clauses
-- [**Math**](#math): Perform a mathmatical operation like taking the maximum value of a list or raising a value to an exponent.
+- [**Math**](#math): Perform a mathematical operation like taking the maximum value of a list or raising a value to an exponent.
 
 :::tip
 
@@ -56,11 +56,11 @@ An object that represents a header to add to an HTTP request.
 
 An enumeration representing the types of HTTP requests available to make.
 
-| Name          | Number | Description                                  |
-| ------------- | ------ | -------------------------------------------- |
-| METHOD_UNKOWN | 0      | Unset HTTP method will default to METHOD_GET |
-| METHOD_GET    | 1      | Perform an HTTP &#39;GET&#39; request.       |
-| METHOD_POST   | 2      | Perform an HTTP &#39;POST&#39; request.      |
+| Name           | Number | Description                                  |
+| -------------- | ------ | -------------------------------------------- |
+| METHOD_UNKNOWN | 0      | Unset HTTP method will default to METHOD_GET |
+| METHOD_GET     | 1      | Perform an HTTP &#39;GET&#39; request.       |
+| METHOD_POST    | 2      | Perform an HTTP &#39;POST&#39; request.      |
 
 ### 🛠WebsocketTask
 
@@ -93,7 +93,7 @@ Fetch the current price of a Solana oracle protocol
 | switchboard_address              | string | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
 | pyth_address                     | string | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
 | chainlink_address                | string | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
-| pyth_allowed_confidence_interval | double | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected.                                |
+| pyth_allowed_confidence_interval | double | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this threshold are rejected.                               |
 
 ### 🛠JupiterSwapTask
 
@@ -349,7 +349,7 @@ aggregate.
 | Field             | Type                    | Label    | Description                                                                        |
 | ----------------- | ----------------------- | -------- | ---------------------------------------------------------------------------------- |
 | scalar            | double                  | optional | Specifies a basic scalar denominator to divide by.                                 |
-| aggregator_pubkey | string                  | optional | Specifies another aggregator resut to divide by.                                   |
+| aggregator_pubkey | string                  | optional | Specifies another aggregator result to divide by.                                  |
 | job               | [OracleJob](#OracleJob) | optional | A job whose result is computed before dividing our numerical input by that result. |
 
 ### 🛠PowTask
@@ -469,7 +469,7 @@ Fetch the current price of a Solana oracle protocol
 | switchboard_address              | string            | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
 | pyth_address                     | string            | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
 | chainlink_address                | string            | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
-| pyth_allowed_confidence_interval | [double](#double) | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected.                                |
+| pyth_allowed_confidence_interval | [double](#double) | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this threshold are rejected.                                |
 
 ## 🛠JsonParseTask
 
