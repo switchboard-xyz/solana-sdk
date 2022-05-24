@@ -1,4 +1,5 @@
 {
   "label": "Oracles",
-  "position": 20
+  "position": 20,
+  "collapsible": true
 }

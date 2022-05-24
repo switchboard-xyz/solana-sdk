@@ -1,7 +1,7 @@
 
 | Name | Value | Description |
 |--|--|--|
-| InvalidPublicKey | 1 |  |
-| SerializationError | 2 |  |
-| DeserializationError | 3 |  |
-| InvalidDataError | 4 |  |
+| InvalidPublicKey | 0 |  |
+| SerializationError | 1 |  |
+| DeserializationError | 2 |  |
+| InvalidDataError | 3 |  |

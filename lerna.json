@@ -1,5 +1,6 @@
 {
   "packages": [
+    "config/*",
     "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/sbv2-utils",

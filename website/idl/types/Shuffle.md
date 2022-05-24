@@ -1,13 +1,13 @@
 
 | Name | Value | Description |
 |--|--|--|
-| AAAA | 1 |  |
-| BBBB | 2 |  |
-| BADC | 3 |  |
-| BACD | 4 |  |
-| ADDA | 5 |  |
-| CBCB | 6 |  |
-| ABDC | 7 |  |
-| ABAB | 8 |  |
-| DBBD | 9 |  |
-| CACA | 10 |  |
+| AAAA | 0 |  |
+| BBBB | 1 |  |
+| BADC | 2 |  |
+| BACD | 3 |  |
+| ADDA | 4 |  |
+| CBCB | 5 |  |
+| ABDC | 6 |  |
+| ABAB | 7 |  |
+| DBBD | 8 |  |
+| CACA | 9 |  |

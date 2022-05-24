@@ -3,12 +3,11 @@ Create and initialize the AggregatorAccount.
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| aggregator | true | false |  |
-| authority | false | false |  |
-| queue | false | false |  |
-| authorWallet | false | false |  |
-| programState | false | false |  |
-## Args
+| aggregator | TRUE | FALSE | The [AggregatorAccountData](/idl/accounts/AggregatorAccountData) being initialized. | 
+| authority | FALSE | FALSE | The aggregator authority delegated to make account changes. | 
+| queue | FALSE | FALSE | The [OracleQueueAccountData](/idl/accounts/OracleQueueAccountData) the aggregator is being created for. | 
+| programState | FALSE | FALSE | The Switchboard [SbState](/idl/accounts/SbState) account. | 
+## Params
 |Field|Type|Description|
 |--|--|--|
 | name |  u8[32] | Name of the aggregator to store on-chain. |
@@ -21,4 +20,5 @@ Create and initialize the AggregatorAccount.
 | varianceThreshold |  [BorshDecimal](/idl/types/BorshDecimal) | Change percentage required between a previous round and the current round. If variance percentage is not met, reject new oracle responses. |
 | forceReportPeriod |  i64 | Number of seconds for which, even if the variance threshold is not passed, accept new responses from oracles. |
 | expiration |  i64 | unix_timestamp after which funds may be withdrawn from the aggregator. null/undefined/0 means the feed has no expiration. |
-| stateBump |  u8 |  |
+| stateBump |  u8 | The [SbState](/idl/accounts/SbState) bump used to derive its public key. |
+| disableCrank |  bool |  |

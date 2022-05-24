@@ -3,17 +3,19 @@ Adds fund to a LeaseAccount. Note that funds can always be withdrawn by the with
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| lease | true | false |  |
-| aggregator | false | false |  |
-| queue | false | false |  |
-| funder | true | false |  |
-| owner | true | true |  |
-| escrow | true | false |  |
-| tokenProgram | false | false |  |
-| programState | false | false |  |
-## Args
+| lease | TRUE | FALSE |  | 
+| aggregator | FALSE | FALSE |  | 
+| queue | FALSE | FALSE |  | 
+| funder | TRUE | FALSE |  | 
+| owner | TRUE | TRUE |  | 
+| escrow | TRUE | FALSE |  | 
+| tokenProgram | FALSE | FALSE | The Solana token program account. | 
+| programState | FALSE | FALSE | The Switchboard [SbState](/idl/accounts/SbState) account. | 
+| mint | FALSE | FALSE |  | 
+## Params
 |Field|Type|Description|
 |--|--|--|
 | loadAmount |  u64 |  |
 | leaseBump |  u8 |  |
-| stateBump |  u8 |  |
+| stateBump |  u8 | The [SbState](/idl/accounts/SbState) bump used to derive its public key. |
+| walletBumps |  bytes |  |

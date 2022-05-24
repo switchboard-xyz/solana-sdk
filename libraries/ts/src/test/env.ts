@@ -8,7 +8,7 @@ import path from "path";
 import * as sbv2 from "../";
 import { getIdlAddress, getProgramDataAddress } from "./utils";
 
-const LATEST_DOCKER_VERSION = "dev-v2-4-12-22h";
+const LATEST_DOCKER_VERSION = "dev-v2-5-3-22";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;

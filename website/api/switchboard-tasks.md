@@ -24,7 +24,7 @@ Switchboard tasks can be divided into the following categories:
 
 :::tip
 
-Check out the [**Job Directory**](/job-directory) for examples!
+Check out the [**Job Directory**](/feed/directory) for examples!
 
 :::
 

@@ -5,4 +5,5 @@
 | authority |  publicKey | The account authority permitted to make account changes. |
 | tokenMint |  publicKey | The token mint used for oracle rewards, aggregator leases, and other reward incentives. |
 | tokenVault |  publicKey | Token vault used by the program to receive kickbacks. |
-| ebuf |  u8[1024] | Reserved. |
+| daoMint |  publicKey | The token mint used by the DAO. |
+| ebuf |  u8[992] | Reserved. |

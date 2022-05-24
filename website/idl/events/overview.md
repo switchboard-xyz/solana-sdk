@@ -4,9 +4,11 @@ title: Overview
 slug: .
 ---
 
+- [AggregatorCrankEvictionEvent](/idl/events/AggregatorCrankEvictionEvent)
 - [AggregatorInitEvent](/idl/events/AggregatorInitEvent)
 - [AggregatorOpenRoundEvent](/idl/events/AggregatorOpenRoundEvent)
 - [AggregatorValueUpdateEvent](/idl/events/AggregatorValueUpdateEvent)
+- [BufferRelayerOpenRoundEvent](/idl/events/BufferRelayerOpenRoundEvent)
 - [CrankLeaseInsufficientFundsEvent](/idl/events/CrankLeaseInsufficientFundsEvent)
 - [CrankPopExpectedFailureEvent](/idl/events/CrankPopExpectedFailureEvent)
 - [FeedPermissionRevokedEvent](/idl/events/FeedPermissionRevokedEvent)

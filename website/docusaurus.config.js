@@ -1,6 +1,9 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const math = require("remark-math");
+const katex = require("rehype-katex");
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Switchboard",
@@ -29,6 +32,8 @@ const config = {
           remarkPlugins: [
             [require("@docusaurus/remark-plugin-npm2yarn"), { sync: true }],
           ],
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
           // editUrl:
           //   process.env.NODE_ENV === "production"
           //     ? process.env.CI_PROJECT_URL + "/-/edit/main/"
@@ -47,6 +52,15 @@ const config = {
         },
       }),
     ],
+  ],
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css",
+      type: "text/css",
+      integrity:
+        "sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM",
+      crossorigin: "anonymous",
+    },
   ],
   plugins: [
     "my-loaders",
@@ -115,24 +129,20 @@ const config = {
             label: "Docs",
           },
           {
-            to: "idl/",
+            to: "/idl/",
             position: "left",
             label: "IDL",
             // activeBaseRegex: "docs/(next|v8)",
           },
           {
             type: "dropdown",
-            label: "Developers",
+            label: "APIs",
             position: "left",
-            to: "api",
+            to: "/api/",
             items: [
               {
-                label: "Overview",
-                to: "api/",
-              },
-              {
                 label: "Task Protobufs",
-                to: "api/tasks",
+                to: "/api/tasks",
               },
               {
                 label: "Typescript",
@@ -152,7 +162,7 @@ const config = {
               },
               {
                 label: "CLI",
-                to: "api/cli",
+                to: "/api/cli",
               },
             ],
           },

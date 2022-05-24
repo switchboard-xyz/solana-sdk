@@ -3,12 +3,12 @@ Create and initialize the CrankAccount.
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| crank | true | true |  |
-| queue | false | false |  |
-| buffer | true | false |  |
-| payer | true | false |  |
-| systemProgram | false | false |  |
-## Args
+| crank | TRUE | TRUE |  | 
+| queue | FALSE | FALSE |  | 
+| buffer | TRUE | FALSE |  | 
+| payer | TRUE | TRUE |  | 
+| systemProgram | FALSE | FALSE | The Solana system program account. | 
+## Params
 |Field|Type|Description|
 |--|--|--|
 | name |  bytes |  |

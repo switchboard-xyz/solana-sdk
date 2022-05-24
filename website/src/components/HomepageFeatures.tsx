@@ -29,12 +29,6 @@ const StyledHeaderTitle = styled(Typography)<{ dark: number }>(
   })
 );
 
-export type FeatureItem = {
-  title: string;
-  image: string;
-  description: JSX.Element;
-  linkTo: string;
-};
 
 export function HomepageFeatures(): JSX.Element {
   const theme = useTheme();

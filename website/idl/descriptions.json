@@ -13,16 +13,16 @@
           "description": "Metadata of the aggregator to store on-chain."
         },
         {
-          "name": "authorWallet",
-          "description": "An optional wallet for receiving kickbacks from job usage in feeds. Defaults to token vault."
+          "name": "reserved1",
+          "description": "Reserved."
         },
         {
           "name": "queuePubkey",
-          "description": "Pubkey of the queue the aggregator belongs to"
+          "description": "Pubkey of the queue the aggregator belongs to."
         },
         {
           "name": "oracleRequestBatchSize",
-          "description": "Number of oracles assigned to an update request"
+          "description": "Number of oracles assigned to an update request."
         },
         {
           "name": "minOracleResults",
@@ -30,7 +30,7 @@
         },
         {
           "name": "minJobResults",
-          "description": "Minimum number of job results before an oracle accepts a result"
+          "description": "Minimum number of job results before an oracle accepts a result."
         },
         {
           "name": "minUpdateDelaySeconds",
@@ -50,7 +50,7 @@
         },
         {
           "name": "expiration",
-          "description": "Timestamp when the feed is no longer needed"
+          "description": "Timestamp when the feed is no longer needed."
         },
         {
           "name": "consecutiveFailureCount",
@@ -58,11 +58,11 @@
         },
         {
           "name": "nextAllowedUpdateTime",
-          "description": "Timestamp when the next update request will be available"
+          "description": "Timestamp when the next update request will be available."
         },
         {
           "name": "isLocked",
-          "description": "Flag for whether an aggregators configuration is locked for editing"
+          "description": "Flag for whether an aggregators configuration is locked for editing."
         },
         {
           "name": "crankPubkey",
@@ -74,35 +74,101 @@
         },
         {
           "name": "currentRound",
-          "description": "Oracle results from the current round of update request that has not been accepted as valid yet"
+          "description": "Oracle results from the current round of update request that has not been accepted as valid yet."
         },
         {
           "name": "jobPubkeysData",
-          "description": "List of public keys containing the job definitions for how data is sourced off-chain by oracles"
+          "description": "List of public keys containing the job definitions for how data is sourced off-chain by oracles."
         },
         {
           "name": "jobHashes",
-          "description": "Used to protect against malicious RPC nodes providing incorrect task definitions to oracles before fulfillment"
+          "description": "Used to protect against malicious RPC nodes providing incorrect task definitions to oracles before fulfillment."
         },
         {
           "name": "jobPubkeysSize",
-          "description": "Number of jobs assigned to an oracle"
+          "description": "Number of jobs assigned to an oracle."
         },
         {
           "name": "jobsChecksum",
-          "description": "Used to protect against malicious RPC nodes providing incorrect task definitions to oracles before fulfillment"
+          "description": "Used to protect against malicious RPC nodes providing incorrect task definitions to oracles before fulfillment."
         },
         {
           "name": "authority",
-          "description": "The account delegated as the authority to for changing configs or withdrawing from a lease."
+          "description": "The account delegated as the authority for making account changes or withdrawing funds from a lease."
         },
         {
           "name": "historyBuffer",
           "description": "Optional, public key of a history buffer account storing the last N accepted results and their timestamps."
         },
         {
+          "name": "previousConfirmedRoundResult",
+          "description": "The previous confirmed round result."
+        },
+        {
+          "name": "previousConfirmedRoundSlot",
+          "description": "The slot when the previous confirmed round was opened."
+        },
+        {
+          "name": "disableCrank",
+          "description": "Whether an aggregator is permitted to join a crank."
+        },
+        {
+          "name": "jobWeights",
+          "description": "Job weights used for the weighted median of the aggregator's assigned job accounts."
+        },
+        {
           "name": "ebuf",
-          "description": "Reserved"
+          "description": "Reserved."
+        }
+      ]
+    },
+    {
+      "name": "BufferRelayerAccountData",
+      "description": "",
+      "children": [
+        {
+          "name": "name",
+          "description": "Name of the buffer account to store on-chain."
+        },
+        {
+          "name": "queuePubkey",
+          "description": "Public key of the OracleQueueAccountData that is currently assigned to fulfill buffer relayer update request"
+        },
+        {
+          "name": "escrow",
+          "description": "Token account to reward oracles for completing update request"
+        },
+        {
+          "name": "authority",
+          "description": "The account delegated as the authority for making account changes."
+        },
+        {
+          "name": "jobPubkey",
+          "description": "Public key of the JobAccountData that defines how the buffer relayer is updated"
+        },
+        {
+          "name": "jobHash",
+          "description": "Used to protect against malicious RPC nodes providing incorrect task definitions to oracles before fulfillment"
+        },
+        {
+          "name": "minUpdateDelaySeconds",
+          "description": "Minimum delay between update request"
+        },
+        {
+          "name": "isLocked",
+          "description": "Whether buffer relayer config is locked for further changes"
+        },
+        {
+          "name": "currentRound",
+          "description": "The current buffer relayer update round that is yet to be confirmed"
+        },
+        {
+          "name": "latestConfirmedRound",
+          "description": "The latest confirmed buffer relayer update round"
+        },
+        {
+          "name": "result",
+          "description": "The buffer holding the latest confirmed result"
         }
       ]
     },
@@ -140,7 +206,7 @@
         },
         {
           "name": "dataBuffer",
-          "description": "Public key of the buffer account holding the list of aggregators"
+          "description": " The public key of the CrankBuffer account holding a collection of Aggregator pubkeys and their next allowed update time."
         }
       ]
     },
@@ -155,6 +221,10 @@
         {
           "name": "metadata",
           "description": "Metadata of the job to store on-chain."
+        },
+        {
+          "name": "authority",
+          "description": "The account delegated as the authority for making account changes."
         },
         {
           "name": "authorWallet",
@@ -238,7 +308,7 @@
         },
         {
           "name": "oracleAuthority",
-          "description": "Public key of the authority who owns the oracle account"
+          "description": "The account delegated as the authority for making account changes or withdrawing funds from a staking wallet."
         },
         {
           "name": "lastHeartbeat",
@@ -280,7 +350,7 @@
         },
         {
           "name": "authority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         },
         {
           "name": "oracleTimeout",
@@ -335,6 +405,22 @@
           "description": "Enabling this setting means VRF accounts do not need explicit permission to join the queue and request new values from its oracles."
         },
         {
+          "name": "curatorRewardCut",
+          "description": ""
+        },
+        {
+          "name": "lockLeaseFunding",
+          "description": ""
+        },
+        {
+          "name": "mint",
+          "description": "Token mint used for the oracle queue rewards and slashing."
+        },
+        {
+          "name": "enableBufferRelayers",
+          "description": "Whether oracles are permitted to fulfill buffer relayer update request."
+        },
+        {
           "name": "ebuf",
           "description": "Reserved."
         },
@@ -344,7 +430,7 @@
         },
         {
           "name": "dataBuffer",
-          "description": "Pubkey of the on-chain account holding the queue data."
+          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver succesfully heartbeated before the queues `oracleTimeout`."
         }
       ]
     },
@@ -358,7 +444,7 @@
         },
         {
           "name": "permissions",
-          "description": "The current assigned permission enumeration"
+          "description": "The SwitchboardPermission enumeration assigned by the `granter` to the `grantee`."
         },
         {
           "name": "granter",
@@ -395,6 +481,10 @@
           "description": "Token vault used by the program to receive kickbacks."
         },
         {
+          "name": "daoMint",
+          "description": "The token mint used by the DAO."
+        },
+        {
           "name": "ebuf",
           "description": "Reserved."
         }
@@ -405,12 +495,40 @@
       "description": "<b>Size: </b>29058 Bytes<br /><b>Rent Exemption: </b>0.203134560SOL<br /><br />",
       "children": [
         {
-          "name": "counter",
-          "description": "Incremental counter for current round."
+          "name": "status",
+          "description": "The current status of the VRF account."
         },
         {
-          "name": "latestFinalizedRound",
-          "description": "Latest confirmed update request result that has been accepted as valid."
+          "name": "counter",
+          "description": "Incremental counter for tracking VRF rounds."
+        },
+        {
+          "name": "authority",
+          "description": "On-chain account delegated for making account changes."
+        },
+        {
+          "name": "oracleQueue",
+          "description": "The OracleQueueAccountData that is assigned to fulfill VRF update request."
+        },
+        {
+          "name": "escrow",
+          "description": "The token account used to hold funds for VRF update request."
+        },
+        {
+          "name": "callback",
+          "description": "The callback that is invoked when an update request is succesfully verified."
+        },
+        {
+          "name": "batchSize",
+          "description": "The number of oracles assigned to a VRF update request."
+        },
+        {
+          "name": "builders",
+          "description": "Struct containing the intermediate state between VRF crank actions."
+        },
+        {
+          "name": "buildersLen",
+          "description": "The number of builders."
         },
         {
           "name": "currentRound",
@@ -489,7 +607,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         }
       ]
     },
@@ -504,7 +622,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "leaseBump",
@@ -634,7 +752,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         }
       ]
     },
@@ -708,6 +826,32 @@
       ]
     },
     {
+      "name": "BufferRelayerRound",
+      "description": "",
+      "children": [
+        {
+          "name": "numSuccess",
+          "description": "Number of successful responses"
+        },
+        {
+          "name": "numError",
+          "description": "Number of error responses"
+        },
+        {
+          "name": "roundOpenSlot",
+          "description": "Slot when the buffer relayer round was opened"
+        },
+        {
+          "name": "roundOpenTimestamp",
+          "description": "Timestamp when the buffer relayer round was opened"
+        },
+        {
+          "name": "oraclePubkey",
+          "description": "The public key of the oracle fulfilling the buffer relayer update request"
+        }
+      ]
+    },
+    {
       "name": "CallbackZC",
       "description": "",
       "children": [
@@ -757,7 +901,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "leaseBumps",
@@ -783,7 +927,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "permissionBump",
@@ -865,7 +1009,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "data",
@@ -887,7 +1031,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         }
       ]
     },
@@ -909,7 +1053,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         }
       ]
     },
@@ -919,7 +1063,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "leaseBump",
@@ -955,7 +1099,7 @@
         },
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "oracleBump",
@@ -1097,7 +1241,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "permissionBump",
@@ -1153,7 +1297,7 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         }
       ]
     },
@@ -1199,10 +1343,198 @@
       "children": [
         {
           "name": "stateBump",
-          "description": ""
+          "description": "The SbState bump used to derive its public key."
         },
         {
           "name": "amount",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "VrfBuilder",
+      "description": "",
+      "children": [
+        {
+          "name": "producer",
+          "description": ""
+        },
+        {
+          "name": "status",
+          "description": ""
+        },
+        {
+          "name": "reprProof",
+          "description": ""
+        },
+        {
+          "name": "proof",
+          "description": ""
+        },
+        {
+          "name": "yPoint",
+          "description": ""
+        },
+        {
+          "name": "stage",
+          "description": ""
+        },
+        {
+          "name": "stage1Out",
+          "description": ""
+        },
+        {
+          "name": "r1",
+          "description": ""
+        },
+        {
+          "name": "r2",
+          "description": ""
+        },
+        {
+          "name": "stage3Out",
+          "description": ""
+        },
+        {
+          "name": "hPoint",
+          "description": ""
+        },
+        {
+          "name": "sReduced",
+          "description": ""
+        },
+        {
+          "name": "yPointBuilder",
+          "description": ""
+        },
+        {
+          "name": "yRistrettoPoint",
+          "description": ""
+        },
+        {
+          "name": "mulRound",
+          "description": ""
+        },
+        {
+          "name": "hashPointsRound",
+          "description": ""
+        },
+        {
+          "name": "mulTmp1",
+          "description": ""
+        },
+        {
+          "name": "uPoint1",
+          "description": ""
+        },
+        {
+          "name": "uPoint2",
+          "description": ""
+        },
+        {
+          "name": "vPoint1",
+          "description": ""
+        },
+        {
+          "name": "vPoint2",
+          "description": ""
+        },
+        {
+          "name": "uPoint",
+          "description": ""
+        },
+        {
+          "name": "vPoint",
+          "description": ""
+        },
+        {
+          "name": "u1",
+          "description": ""
+        },
+        {
+          "name": "u2",
+          "description": ""
+        },
+        {
+          "name": "invertee",
+          "description": ""
+        },
+        {
+          "name": "y",
+          "description": ""
+        },
+        {
+          "name": "z",
+          "description": ""
+        },
+        {
+          "name": "p1Bytes",
+          "description": ""
+        },
+        {
+          "name": "p2Bytes",
+          "description": ""
+        },
+        {
+          "name": "p3Bytes",
+          "description": ""
+        },
+        {
+          "name": "p4Bytes",
+          "description": ""
+        },
+        {
+          "name": "cPrimeHashbuf",
+          "description": ""
+        },
+        {
+          "name": "m1",
+          "description": ""
+        },
+        {
+          "name": "m2",
+          "description": ""
+        },
+        {
+          "name": "txRemaining",
+          "description": ""
+        },
+        {
+          "name": "verified",
+          "description": ""
+        },
+        {
+          "name": "result",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "VrfStatus",
+      "description": "",
+      "children": [
+        {
+          "name": "StatusNone",
+          "description": ""
+        },
+        {
+          "name": "StatusRequesting",
+          "description": ""
+        },
+        {
+          "name": "StatusVerifying",
+          "description": ""
+        },
+        {
+          "name": "StatusVerified",
+          "description": ""
+        },
+        {
+          "name": "StatusCallbackSuccess",
+          "description": ""
+        },
+        {
+          "name": "StatusVerifyFailure",
           "description": ""
         }
       ]
@@ -1355,7 +1687,7 @@
         },
         {
           "name": "dataBuffer",
-          "description": "The OracleQueueBuffer account holding a collection of Oracle pubkeys."
+          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver succesfully heartbeated before the queues `oracleTimeout`."
         },
         {
           "name": "tokenProgram",
@@ -1629,7 +1961,7 @@
         },
         {
           "name": "queueAuthority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         },
         {
           "name": "programState",
@@ -1675,7 +2007,7 @@
         },
         {
           "name": "queueAuthority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         },
         {
           "name": "permission",
@@ -1959,7 +2291,7 @@
         },
         {
           "name": "authority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         },
         {
           "name": "buffer",
@@ -1989,7 +2321,7 @@
         },
         {
           "name": "authority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         },
         {
           "name": "params",
@@ -2375,7 +2707,7 @@
         },
         {
           "name": "queueAuthority",
-          "description": "The account delegated as the authority to for creating permissions targeted at the queue."
+          "description": "The account delegated as the authority for making account changes or assigning permissions targeted at the queue."
         }
       ]
     },

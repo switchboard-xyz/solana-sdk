@@ -17,17 +17,9 @@ export const FeatureList: FeatureItem[] = [
     title: "Architecture",
     image: "/img/icons/arc.png",
     description:
-      "Learn about the different Switchboard components and how they interact.",
+      "Learn about Switchboard Oracle Queues and how they allocate oracle resources on-chain.",
 
-    linkTo: "/architecture",
-  },
-  {
-    title: "On-Chain",
-    image: "/img/icons/sol.png",
-    description:
-      "Learn how to read Switchboard data on-chain and resolve data feed updates.",
-
-    linkTo: "/developers/js",
+    linkTo: "/queue",
   },
   {
     title: "Oracle",
@@ -35,6 +27,13 @@ export const FeatureList: FeatureItem[] = [
     description:
       "Learn how to contribute to the network and process data feed updates.",
     linkTo: "/oracle",
+  },
+  {
+    title: "Data Feeds",
+    image: "/img/icons/sol.png",
+    description: "Learn how Switchboard data feeds work.",
+
+    linkTo: "/feed",
   },
   {
     title: "Develop",

@@ -3,9 +3,9 @@
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| queue | true | false |  |
-| authority | false | true |  |
-## Args
+| queue | TRUE | FALSE |  | 
+| authority | FALSE | TRUE |  | 
+## Params
 |Field|Type|Description|
 |--|--|--|
 | unpermissionedVrfEnabled |  bool |  |

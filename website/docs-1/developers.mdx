@@ -1,0 +1,81 @@
+---
+sidebar_position: 70
+slug: /developers
+title: Developers
+---
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Box, Typography, Grid } from "@mui/material";
+import Link from "@docusaurus/Link";
+import { VscGithubInverted } from "react-icons/vsc";
+import { FiType } from "react-icons/fi";
+import { SiTypescript } from "react-icons/si";
+import { SiJavascript } from "react-icons/si";
+import { SiPython } from "react-icons/si";
+import { SiRust } from "react-icons/si";
+import { SiPowershell } from "react-icons/si";
+import { VscJson } from "react-icons/vsc";
+import { GoLinkExternal } from "react-icons/go";
+import { SerumIcon } from "/src/components/icons/SerumIcon";
+
+# Developer Resources
+
+<MarkdownImage
+  img="/img/Switchboard_v2_Live.png"
+  sx={{ borderWidth: "thin", border: "1px solid #D3D3D3", borderRadius: 3 }}
+/>
+
+## SDK
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  The Switchboard-V2 repository contains all of the libraries, examples, and
+  documentation to help you get started integrating Switchboard.
+</Typography>
+
+<br />
+
+<Link to="https://github.com/switchboard-xyz/switchboard-v2">
+
+<Typography variant="h5" sx={{ textAlign: "center" }}>
+  <VscGithubInverted />
+  &nbsp;@switchboard-xyz/switchboard-v2&nbsp;
+  <VscGithubInverted />
+</Typography>
+
+</Link>
+
+<hr />
+
+## Anchor IDL
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  Switchboard's Anchor IDL contains a detailed description of the program
+  interfaces and schemas.
+</Typography>
+
+<Link to="/idl">
+
+<Typography variant="h5" sx={{ textAlign: "center" }}>
+  ⚓ Anchor IDL ⚓
+</Typography>
+
+</Link>
+
+<hr />
+
+## APIs
+
+<Typography variant="body2" sx={{ fontSize: "1.5em" }}>
+  Switchboard's APIs provide a client interface to interact with Switchboard V2
+  on-chain.
+</Typography>
+
+| Resource                                                                                                                                               | Description                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| <a className="nowrap" href="api/tasks"><VscJson className="devicons" fontSize="large" /> switchboard-tasks</a>                                         | Protobuf definitions for the various supported task definitions to build job definitions from. |
+| <a className="nowrap" href="api/ts/"><SiTypescript className="devicons" fontSize="large" /> switchboardv2-api</a>                                      | A typescript library of utility functions to interact with the Switchboardv2 program.          |
+| <a className="nowrap" href="api/py"><SiPython className="devicons" fontSize="large" /> switchboardpy</a>                                               | A python library of utility functions to interact with the Switchboardv2 program.              |
+| <a className="nowrap" href="api/cli"><SiPowershell className="devicons" fontSize="large" /> switchboardv2-cli</a>                                      | A Command Line Interface (CLI) to interact with the Switchboardv2 program.                     |
+| <a className="nowrap" href="https://docs.rs/switchboard-v2"><SiRust className="devicons" /> switchboard-v2 <GoLinkExternal className="devicons" /></a> | A rust library of utility functions to interact with the Switchboardv2 program on-chain.       |
+
+<hr />
