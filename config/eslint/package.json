@@ -10,8 +10,9 @@
     "test": "echo \"No test script required for workspace eslint-config\" && exit 0"
   },
   "peerDependencies": {
-    "eslint": "^6 || ^7.2.0",
-    "prettier": ">= 1.13"
+    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint-plugin-import": "^2.25.3",
+    "prettier": ">=2.0.0"
   },
   "dependencies": {},
   "devDependencies": {
