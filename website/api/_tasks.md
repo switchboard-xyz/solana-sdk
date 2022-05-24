@@ -84,7 +84,7 @@ This schema Oracle nodes respond with when fulfilling a job.
 
 ### OracleJob
 
-Represnts a list of tasks to be performed by a switchboard oracle.
+Represents a list of tasks to be performed by a switchboard oracle.
 
 | Field | Type                              | Label    | Description                                       |
 | ----- | --------------------------------- | -------- | ------------------------------------------------- |
@@ -155,7 +155,7 @@ aggregate.
 | Field             | Type                    | Label    | Description                                                                        |
 | ----------------- | ----------------------- | -------- | ---------------------------------------------------------------------------------- |
 | scalar            | double                  | optional | Specifies a basic scalar denominator to divide by.                                 |
-| aggregator_pubkey | string                  | optional | Specifies another aggregator resut to divide by.                                   |
+| aggregator_pubkey | string                  | optional | Specifies another aggregator result to divide by.                                  |
 | job               | [OracleJob](#OracleJob) | optional | A job whose result is computed before dividing our numerical input by that result. |
 
 <a name=".OracleJob.HttpTask"></a>
@@ -319,7 +319,7 @@ Fetch the current price of a Solana oracle protocol
 | switchboard_address              | string | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
 | pyth_address                     | string | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/                                                                                                 |
 | chainlink_address                | string | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana                                                                     |
-| pyth_allowed_confidence_interval | double | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected.                                |
+| pyth_allowed_confidence_interval | double | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this threshold are rejected.                               |
 
 <a name=".OracleJob.PerpMarketTask"></a>
 
@@ -400,13 +400,13 @@ aggregate.
 
 ### OracleJob.SushiswapExchangeRateTask
 
-| Field             | Type              | Label    | Description |
-| ----------------- | ----------------- | -------- | ----------- |
-| in_token_address  | string            | optional |             |
-| out_token_address | string            | optional |             |
+| Field             | Type   | Label    | Description |
+| ----------------- | ------ | -------- | ----------- |
+| in_token_address  | string | optional |             |
+| out_token_address | string | optional |             |
 | in_token_amount   | uint32 | optional |             |
-| slippage          | double            | optional |             |
-| provider          | string            | optional |             |
+| slippage          | double | optional |             |
+| provider          | string | optional |             |
 
 <a name=".OracleJob.Task"></a>
 
@@ -456,25 +456,25 @@ aggregate.
 
 Takes a twap over a set period for a certain aggregator.
 
-| Field                      | Type              | Label    | Description                                                          |
-| -------------------------- | ----------------- | -------- | -------------------------------------------------------------------- |
-| aggregator_pubkey          | string            | optional | The target aggregator for the TWAP.                                  |
-| period                     | int32             | optional | Period, in seconds, the twap should account for                      |
-| weight_by_propagation_time | [bool](#bool)     | optional | Weight samples by their propagation time                             |
-| min_samples                | uint32 | optional | Minimum number of samples in the history to calculate a valid result |
-| ending_unix_timestamp      | int32             | optional | Ending unix timestamp to collect values up to                        |
+| Field                      | Type          | Label    | Description                                                          |
+| -------------------------- | ------------- | -------- | -------------------------------------------------------------------- |
+| aggregator_pubkey          | string        | optional | The target aggregator for the TWAP.                                  |
+| period                     | int32         | optional | Period, in seconds, the twap should account for                      |
+| weight_by_propagation_time | [bool](#bool) | optional | Weight samples by their propagation time                             |
+| min_samples                | uint32        | optional | Minimum number of samples in the history to calculate a valid result |
+| ending_unix_timestamp      | int32         | optional | Ending unix timestamp to collect values up to                        |
 
 <a name=".OracleJob.UniswapExchangeRateTask"></a>
 
 ### OracleJob.UniswapExchangeRateTask
 
-| Field             | Type              | Label    | Description |
-| ----------------- | ----------------- | -------- | ----------- |
-| in_token_address  | string            | optional |             |
-| out_token_address | string            | optional |             |
+| Field             | Type   | Label    | Description |
+| ----------------- | ------ | -------- | ----------- |
+| in_token_address  | string | optional |             |
+| out_token_address | string | optional |             |
 | in_token_amount   | uint32 | optional |             |
-| slippage          | double            | optional |             |
-| provider          | string            | optional |             |
+| slippage          | double | optional |             |
+| provider          | string | optional |             |
 
 <a name=".OracleJob.ValueTask"></a>
 
@@ -485,7 +485,7 @@ Returns a specified value.
 | Field             | Type   | Label    | Description                                     |
 | ----------------- | ------ | -------- | ----------------------------------------------- |
 | value             | double | optional | The value that will be returned from this task. |
-| aggregator_pubkey | string | optional | Specifies an aggregatorr to pull the value of.  |
+| aggregator_pubkey | string | optional | Specifies an aggregator to pull the value of.   |
 
 <a name=".OracleJob.WebsocketTask"></a>
 
@@ -515,11 +515,11 @@ Opens and maintains a websocket for light speed data retrieval.
 
 An enumeration representing the types of HTTP requests available to make.
 
-| Name          | Number | Description                                  |
-| ------------- | ------ | -------------------------------------------- |
-| METHOD_UNKOWN | 0      | Unset HTTP method will default to METHOD_GET |
-| METHOD_GET    | 1      | Perform an HTTP &#39;GET&#39; request.       |
-| METHOD_POST   | 2      | Perform an HTTP &#39;POST&#39; request.      |
+| Name           | Number | Description                                  |
+| -------------- | ------ | -------------------------------------------- |
+| METHOD_UNKNOWN | 0      | Unset HTTP method will default to METHOD_GET |
+| METHOD_GET     | 1      | Perform an HTTP &#39;GET&#39; request.       |
+| METHOD_POST    | 2      | Perform an HTTP &#39;POST&#39; request.      |
 
 <a name=".OracleJob.JsonParseTask.AggregationMethod"></a>
 

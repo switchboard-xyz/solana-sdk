@@ -430,7 +430,7 @@
         },
         {
           "name": "dataBuffer",
-          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver succesfully heartbeated before the queues `oracleTimeout`."
+          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver successfully heartbeated before the queues `oracleTimeout`."
         }
       ]
     },
@@ -516,7 +516,7 @@
         },
         {
           "name": "callback",
-          "description": "The callback that is invoked when an update request is succesfully verified."
+          "description": "The callback that is invoked when an update request is successfully verified."
         },
         {
           "name": "batchSize",
@@ -1687,7 +1687,7 @@
         },
         {
           "name": "dataBuffer",
-          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver succesfully heartbeated before the queues `oracleTimeout`."
+          "description": "The public key of the OracleQueueBuffer account holding a collection of Oracle pubkeys that haver successfully heartbeated before the queues `oracleTimeout`."
         },
         {
           "name": "tokenProgram",

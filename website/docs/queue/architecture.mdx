@@ -79,7 +79,7 @@ The queue uses `queue.gcIdx` to track its garbage collection index. When an orac
 
 Oracle queue resources, such as oracles, aggregators, VRF accounts, or buffer relayer accounts, _MUST_ have an associated [PermissionAccount](/idl/accounts/PermissionAccountData) initialized before interacting with a queue. Permissions are granted by `queue.authority`, which could be a DAO controlled account to allow network participants to vote on new entrants.
 
-Oracles _MUST_ have **PermitOracleHeartbeat** permissions before heartbeating on a queue. This is to prevent a malicous actor from spinning up a plethora of oracles until it obtains the super majority, at which point it could misreport data feed results and cause honest oracles to be slashed.
+Oracles _MUST_ have **PermitOracleHeartbeat** permissions before heartbeating on a queue. This is to prevent a malicious actor from spinning up a plethora of oracles until it obtains the super majority, at which point it could misreport data feed results and cause honest oracles to be slashed.
 
 See the table below for the minimum required permissions for a resource based on the queues settings:
 
@@ -132,7 +132,7 @@ An oracle queue can be governed by its network participants to control the vario
 
 - `queue.minStake` - require a higher up-front cost for oracles to entice honest behavior
 - `queue.reward` - control the oracle reward payout for successfully fulfilling update request
-- `queue.slashingEnabled` - to disincentivize malcious oracle behavior
+- `queue.slashingEnabled` - to disincentivize malicious oracle behavior
 - Permit new oracles to join the network
 
 ## More Information
