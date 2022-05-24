@@ -90,7 +90,7 @@ if [[ -z "${GRAFANA_HOSTNAME}" ]]; then
   exit 1
 fi
 if [[ -z "${GRAFANA_ADMIN_PASSWORD}" ]]; then
-  GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD:-SbCongraph50!}"
+  GRAFANA_ADMIN_PASSWORD="${GRAFANA_ADMIN_PASSWORD:-Sbv2K8sPassword123@}"
 fi
 if [[ -z "${GRAFANA_TLS_CRT}" ]]; then
   echo "failed to set GRAFANA_TLS_CRT"

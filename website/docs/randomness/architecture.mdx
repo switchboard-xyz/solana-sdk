@@ -1,0 +1,93 @@
+---
+sidebar_position: 1
+slug: .
+title: Architecture
+description: Learn how to use Switchboard's Verifiable Random Functions
+keywords: [Switchboard, Solana, VRF, randomness, verifiable, proof]
+---
+
+# Randomness Architecture
+
+import MarkdownImage from "/src/components/MarkdownImage";
+import RandomnessInstructions from "/idl/_randomness_instructions.mdx";
+import {
+  Typography,
+  IconButton,
+  Box,
+  CardActionArea,
+  Card,
+  CardContent,
+} from "@mui/material";
+import Link from "@docusaurus/Link";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import VrfAccountData from "/idl/accounts/VrfAccountData.md";
+import VrfInit from "/idl/instructions/vrfInit.md";
+import VrfProve from "/idl/instructions/vrfProve.md";
+import VrfVerify from "/idl/instructions/vrfVerify.md";
+import VrfRequestRandomness from "/idl/instructions/vrfRequestRandomness.md";
+
+import CallbackZC from "/idl/types/CallbackZC.md";
+
+:::caution
+
+While Switchboard V2's oracle network is fully audited, the VRF implementation is currently unaudited software. Please use at your own risk.
+
+:::
+
+A VRF account is an on-chain account that holds the latest VRF value, as well as its owners specified callback function. When a VRF account owner requests a new randomness value, the oracle queue delegates the update request to an oracle based on its round robin ordering of oracles heartbeating on-chain. The oracle submits its VRF seed on-chain, then must submit 276 transactions to turn the state machine, which computes the proof. When the proof is computed and successfully validates the pseudo-random value, the oracle invokes the account owner’s callback instruction.
+
+The VRF function return a **_u8[32]_** buffer that can be transmuted to most data types using the [bytemuck crate](https://crates.io/crates/bytemuck).
+
+```rust
+let result_buffer: [u8; 32];
+// get result buffer from parsed VRF Account
+msg!("Result buffer is {:?}", result_buffer);
+let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
+msg!("u128 buffer {:?}", value);
+let result = value[0] % max_result as u128;
+msg!("Current VRF Value [0 - {}) = {}!", max_result, result);
+```
+
+## Configuration
+
+:::tip
+
+See [/idl/accounts/VrfAccountData](/idl/accounts/VrfAccountData) for the full list of an AggregatorAccount's configuration parameters.
+
+:::
+
+## Callback
+
+When creating a VRF Account, the VRF `authority` should specify a `callback` function that will be called by the oracle. VRF Accounts should ensure their `callback` function consumes less than ~160k compute units or it may fail to complete.
+
+<CallbackZC />
+
+## Reward Oracles
+
+When a VRF Account requests a new random value from a queue, it transfers 0.1 wSOL to it's `escrow` wallet. An oracle receives 90% of the reward when it verifies the proof on-chain and the remaining 10% if the callback succeeds.
+
+## Update Lifecycle
+
+- `vrfRequestRandomness`
+- check `vrfStatus`
+- `tokenTransfer`
+- increment counter
+- set status to _StatusRequesting_
+- emit `VrfRequestEvent`
+- oracle fulfills VRF request
+- `vrfProve`
+- set status to _StatusVerifying_
+- `vrfVerify` x 277
+- set status to _StatusVerified_
+- 90% `tokenTransfer`
+- invoke VRF Callback
+- if success
+  - 10% `tokenTransfer`
+  - set status to _StatusCallbackSuccess_
+- if failure
+  - set status to _StatusVerifyFailure_
+
+## More Information
+
+- [/idl/accounts/VrfAccountData](/idl/accounts/VrfAccountData)
+- [/developers/randomness](/developers/randomness)

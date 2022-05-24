@@ -3,9 +3,9 @@
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| aggregator | true | false |  |
-| authority | false | true |  |
-| queue | false | false |  |
-## Args
+| aggregator | TRUE | FALSE |  | 
+| authority | FALSE | TRUE |  | 
+| queue | FALSE | FALSE |  | 
+## Params
 |Field|Type|Description|
 |--|--|--|

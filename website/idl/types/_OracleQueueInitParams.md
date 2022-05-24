@@ -15,3 +15,4 @@
 | queueSize |  u32 | The size of the queue. |
 | unpermissionedFeeds |  bool | Enabling this setting means data feeds do not need explicit permission to join the queue. |
 | unpermissionedVrf |  bool |  |
+| enableBufferRelayers |  bool |  |

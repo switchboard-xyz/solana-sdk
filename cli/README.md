@@ -13,6 +13,7 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 
 <!-- commands -->
 * [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
+* [`sbv2 aggregator:create QUEUEKEY`](#sbv2-aggregatorcreate-queuekey)
 * [`sbv2 aggregator:create:copy AGGREGATORSOURCE`](#sbv2-aggregatorcreatecopy-aggregatorsource)
 * [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
 * [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
@@ -123,6 +124,57 @@ EXAMPLE
 ```
 
 _See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.21/src/commands/aggregator/add/job.ts)_
+
+## `sbv2 aggregator:create QUEUEKEY`
+
+create an aggregator account
+
+```
+USAGE
+  $ sbv2 aggregator:create QUEUEKEY
+
+ARGUMENTS
+  QUEUEKEY  public key of the oracle queue account to create aggregator for
+
+OPTIONS
+  -a, --authority=authority              alternate keypair that is the authority for the aggregator
+  -h, --help                             show CLI help
+  -j, --job=job                          filesystem path to job definition file
+
+  -k, --keypair=keypair                  keypair that will pay for onchain transactions. defaults to new account
+                                         authority if no alternate authority provided
+
+  -s, --silent                           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl                    alternate RPC url
+
+  -v, --verbose                          log everything
+
+  --batchSize=batchSize                  number of oracles requested for each open round call
+
+  --force                                skip job confirmation
+
+  --forceReportPeriod=forceReportPeriod  Number of seconds for which, even if the variance threshold is not passed,
+                                         accept new responses from oracles.
+
+  --mainnetBeta                          WARNING: use mainnet-beta solana cluster
+
+  --minJobs=minJobs                      number of jobs that must respond before an oracle responds
+
+  --minOracles=minOracles                number of oracles that must respond before a value is accepted on-chain
+
+  --newQueue=newQueue                    public key of the new oracle queue
+
+  --programId=programId                  alternative Switchboard program ID to interact with
+
+  --updateInterval=updateInterval        set an aggregator's minimum update delay
+
+  --varianceThreshold=varianceThreshold  percentage change between a previous accepted result and the next round before
+                                         an oracle reports a value on-chain. Used to conserve lease cost during low
+                                         volatility
+```
+
+_See code: [src/commands/aggregator/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.21/src/commands/aggregator/create/index.ts)_
 
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE`
 

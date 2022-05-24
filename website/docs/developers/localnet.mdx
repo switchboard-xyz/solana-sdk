@@ -1,0 +1,149 @@
+---
+sidebar_position: 5
+title: Localnet Integration
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+You may wish to run a localnet version of Switchboard to watch how your program reacts to data feed updates. The following will walk through how to create your own Oracle Queue and Oracle and output some helper scripts to quickly load the environment in your tests.
+
+## Setup Switchboard Test Environment
+
+The following will create an Oracle Queue and Oracle with the provided keypair as the authority
+
+<Tabs>
+  <TabItem value="CLI" label="CLI" default>
+
+```shell
+sbv2 localnet:env \
+    --keypair "../payer-keypair.json" \
+    --outputDir ".switchboard"
+```
+
+  </TabItem>
+  <TabItem value="Typescript" label="Typescript">
+
+```typescript
+import { SwitchboardTestEnvironment } from "@switchboard-xyz/sbv2-utils";
+
+const testEnvironment = await SwitchboardTestEnvironment.create(
+  "../payer-keypair.json"
+);
+testEnvironment.writeAll(".switchboard");
+```
+
+  </TabItem>
+</Tabs>
+
+In the specified `outputDir`, you will find:
+
+- **start-local-validator.sh**: Bash script which starts a local Solana validator with the Switchboard program, IDL, and our devnet environment pre-loaded
+- **start-oracle.sh**: Bash script which starts a Switchboard oracle and start heartbeating on the localnet queue
+- **docker-compose.switchboard.yml**: docker file with the Switchboard oracle environment
+- **switchboard.env**: Env file with your Switchboard account public keys
+- **switchboard.json**: JSON file with your Switchboard account public keys
+
+## Switchboard Test Context
+
+In your tests, you will need to load the `switchboard.env` file to build the SwitchboardTestContext.
+
+### Starting Test
+
+Before you run your test you will need a localnet Solana validator running with the Switchboard-V2 program loaded and your Switchboard oracle running and heartbeating.
+
+**_In Shell #1_**
+
+```bash
+./.switchboard/start-local-validator.sh
+```
+
+**_In Shell #2_**
+
+```bash
+./.switchboard/start-oracle.sh
+```
+
+**_In Shell #3_**
+
+```bash
+anchor test --skip-local-validator
+```
+
+### loadFromEnv
+
+`SwitchboardTestContext.loadFromEnv` will look for `switchboard.env` or a `.switchboard` directory in the current directory or three levels up before throwing an error.
+
+<Tabs>
+  <TabItem value="Typescript" label="Typescript" default>
+
+```typescript
+import * as anchor from "@project-serum/anchor";
+import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
+import chai from "chai";
+import "mocha";
+
+describe("switchboard integration test", async () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  let switchboard: SwitchboardTestContext;
+
+  before(async () => {
+    // Optional, attempt to load the switchboard devnet PID
+    // If successful, then we can assume we're on devnet and can use the public permissionless queue
+    try {
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      console.log("devnet detected");
+      return;
+    } catch (error: any) {
+      console.log("Error: SBV2 Devnet - ", error.message);
+    }
+
+    // Attempt to load switchboard.env or .switchboard directory
+    // Will look 3 levels up before failing
+    try {
+      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
+      console.log("localnet detected");
+      return;
+    } catch (error: any) {
+      console.log("Error: SBV2 Localnet - ", error.message);
+    }
+
+    // If fails, throw error
+    throw new Error(
+      "Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file"
+    );
+  });
+
+  it("Your test here", async () => {});
+});
+```
+
+  </TabItem>
+</Tabs>
+
+### createStaticFeed
+
+<Tabs>
+  <TabItem value="Typescript" label="Typescript" default>
+
+```typescript
+import * as anchor from "@project-serum/anchor";
+import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
+import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
+
+// load the Switchboard env to dictate which queue to create feed for
+const switchboard = await SwitchboardTestContext.loadFromEnv(
+  anchor.AnchorProvider.env()
+);
+
+// create a static feed that will always resolve to 100
+// then call openRound and wait for the oracle to process the update
+const aggregatorAccount: AggregatorAccount = await switchboard.createStaticFeed(
+  100
+);
+```
+
+  </TabItem>
+</Tabs>

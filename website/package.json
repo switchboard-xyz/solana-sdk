@@ -42,6 +42,7 @@
     "@svgr/webpack": "^5.5.0",
     "clsx": "^1.1.1",
     "file-loader": "^6.2.0",
+    "hast-util-is-element": "1.1.0",
     "my-loaders": "file:plugins/my-loaders",
     "prism-react-renderer": "^1.2.1",
     "react": "^17.0.1",
@@ -49,11 +50,13 @@
     "react-icons": "^4.3.1",
     "react-player": "^2.9.0",
     "react-spring": "^9.3.2",
+    "rehype-katex": "5",
+    "remark-math": "3",
     "url-loader": "^4.1.1"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.0.0-beta.18",
-    "@docusaurus/types": "^2.0.0-beta.18",
+    "@docusaurus/module-type-aliases": "^2.0.0-beta.20",
+    "@docusaurus/types": "^2.0.0-beta.20",
     "@tsconfig/docusaurus": "^1.0.4",
     "@types/eslint": "^8.4.1",
     "babel-plugin-import": "^1.13.3",

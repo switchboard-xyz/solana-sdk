@@ -12,4 +12,5 @@ Parameters to create and initialize the AggregatorAccount.
 | varianceThreshold |  [BorshDecimal](/idl/types/BorshDecimal) | Change percentage required between a previous round and the current round. If variance percentage is not met, reject new oracle responses. |
 | forceReportPeriod |  i64 | Number of seconds for which, even if the variance threshold is not passed, accept new responses from oracles. |
 | expiration |  i64 | unix_timestamp after which funds may be withdrawn from the aggregator. null/undefined/0 means the feed has no expiration. |
-| stateBump |  u8 |  |
+| stateBump |  u8 | The [SbState](/idl/accounts/SbState) bump used to derive its public key. |
+| disableCrank |  bool |  |

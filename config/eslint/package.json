@@ -1,0 +1,23 @@
+{
+  "name": "@switchboard-xyz/eslint-config",
+  "version": "0.1.0",
+  "author": "",
+  "license": "MIT",
+  "description": "Switchboard eslint-config",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo \"No build script required for workspace eslint-config\" && exit 0",
+    "test": "echo \"No test script required for workspace eslint-config\" && exit 0"
+  },
+  "peerDependencies": {
+    "eslint": "^6 || ^7.2.0",
+    "prettier": ">= 1.13"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.0.0"
+  }
+}

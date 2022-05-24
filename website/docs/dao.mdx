@@ -1,9 +1,116 @@
 ---
 sidebar_position: 80
-slug: /dao
 title: Switchboard DAO
 ---
 
 # Switchboard DAO
 
-The Switchboard DAO will operate a set of oracle queues and provide the mechanisms for stakeholders to contribute, join, and vote on new proposals. More information coming soon.
+The Switchboard DAO operates a set of oracle queues and provide the mechanisms for stakeholders to contribute, join, and vote on new proposals. More information coming soon.
+
+import PublicKeyButton from "/src/components/PublicKeyButton";
+import MarkdownImage from "/src/components/MarkdownImage";
+import { Box, Typography, Grid } from "@mui/material";
+import ProgramStateAccountData from "/idl/accounts/SbState.md";
+import Link from "@docusaurus/Link";
+
+## Mainnet-Beta
+
+Below is a list of public keys used in the Switchboard V2 mainnet deployment.
+
+<table>
+  <thead>
+    <tr>
+      <th>Account</th>
+      <th>Public Key</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <b>Program ID</b>
+      </td>
+      <td>
+        <PublicKeyButton publicKey="SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Permissionless Queue</b>
+      </td>
+      <td>
+        <b>Queue</b>
+        <br />
+        <PublicKeyButton publicKey="5JYwqvKkqp35w8Nq3ba4z1WYUeJQ1rB36V8XvaGp6zn1" />
+        <br />
+        <b>Crank</b>
+        <br />
+        <PublicKeyButton publicKey="BKtF8yyQsj3Ft6jb2nkfpEKzARZVdGgdEPs6mFmZNmbA" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Permissioned Queue</b>
+      </td>
+      <td>
+        <b>Queue</b>
+        <br />
+        <PublicKeyButton publicKey="3HBb2DQqDfuMdzWxNk1Eo9RTMkFYmuEAd32RiLKn9pAn" />
+        <br />
+        <b>Crank</b>
+        <br />
+        <PublicKeyButton publicKey="GdNVLWzcE6h9SPuSbmu69YzxAj8enim9t6mjzuqTXgLd" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+## Devnet
+
+Below is a list of public keys used in the Switchboard V2 devnet deployment.
+
+<table>
+  <thead>
+    <tr>
+      <th>Account</th>
+      <th>Public Key</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <b>Program ID</b>
+      </td>
+      <td>
+        <PublicKeyButton publicKey="2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Permissionless Queue</b>
+      </td>
+      <td>
+        <b>Queue</b>
+        <br />
+        <PublicKeyButton publicKey="F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy" />
+        <br />
+        <b>Crank</b>
+        <br />
+        <PublicKeyButton publicKey="GN9jjCy2THzZxhYqZETmPM3my8vg4R5JyNkgULddUMa5" />
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Permissioned Queue</b>
+      </td>
+      <td>
+        <b>Queue</b>
+        <br />
+        <PublicKeyButton publicKey="GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U" />
+        <br />
+        <b>Crank</b>
+        <br />
+        <PublicKeyButton publicKey="GdNVLWzcE6h9SPuSbmu69YzxAj8enim9t6mjzuqTXgLd" />
+      </td>
+    </tr>
+  </tbody>
+</table>

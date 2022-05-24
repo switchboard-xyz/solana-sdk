@@ -5,6 +5,7 @@ slug: .
 ---
 
 - [AggregatorAccountData](/idl/accounts/AggregatorAccountData)
+- [BufferRelayerAccountData](/idl/accounts/BufferRelayerAccountData)
 - [CrankAccountData](/idl/accounts/CrankAccountData)
 - [JobAccountData](/idl/accounts/JobAccountData)
 - [LeaseAccountData](/idl/accounts/LeaseAccountData)

@@ -2,6 +2,7 @@ import Link from "@docusaurus/Link";
 import { useColorMode } from "@docusaurus/theme-common";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import { Card, CardContent, Divider, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/system";
 import React from "react";
 import { FeatureItem } from "./FeatureList";
@@ -55,13 +56,14 @@ const StyledCardContent = styled(CardContent)(({ theme }) => ({
   },
 }));
 
-export  function FeatureCard({
+export function FeatureCard({
   title,
   image,
   description,
   linkTo,
 }: FeatureItem) {
   const { colorMode } = useColorMode();
+  const theme = useTheme();
 
   return (
     <StyledCard dark={colorMode === "dark" ? 1 : 0}>

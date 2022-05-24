@@ -3,9 +3,9 @@ Change the aggregator authority.
 ## Accounts
 |Name|isMut|isSigner|Description|
 |--|--|--|--|
-| aggregator | true | false |  |
-| authority | false | true |  |
-| newAuthority | false | false |  |
-## Args
+| aggregator | TRUE | FALSE |  | 
+| authority | FALSE | TRUE |  | 
+| newAuthority | FALSE | FALSE |  | 
+## Params
 |Field|Type|Description|
 |--|--|--|

@@ -3,6 +3,7 @@
   "description": "switchboard v2 repo containing type definitions, libraries, and examples",
   "private": true,
   "workspaces": [
+    "config/*",
     "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/sbv2-utils",
@@ -29,6 +30,7 @@
     "docs:build": "run-s docs:build:ts docs:build:sbv2-lite docs:build:site",
     "docs:deploy": "yarn workspace website deploy",
     "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p /idl",
+    "gen:idl:devnet": "rawrtools gen:anchor --devnet 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG -o website/idl -p /idl",
     "nuke": "shx rm -rf {./programs/*,./packages/*,./website,./libraries/*,.}/{node_modules,yarn*.log,build,dist,lib,.anchor,target,Cargo.lock,.docusaurus}"
   },
   "devDependencies": {

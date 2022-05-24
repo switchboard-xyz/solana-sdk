@@ -8,6 +8,7 @@ import bs58 from "bs58";
 import fs from "fs";
 import path from "path";
 import BaseCommand from "../../BaseCommand";
+import { LogProvider } from "../../types";
 
 export default class MetricsAggregator extends BaseCommand {
   static description = "get metrics on switchboard aggregators";
@@ -259,7 +260,7 @@ async function buildAggregators(
     .flat();
 
   // store a map of job pubkeys and their definitions
-  const jobMap = await buildJobMap(program, jobPubkeys);
+  const jobMap = await buildJobMap(this.logger, program, jobPubkeys);
 
   const aggregators: Aggregator[] = [];
   for await (const account of aggregatorAccounts) {
@@ -286,6 +287,7 @@ async function buildAggregators(
 }
 
 async function buildJobMap(
+  logger: LogProvider,
   program: anchor.Program,
   pubkeys: PublicKey[],
   max = 300
@@ -312,7 +314,7 @@ async function buildJobMap(
         //   console.log(`jobKey: ${publicKey}, ${JSON.stringify(job)}`);
         jobMap.set(publicKey.toString(), job);
       } catch (error) {
-        this.logger.debug(`JobDecodeError: ${error}`);
+        this.logger.debug(`JobDecodeError: ${pubKeyBatch[index]} - ${error}`);
       }
     }
   }
