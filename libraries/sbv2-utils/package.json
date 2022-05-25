@@ -27,7 +27,7 @@
     "test": "echo \"No test script for @switchboard-xyz/sbv2-utils\" && exit 0",
     "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
     "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
-    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm",
+    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm && shx rm lib/*.tsbuildinfo",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
