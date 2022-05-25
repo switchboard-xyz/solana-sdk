@@ -11,8 +11,8 @@
   },
   "homepage": "https://docs.switchboard.xyz",
   "files": [
-    "./lib",
-    "./src"
+    "lib",
+    "src"
   ],
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",

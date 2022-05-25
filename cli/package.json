@@ -138,12 +138,12 @@
     "node": ">=8.5.0"
   },
   "files": [
-    "/bin",
-    "/lib",
-    "./src",
-    "/examples",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json"
+    "bin",
+    "lib",
+    "src",
+    "examples",
+    "npm-shrinkwrap.json",
+    "oclif.manifest.json"
   ],
   "keywords": [
     "oclif",
