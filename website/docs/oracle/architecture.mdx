@@ -10,7 +10,7 @@ import OracleMetrics from "/idl/types/OracleMetrics.md";
 
 A Switchboard oracle is a Node.js container that sits between the Solana blockchain and the internet and waits for update requests from an oracle queue. An oracle queue assigns updates to oracles in a round robin fashion.
 
-An oracle account is a program derived address (PDA) between the oracle queue it’s being initialized for, as well as the authority public key which will control it. Before an oracle is granted permissions to use a queue, it must transfer the minimum stake amount, set by the queue, to its escrow wallet.
+An oracle account is a program derived address (PDA) between the oracle queue it’s being initialized for, as well as the oracles staking wallet. Before an oracle is granted permissions to use a queue, it must transfer the minimum stake amount, set by the queue, to its staking wallet.
 
 ## Staking
 
@@ -18,7 +18,7 @@ An oracle is required to transfer `queue.minStake` tokens to its staking wallet,
 
 ## Heartbeat
 
-An oracle is required to heartbeat on-chain, `oracle.lastHeartbeat`, in order to join the queue and be assigned update request. An oracle must heartbeat before the queue's specified `queue.oracleTimeout` or it will be removed from the queue.
+An oracle is required to heartbeat on-chain in order to join the queue and be assigned update request. An oracle must heartbeat before the queue's specified `queue.oracleTimeout` or it will be removed from the queue by the queue's garbage collector.
 
 ## Metrics
 
