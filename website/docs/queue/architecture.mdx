@@ -104,7 +104,9 @@ TODO:
 
 A queue can choose to create one or many cranks. A crank is a scheduling mechanism that allows data feeds to request periodic updates. A crank can be turned by anyone, and if successful, the crank turner will be rewarded for jump starting the system.
 
-A data feed is only permitted to join a crank if it has sufficient permissions (as detailed above) and the crank has available capacity. Data feeds on a crank are ordered by their next available update time with some level of jitter, providing a maximum update interval of 2 × a data feed's `aggregator.minUpdateDelaySeconds`. This is to mitigate oracles being assigned to the same aggregator update request, making a feed vulnerable to a malicious oracle.
+A data feed is only permitted to join a crank if it has sufficient permissions (as detailed above) and the crank has available capacity. Data feeds on a crank are ordered by their next available update time with some level of jitter to mitigate oracles being assigned to the same update request upon each iteration of the queue, which makes them susceptible to a malicous oracle. The maximum update interval for a feed on a crank is based on its `aggregator.minUpdateDelaySeconds` and can be calculated by:
+
+$I_{Max} (seconds) = 15\quad\% \quad I_{minUpdateDelaySeconds}$
 
 ## Economic Security
 
@@ -112,7 +114,7 @@ An oracle queue uses economic incentives to entice oracles to act honestly, whic
 
 ### Stake
 
-The queue's `queue.minStake` is the number of tokens required by an oracle to heartbeat on a queue. If an oracle's staking wallet falls below the minStake requirement, it is removed from the queue.
+The queue's `queue.minStake` is the raw token amount in the token mints base unit (_Ex: lamports or satoshis_) required by an oracle to heartbeat on a queue. If an oracle's staking wallet falls below the minStake requirement, it is removed from the queue.
 
 DeFi protocols with a significant Total Value Locked (TVL) should require oracles with a higher minimum stake to fulfill their update request. Oracles with a higher degree of _skin-in-the-game_ have a greater incentive to respond honestly.
 
