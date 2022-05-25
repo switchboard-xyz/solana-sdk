@@ -7,12 +7,8 @@
       "strict": false,
       "skipLibCheck": true,
       "noImplicitReturns": false
-      // "paths": {
-      //   "@switchboard-xyz/v2-task-runner": ["tasks/v2-task-runner"]
-      // }
     }
   },
-  // "references": [{ "path": "tasks/v2-task-runner" }],
   "exclude": ["scripts/**/*.ts", "node_modules"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
@@ -79,7 +75,7 @@
     // "sourceRoot": "",                                      /* Specify the root path for debuggers to find the reference source code. */
     // "mapRoot": "",                                         /* Specify the location where debugger should locate map files instead of generated locations. */
     // "inlineSourceMap": true,                               /* Include sourcemap files inside the emitted JavaScript. */
-    // "inlineSources": true,                                 /* Include source code in the sourcemaps inside the emitted JavaScript. */
+    "inlineSources": true /* Include source code in the sourcemaps inside the emitted JavaScript. */,
     // "emitBOM": true,                                       /* Emit a UTF-8 Byte Order Mark (BOM) in the beginning of output files. */
     // "newLine": "crlf",                                     /* Set the newline character for emitting files. */
     // "stripInternal": true,                                 /* Disable emitting declarations that have `@internal` in their JSDoc comments. */

@@ -1,5 +1,5 @@
 {
-  // "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.json",
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs",
@@ -10,24 +10,19 @@
     }
   },
   "compilerOptions": {
-    // from initial repo
-    "declaration": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "target": "ES2019",
+    "composite": true,
+    "rootDir": "src",
+    "noImplicitAny": false,
+    "outDir": "lib/esm",
+    "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowJs": true,
-    "checkJs": false,
+    "noImplicitReturns": false,
+    "importsNotUsedAsValues": "preserve",
+    "strict": false,
+    "noEmit": false,
+    "emitDeclarationOnly": false,
     "types": ["mocha", "node", "long"],
     "sourceMap": true,
-    // new
-    "composite": true,
-    "baseUrl": "src",
-    "outDir": "lib",
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
- 
     "inlineSources": true,
     "lib": ["esnext"],
     "listEmittedFiles": false,
@@ -36,11 +31,7 @@
     "pretty": true,
     "resolveJsonModule": true,
     "traceResolution": false,
-    "downlevelIteration": true,
-    /* TODO: Fix undefined errors */
-    "strict": false,
-    "noImplicitReturns": false,
-    "strictNullChecks": false
+    "downlevelIteration": true
   },
   "include": ["src/**/*"],
   "exclude": ["tests/**/*", "lib", "node_modules"],

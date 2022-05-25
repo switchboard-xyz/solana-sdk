@@ -8,6 +8,7 @@
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
     "directory": "libraries/sbv2-lite"
   },
+  "homepage": "https://docs.switchboard.xyz",
   "files": [
     "./lib",
     "./src"
@@ -16,13 +17,15 @@
   "module": "lib/esm/index.js",
   "exports": {
     ".": {
-      "import": "./lib/esm/index.js",
-      "require": "./lib/cjs/index.js"
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/esm/index.js"
     }
   },
   "scripts": {
     "docgen": "yarn build && npx typedoc",
-    "build": "shx rm -rf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
+    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
+    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
     "prepublishOnly": "yarn build && yarn test"
   },

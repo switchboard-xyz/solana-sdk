@@ -69,7 +69,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
 
   payerKeypairPath: string;
 
-  additionalClonedAccounts?: Record<string, PublicKey>;
+  additionalClonedAccounts: Record<string, PublicKey>;
 
   constructor(ctx: ISwitchboardTestEnvironment) {
     this.programId = ctx.programId;
@@ -89,11 +89,11 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     this.oracleEscrow = ctx.oracleEscrow;
     this.oraclePermissions = ctx.oraclePermissions;
     this.payerKeypairPath = ctx.payerKeypairPath;
-    this.additionalClonedAccounts = ctx.additionalClonedAccounts;
+    this.additionalClonedAccounts = ctx.additionalClonedAccounts ?? {};
   }
 
   private getAccountCloneString(): string {
-    const accounts: string[] = Object.keys(this).map((key) => {
+    const accounts = Object.keys(this).map((key) => {
       // iterate over additionalClonedAccounts and collect pubkeys
       if (typeof this[key] === "string") {
         return;
@@ -109,7 +109,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
       return `--clone ${(this[key] as PublicKey).toBase58()} \`# ${key}\` `;
     });
 
-    return accounts.filter((i) => i).join(`\\\n`);
+    return accounts.filter(Boolean).join(`\\\n`);
   }
 
   public toJSON(): ISwitchboardTestEnvironment {

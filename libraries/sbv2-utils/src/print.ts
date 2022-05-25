@@ -393,7 +393,7 @@ export async function prettyPrintAggregator(
 
   let outputString = "";
   outputString += chalk.underline(
-    chalkString("## Aggregator", aggregatorAccount.publicKey, SPACING) + "\r\n"
+    chalkString("## Aggregator", aggregatorAccount.publicKey!, SPACING) + "\r\n"
   );
 
   outputString +=
@@ -454,7 +454,7 @@ export async function prettyPrintAggregator(
         aggregatorAccount.program,
         queue.authority,
         queueAccount.publicKey,
-        aggregatorAccount.publicKey
+        aggregatorAccount.publicKey!
       );
       const permissionData = await permissionAccount.loadData();
       outputString +=

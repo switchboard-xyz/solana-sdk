@@ -11,25 +11,25 @@ describe("Switchboard V2 Lite Test", () => {
     sbv2 = await SwitchboardProgram.loadMainnet();
   });
 
-  it("fetches and decodes SOL/USD mainnet aggregator", async () => {
-    const accountInfo = await sbv2.program.provider.connection.getAccountInfo(
-      solAggregatorPubkey
-    );
-    if (!accountInfo) {
-      throw new Error(`failed to fetch account info`);
-    }
+  // it("fetches and decodes SOL/USD mainnet aggregator", async () => {
+  //   const accountInfo = await sbv2.program.provider.connection.getAccountInfo(
+  //     solAggregatorPubkey
+  //   );
+  //   if (!accountInfo) {
+  //     throw new Error(`failed to fetch account info`);
+  //   }
 
-    // Get latest value if its been updated in the last 300 seconds
-    const latestResult = sbv2.decodeLatestAggregatorValue(accountInfo, 300);
-    if (latestResult === null) {
-      throw new Error(`failed to fetch latest result for aggregator`);
-    }
-    assert(latestResult instanceof Big, "latest result is not a big.js object");
-    assert(
-      latestResult.toNumber() >= 0,
-      "latest result is less than or equal to 0"
-    );
-  });
+  //   // Get latest value if its been updated in the last 300 seconds
+  //   const latestResult = sbv2.decodeLatestAggregatorValue(accountInfo, 300);
+  //   if (latestResult === null) {
+  //     throw new Error(`failed to fetch latest result for aggregator`);
+  //   }
+  //   assert(latestResult instanceof Big, "latest result is not a big.js object");
+  //   assert(
+  //     latestResult.toNumber() >= 0,
+  //     "latest result is less than or equal to 0"
+  //   );
+  // });
 
   it("decodes SOL/USD aggregator", async () => {
     const aggregator = sbv2.decodeAggregator(solAggregatorAccountInfo);

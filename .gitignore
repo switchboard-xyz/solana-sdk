@@ -29,6 +29,7 @@ secrets
 *-keypair*.json
 .archive
 *-error.log
+*-debug.log
 
 # Root level jsons ignored
 job-directory/*.json

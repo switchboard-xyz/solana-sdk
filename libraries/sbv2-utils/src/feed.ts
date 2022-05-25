@@ -35,19 +35,17 @@ export async function awaitOpenRound(
   let accountWs: number;
   const awaitUpdatePromise = new Promise((resolve: (value: Big) => void) => {
     accountWs = aggregatorAccount.program.provider.connection.onAccountChange(
-      aggregatorAccount.publicKey,
+      aggregatorAccount?.publicKey ?? PublicKey.default,
       async (accountInfo) => {
         const aggregator = accountsCoder.decode(
           "AggregatorAccountData",
           accountInfo.data
         );
         const latestResult = await aggregatorAccount.getLatestValue(aggregator);
-        if (expectedValue === undefined) {
+        if (!expectedValue) {
+          resolve(new Big(0));
+        } else if (latestResult?.eq(expectedValue)) {
           resolve(latestResult);
-        } else {
-          if (latestResult.eq(expectedValue)) {
-            resolve(latestResult);
-          }
         }
       }
     );
@@ -97,7 +95,7 @@ export async function createAggregator(
   // Aggregator params
   const aggregatorKeypair = params.keypair ?? anchor.web3.Keypair.generate();
   const authority = params.authority ?? payerKeypair.publicKey;
-  const size = program.account.aggregatorAccountData.size;
+  const size = program.account.aggregatorAccountData!.size;
   const [programStateAccount, stateBump] =
     ProgramStateAccount.fromSeed(program);
   const state = await programStateAccount.loadData();
@@ -148,7 +146,7 @@ export async function createAggregator(
   const createIxns: TransactionInstruction[] = [];
 
   createIxns.push(
-    ...[
+    ...([
       // allocate aggregator account
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: programWallet(program).publicKey,
@@ -161,21 +159,20 @@ export async function createAggregator(
         programId: program.programId,
       }),
       // create aggregator
-      await program.methods
-        .aggregatorInit({
-          name: (params.name ?? Buffer.from("")).slice(0, 32),
-          metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
-          batchSize: params.batchSize,
-          minOracleResults: params.minRequiredOracleResults,
-          minJobResults: params.minRequiredJobResults,
-          minUpdateDelaySeconds: params.minUpdateDelaySeconds,
-          varianceThreshold: SwitchboardDecimal.fromBig(
-            new Big(params.varianceThreshold ?? 0)
-          ),
-          forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
-          expiration: params.expiration ?? new anchor.BN(0),
-          stateBump,
-        })
+      await program.methods!.aggregatorInit!({
+        name: (params.name ?? Buffer.from("")).slice(0, 32),
+        metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
+        batchSize: params.batchSize,
+        minOracleResults: params.minRequiredOracleResults,
+        minJobResults: params.minRequiredJobResults,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+        varianceThreshold: SwitchboardDecimal.fromBig(
+          new Big(params.varianceThreshold ?? 0)
+        ),
+        forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
+        expiration: params.expiration ?? new anchor.BN(0),
+        stateBump,
+      })
         .accounts({
           aggregator: aggregatorKeypair.publicKey,
           authority,
@@ -184,8 +181,7 @@ export async function createAggregator(
           programState: programStateAccount.publicKey,
         })
         .instruction(),
-      await program.methods
-        .permissionInit({})
+      await program.methods.permissionInit!({})
         .accounts({
           permission: permissionAccount.publicKey,
           authority: params.authority,
@@ -196,11 +192,10 @@ export async function createAggregator(
         })
         .instruction(),
       payerKeypair.publicKey.equals(queue.authority)
-        ? await program.methods
-            .permissionSet({
-              permission: { permitOracleQueueUsage: null },
-              enable: true,
-            })
+        ? await program.methods.permissionSet!({
+            permission: { permitOracleQueueUsage: null },
+            enable: true,
+          })
             .accounts({
               permission: permissionAccount.publicKey,
               authority: queue.authority,
@@ -215,14 +210,13 @@ export async function createAggregator(
         leaseAccount.publicKey,
         payerKeypair.publicKey
       ),
-      await program.methods
-        .leaseInit({
-          loadAmount: new anchor.BN(0),
-          stateBump,
-          leaseBump,
-          withdrawAuthority: payerKeypair.publicKey,
-          walletBumps: Buffer.from([]),
-        })
+      await program.methods.leaseInit!({
+        loadAmount: new anchor.BN(0),
+        stateBump,
+        leaseBump,
+        withdrawAuthority: payerKeypair.publicKey,
+        walletBumps: Buffer.from([]),
+      })
         .accounts({
           programState: programStateAccount.publicKey,
           lease: leaseAccount.publicKey,
@@ -244,10 +238,9 @@ export async function createAggregator(
         .instruction(),
       ...(await Promise.all(
         jobs.map(async ([jobAccount, weight]) => {
-          return program.methods
-            .aggregatorAddJob({
-              weight,
-            })
+          return program.methods.aggregatorAddJob!({
+            weight,
+          })
             .accounts({
               aggregator: aggregatorKeypair.publicKey,
               authority: payerKeypair.publicKey,
@@ -256,10 +249,10 @@ export async function createAggregator(
             .instruction();
         })
       )),
-    ].filter((item) => item)
+    ].filter(Boolean) as TransactionInstruction[])
   );
 
-  const createSig = await program.provider.sendAndConfirm(
+  const createSig = await program.provider.sendAndConfirm!(
     new Transaction().add(...createIxns),
     [payerKeypair, aggregatorKeypair]
   );

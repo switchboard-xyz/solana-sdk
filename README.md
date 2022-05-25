@@ -78,6 +78,28 @@ The anchor test are configured to first fetch the account info for the Switchboa
 
 ## Website
 
+Run live server
+
 ```
 yarn workspace website start
+```
+
+Build
+
+```
+yarn docs:build
+```
+
+## Publishing
+
+To check which packages have changed
+
+```
+lerna changed
+```
+
+To publish changes to NPM registries
+
+```
+lerna publish
 ```

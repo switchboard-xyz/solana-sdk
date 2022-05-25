@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/v2-feed-parser",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "switchboard v2 example demonstrating how to parse a data feed",
   "private": true,
   "repository": {
@@ -8,7 +8,8 @@
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
     "directory": "packages/feed-parser"
   },
-  "main": "index.js",
+  "homepage": "https://docs.switchboard.xyz",
+  "main": "dist/index.js",
   "scripts": {
     "start": "ts-node src/main",
     "build": "rimraf dist && ./esbuild.js",
@@ -27,7 +28,7 @@
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
     "@solana/web3.js": "^1.33.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.95",
+    "@switchboard-xyz/switchboard-v2": "^0.0.97",
     "big.js": "^6.1.1"
   }
 }

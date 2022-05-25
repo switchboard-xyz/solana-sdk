@@ -11,8 +11,8 @@ import assert from "assert";
 import crypto from "crypto";
 
 export interface OracleNonceAccounts {
-  heartbeatNonce: PublicKey;
-  unwrapStakeNonce: PublicKey;
+  heartbeatNonce?: PublicKey;
+  unwrapStakeNonce?: PublicKey;
   queueNonces: PublicKey[];
 }
 
@@ -56,7 +56,7 @@ export async function getOracleHeartbeatNonceAccount(
     await oracleAccount.program.provider.connection.getAccountInfo(
       heartbeatNoncePubkey
     );
-  if (nonceAccountExists(accountInfo)) {
+  if (nonceAccountExists(accountInfo ?? undefined)) {
     return heartbeatNoncePubkey;
   }
   return null;
@@ -75,7 +75,7 @@ export async function getOracleStakeUnwrapNonceAccount(
     await oracleAccount.program.provider.connection.getAccountInfo(
       heartbeatNoncePubkey
     );
-  if (nonceAccountExists(accountInfo)) {
+  if (nonceAccountExists(accountInfo ?? undefined)) {
     return heartbeatNoncePubkey;
   }
   return null;
@@ -148,16 +148,17 @@ export async function getOracleNonceQueueAccounts(
 
   const nonceAccountInfos: {
     accountInfo: AccountInfo<Buffer>;
-    pubkey: PublicKey;
-    fullSeed: string;
-    baseSeed: string;
+    pubkey?: PublicKey;
+    fullSeed?: string;
+    baseSeed?: string;
   }[] = (
     await Promise.all(
       pubkeyChunks.map(async (chunk, chunkIdx) => {
-        const accountInfos =
+        const accountInfos = (
           await oracleAccount.program.provider.connection.getMultipleAccountsInfo(
-            chunk.map((i) => i.pubkey)
-          );
+            chunk.map((i) => i.pubkey).filter(Boolean) as PublicKey[]
+          )
+        ).filter(Boolean) as AccountInfo<Buffer>[];
         return accountInfos.map((accountInfo, idx) => {
           return {
             ...chunk[idx],
@@ -170,12 +171,11 @@ export async function getOracleNonceQueueAccounts(
 
   const nonceQueuePubkeys = nonceAccountInfos
     .map((nonce, i) => {
-      if (nonceAccountExists(nonce.accountInfo)) {
+      if (nonceAccountExists(nonce.accountInfo ?? undefined)) {
         return nonce.pubkey;
       }
-      return null;
     })
-    .filter((n) => n);
+    .filter(Boolean) as PublicKey[];
   return nonceQueuePubkeys;
 }
 
@@ -197,8 +197,8 @@ export async function getOracleNonceAccounts(
   );
 
   return {
-    heartbeatNonce,
-    unwrapStakeNonce,
+    heartbeatNonce: heartbeatNonce ?? undefined,
+    unwrapStakeNonce: unwrapStakeNonce ?? undefined,
     queueNonces,
   };
 }

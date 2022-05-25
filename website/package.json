@@ -1,12 +1,14 @@
 {
   "name": "website",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
     "directory": "website"
   },
+  "homepage": "https://docs.switchboard.xyz",
   "main": "src/pages/index.tsx",
   "scripts": {
     "docusaurus": "docusaurus",

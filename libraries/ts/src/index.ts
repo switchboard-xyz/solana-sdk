@@ -24,8 +24,7 @@ import Big from "big.js";
 import * as crypto from "crypto";
 var assert = require("assert");
 
-export { OracleJob } from "@switchboard-xyz/switchboard-api";
-export * from "./test";
+export { IOracleJob, OracleJob } from "@switchboard-xyz/switchboard-api";
 
 /**
  * Switchboard Devnet Program ID

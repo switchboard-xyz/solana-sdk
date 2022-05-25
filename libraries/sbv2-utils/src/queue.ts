@@ -46,11 +46,10 @@ export async function createQueue(
 ): Promise<CreateQueueResponse> {
   const payerKeypair = programWallet(program);
 
-  const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
-    this.program
-  );
+  const [programStateAccount, stateBump] =
+    ProgramStateAccount.fromSeed(program);
   const tokenMint = new spl.Token(
-    this.program.provider.connection,
+    program.provider.connection,
     spl.NATIVE_MINT,
     spl.TOKEN_PROGRAM_ID,
     payerKeypair
@@ -68,7 +67,7 @@ export async function createQueue(
         fromPubkey: payerKeypair.publicKey,
         newAccountPubkey: vaultKeypair.publicKey,
         lamports:
-          await this.program.provider.connection.getMinimumBalanceForRentExemption(
+          await program.provider.connection.getMinimumBalanceForRentExemption(
             spl.AccountLayout.span
           ),
         space: spl.AccountLayout.span,
@@ -80,10 +79,9 @@ export async function createQueue(
         vaultKeypair.publicKey,
         payerKeypair.publicKey
       ),
-      await this.program.methods
-        .programInit({
-          stateBump,
-        })
+      await program.methods.programInit!({
+        stateBump,
+      })
         .accounts({
           state: programStateAccount.publicKey,
           authority: payerKeypair.publicKey,
@@ -104,22 +102,22 @@ export async function createQueue(
   const queueBufferSize = queueSize * 32 + 8;
 
   const queueAccount = new OracleQueueAccount({
-    program: this.program,
+    program: program,
     publicKey: queueKeypair.publicKey,
   });
 
-  this.logger.debug(chalkString("OracleQueue", queueKeypair.publicKey));
-  this.logger.debug(chalkString("OracleBuffer", queueBuffer.publicKey));
+  console.debug(chalkString("OracleQueue", queueKeypair.publicKey));
+  console.debug(chalkString("OracleBuffer", queueBuffer.publicKey));
 
   const crankKeypair = anchor.web3.Keypair.generate();
   const crankBuffer = anchor.web3.Keypair.generate();
   const crankSize = params.crankSize ? params.crankSize * 40 + 8 : 0;
 
-  this.logger.debug(chalkString("CrankAccount", crankKeypair.publicKey));
-  this.logger.debug(chalkString("CrankBuffer", crankBuffer.publicKey));
+  console.debug(chalkString("CrankAccount", crankKeypair.publicKey));
+  console.debug(chalkString("CrankBuffer", crankBuffer.publicKey));
 
   const crankAccount = new CrankAccount({
-    program: this.program,
+    program: program,
     publicKey: crankKeypair.publicKey,
   });
 
@@ -129,31 +127,30 @@ export async function createQueue(
       newAccountPubkey: queueBuffer.publicKey,
       space: queueBufferSize,
       lamports:
-        await this.program.provider.connection.getMinimumBalanceForRentExemption(
+        await program.provider.connection.getMinimumBalanceForRentExemption(
           queueBufferSize
         ),
-      programId: this.program.programId,
+      programId: program.programId,
     }),
-    await this.program.methods
-      .oracleQueueInit({
-        name: Buffer.from(params.name).slice(0, 32),
-        metadata: Buffer.from("").slice(0, 64),
-        reward: params.reward ? new anchor.BN(params.reward) : new anchor.BN(0),
-        minStake: params.minStake
-          ? new anchor.BN(params.minStake)
-          : new anchor.BN(0),
-        // feedProbationPeriod: 0,
-        oracleTimeout: params.oracleTimeout,
-        slashingEnabled: false,
-        varianceToleranceMultiplier: SwitchboardDecimal.fromBig(new Big(2)),
-        authority: authorityKeypair.publicKey,
-        // consecutiveFeedFailureLimit: new anchor.BN(1000),
-        // consecutiveOracleFailureLimit: new anchor.BN(1000),
-        minimumDelaySeconds: 5,
-        queueSize: queueSize,
-        unpermissionedFeeds: params.unpermissionedFeeds ?? false,
-        unpermissionedVrf: params.unpermissionedVrf ?? false,
-      })
+    await program.methods.oracleQueueInit!({
+      name: Buffer.from(params.name ?? "").slice(0, 32),
+      metadata: Buffer.from("").slice(0, 64),
+      reward: params.reward ? new anchor.BN(params.reward) : new anchor.BN(0),
+      minStake: params.minStake
+        ? new anchor.BN(params.minStake)
+        : new anchor.BN(0),
+      // feedProbationPeriod: 0,
+      oracleTimeout: params.oracleTimeout,
+      slashingEnabled: false,
+      varianceToleranceMultiplier: SwitchboardDecimal.fromBig(new Big(2)),
+      authority: authorityKeypair.publicKey,
+      // consecutiveFeedFailureLimit: new anchor.BN(1000),
+      // consecutiveOracleFailureLimit: new anchor.BN(1000),
+      minimumDelaySeconds: 5,
+      queueSize: queueSize,
+      unpermissionedFeeds: params.unpermissionedFeeds ?? false,
+      unpermissionedVrf: params.unpermissionedVrf ?? false,
+    })
       .accounts({
         oracleQueue: queueKeypair.publicKey,
         authority: authorityKeypair.publicKey,
@@ -168,17 +165,16 @@ export async function createQueue(
       newAccountPubkey: crankBuffer.publicKey,
       space: crankSize,
       lamports:
-        await this.program.provider.connection.getMinimumBalanceForRentExemption(
+        await program.provider.connection.getMinimumBalanceForRentExemption(
           crankSize
         ),
-      programId: this.program.programId,
+      programId: program.programId,
     }),
-    await this.program.methods
-      .crankInit({
-        name: Buffer.from("Crank").slice(0, 32),
-        metadata: Buffer.from("").slice(0, 64),
-        crankSize: params.crankSize,
-      })
+    await program.methods.crankInit!({
+      name: Buffer.from("Crank").slice(0, 32),
+      metadata: Buffer.from("").slice(0, 64),
+      crankSize: params.crankSize,
+    })
       .accounts({
         crank: crankKeypair.publicKey,
         queue: queueKeypair.publicKey,
@@ -200,20 +196,20 @@ export async function createQueue(
       const name = `Oracle-${n + 1}`;
       const tokenWalletKeypair = anchor.web3.Keypair.generate();
       const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
-        this.program,
+        program,
         queueAccount,
         tokenWalletKeypair.publicKey
       );
 
-      this.logger.debug(chalkString(name, oracleAccount.publicKey));
+      console.debug(chalkString(name, oracleAccount.publicKey));
 
       const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-        this.program,
+        program,
         authorityKeypair.publicKey,
         queueAccount.publicKey,
         oracleAccount.publicKey
       );
-      this.logger.debug(
+      console.debug(
         chalkString(`Permission-${n + 1}`, permissionAccount.publicKey)
       );
 
@@ -222,7 +218,7 @@ export async function createQueue(
           fromPubkey: payerKeypair.publicKey,
           newAccountPubkey: tokenWalletKeypair.publicKey,
           lamports:
-            await this.program.provider.connection.getMinimumBalanceForRentExemption(
+            await program.provider.connection.getMinimumBalanceForRentExemption(
               spl.AccountLayout.span
             ),
           space: spl.AccountLayout.span,
@@ -234,13 +230,12 @@ export async function createQueue(
           tokenWalletKeypair.publicKey,
           programStateAccount.publicKey
         ),
-        await this.program.methods
-          .oracleInit({
-            name: Buffer.from(name).slice(0, 32),
-            metadata: Buffer.from("").slice(0, 128),
-            stateBump,
-            oracleBump,
-          })
+        await program.methods.oracleInit!({
+          name: Buffer.from(name).slice(0, 32),
+          metadata: Buffer.from("").slice(0, 128),
+          stateBump,
+          oracleBump,
+        })
           .accounts({
             oracle: oracleAccount.publicKey,
             oracleAuthority: authorityKeypair.publicKey,
@@ -251,8 +246,7 @@ export async function createQueue(
             payer: payerKeypair.publicKey,
           })
           .instruction(),
-        await this.program.methods
-          .permissionInit({})
+        await program.methods.permissionInit!({})
           .accounts({
             permission: permissionAccount.publicKey,
             authority: authorityKeypair.publicKey,
@@ -262,11 +256,10 @@ export async function createQueue(
             systemProgram: SystemProgram.programId,
           })
           .instruction(),
-        await this.program.methods
-          .permissionSet({
-            permission: { permitOracleHeartbeat: null },
-            enable: true,
-          })
+        await program.methods.permissionSet!({
+          permission: { permitOracleHeartbeat: null },
+          enable: true,
+        })
           .accounts({
             permission: permissionAccount.publicKey,
             authority: authorityKeypair.publicKey,
@@ -284,7 +277,7 @@ export async function createQueue(
   );
 
   const createAccountSignatures = packAndSend(
-    this.program,
+    program,
     [ixns, finalTransactions],
     signers,
     payerKeypair.publicKey

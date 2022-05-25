@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/sbv2-utils",
-  "version": "0.0.13",
+  "version": "0.1.12",
   "description": "some basic utility functions when working with switchboard-v2",
   "author": "",
   "license": "ISC",
@@ -9,25 +9,26 @@
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
     "directory": "libraries/sbv2-utils"
   },
+  "homepage": "https://docs.switchboard.xyz",
   "files": [
     "./lib",
     "./src"
   ],
   "main": "lib/cjs/index.js",
-  "types": "./lib/cjs/index.d.ts",
   "module": "lib/esm/index.js",
   "exports": {
     ".": {
-      "import": "./lib/esm/index.js",
-      "types": "./lib/cjs/index.d.ts",
-      "require": "./lib/cjs/index.js"
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/esm/index.js"
     }
   },
   "scripts": {
     "docgen": "yarn build && npx typedoc",
     "test": "echo \"No test script for @switchboard-xyz/sbv2-utils\" && exit 0",
-    "build": "shx rm -rf lib && tsc -p tsconfig.json && tsc -p tsconfig-cjs.json && tsc -p tsconfig-types.json && npx shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json && npx shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
-    "prepublishOnly": "yarn build && npm version patch --force"
+    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
+    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
+    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm",
+    "prepublishOnly": "yarn build"
   },
   "dependencies": {
     "@orca-so/sdk": "^1.2.24",

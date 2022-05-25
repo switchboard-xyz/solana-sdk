@@ -64,7 +64,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         provider.connection,
         payerKeypair
       );
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `Failed to load the SBV2 program for the given cluster, ${error.message}`
       );
@@ -80,7 +80,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       if (queueData.queue.length < 1) {
         throw new Error(`OracleQueue has no active oracles heartbeating`);
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `Failed to load the SBV2 queue for the given cluster, ${error.message}`
       );
@@ -88,7 +88,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     let mint: spl.Token;
     try {
       mint = await queue.loadMint();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `Failed to load the SBV2 mint for the given cluster, ${error.message}`
       );
@@ -98,7 +98,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       payerTokenWallet = (
         await mint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
       ).address;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(
         `Failed to load the SBV2 mint for the given cluster, ${error.message}`
       );
@@ -205,14 +205,12 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       throw new Error(`OracleQueue has no active oracles heartbeating`);
     }
 
-    let oracle: sbv2.OracleAccount;
-    if (process.env.ORACLE) {
-      const SWITCHBOARD_ORACLE = new PublicKey(process.env.ORACLE);
-      oracle = new sbv2.OracleAccount({
-        program: switchboardProgram,
-        publicKey: SWITCHBOARD_ORACLE,
-      });
-    }
+    const oracle = process.env.ORACLE
+      ? new sbv2.OracleAccount({
+          program: switchboardProgram,
+          publicKey: new PublicKey(process.env.ORACLE),
+        })
+      : undefined;
 
     const [switchboardProgramState] =
       sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
@@ -307,9 +305,11 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         if (!jobKey.equals(PublicKey.default)) {
           return jobKey;
         }
+        return undefined;
       })
+      .filter((item: PublicKey | undefined) => item !== undefined)
       .map(
-        (jobKey) =>
+        (jobKey: PublicKey) =>
           new sbv2.JobAccount({
             program: this.program,
             publicKey: jobKey,

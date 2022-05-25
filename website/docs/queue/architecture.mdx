@@ -10,7 +10,7 @@ import SwitchboardPermission from "/idl/types/SwitchboardPermission.md";
 
 # Oracle Queue Architecture
 
-An oracle queue is an independent realm of oracles, responsible for allocating oracle resources for update requests from data feeds, randomness, or buffer relayers. Oracle queue's act as a broker for on-chain consumers looking to publish data on-chain by specifying an upfront reward a requester is required to pay when a new update is requested by an oracle. Oracles act as an off-chain compute resource that can be utilized by on-chain programs needing a decentralized way to source data.
+An oracle queue is an independent realm of oracles, responsible for allocating oracle resources for update requests from data feeds, randomness, or buffer relayers. Oracle queue's act as an aggregator for on-chain consumers looking to publish data on-chain by specifying an upfront reward a requester is required to pay when a new update is requested by an oracle. Oracles act as an off-chain compute resource that can be utilized by on-chain programs needing a decentralized way to source data.
 
 Each oracle queue is independent and maintain their own configurations, which dictates its degree of security. Queue's can require update requesters to be pre-approved to use a queues resources or allow any requester access to a queue. Queue's also specify a minimum stake oracles must maintain in their escrow wallet before joining a queue, which acts as a deposit to incentivize honest oracle behavior.
 

@@ -32,7 +32,7 @@ export async function packAndSend(
 
     for (let k = 0; k < packedTransactions.length; k += 1) {
       const tx = signedTxs[k];
-      const rawTx = tx.serialize();
+      const rawTx = tx!.serialize();
       signatures.push(
         sendAndConfirmRawTransaction(program.provider.connection, rawTx, {
           maxRetries: 10,
