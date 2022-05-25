@@ -30,7 +30,11 @@ The oracle also tracks its performance, `oracle.metrics`.
 
 An oracle is required to submit an [aggregatorSaveResult](/idl/instructions/aggregatorSaveResult) transaction each time it updates a feed, which incurs a cost of 5000 lamports. This fee is set by the Solana network and is subject to change.
 
-$Reward_{perUpdate}=queue.reward - 5000$
+$T_{perUpdate}=T_{queueReward} - 5000$
+
+where,
+
+- `T` is the raw token amount in base units (_Ex: lamports or satoshis_)
 
 To estimate an oracles cost basis, you will need to know a queue's capacity (Oracles, Feeds, VRFs) and the average number of update request an oracle is assigned over a given time period.
 

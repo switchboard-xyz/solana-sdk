@@ -118,10 +118,11 @@ A feed can set `aggregator.disableCrank` to prevent being pushed onto a Crank an
 
 Each data feed update cost can be calculated by the following equation:
 
-$Cost_{perUpdate}=(1 + numSuccess) × queue.reward$
+$T_{costPerUpdate}=(1 + numSuccess) × T_{queueReward}$
 
 where,
 
+- `T` is the raw token amount in base units (_Ex: lamports or satoshis_)
 - _`+1`_ is to reward the update requester for keeping the feed updating
 - `numSuccess` is the number of successful oracle responses, which will always be between `[aggregator.minOracleResults, aggregator.oracleRequestBatchSize]`
 - `queue.reward` is the queue's set oracle reward

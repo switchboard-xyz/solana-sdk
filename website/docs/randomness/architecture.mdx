@@ -34,9 +34,35 @@ While Switchboard V2's oracle network is fully audited, the VRF implementation i
 
 :::
 
-A VRF account is an on-chain account that holds the latest VRF value, as well as its owners specified callback function. When a VRF account owner requests a new randomness value, the oracle queue delegates the update request to an oracle based on its round robin ordering of oracles heartbeating on-chain. The oracle submits its VRF seed on-chain, then must submit 276 transactions to turn the state machine, which computes the proof. When the proof is computed and successfully validates the pseudo-random value, the oracle invokes the account owner’s callback instruction.
+Random numbers are crucial for many DeFi applications whether its fair NFT launches, gambling, gaming, or assigning user roles in a DAO. Without an element of randomness, each of the above could be exploited and the final outcome predicted.
 
-The VRF function return a **_u8[32]_** buffer that can be transmuted to most data types using the [bytemuck crate](https://crates.io/crates/bytemuck).
+A Verifiable Random Function (VRF) is a public-key pseudorandom function that provides proofs that its outputs were calculated correctly. This means we can use a cryptographic keypair to generate a random number with a proof, which can then be validated by anyone to ensure the value was calculated correctly without the possibility of leaking the producer’s secret key. You can read more about VRF from the Algorand team, whose founder was one of the authors on the original VRF paper - [Algorand Releases First Open Source Code of Verifiable Random Functions](https://medium.com/algorand/algorand-releases-first-open-source-code-of-verifiable-random-function-93c2960abd61).
+
+Switchboard's VRF implementation uses the oracle authority secret key to publish the VRF proof on-chain. The on-chain proof verification is very computationally expensive and requires 276 instructions on-chain to fully verify. Once the proof is submitted on-chain anyone can turn the VRF crank to produce the pseduorandom result, although for simplicity and speed the Switchboard oracle that submitted the proof also submits the verification instructions.
+
+The final proof verification instruction invokes the VRF Account's specified callback, which allows developers to integrate pseduorandomness into their applications and be confident they are consuming the latest pseduorandom result.
+
+## Configuration
+
+:::tip
+
+See [/idl/accounts/VrfAccountData](/idl/accounts/VrfAccountData) for the full list of an AggregatorAccount's configuration parameters.
+
+:::
+
+## Integration
+
+Switchboard's VRF implementation allows the creator to specify a program callback that will be called each time a new proof is verified on-chain.
+
+### Callback
+
+When creating a VRF Account, the VRF `vrf.authority` _should_ specify a `vrf.callback` function that will be called by the oracle when a new randomness value is produced.
+
+<CallbackZC />
+
+### Pseudorandom Result
+
+The VRF function produces a **_u8[32]_** buffer, `vrf.result`, that can be transmuted to most data types using the [bytemuck crate](https://crates.io/crates/bytemuck).
 
 ```rust
 let result_buffer: [u8; 32];
@@ -48,44 +74,40 @@ let result = value[0] % max_result as u128;
 msg!("Current VRF Value [0 - {}) = {}!", max_result, result);
 ```
 
-## Configuration
+## Update Cost
 
-:::tip
+The Switchboard VRF implementation requires an oracle to submit 277 instructions on-chain, which can tie up an oracle's resources for fulfilling other update request on the queue. Because of this the initial update cost was hard coded to `0.1 wrapped SOL` in order to assess the impact on the oracle network. The oracle fulfilling the VRF request receives 90& of the reward when the proof is verified on-chain and the remaining 10% if the callback is successfully invoked.
 
-See [/idl/accounts/VrfAccountData](/idl/accounts/VrfAccountData) for the full list of an AggregatorAccount's configuration parameters.
-
-:::
-
-## Callback
-
-When creating a VRF Account, the VRF `authority` should specify a `callback` function that will be called by the oracle. VRF Accounts should ensure their `callback` function consumes less than ~160k compute units or it may fail to complete.
-
-<CallbackZC />
-
-## Reward Oracles
-
-When a VRF Account requests a new random value from a queue, it transfers 0.1 wSOL to it's `escrow` wallet. An oracle receives 90% of the reward when it verifies the proof on-chain and the remaining 10% if the callback succeeds.
+The Switchboard team is currently testing a few options to significantly lower this cost. If you are concerned about the update cost and are interested in integrating the VRF into your application, reach out to the team to discuss some available options.
 
 ## Update Lifecycle
 
-- `vrfRequestRandomness`
-- check `vrfStatus`
-- `tokenTransfer`
-- increment counter
-- set status to _StatusRequesting_
-- emit `VrfRequestEvent`
-- oracle fulfills VRF request
-- `vrfProve`
-- set status to _StatusVerifying_
-- `vrfVerify` x 277
-- set status to _StatusVerified_
-- 90% `tokenTransfer`
-- invoke VRF Callback
-- if success
-  - 10% `tokenTransfer`
-  - set status to _StatusCallbackSuccess_
-- if failure
-  - set status to _StatusVerifyFailure_
+### Update Request
+
+- The `vrf.authority` calls [vrfRequestRandomness](/idl/instructions/vrfRequestRandomness)
+- sbv2 program checks if the request is valid by:
+  - The previous `vrf.status` is equal to **_StatusNone_**, **_StatusCallbackSuccess_**, or **_StatusVerifyFailure_**
+  - The previous `vrf.status` is equal to **_StatusRequesting_**, **_StatusVerifying_**, or **_StatusVerified_** and one minute has elapsed since the previous VRF request
+- sbv2 program sets the current `vrf.status` to **_StatusRequesting_**
+- sbv2 program checks the requester provided the required oracle reward and transfers it to `vrf.escrow`
+- sbv2 program increments `vrf.counter`
+- sbv2 program emits [VrfRequestRandomnessEvent](/idl/events/VrfRequestRandomnessEvent)
+
+### Oracle Execution
+
+- Oracle watches the chain for a [VrfRequestRandomnessEvent](/idl/events/VrfRequestRandomnessEvent) with the oracle's public key assigned to the update request
+- Oracle calculates the VRF proof and submits a [vrfProve](/idl/instructions/vrfProve) instruction on-chain
+- sbv2 program sets the current `vrf.status` to **_StatusVerifying_**
+- Oracle submits 276 × [vrfVerify](/idl/instructions/vrfVerify) instructions on-chain
+- If proof verification fails,
+  - sbv2 program sets `vrf.status` to **_StatusVerifyFailure_**
+- If proof verification succeeds,
+  - sbv2 program sets `vrf.status` to **_StatusVerified_**
+  - 90% of `vrf.escrow` transferred to oracles staking wallet
+  - Oracle invokes `vrf.callback`
+  - If `vrf.callback` is successfully invoked,
+    - sbv2 program sets `vrf.status` to **_StatusCallbackSuccess_**
+    - The remaining 10% of `vrf.escrow` transferred to the oracle
 
 ## More Information
 
