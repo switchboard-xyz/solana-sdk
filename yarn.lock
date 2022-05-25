@@ -15087,7 +15087,7 @@ shiki@^0.10.1:
 
 shx@^0.3.4:
   version "0.3.4"
-  resolved "https://registry.npmjs.org/shx/-/shx-0.3.4.tgz"
+  resolved "https://registry.npmjs.org/shx/-/shx-0.3.4.tgz#74289230b4b663979167f94e1935901406e40f02"
   integrity sha512-N6A9MLVqjxZYcVn8hLmtneQWIJtp8IKzMP4eMnx+nqkvXoqinUPCbUFLp2UcWTEIUONhlk0ewxr/jaVGlc+J+g==
   dependencies:
     minimist "^1.2.3"

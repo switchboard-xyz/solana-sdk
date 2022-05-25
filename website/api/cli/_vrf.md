@@ -1,8 +1,9 @@
+
 create a Switchboard VRF Account
 
-- [`sbv2 vrf:create QUEUEKEY`](#sbv2-vrfcreate-queuekey)
-- [`sbv2 vrf:create:example QUEUEKEY`](#sbv2-vrfcreateexample-queuekey)
-- [`sbv2 vrf:request VRFKEY`](#sbv2-vrfrequest-vrfkey)
+* [`sbv2 vrf:create QUEUEKEY`](#sbv2-vrfcreate-queuekey)
+* [`sbv2 vrf:create:example QUEUEKEY`](#sbv2-vrfcreateexample-queuekey)
+* [`sbv2 vrf:request VRFKEY`](#sbv2-vrfrequest-vrfkey)
 
 ## `sbv2 vrf:create QUEUEKEY`
 
@@ -43,6 +44,18 @@ OPTIONS
   --queueAuthority=queueAuthority  alternative keypair to use for queue authority
 
   --vrfKeypair=vrfKeypair          filesystem path of existing keypair to use for VRF Account
+
+EXAMPLES
+  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
+  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
+  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": 
+  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": 
+  false,"isWritable": false}"
+  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
+  --queueAuthority oracle-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
+  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HYKi1grticLXPe5vqapUHhm976brwqRob8vqRnWMKWL5","isSigner": 
+  false,"isWritable": true}" -a "{"pubkey": "6vG9QLMgSvsfjvSpDxWfZ2MGPYGzEYoBxviLG7cr4go","isSigner": 
+  false,"isWritable": false}"
 ```
 
 _See code: [src/commands/vrf/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/vrf/create/index.ts)_
@@ -85,8 +98,8 @@ OPTIONS
   --vrfPid=vrfPid                  (required) program ID for the VRF example program
 
 EXAMPLE
-  sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid
-  6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority
+  sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid 
+  6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority 
   queue-authority-keypair.json
 ```
 
@@ -124,10 +137,10 @@ OPTIONS
   --programId=programId              alternative Switchboard program ID to interact with
 
 EXAMPLE
-  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable
-  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData
-  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner":
-  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner":
+  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
+  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
+  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": 
+  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": 
   false,"isWritable": false}"
 ```
 

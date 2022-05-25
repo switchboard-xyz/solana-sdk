@@ -106,7 +106,7 @@ A queue can choose to create one or many cranks. A crank is a scheduling mechani
 
 A data feed is only permitted to join a crank if it has sufficient permissions (as detailed above) and the crank has available capacity. Data feeds on a crank are ordered by their next available update time with some level of jitter to mitigate oracles being assigned to the same update request upon each iteration of the queue, which makes them susceptible to a malicous oracle. The maximum update interval for a feed on a crank is based on its `aggregator.minUpdateDelaySeconds` and can be calculated by:
 
-$I_{Max} (seconds) = 15\quad\% \quad I_{minUpdateDelaySeconds}$
+$I_{Max} (seconds) = I_{minUpdateDelaySeconds}  + [15\quad\% \quad I_{minUpdateDelaySeconds}]$
 
 ## Economic Security
 

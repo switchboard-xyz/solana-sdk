@@ -76,6 +76,8 @@ OPTIONS
 
   -v, --verbose                      log everything
 
+  --enableBufferRelayers             enable oracles to fulfill buffer relayer requests
+
   --force                            overwrite output file if existing
 
   --mainnetBeta                      WARNING: use mainnet-beta solana cluster
@@ -87,6 +89,8 @@ OPTIONS
   --queueSize=queueSize              [default: 100] maximum number of oracles the queue can support
 
   --unpermissionedFeeds              permit unpermissioned feeds
+
+  --unpermissionedVrf                permit unpermissioned VRF accounts
 
 ALIASES
   $ sbv2 custom:queue

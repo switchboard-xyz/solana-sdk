@@ -53,23 +53,27 @@ ARGUMENTS
   QUEUEKEY  public key of the oracle queue to join
 
 OPTIONS
-  -a, --authority=authority  keypair to delegate authority to for managing the oracle account
-  -h, --help                 show CLI help
+  -a, --authority=authority        keypair to delegate authority to for managing the oracle account
+  -h, --help                       show CLI help
 
-  -k, --keypair=keypair      keypair that will pay for onchain transactions. defaults to new account authority if no
-                             alternate authority provided
+  -k, --keypair=keypair            keypair that will pay for onchain transactions. defaults to new account authority if
+                                   no alternate authority provided
 
-  -n, --name=name            name of the oracle for easier identification
+  -n, --name=name                  name of the oracle for easier identification
 
-  -s, --silent               suppress cli prompts
+  -s, --silent                     suppress cli prompts
 
-  -u, --rpcUrl=rpcUrl        alternate RPC url
+  -u, --rpcUrl=rpcUrl              alternate RPC url
 
-  -v, --verbose              log everything
+  -v, --verbose                    log everything
 
-  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+  --enable                         enable oracle heartbeat permissions
 
-  --programId=programId      alternative Switchboard program ID to interact with
+  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
+
+  --programId=programId            alternative Switchboard program ID to interact with
+
+  --queueAuthority=queueAuthority  alternative keypair to use for queue authority
 
 EXAMPLES
   $ sbv2 oracle:create GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --keypair ../payer-and-authority-keypair.json

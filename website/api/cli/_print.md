@@ -49,22 +49,24 @@ ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
 
 OPTIONS
-  -h, --help             show CLI help
+  -h, --help               show CLI help
 
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
+  -k, --keypair=keypair    keypair that will pay for onchain transactions. defaults to new account authority if no
+                           alternate authority provided
 
-  -s, --silent           suppress cli prompts
+  -o, --oraclePubkeysData  print the assigned oracles for the current round
 
-  -u, --rpcUrl=rpcUrl    alternate RPC url
+  -s, --silent             suppress cli prompts
 
-  -v, --verbose          log everything
+  -u, --rpcUrl=rpcUrl      alternate RPC url
 
-  --jobs                 output job definitions
+  -v, --verbose            log everything
 
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --jobs                   output job definitions
 
-  --programId=programId  alternative Switchboard program ID to interact with
+  --mainnetBeta            WARNING: use mainnet-beta solana cluster
+
+  --programId=programId    alternative Switchboard program ID to interact with
 
 ALIASES
   $ sbv2 aggregator:print

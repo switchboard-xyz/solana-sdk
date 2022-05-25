@@ -1,22 +1,24 @@
+
 interact with a switchboard aggregator account
 
-- [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
-- [`sbv2 aggregator:create:copy AGGREGATORSOURCE`](#sbv2-aggregatorcreatecopy-aggregatorsource)
-- [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
-- [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
-- [`sbv2 aggregator:permission:create AGGREGATORKEY`](#sbv2-aggregatorpermissioncreate-aggregatorkey)
-- [`sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`](#sbv2-aggregatoremovejob-aggregatorkey-jobkey)
-- [`sbv2 aggregator:set AGGREGATORKEY`](#sbv2-aggregatorset-aggregatorkey)
-- [`sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`](#sbv2-aggregatorsetauthority-aggregatorkey-newauthority)
-- [`sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`](#sbv2-aggregatorsetbatchsize-aggregatorkey-batchsize)
-- [`sbv2 aggregator:set:forceReportPeriod AGGREGATORKEY FORCEREPORTPERIOD`](#sbv2-aggregatorsetforcereportperiod-aggregatorkey-forcereportperiod)
-- [`sbv2 aggregator:set:history AGGREGATORKEY SIZE`](#sbv2-aggregatorsethistory-aggregatorkey-size)
-- [`sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`](#sbv2-aggregatorsetminjobs-aggregatorkey-minjobresults)
-- [`sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`](#sbv2-aggregatorsetminoracles-aggregatorkey-minoracleresults)
-- [`sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`](#sbv2-aggregatorsetqueue-aggregatorkey-queuekey)
-- [`sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`](#sbv2-aggregatorsetupdateinterval-aggregatorkey-updateinterval)
-- [`sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`](#sbv2-aggregatorsetvariancethreshold-aggregatorkey-variancethreshold)
-- [`sbv2 aggregator:update AGGREGATORKEY`](#sbv2-aggregatorupdate-aggregatorkey)
+* [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
+* [`sbv2 aggregator:create QUEUEKEY`](#sbv2-aggregatorcreate-queuekey)
+* [`sbv2 aggregator:create:copy AGGREGATORSOURCE`](#sbv2-aggregatorcreatecopy-aggregatorsource)
+* [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
+* [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
+* [`sbv2 aggregator:permission:create AGGREGATORKEY`](#sbv2-aggregatorpermissioncreate-aggregatorkey)
+* [`sbv2 aggregator:remove:job AGGREGATORKEY JOBKEY`](#sbv2-aggregatorremovejob-aggregatorkey-jobkey)
+* [`sbv2 aggregator:set AGGREGATORKEY`](#sbv2-aggregatorset-aggregatorkey)
+* [`sbv2 aggregator:set:authority AGGREGATORKEY NEWAUTHORITY`](#sbv2-aggregatorsetauthority-aggregatorkey-newauthority)
+* [`sbv2 aggregator:set:batchSize AGGREGATORKEY BATCHSIZE`](#sbv2-aggregatorsetbatchsize-aggregatorkey-batchsize)
+* [`sbv2 aggregator:set:forceReportPeriod AGGREGATORKEY FORCEREPORTPERIOD`](#sbv2-aggregatorsetforcereportperiod-aggregatorkey-forcereportperiod)
+* [`sbv2 aggregator:set:history AGGREGATORKEY SIZE`](#sbv2-aggregatorsethistory-aggregatorkey-size)
+* [`sbv2 aggregator:set:minJobs AGGREGATORKEY MINJOBRESULTS`](#sbv2-aggregatorsetminjobs-aggregatorkey-minjobresults)
+* [`sbv2 aggregator:set:minOracles AGGREGATORKEY MINORACLERESULTS`](#sbv2-aggregatorsetminoracles-aggregatorkey-minoracleresults)
+* [`sbv2 aggregator:set:queue AGGREGATORKEY QUEUEKEY`](#sbv2-aggregatorsetqueue-aggregatorkey-queuekey)
+* [`sbv2 aggregator:set:updateInterval AGGREGATORKEY UPDATEINTERVAL`](#sbv2-aggregatorsetupdateinterval-aggregatorkey-updateinterval)
+* [`sbv2 aggregator:set:varianceThreshold AGGREGATORKEY VARIANCETHRESHOLD`](#sbv2-aggregatorsetvariancethreshold-aggregatorkey-variancethreshold)
+* [`sbv2 aggregator:update AGGREGATORKEY`](#sbv2-aggregatorupdate-aggregatorkey)
 
 ## `sbv2 aggregator:add:job AGGREGATORKEY`
 
@@ -58,6 +60,57 @@ EXAMPLE
 ```
 
 _See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/add/job.ts)_
+
+## `sbv2 aggregator:create QUEUEKEY`
+
+create an aggregator account
+
+```
+USAGE
+  $ sbv2 aggregator:create QUEUEKEY
+
+ARGUMENTS
+  QUEUEKEY  public key of the oracle queue account to create aggregator for
+
+OPTIONS
+  -a, --authority=authority              alternate keypair that is the authority for the aggregator
+  -h, --help                             show CLI help
+  -j, --job=job                          filesystem path to job definition file
+
+  -k, --keypair=keypair                  keypair that will pay for onchain transactions. defaults to new account
+                                         authority if no alternate authority provided
+
+  -s, --silent                           suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl                    alternate RPC url
+
+  -v, --verbose                          log everything
+
+  --batchSize=batchSize                  number of oracles requested for each open round call
+
+  --force                                skip job confirmation
+
+  --forceReportPeriod=forceReportPeriod  Number of seconds for which, even if the variance threshold is not passed,
+                                         accept new responses from oracles.
+
+  --mainnetBeta                          WARNING: use mainnet-beta solana cluster
+
+  --minJobs=minJobs                      number of jobs that must respond before an oracle responds
+
+  --minOracles=minOracles                number of oracles that must respond before a value is accepted on-chain
+
+  --newQueue=newQueue                    public key of the new oracle queue
+
+  --programId=programId                  alternative Switchboard program ID to interact with
+
+  --updateInterval=updateInterval        set an aggregator's minimum update delay
+
+  --varianceThreshold=varianceThreshold  percentage change between a previous accepted result and the next round before
+                                         an oracle reports a value on-chain. Used to conserve lease cost during low
+                                         volatility
+```
+
+_See code: [src/commands/aggregator/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/create/index.ts)_
 
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE`
 
@@ -104,11 +157,17 @@ OPTIONS
 
   --queueKey=queueKey                    (required) public key of the queue to create aggregator for
 
+  --sourceCluster=devnet|mainnet-beta    alternative solana cluster to copy source aggregator from
+
   --varianceThreshold=varianceThreshold  override source aggregator's varianceThreshold
 
-EXAMPLE
-  $ sbv2 aggregator:create:copy 8SXvChNYFhRq4EZuZvnhjrB3jJRQCv4k3P4W6hesH3Ee
-  AY3vpUu6v49shWajeFjHjgikYfaBWNJgax8zoEouUDTs --keypair ../payer-keypair.json
+EXAMPLES
+  $ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json
+  $ sbv2 aggregator:create:copy GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta
+  $ sbv2 aggregator:create:copy FcSmdsdWks75YdyCGegRqXdt5BiNGQKxZywyzb8ckD7D --queueKey 
+  9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json --sourceCluster mainnet-beta
 ```
 
 _See code: [src/commands/aggregator/create/copy.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/aggregator/create/copy.ts)_
@@ -150,7 +209,7 @@ ALIASES
   $ sbv2 json:create:aggregator
 
 EXAMPLE
-  $ sbv2 aggregator:create:json examples/aggregator.json --keypair ../payer-keypair.json --queueKey
+  $ sbv2 aggregator:create:json examples/aggregator.json --keypair ../payer-keypair.json --queueKey 
   GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U --outputFile aggregator.schema.json
 ```
 
@@ -301,7 +360,7 @@ ALIASES
   $ sbv2 set:aggregator
 
 EXAMPLE
-  $ sbv2 aggregator:set GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --updateInterval 300 --minOracles 3 --keypair
+  $ sbv2 aggregator:set GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --updateInterval 300 --minOracles 3 --keypair 
   ../payer-keypair.json
 ```
 
@@ -406,7 +465,7 @@ ALIASES
   $ sbv2 aggregator:set:forceReport
 
 EXAMPLE
-  $ sbv2 aggregator:set:forceReportPeriod GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 300 --keypair
+  $ sbv2 aggregator:set:forceReportPeriod GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 300 --keypair 
   ../payer-keypair.json
 ```
 
@@ -616,7 +675,7 @@ ALIASES
   $ sbv2 aggregator:set:variance
 
 EXAMPLE
-  $ sbv2 aggregator:set:varianceThreshold GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 0.1 --keypair
+  $ sbv2 aggregator:set:varianceThreshold GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR 0.1 --keypair 
   ../payer-keypair.json
 ```
 
