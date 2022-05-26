@@ -46,7 +46,7 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 yarn install
 yarn workspaces run build
 yarn workspace @switchboard-xyz/switchboardv2-cli link
-anchor build && node ./scripts/setup-example-programs.js
+anchor build && node ./tools/scripts/setup-example-programs.js
 ```
 
 ### Localnet Testing Setup

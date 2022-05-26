@@ -59,7 +59,7 @@ export default class MetricsVrf extends BaseCommand {
     this.outputBasePath = path.join(parsedPath.dir, parsedPath.name);
     if (parsedPath.ext === ".txt" || flags.txt) {
       this.outputTxtFile = `${this.outputBasePath}.txt`;
-      if (fs.existsSync(this.outputTxtFile) && args.force === false) {
+      if (fs.existsSync(this.outputTxtFile) && flags.force === false) {
         throw new Error(
           `output txt file already exists: ${this.outputTxtFile}`
         );
@@ -67,7 +67,7 @@ export default class MetricsVrf extends BaseCommand {
     }
     if (parsedPath.ext === ".json" || flags.json) {
       this.outputJsonFile = `${this.outputBasePath}.json`;
-      if (fs.existsSync(this.outputJsonFile) && args.force === false) {
+      if (fs.existsSync(this.outputJsonFile) && flags.force === false) {
         throw new Error(
           `output json file already exists: ${this.outputJsonFile}`
         );
@@ -75,7 +75,7 @@ export default class MetricsVrf extends BaseCommand {
     }
     if (parsedPath.ext === ".csv" || flags.csv) {
       this.outputCsvFile = `${this.outputBasePath}.csv`;
-      if (fs.existsSync(this.outputCsvFile) && args.force === false) {
+      if (fs.existsSync(this.outputCsvFile) && flags.force === false) {
         throw new Error(
           `output csv file already exists: ${this.outputCsvFile}`
         );

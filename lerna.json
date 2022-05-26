@@ -1,6 +1,6 @@
 {
   "packages": [
-    "config/*",
+    "tools/eslint",
     "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/sbv2-utils",
