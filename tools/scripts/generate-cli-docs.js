@@ -28,12 +28,12 @@ const oclifBin = path.join(
 
 // Generate Oclif documentation
 shell.cd(cliPath);
-if (shell.exec(`${oclifBin} readme`).code !== 0) {
+if (shell.exec(`npx oclif-dev readme`).code !== 0) {
   shell.echo(`Error: Oclif failed to generate documentation`);
   shell.exit(1);
 }
 if (
-  shell.exec(`${oclifBin} readme --multi --dir ${cliOutRelPath}`).code !== 0
+  shell.exec(`npx oclif-dev readme --multi --dir ${cliOutRelPath}`).code !== 0
 ) {
   shell.echo(`Error: Oclif failed to generate documentation`);
   shell.exit(1);
