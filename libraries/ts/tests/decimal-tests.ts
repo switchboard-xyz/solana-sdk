@@ -1,8 +1,8 @@
-import "mocha";
-import { strict as assert } from "assert";
-import * as sbv2 from "../src";
-import Big from "big.js";
 import * as anchor from "@project-serum/anchor";
+import { strict as assert } from "assert";
+import Big from "big.js";
+import "mocha";
+import * as sbv2 from "../src";
 
 describe("Decimal tests", () => {
   it("Converts a SwitchboardDecimal to a Big", async () => {
@@ -44,7 +44,7 @@ describe("Decimal tests", () => {
   });
 
   it("Converts a SwitchboardDecimal back and forth", async () => {
-    let big = new Big(4.847);
+    const big = new Big(4.847);
     let sbd = sbv2.SwitchboardDecimal.fromBig(big);
     assert(sbd.toBig().toNumber() === 4.847);
 

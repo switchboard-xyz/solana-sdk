@@ -1,5 +1,4 @@
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { getGovernance } from "@solana/spl-governance";
 import * as spl from "@solana/spl-token";
 import {
@@ -22,6 +21,7 @@ import {
 import { OracleJob } from "@switchboard-xyz/switchboard-api";
 import Big from "big.js";
 import * as crypto from "crypto";
+
 var assert = require("assert");
 
 export { IOracleJob, OracleJob } from "@switchboard-xyz/switchboard-api";
@@ -82,9 +82,9 @@ export async function loadSwitchboardProgram(
 ): Promise<anchor.Program> {
   const DEFAULT_KEYPAIR = Keypair.fromSeed(new Uint8Array(32).fill(1));
   const programId = getSwitchboardPid(cluster);
-  const wallet: NodeWallet = payerKeypair
-    ? new NodeWallet(payerKeypair)
-    : new NodeWallet(DEFAULT_KEYPAIR);
+  const wallet: AnchorWallet = payerKeypair
+    ? new AnchorWallet(payerKeypair)
+    : new AnchorWallet(DEFAULT_KEYPAIR);
   const provider = new anchor.AnchorProvider(
     connection,
     wallet,
@@ -4258,7 +4258,7 @@ export async function createMint(
 }
 
 export function programWallet(program: anchor.Program): Keypair {
-  return ((program.provider as anchor.AnchorProvider).wallet as NodeWallet)
+  return ((program.provider as anchor.AnchorProvider).wallet as AnchorWallet)
     .payer;
 }
 
@@ -4268,4 +4268,26 @@ function safeDiv(number_: Big, denominator: Big, decimals = 20): Big {
   const result = number_.div(denominator);
   Big.DP = oldDp;
   return result;
+}
+
+export class AnchorWallet implements anchor.Wallet {
+  constructor(readonly payer: Keypair) {
+    this.payer = payer;
+  }
+
+  async signTransaction(tx: Transaction): Promise<Transaction> {
+    tx.partialSign(this.payer);
+    return tx;
+  }
+
+  async signAllTransactions(txs: Transaction[]): Promise<Transaction[]> {
+    return txs.map((t) => {
+      t.partialSign(this.payer);
+      return t;
+    });
+  }
+
+  get publicKey(): PublicKey {
+    return this.payer.publicKey;
+  }
 }

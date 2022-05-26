@@ -4690,6 +4690,26 @@
     typedoc "^0.22.15"
     ws "^7.4.6"
 
+"@switchboard-xyz/switchboard-v2@^0.0.99":
+  version "0.0.99"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.99.tgz#4e03c812bf4a4a90d2ea1bcc554e96cb6b18c63f"
+  integrity sha512-zZfZbi7KODZI617n9ndlRsvqOtM1ksuJBEWvhKzp9Ct//BtN2cij0yQNMtEse05y4fODRDfA0HHtS9ygS2mxjQ==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@switchboard-xyz/switchboard-api" "^0.2.200"
+    assert "^2.0.0"
+    big.js "^6.1.1"
+    bs58 "^4.0.1"
+    buffer-layout "^1.2.0"
+    chalk "^4.1.2"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    dotenv "^16.0.0"
+    long "^4.0.0"
+    node-fetch "^3.2.3"
+    protobufjs "^6.10.2"
+
 "@switchboard-xyz/v2-task-library@^0.1.1":
   version "0.1.5"
   resolved "https://registry.npmjs.org/@switchboard-xyz/v2-task-library/-/v2-task-library-0.1.5.tgz"
