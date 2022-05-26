@@ -47,6 +47,10 @@ export default class MetricsAggregator extends BaseCommand {
     txt: flags.boolean({
       description: "output aggregator pubkeys in txt format",
     }),
+    jobDirectory: flags.string({
+      description:
+        "output the aggregator jobs to a directory sorted by the first task type",
+    }),
   };
 
   static args = [
@@ -69,7 +73,7 @@ export default class MetricsAggregator extends BaseCommand {
     this.outputBasePath = path.join(parsedPath.dir, parsedPath.name);
     if (parsedPath.ext === ".txt" || flags.txt) {
       this.outputTxtFile = `${this.outputBasePath}.txt`;
-      if (fs.existsSync(this.outputTxtFile) && !args.force) {
+      if (fs.existsSync(this.outputTxtFile) && !flags.force) {
         throw new Error(
           `output txt file already exists: ${this.outputTxtFile}`
         );
@@ -77,7 +81,7 @@ export default class MetricsAggregator extends BaseCommand {
     }
     if (parsedPath.ext === ".json" || flags.json) {
       this.outputJsonFile = `${this.outputBasePath}.json`;
-      if (fs.existsSync(this.outputJsonFile) && !args.force) {
+      if (fs.existsSync(this.outputJsonFile) && !flags.force) {
         throw new Error(
           `output json file already exists: ${this.outputJsonFile}`
         );
@@ -85,7 +89,7 @@ export default class MetricsAggregator extends BaseCommand {
     }
     if (parsedPath.ext === ".csv" || flags.csv) {
       this.outputCsvFile = `${this.outputBasePath}.csv`;
-      if (fs.existsSync(this.outputCsvFile) && !args.force) {
+      if (fs.existsSync(this.outputCsvFile) && !flags.force) {
         throw new Error(
           `output csv file already exists: ${this.outputCsvFile}`
         );
@@ -123,9 +127,61 @@ export default class MetricsAggregator extends BaseCommand {
     );
 
     const allAggregators = await buildAggregators(
+      this.logger,
       this.program,
       this.aggregatorAccounts
     );
+
+    if (flags.jobDirectory) {
+      const jobDirPath =
+        flags.jobDirectory.startsWith("/") ||
+        flags.jobDirectory.startsWith("C:")
+          ? flags.jobDirectory
+          : path.join(process.cwd(), flags.jobDirectory);
+      fs.mkdirSync(jobDirPath, { recursive: true });
+      for (const aggregator of allAggregators) {
+        for (const job of aggregator.jobs) {
+          if (!job) {
+            this.logger.debug(`Job is undefined`);
+            continue;
+          }
+          if (!("tasks" in job)) {
+            this.logger.debug(`Job has no tasks - ${job.publicKey}`);
+            continue;
+          }
+          const firstTask = Object.keys(job.tasks[0])[0];
+          const oracleJob = OracleJob.create({ tasks: job.tasks });
+          const jobObject: { [k: string]: any } = {};
+          // const jobObject = oracleJob.toJSON();
+          if (job.name) {
+            jobObject["name"] = job.name;
+          }
+          if (job.metadata) {
+            jobObject["metadata"] = job.metadata;
+          }
+          // if (job.authority) {
+          //   jobObject["authority"] = job.authority;
+          // }
+          try {
+            const taskPath = path.join(jobDirPath, firstTask);
+            fs.mkdirSync(taskPath, { recursive: true });
+            fs.writeFileSync(
+              path.join(taskPath, `${job.publicKey.toString()}.json`),
+              JSON.stringify(
+                {
+                  ...jobObject,
+                  ...oracleJob.toJSON(),
+                },
+                undefined,
+                2
+              )
+            );
+          } catch (error) {
+            this.logger.debug(`Error - ${firstTask}`);
+          }
+        }
+      }
+    }
 
     const aggregators: Aggregator[] = [];
 
@@ -235,6 +291,7 @@ function writeAggregators(
 }
 
 async function buildAggregators(
+  logger: LogProvider,
   program: anchor.Program,
   aggregatorAccounts: { pubkey: PublicKey; account: AccountInfo<Buffer> }[]
 ): Promise<Aggregator[]> {
@@ -260,7 +317,7 @@ async function buildAggregators(
     .flat();
 
   // store a map of job pubkeys and their definitions
-  const jobMap = await buildJobMap(this.logger, program, jobPubkeys);
+  const jobMap = await buildJobMap(logger, program, jobPubkeys);
 
   const aggregators: Aggregator[] = [];
   for await (const account of aggregatorAccounts) {
@@ -314,7 +371,7 @@ async function buildJobMap(
         //   console.log(`jobKey: ${publicKey}, ${JSON.stringify(job)}`);
         jobMap.set(publicKey.toString(), job);
       } catch (error) {
-        this.logger.debug(`JobDecodeError: ${pubKeyBatch[index]} - ${error}`);
+        logger.debug(`JobDecodeError: ${pubKeyBatch[index]} - ${error}`);
       }
     }
   }
@@ -339,7 +396,7 @@ class Job {
   tasks: OracleJob.ITask[];
   name?: string;
   metadata?: string;
-  authorWallet?: PublicKey;
+  authority?: PublicKey;
   expiration?: number;
   hash?: Buffer;
   referenceCount?: number;
@@ -350,10 +407,10 @@ class Job {
     this.tasks = tasks;
     this.name = buffer2string(jobData.name);
     this.metadata = buffer2string(jobData.metadata);
-    this.authorWallet =
-      jobData.authorWallet && !PublicKey.default.equals(jobData.authorWallet)
-        ? jobData.authorWallet
-        : PublicKey.default;
+    this.authority =
+      jobData.authority && !PublicKey.default.equals(jobData.authority)
+        ? jobData.authority
+        : undefined;
     this.expiration = jobData.expiration.toNumber();
     this.hash = jobData.hash;
     this.referenceCount = jobData.referenceCount;
@@ -365,9 +422,7 @@ class Job {
       publicKey: this.publicKey.toString(),
       name: this.name,
       metadata: this.metadata,
-      authorWallet: this.authorWallet.equals(PublicKey.default)
-        ? "N/A"
-        : this.authorWallet.toString(),
+      authority: this.authority ? "N/A" : this.authority?.toString() ?? "",
       expiration: this.expiration,
       hash: this.hash.toString(),
       referenceCount: this.referenceCount,

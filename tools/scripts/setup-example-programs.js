@@ -10,12 +10,12 @@
  */
 
 const shell = require("shelljs");
-const { exec, spawn, execSync, spawnSync } = require("child_process");
+const { spawn, execSync } = require("child_process");
 const web3 = require("@solana/web3.js");
 const fs = require("fs");
 const path = require("path");
 
-const projectRoot = path.join(__dirname, "..");
+const projectRoot = path.join(__dirname, "..", "..");
 const targetDir = path.join(projectRoot, "target");
 const idlDir = path.join(targetDir, "idl");
 const anchorToml = path.join(projectRoot, "Anchor.toml");
