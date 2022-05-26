@@ -6,6 +6,7 @@ import {
   AccountInfo,
   AccountMeta,
   clusterApiUrl,
+  Commitment,
   ConfirmOptions,
   Connection,
   Keypair,
@@ -810,18 +811,46 @@ export class AggregatorAccount {
 
   /**
    * Speciifies if the aggregator settings recommend reporting a new value
+   * @param connection The Solana connection object to fetch the current cluster time
    * @param value The value which we are evaluating
    * @param aggregator The loaded aggegator schema
+   * @param commitment Optional, commitment to fetch the current block height
    * @returns boolean
    */
   static async shouldReportValue(
+    connection: Connection,
     value: Big,
-    aggregator: any
+    aggregator: any,
+    commitment?: Commitment
   ): Promise<boolean> {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
       return true;
     }
-    const timestamp: anchor.BN = new anchor.BN(Math.round(Date.now() / 1000));
+    const timestamp: anchor.BN = new anchor.BN(
+      await connection.getBlockTime(await connection.getBlockHeight(commitment))
+    );
+    return AggregatorAccount.shouldReportValueSync(
+      value,
+      aggregator,
+      timestamp
+    );
+  }
+
+  /**
+   * Speciifies if the aggregator settings recommend reporting a new value
+   * @param value The value which we are evaluating
+   * @param aggregator The loaded aggegator schema
+   * @param timestamp The current cluster's unix timestamp
+   * @returns boolean
+   */
+  static shouldReportValueSync(
+    value: Big,
+    aggregator: any,
+    timestamp: anchor.BN
+  ): boolean {
+    if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
+      return true;
+    }
     if (aggregator.startAfter.gt(timestamp)) {
       return false;
     }
