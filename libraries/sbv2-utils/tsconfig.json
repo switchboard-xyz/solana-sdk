@@ -32,5 +32,9 @@
   "include": ["src/**/*"],
   "exclude": ["esbuild.js", "lib"],
   "references": [{ "path": "../ts" }],
-  "files": ["src/index.ts"]
+  "files": ["src/index.ts"],
+  "typedocOptions": {
+    "entryPoints": ["src/index.ts"],
+    "out": "../../website/static/api/sbv2-utils"
+  }
 }
