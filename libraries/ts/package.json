@@ -29,22 +29,23 @@
   },
   "scripts": {
     "docgen": "yarn build && npx typedoc",
+    "build:protos": "pbjs -t static-module -o src/protos.js ../protos/*.proto && pbts -o src/protos.d.ts src/protos.js",
     "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
     "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
     "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm && shx rm lib/*.tsbuildinfo",
     "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
+    "lint": "eslint --fix-dry-run --ext .ts src/**/*.ts",
     "prepublish": "yarn build"
   },
   "peerDependencies": {
     "@solana/spl-governance": "^0.0.34",
     "@solana/spl-token": "^0.1.8",
-    "@solana/web3.js": "1.37.1",
-    "@switchboard-xyz/switchboard-api": "^0.2.200"
+    "@solana/web3.js": "1.37.1"
   },
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
     "@solana/spl-governance": "^0.0.34",
-    "@switchboard-xyz/switchboard-api": "^0.2.200",
+    "@switchboard-xyz/eslint-config": "^0.1.1",
     "assert": "^2.0.0",
     "big.js": "^6.1.1",
     "bs58": "^4.0.1",
@@ -62,9 +63,17 @@
     "@types/big.js": "^6.0.2",
     "@types/long": "^4.0.1",
     "@types/mocha": "^9.0.0",
+    "@types/node": "^17.0.35",
     "npm-run-all": "^4.1.5",
     "shx": "^0.3.4",
     "typedoc": "^0.22.13",
     "typescript": "^4.2.4"
+  },
+  "eslintConfig": {
+    "extends": "@switchboard-xyz",
+    "rules": {
+      "no-return-await": "off",
+      "quotes": "off"
+    }
   }
 }

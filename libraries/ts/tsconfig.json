@@ -22,6 +22,8 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "types": ["mocha", "node", "long"],
+    "allowJs": true,
+    "checkJs": false,
     "sourceMap": true,
     "inlineSources": true,
     "lib": ["esnext"],
