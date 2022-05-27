@@ -1,7 +1,7 @@
 {
   "name": "@switchboard-xyz/switchboardv2-cli",
   "description": "command line tool to interact with switchboard v2",
-  "version": "0.1.24",
+  "version": "0.1.25",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -98,8 +98,8 @@
     "@project-serum/anchor": "^0.24.2",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.42.0",
-    "@switchboard-xyz/sbv2-utils": "^0.1.15",
-    "@switchboard-xyz/switchboard-v2": "^0.0.102",
+    "@switchboard-xyz/sbv2-utils": "^0.1.16",
+    "@switchboard-xyz/switchboard-v2": "^0.0.103",
     "assert": "^2.0.0",
     "big.js": "^6.1.1",
     "bs58": "^5.0.0",
