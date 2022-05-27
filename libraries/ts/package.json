@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.103",
+  "version": "0.0.106",
   "license": "MIT",
   "author": "mitch@switchboard.xyz",
   "description": "API wrapper for intergating with the Switchboardv2 program",
@@ -19,20 +19,17 @@
     "lib",
     "src"
   ],
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
-  "exports": {
-    ".": {
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js"
-    }
-  },
+  "module": "./lib/esm/index.js",
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/cjs/index.d.ts",
   "scripts": {
     "docgen": "yarn build && npx typedoc",
-    "build:protos": "pbjs -t static-module -o src/protos.js ../protos/*.proto && pbts -o src/protos.d.ts src/protos.js",
-    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
-    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
-    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm && shx rm lib/*.tsbuildinfo",
+    "build:protos": "pbjs -t static-module -o src/protos/index.js ../protos/*.proto && pbts -o src/protos/index.d.ts src/protos/index.js",
+    "build:cjs:protos": "shx mkdir -p lib/cjs/protos; pbjs -t static-module -w commonjs -o lib/cjs/protos/index.js ../protos/*.proto && pbts -o lib/cjs/protos/index.d.ts lib/cjs/protos/index.js",
+    "build:esm:protos": "shx mkdir -p lib/esm/protos; pbjs -t static-module -o lib/esm/protos/index.js ../protos/*.proto && pbts -o lib/esm/protos/index.d.ts lib/esm/protos/index.js",
+    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json && yarn build:cjs:protos",
+    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json && yarn build:esm:protos",
+    "build": "shx rm -rf lib && yarn build:protos && yarn build:cjs && yarn build:esm && shx rm lib/*.tsbuildinfo",
     "test": "mocha --extension ts --require ts-node/register -t 1000000 tests/",
     "lint": "eslint --fix-dry-run --ext .ts src/**/*.ts",
     "prepublish": "yarn build"

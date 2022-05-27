@@ -8774,6 +8774,403 @@
             return PancakeswapExchangeRateTask;
         })();
     
+        OracleJob.CacheTask = (function() {
+    
+            /**
+             * Properties of a CacheTask.
+             * @memberof OracleJob
+             * @interface ICacheTask
+             * @property {string|null} [name] CacheTask name
+             * @property {OracleJob.CacheTask.Method|null} [method] CacheTask method
+             */
+    
+            /**
+             * Constructs a new CacheTask.
+             * @memberof OracleJob
+             * @classdesc Represents a CacheTask.
+             * @implements ICacheTask
+             * @constructor
+             * @param {OracleJob.ICacheTask=} [properties] Properties to set
+             */
+            function CacheTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * CacheTask name.
+             * @member {string} name
+             * @memberof OracleJob.CacheTask
+             * @instance
+             */
+            CacheTask.prototype.name = "";
+    
+            /**
+             * CacheTask method.
+             * @member {OracleJob.CacheTask.Method} method
+             * @memberof OracleJob.CacheTask
+             * @instance
+             */
+            CacheTask.prototype.method = 0;
+    
+            /**
+             * Creates a new CacheTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {OracleJob.ICacheTask=} [properties] Properties to set
+             * @returns {OracleJob.CacheTask} CacheTask instance
+             */
+            CacheTask.create = function create(properties) {
+                return new CacheTask(properties);
+            };
+    
+            /**
+             * Encodes the specified CacheTask message. Does not implicitly {@link OracleJob.CacheTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {OracleJob.ICacheTask} message CacheTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CacheTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.name != null && Object.hasOwnProperty.call(message, "name"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
+                if (message.method != null && Object.hasOwnProperty.call(message, "method"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.method);
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified CacheTask message, length delimited. Does not implicitly {@link OracleJob.CacheTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {OracleJob.ICacheTask} message CacheTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CacheTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a CacheTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.CacheTask} CacheTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CacheTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.CacheTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.name = reader.string();
+                        break;
+                    case 2:
+                        message.method = reader.int32();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a CacheTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.CacheTask} CacheTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CacheTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a CacheTask message.
+             * @function verify
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            CacheTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.name != null && message.hasOwnProperty("name"))
+                    if (!$util.isString(message.name))
+                        return "name: string expected";
+                if (message.method != null && message.hasOwnProperty("method"))
+                    switch (message.method) {
+                    default:
+                        return "method: enum value expected";
+                    case 0:
+                    case 1:
+                        break;
+                    }
+                return null;
+            };
+    
+            /**
+             * Creates a CacheTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.CacheTask} CacheTask
+             */
+            CacheTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.CacheTask)
+                    return object;
+                var message = new $root.OracleJob.CacheTask();
+                if (object.name != null)
+                    message.name = String(object.name);
+                switch (object.method) {
+                case "METHOD_GET":
+                case 0:
+                    message.method = 0;
+                    break;
+                case "METHOD_SET":
+                case 1:
+                    message.method = 1;
+                    break;
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a CacheTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.CacheTask
+             * @static
+             * @param {OracleJob.CacheTask} message CacheTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            CacheTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.name = "";
+                    object.method = options.enums === String ? "METHOD_GET" : 0;
+                }
+                if (message.name != null && message.hasOwnProperty("name"))
+                    object.name = message.name;
+                if (message.method != null && message.hasOwnProperty("method"))
+                    object.method = options.enums === String ? $root.OracleJob.CacheTask.Method[message.method] : message.method;
+                return object;
+            };
+    
+            /**
+             * Converts this CacheTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.CacheTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            CacheTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            /**
+             * Method enum.
+             * @name OracleJob.CacheTask.Method
+             * @enum {number}
+             * @property {number} METHOD_GET=0 METHOD_GET value
+             * @property {number} METHOD_SET=1 METHOD_SET value
+             */
+            CacheTask.Method = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "METHOD_GET"] = 0;
+                values[valuesById[1] = "METHOD_SET"] = 1;
+                return values;
+            })();
+    
+            return CacheTask;
+        })();
+    
+        OracleJob.SysclockOffsetTask = (function() {
+    
+            /**
+             * Properties of a SysclockOffsetTask.
+             * @memberof OracleJob
+             * @interface ISysclockOffsetTask
+             */
+    
+            /**
+             * Constructs a new SysclockOffsetTask.
+             * @memberof OracleJob
+             * @classdesc Represents a SysclockOffsetTask.
+             * @implements ISysclockOffsetTask
+             * @constructor
+             * @param {OracleJob.ISysclockOffsetTask=} [properties] Properties to set
+             */
+            function SysclockOffsetTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * Creates a new SysclockOffsetTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {OracleJob.ISysclockOffsetTask=} [properties] Properties to set
+             * @returns {OracleJob.SysclockOffsetTask} SysclockOffsetTask instance
+             */
+            SysclockOffsetTask.create = function create(properties) {
+                return new SysclockOffsetTask(properties);
+            };
+    
+            /**
+             * Encodes the specified SysclockOffsetTask message. Does not implicitly {@link OracleJob.SysclockOffsetTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {OracleJob.ISysclockOffsetTask} message SysclockOffsetTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SysclockOffsetTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified SysclockOffsetTask message, length delimited. Does not implicitly {@link OracleJob.SysclockOffsetTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {OracleJob.ISysclockOffsetTask} message SysclockOffsetTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SysclockOffsetTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a SysclockOffsetTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.SysclockOffsetTask} SysclockOffsetTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SysclockOffsetTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.SysclockOffsetTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a SysclockOffsetTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.SysclockOffsetTask} SysclockOffsetTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SysclockOffsetTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a SysclockOffsetTask message.
+             * @function verify
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            SysclockOffsetTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                return null;
+            };
+    
+            /**
+             * Creates a SysclockOffsetTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.SysclockOffsetTask} SysclockOffsetTask
+             */
+            SysclockOffsetTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.SysclockOffsetTask)
+                    return object;
+                return new $root.OracleJob.SysclockOffsetTask();
+            };
+    
+            /**
+             * Creates a plain object from a SysclockOffsetTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.SysclockOffsetTask
+             * @static
+             * @param {OracleJob.SysclockOffsetTask} message SysclockOffsetTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            SysclockOffsetTask.toObject = function toObject() {
+                return {};
+            };
+    
+            /**
+             * Converts this SysclockOffsetTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.SysclockOffsetTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            SysclockOffsetTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return SysclockOffsetTask;
+        })();
+    
         OracleJob.Task = (function() {
     
             /**
@@ -8812,6 +9209,8 @@
              * @property {OracleJob.IUniswapExchangeRateTask|null} [uniswapExchangeRateTask] Task uniswapExchangeRateTask
              * @property {OracleJob.ISushiswapExchangeRateTask|null} [sushiswapExchangeRateTask] Task sushiswapExchangeRateTask
              * @property {OracleJob.IPancakeswapExchangeRateTask|null} [pancakeswapExchangeRateTask] Task pancakeswapExchangeRateTask
+             * @property {OracleJob.ICacheTask|null} [cacheTask] Task cacheTask
+             * @property {OracleJob.ISysclockOffsetTask|null} [sysclockOffsetTask] Task sysclockOffsetTask
              */
     
             /**
@@ -9085,17 +9484,33 @@
              */
             Task.prototype.pancakeswapExchangeRateTask = null;
     
+            /**
+             * Task cacheTask.
+             * @member {OracleJob.ICacheTask|null|undefined} cacheTask
+             * @memberof OracleJob.Task
+             * @instance
+             */
+            Task.prototype.cacheTask = null;
+    
+            /**
+             * Task sysclockOffsetTask.
+             * @member {OracleJob.ISysclockOffsetTask|null|undefined} sysclockOffsetTask
+             * @memberof OracleJob.Task
+             * @instance
+             */
+            Task.prototype.sysclockOffsetTask = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * Task Task.
-             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|undefined} Task
+             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|undefined} Task
              * @memberof OracleJob.Task
              * @instance
              */
             Object.defineProperty(Task.prototype, "Task", {
-                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask"]),
+                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask", "cacheTask", "sysclockOffsetTask"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -9187,6 +9602,10 @@
                     $root.OracleJob.SushiswapExchangeRateTask.encode(message.sushiswapExchangeRateTask, writer.uint32(/* id 32, wireType 2 =*/258).fork()).ldelim();
                 if (message.pancakeswapExchangeRateTask != null && Object.hasOwnProperty.call(message, "pancakeswapExchangeRateTask"))
                     $root.OracleJob.PancakeswapExchangeRateTask.encode(message.pancakeswapExchangeRateTask, writer.uint32(/* id 33, wireType 2 =*/266).fork()).ldelim();
+                if (message.cacheTask != null && Object.hasOwnProperty.call(message, "cacheTask"))
+                    $root.OracleJob.CacheTask.encode(message.cacheTask, writer.uint32(/* id 34, wireType 2 =*/274).fork()).ldelim();
+                if (message.sysclockOffsetTask != null && Object.hasOwnProperty.call(message, "sysclockOffsetTask"))
+                    $root.OracleJob.SysclockOffsetTask.encode(message.sysclockOffsetTask, writer.uint32(/* id 35, wireType 2 =*/282).fork()).ldelim();
                 return writer;
             };
     
@@ -9316,6 +9735,12 @@
                         break;
                     case 33:
                         message.pancakeswapExchangeRateTask = $root.OracleJob.PancakeswapExchangeRateTask.decode(reader, reader.uint32());
+                        break;
+                    case 34:
+                        message.cacheTask = $root.OracleJob.CacheTask.decode(reader, reader.uint32());
+                        break;
+                    case 35:
+                        message.sysclockOffsetTask = $root.OracleJob.SysclockOffsetTask.decode(reader, reader.uint32());
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -9671,6 +10096,26 @@
                             return "pancakeswapExchangeRateTask." + error;
                     }
                 }
+                if (message.cacheTask != null && message.hasOwnProperty("cacheTask")) {
+                    if (properties.Task === 1)
+                        return "Task: multiple values";
+                    properties.Task = 1;
+                    {
+                        var error = $root.OracleJob.CacheTask.verify(message.cacheTask);
+                        if (error)
+                            return "cacheTask." + error;
+                    }
+                }
+                if (message.sysclockOffsetTask != null && message.hasOwnProperty("sysclockOffsetTask")) {
+                    if (properties.Task === 1)
+                        return "Task: multiple values";
+                    properties.Task = 1;
+                    {
+                        var error = $root.OracleJob.SysclockOffsetTask.verify(message.sysclockOffsetTask);
+                        if (error)
+                            return "sysclockOffsetTask." + error;
+                    }
+                }
                 return null;
             };
     
@@ -9845,6 +10290,16 @@
                     if (typeof object.pancakeswapExchangeRateTask !== "object")
                         throw TypeError(".OracleJob.Task.pancakeswapExchangeRateTask: object expected");
                     message.pancakeswapExchangeRateTask = $root.OracleJob.PancakeswapExchangeRateTask.fromObject(object.pancakeswapExchangeRateTask);
+                }
+                if (object.cacheTask != null) {
+                    if (typeof object.cacheTask !== "object")
+                        throw TypeError(".OracleJob.Task.cacheTask: object expected");
+                    message.cacheTask = $root.OracleJob.CacheTask.fromObject(object.cacheTask);
+                }
+                if (object.sysclockOffsetTask != null) {
+                    if (typeof object.sysclockOffsetTask !== "object")
+                        throw TypeError(".OracleJob.Task.sysclockOffsetTask: object expected");
+                    message.sysclockOffsetTask = $root.OracleJob.SysclockOffsetTask.fromObject(object.sysclockOffsetTask);
                 }
                 return message;
             };
@@ -10021,6 +10476,16 @@
                     object.pancakeswapExchangeRateTask = $root.OracleJob.PancakeswapExchangeRateTask.toObject(message.pancakeswapExchangeRateTask, options);
                     if (options.oneofs)
                         object.Task = "pancakeswapExchangeRateTask";
+                }
+                if (message.cacheTask != null && message.hasOwnProperty("cacheTask")) {
+                    object.cacheTask = $root.OracleJob.CacheTask.toObject(message.cacheTask, options);
+                    if (options.oneofs)
+                        object.Task = "cacheTask";
+                }
+                if (message.sysclockOffsetTask != null && message.hasOwnProperty("sysclockOffsetTask")) {
+                    object.sysclockOffsetTask = $root.OracleJob.SysclockOffsetTask.toObject(message.sysclockOffsetTask, options);
+                    if (options.oneofs)
+                        object.Task = "sysclockOffsetTask";
                 }
                 return object;
             };

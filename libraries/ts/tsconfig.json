@@ -1,16 +1,10 @@
 {
   "extends": "../../tsconfig.json",
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs",
-      "target": "ES2019",
-      "strictFunctionTypes": true,
-      "noImplicitReturns": true,
-      "noImplicitAny": true
-    }
-  },
   "compilerOptions": {
     "composite": true,
+    "moduleResolution": "node",
+    "target": "es2019",
+    "module": "ES2020",
     "rootDir": "src",
     "noImplicitAny": false,
     "outDir": "lib/esm",
@@ -19,11 +13,12 @@
     "noImplicitReturns": false,
     "importsNotUsedAsValues": "preserve",
     "strict": false,
+    "allowSyntheticDefaultImports": true,
     "noEmit": false,
     "emitDeclarationOnly": false,
     "types": ["mocha", "node", "long"],
-    "allowJs": true,
-    "checkJs": false,
+    // "allowJs": true,
+    // "checkJs": false,
     "sourceMap": true,
     "inlineSources": true,
     "lib": ["esnext"],

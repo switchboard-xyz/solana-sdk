@@ -16,7 +16,7 @@
     "@project-serum/anchor": "^0.24.2",
     "@solana/web3.js": "^1.42.0",
     "@switchboard-xyz/sbv2-utils": "^0.1.16",
-    "@switchboard-xyz/switchboard-v2": "^0.0.103"
+    "@switchboard-xyz/switchboard-v2": "^0.0.105"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
