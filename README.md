@@ -6,14 +6,15 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 
 ### Libraries
 
-| Package                                        | Description                                                   |
-| ---------------------------------------------- | ------------------------------------------------------------- |
-| [Typescript](./libraries/ts)                   | Typescript client to interact with Switchboard V2.            |
-| [Typescript **_Lite_**](./libraries/sbv2-lite) | Typescript "Lite" client to deserialize aggregator accounts   |
-| [Sbv2 Utils](./libraries/sbv2-utils)           | Typescript library with helpful utility functions             |
-| [Python](./libraries/py)                       | Python client to interact with Switchboard V2.                |
-| [Rust](./libraries/rs)                         | Rust client to interact with Switchboard V2.                  |
-| [CLI](./cli)                                   | Command Line Interface (CLI) to interact with Switchboard V2. |
+| Package                                        | Description                                                    |
+| ---------------------------------------------- | -------------------------------------------------------------- |
+| [Protobufs](./libraries/protos)                | Protocol buffers used by the oracle to fetch and publish data. |
+| [Typescript](./libraries/ts)                   | Typescript client to interact with Switchboard V2.             |
+| [Typescript **_Lite_**](./libraries/sbv2-lite) | Typescript "Lite" client to deserialize aggregator accounts    |
+| [Sbv2 Utils](./libraries/sbv2-utils)           | Typescript library with helpful utility functions              |
+| [Python](./libraries/py)                       | Python client to interact with Switchboard V2.                 |
+| [Rust](./libraries/rs)                         | Rust client to interact with Switchboard V2.                   |
+| [CLI](./cli)                                   | Command Line Interface (CLI) to interact with Switchboard V2.  |
 
 ### Program Examples
 
@@ -49,33 +50,6 @@ yarn workspace @switchboard-xyz/switchboardv2-cli link
 anchor build && node ./tools/scripts/setup-example-programs.js
 ```
 
-### Localnet Testing Setup
-
-The SDK supports copying a Switchboard devnet environment to your localnet environment for integration testing. This is useful if you want to see how your program will react to Switchboard data feed updates.
-
-First, set the _[provider.cluster]_ in `Anchor.toml` to localnet.
-
-Next, create a Switchboard devnet queue and oracle.
-
-```
-sbv2 localnet:env --keypair ../payer-keypair.json -o .switchboard
-```
-
-This command will output:
-
-- **start-local-validator.sh**: starts a local Solana validator with the Switchboard program, IDL, and our devnet environment pre-loaded
-- **start-oracle.sh**: start a Switchboard oracle and start heartbeating on the localnet queue
-- **docker-compose.yml**: docker file with the Switchboard oracle environment
-- **switchboard.env**: contains your Switchboard accounts
-
-In three separate shells, run the following commands in this order:
-
-- `./.switchboard/start-local-validator.sh`
-- `./.switchboard/start-oracle.sh`
-- `anchor test --skip-local-validator`
-
-The anchor test are configured to first fetch the account info for the Switchboard DAO controlled devnet permissionless queue. If the account info is not found, it assumes a localnet connection and looks for the `switchboard.env` with your Switchboard environment specific public keys. If a`.switchboard` directory or `switchboard.env` file is not found in the root project directory, it will look 2 levels higher until giving up.
-
 ## Website
 
 Run live server
@@ -103,3 +77,30 @@ To publish changes to NPM registries
 ```
 lerna publish
 ```
+
+### Localnet Testing Setup
+
+The SDK supports copying a Switchboard devnet environment to your localnet environment for integration testing. This is useful if you want to see how your program will react to Switchboard data feed updates.
+
+First, set the _[provider.cluster]_ in `Anchor.toml` to localnet.
+
+Next, create a Switchboard devnet queue and oracle.
+
+```
+sbv2 localnet:env --keypair ../payer-keypair.json -o .switchboard
+```
+
+This command will output:
+
+- **start-local-validator.sh**: starts a local Solana validator with the Switchboard program, IDL, and our devnet environment pre-loaded
+- **start-oracle.sh**: start a Switchboard oracle and start heartbeating on the localnet queue
+- **docker-compose.yml**: docker file with the Switchboard oracle environment
+- **switchboard.env**: contains your Switchboard accounts
+
+In three separate shells, run the following commands in this order:
+
+- `./.switchboard/start-local-validator.sh`
+- `./.switchboard/start-oracle.sh`
+- `anchor test --skip-local-validator`
+
+The anchor test are configured to first fetch the account info for the Switchboard DAO controlled devnet permissionless queue. If the account info is not found, it assumes a localnet connection and looks for the `switchboard.env` with your Switchboard environment specific public keys. If a`.switchboard` directory or `switchboard.env` file is not found in the root project directory, it will look 2 levels higher until giving up.
