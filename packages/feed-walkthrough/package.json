@@ -1,6 +1,5 @@
 {
   "name": "@switchboard-xyz/v2-feed-walkthrough",
-  "version": "0.1.4",
   "description": "switchboard v2 example demonstrating how to create a private queue, oracle, and data feed",
   "private": true,
   "repository": {

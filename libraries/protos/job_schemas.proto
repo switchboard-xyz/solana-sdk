@@ -268,7 +268,6 @@ message OracleJob {
     optional Field field = 3;
   }
 
-
   // Fetch the current price for a Mango perpetual market
   message MangoPerpMarketTask {
     // Mainnet address for a mango perpetual market. A full list can be found here: https://github.com/blockworks-foundation/mango-client-v3/blob/main/src/ids.json
@@ -366,6 +365,17 @@ message OracleJob {
     optional string provider = 5;
   }
 
+  message CacheTask {
+    optional string name = 1;
+    enum Method {
+      METHOD_GET = 0;
+      METHOD_SET = 1;
+    }
+    optional Method method = 2;
+  }
+
+  message SysclockOffsetTask {}
+
   message Task {
     oneof Task {
       HttpTask http_task = 1;
@@ -400,6 +410,8 @@ message OracleJob {
       UniswapExchangeRateTask uniswap_exchange_rate_task = 31;
       SushiswapExchangeRateTask sushiswap_exchange_rate_task = 32;
       PancakeswapExchangeRateTask pancakeswap_exchange_rate_task = 33;
+      CacheTask cache_task = 34;
+      SysclockOffsetTask sysclock_offset_task = 35;
     }
   }
   // The chain of tasks to perform for this OracleJob.

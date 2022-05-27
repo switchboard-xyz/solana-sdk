@@ -1,6 +1,5 @@
 {
   "name": "@switchboard-xyz/v2-feed-parser",
-  "version": "0.1.4",
   "description": "switchboard v2 example demonstrating how to parse a data feed",
   "private": true,
   "repository": {
