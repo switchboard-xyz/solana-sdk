@@ -27,7 +27,7 @@
     "docs:build:sbv2-utils": "yarn workspace @switchboard-xyz/sbv2-utils docgen",
     "docs:build:cli": "node ./tools/scripts/generate-cli-docs.js",
     "docs:build:site": "yarn workspace website build:site",
-    "docs:build:tasks": "protoc --proto_path=../switchboard-core/protos --doc_out=website/api --doc_opt=markdown,_tasks.md ../switchboard-core/protos/job_schemas.proto",
+    "docs:build:tasks": "protoc --proto_path=./libraries/protos --doc_out=website/api --doc_opt=markdown,_tasks.md ./libraries/protos/job_schemas.proto",
     "docs:build": "run-s docs:build:ts docs:build:sbv2-lite docs:build:sbv2-utils docs:build:cli docs:build:site",
     "docs:deploy": "yarn workspace website deploy",
     "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p /idl",

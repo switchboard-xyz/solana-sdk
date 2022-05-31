@@ -1,19 +1,20 @@
 import { flags } from "@oclif/command";
-import { Keypair, PublicKey } from "@solana/web3.js";
-import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
+import * as anchor from "@project-serum/anchor";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
+import {
+  prettyPrintCrank,
+  verifyProgramHasPayer,
+} from "@switchboard-xyz/sbv2-utils";
+import {
+  CrankAccount,
+  OracleQueueAccount,
+  programWallet,
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { fromCrankJSON } from "../../../accounts";
-import { CrankClass } from "../../../accounts/crank/crank";
 import BaseCommand from "../../../BaseCommand";
 import { CHECK_ICON } from "../../../utils";
 
 export default class QueueAddCrank extends BaseCommand {
-  queueAccount: OracleQueueAccount;
-
-  crankDefinition: fromCrankJSON;
-
-  queueAuthority: Keypair | undefined = undefined;
-
   static description = "add a crank to an existing oracle queue";
 
   static flags = {
@@ -26,10 +27,9 @@ export default class QueueAddCrank extends BaseCommand {
       char: "r",
       description: "maximum number of rows a crank can support",
     }),
-    // authority: flags.string({
-    //   char: "a",
-    //   description: "alternate keypair that is the authority for oracle queue",
-    // }),
+    queueAuthority: flags.string({
+      description: "alternative keypair to use for queue authority",
+    }),
   };
 
   static args = [
@@ -46,41 +46,72 @@ export default class QueueAddCrank extends BaseCommand {
     // "$ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../payer-keypair.json -a ../authority-keypair.json",
   ];
 
-  async init() {
-    await super.init();
+  async run() {
     const { args, flags } = this.parse(QueueAddCrank);
-
-    this.queueAccount = new OracleQueueAccount({
-      program: this.program,
-      publicKey: args.queueKey,
-    });
-
-    // TODO: Not implemented yet
-    // if (flags.authority) {
-    //   this.queueAuthority = await loadKeypair(flags.authority);
-    // }
+    verifyProgramHasPayer(this.program);
+    const payerKeypair = programWallet(this.program);
 
     if (flags.maxRows < 0) {
       throw new Error("max rows must be a positive number");
     }
 
-    this.crankDefinition = {
-      name: flags.name || "",
-      maxRows: flags.maxRows || undefined,
-    };
-  }
+    const maxRows = flags.maxRows;
 
-  async run() {
-    const crank = await CrankClass.fromJSON(
-      this.context,
-      this.crankDefinition,
-      this.queueAccount
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: args.queueKey,
+    });
+    const queue = await queueAccount.loadData();
+
+    const queueAuthority = await this.loadAuthority(
+      flags.queueAuthority,
+      queue.authority
     );
 
+    const crankKeypair = anchor.web3.Keypair.generate();
+    const bufferKeypair = anchor.web3.Keypair.generate();
+    const crankSize = this.program.account.crankAccountData.size;
+    const bufferSize = maxRows * 40 + 8;
+    const signature = await this.program.methods
+      .crankInit({
+        name: (flags.name ? Buffer.from(flags.name) : Buffer.from("")).slice(
+          0,
+          32
+        ),
+        metadata: Buffer.from("").slice(0, 64),
+        crankSize: maxRows,
+      })
+      .accounts({
+        crank: crankKeypair.publicKey,
+        queue: queueAccount.publicKey,
+        buffer: bufferKeypair.publicKey,
+        systemProgram: SystemProgram.programId,
+        payer: payerKeypair.publicKey,
+      })
+      .signers([crankKeypair, bufferKeypair])
+      .preInstructions([
+        anchor.web3.SystemProgram.createAccount({
+          fromPubkey: payerKeypair.publicKey,
+          newAccountPubkey: bufferKeypair.publicKey,
+          space: bufferSize,
+          lamports:
+            await this.program.provider.connection.getMinimumBalanceForRentExemption(
+              bufferSize
+            ),
+          programId: this.program.programId,
+        }),
+      ])
+      .rpc();
+
+    const crankAccount = new CrankAccount({
+      program: this.program,
+      publicKey: crankKeypair.publicKey,
+    });
+
     if (this.silent) {
-      console.log(crank.account.publicKey.toString());
+      console.log(crankKeypair.publicKey.toString());
     } else {
-      this.logger.log(crank.prettyPrint());
+      this.logger.log(await prettyPrintCrank(crankAccount));
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Crank created successfully\r\n`)}`
       );

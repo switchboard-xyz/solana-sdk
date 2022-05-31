@@ -13,7 +13,6 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 
 <!-- commands -->
 * [`sbv2 aggregator:add:job AGGREGATORKEY`](#sbv2-aggregatoraddjob-aggregatorkey)
-* [`sbv2 aggregator:create QUEUEKEY`](#sbv2-aggregatorcreate-queuekey)
 * [`sbv2 aggregator:create:copy AGGREGATORSOURCE`](#sbv2-aggregatorcreatecopy-aggregatorsource)
 * [`sbv2 aggregator:create:json DEFINITIONFILE`](#sbv2-aggregatorcreatejson-definitionfile)
 * [`sbv2 aggregator:lock AGGREGATORKEY`](#sbv2-aggregatorlock-aggregatorkey)
@@ -36,6 +35,7 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 * [`sbv2 crank:push CRANKKEY AGGREGATORKEY`](#sbv2-crankpush-crankkey-aggregatorkey)
 * [`sbv2 crank:turn CRANKKEY`](#sbv2-crankturn-crankkey)
 * [`sbv2 help [COMMAND]`](#sbv2-help-command)
+* [`sbv2 job:create JOBDEFINITION`](#sbv2-jobcreate-jobdefinition)
 * [`sbv2 job:create:copy JOBSOURCE`](#sbv2-jobcreatecopy-jobsource)
 * [`sbv2 job:create:json DEFINITIONFILE`](#sbv2-jobcreatejson-definitionfile)
 * [`sbv2 job:create:template TEMPLATE ID`](#sbv2-jobcreatetemplate-template-id)
@@ -125,57 +125,6 @@ EXAMPLE
 
 _See code: [src/commands/aggregator/add/job.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.26/src/commands/aggregator/add/job.ts)_
 
-## `sbv2 aggregator:create QUEUEKEY`
-
-create an aggregator account
-
-```
-USAGE
-  $ sbv2 aggregator:create QUEUEKEY
-
-ARGUMENTS
-  QUEUEKEY  public key of the oracle queue account to create aggregator for
-
-OPTIONS
-  -a, --authority=authority              alternate keypair that is the authority for the aggregator
-  -h, --help                             show CLI help
-  -j, --job=job                          filesystem path to job definition file
-
-  -k, --keypair=keypair                  keypair that will pay for onchain transactions. defaults to new account
-                                         authority if no alternate authority provided
-
-  -s, --silent                           suppress cli prompts
-
-  -u, --rpcUrl=rpcUrl                    alternate RPC url
-
-  -v, --verbose                          log everything
-
-  --batchSize=batchSize                  number of oracles requested for each open round call
-
-  --force                                skip job confirmation
-
-  --forceReportPeriod=forceReportPeriod  Number of seconds for which, even if the variance threshold is not passed,
-                                         accept new responses from oracles.
-
-  --mainnetBeta                          WARNING: use mainnet-beta solana cluster
-
-  --minJobs=minJobs                      number of jobs that must respond before an oracle responds
-
-  --minOracles=minOracles                number of oracles that must respond before a value is accepted on-chain
-
-  --newQueue=newQueue                    public key of the new oracle queue
-
-  --programId=programId                  alternative Switchboard program ID to interact with
-
-  --updateInterval=updateInterval        set an aggregator's minimum update delay
-
-  --varianceThreshold=varianceThreshold  percentage change between a previous accepted result and the next round before
-                                         an oracle reports a value on-chain. Used to conserve lease cost during low
-                                         volatility
-```
-
-_See code: [src/commands/aggregator/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.26/src/commands/aggregator/create/index.ts)_
-
 ## `sbv2 aggregator:create:copy AGGREGATORSOURCE`
 
 copy an aggregator account to a new oracle queue
@@ -203,7 +152,11 @@ OPTIONS
 
   --batchSize=batchSize                  override source aggregator's oracleRequestBatchSize
 
+  --copyJobs                             create copy of job accounts instead of referincing existing job account
+
   --crankKey=crankKey                    public key of the crank to push aggregator to
+
+  --enable                               set permissions to PERMIT_ORACLE_QUEUE_USAGE
 
   --force                                skip job confirmation
 
@@ -219,9 +172,9 @@ OPTIONS
 
   --programId=programId                  alternative Switchboard program ID to interact with
 
-  --queueKey=queueKey                    (required) public key of the queue to create aggregator for
+  --queueAuthority=queueAuthority        alternative keypair to use for queue authority
 
-  --sourceCluster=devnet|mainnet-beta    alternative solana cluster to copy source aggregator from
+  --queueKey=queueKey                    (required) public key of the queue to create aggregator for
 
   --varianceThreshold=varianceThreshold  override source aggregator's varianceThreshold
 
@@ -958,6 +911,39 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
+
+## `sbv2 job:create JOBDEFINITION`
+
+create a buffer relayer account
+
+```
+USAGE
+  $ sbv2 job:create JOBDEFINITION
+
+ARGUMENTS
+  JOBDEFINITION  filesystem path to job definition
+
+OPTIONS
+  -a, --authority=authority  alternate keypair that will be the aggregator authority
+  -h, --help                 show CLI help
+
+  -k, --keypair=keypair      keypair that will pay for onchain transactions. defaults to new account authority if no
+                             alternate authority provided
+
+  -n, --name=name            name of the buffer account
+
+  -s, --silent               suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl        alternate RPC url
+
+  -v, --verbose              log everything
+
+  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
+```
+
+_See code: [src/commands/job/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.26/src/commands/job/create/index.ts)_
 
 ## `sbv2 job:create:copy JOBSOURCE`
 
@@ -2151,24 +2137,26 @@ ARGUMENTS
   QUEUEKEY  public key of the oracle queue to create a crank on
 
 OPTIONS
-  -h, --help             show CLI help
+  -h, --help                       show CLI help
 
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
+  -k, --keypair=keypair            keypair that will pay for onchain transactions. defaults to new account authority if
+                                   no alternate authority provided
 
-  -n, --name=name        name of the crank for easier identification
+  -n, --name=name                  name of the crank for easier identification
 
-  -r, --maxRows=maxRows  maximum number of rows a crank can support
+  -r, --maxRows=maxRows            maximum number of rows a crank can support
 
-  -s, --silent           suppress cli prompts
+  -s, --silent                     suppress cli prompts
 
-  -u, --rpcUrl=rpcUrl    alternate RPC url
+  -u, --rpcUrl=rpcUrl              alternate RPC url
 
-  -v, --verbose          log everything
+  -v, --verbose                    log everything
 
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
 
-  --programId=programId  alternative Switchboard program ID to interact with
+  --programId=programId            alternative Switchboard program ID to interact with
+
+  --queueAuthority=queueAuthority  alternative keypair to use for queue authority
 
 EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1

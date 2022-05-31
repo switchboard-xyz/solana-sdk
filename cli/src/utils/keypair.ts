@@ -60,7 +60,9 @@ export const loadGoogleSecretKeypair = async (
   const client = new SecretManagerServiceClient();
 
   const [accessResponse] = await client.accessSecretVersion({
-    name: secretPath,
+    name: secretPath.includes("/versions/")
+      ? secretPath
+      : `${secretPath}/versions/latest`,
   });
 
   const secrets = accessResponse?.payload.data;
@@ -91,6 +93,7 @@ export const loadKeypair = async (
       const keypair = loadKeypairFs(keypairPath);
       return keypair;
     } catch {}
+
     try {
       const keypair = await loadGoogleSecretKeypair(keypairPath);
       return keypair;
@@ -100,6 +103,7 @@ export const loadKeypair = async (
   } else if ("secretPath" in keypairPath) {
     return loadGoogleSecretKeypair(keypairPath.secretPath);
   }
+
   throw new InvalidKeypairProvided(keypairPath);
 };
 
@@ -140,5 +144,6 @@ export const loadKeypairWithDescriptor = async (
     };
     return [keypair, descriptor];
   }
+
   throw new InvalidKeypairProvided(keypairPath);
 };

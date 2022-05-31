@@ -64,11 +64,19 @@ export default class OracleCreate extends BaseCommand {
     const { args, flags } = this.parse(OracleCreate);
     verifyProgramHasPayer(this.program);
     const payerKeypair = programWallet(this.program);
+    const signers: Keypair[] = [payerKeypair];
 
     const authorityKeypair = await this.loadAuthority(flags.authority);
+    // if (!payerKeypair.publicKey.equals(authorityKeypair.publicKey)) {
+    //   signers.push(authorityKeypair);
+    // }
+
     const queueAuthority: Keypair = flags.queueAuthority
       ? await loadKeypair(flags.queueAuthority)
       : payerKeypair;
+    if (!payerKeypair.publicKey.equals(queueAuthority.publicKey)) {
+      signers.push(queueAuthority);
+    }
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
@@ -82,6 +90,7 @@ export default class OracleCreate extends BaseCommand {
     );
 
     const tokenWalletKeypair = anchor.web3.Keypair.generate();
+    signers.push(tokenWalletKeypair);
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       this.program,
       queueAccount,
@@ -92,7 +101,7 @@ export default class OracleCreate extends BaseCommand {
 
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
-      authorityKeypair.publicKey,
+      queue.authority,
       queueAccount.publicKey,
       oracleAccount.publicKey
     );
@@ -137,7 +146,7 @@ export default class OracleCreate extends BaseCommand {
         .permissionInit({})
         .accounts({
           permission: permissionAccount.publicKey,
-          authority: authorityKeypair.publicKey,
+          authority: queue.authority,
           granter: queueAccount.publicKey,
           grantee: oracleAccount.publicKey,
           payer: payerKeypair.publicKey,
@@ -152,9 +161,11 @@ export default class OracleCreate extends BaseCommand {
           `Invalid queue authority, received ${queueAuthority.publicKey}, expected ${queue.authority}`
         );
       }
+
       createOracleTxn.add(
         await this.program.methods
           .permissionSet({
+            // eslint-disable-next-line unicorn/no-null
             permission: { permitOracleHeartbeat: null },
             enable: true,
           })
@@ -168,7 +179,7 @@ export default class OracleCreate extends BaseCommand {
 
     const signature = await this.program.provider.sendAndConfirm(
       createOracleTxn,
-      [payerKeypair, authorityKeypair, tokenWalletKeypair]
+      signers
     );
     const oracleData = await oracleAccount.loadData();
 
@@ -176,6 +187,7 @@ export default class OracleCreate extends BaseCommand {
       console.log(oracleAccount.publicKey.toString());
       return;
     }
+
     this.logger.log(
       `${chalk.green(`${CHECK_ICON}Oracle account created successfully`)}`
     );

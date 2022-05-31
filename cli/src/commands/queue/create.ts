@@ -1,4 +1,4 @@
-/* eslint-disable unicorn/prevent-abbreviations */
+/* eslint-disable complexity */
 /* eslint-disable unicorn/new-for-builtins */
 import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
@@ -102,7 +102,7 @@ export default class QueueCreate extends BaseCommand {
     verifyProgramHasPayer(this.program);
     const { flags, args } = this.parse(QueueCreate);
     const payerKeypair = programWallet(this.program);
-    const signers: Keypair[] = [];
+    const signers: Keypair[] = [payerKeypair];
 
     const outputPath =
       flags.outputFile === undefined
@@ -119,6 +119,7 @@ export default class QueueCreate extends BaseCommand {
     if (!authorityKeypair.publicKey.equals(payerKeypair.publicKey)) {
       signers.push(authorityKeypair);
     }
+
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
     );
@@ -186,18 +187,6 @@ export default class QueueCreate extends BaseCommand {
     this.logger.debug(chalkString("OracleQueue", queueKeypair.publicKey));
     this.logger.debug(chalkString("OracleBuffer", queueBuffer.publicKey));
 
-    const crankKeypair = anchor.web3.Keypair.generate();
-    const crankBuffer = anchor.web3.Keypair.generate();
-    const crankSize = flags.crankSize ? flags.crankSize * 40 + 8 : 0;
-
-    this.logger.debug(chalkString("CrankAccount", crankKeypair.publicKey));
-    this.logger.debug(chalkString("CrankBuffer", crankBuffer.publicKey));
-
-    const crankAccount = new CrankAccount({
-      program: this.program,
-      publicKey: crankKeypair.publicKey,
-    });
-
     setupQueueTxns.push(
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,
@@ -238,33 +227,51 @@ export default class QueueCreate extends BaseCommand {
           payer: payerKeypair.publicKey,
           mint: tokenMint.publicKey,
         })
-        .instruction(),
-      anchor.web3.SystemProgram.createAccount({
-        fromPubkey: payerKeypair.publicKey,
-        newAccountPubkey: crankBuffer.publicKey,
-        space: crankSize,
-        lamports:
-          await this.program.provider.connection.getMinimumBalanceForRentExemption(
-            crankSize
-          ),
-        programId: this.program.programId,
-      }),
-      await this.program.methods
-        .crankInit({
-          name: Buffer.from("Crank").slice(0, 32),
-          metadata: Buffer.from("").slice(0, 64),
-          crankSize: flags.crankSize,
-        })
-        .accounts({
-          crank: crankKeypair.publicKey,
-          queue: queueKeypair.publicKey,
-          buffer: crankBuffer.publicKey,
-          systemProgram: SystemProgram.programId,
-          payer: payerKeypair.publicKey,
-        })
         .instruction()
     );
-    signers.push(queueKeypair, queueBuffer, crankKeypair, crankBuffer);
+    signers.push(queueKeypair, queueBuffer);
+
+    let crankAccount: CrankAccount | undefined;
+    if (flags.crankSize) {
+      const crankKeypair = anchor.web3.Keypair.generate();
+      const crankBuffer = anchor.web3.Keypair.generate();
+      const crankSize = flags.crankSize ? flags.crankSize * 40 + 8 : 0;
+
+      this.logger.debug(chalkString("CrankAccount", crankKeypair.publicKey));
+      this.logger.debug(chalkString("CrankBuffer", crankBuffer.publicKey));
+      crankAccount = new CrankAccount({
+        program: this.program,
+        publicKey: crankKeypair.publicKey,
+      });
+      signers.push(crankKeypair, crankBuffer);
+
+      setupQueueTxns.push(
+        anchor.web3.SystemProgram.createAccount({
+          fromPubkey: payerKeypair.publicKey,
+          newAccountPubkey: crankBuffer.publicKey,
+          space: crankSize,
+          lamports:
+            await this.program.provider.connection.getMinimumBalanceForRentExemption(
+              crankSize
+            ),
+          programId: this.program.programId,
+        }),
+        await this.program.methods
+          .crankInit({
+            name: Buffer.from("Crank").slice(0, 32),
+            metadata: Buffer.from("").slice(0, 64),
+            crankSize: flags.crankSize,
+          })
+          .accounts({
+            crank: crankKeypair.publicKey,
+            queue: queueKeypair.publicKey,
+            buffer: crankBuffer.publicKey,
+            systemProgram: SystemProgram.programId,
+            payer: payerKeypair.publicKey,
+          })
+          .instruction()
+      );
+    }
 
     const finalTransactions: (
       | TransactionInstruction
@@ -272,7 +279,7 @@ export default class QueueCreate extends BaseCommand {
     )[] = [];
 
     const oracleAccounts = await Promise.all(
-      Array.from(Array(flags.numOracles).keys()).map(async (n) => {
+      [...Array(flags.numOracles).keys()].map(async (n) => {
         const name = `Oracle-${n + 1}`;
         const tokenWalletKeypair = anchor.web3.Keypair.generate();
         const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
@@ -340,6 +347,7 @@ export default class QueueCreate extends BaseCommand {
             .instruction(),
           await this.program.methods
             .permissionSet({
+              // eslint-disable-next-line unicorn/no-null
               permission: { permitOracleHeartbeat: null },
               enable: true,
             })
@@ -386,16 +394,20 @@ export default class QueueCreate extends BaseCommand {
             name: flags.name,
             queueAccount: queueKeypair.publicKey.toString(),
             queueSize: flags.queueSize,
-            queueReward: Number.parseInt(flags.reward),
-            minStake: Number.parseInt(flags.minStake),
+            queueReward: Number.parseInt(flags.reward, 10),
+            minStake: Number.parseInt(flags.minStake, 10),
             oracleTimeout: flags.oracleTimeout,
-            crankAccounts: [
-              {
-                name: "Crank",
-                crankAccount: crankKeypair.publicKey.toString(),
-                maxRows: flags.crankSize,
-              },
-            ],
+            // crankAccount === undefined ? undefined :
+            crankAccounts:
+              crankAccount === undefined
+                ? undefined
+                : [
+                    {
+                      name: "Crank",
+                      crankAccount: crankAccount.publicKey.toString(),
+                      maxRows: flags.crankSize,
+                    },
+                  ],
             oracleAccounts: [
               oracleAccounts.map((oracle) => {
                 return {

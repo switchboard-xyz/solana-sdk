@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/no-array-push-push */
 import { flags } from "@oclif/command";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
@@ -9,6 +10,7 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import {
+  packAndSend,
   prettyPrintAggregator,
   promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
@@ -17,7 +19,6 @@ import {
   CrankAccount,
   JobAccount,
   LeaseAccount,
-  loadSwitchboardProgram,
   OracleJob,
   OracleQueueAccount,
   PermissionAccount,
@@ -28,8 +29,9 @@ import {
 import Big from "big.js";
 import BaseCommand from "../../../BaseCommand";
 import { verifyProgramHasPayer } from "../../../utils";
-import { packAndSend } from "../../../utils/transaction";
 
+// TODO: Fix command so it accepts a feed authority flag
+// TODO: Add flag that skips job creation
 export default class AggregatorCreateCopy extends BaseCommand {
   static description = "copy an aggregator account to a new oracle queue";
 
@@ -70,11 +72,21 @@ export default class AggregatorCreateCopy extends BaseCommand {
       description: "public key of the crank to push aggregator to",
       required: false,
     }),
-    sourceCluster: flags.string({
-      description: "alternative solana cluster to copy source aggregator from",
-      required: false,
-      options: ["devnet", "mainnet-beta"],
+    enable: flags.boolean({
+      description: "set permissions to PERMIT_ORACLE_QUEUE_USAGE",
     }),
+    queueAuthority: flags.string({
+      description: "alternative keypair to use for queue authority",
+    }),
+    copyJobs: flags.boolean({
+      description:
+        "create copy of job accounts instead of referincing existing job account",
+    }),
+    // sourceCluster: flags.string({
+    //   description: "alternative solana cluster to copy source aggregator from",
+    //   required: false,
+    //   options: ["devnet", "mainnet-beta"],
+    // }),
   };
 
   static args = [
@@ -97,20 +109,24 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const { args, flags } = this.parse(AggregatorCreateCopy);
 
     const payerKeypair = programWallet(this.program);
+    const feedAuthority = await this.loadAuthority(flags.authority);
+    const queueAuthority = await this.loadAuthority(flags.queueAuthority);
 
-    const sourceProgram = !flags.sourceCluster
-      ? this.program
-      : flags.sourceCluster === "devnet" ||
-        flags.sourceCluster === "mainnet-beta"
-      ? await loadSwitchboardProgram(
-          flags.sourceCluster,
-          undefined,
-          payerKeypair
-        )
-      : undefined;
+    // const sourceProgram = !flags.sourceCluster
+    //   ? this.program
+    //   : flags.sourceCluster === "devnet" ||
+    //     flags.sourceCluster === "mainnet-beta"
+    //   ? await loadSwitchboardProgram(
+    //       flags.sourceCluster,
+    //       undefined,
+    //       payerKeypair
+    //     )
+    //   : undefined;
+    const sourceProgram = this.program;
     if (sourceProgram === undefined) {
-      throw new Error(`Invalid sourceAggregatorCluster ${flags.sourceCluster}`);
+      throw new Error(`Invalid sourceAggregatorCluster`);
     }
+
     const sourceAggregatorAccount = new AggregatorAccount({
       program: sourceProgram,
       publicKey: args.aggregatorSource,
@@ -125,14 +141,6 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const sourceJobAccounts = sourceJobPubkeys.map((publicKey) => {
       return new JobAccount({ program: sourceProgram, publicKey: publicKey });
     });
-
-    const sourceJobs = await Promise.all(
-      sourceJobAccounts.map(async (jobAccount) => {
-        const data = await jobAccount.loadData();
-        const job = OracleJob.decodeDelimited(data.data);
-        return { job, data };
-      })
-    );
 
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
@@ -153,67 +161,17 @@ export default class AggregatorCreateCopy extends BaseCommand {
       | TransactionInstruction
       | TransactionInstruction[]
     )[] = [];
-    const createAccountSigners: Keypair[] = [payerKeypair];
+    const createAccountSigners: Keypair[] = [
+      payerKeypair,
+      feedAuthority,
+      queueAuthority,
+    ];
 
-    const jobAccounts = await Promise.all(
-      sourceJobs.map(async ({ job, data }) => {
-        const jobKeypair = Keypair.generate();
-        createAccountSigners.push(jobKeypair);
-
-        const jobData = Buffer.from(
-          OracleJob.encodeDelimited(
-            OracleJob.create({
-              tasks: job.tasks,
-            })
-          ).finish()
-        );
-        const size =
-          280 + jobData.length + (data.variables?.join("")?.length ?? 0);
-
-        createAccountInstructions.push([
-          SystemProgram.createAccount({
-            fromPubkey: payerKeypair.publicKey,
-            newAccountPubkey: jobKeypair.publicKey,
-            space: size,
-            lamports:
-              await this.program.provider.connection.getMinimumBalanceForRentExemption(
-                size
-              ),
-            programId: this.program.programId,
-          }),
-          await this.program.methods
-            .jobInit({
-              name: Buffer.from(data.name),
-              data: jobData,
-              variables:
-                data.variables?.map((item) => Buffer.from("")) ??
-                new Array<Buffer>(),
-              authorWallet: payerKeypair.publicKey,
-              stateBump,
-            })
-            .accounts({
-              job: jobKeypair.publicKey,
-              authorWallet: tokenWallet,
-              authority: payerKeypair.publicKey,
-              programState: programStateAccount.publicKey,
-            })
-            // .signers([jobKeypair])
-            .instruction(),
-        ]);
-
-        return new JobAccount({
-          program: this.program,
-          publicKey: jobKeypair.publicKey,
-        });
-      })
-    );
-
+    // Create Aggregator & Permissions
     const aggregatorKeypair = Keypair.generate();
     this.logger.debug(`Aggregator: ${aggregatorKeypair.publicKey}`);
     createAccountSigners.push(aggregatorKeypair);
     const aggregatorSize = this.program.account.aggregatorAccountData.size;
-    const permissionAccountSize =
-      this.program.account.permissionAccountData.size;
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
       queue.authority,
@@ -239,23 +197,6 @@ export default class AggregatorCreateCopy extends BaseCommand {
       leaseAccount.publicKey,
       true
     );
-
-    const jobPubkeys: Array<PublicKey> = [];
-    const jobWallets: Array<PublicKey> = [];
-    const walletBumps: Array<number> = [];
-    for (let idx in jobAccounts) {
-      const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
-        [
-          payerKeypair.publicKey.toBuffer(),
-          spl.TOKEN_PROGRAM_ID.toBuffer(),
-          tokenMint.publicKey.toBuffer(),
-        ],
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      jobPubkeys.push(jobAccounts[idx].publicKey);
-      jobWallets.push(jobWallet);
-      walletBumps.push(bump);
-    }
 
     createAccountInstructions.push(
       [
@@ -291,7 +232,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
           })
           .accounts({
             aggregator: aggregatorKeypair.publicKey,
-            authority: payerKeypair.publicKey,
+            authority: feedAuthority.publicKey,
             queue: queueAccount.publicKey,
             authorWallet: tokenWallet,
             programState: programStateAccount.publicKey,
@@ -309,18 +250,23 @@ export default class AggregatorCreateCopy extends BaseCommand {
             systemProgram: SystemProgram.programId,
           })
           .instruction(),
-        payerKeypair.publicKey.equals(queue.authority)
+        flags.enable && queueAuthority.publicKey.equals(queue.authority)
           ? await this.program.methods
               .permissionSet({
-                permission: { permitOracleQueueUsage: null },
+                permission: { permitOracleQueueUsage: undefined },
                 enable: true,
               })
               .accounts({
                 permission: permissionAccount.publicKey,
-                authority: queue.authority,
+                authority: queueAuthority.publicKey,
               })
               .instruction()
           : undefined,
+      ].filter((item) => item)
+    );
+
+    createAccountInstructions.push(
+      [
         spl.Token.createAssociatedTokenAccountInstruction(
           spl.ASSOCIATED_TOKEN_PROGRAM_ID,
           spl.TOKEN_PROGRAM_ID,
@@ -334,7 +280,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
             loadAmount: new anchor.BN(0),
             stateBump,
             leaseBump,
-            withdrawAuthority: payerKeypair.publicKey,
+            withdrawAuthority: feedAuthority.publicKey,
             walletBumps: Buffer.from([]),
           })
           .accounts({
@@ -364,7 +310,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
               })
               .accounts({
                 crank: new PublicKey(flags.crankKey),
-                aggregator: aggregatorAccount.publicKey,
+                aggregator: aggregatorKeypair.publicKey,
                 oracleQueue: queueAccount.publicKey,
                 queueAuthority: queue.authority,
                 permission: permissionAccount.publicKey,
@@ -383,54 +329,116 @@ export default class AggregatorCreateCopy extends BaseCommand {
       ].filter((item) => item)
     );
 
-    const finalInstructions: (
-      | TransactionInstruction
-      | TransactionInstruction[]
-    )[] = [];
+    const createJobIxns = flags.copyJobs
+      ? // create job account copies
+        await Promise.all(
+          sourceJobAccounts.map(async (jobAccount) => {
+            const jobKeypair = Keypair.generate();
+            createAccountSigners.push(jobKeypair); // add signers
 
-    finalInstructions.push(
-      ...(await Promise.all(
-        jobAccounts.map(async (jobAccount) => {
-          return this.program.methods
-            .aggregatorAddJob({
-              weight: 1,
-            })
-            .accounts({
-              aggregator: aggregatorKeypair.publicKey,
-              authority: payerKeypair.publicKey,
-              job: jobAccount.publicKey,
-            })
-            .instruction();
-        })
-      ))
-    );
+            const job = await jobAccount.loadData();
+            const data = await jobAccount.loadData();
+            const jobData = Buffer.from(
+              OracleJob.encodeDelimited(
+                OracleJob.create({
+                  tasks: job.tasks,
+                })
+              ).finish()
+            );
+
+            const size =
+              280 + jobData.length + (data.variables?.join("")?.length ?? 0);
+
+            return [
+              SystemProgram.createAccount({
+                fromPubkey: payerKeypair.publicKey,
+                newAccountPubkey: jobKeypair.publicKey,
+                space: size,
+                lamports:
+                  await this.program.provider.connection.getMinimumBalanceForRentExemption(
+                    size
+                  ),
+                programId: this.program.programId,
+              }),
+              await this.program.methods
+                .jobInit({
+                  name: Buffer.from(data.name),
+                  data: jobData,
+                  variables:
+                    data.variables?.map((item) => Buffer.from("")) ??
+                    new Array<Buffer>(),
+                  authorWallet: payerKeypair.publicKey,
+                  stateBump,
+                })
+                .accounts({
+                  job: jobKeypair.publicKey,
+                  authorWallet: tokenWallet,
+                  authority: feedAuthority.publicKey,
+                  programState: programStateAccount.publicKey,
+                })
+                .signers([feedAuthority])
+                .instruction(),
+              await this.program.methods
+                .aggregatorAddJob({
+                  weight: 1,
+                })
+                .accounts({
+                  aggregator: aggregatorKeypair.publicKey,
+                  authority: feedAuthority.publicKey,
+                  job: jobAccount.publicKey,
+                })
+                .instruction(),
+            ];
+          })
+        )
+      : // add job by pubkey
+        await Promise.all(
+          sourceJobAccounts.map(async (jobAccount) => {
+            const addJobIxn = await this.program.methods
+              .aggregatorAddJob({
+                weight: 1,
+              })
+              .accounts({
+                aggregator: aggregatorKeypair.publicKey,
+                authority: feedAuthority.publicKey,
+                job: jobAccount.publicKey,
+              })
+              .instruction();
+            return addJobIxn;
+          })
+        );
 
     const createAccountSignatures = packAndSend(
       this.program,
-      createAccountInstructions,
-      finalInstructions,
+      [createAccountInstructions, createJobIxns],
       createAccountSigners,
       payerKeypair.publicKey
-    );
+    ).catch((error) => {
+      throw error;
+    });
 
     let aggInitWs: number;
-    const aggInitPromise = new Promise((resolve: (result: boolean) => void) => {
+    const aggInitPromise = new Promise((resolve: (result: any) => void) => {
       aggInitWs = this.program.provider.connection.onAccountChange(
-        aggregatorAccount.publicKey,
+        aggregatorKeypair.publicKey,
         (accountInfo: AccountInfo<Buffer>, slot) => {
-          resolve(true);
+          const aggData = new anchor.BorshAccountsCoder(
+            this.program.idl
+          ).decode("AggregatorAccountData", accountInfo.data);
+          resolve(aggData);
         }
       );
     });
 
-    const awaitResult = await promiseWithTimeout(
-      22_000,
-      aggInitPromise
-    ).finally(() => {
-      try {
-        this.program.provider.connection.removeAccountChangeListener(aggInitWs);
-      } catch {}
-    });
+    const result = await promiseWithTimeout(45_000, aggInitPromise).finally(
+      () => {
+        try {
+          this.program.provider.connection.removeAccountChangeListener(
+            aggInitWs
+          );
+        } catch {}
+      }
+    );
 
     if (this.silent) {
       console.log(aggregatorAccount.publicKey.toString());
@@ -438,13 +446,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
     }
 
     this.logger.info(
-      await prettyPrintAggregator(
-        aggregatorAccount,
-        undefined,
-        true,
-        true,
-        true
-      )
+      await prettyPrintAggregator(aggregatorAccount, result, true, true, true)
     );
   }
 

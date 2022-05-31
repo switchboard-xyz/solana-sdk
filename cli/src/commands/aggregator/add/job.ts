@@ -81,12 +81,14 @@ export default class AggregatorAddJob extends BaseCommand {
     if (flags.jobDefinition) {
       this.jobDefinition = JSON.parse(flags.jobDefinition, pubKeyReviver);
     }
+
     if (flags.jobKey) {
       this.jobAccount = new JobAccount({
         program: this.program,
         publicKey: new PublicKey(flags.jobKey),
       });
     }
+
     if (!this.jobDefinition && !this.jobAccount) {
       throw new Error("need to provide --jobDefinition or --jobKey");
     }
@@ -95,6 +97,7 @@ export default class AggregatorAddJob extends BaseCommand {
       if (fs.existsSync(flags.outputFile) && !flags.force) {
         throw new OutputFileExistsNoForce(flags.outputFile);
       }
+
       this.outputFile = flags.outputFile;
     }
   }
