@@ -1,9 +1,43 @@
 
 interact with a switchboard job account
 
+* [`sbv2 job:create JOBDEFINITION`](#sbv2-jobcreate-jobdefinition)
 * [`sbv2 job:create:copy JOBSOURCE`](#sbv2-jobcreatecopy-jobsource)
 * [`sbv2 job:create:json DEFINITIONFILE`](#sbv2-jobcreatejson-definitionfile)
 * [`sbv2 job:create:template TEMPLATE ID`](#sbv2-jobcreatetemplate-template-id)
+
+## `sbv2 job:create JOBDEFINITION`
+
+create a buffer relayer account
+
+```
+USAGE
+  $ sbv2 job:create JOBDEFINITION
+
+ARGUMENTS
+  JOBDEFINITION  filesystem path to job definition
+
+OPTIONS
+  -a, --authority=authority  alternate keypair that will be the aggregator authority
+  -h, --help                 show CLI help
+
+  -k, --keypair=keypair      keypair that will pay for onchain transactions. defaults to new account authority if no
+                             alternate authority provided
+
+  -n, --name=name            name of the buffer account
+
+  -s, --silent               suppress cli prompts
+
+  -u, --rpcUrl=rpcUrl        alternate RPC url
+
+  -v, --verbose              log everything
+
+  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+
+  --programId=programId      alternative Switchboard program ID to interact with
+```
+
+_See code: [src/commands/job/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/job/create/index.ts)_
 
 ## `sbv2 job:create:copy JOBSOURCE`
 

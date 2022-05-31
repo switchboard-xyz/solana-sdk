@@ -20,24 +20,26 @@ ARGUMENTS
   QUEUEKEY  public key of the oracle queue to create a crank on
 
 OPTIONS
-  -h, --help             show CLI help
+  -h, --help                       show CLI help
 
-  -k, --keypair=keypair  keypair that will pay for onchain transactions. defaults to new account authority if no
-                         alternate authority provided
+  -k, --keypair=keypair            keypair that will pay for onchain transactions. defaults to new account authority if
+                                   no alternate authority provided
 
-  -n, --name=name        name of the crank for easier identification
+  -n, --name=name                  name of the crank for easier identification
 
-  -r, --maxRows=maxRows  maximum number of rows a crank can support
+  -r, --maxRows=maxRows            maximum number of rows a crank can support
 
-  -s, --silent           suppress cli prompts
+  -s, --silent                     suppress cli prompts
 
-  -u, --rpcUrl=rpcUrl    alternate RPC url
+  -u, --rpcUrl=rpcUrl              alternate RPC url
 
-  -v, --verbose          log everything
+  -v, --verbose                    log everything
 
-  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
 
-  --programId=programId  alternative Switchboard program ID to interact with
+  --programId=programId            alternative Switchboard program ID to interact with
+
+  --queueAuthority=queueAuthority  alternative keypair to use for queue authority
 
 EXAMPLE
   $ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../authority-keypair.json -n crank-1
