@@ -8,7 +8,6 @@ title: Requirements
 
 A Switchboard oracle is a Node.js container that sits between the Solana blockchain and the internet and waits for update requests from its assigned oracle queue.
 
-
 You can find the latest Switchboard oracle image on [DockerHub](https://hub.docker.com/r/switchboardlabs/node/tags).
 
 ## Hardware Requirements
@@ -43,6 +42,7 @@ BACKUP_MAINNET_RPC=""
 ORACLE_KEY=""
 HEARTBEAT_INTERVAL=15
 GCP_CONFIG_BUCKET=""
+UNWRAP_STAKE_THRESHOLD=""
 # Keypair Config
 PAYER_SECRET_PATH=""
 PAYER_SECRETS=""
@@ -173,6 +173,20 @@ VERBOSE=1
         directory. If not found, no config is loaded.
         <br />
         <b>Description</b> - Contains API keys for private API endpoints
+      </td>
+    </tr>
+    <tr>
+      <td>UNWRAP_STAKE_THRESHOLD</td>
+      <td>
+        <b>
+          <u>Optional</u>
+        </b>
+        <br />
+        <b>Type</b> - Number (SOL amount, Ex. 1.55)
+        <br />
+        <b>Default</b> - 0, disabled.
+        <br />
+        <b>Description</b> - The Solana balance amount to trigger an unwrap stake action. When an oracle's Solana balance falls below the set threshold, the node will automatically unwrap funds from the oracle's staking wallet, leaving at least 0.1 wSOL or 10% more than the queue's minimum stake requirement. 
       </td>
     </tr>
   </tbody>
