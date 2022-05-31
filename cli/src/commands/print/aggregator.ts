@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/import-style */
 import { flags } from "@oclif/command";
 import { PublicKey } from "@solana/web3.js";
 import {

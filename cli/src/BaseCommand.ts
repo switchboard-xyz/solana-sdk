@@ -1,5 +1,3 @@
-/* eslint-disable unicorn/no-process-exit */
-/* eslint-disable no-process-exit */
 import Command, { flags } from "@oclif/command";
 import { Input } from "@oclif/parser";
 import * as anchor from "@project-serum/anchor";
@@ -146,6 +144,7 @@ abstract class BaseCommand extends Command {
     if (this.verbose) {
       this.logger.log("verbose logging enabled");
     }
+
     this.logger.debug(chalk.underline(chalk.blue("## Config".padEnd(16))));
     this.logger.debug(
       `${chalk.yellow("cluster:")} ${chalk.blue(this.cluster)}`
@@ -166,10 +165,12 @@ abstract class BaseCommand extends Command {
     if (message) {
       logger.info(chalk.red(`${FAILED_ICON}${message}`));
     }
+
     if (error.message) {
       const messageLines = error.message.split("\n");
       logger.error(messageLines[0]);
     }
+
     if (this.verbose) {
       console.error(error);
     }
@@ -209,7 +210,6 @@ abstract class BaseCommand extends Command {
   loadConfig(): void {
     const configPath = path.join(this.config.configDir, "config.json");
     if (fs.existsSync(configPath)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const userConfig: CliConfig = JSON.parse(
         fs.readFileSync(configPath, "utf-8")
       );
@@ -240,6 +240,7 @@ abstract class BaseCommand extends Command {
         this.saveConfig(newConfig);
         break;
       }
+
       case "mainnet-rpc": {
         const newConfig = {
           ...this.cliConfig,
@@ -251,6 +252,7 @@ abstract class BaseCommand extends Command {
         this.saveConfig(newConfig);
         break;
       }
+
       default: {
         this.logger.warn("not implemented yet");
       }
@@ -274,15 +276,17 @@ abstract class BaseCommand extends Command {
   // Converts a string to a tokenAmount
   // If a decimal is found, it will be normalized using 9 decimal places
   getTokenAmount(value: string, decimals = 9): anchor.BN {
-    if (isNaN(Number(value))) {
-      throw new Error("tokenAmount must be an integer or decimal");
+    if (Number.isNaN(Number(value))) {
+      throw new TypeError("tokenAmount must be an integer or decimal");
     }
+
     if (value.split(".").length > 1) {
       const float = new Big(value);
       const scale = BigUtils.safePow(new Big(10), decimals);
       const tokenAmount = BigUtils.safeMul(float, scale);
       return new anchor.BN(tokenAmount.toFixed(0));
     }
+
     return new anchor.BN(value);
   }
 }

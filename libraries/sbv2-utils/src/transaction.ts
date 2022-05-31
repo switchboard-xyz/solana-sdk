@@ -31,11 +31,12 @@ export async function packAndSend(
     ).wallet.signAllTransactions(signedTransactions);
 
     for (let k = 0; k < packedTransactions.length; k += 1) {
-      const tx = signedTxs[k];
-      const rawTx = tx!.serialize();
+      const tx = signedTxs[k]!;
+      const rawTx = tx.serialize();
       signatures.push(
         sendAndConfirmRawTransaction(program.provider.connection, rawTx, {
           maxRetries: 10,
+          commitment: "processed",
         })
           .then((sig) => {
             return sig;

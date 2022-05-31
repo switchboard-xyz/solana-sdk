@@ -18,11 +18,12 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+// eslint-disable-next-line import/extensions
+// import { OracleJob } from "./protos/index.js";
+import { OracleJob } from "@switchboard-xyz/switchboard-api";
+import assert from "assert";
 import Big from "big.js";
 import * as crypto from "crypto";
-// eslint-disable-next-line import/extensions
-import { OracleJob } from "./protos/index.js";
-const assert = require("assert");
 
 /**
  * Switchboard Devnet Program ID

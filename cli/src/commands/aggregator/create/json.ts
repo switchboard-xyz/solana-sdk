@@ -70,17 +70,16 @@ export default class JsonCreateAggregator extends BaseCommand {
     if (!fs.existsSync(definitionFile)) {
       throw new Error("input file does not exist");
     }
-    let aggregatorDefinition: fromAggregatorJSON = JSON.parse(
+
+    const aggregatorDefinition: fromAggregatorJSON = JSON.parse(
       fs.readFileSync(definitionFile, "utf-8"),
       pubKeyReviver
     );
 
-    if (flags.outputFile) {
-      if (fs.existsSync(flags.outputFile) && !flags.force) {
-        throw new Error(
-          "output file exists. Run the command with '--force' to overwrite it"
-        );
-      }
+    if (flags.outputFile && fs.existsSync(flags.outputFile) && !flags.force) {
+      throw new Error(
+        "output file exists. Run the command with '--force' to overwrite it"
+      );
     }
 
     let authority = programWallet(this.program);
@@ -91,6 +90,7 @@ export default class JsonCreateAggregator extends BaseCommand {
     if (!aggregatorDefinition.queuePublicKey && !flags.queueKey) {
       throw new Error("you must provide a --queueKey to create aggregator for");
     }
+
     const queueAccount = new OracleQueueAccount({
       program: this.program,
       publicKey: aggregatorDefinition.queuePublicKey
@@ -173,6 +173,7 @@ export default class JsonCreateAggregator extends BaseCommand {
         jobs.push(account);
       }
     }
+
     for await (const job of jobs) {
       await aggregatorAccount.addJob(job, authority);
     }

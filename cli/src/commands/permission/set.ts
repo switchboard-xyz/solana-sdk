@@ -57,12 +57,14 @@ export default class PermissionSet extends BaseCommand {
         authorityKey = data.authority;
         break;
       }
+
       default: {
         throw new Error(
           `Granter should be a OracleQueueAccount, received ${granterAccountType}`
         );
       }
     }
+
     const authority = await this.loadAuthority(flags.authority, authorityKey);
 
     // check and load grantees account type, and assign permissions based on type
