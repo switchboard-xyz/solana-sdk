@@ -59,3 +59,9 @@ LATEST VALUE:
 """
 
 ```
+
+## Anchorpy Client Gen
+
+```sh
+anchorpy client-gen ./switchboard_v2.mainnet.parsed.json ./switchboardpy --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+```

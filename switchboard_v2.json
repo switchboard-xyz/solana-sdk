@@ -1528,10 +1528,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                1024
-              ]
+              "array": ["u8", 1024]
             }
           }
         ]
@@ -1545,19 +1542,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                128
-              ]
+              "array": ["u8", 128]
             }
           },
           {
@@ -1633,10 +1624,7 @@
           {
             "name": "jobPubkeysData",
             "type": {
-              "array": [
-                "publicKey",
-                16
-              ]
+              "array": ["publicKey", 16]
             }
           },
           {
@@ -1657,10 +1645,7 @@
           {
             "name": "jobsChecksum",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -1688,10 +1673,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                163
-              ]
+              "array": ["u8", 163]
             }
           }
         ]
@@ -1725,10 +1707,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                256
-              ]
+              "array": ["u8", 256]
             }
           }
         ]
@@ -1778,10 +1757,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                256
-              ]
+              "array": ["u8", 256]
             }
           }
         ]
@@ -1795,19 +1771,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           },
           {
@@ -1881,10 +1851,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                1001
-              ]
+              "array": ["u8", 1001]
             }
           },
           {
@@ -1906,19 +1873,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           },
           {
@@ -1940,10 +1901,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                255
-              ]
+              "array": ["u8", 255]
             }
           },
           {
@@ -1961,19 +1919,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                128
-              ]
+              "array": ["u8", 128]
             }
           },
           {
@@ -2005,10 +1957,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                256
-              ]
+              "array": ["u8", 256]
             }
           }
         ]
@@ -2022,19 +1971,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           },
           {
@@ -2048,10 +1991,7 @@
           {
             "name": "hash",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -2134,10 +2074,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                1024
-              ]
+              "array": ["u8", 1024]
             }
           }
         ]
@@ -2160,19 +2097,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                128
-              ]
+              "array": ["u8", 128]
             }
           },
           {
@@ -2216,13 +2147,13 @@
         ]
       }
     },
-    {
-      "name": "AggregatorLockParams",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
+  {
+    "name": "AggregatorLockParams",
+    "type": {
+      "kind": "struct",
+      "fields": []
+    }
+  },
     {
       "name": "AggregatorOpenRoundParams",
       "type": {
@@ -2281,10 +2212,7 @@
           {
             "name": "jobsChecksum",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -2477,10 +2405,7 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -2613,19 +2538,13 @@
           {
             "name": "name",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "metadata",
             "type": {
-              "array": [
-                "u8",
-                64
-              ]
+              "array": ["u8", 64]
             }
           },
           {
@@ -2901,10 +2820,7 @@
           {
             "name": "data",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -2962,10 +2878,7 @@
           {
             "name": "oraclePubkeysData",
             "type": {
-              "array": [
-                "publicKey",
-                16
-              ]
+              "array": ["publicKey", 16]
             }
           },
           {
@@ -2982,28 +2895,19 @@
           {
             "name": "currentPayout",
             "type": {
-              "array": [
-                "i64",
-                16
-              ]
+              "array": ["i64", 16]
             }
           },
           {
             "name": "mediansFulfilled",
             "type": {
-              "array": [
-                "bool",
-                16
-              ]
+              "array": ["bool", 16]
             }
           },
           {
             "name": "errorsFulfilled",
             "type": {
-              "array": [
-                "bool",
-                16
-              ]
+              "array": ["bool", 16]
             }
           }
         ]
@@ -3153,10 +3057,7 @@
           {
             "name": "bytes",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -3170,10 +3071,7 @@
           {
             "name": "bytes",
             "type": {
-              "array": [
-                "u64",
-                5
-              ]
+              "array": ["u64", 5]
             }
           }
         ]
@@ -3325,10 +3223,7 @@
           {
             "name": "reprProof",
             "type": {
-              "array": [
-                "u8",
-                80
-              ]
+              "array": ["u8", 80]
             }
           },
           {
@@ -3481,46 +3376,31 @@
           {
             "name": "p1Bytes",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "p2Bytes",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "p3Bytes",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "p4Bytes",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
             "name": "cPrimeHashbuf",
             "type": {
-              "array": [
-                "u8",
-                16
-              ]
+              "array": ["u8", 16]
             }
           },
           {
@@ -3546,10 +3426,7 @@
           {
             "name": "result",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           }
         ]
@@ -3622,10 +3499,7 @@
           {
             "name": "ixData",
             "type": {
-              "array": [
-                "u8",
-                1024
-              ]
+              "array": ["u8", 1024]
             }
           },
           {
@@ -3667,10 +3541,7 @@
           {
             "name": "alpha",
             "type": {
-              "array": [
-                "u8",
-                256
-              ]
+              "array": ["u8", 256]
             }
           },
           {
@@ -3688,10 +3559,7 @@
           {
             "name": "result",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "array": ["u8", 32]
             }
           },
           {
@@ -3701,10 +3569,7 @@
           {
             "name": "ebuf",
             "type": {
-              "array": [
-                "u8",
-                256
-              ]
+              "array": ["u8", 256]
             }
           }
         ]
@@ -3840,36 +3705,6 @@
           },
           {
             "name": "BCD"
-          }
-        ]
-      }
-    },
-    {
-      "name": "Error",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "InvalidPublicKey"
-          },
-          {
-            "name": "SerializationError",
-            "fields": [
-              {
-                "defined": "bincode::Error"
-              }
-            ]
-          },
-          {
-            "name": "DeserializationError",
-            "fields": [
-              {
-                "defined": "bincode::Error"
-              }
-            ]
-          },
-          {
-            "name": "InvalidDataError"
           }
         ]
       }

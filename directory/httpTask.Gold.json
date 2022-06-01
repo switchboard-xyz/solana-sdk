@@ -1,15 +1,25 @@
 {
-  "name": "ASG Gold Price",
-  "tasks": [
+  "jobs": [
     {
-      "httpTask": {
-        "url": "https://data-asg.goldprice.org/dbXRates/USD"
-      }
-    },
-    {
-      "jsonParseTask": {
-        "path": "$.items[?(@.curr == \"USD\")].xauPrice"
-      }
+      "name": "ASG Gold Price",
+      "tasks": [
+        {
+          "httpTask": {
+            "url": "https://data-asg.goldprice.org/dbXRates/USD",
+            "headers": [
+              {
+                "key": "Authorization",
+                "value": "Bearer XXXX"
+              }
+            ]
+          }
+        },
+        {
+          "jsonParseTask": {
+            "path": "$.items[?(@.curr == \"USD\")].xauPrice"
+          }
+        }
+      ]
     }
   ]
 }

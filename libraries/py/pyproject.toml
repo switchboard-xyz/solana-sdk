@@ -9,7 +9,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-anchorpy = "^0.9.1"
+anchorpy = {extras = ["cli"], version = "^0.9.1"}
 anyio = "3.4.0"
 apischema = "0.16.6"
 attrs = "21.2.0"
@@ -27,7 +27,7 @@ httpx = "0.18.2"
 idna = "3.3"
 inflection = "0.5.1"
 iniconfig = "1.1.1"
-jsonrpcclient = "4.0.2"
+jsonrpcclient = ">=4.0.2"
 jsonrpcserver = ">=5.0.7"
 jsonschema = "3.2.0"
 more-itertools = "8.12.0"
@@ -54,6 +54,7 @@ typing-extensions = "3.10.0.2"
 urllib3 = "1.26.7"
 websockets = "10.1"
 zstandard = ">=0.17.0"
+typer = "^0.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "6.2.5"
