@@ -63,6 +63,8 @@ class AggregatorSaveResultParams:
     """List of parsed oracles"""
     oracles: list[Any]
 
+
+
 # Parameters for creating and setting a history buffer
 @dataclass
 class AggregatorSetHistoryBufferParams:
@@ -556,6 +558,49 @@ class AggregatorAccount:
                         )
                     )
                 ]
+            )
+        )
+
+    # TODO: Verify this function 
+    async def open_round(self, params: AggregatorOpenRoundParams):
+        program = self.program
+        authority = params.authority or self.keypair
+        state_account, state_bump = ProgramStateAccount.from_seed(program)
+        mint = await state_account.get_token_mint()
+        queue = await params.oracle_queue_account.load_data()
+        lease_account, lease_bump = LeaseAccount.from_seed(
+            self.program,
+            queue_account,
+            self
+        )
+        lease = await lease_account.load_data()
+        permission_account, permission_bump = PermissionAccount.from_seed(
+            self.program,
+            queue.authority,
+            params.oracle_queue_account.public_key,
+            self.public_key
+        )
+        await program.rpc["aggregator_open_round"](
+            {
+                "state_bump": state_bump,
+                "lease_bump": lease_bump,
+                "permission_bump": permission_bump,
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "lease":  self.public_key,
+                    "oracle_queue": self.public_key,
+                    "queue_authority": queue.authority,
+                    "permission": permission_account.public_key,
+                    "escrow": lease.escrow,
+                    "program_state": state_account.public_key,
+                    "payout_wallet": params.payout_wallet,
+                    "token_program": TOKEN_PROGRAM_ID,
+                    "data_buffer": queue.data_buffer,
+                    "mint": mint.public_key,
+                },
+                signers=[self.keypair]
             )
         )
     
