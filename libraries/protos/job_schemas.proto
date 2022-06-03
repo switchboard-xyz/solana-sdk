@@ -128,7 +128,7 @@ message OracleJob {
       // A job whose result is computed before dividing our numerical input by that result.
       OracleJob job = 3;
     }
-    optional bool force_mainnet = 3;
+    optional bool force_mainnet = 4;
   }
 
   // This task will multiply a numerical input by a scalar value or by another
@@ -142,7 +142,7 @@ message OracleJob {
       // A job whose result is computed before multiplying our numerical input by that result.
       OracleJob job = 3;
     }
-    optional bool force_mainnet = 3;
+    optional bool force_mainnet = 4;
   }
 
   // This task will add a numerical input by a scalar value or by another
@@ -156,7 +156,7 @@ message OracleJob {
       // A job whose result is computed before adding our numerical input by that result.
       OracleJob job = 3;
     }
-    optional bool force_mainnet = 3;
+    optional bool force_mainnet = 4;
   }
 
   // This task will subtract a numerical input by a scalar value or by another
@@ -170,7 +170,7 @@ message OracleJob {
       // A job whose result is computed before subtracting our numerical input by that result.
       OracleJob job = 3;
     }
-    optional bool force_mainnet = 3;
+    optional bool force_mainnet = 4;
   }
 
   // Fetch LP token price info from a number of supported exchanges.
