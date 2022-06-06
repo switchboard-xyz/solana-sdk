@@ -12,24 +12,52 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 ```
 
 <!-- commands -->
-# Command Topics
+* [`sbv2 help [COMMAND]`](#sbv2-help-command)
+* [`sbv2 print:job:templates`](#sbv2-printjobtemplates)
+* [`sbv2 update [CHANNEL]`](#sbv2-update-channel)
 
-* [`sbv2 aggregator`](../website/api/cli/aggregator.md) - interact with a switchboard aggregator account
-* [`sbv2 config`](../website/api/cli/config.md) - print cli config
-* [`sbv2 crank`](../website/api/cli/crank.md) - interact with a switchboard crank account
-* [`sbv2 help`](../website/api/cli/help.md) - Display help for sbv2.
-* [`sbv2 job`](../website/api/cli/job.md) - interact with a switchboard job account
-* [`sbv2 json`](../website/api/cli/json.md) - create and manage an oracle queue from a json file
-* [`sbv2 lease`](../website/api/cli/lease.md) - interact with a switchboard lease account
-* [`sbv2 localnet`](../website/api/cli/localnet.md) - create a localnet switchboard environment
-* [`sbv2 oracle`](../website/api/cli/oracle.md) - interact with a switchboard oracle account
-* [`sbv2 permission`](../website/api/cli/permission.md) - create a permission account
-* [`sbv2 print`](../website/api/cli/print.md) - find and print a switchboard account by public key for a given cluster
-* [`sbv2 queue`](../website/api/cli/queue.md) - interact with a switchboard oracle queue account
-* [`sbv2 sandbox`](../website/api/cli/sandbox.md) - sandbox
-* [`sbv2 test`](../website/api/cli/test.md) - sandbox
-* [`sbv2 update`](../website/api/cli/update.md) - update the sbv2 CLI
-* [`sbv2 vrf`](../website/api/cli/vrf.md) - create a Switchboard VRF Account
-* [`sbv2 watch`](../website/api/cli/watch.md) - watch an aggregator for a new value
+## `sbv2 help [COMMAND]`
 
+Display help for sbv2.
+
+```
+USAGE
+  $ sbv2 help [COMMAND]
+
+ARGUMENTS
+  COMMAND  Command to show help for.
+
+OPTIONS
+  -n, --nested-commands  Include all nested commands in the output.
+```
+
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
+
+## `sbv2 print:job:templates`
+
+list available templates to build a job from
+
+```
+USAGE
+  $ sbv2 print:job:templates
+
+ALIASES
+  $ sbv2 job:print:templates
+```
+
+_See code: [src/commands/print/job/templates.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.1.28/src/commands/print/job/templates.ts)_
+
+## `sbv2 update [CHANNEL]`
+
+update the sbv2 CLI
+
+```
+USAGE
+  $ sbv2 update [CHANNEL]
+
+OPTIONS
+  --from-local  interactively choose an already installed version
+```
+
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v1.5.0/src/commands/update.ts)_
 <!-- commandsstop -->
