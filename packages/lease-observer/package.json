@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/lease-observer",
-  "version": "0.1.8",
+  "version": "0.1.7",
   "description": "receive pager duty alerts when a switchboard v2 lease crosses a provided threshold",
   "private": true,
   "repository": {
