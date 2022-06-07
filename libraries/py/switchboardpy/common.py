@@ -12,6 +12,12 @@ SBV2_DEVNET_PID = PublicKey(
     '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
 )
 
+# Mainnet-Beta Program ID.
+SBV2_MAINNET_PID = PublicKey(
+    'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+)
+
+
 # Input parameters for constructing wrapped representations of Switchboard accounts. 
 @dataclass
 class AccountParams:

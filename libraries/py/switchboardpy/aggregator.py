@@ -26,6 +26,8 @@ from switchboardpy.job import JobAccount
 from switchboardpy.lease import LeaseAccount
 from switchboardpy.permission import PermissionAccount
 
+from .generated.accounts import AggregatorAccountData
+
 # Parameters for which oracles must submit for responding to update requests.
 @dataclass
 class AggregatorSaveResultParams:
@@ -64,13 +66,22 @@ class AggregatorSaveResultParams:
     oracles: list[Any]
 
 
-
 # Parameters for creating and setting a history buffer
 @dataclass
 class AggregatorSetHistoryBufferParams:
     
     """Number of elements for the history buffer to fit"""
     size: int
+
+    """Authority keypair for the aggregator"""
+    authority: Keypair = None
+
+# Parameters for creating and setting a history buffer
+@dataclass
+class AggregatorSetUpdateIntervalParams:
+    
+    """Seconds between updates"""
+    new_interval: int
 
     """Authority keypair for the aggregator"""
     authority: Keypair = None
@@ -85,6 +96,58 @@ class AggregatorOpenRoundParams:
     """The token wallet which will receive rewards for calling update on this feed."""
     payout_wallet: PublicKey
 
+# Parameters required to set min jobs for Aggregator
+@dataclass
+class AggregatorSetMinJobsParams:
+
+    """The min number of jobs required"""
+    min_job_results: int
+    
+    """The feed authority."""
+    authority: Keypair = None
+
+
+# Parameters required to set batch size for Aggregator
+@dataclass
+class AggregatorSetBatchSizeParams:
+
+    """The batch size."""
+    batch_size: int
+    
+    """The feed authority."""
+    authority: Keypair = None
+
+
+# Parameters required to set min oracles for Aggregator
+@dataclass
+class AggregatorSetMinOraclesParams:
+
+    """The min results required"""
+    min_oracle_results: int
+    
+    """The feed authority."""
+    authority: Keypair = None
+
+
+# Parameters required to set min oracles for Aggregator
+@dataclass
+class AggregatorSetQueueParams:
+
+    """The min results required"""
+    queue_account: OracleQueueAccount
+    
+    """The feed authority."""
+    authority: Keypair = None
+
+# Parameters required to set min oracles for Aggregator
+@dataclass
+class AggregatorSetVarianceThresholdParams:
+
+    """The % change needed to trigger an update"""
+    threshold: Decimal
+    
+    """The feed authority."""
+    authority: Keypair = None
 
 # Init Params for Aggregators
 @dataclass
@@ -148,6 +211,9 @@ class AggregatorInitParams:
     the aggregator keypair.
     """
     authority: PublicKey = None
+
+    """Disable automatic updates"""
+    disable_crank: bool = None
 
 
 @dataclass
@@ -228,9 +294,8 @@ class AggregatorAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        aggregator = await self.program.account["AggregatorAccountData"].fetch(self.public_key)
-        aggregator.ebuf = None
-        return aggregator
+        return await AggregatorAccountData.fetch(self.program.provider.connection, self.public_key)
+        
 
     """
     Get AggregatorAccount historical data 
@@ -350,11 +415,14 @@ class AggregatorAccount:
         last_timestamp = aggregator.latest_confirmed_round.round_open_timestamp
         if last_timestamp + force_report_period < timestamp:
             return True
-        if value < latest_result - variance_threshold:
+        diff = latest_result / value
+        if abs(diff) > 1:
+            diff = value / latest_result
+        if diff < 0:
             return True
-        if value > latest_result + variance_threshold:
-            return True
-        return False
+        
+        change_percentage = 1 - diff * 100
+        return change_percentage > variance_threshold
 
     """
     Get the individual oracle results of the latest confirmed round. 
@@ -479,7 +547,7 @@ class AggregatorAccount:
         state = await state_account.load_data()
         response = await program.provider.connection.get_minimum_balance_for_rent_exemption(size)
         lamports = response["result"]
-        zero_decimal = program.type['SwitchboardDecimal'](0, 0)
+        zero_decimal = SwitchboardDecimal(0, 0).as_proper_sbd(program)
 
         await program.rpc["aggregator_init"](
             {
@@ -493,7 +561,8 @@ class AggregatorAccount:
                 "force_report_period": aggregator_init_params.force_report_period or 0,
                 "expiration": aggregator_init_params.expiration or 0,
                 "state_bump": state_bump,
-                "start_after": aggregator_init_params.start_after,
+                "disable_crank": aggregator_init_params.disable_crank or False,
+                "start_after": aggregator_init_params.start_after or 0
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -561,16 +630,23 @@ class AggregatorAccount:
             )
         )
 
-    # TODO: Verify this function 
+    """
+    Open round on aggregator to get an update
+
+    Args:
+        program (anchorpy.Program): Switchboard program representation holding connection and IDL
+        params (AggregatorOpenRoundParams)
+
+    Returns:
+        TransactionSignature
+    """
     async def open_round(self, params: AggregatorOpenRoundParams):
         program = self.program
-        authority = params.authority or self.keypair
         state_account, state_bump = ProgramStateAccount.from_seed(program)
-        mint = await state_account.get_token_mint()
         queue = await params.oracle_queue_account.load_data()
         lease_account, lease_bump = LeaseAccount.from_seed(
             self.program,
-            queue_account,
+            params.oracle_queue_account,
             self
         )
         lease = await lease_account.load_data()
@@ -580,7 +656,7 @@ class AggregatorAccount:
             params.oracle_queue_account.public_key,
             self.public_key
         )
-        await program.rpc["aggregator_open_round"](
+        return await program.rpc["aggregator_open_round"](
             {
                 "state_bump": state_bump,
                 "lease_bump": lease_bump,
@@ -589,8 +665,8 @@ class AggregatorAccount:
             ctx=anchorpy.Context(
                 accounts={
                     "aggregator": self.public_key,
-                    "lease":  self.public_key,
-                    "oracle_queue": self.public_key,
+                    "lease":  lease_account.public_key,
+                    "oracle_queue": params.oracle_queue_account.public_key,
                     "queue_authority": queue.authority,
                     "permission": permission_account.public_key,
                     "escrow": lease.escrow,
@@ -598,9 +674,58 @@ class AggregatorAccount:
                     "payout_wallet": params.payout_wallet,
                     "token_program": TOKEN_PROGRAM_ID,
                     "data_buffer": queue.data_buffer,
-                    "mint": mint.public_key,
+                    "mint": (await params.oracle_queue_account.load_mint()).public_key,
                 },
-                signers=[self.keypair]
+            )
+        )
+
+    """
+    Set min jobs sets the min jobs parameter. This is a suggestion to oracles 
+    of the number of jobs that must resolve for a job to be considered valid.
+
+    Args:
+        params (AggregatorSetMinJobsParams): parameters pecifying the min jobs that must respond
+    Returns:
+        TransactionSignature
+
+    """
+    async def set_min_jobs(self, params: AggregatorSetMinJobsParams):
+        authority = authority or self.keypair
+        return await self.program.rpc['aggregator_set_min_jobs'](
+            {
+                "min_job_results": params.min_job_results
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
+                },
+                signers=[authority]
+            )
+        )
+
+    """
+    Set min oracles sets the min oracles parameter. This will determine how many oracles need to come back with a 
+    valid response for a result to be accepted. 
+
+    Args:
+        params (AggregatorSetMinOraclesParams): parameters pecifying the min jobs that must respond
+    Returns:
+        TransactionSignature
+
+    """
+    async def set_min_jobs(self, params: AggregatorSetMinJobsParams):
+        authority = authority or self.keypair
+        return await self.program.rpc['aggregator_set_min_jobs'](
+            {
+                "min_job_results": params.min_job_results
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
+                },
+                signers=[authority]
             )
         )
     
@@ -613,18 +738,114 @@ class AggregatorAccount:
     Returns:
         TransactionSignature
     """
-    async def add_job(self, job: JobAccount, authority: Optional[Keypair] = None) -> TransactionSignature:
+    async def add_job(self, job: JobAccount, weight: int = 0, authority: Optional[Keypair] = None) -> TransactionSignature:
         authority = authority or self.keypair
         
         return await self.program.rpc['aggregator_add_job'](
             {
-                "params": None
+                "weight": weight
             },
             ctx=anchorpy.Context(
                 accounts={
                     "aggregator": self.public_key,
                     "authority": authority.public_key,
                     "job": job.public_key
+                },
+                signers=[authority]
+            )
+        )
+
+    """
+    RPC Set batch size / the number of oracles that'll respond to updates
+
+    Args:
+        params (AggregatorSetBatchSizeParams)
+    Returns:
+        TransactionSignature
+    """
+    async def set_batch_size(self, params: AggregatorSetBatchSizeParams) -> TransactionSignature:
+        authority = authority or self.keypair
+        return await self.program.rpc['aggregator_set_batch_size'](
+            {
+                "batch_size": params.batch_size
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
+                },
+                signers=[authority]
+            )
+        )
+        
+
+    """
+    RPC set variance threshold (only write updates when response is > variance threshold %)
+
+    Args:
+        params (AggregatorSetVarianceThresholdParams)
+    Returns:
+        TransactionSignature
+    """
+    async def set_variance_threshold(self, params: AggregatorSetVarianceThresholdParams) -> TransactionSignature:
+        authority = authority or self.keypair
+        
+        return await self.program.rpc['aggregator_set_variance_threshold'](
+            {
+                "variance_threshold": SwitchboardDecimal.from_decimal(params.threshold)
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
+                },
+                signers=[authority]
+            )
+        )
+
+    """
+    RPC set min oracles
+
+    Args:
+        params (AggregatorSetMinOraclesParams)
+    Returns:
+        TransactionSignature
+    """
+    async def set_min_oracles(self, params: AggregatorSetMinOraclesParams) -> TransactionSignature:
+        authority = authority or self.keypair
+        
+        return await self.program.rpc['aggregator_set_min_oracles'](
+            {
+                "min_oracle_results": params.min_oracle_results
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
+                },
+                signers=[authority]
+            )
+        )
+
+    """
+    RPC set update interval
+
+    Args:
+        params (AggregatorSetUpdateIntervalParams)
+    Returns:
+        TransactionSignature
+    """
+    async def set_update_interval(self, params: AggregatorSetUpdateIntervalParams) -> TransactionSignature:
+        authority = authority or self.keypair
+        
+        return await self.program.rpc['aggregator_set_update_interval'](
+            {
+                "new_interval": params.new_interval
+            },
+            ctx=anchorpy.Context(
+                accounts={
+                    "aggregator": self.public_key,
+                    "authority": authority.public_key,
                 },
                 signers=[authority]
             )
@@ -802,7 +1023,8 @@ class AggregatorAccount:
                     "escrow": escrow,
                     "token_program": TOKEN_PROGRAM_ID,
                     "program_state": program_state_account.public_key,
-                    "history_buffer": history_buffer
+                    "history_buffer": history_buffer,
+                    "mint": params.token_mint
                 },
                 remaining_accounts=[{"is_signer": False, "is_writable": True, "pubkey": pubkey} for pubkey in remaining_accounts]
             )
