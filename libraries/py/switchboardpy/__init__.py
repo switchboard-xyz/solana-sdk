@@ -6,7 +6,7 @@ from switchboardpy.aggregator import (
     AggregatorInitParams, 
     AggregatorOpenRoundParams, 
     AggregatorSaveResultParams, 
-    AggregatorSetHistoryBufferParams
+    AggregatorSetHistoryBufferParams,
 )
 from switchboardpy.compiled import OracleJob
 from switchboardpy.common import SBV2_DEVNET_PID, AccountParams, SwitchboardDecimal
@@ -49,5 +49,5 @@ __all__ = [
     "ProgramStateAccount",
     "ProgramInitParams",
     "VaultTransferParams",
-    "SwitchboardDecimal"
+    "SwitchboardDecimal",
 ]

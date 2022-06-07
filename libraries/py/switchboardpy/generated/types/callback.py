@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from construct import Container, Construct
 from solana.publickey import PublicKey
 import borsh_construct as borsh
+from anchorpy.borsh_extension import BorshPubkey
 
 
 class CallbackJSON(typing.TypedDict):

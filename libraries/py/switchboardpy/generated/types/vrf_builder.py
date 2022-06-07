@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from construct import Container
 from solana.publickey import PublicKey
 import borsh_construct as borsh
+from anchorpy.borsh_extension import BorshPubkey
 
 
 class VrfBuilderJSON(typing.TypedDict):
