@@ -2330,6 +2330,19 @@
     webpack "^5.70.0"
     webpack-merge "^5.8.0"
 
+"@docusaurus/types@2.0.0-beta.21":
+  version "2.0.0-beta.21"
+  resolved "https://registry.yarnpkg.com/@docusaurus/types/-/types-2.0.0-beta.21.tgz#36659c6c012663040dcd4cbc97b5d7a555dae229"
+  integrity sha512-/GH6Npmq81eQfMC/ikS00QSv9jNyO1RXEpNSx5GLA3sFX8Iib26g2YI2zqNplM8nyxzZ2jVBuvUoeODTIbTchQ==
+  dependencies:
+    commander "^5.1.0"
+    history "^4.9.0"
+    joi "^17.6.0"
+    react-helmet-async "^1.3.0"
+    utility-types "^3.10.0"
+    webpack "^5.72.1"
+    webpack-merge "^5.8.0"
+
 "@docusaurus/utils-common@2.0.0-beta.18":
   version "2.0.0-beta.18"
   resolved "https://registry.npmjs.org/@docusaurus/utils-common/-/utils-common-2.0.0-beta.18.tgz#46cf0bed2a7c532b2b85eab5bb914ff118b2c4e9"
@@ -14667,7 +14680,7 @@ react-fast-compare@^3.0.1, react-fast-compare@^3.2.0:
   resolved "https://registry.npmjs.org/react-fast-compare/-/react-fast-compare-3.2.0.tgz"
   integrity sha512-rtGImPZ0YyLrscKI9xTpV8psd6I8VAtjKCzQDlzyDvqJA8XOW78TXYQwNRNd8g8JZnDu8q9Fu/1v4HPAVwVdHA==
 
-react-helmet-async@*, react-helmet-async@^1.2.3:
+react-helmet-async@*, react-helmet-async@^1.2.3, react-helmet-async@^1.3.0:
   version "1.3.0"
   resolved "https://registry.npmjs.org/react-helmet-async/-/react-helmet-async-1.3.0.tgz#7bd5bf8c5c69ea9f02f6083f14ce33ef545c222e"
   integrity sha512-9jZ57/dAn9t3q6hneQS0wukqC2ENOBgMNVEhb/ZG9ZSxUetzVIw4iAmEU38IaVg3QGYauQPhSeUTuIUtFglWpg==
@@ -17540,10 +17553,10 @@ webpack-sources@^3.2.3:
   resolved "https://registry.npmjs.org/webpack-sources/-/webpack-sources-3.2.3.tgz"
   integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
 
-webpack@^5.70.0:
-  version "5.72.1"
-  resolved "https://registry.npmjs.org/webpack/-/webpack-5.72.1.tgz#3500fc834b4e9ba573b9f430b2c0a61e1bb57d13"
-  integrity sha512-dXG5zXCLspQR4krZVR6QgajnZOjW2K/djHvdcRaDQvsjV9z9vaW6+ja5dZOYbqBBjF6kGXka/2ZyxNdc+8Jung==
+webpack@^5.70.0, webpack@^5.72.1:
+  version "5.73.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.73.0.tgz#bbd17738f8a53ee5760ea2f59dce7f3431d35d38"
+  integrity sha512-svjudQRPPa0YiOYa2lM/Gacw0r6PvxptHj4FuEKQ2kX05ZLkjbVc5MnPs6its5j7IZljnIqSVo/OsY2X0IpHGA==
   dependencies:
     "@types/eslint-scope" "^3.7.3"
     "@types/estree" "^0.0.51"

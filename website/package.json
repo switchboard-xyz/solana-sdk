@@ -32,7 +32,7 @@
     "@docusaurus/preset-classic": "2.0.0-beta.18",
     "@docusaurus/remark-plugin-npm2yarn": "2.0.0-beta.18",
     "@docusaurus/theme-common": "2.0.0-beta.18",
-    "@docusaurus/types": "2.0.0-beta.18",
+    "@docusaurus/types": "2.0.0-beta.21",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@fontsource/roboto": "^4.5.1",
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.0.0-beta.18",
-    "@docusaurus/types": "2.0.0-beta.18",
+    "@docusaurus/types": "2.0.0-beta.21",
     "@tsconfig/docusaurus": "^1.0.4",
     "@types/eslint": "^8.4.1",
     "babel-plugin-import": "^1.13.3",
