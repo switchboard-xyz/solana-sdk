@@ -50,7 +50,7 @@
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-icons": "^4.3.1",
-    "react-player": "^2.9.0",
+    "react-player": "^2.10.1",
     "react-spring": "^9.3.2",
     "rehype-katex": "5",
     "remark-math": "3",
