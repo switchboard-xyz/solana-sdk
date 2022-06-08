@@ -281,7 +281,7 @@ export async function prettyPrintQueue(
       SPACING
     ) + "\r\n";
   outputString += chalkString(
-    "unpermissionedVrfEnabled",
+    "enableBufferRelayers",
     data.enableBufferRelayers?.toString() ?? "",
     SPACING
   );
