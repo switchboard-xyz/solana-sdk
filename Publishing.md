@@ -33,7 +33,7 @@ The command below will
 
 ```
 lerna version patch --no-private --yes
-lerna publish from-package --yes
+lerna publish from-git --yes
 ```
 
 If the above command fails halfway, use the following command to check for any version differences between NPM and only publish the missing packages.
