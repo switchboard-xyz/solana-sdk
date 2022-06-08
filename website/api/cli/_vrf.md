@@ -1,147 +1,169 @@
 
 create a Switchboard VRF Account
 
-* [`sbv2 vrf:create QUEUEKEY`](#sbv2-vrfcreate-queuekey)
-* [`sbv2 vrf:create:example QUEUEKEY`](#sbv2-vrfcreateexample-queuekey)
-* [`sbv2 vrf:request VRFKEY`](#sbv2-vrfrequest-vrfkey)
+* [`sbv2 vrf create [QUEUEKEY]`](#sbv2-vrf-create-queuekey)
+* [`sbv2 vrf create example [QUEUEKEY]`](#sbv2-vrf-create-example-queuekey)
+* [`sbv2 vrf print [VRFKEY]`](#sbv2-vrf-print-vrfkey)
+* [`sbv2 vrf request [VRFKEY]`](#sbv2-vrf-request-vrfkey)
+* [`sbv2 vrf watch [VRFKEY]`](#sbv2-vrf-watch-vrfkey)
 
-## `sbv2 vrf:create QUEUEKEY`
+## `sbv2 vrf create [QUEUEKEY]`
 
 create a Switchboard VRF Account
 
 ```
 USAGE
-  $ sbv2 vrf:create QUEUEKEY
+  $ sbv2 vrf create [QUEUEKEY] -a <value> --callbackPid <value> --ixData <value> [-v] [-s] [--mainnetBeta] [-u
+    <value>] [--programId <value>] [-k <value>] [--vrfKeypair <value>] [--enable] [--authority <value>]
+    [--queueAuthority <value>]
 
 ARGUMENTS
   QUEUEKEY  public key of the oracle queue to create VRF account for
 
-OPTIONS
-  -a, --accountMeta=accountMeta    (required) account metas for VRF callback
-  -h, --help                       show CLI help
+FLAGS
+  -a, --accountMeta=<value>...  (required) account metas for VRF callback
+  -k, --keypair=<value>         keypair that will pay for onchain transactions. defaults to new account authority if no
+                                alternate authority provided
+  -s, --silent                  suppress cli prompts
+  -u, --rpcUrl=<value>          alternate RPC url
+  -v, --verbose                 log everything
+  --authority=<value>           alternative keypair to use for VRF authority
+  --callbackPid=<value>         (required) callback program ID
+  --enable                      enable vrf permissions
+  --ixData=<value>              (required) instruction data
+  --mainnetBeta                 WARNING: use mainnet-beta solana cluster
+  --programId=<value>           alternative Switchboard program ID to interact with
+  --queueAuthority=<value>      alternative keypair to use for queue authority
+  --vrfKeypair=<value>          filesystem path of existing keypair to use for VRF Account
 
-  -k, --keypair=keypair            keypair that will pay for onchain transactions. defaults to new account authority if
-                                   no alternate authority provided
-
-  -s, --silent                     suppress cli prompts
-
-  -u, --rpcUrl=rpcUrl              alternate RPC url
-
-  -v, --verbose                    log everything
-
-  --authority=authority            alternative keypair to use for VRF authority
-
-  --callbackPid=callbackPid        (required) callback program ID
-
-  --enable                         enable vrf permissions
-
-  --ixData=ixData                  (required) instruction data
-
-  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
-
-  --programId=programId            alternative Switchboard program ID to interact with
-
-  --queueAuthority=queueAuthority  alternative keypair to use for queue authority
-
-  --vrfKeypair=vrfKeypair          filesystem path of existing keypair to use for VRF Account
+DESCRIPTION
+  create a Switchboard VRF Account
 
 EXAMPLES
-  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
-  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
-  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": 
-  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": 
-  false,"isWritable": false}"
-  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
-  --queueAuthority oracle-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
-  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HYKi1grticLXPe5vqapUHhm976brwqRob8vqRnWMKWL5","isSigner": 
-  false,"isWritable": true}" -a "{"pubkey": "6vG9QLMgSvsfjvSpDxWfZ2MGPYGzEYoBxviLG7cr4go","isSigner": 
-  false,"isWritable": false}"
+  $ sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": false,"isWritable": false}"
+
+  $ sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable --queueAuthority oracle-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HYKi1grticLXPe5vqapUHhm976brwqRob8vqRnWMKWL5","isSigner": false,"isWritable": true}" -a "{"pubkey": "6vG9QLMgSvsfjvSpDxWfZ2MGPYGzEYoBxviLG7cr4go","isSigner": false,"isWritable": false}"
 ```
 
-_See code: [src/commands/vrf/create/index.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/vrf/create/index.ts)_
-
-## `sbv2 vrf:create:example QUEUEKEY`
+## `sbv2 vrf create example [QUEUEKEY]`
 
 create a VRF account for the client example program
 
 ```
 USAGE
-  $ sbv2 vrf:create:example QUEUEKEY
+  $ sbv2 vrf create example [QUEUEKEY] --vrfPid <value> [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--vrfKeypair <value>] [--enable] [--queueAuthority <value>] [--maxResult <value>]
 
 ARGUMENTS
   QUEUEKEY  public key of the oracle queue to create VRF account for
 
-OPTIONS
-  -h, --help                       show CLI help
+FLAGS
+  -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
+                            alternate authority provided
+  -s, --silent              suppress cli prompts
+  -u, --rpcUrl=<value>      alternate RPC url
+  -v, --verbose             log everything
+  --enable                  enable vrf permissions
+  --mainnetBeta             WARNING: use mainnet-beta solana cluster
+  --maxResult=<value>       [default: 256000] the maximum VRF result
+  --programId=<value>       alternative Switchboard program ID to interact with
+  --queueAuthority=<value>  alternative keypair to use for queue authority
+  --vrfKeypair=<value>      filesystem path of existing keypair to use for VRF Account
+  --vrfPid=<value>          (required) program ID for the VRF example program
 
-  -k, --keypair=keypair            keypair that will pay for onchain transactions. defaults to new account authority if
-                                   no alternate authority provided
+DESCRIPTION
+  create a VRF account for the client example program
 
-  -s, --silent                     suppress cli prompts
-
-  -u, --rpcUrl=rpcUrl              alternate RPC url
-
-  -v, --verbose                    log everything
-
-  --enable                         enable vrf permissions
-
-  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
-
-  --maxResult=maxResult            [default: 256000] the maximum VRF result
-
-  --programId=programId            alternative Switchboard program ID to interact with
-
-  --queueAuthority=queueAuthority  alternative keypair to use for queue authority
-
-  --vrfKeypair=vrfKeypair          filesystem path of existing keypair to use for VRF Account
-
-  --vrfPid=vrfPid                  (required) program ID for the VRF example program
-
-EXAMPLE
-  sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid 
-  6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority 
-  queue-authority-keypair.json
+EXAMPLES
+  $ sbv2 vrf:create:example 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --vrfPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --keypair ../payer-keypair.json -v --enable --queueAuthority queue-authority-keypair.json
 ```
 
-_See code: [src/commands/vrf/create/example.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/vrf/create/example.ts)_
+## `sbv2 vrf print [VRFKEY]`
 
-## `sbv2 vrf:request VRFKEY`
+Print the deserialized Switchboard VRF account
+
+```
+USAGE
+  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+
+ARGUMENTS
+  VRFKEY  public key of the vrf account to deserialize
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  Print the deserialized Switchboard VRF account
+
+ALIASES
+  $ sbv2 vrf print
+
+EXAMPLES
+  $ sbv2 vrf:print
+```
+
+## `sbv2 vrf request [VRFKEY]`
 
 request a new value for a VRF
 
 ```
 USAGE
-  $ sbv2 vrf:request VRFKEY
+  $ sbv2 vrf request [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--funderAuthority <value>] [--authority <value>]
 
 ARGUMENTS
   VRFKEY  public key of the VRF account to request randomness for
 
-OPTIONS
-  -h, --help                         show CLI help
+FLAGS
+  -k, --keypair=<value>      keypair that will pay for onchain transactions. defaults to new account authority if no
+                             alternate authority provided
+  -s, --silent               suppress cli prompts
+  -u, --rpcUrl=<value>       alternate RPC url
+  -v, --verbose              log everything
+  --authority=<value>        alternative keypair that is the VRF authority
+  --funderAuthority=<value>  alternative keypair to pay for VRF request
+  --mainnetBeta              WARNING: use mainnet-beta solana cluster
+  --programId=<value>        alternative Switchboard program ID to interact with
 
-  -k, --keypair=keypair              keypair that will pay for onchain transactions. defaults to new account authority
-                                     if no alternate authority provided
+DESCRIPTION
+  request a new value for a VRF
 
-  -s, --silent                       suppress cli prompts
-
-  -u, --rpcUrl=rpcUrl                alternate RPC url
-
-  -v, --verbose                      log everything
-
-  --authority=authority              alternative keypair that is the VRF authority
-
-  --funderAuthority=funderAuthority  alternative keypair to pay for VRF request
-
-  --mainnetBeta                      WARNING: use mainnet-beta solana cluster
-
-  --programId=programId              alternative Switchboard program ID to interact with
-
-EXAMPLE
-  sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable 
-  --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData 
-  "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": 
-  false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": 
-  false,"isWritable": false}"
+EXAMPLES
+  $ sbv2 vrf:create 9WZ59yz95bd3XwJxDPVE2PjvVWmSy9WM1NgGD2Hqsohw --keypair ../payer-keypair.json -v --enable --queueAuthority queue-authority-keypair.json --callbackPid 6MLk7G54uHZ7JuzNxpBAVENANrgM9BZ51pKkzGwPYBCE --ixData "[145,72,9,94,61,97,126,106]" -a "{"pubkey": "HpQoFL5kxPp2JCFvjsVTvBd7navx4THLefUU68SXAyd6","isSigner": false,"isWritable": true}" -a "{"pubkey": "8VdBtS8ufkXMCa6Yr9E4KVCfX2inVZVwU4KGg2CL1q7P","isSigner": false,"isWritable": false}"
 ```
 
-_See code: [src/commands/vrf/request.ts](https://github.com/switchboard-xyz/switchboard-v2/tree/main/cli/src/commands/vrf/request.ts)_
+## `sbv2 vrf watch [VRFKEY]`
+
+watch a vrf for a new value
+
+```
+USAGE
+  $ sbv2 vrf watch [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+
+ARGUMENTS
+  VRFKEY  public key of the vrf account to deserialize
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  watch a vrf for a new value
+
+ALIASES
+  $ sbv2 vrf watch
+
+EXAMPLES
+  $ sbv2 vrf:aggregator J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa
+```

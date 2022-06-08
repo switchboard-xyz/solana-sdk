@@ -18,23 +18,15 @@ const projectRoot = path.join(__dirname, "..", "..");
 const cliPath = path.join(projectRoot, "cli");
 const cliOutPath = path.join(projectRoot, "website", "api", "cli");
 const cliOutRelPath = path.relative(cliPath, cliOutPath);
-const oclifBin = path.join(
-  projectRoot,
-  "cli",
-  "node_modules",
-  ".bin",
-  "oclif-dev"
-);
+const oclifBin = path.join(projectRoot, "cli", "node_modules", ".bin", "oclif");
 
 // Generate Oclif documentation
 shell.cd(cliPath);
-if (shell.exec(`npx oclif-dev readme`).code !== 0) {
+if (shell.exec(`npx oclif readme`).code !== 0) {
   shell.echo(`Error: Oclif failed to generate documentation`);
   shell.exit(1);
 }
-if (
-  shell.exec(`npx oclif-dev readme --multi --dir ${cliOutRelPath}`).code !== 0
-) {
+if (shell.exec(`npx oclif readme --multi --dir ${cliOutRelPath}`).code !== 0) {
   shell.echo(`Error: Oclif failed to generate documentation`);
   shell.exit(1);
 }
