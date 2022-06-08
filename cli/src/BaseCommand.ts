@@ -10,6 +10,7 @@ import {
 } from "@solana/web3.js";
 import { BigUtils } from "@switchboard-xyz/sbv2-utils";
 import {
+  AnchorWallet,
   getSwitchboardPid,
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
@@ -107,6 +108,7 @@ abstract class BaseCommand extends Command {
       (flags as any).rpcUrl ??
       this.getRpcUrl(this.cluster) ??
       clusterApiUrl(this.cluster);
+
     try {
       this.connection = new Connection(url, {
         commitment: "finalized",
@@ -132,7 +134,7 @@ abstract class BaseCommand extends Command {
       ? new anchor.web3.PublicKey((flags as any).programId)
       : getSwitchboardPid(this.cluster as "mainnet-beta" | "devnet");
 
-    const wallet = new anchor.Wallet(this.payerKeypair);
+    const wallet = new AnchorWallet(this.payerKeypair);
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
       commitment: "finalized",
       // preflightCommitment: "finalized",
@@ -268,11 +270,11 @@ abstract class BaseCommand extends Command {
     switch (cluster) {
       case "devnet":
         return (
-          this.cliConfig.devnet.rpcUrl || clusterApiUrl(toCluster("devnet"))
+          this.cliConfig.devnet.rpcUrl ?? clusterApiUrl(toCluster("devnet"))
         );
       case "mainnet-beta":
         return (
-          this.cliConfig.devnet.rpcUrl ||
+          this.cliConfig.mainnet.rpcUrl ??
           clusterApiUrl(toCluster("mainnet-beta"))
         );
       default:

@@ -5,6 +5,8 @@ import BaseCommand from "../../BaseCommand";
 export default class ConfigPrint extends BaseCommand {
   static description = "print cli config";
 
+  static alias = ["config get"];
+
   static flags = {
     ...BaseCommand.flags,
   };
