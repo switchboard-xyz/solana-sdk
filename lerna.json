@@ -15,13 +15,14 @@
   "publish": {
     "registry": "https://npm.pkg.github.com",
     "ignoreChanges": [
-      "./website/**/*",
-      "./programs/**/*",
-      "./packages/**/*",
-      "./libraries/rs",
-      "./directory/**",
-      "./tools/**",
-      "./**/README.md"
+      "website/**/*",
+      "programs/**/*",
+      "packages/**/*",
+      "libraries/rs",
+      "libraries/py",
+      "directory/**",
+      "tools/**",
+      "**/README.md"
     ]
   }
 }
