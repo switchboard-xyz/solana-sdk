@@ -1358,30 +1358,30 @@ create a custom queue
 ```
 USAGE
   $ sbv2 custom queue [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [--force] [-a
-    <value>] [-n <value>] [--minStake <value>] [-r <value>] [-c <value>] [-o <value>] [-o <value>] [--queueSize <value>]
-    [--unpermissionedFeeds] [--unpermissionedVrf] [--enableBufferRelayers] [-f <value>]
+    <value>] [-n <value>] [--minStake <value>] [-r <value>] [-c <value>] [--oracleTimeout <value>] [-o <value>]
+    [--queueSize <value>] [--unpermissionedFeeds] [--unpermissionedVrf] [--enableBufferRelayers] [-f <value>]
 
 FLAGS
-  -a, --authority=<value>      keypair to delegate authority to for creating permissions targeted at the queue
-  -c, --crankSize=<value>      [default: 100] size of the crank
-  -f, --outputFile=<value>     output queue schema to a json file
-  -k, --keypair=<value>        keypair that will pay for onchain transactions. defaults to new account authority if no
-                               alternate authority provided
-  -n, --name=<value>           [default: Custom Queue] name of the queue for easier identification
-  -o, --numOracles=<value>     number of oracles to add to the queue
-  -o, --oracleTimeout=<value>  [default: 180] number of oracles to add to the queue
-  -r, --reward=<value>         [default: 0] oracle rewards for successfully responding to an update request
-  -s, --silent                 suppress cli prompts
-  -u, --rpcUrl=<value>         alternate RPC url
-  -v, --verbose                log everything
-  --enableBufferRelayers       enable oracles to fulfill buffer relayer requests
-  --force                      overwrite output file if existing
-  --mainnetBeta                WARNING: use mainnet-beta solana cluster
-  --minStake=<value>           [default: 0] minimum stake required by an oracle to join the queue
-  --programId=<value>          alternative Switchboard program ID to interact with
-  --queueSize=<value>          [default: 100] maximum number of oracles the queue can support
-  --unpermissionedFeeds        permit unpermissioned feeds
-  --unpermissionedVrf          permit unpermissioned VRF accounts
+  -a, --authority=<value>   keypair to delegate authority to for creating permissions targeted at the queue
+  -c, --crankSize=<value>   [default: 100] size of the crank
+  -f, --outputFile=<value>  output queue schema to a json file
+  -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
+                            alternate authority provided
+  -n, --name=<value>        [default: Custom Queue] name of the queue for easier identification
+  -o, --numOracles=<value>  number of oracles to add to the queue
+  -r, --reward=<value>      [default: 0] oracle rewards for successfully responding to an update request
+  -s, --silent              suppress cli prompts
+  -u, --rpcUrl=<value>      alternate RPC url
+  -v, --verbose             log everything
+  --enableBufferRelayers    enable oracles to fulfill buffer relayer requests
+  --force                   overwrite output file if existing
+  --mainnetBeta             WARNING: use mainnet-beta solana cluster
+  --minStake=<value>        [default: 0] minimum stake required by an oracle to join the queue
+  --oracleTimeout=<value>   [default: 180] number of oracles to add to the queue
+  --programId=<value>       alternative Switchboard program ID to interact with
+  --queueSize=<value>       [default: 100] maximum number of oracles the queue can support
+  --unpermissionedFeeds     permit unpermissioned feeds
+  --unpermissionedVrf       permit unpermissioned VRF accounts
 
 DESCRIPTION
   create a custom queue
@@ -1998,7 +1998,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.1/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.2/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2403,30 +2403,30 @@ create a custom queue
 ```
 USAGE
   $ sbv2 queue create [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [--force] [-a
-    <value>] [-n <value>] [--minStake <value>] [-r <value>] [-c <value>] [-o <value>] [-o <value>] [--queueSize <value>]
-    [--unpermissionedFeeds] [--unpermissionedVrf] [--enableBufferRelayers] [-f <value>]
+    <value>] [-n <value>] [--minStake <value>] [-r <value>] [-c <value>] [--oracleTimeout <value>] [-o <value>]
+    [--queueSize <value>] [--unpermissionedFeeds] [--unpermissionedVrf] [--enableBufferRelayers] [-f <value>]
 
 FLAGS
-  -a, --authority=<value>      keypair to delegate authority to for creating permissions targeted at the queue
-  -c, --crankSize=<value>      [default: 100] size of the crank
-  -f, --outputFile=<value>     output queue schema to a json file
-  -k, --keypair=<value>        keypair that will pay for onchain transactions. defaults to new account authority if no
-                               alternate authority provided
-  -n, --name=<value>           [default: Custom Queue] name of the queue for easier identification
-  -o, --numOracles=<value>     number of oracles to add to the queue
-  -o, --oracleTimeout=<value>  [default: 180] number of oracles to add to the queue
-  -r, --reward=<value>         [default: 0] oracle rewards for successfully responding to an update request
-  -s, --silent                 suppress cli prompts
-  -u, --rpcUrl=<value>         alternate RPC url
-  -v, --verbose                log everything
-  --enableBufferRelayers       enable oracles to fulfill buffer relayer requests
-  --force                      overwrite output file if existing
-  --mainnetBeta                WARNING: use mainnet-beta solana cluster
-  --minStake=<value>           [default: 0] minimum stake required by an oracle to join the queue
-  --programId=<value>          alternative Switchboard program ID to interact with
-  --queueSize=<value>          [default: 100] maximum number of oracles the queue can support
-  --unpermissionedFeeds        permit unpermissioned feeds
-  --unpermissionedVrf          permit unpermissioned VRF accounts
+  -a, --authority=<value>   keypair to delegate authority to for creating permissions targeted at the queue
+  -c, --crankSize=<value>   [default: 100] size of the crank
+  -f, --outputFile=<value>  output queue schema to a json file
+  -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
+                            alternate authority provided
+  -n, --name=<value>        [default: Custom Queue] name of the queue for easier identification
+  -o, --numOracles=<value>  number of oracles to add to the queue
+  -r, --reward=<value>      [default: 0] oracle rewards for successfully responding to an update request
+  -s, --silent              suppress cli prompts
+  -u, --rpcUrl=<value>      alternate RPC url
+  -v, --verbose             log everything
+  --enableBufferRelayers    enable oracles to fulfill buffer relayer requests
+  --force                   overwrite output file if existing
+  --mainnetBeta             WARNING: use mainnet-beta solana cluster
+  --minStake=<value>        [default: 0] minimum stake required by an oracle to join the queue
+  --oracleTimeout=<value>   [default: 180] number of oracles to add to the queue
+  --programId=<value>       alternative Switchboard program ID to interact with
+  --queueSize=<value>       [default: 100] maximum number of oracles the queue can support
+  --unpermissionedFeeds     permit unpermissioned feeds
+  --unpermissionedVrf       permit unpermissioned VRF accounts
 
 DESCRIPTION
   create a custom queue
@@ -2544,7 +2544,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.1/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.2/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2611,7 +2611,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.1/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.2/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
