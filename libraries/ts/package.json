@@ -55,7 +55,7 @@
     "long": "^4.0.0",
     "mocha": "^9.1.1",
     "node-fetch": "^3.2.3",
-    "protobufjs": "^6.10.2"
+    "protobufjs": "^6.11.3"
   },
   "devDependencies": {
     "@types/big.js": "^6.0.2",
