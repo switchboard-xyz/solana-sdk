@@ -8,11 +8,11 @@ import {
   LeaseAccount,
   loadSwitchboardProgram,
   OracleAccount,
+  OracleJob,
   OracleQueueAccount,
   PermissionAccount,
   ProgramStateAccount,
   SwitchboardPermission,
-  OracleJob,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import dotenv from "dotenv";

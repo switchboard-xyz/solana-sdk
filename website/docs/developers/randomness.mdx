@@ -8,11 +8,13 @@ import Link from "@docusaurus/Link";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
+<!--
 <Typography variant="h4">
   <Link to="https://github.com/switchboard-xyz/switchboard-v2/tree/main/programs/anchor-vrf-parser">
     # anchor-vrf-parser
   </Link>
 </Typography>
+-->
 
 ## Reading a VRF Account
 
@@ -20,34 +22,52 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Rust" label="Rust" default>
 
 ```rust
-// Rust code
+use switchboard_v2::VrfAccountData;
+
+let vrf = VrfAccountData::new(vrf_account_info)?;
+let result_buffer = vrf.get_result()?;
+if result_buffer == [0u8; 32] {
+    msg!("vrf buffer empty");
+    return Ok(());
+}
+
+let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
+let result = value[0] % 256000 as u128;
 ```
 
   </TabItem>
   <TabItem value="Typescript" label="Typescript">
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  VrfAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
 
-```python
-# Python code
+const vrfAccount = new VrfAccount({
+  program,
+  publicKey: vrfKey,
+});
+const vrf = await vrfAccount.loadData();
+console.log(vrf.currentRound.result);
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
+sbv2 vrf print VRFKEY
+# OR
+sbv2 vrf watch VRFKEY
 ```
 
   </TabItem>
 </Tabs>
-
-## Define Callback
 
 ## Creating a VRF Account
 
@@ -57,21 +77,76 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Typescript" label="Typescript" default>
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  OracleQueueAccount,
+  PermissionAccount,
+  SwitchboardPermission,
+  VrfAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
+const queueAccount = new queueAccount({ program, publicKey: queueKey });
+const queue = await queueAccount.loadData();
 
-```python
-# Python code
+// load client program used for callback
+const vrfClientProgram = anchor.workspace
+  .AnchorVrfParser as anchor.Program<AnchorVrfParser>;
+const vrfSecret = anchor.web3.Keypair.generate();
+
+const vrfIxCoder = new anchor.BorshInstructionCoder(vrfClientProgram.idl);
+const vrfClientCallback: Callback = {
+  programId: vrfClientProgram.programId,
+  accounts: [
+    // ensure all accounts in updateResult are populated
+    { pubkey: vrfClientKey, isSigner: false, isWritable: true },
+    { pubkey: vrfSecret.publicKey, isSigner: false, isWritable: false },
+  ],
+  ixData: vrfIxCoder.encode("updateResult", ""), // pass any params for instruction here
+};
+
+// create VRF
+const vrfAccount = await VrfAccount.create(program, {
+  queue: queueAccount,
+  callback: vrfClientCallback,
+  authority: vrfClientKey, // vrf authority
+  keypair: vrfSecret,
+});
+
+// create permission
+const permissionAccount = await PermissionAccount.create(program, {
+  authority: queue.authority,
+  granter: queue.publicKey,
+  grantee: vrfAccount.publicKey,
+});
+
+// if queue has not enabled unpermissionedVrfEnabled, queue will need to grant permission
+let queueAuthority: Keypair;
+await permissionAccount.set({
+  authority: queueAuthority,
+  permission: SwitchboardPermission.PERMIT_VRF_REQUESTS,
+  enable: true,
+});
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
+sbv2 vrf create QUEUEKEY \
+    --keypair "path/to/payer/keypair.json" \
+    --authority "path/to/authority/keypair.json" \
+    --queueAuthority "path/to/queue-authority/keypair.json" \
+    --vrfKeypair vrf-keypair.json \
+    --callbackPid CALLBACKPROGRAMID \
+    --ixData "[145,72,9,94,61,97,126,106]" \
+    -a "{\"pubkey\": \"C7PVykaTT8xDt8D1bugNvAJP1mJnfK5h12PuqgghmCDZ\",\"isSigner\": false,\"isWritable\": true}" \
+    -a "{\"pubkey\": \"BV7TXpXtnzYCFjoQCeGx8iMgfi9WB38tmirrDkun8P38\",\"isSigner\": false,\"isWritable\": false}" \
+    --enable \
+    --verbose
 ```
 
   </TabItem>
@@ -85,21 +160,47 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Typescript" label="Typescript" default>
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  VrfAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+let authority: Keypair;
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
 
-```python
-# Python code
+const vrfAccount = new VrfAccount({
+  program,
+  publicKey: vrfKey,
+});
+const vrf = await vrfAccount.loadData();
+
+const queueAccount = new OracleQueueAccount({
+  program,
+  publicKey: vrf.queuePubkey,
+});
+const queue = await queueAccount.loadData();
+const mint = await queueAccount.loadMint();
+
+const payerTokenWallet = = (
+  await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
+).address;
+
+const signature = await vrfAccount.requestRandomness({
+  authority,
+  payer: payerTokenWallet,
+  payerAuthority: payer,
+});
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
+sbv2 vrf request VRFKEY \
+    --keypair "path/to/payer/keypair.json"
 ```
 
   </TabItem>

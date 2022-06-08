@@ -14,21 +14,39 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Typescript" label="Typescript" default>
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  OracleAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
 
-```python
-# Python code
+const queueAccount = new OracleQueueAccount({
+  program,
+  publicKey: queuePubkey,
+});
+
+// Create oracle
+const oracleAccount = await OracleAccount.create(program, {
+  name: Buffer.from("My Oracle"),
+  queueAccount,
+});
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
+sbv2 oracle create QUEUEKEY \
+    --name "My Oracle" \
+    --keypair "path/to/payer/keypair.json" \
+    --authority "path/to/authority/keypair.json"  \
+    --enable \
+    --verbose
 ```
 
   </TabItem>
@@ -42,77 +60,46 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Typescript" label="Typescript" default>
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  OracleAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+let amount = new anchor.BN(1_000_000_000);
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
 
-```python
-# Python code
-```
+const oracleAccount = new OracleAccount({ program, publicKey: oracleKey });
+const oracle = await oracleAccount.loadData();
 
-  </TabItem>
-  <TabItem value="CLI" label="CLI">
+const queueAccount = new OracleQueueAccount({
+  program,
+  publicKey: oracle.queuePubkey,
+});
+const mint = await queueAccount.loadMint();
+const funderTokenAccount = (
+  await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
+).address;
 
-```bash
-# CLI command
-```
-
-  </TabItem>
-</Tabs>
-
-## Oracle Heartbeat
-
-- `oracleHeartbeat`
-
-<Tabs>
-  <TabItem value="Typescript" label="Typescript" default>
-
-```ts
-// Typescript code
-```
-
-  </TabItem>
-  <TabItem value="Python" label="Python">
-
-```python
-# Python code
+const signature = await mint.transfer(
+  funderTokenAccount,
+  oracle.tokenAccount,
+  payer,
+  [],
+  amount.toNumber()
+);
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
-```
-
-  </TabItem>
-</Tabs>
-
-## Save Result
-
-- `aggregatorSaveResult`
-
-<Tabs>
-  <TabItem value="Typescript" label="Typescript" default>
-
-```ts
-// Typescript code
-```
-
-  </TabItem>
-  <TabItem value="Python" label="Python">
-
-```python
-# Python code
-```
-
-  </TabItem>
-  <TabItem value="CLI" label="CLI">
-
-```bash
-# CLI command
+sbv2 oracle deposit ORACLEKEY \
+   --keypair "path/to/payer/keypair.json" \
+   --amount 1.25
 ```
 
   </TabItem>
@@ -126,21 +113,44 @@ import TabItem from "@theme/TabItem";
   <TabItem value="Typescript" label="Typescript" default>
 
 ```ts
-// Typescript code
-```
+import * as anchor from "@project-serum/anchor";
+import { Keypair } from "@solana/web3.js";
+import {
+  loadSwitchboardProgram,
+  OracleAccount,
+  OracleQueueAccount,
+} from "@switchboard-xyz/switchboard-v2";
 
-  </TabItem>
-  <TabItem value="Python" label="Python">
+let payer: Keypair;
+let amount = new anchor.BN(1_000_000_000);
+const program = await loadSwitchboardProgram("devnet", undefined, payer);
 
-```python
-# Python code
+const oracleAccount = new OracleAccount({ program, publicKey: oracleKey });
+const oracle = await oracleAccount.loadData();
+
+const queueAccount = new OracleQueueAccount({
+  program,
+  publicKey: oracle.queuePubkey,
+});
+const mint = await queueAccount.loadMint();
+const withdrawAccount = (
+  await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
+).address;
+
+const signature = await oracleAccount.withdraw({
+  amount,
+  oracleAuthority: payer,
+  withdrawAccount,
+});
 ```
 
   </TabItem>
   <TabItem value="CLI" label="CLI">
 
 ```bash
-# CLI command
+sbv2 oracle withdraw ORACLEKEY \
+    --keypair "path/to/payer/keypair.json" \
+    --amount 1.25
 ```
 
   </TabItem>

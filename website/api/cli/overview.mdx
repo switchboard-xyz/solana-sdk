@@ -20,17 +20,21 @@ npm install -g @switchboard-xyz/switchboardv2-cli
 
 ## Overview
 
+**Logging** Most commands will have a `--silent`, `-s` flag that will suppress console output and only output a new account public key to assist in scripting. A `--verbose`, `-v` flag will do the opposite and log any debug or configuration information to help debug.
+
+**Help** All commands can be run with the `--help` flag to print the available arguments and flags for a given command.
+
 **Keypairs** The Switchboard V2 CLI lets you specify a keypair from an absolute or relative filesystem path as well as a Google Secret Manager secret. The following flags are common among most commands, with the exception of the print commands that require no keypairs:
 
-- `--authority` is the keypair that is or will be the authority for a given account. The authority is responsible for authorizing new permissions, changing an account, or withdrawing from a token account.
 - `--keypair` is required for any command that submits an onchain transaction such as creating accounts, turning the crank, or updating an account config. This keypair will default as the authority if the authority flag is not provided.
+- `--authority` is the keypair that is or will be the authority for a given account. The authority is responsible for authorizing new permissions, changing an account, or withdrawing from a token account.
 
 **Token Amounts**
 Any commands that specify a token amount will be converted to the raw token amount if it contains a decimal. For example, wSOL has 9 decimal places so a CLI arguement of 1.5 would be interpretted as 1_500_000_000 tokens whereas 1 would be interpretted as 1 token.
 
-**Logging** Most commands will have a `--silent`, `-s` flag that will suppress console output and only output a new account public key to assist in scripting. A `--verbose`, `-v` flag will do the opposite and log any debug or configuration information to help debug.
+**Cluster** By default the CLI will target devnet unless the `--mainnetBeta` flag is provided.
 
-**Help** All commands can be run with the `--help` flag to print the available arguments and flags for a given command.
+**RPC URL** The CLI will connect to the default solana endpoints unless `--rpcUrl` is provided.
 
 ## Examples
 
@@ -40,37 +44,97 @@ Any commands that specify a token amount will be converted to the raw token amou
 # check account discriminator and print account information if found
 sbv2 print PUBLICKEY
 # print an oracle account by its public key
-sbv2 print:oracle ORACLEKEY
-# print an aggregator account and save to a JSON file
-sbv2 print:aggregator AGGREGATORKEY --outputFile outputFile.json
+sbv2 print oracle ORACLEKEY
+# print an aggregator account
+sbv2 print aggregator AGGREGATORKEY
 ```
 
 ### Create a Queue
 
 ```bash
-sbv2 queue:create \
-    --keypair payer-keypair.json \
-    -f queue-schema.json \
-    -n "My New Queue" \
-    --numOracles 1 \
-    -v
+sbv2 queue create \
+    --name "My Queue" \
+    --keypair "path/to/payer/keypair.json" \
+    --authority "path/to/authority/keypair.json"  \
+    --minStake 0 \
+    --reward 0 \
+    --crankSize 0 \
+    --oracleTimeout 300 \
+    --numOracles 0 \
+    --queueSize 25 \
+    --outputFile "My_Switchboard_Queue.json" \
+    --verbose
 ```
 
 ### Create Aggregator
 
 ```bash
-# write sample json files to outputDirectory
-sbv2 print:json:samples outputDirectory
-# create aggregator from json
-sbv2 aggregator:create:json aggregator.json \
---keypair ../dev/switchboardxyz/payer-keypair.json \
---queueKey GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U \
---outputFile aggregator.schema.json
+sbv2 aggregator create AGGREGATORKEY \
+    --name "My Buffer" \
+    --keypair "path/to/payer/keypair.json" \
+    --batchSize 1 \
+    --minOracles 1 \
+    --minJobs 1 \
+    --updateInterval 45 \
+    --job "path/to/job-definition-1.json" \
+    --job "path/to/job-definition-2.json" \
+    --verbose
 ```
 
-<!-- ### Create Oracle
+### Create Oracle
 
-### Create Queue
+```bash
+sbv2 oracle create QUEUEKEY \
+    --name "My Oracle" \
+    --keypair "path/to/payer/keypair.json" \
+    --authority "path/to/authority/keypair.json"  \
+    --enable \
+    --verbose
+```
+
+### Create Crank
+
+```bash
+sbv2 crank create QUEUEKEY \
+  --name "My Crank" \
+  --keypair "path/to/payer/keypair.json"  \
+  --authority "queue-authority.json" \
+  --maxRows 1000 \
+  --verbose
+```
+
+### Push to Crank
+
+```bash
+sbv2 crank push CRANKKEY AGGREGATORKEY \
+    --keypair "path/to/payer/keypair.json"
+```
+
+### Create Job
+
+```bash
+sbv2 job create "job-directory/sysclockOffsetTask/sysclock.json" \
+    --name "SysClock Drift" \
+    --keypair "path/to/payer/keypair.json"
+```
+
+### Add Job to Aggregator
+
+```bash
+sbv2 aggregator add job AGGREGATORKEY \
+    --jobDefinition "job-directory/sysclockOffsetTask/sysclock.json" \
+    --keypair "path/to/payer/keypair.json" \
+    --verbose
+# OR
+sbv2 aggregator add job AGGREGATORKEY \
+    --jobKey "6jXKur6RaBMewKyEE8YVGLwWXM15ZDygeoqgAZUW9y3r" \
+    --keypair "path/to/payer/keypair.json" \
+    --verbose
+```
+
+<!--
+
+
 
 #### Permit an Aggregator
 
