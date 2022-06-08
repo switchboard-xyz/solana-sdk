@@ -19,30 +19,26 @@ export default class CrankPush extends BaseCommand {
   static args = [
     {
       name: "crankKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the crank",
     },
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator",
     },
   ];
 
   async run() {
-    const { args } = this.parse(CrankPush);
+    const { args } = await this.parse(CrankPush);
     verifyProgramHasPayer(this.program);
 
     const crankAccount = new CrankAccount({
       program: this.program,
-      publicKey: args.crankKey,
+      publicKey: new PublicKey(args.crankKey),
     });
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
 
     const txn = await crankAccount.push({ aggregatorAccount });
@@ -51,9 +47,7 @@ export default class CrankPush extends BaseCommand {
       console.log(txn);
     } else {
       this.logger.log(
-        `${chalk.green(
-          `${CHECK_ICON}Aggregator pushed to crank successfully`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Aggregator pushed to crank successfully`)}`
       );
       this.logger.log(
         `https://explorer.solana.com/tx/${txn}?cluster=${this.cluster}`

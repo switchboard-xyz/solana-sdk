@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
+import { chalkString } from "@switchboard-xyz/sbv2-utils";
 import { OracleAccount } from "@switchboard-xyz/switchboard-v2";
-import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 
 export default class OracleBalance extends BaseCommand {
@@ -13,8 +13,7 @@ export default class OracleBalance extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle to check token balance",
     },
   ];
@@ -24,11 +23,11 @@ export default class OracleBalance extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(OracleBalance);
+    const { args } = await this.parse(OracleBalance);
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const oracle = await oracleAccount.loadData();
 

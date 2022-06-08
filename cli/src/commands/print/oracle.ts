@@ -17,8 +17,6 @@ export default class OraclePrint extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle account to deserialize",
     },
   ];
@@ -28,11 +26,11 @@ export default class OraclePrint extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(OraclePrint);
+    const { args, flags } = await this.parse(OraclePrint);
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const data = await oracleAccount.loadData();
 

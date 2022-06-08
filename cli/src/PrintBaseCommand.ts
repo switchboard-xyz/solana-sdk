@@ -1,10 +1,7 @@
-/* eslint-disable unicorn/no-process-exit */
-/* eslint-disable no-process-exit */
-import Command, { flags } from "@oclif/command";
-import { Input } from "@oclif/parser";
+import { Command, Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@project-serum/anchor/dist/cjs/coder";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
   prettyPrintAggregator,
   prettyPrintCrank,
@@ -15,6 +12,8 @@ import {
   prettyPrintProgramState,
   prettyPrintQueue,
   prettyPrintVrf,
+  SwitchboardAccountType,
+  SWITCHBOARD_DISCRIMINATOR_MAP,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
@@ -29,11 +28,6 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as path from "path";
-import {
-  DEFAULT_KEYPAIR,
-  SwitchboardAccountType,
-  SWITCHBOARD_DISCRIMINATOR_MAP,
-} from "./accounts";
 import { CliConfig } from "./config";
 import { FsProvider } from "./types";
 import { CommandContext } from "./types/context/context";
@@ -47,8 +41,8 @@ export interface ClusterConfigs {
 
 abstract class PrintBaseCommand extends Command {
   static flags = {
-    help: flags.help({ char: "h" }),
-    verbose: flags.boolean({
+    help: Flags.help({ char: "h" }),
+    verbose: Flags.boolean({
       char: "v",
       description: "log everything",
       default: false,
@@ -64,8 +58,8 @@ abstract class PrintBaseCommand extends Command {
   public clusters: ClusterConfigs;
 
   async init() {
-    const { flags } = this.parse(<Input<any>>this.constructor);
-    PrintBaseCommand.flags = flags;
+    const { flags } = (await this.parse(this.constructor as any)) as any;
+    // this.flags = flags;
 
     // setup logging
     const level = flags.silent ? "error" : flags.verbose ? "debug" : "info";
@@ -93,12 +87,12 @@ abstract class PrintBaseCommand extends Command {
       devnet: await loadAnchor(
         "devnet",
         new Connection(clusterApiUrl("devnet")),
-        DEFAULT_KEYPAIR
+        Keypair.fromSeed(new Uint8Array(32).fill(1))
       ),
       mainnet: await loadAnchor(
         "mainnet-beta",
         new Connection(clusterApiUrl("mainnet-beta")),
-        DEFAULT_KEYPAIR
+        Keypair.fromSeed(new Uint8Array(32).fill(1))
       ),
     };
   }
@@ -114,6 +108,7 @@ abstract class PrintBaseCommand extends Command {
         this.logger.log(await prettyPrintJob(job));
         break;
       }
+
       case "AggregatorAccountData": {
         const aggregator = new AggregatorAccount({ program, publicKey });
         this.logger.log(
@@ -121,42 +116,50 @@ abstract class PrintBaseCommand extends Command {
         );
         break;
       }
+
       case "OracleAccountData": {
         const oracle = new OracleAccount({ program, publicKey });
         this.logger.log(await prettyPrintOracle(oracle, undefined, true));
         break;
       }
+
       case "PermissionAccountData": {
         const permission = new PermissionAccount({ program, publicKey });
-        this.logger.log(await prettyPrintPermissions(permission, undefined));
+        this.logger.log(await prettyPrintPermissions(permission));
         break;
       }
+
       case "LeaseAccountData": {
         const lease = new LeaseAccount({ program, publicKey });
-        this.logger.log(await prettyPrintLease(lease, undefined));
+        this.logger.log(await prettyPrintLease(lease));
         break;
       }
+
       case "OracleQueueAccountData": {
         const queue = new OracleQueueAccount({ program, publicKey });
         this.logger.log(await prettyPrintQueue(queue));
         break;
       }
+
       case "CrankAccountData": {
         const crank = new CrankAccount({ program, publicKey });
         this.logger.log(await prettyPrintCrank(crank));
         break;
       }
+
       case "SbState":
       case "ProgramStateAccountData": {
         const [programState] = ProgramStateAccount.fromSeed(program);
         this.logger.log(await prettyPrintProgramState(programState));
         break;
       }
+
       case "VrfAccountData": {
         const vrfAccount = new VrfAccount({ program, publicKey });
         this.logger.log(await prettyPrintVrf(vrfAccount));
         break;
       }
+
       case "BUFFERxx": {
         console.log(`Found buffer account but dont know which one`);
         break;
@@ -173,6 +176,7 @@ abstract class PrintBaseCommand extends Command {
     if (!account) {
       throw new Error(`devnet account not found`);
     }
+
     const accountDiscriminator = account.data.slice(
       0,
       ACCOUNT_DISCRIMINATOR_SIZE
@@ -228,6 +232,7 @@ abstract class PrintBaseCommand extends Command {
     if (message) {
       logger.info(chalk.red(`${FAILED_ICON}${message}`));
     }
+
     if (error.message) {
       const messageLines = error.message.split("\n");
       logger.error(messageLines[0]);

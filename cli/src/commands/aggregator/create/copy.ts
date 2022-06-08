@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-array-push-push */
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -13,6 +13,7 @@ import {
   packAndSend,
   prettyPrintAggregator,
   promiseWithTimeout,
+  verifyProgramHasPayer,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
@@ -28,7 +29,6 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import BaseCommand from "../../../BaseCommand";
-import { verifyProgramHasPayer } from "../../../utils";
 
 // TODO: Fix command so it accepts a feed authority flag
 // TODO: Add flag that skips job creation
@@ -37,52 +37,47 @@ export default class AggregatorCreateCopy extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({ description: "skip job confirmation" }),
-    outputFile: flags.string({
-      char: "f",
-      description: "output file to save aggregator definition to",
-    }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that will be the aggregator authority",
     }),
-    minOracles: flags.integer({
+    minOracles: Flags.integer({
       description: "override source aggregator's minOracleResults",
     }),
-    batchSize: flags.integer({
+    batchSize: Flags.integer({
       description: "override source aggregator's oracleRequestBatchSize",
     }),
-    minJobs: flags.integer({
+    minJobs: Flags.integer({
       description: "override source aggregator's minJobResults",
     }),
-    minUpdateDelay: flags.integer({
+    minUpdateDelay: Flags.integer({
       description: "override source aggregator's minUpdateDelaySeconds",
     }),
-    forceReportPeriod: flags.integer({
+    forceReportPeriod: Flags.integer({
       description: "override source aggregator's forceReportPeriod",
     }),
-    varianceThreshold: flags.string({
+    varianceThreshold: Flags.string({
       description: "override source aggregator's varianceThreshold",
     }),
-    queueKey: flags.string({
+    queueKey: Flags.string({
       description: "public key of the queue to create aggregator for",
       required: true,
     }),
-    crankKey: flags.string({
+    crankKey: Flags.string({
       description: "public key of the crank to push aggregator to",
       required: false,
     }),
-    enable: flags.boolean({
+    enable: Flags.boolean({
       description: "set permissions to PERMIT_ORACLE_QUEUE_USAGE",
     }),
-    queueAuthority: flags.string({
+    queueAuthority: Flags.string({
       description: "alternative keypair to use for queue authority",
     }),
-    copyJobs: flags.boolean({
+    copyJobs: Flags.boolean({
       description:
         "create copy of job accounts instead of referincing existing job account",
     }),
-    // sourceCluster: flags.string({
+    // sourceCluster: Flags.string({
     //   description: "alternative solana cluster to copy source aggregator from",
     //   required: false,
     //   options: ["devnet", "mainnet-beta"],
@@ -92,8 +87,6 @@ export default class AggregatorCreateCopy extends BaseCommand {
   static args = [
     {
       name: "aggregatorSource",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account to copy",
     },
   ];
@@ -106,7 +99,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args, flags } = this.parse(AggregatorCreateCopy);
+    const { args, flags } = await this.parse(AggregatorCreateCopy);
 
     const payerKeypair = programWallet(this.program);
     const feedAuthority = await this.loadAuthority(flags.authority);

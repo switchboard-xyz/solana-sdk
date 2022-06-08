@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -28,20 +28,20 @@ export default class VrfCreateExample extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    vrfPid: flags.string({
+    vrfPid: Flags.string({
       description: "program ID for the VRF example program",
       required: true,
     }),
-    vrfKeypair: flags.string({
+    vrfKeypair: Flags.string({
       description: "filesystem path of existing keypair to use for VRF Account",
     }),
-    enable: flags.boolean({
+    enable: Flags.boolean({
       description: "enable vrf permissions",
     }),
-    queueAuthority: flags.string({
+    queueAuthority: Flags.string({
       description: "alternative keypair to use for queue authority",
     }),
-    maxResult: flags.string({
+    maxResult: Flags.string({
       description: "the maximum VRF result",
       default: "256000",
     }),
@@ -50,14 +50,12 @@ export default class VrfCreateExample extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle queue to create VRF account for",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(VrfCreateExample);
+    const { args, flags } = await this.parse(VrfCreateExample);
     verifyProgramHasPayer(this.program);
     const payerKeypair = programWallet(this.program);
     this.mainnetCheck();
@@ -81,6 +79,7 @@ export default class VrfCreateExample extends BaseCommand {
         `failed to read VRF Example program idl for ${this.cluster} ${vrfProgramId}`
       );
     }
+
     const vrfclientProgram = new anchor.Program(
       vrfExampleIdl,
       vrfProgramId,
@@ -114,7 +113,7 @@ export default class VrfCreateExample extends BaseCommand {
     );
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
     const tokenMint = await queueAccount.loadMint();
@@ -195,10 +194,11 @@ export default class VrfCreateExample extends BaseCommand {
           `Invalid queue authority, received ${queueAuthority.publicKey}, expected ${queue.authority}`
         );
       }
+
       createTxn.add(
         await this.program.methods
           .permissionSet({
-            permission: { permitVrfRequests: null },
+            permission: { permitVrfRequests: undefined },
             enable: true,
           })
           .accounts({

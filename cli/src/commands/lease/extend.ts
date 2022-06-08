@@ -1,6 +1,10 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import {
+  chalkString,
+  verifyProgramHasPayer,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   LeaseAccount,
@@ -8,9 +12,8 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
+import { CHECK_ICON } from "../../utils";
 
 export default class LeaseExtend extends BaseCommand {
   static description = "fund and re-enable an aggregator lease";
@@ -19,7 +22,7 @@ export default class LeaseExtend extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    amount: flags.string({
+    amount: Flags.string({
       required: true,
       description:
         "token amount to load into the lease escrow. If decimals provided, amount will be normalized to raw tokenAmount",
@@ -29,8 +32,7 @@ export default class LeaseExtend extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the aggregator to extend a lease for",
     },
   ];
@@ -40,19 +42,19 @@ export default class LeaseExtend extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(LeaseExtend);
+    const { args, flags } = await this.parse(LeaseExtend);
     verifyProgramHasPayer(this.program);
 
     const payerKeypair = programWallet(this.program);
 
-    let amount = this.getTokenAmount(flags.amount);
+    const amount = this.getTokenAmount(flags.amount);
     if (amount.lte(new anchor.BN(0))) {
       throw new Error("amount to deposit must be greater than 0");
     }
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
@@ -72,6 +74,7 @@ export default class LeaseExtend extends BaseCommand {
     } catch {
       throw new Error(`Failed to load lease account. Has it been created yet?`);
     }
+
     const lease = await leaseAccount.loadData();
     const escrow: PublicKey = lease.escrow;
 

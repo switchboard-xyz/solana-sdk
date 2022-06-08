@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -32,7 +33,7 @@ export default class TestCommand extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    // name: flags.string({
+    // name: Flags.string({
     //   char: "n",
     //   description: "name of the job account for easier identification",
     //   default: "",
@@ -42,24 +43,22 @@ export default class TestCommand extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle to deposit funds into",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(TestCommand);
+    const { args, flags } = await this.parse(TestCommand);
     verifyProgramHasPayer(this.program);
 
     const oracleAuthority = programWallet(this.program);
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
 
-    /////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////
     const oracle = await oracleAccount.loadData();
     const queueAccount = new OracleQueueAccount({
       program: oracleAccount.program,
@@ -103,6 +102,7 @@ export default class TestCommand extends BaseCommand {
       if (error.message !== "NonceAccount has not been created") {
         throw error;
       }
+
       const nonceRentExemption =
         await oracleAccount.program.provider.connection.getMinimumBalanceForRentExemption(
           NONCE_ACCOUNT_LENGTH
@@ -152,6 +152,7 @@ export default class TestCommand extends BaseCommand {
               `Oracle Authority is low on funds and not enough funds in the staking wallet to cover`
             );
           }
+
           const unwrapAmountUi = fromBN(unwrapAmountBN).div(LAMPORTS_PER_SOL);
           this.logger.info(
             `NodeBalance: ${nodeBalance}, unwrapping ${unwrapAmountUi} SOL`
@@ -255,7 +256,7 @@ function decodeTokenAccount(
     throw new Error("INVALID_ACCOUNT_OWNER");
   }
 
-  if (info.data.length != spl.AccountLayout.span) {
+  if (info.data.length !== spl.AccountLayout.span) {
     throw new Error(`Invalid account size`);
   }
 
@@ -267,7 +268,7 @@ function decodeTokenAccount(
   accountInfo.amount = spl.u64.fromBuffer(accountInfo.amount);
 
   if (accountInfo.delegateOption === 0) {
-    accountInfo.delegate = null;
+    accountInfo.delegate = undefined;
     accountInfo.delegatedAmount = new spl.u64(0);
   } else {
     accountInfo.delegate = new PublicKey(accountInfo.delegate);
@@ -283,15 +284,14 @@ function decodeTokenAccount(
     accountInfo.rentExemptReserve = spl.u64.fromBuffer(accountInfo.isNative);
     accountInfo.isNative = true;
   } else {
-    accountInfo.rentExemptReserve = null;
+    accountInfo.rentExemptReserve = undefined;
     accountInfo.isNative = false;
   }
 
-  if (accountInfo.closeAuthorityOption === 0) {
-    accountInfo.closeAuthority = null;
-  } else {
-    accountInfo.closeAuthority = new PublicKey(accountInfo.closeAuthority);
-  }
+  accountInfo.closeAuthority =
+    accountInfo.closeAuthorityOption === 0
+      ? undefined
+      : new PublicKey(accountInfo.closeAuthority);
 
   return accountInfo;
 }

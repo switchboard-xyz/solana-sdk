@@ -1,7 +1,11 @@
-import { flags } from "@oclif/command";
+/* eslint-disable complexity */
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { prettyPrintAggregator } from "@switchboard-xyz/sbv2-utils";
+import {
+  prettyPrintAggregator,
+  verifyProgramHasPayer,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   JobAccount,
@@ -12,14 +16,13 @@ import {
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
+import BaseCommand from "../../../BaseCommand";
 import {
-  fromAggregatorJSON,
-  fromJobJSON,
+  CHECK_ICON,
+  loadKeypair,
   pubKeyConverter,
   pubKeyReviver,
-} from "../../../accounts";
-import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../../utils";
+} from "../../../utils";
 
 export default class JsonCreateAggregator extends BaseCommand {
   static description = "create an aggregator from a json file";
@@ -28,18 +31,11 @@ export default class JsonCreateAggregator extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite output file",
-    }),
-    outputFile: flags.string({
-      description: "output aggregator definition to a json file",
-      char: "f",
-    }),
-    queueKey: flags.string({
+    queueKey: Flags.string({
       description: "public key of the oracle queue to create aggregator for",
       char: "q",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       description:
         "alternate keypair that will be the authority for the aggregator",
       char: "a",
@@ -49,7 +45,6 @@ export default class JsonCreateAggregator extends BaseCommand {
   static args = [
     {
       name: "definitionFile",
-      required: true,
       description: "filesystem path of queue definition json file",
     },
   ];
@@ -59,7 +54,7 @@ export default class JsonCreateAggregator extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(JsonCreateAggregator);
+    const { args, flags } = await this.parse(JsonCreateAggregator);
     verifyProgramHasPayer(this.program);
 
     const payerKeypair = programWallet(this.program);
@@ -71,16 +66,10 @@ export default class JsonCreateAggregator extends BaseCommand {
       throw new Error("input file does not exist");
     }
 
-    const aggregatorDefinition: fromAggregatorJSON = JSON.parse(
+    const aggregatorDefinition: any = JSON.parse(
       fs.readFileSync(definitionFile, "utf-8"),
       pubKeyReviver
     );
-
-    if (flags.outputFile && fs.existsSync(flags.outputFile) && !flags.force) {
-      throw new Error(
-        "output file exists. Run the command with '--force' to overwrite it"
-      );
-    }
 
     let authority = programWallet(this.program);
     if (flags.authority) {
@@ -146,7 +135,7 @@ export default class JsonCreateAggregator extends BaseCommand {
     const jobs: JobAccount[] = [];
     if (aggregatorDefinition.jobs) {
       for await (const job of aggregatorDefinition.jobs) {
-        const jobDefinition: fromJobJSON = JSON.parse(
+        const jobDefinition: any = JSON.parse(
           JSON.stringify(job),
           pubKeyConverter
         );
@@ -187,13 +176,6 @@ export default class JsonCreateAggregator extends BaseCommand {
           false,
           true
         )
-      );
-    }
-
-    if (flags.outputFile) {
-      fs.writeFileSync(
-        flags.outputFile,
-        JSON.stringify(aggregator, pubKeyConverter, 2)
       );
     }
 

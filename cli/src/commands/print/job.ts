@@ -17,8 +17,6 @@ export default class JobPrint extends BaseCommand {
   static args = [
     {
       name: "jobKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the job account to deserialize",
     },
   ];
@@ -28,11 +26,11 @@ export default class JobPrint extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(JobPrint);
+    const { args, flags } = await this.parse(JobPrint);
 
     const jobAccount = new JobAccount({
       program: this.program,
-      publicKey: args.jobKey,
+      publicKey: new PublicKey(args.jobKey),
     });
 
     this.logger.log(await prettyPrintJob(jobAccount));

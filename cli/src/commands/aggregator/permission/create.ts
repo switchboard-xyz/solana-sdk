@@ -19,19 +19,17 @@ export default class AggregatorPermissionCreate extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
   ];
 
   async run() {
-    const { args } = this.parse(AggregatorPermissionCreate);
+    const { args } = await this.parse(AggregatorPermissionCreate);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
@@ -69,9 +67,7 @@ export default class AggregatorPermissionCreate extends BaseCommand {
       console.log(permissionAccount.publicKey.toString());
     } else {
       this.logger.log(
-        `${chalk.green(
-          `${CHECK_ICON}Permission account created successfully`
-        )}`
+        `${chalk.green(`${CHECK_ICON}Permission account created successfully`)}`
       );
       this.logger.log(await prettyPrintPermissions(permissionAccount));
     }

@@ -5,7 +5,6 @@ import {
   SBV2_DEVNET_PID,
   SBV2_MAINNET_PID,
 } from "@switchboard-xyz/switchboard-v2";
-import { DEFAULT_KEYPAIR } from "../accounts";
 import { NoPayerKeypairProvided } from "../types";
 
 export const loadAnchor = async (
@@ -24,6 +23,7 @@ export const loadAnchor = async (
       PID = SBV2_MAINNET_PID;
       break;
     }
+
     case "testnet": {
       throw new Error(`${cluster} PID not implemented yet`);
     }
@@ -75,7 +75,9 @@ export const getNewProgram = (
 
 export const programHasPayer = (program: anchor.Program): boolean => {
   const payer = programWallet(program);
-  return !payer.publicKey.equals(DEFAULT_KEYPAIR.publicKey);
+  return !payer.publicKey.equals(
+    Keypair.fromSeed(new Uint8Array(32).fill(1)).publicKey
+  );
 };
 
 export const getProgramPayer = (program: anchor.Program): Keypair => {

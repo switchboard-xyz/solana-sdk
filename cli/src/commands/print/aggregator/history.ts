@@ -1,7 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
+import {
+  anchorBNtoDateTimeString,
+  chalkString,
+} from "@switchboard-xyz/sbv2-utils";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { anchorBNtoDateTimeString, chalkString } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
 
 export default class AggregatorHistoryPrint extends BaseCommand {
@@ -17,8 +20,6 @@ export default class AggregatorHistoryPrint extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description:
         "public key of the aggregator account to fetch permission account and deserialize",
     },
@@ -29,11 +30,11 @@ export default class AggregatorHistoryPrint extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(AggregatorHistoryPrint);
+    const { args } = await this.parse(AggregatorHistoryPrint);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 

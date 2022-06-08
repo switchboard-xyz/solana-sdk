@@ -1,5 +1,4 @@
-import { flags } from "@oclif/command";
-import * as anchor from "@project-serum/anchor";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -11,7 +10,7 @@ export default class QueueSetRewards extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for oracle queue",
     }),
@@ -20,14 +19,11 @@ export default class QueueSetRewards extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle queue",
     },
     {
       name: "rewards",
-      required: true,
-      parse: (reward: string) => new anchor.BN(reward),
       description: "token rewards for each assigned oracle per open round call",
     },
   ];
@@ -38,12 +34,12 @@ export default class QueueSetRewards extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(QueueSetRewards);
+    const { args, flags } = await this.parse(QueueSetRewards);
     verifyProgramHasPayer(this.program);
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
 

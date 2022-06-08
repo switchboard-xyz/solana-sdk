@@ -1,5 +1,6 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey, Transaction } from "@solana/web3.js";
+import { verifyProgramHasPayer } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   OracleQueueAccount,
@@ -9,7 +10,7 @@ import {
 import Big from "big.js";
 import chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON } from "../../../utils";
 
 export default class AggregatorSet extends BaseCommand {
   static description = "set an aggregator's config";
@@ -18,31 +19,31 @@ export default class AggregatorSet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
-    forceReportPeriod: flags.string({
+    forceReportPeriod: Flags.string({
       description:
         "Number of seconds for which, even if the variance threshold is not passed, accept new responses from oracles.",
     }),
-    // batchSize: flags.string({
+    // batchSize: Flags.string({
     //   description: "number of oracles requested for each open round call",
     // }),
-    minJobs: flags.string({
+    minJobs: Flags.string({
       description: "number of jobs that must respond before an oracle responds",
     }),
-    minOracles: flags.string({
+    minOracles: Flags.string({
       description:
         "number of oracles that must respond before a value is accepted on-chain",
     }),
-    newQueue: flags.string({
+    newQueue: Flags.string({
       description: "public key of the new oracle queue",
     }),
-    updateInterval: flags.string({
+    updateInterval: Flags.string({
       description: "set an aggregator's minimum update delay",
     }),
-    varianceThreshold: flags.string({
+    varianceThreshold: Flags.string({
       description:
         "percentage change between a previous accepted result and the next round before an oracle reports a value on-chain. Used to conserve lease cost during low volatility",
     }),
@@ -51,8 +52,6 @@ export default class AggregatorSet extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator",
     },
   ];
@@ -62,14 +61,14 @@ export default class AggregatorSet extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSet);
+    const { args, flags } = await this.parse(AggregatorSet);
     verifyProgramHasPayer(this.program);
 
     const payerKeypair = programWallet(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
     const authority = await this.loadAuthority(
@@ -114,7 +113,7 @@ export default class AggregatorSet extends BaseCommand {
 
     // min oracles responses
     if (flags.minOracles) {
-      const minOracles = Number.parseInt(flags.minOracles);
+      const minOracles = Number.parseInt(flags.minOracles, 10);
       txn.add(
         await this.program.methods
           .aggregatorSetMinOracles({
@@ -130,7 +129,7 @@ export default class AggregatorSet extends BaseCommand {
 
     // min job responses
     if (flags.minJobs) {
-      const minJobs = Number.parseInt(flags.minJobs);
+      const minJobs = Number.parseInt(flags.minJobs, 10);
       txn.add(
         await this.program.methods
           .aggregatorSetMinJobs({
@@ -167,7 +166,7 @@ export default class AggregatorSet extends BaseCommand {
       txn.add(
         await this.program.methods
           .aggregatorSetForceReportPeriod({
-            forceReportPeriod: Number.parseInt(flags.forceReportPeriod),
+            forceReportPeriod: Number.parseInt(flags.forceReportPeriod, 10),
           })
           .accounts({
             aggregator: aggregatorAccount.publicKey,

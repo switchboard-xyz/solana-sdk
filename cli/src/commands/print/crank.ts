@@ -17,8 +17,6 @@ export default class CrankPrint extends BaseCommand {
   static args = [
     {
       name: "crankKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the crank account to deserialize",
     },
   ];
@@ -28,11 +26,11 @@ export default class CrankPrint extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(CrankPrint);
+    const { args, flags } = await this.parse(CrankPrint);
 
     const crankAccount = new CrankAccount({
       program: this.program,
-      publicKey: args.crankKey,
+      publicKey: new PublicKey(args.crankKey),
     });
 
     this.logger.log(await prettyPrintCrank(crankAccount, undefined, true));

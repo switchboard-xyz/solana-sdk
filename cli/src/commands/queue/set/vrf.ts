@@ -1,27 +1,25 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { Keypair, PublicKey } from "@solana/web3.js";
+import { prettyPrintQueue } from "@switchboard-xyz/sbv2-utils";
 import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { fromCrankJSON, OracleQueueClass } from "../../../accounts";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, getProgramPayer, loadKeypair } from "../../../utils";
+import { CHECK_ICON, getProgramPayer } from "../../../utils";
 
 export default class QueueSetVrf extends BaseCommand {
   queueAccount: OracleQueueAccount;
 
-  crankDefinition: fromCrankJSON;
-
   queueAuthority: Keypair | undefined = undefined;
 
-  static description = "add a crank to an existing oracle queue";
+  static description = "set unpermissionedVrfEnabled";
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for oracle queue",
     }),
-    disable: flags.boolean({
+    disable: Flags.boolean({
       description: "disable unpermissionedVrfEnabled",
     }),
   };
@@ -29,8 +27,6 @@ export default class QueueSetVrf extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle queue to create a crank on",
     },
   ];
@@ -40,36 +36,29 @@ export default class QueueSetVrf extends BaseCommand {
     // "$ sbv2 queue:add:crank 5aYuxRdcB9GpWrEXVMBQp2R5uf94uoBiFdMEBwcmHuU4 -k ../payer-keypair.json -a ../authority-keypair.json",
   ];
 
-  async init() {
-    await super.init();
-    const { args, flags } = this.parse(QueueSetVrf);
-
-    this.queueAccount = new OracleQueueAccount({
-      program: this.program,
-      publicKey: args.queueKey,
-    });
-
-    // TODO: Not implemented yet
-    if (flags.authority) {
-      this.queueAuthority = await loadKeypair(flags.authority);
-    }
-  }
-
   async run() {
+    const { args, flags } = await this.parse(QueueSetVrf);
+
+    const queueAccount = new OracleQueueAccount({
+      program: this.program,
+      publicKey: new PublicKey(args.queueKey),
+    });
+    const queue = await queueAccount.loadData();
+
+    const queueAuthority = await this.loadAuthority(
+      flags.authority,
+      queue.authority
+    );
+
     const setVrfTxn = await this.queueAccount.setVrfSettings({
       unpermissionedVrf: true,
       authority: this.queueAuthority ?? getProgramPayer(this.program),
     });
 
-    const queue = await OracleQueueClass.fromAccount(
-      this.context,
-      this.queueAccount
-    );
-
     if (this.silent) {
       console.log(setVrfTxn);
     } else {
-      this.logger.log(queue.prettyPrint());
+      this.logger.log(await prettyPrintQueue(queueAccount, undefined, true));
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Queue VRF successfully set\r\n`)}`
       );

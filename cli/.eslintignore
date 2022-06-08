@@ -1,6 +1,1 @@
-lib
-dist
-dts
-node_modules
-scripts
-test
+/dist

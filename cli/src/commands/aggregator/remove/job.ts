@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount, JobAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -10,10 +10,7 @@ export default class AggregatorRemoveJob extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
-      description: "overwrite outputFile if existing",
-    }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -22,14 +19,10 @@ export default class AggregatorRemoveJob extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
     {
       name: "jobKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description:
         "public key of an existing job account to remove from an aggregator",
     },
@@ -38,12 +31,12 @@ export default class AggregatorRemoveJob extends BaseCommand {
   static examples = ["$ sbv2 aggregator:remove:job"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorRemoveJob);
+    const { args, flags } = await this.parse(AggregatorRemoveJob);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
     const authority = await this.loadAuthority(

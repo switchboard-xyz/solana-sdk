@@ -1,6 +1,6 @@
 /* eslint-disable unicorn/prevent-abbreviations */
-/* eslint-disable unicorn/new-for-builtins */
-import { flags } from "@oclif/command";
+
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestEnvironment } from "@switchboard-xyz/sbv2-utils";
 import { programWallet } from "@switchboard-xyz/switchboard-v2";
@@ -14,11 +14,11 @@ export default class LocalnetEnvironment extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
+    force: Flags.boolean({
       description: "overwrite output file if existing",
       default: false,
     }),
-    outputDir: flags.string({
+    outputDir: Flags.string({
       char: "o",
       description: "output directory for scripts",
     }),
@@ -26,7 +26,7 @@ export default class LocalnetEnvironment extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { flags } = this.parse(LocalnetEnvironment);
+    const { flags } = await this.parse(LocalnetEnvironment);
     const payerKeypair = programWallet(this.program);
 
     const outputDir = flags.outputDir
@@ -40,21 +40,25 @@ export default class LocalnetEnvironment extends BaseCommand {
           "switchboard.env already exists, use --force to overwrite"
         );
       }
+
       if (fs.existsSync(path.join(outputDir, "switchboard.json"))) {
         throw new Error(
           "switchboard.json already exists, use --force to overwrite"
         );
       }
+
       if (fs.existsSync(path.join(outputDir, "start-local-validator.sh"))) {
         throw new Error(
           "start-local-validator.sh already exists, use --force to overwrite"
         );
       }
+
       if (fs.existsSync(path.join(outputDir, "start-oracle.sh"))) {
         throw new Error(
           "start-oracle.sh already exists, use --force to overwrite"
         );
       }
+
       if (
         fs.existsSync(
           path.join(process.cwd(), "docker-compose.switchboard.yml")

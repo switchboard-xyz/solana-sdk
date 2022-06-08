@@ -3,16 +3,7 @@
 /.nyc_output
 /dist
 /lib
+/package-lock.json
 /tmp
-/yarn.lock
 node_modules
-switchboardv2_idl*.json
-.archive
-.keypairs
-
-
-*-keypair.json
-*.schema.json
-.data
-
 oclif.manifest.json

@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import {
   PermissionAccount,
@@ -17,11 +17,11 @@ export default class PermissionSet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the granters authority",
     }),
-    disable: flags.boolean({
+    disable: Flags.boolean({
       description: "disable permissions",
     }),
   };
@@ -29,14 +29,13 @@ export default class PermissionSet extends BaseCommand {
   static args = [
     {
       name: "permissionKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the permission account",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(PermissionSet);
+    const { args, flags } = await this.parse(PermissionSet);
     verifyProgramHasPayer(this.program);
 
     const permissionAccount = new PermissionAccount({

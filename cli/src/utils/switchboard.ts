@@ -90,28 +90,36 @@ export const loadSwitchboardAccount = async (
     case "JobAccountData": {
       return [accountType, new JobAccount({ program, publicKey })];
     }
+
     case "AggregatorAccountData": {
       return [accountType, new AggregatorAccount({ program, publicKey })];
     }
+
     case "OracleAccountData": {
       return [accountType, new OracleAccount({ program, publicKey })];
     }
+
     case "PermissionAccountData": {
       return [accountType, new PermissionAccount({ program, publicKey })];
     }
+
     case "LeaseAccountData": {
       return [accountType, new LeaseAccount({ program, publicKey })];
     }
+
     case "OracleQueueAccountData": {
       return [accountType, new OracleQueueAccount({ program, publicKey })];
     }
+
     case "CrankAccountData": {
       return [accountType, new CrankAccount({ program, publicKey })];
     }
+
     case "SbState":
     case "ProgramStateAccountData": {
       return [accountType, new ProgramStateAccount({ program, publicKey })];
     }
+
     case "VrfAccountData": {
       return [accountType, new VrfAccount({ program, publicKey })];
     }

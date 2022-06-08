@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import BaseCommand from "../BaseCommand";
 import OracleDeposit from "./oracle/deposit";
 import OracleWithdraw from "./oracle/withdraw";
@@ -16,7 +16,7 @@ export default class Config extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    pubkey: flags.string({
+    pubkey: Flags.string({
       description:
         "command specific. override default account with provided public key",
     }),
@@ -39,7 +39,7 @@ export default class Config extends BaseCommand {
 
   async init() {
     await super.init();
-    const { args, flags, argv } = this.parse(Config);
+    const { args, flags, argv } = await this.parse(Config);
     this.passThroughArguments = argv.slice(1);
     this.baseCommand = args.baseCommand;
     this.flags = flags;
@@ -51,6 +51,7 @@ export default class Config extends BaseCommand {
         await OracleWithdraw.run(this.passThroughArguments);
         break;
       }
+
       case "oracle:deposit": {
         await OracleDeposit.run(this.passThroughArguments);
         break;

@@ -1,0 +1,34 @@
+{
+  "extends": [
+    "oclif",
+    "oclif-typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:unicorn/recommended",
+    "plugin:import/typescript",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "plugins": ["@typescript-eslint", "prettier", "unicorn", "import"],
+  "parserOptions": { "project": ["./tsconfig.json"] },
+  "ignorePatterns": ["test/**/*.ts"],
+  "rules": {
+    "valid-jsdoc": "off",
+    "camelcase": "off",
+    "max-params": "off",
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-shadow": "off",
+    "unicorn/filename-case": "off",
+    "unicorn/import-style": "off",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/prefer-code-point": "off",
+    "unicorn/no-await-expression-member": "off",
+    "no-useless-constructor": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "lines-between-class-members": "off",
+    "no-warning-comments": "off"
+  }
+}

@@ -2,7 +2,7 @@ import { Keypair } from "@solana/web3.js";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
-import { pubKeyConverter } from "../../accounts";
+import { pubKeyConverter } from "../../utils";
 import { DEFAULT_LOGGER, LogProvider } from "./logging";
 
 export class FsProvider {
@@ -48,4 +48,4 @@ export class FsProvider {
   }
 }
 
-// export const DEFAULT_KEYPAIR_PROVIDER = new FsProvider(".");
+// export const Keypair.fromSeed(new Uint8Array(32).fill(1))_PROVIDER = new FsProvider(".");

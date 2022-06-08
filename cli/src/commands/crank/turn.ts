@@ -22,8 +22,6 @@ export default class CrankTurn extends BaseCommand {
   static args = [
     {
       name: "crankKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the crank to turn",
     },
   ];
@@ -33,14 +31,14 @@ export default class CrankTurn extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(CrankTurn);
+    const { args } = await this.parse(CrankTurn);
     verifyProgramHasPayer(this.program);
     const payer = programWallet(this.program);
 
     // load crank
     const crankAccount = new CrankAccount({
       program: this.program,
-      publicKey: args.crankKey,
+      publicKey: new PublicKey(args.crankKey),
     });
     const crank = await crankAccount.loadData();
 

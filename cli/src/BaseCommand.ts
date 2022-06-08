@@ -1,4 +1,4 @@
-import Command, { flags } from "@oclif/command";
+import { Command, Flags } from "@oclif/core";
 import { Input } from "@oclif/parser";
 import * as anchor from "@project-serum/anchor";
 import {
@@ -17,7 +17,6 @@ import Big from "big.js";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
-import { DEFAULT_KEYPAIR } from "./accounts";
 import { CliConfig, ConfigParameter, DEFAULT_CONFIG } from "./config";
 import { AuthorityMismatch } from "./types";
 import { CommandContext } from "./types/context/context";
@@ -27,28 +26,25 @@ import { FAILED_ICON, loadKeypair, toCluster } from "./utils";
 
 abstract class BaseCommand extends Command {
   static flags = {
-    help: flags.help({ char: "h" }),
-    verbose: flags.boolean({
+    verbose: Flags.boolean({
       char: "v",
       description: "log everything",
-      default: false,
     }),
-    silent: flags.boolean({
+    silent: Flags.boolean({
       char: "s",
       description: "suppress cli prompts",
-      default: false,
     }),
-    mainnetBeta: flags.boolean({
+    mainnetBeta: Flags.boolean({
       description: "WARNING: use mainnet-beta solana cluster",
     }),
-    rpcUrl: flags.string({
+    rpcUrl: Flags.string({
       char: "u",
       description: "alternate RPC url",
     }),
-    programId: flags.string({
+    programId: Flags.string({
       description: "alternative Switchboard program ID to interact with",
     }),
-    keypair: flags.string({
+    keypair: Flags.string({
       char: "k",
       description:
         "keypair that will pay for onchain transactions. defaults to new account authority if no alternate authority provided",
@@ -71,16 +67,20 @@ abstract class BaseCommand extends Command {
 
   public program: anchor.Program;
 
-  public payerKeypair?: Keypair | undefined = undefined;
+  public payerKeypair: Keypair;
 
   async init() {
-    const { flags } = this.parse(<Input<any>>this.constructor);
-    BaseCommand.flags = flags;
+    const { flags } = await this.parse((<Input<any>>this.constructor) as any);
+    BaseCommand.flags = flags as any;
 
     // setup logging
-    this.silent = flags.silent;
-    this.verbose = flags.verbose;
-    const level = flags.silent ? "error" : flags.verbose ? "debug" : "info";
+    this.silent = (flags as any).silent;
+    this.verbose = (flags as any).verbose;
+    const level = (flags as any).silent
+      ? "error"
+      : (flags as any).verbose
+      ? "debug"
+      : "info";
     const logFilename = path.join(this.config.cacheDir, "log.txt");
     const logParameters: LoggerParameters = {
       console: {
@@ -90,8 +90,8 @@ abstract class BaseCommand extends Command {
         level: "debug",
         filename: logFilename,
       },
-      silent: flags.silent,
-      verbose: flags.verbose,
+      silent: this.silent ?? false,
+      verbose: this.verbose ?? false,
     };
     this.logger = new LogProvider(logParameters);
 
@@ -99,10 +99,14 @@ abstract class BaseCommand extends Command {
 
     this.loadConfig();
 
-    this.cluster = flags.mainnetBeta
+    this.cluster = (flags as any).mainnetBeta
       ? toCluster("mainnet-beta")
       : toCluster("devnet");
-    const url = flags.rpcUrl ?? clusterApiUrl(this.cluster);
+
+    const url =
+      (flags as any).rpcUrl ??
+      this.getRpcUrl(this.cluster) ??
+      clusterApiUrl(this.cluster);
     try {
       this.connection = new Connection(url, {
         commitment: "finalized",
@@ -120,12 +124,12 @@ abstract class BaseCommand extends Command {
       );
     }
 
-    this.payerKeypair = flags.keypair
-      ? await loadKeypair(flags.keypair)
-      : DEFAULT_KEYPAIR;
+    this.payerKeypair = (flags as any).keypair
+      ? await loadKeypair((flags as any).keypair)
+      : Keypair.fromSeed(new Uint8Array(32).fill(1));
 
-    const programId = flags.programId
-      ? new anchor.web3.PublicKey(flags.programId)
+    const programId = (flags as any).programId
+      ? new anchor.web3.PublicKey((flags as any).programId)
       : getSwitchboardPid(this.cluster as "mainnet-beta" | "devnet");
 
     const wallet = new anchor.Wallet(this.payerKeypair);
@@ -158,7 +162,7 @@ abstract class BaseCommand extends Command {
     };
   }
 
-  async catch(error, message?: string) {
+  async catch(error: any, message?: string) {
     // fall back to console if logger is not initialized yet
     const logger = this.logger ?? console;
 
@@ -185,12 +189,13 @@ abstract class BaseCommand extends Command {
 
   /** Load an authority from a CLI flag and optionally check if it matches the expected account authority */
   async loadAuthority(
-    authorityPath?: string,
+    authorityPath: string | unknown,
     expectedAuthority?: PublicKey
   ): Promise<Keypair> {
-    const authority = authorityPath
-      ? await loadKeypair(authorityPath)
-      : programWallet(this.program);
+    const authority: Keypair =
+      typeof authorityPath === "string"
+        ? await loadKeypair(authorityPath)
+        : programWallet(this.program);
 
     if (expectedAuthority && !expectedAuthority.equals(authority.publicKey)) {
       throw new AuthorityMismatch();
@@ -202,7 +207,7 @@ abstract class BaseCommand extends Command {
   mainnetCheck(): void {
     if (this.cluster === "mainnet-beta") {
       throw new Error(
-        `switchboardv2-cli is still in beta, mainnet is disabled for this command.`
+        "switchboardv2-cli is still in beta, mainnet is disabled for this command."
       );
     }
   }
@@ -270,6 +275,8 @@ abstract class BaseCommand extends Command {
           this.cliConfig.devnet.rpcUrl ||
           clusterApiUrl(toCluster("mainnet-beta"))
         );
+      default:
+        return clusterApiUrl(toCluster("devnet"));
     }
   }
 

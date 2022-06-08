@@ -1,4 +1,6 @@
-import { flags } from "@oclif/command";
+/* eslint-disable unicorn/prevent-abbreviations */
+/* eslint-disable complexity */
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import { buffer2string } from "@switchboard-xyz/sbv2-utils";
@@ -16,8 +18,11 @@ export default class MetricsAggregator extends BaseCommand {
   static hidden = true;
 
   outputBasePath: string;
+
   outputTxtFile?: string;
+
   outputJsonFile?: string;
+
   outputCsvFile?: string;
 
   aggregatorAccounts: { pubkey: PublicKey; account: AccountInfo<Buffer> }[];
@@ -26,28 +31,28 @@ export default class MetricsAggregator extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
+    force: Flags.boolean({
       description: "overwrite outputFile if it already exists",
     }),
-    task: flags.string({
+    task: Flags.string({
       description:
         "search for a given string in an aggregator task definitions",
       required: false,
     }),
-    queue: flags.string({
+    queue: Flags.string({
       description: "oracle queue to filter aggregators by",
       required: false,
     }),
-    json: flags.boolean({
+    json: Flags.boolean({
       description: "output aggregator accounts in json format",
     }),
-    csv: flags.boolean({
+    csv: Flags.boolean({
       description: "output aggregator accounts in csv format",
     }),
-    txt: flags.boolean({
+    txt: Flags.boolean({
       description: "output aggregator pubkeys in txt format",
     }),
-    jobDirectory: flags.string({
+    jobDirectory: Flags.string({
       description:
         "output the aggregator jobs to a directory sorted by the first task type",
     }),
@@ -63,7 +68,7 @@ export default class MetricsAggregator extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(MetricsAggregator);
+    const { args, flags } = await this.parse(MetricsAggregator);
 
     const parsedPath = path.parse(
       args.outputFile.startsWith("/") || args.outputFile.startsWith("C:")
@@ -79,6 +84,7 @@ export default class MetricsAggregator extends BaseCommand {
         );
       }
     }
+
     if (parsedPath.ext === ".json" || flags.json) {
       this.outputJsonFile = `${this.outputBasePath}.json`;
       if (fs.existsSync(this.outputJsonFile) && !flags.force) {
@@ -87,6 +93,7 @@ export default class MetricsAggregator extends BaseCommand {
         );
       }
     }
+
     if (parsedPath.ext === ".csv" || flags.csv) {
       this.outputCsvFile = `${this.outputBasePath}.csv`;
       if (fs.existsSync(this.outputCsvFile) && !flags.force) {
@@ -95,6 +102,7 @@ export default class MetricsAggregator extends BaseCommand {
         );
       }
     }
+
     if (!(this.outputJsonFile || this.outputCsvFile || this.outputTxtFile)) {
       throw new Error(
         `no output format specified, try --txt, --json, or --csv`
@@ -145,20 +153,24 @@ export default class MetricsAggregator extends BaseCommand {
             this.logger.debug(`Job is undefined`);
             continue;
           }
+
           if (!("tasks" in job)) {
             this.logger.debug(`Job has no tasks - ${job.publicKey}`);
             continue;
           }
+
           const firstTask = Object.keys(job.tasks[0])[0];
           const oracleJob = OracleJob.create({ tasks: job.tasks });
           const jobObject: { [k: string]: any } = {};
           // const jobObject = oracleJob.toJSON();
           if (job.name) {
-            jobObject["name"] = job.name;
+            jobObject.name = job.name;
           }
+
           if (job.metadata) {
-            jobObject["metadata"] = job.metadata;
+            jobObject.metadata = job.metadata;
           }
+
           // if (job.authority) {
           //   jobObject["authority"] = job.authority;
           // }
@@ -176,7 +188,7 @@ export default class MetricsAggregator extends BaseCommand {
                 2
               )
             );
-          } catch (error) {
+          } catch {
             this.logger.debug(`Error - ${firstTask}`);
           }
         }
@@ -194,8 +206,9 @@ export default class MetricsAggregator extends BaseCommand {
           if (job === undefined || job.tasks === undefined) {
             continue;
           }
+
           const jobString = JSON.stringify(job.tasks).toLowerCase();
-          if (jobString.indexOf(flags.task.toLowerCase()) !== -1) {
+          if (jobString.includes(flags.task.toLowerCase())) {
             aggregators.push(aggregator);
             break;
           }
@@ -297,24 +310,22 @@ async function buildAggregators(
 ): Promise<Aggregator[]> {
   const accountCoder = new anchor.BorshAccountsCoder(program.idl);
   // get all job pubkeys tied to aggregators
-  const jobPubkeys = aggregatorAccounts
-    .map((agg) => {
-      const aggregatorData = accountCoder.decode(
-        "AggregatorAccountData",
-        agg.account.data
-      );
-      const jobKeys = (
-        aggregatorData.jobPubkeysData.slice(
-          0,
-          aggregatorData.jobPubkeysSize
-        ) as anchor.web3.PublicKey[]
-      ).filter(
-        (pubkey: anchor.web3.PublicKey) =>
-          pubkey !== anchor.web3.PublicKey.default
-      );
-      return jobKeys;
-    })
-    .flat();
+  const jobPubkeys = aggregatorAccounts.flatMap((agg) => {
+    const aggregatorData = accountCoder.decode(
+      "AggregatorAccountData",
+      agg.account.data
+    );
+    const jobKeys = (
+      aggregatorData.jobPubkeysData.slice(
+        0,
+        aggregatorData.jobPubkeysSize
+      ) as anchor.web3.PublicKey[]
+    ).filter(
+      (pubkey: anchor.web3.PublicKey) =>
+        pubkey !== anchor.web3.PublicKey.default
+    );
+    return jobKeys;
+  });
 
   // store a map of job pubkeys and their definitions
   const jobMap = await buildJobMap(logger, program, jobPubkeys);
@@ -349,25 +360,32 @@ async function buildJobMap(
   pubkeys: PublicKey[],
   max = 300
 ): Promise<Map<string, Job>> {
-  function sliceIntoChunks(arr: PublicKey[], chunkSize: number): PublicKey[][] {
+  function sliceIntoChunks(
+    array: PublicKey[],
+    chunkSize: number
+  ): PublicKey[][] {
     const res = [];
-    for (let i = 0; i < arr.length; i += chunkSize) {
-      const chunk = arr.slice(i, i + chunkSize);
+    for (let index = 0; index < array.length; index += chunkSize) {
+      const chunk = array.slice(index, index + chunkSize);
       res.push(chunk);
     }
+
     return res;
   }
+
   const jobMap = new Map<string, Job>();
   const publicKeys = sliceIntoChunks(pubkeys, max);
   for await (const pubKeyBatch of publicKeys) {
     const jobAccountInfos = await program.account.jobAccountData.fetchMultiple(
       pubKeyBatch
     );
-    for (const [index, jobAccount] of jobAccountInfos.entries()) {
+    for (const [index, jobAccountData] of jobAccountInfos.entries()) {
       try {
         const publicKey = pubKeyBatch[index];
-        const oracleJob = OracleJob.decodeDelimited(jobAccount["data"]);
-        const job = new Job(publicKey, jobAccount, oracleJob.tasks);
+        const oracleJob = OracleJob.decodeDelimited(
+          (jobAccountData as any).data
+        );
+        const job = new Job(publicKey, jobAccountData, oracleJob.tasks);
         //   console.log(`jobKey: ${publicKey}, ${JSON.stringify(job)}`);
         jobMap.set(publicKey.toString(), job);
       } catch (error) {
@@ -393,13 +411,21 @@ interface JobData {
 
 class Job {
   publicKey: PublicKey;
+
   tasks: OracleJob.ITask[];
+
   name?: string;
+
   metadata?: string;
+
   authority?: PublicKey;
+
   expiration?: number;
+
   hash?: Buffer;
+
   referenceCount?: number;
+
   totalSpent?: number;
 
   constructor(publicKey: PublicKey, jobData: any, tasks: OracleJob.ITask[]) {
@@ -434,23 +460,41 @@ class Job {
 
 class Aggregator {
   publicKey: PublicKey;
+
   jobs: Job[];
+
   name?: string;
+
   metadata?: string;
+
   authorWallet?: PublicKey;
+
   queuePubkey?: PublicKey;
+
   oracleRequestBatchSize?: number;
+
   minOracleResults?: number;
+
   minJobResults?: number;
+
   minUpdateDelaySeconds?: number;
+
   startAfter: anchor.BN;
+
   varianceThreshold?: Big;
+
   forceReportPeriod?: anchor.BN;
+
   expiration?: number;
+
   crankPubkey?: PublicKey;
+
   jobPubkeysSize?: number;
+
   authority?: PublicKey;
+
   historyBuffer?: PublicKey;
+
   disableCrank?: boolean;
 
   constructor(publicKey: PublicKey, aggregatorData: any, jobs: Job[]) {
@@ -523,7 +567,7 @@ class Aggregator {
         ? "N/A"
         : this.historyBuffer.toString(),
       disableCrank: this.disableCrank,
-      jobs: this.jobs.map((job) => (job !== undefined ? job.toJSON() : "N/A")),
+      jobs: this.jobs.map((job) => (job === undefined ? "N/A" : job.toJSON())),
     };
   }
 }
