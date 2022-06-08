@@ -4,6 +4,7 @@ import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
+  AccountInfo,
   Keypair,
   SystemProgram,
   TransactionInstruction,
@@ -14,6 +15,7 @@ import {
   prettyPrintCrank,
   prettyPrintOracle,
   prettyPrintQueue,
+  promiseWithTimeout,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   CrankAccount,
@@ -67,7 +69,6 @@ export default class QueueCreate extends BaseCommand {
       default: 100,
     }),
     oracleTimeout: Flags.integer({
-      char: "o",
       description: "number of oracles to add to the queue",
       default: 180,
     }),
@@ -130,16 +131,17 @@ export default class QueueCreate extends BaseCommand {
       payerKeypair
     );
 
-    const setupQueueTxns: (
+    const createQueueTxns: (
       | TransactionInstruction
       | TransactionInstruction[]
     )[] = [];
 
+    // create program state account if it doesnt exist
     try {
       await programStateAccount.loadData();
     } catch {
       const vaultKeypair = anchor.web3.Keypair.generate();
-      setupQueueTxns.push([
+      createQueueTxns.push([
         SystemProgram.createAccount({
           fromPubkey: payerKeypair.publicKey,
           newAccountPubkey: vaultKeypair.publicKey,
@@ -187,7 +189,7 @@ export default class QueueCreate extends BaseCommand {
     this.logger.debug(chalkString("OracleQueue", queueKeypair.publicKey));
     this.logger.debug(chalkString("OracleBuffer", queueBuffer.publicKey));
 
-    setupQueueTxns.push(
+    createQueueTxns.push(
       anchor.web3.SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,
         newAccountPubkey: queueBuffer.publicKey,
@@ -231,6 +233,12 @@ export default class QueueCreate extends BaseCommand {
     );
     signers.push(queueKeypair, queueBuffer);
 
+    // add crank txns
+    const setupQueueTxns: (
+      | TransactionInstruction
+      | TransactionInstruction[]
+    )[] = [];
+
     let crankAccount: CrankAccount | undefined;
     if (flags.crankSize) {
       const crankKeypair = anchor.web3.Keypair.generate();
@@ -273,7 +281,8 @@ export default class QueueCreate extends BaseCommand {
       );
     }
 
-    const finalTransactions: (
+    // create any oracles
+    const createOracleIxns: (
       | TransactionInstruction
       | TransactionInstruction[]
     )[] = [];
@@ -300,7 +309,7 @@ export default class QueueCreate extends BaseCommand {
           chalkString(`Permission-${n + 1}`, permissionAccount.publicKey)
         );
 
-        finalTransactions.push([
+        createOracleIxns.push([
           SystemProgram.createAccount({
             fromPubkey: payerKeypair.publicKey,
             newAccountPubkey: tokenWalletKeypair.publicKey,
@@ -367,15 +376,45 @@ export default class QueueCreate extends BaseCommand {
       })
     );
 
-    const createAccountSignatures = await packAndSend(
+    const ixnBatches = [createQueueTxns];
+    if (setupQueueTxns.length > 0) {
+      ixnBatches.push(setupQueueTxns);
+    }
+
+    if (createOracleIxns.length > 0) {
+      ixnBatches.push(createOracleIxns);
+    }
+
+    const createAccountSignatures = packAndSend(
       this.program,
-      [setupQueueTxns, finalTransactions],
+      ixnBatches,
       signers,
       payerKeypair.publicKey
     ).catch((error) => {
       this.logger.error(error);
       throw error;
     });
+
+    let queueWs: number;
+    const queueInitPromise = new Promise((resolve: (result: any) => void) => {
+      queueWs = this.program.provider.connection.onAccountChange(
+        queueKeypair.publicKey,
+        (accountInfo: AccountInfo<Buffer>, slot) => {
+          const queueData = new anchor.BorshAccountsCoder(
+            this.program.idl
+          ).decode("OracleQueueAccountData", accountInfo.data);
+          resolve(queueData);
+        }
+      );
+    });
+
+    const result = await promiseWithTimeout(45_000, queueInitPromise).finally(
+      () => {
+        try {
+          this.program.provider.connection.removeAccountChangeListener(queueWs);
+        } catch {}
+      }
+    );
 
     let queueData: any;
     try {
@@ -431,12 +470,17 @@ export default class QueueCreate extends BaseCommand {
       return;
     }
 
-    this.logger.info(
-      "\r\n" + (await prettyPrintQueue(queueAccount, queueData, false))
-    );
-    this.logger.info(
-      await prettyPrintCrank(crankAccount, undefined, false, 30)
-    );
+    try {
+      this.logger.info(
+        "\r\n" + (await prettyPrintQueue(queueAccount, queueData, false))
+      );
+    } catch {}
+
+    try {
+      this.logger.info(
+        await prettyPrintCrank(crankAccount, undefined, false, 30)
+      );
+    } catch {}
 
     for await (const oracle of oracleAccounts) {
       try {
