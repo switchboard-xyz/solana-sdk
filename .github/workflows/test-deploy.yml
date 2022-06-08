@@ -3,7 +3,16 @@ name: Test deployment
 on:
   pull_request:
     branches: [main]
-    paths: [website/**, ".github/workflows/*", "idl/**"]
+    paths:
+      [
+        website/**,
+        ".github/workflows/*",
+        "idl/**",
+        "libraries/sbv2-lite/src/**",
+        "libraries/sbv2-utils/src/**",
+        "libraries/ts/src/**",
+        "cli/src/**",
+      ]
 
 jobs:
   test-deploy:

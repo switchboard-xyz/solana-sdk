@@ -8,9 +8,12 @@ on:
         website/**,
         ".github/workflows/*",
         "idl/**",
+        "libraries/sbv2-lite/src/**",
+        "libraries/sbv2-utils/src/**",
         "libraries/ts/src/**",
-        "libraries/sbv2-cli/src/**",
+        "cli/src/**",
       ]
+
 jobs:
   deploy:
     name: Deploy to GitHub Pages
