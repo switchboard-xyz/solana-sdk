@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/sbv2-utils",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "description": "some basic utility functions when working with switchboard-v2",
   "author": "",
   "license": "ISC",
