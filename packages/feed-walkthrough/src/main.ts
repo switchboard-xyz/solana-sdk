@@ -12,8 +12,8 @@ import {
   PermissionAccount,
   ProgramStateAccount,
   SwitchboardPermission,
+  OracleJob,
 } from "@switchboard-xyz/switchboard-v2";
-import { OracleJob } from "@switchboard-xyz/v2-task-library";
 import chalk from "chalk";
 import dotenv from "dotenv";
 import os from "os";

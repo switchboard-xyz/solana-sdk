@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { AccountInfo, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
@@ -12,8 +12,11 @@ export default class MetricsVrf extends BaseCommand {
   static hidden = true;
 
   outputBasePath: string;
+
   outputTxtFile?: string;
+
   outputJsonFile?: string;
+
   outputCsvFile?: string;
 
   vrfAccounts: { pubkey: PublicKey; account: AccountInfo<Buffer> }[];
@@ -22,20 +25,20 @@ export default class MetricsVrf extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
+    force: Flags.boolean({
       description: "overwrite outputFile if it already exists",
     }),
-    queue: flags.string({
+    queue: Flags.string({
       description: "oracle queue to filter aggregators by",
       required: false,
     }),
-    json: flags.boolean({
+    json: Flags.boolean({
       description: "output aggregator accounts in json format",
     }),
-    csv: flags.boolean({
+    csv: Flags.boolean({
       description: "output aggregator accounts in csv format",
     }),
-    txt: flags.boolean({
+    txt: Flags.boolean({
       description: "output aggregator pubkeys in txt format",
     }),
   };
@@ -49,7 +52,7 @@ export default class MetricsVrf extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(MetricsVrf);
+    const { args, flags } = await this.parse(MetricsVrf);
 
     const parsedPath = path.parse(
       args.outputFile.startsWith("/") || args.outputFile.startsWith("C:")
@@ -65,6 +68,7 @@ export default class MetricsVrf extends BaseCommand {
         );
       }
     }
+
     if (parsedPath.ext === ".json" || flags.json) {
       this.outputJsonFile = `${this.outputBasePath}.json`;
       if (fs.existsSync(this.outputJsonFile) && flags.force === false) {
@@ -73,6 +77,7 @@ export default class MetricsVrf extends BaseCommand {
         );
       }
     }
+
     if (parsedPath.ext === ".csv" || flags.csv) {
       this.outputCsvFile = `${this.outputBasePath}.csv`;
       if (fs.existsSync(this.outputCsvFile) && flags.force === false) {
@@ -81,6 +86,7 @@ export default class MetricsVrf extends BaseCommand {
         );
       }
     }
+
     if (!(this.outputJsonFile || this.outputCsvFile || this.outputTxtFile)) {
       throw new Error(
         `no output format specified, try --txt, --json, or --csv`

@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
@@ -13,7 +13,7 @@ export default class AggregatorSetQueue extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -22,31 +22,27 @@ export default class AggregatorSetQueue extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator",
     },
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle queue",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetQueue);
+    const { args, flags } = await this.parse(AggregatorSetQueue);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
     const oracleQueue = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
 
     const authority = await this.loadAuthority(

@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { prettyPrintJob } from "@switchboard-xyz/sbv2-utils";
 import {
   JobAccount,
@@ -15,11 +15,11 @@ export default class JobCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that will be the aggregator authority",
     }),
-    name: flags.string({
+    name: Flags.string({
       char: "n",
       description: "name of the buffer account",
     }),
@@ -35,7 +35,7 @@ export default class JobCreate extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args, flags } = this.parse(JobCreate);
+    const { args, flags } = await this.parse(JobCreate);
     const payerKeypair = programWallet(this.program);
     const authority = await this.loadAuthority(flags.authority);
 

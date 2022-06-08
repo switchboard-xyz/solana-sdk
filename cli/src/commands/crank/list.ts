@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { CrankAccount, CrankRow } from "@switchboard-xyz/switchboard-v2";
 import * as fs from "fs";
@@ -10,8 +10,8 @@ export default class CrankList extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({ description: "overwrite output file if exists" }),
-    outputFile: flags.string({
+    force: Flags.boolean({ description: "overwrite output file if exists" }),
+    outputFile: Flags.string({
       char: "f",
       description: "output file to save aggregator pubkeys to",
     }),
@@ -20,14 +20,12 @@ export default class CrankList extends BaseCommand {
   static args = [
     {
       name: "crankKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the crank",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(CrankList);
+    const { args, flags } = await this.parse(CrankList);
 
     const outputFile = flags.outputFile
       ? path.join(process.cwd(), flags.outputFile)
@@ -40,7 +38,7 @@ export default class CrankList extends BaseCommand {
 
     const crankAccount = new CrankAccount({
       program: this.program,
-      publicKey: args.crankKey,
+      publicKey: new PublicKey(args.crankKey),
     });
 
     const crank = await crankAccount.loadData();

@@ -1,6 +1,5 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import BaseCommand from "../../BaseCommand";
-import { ConfigParameter } from "../../config";
 
 export default class ConfigSet extends BaseCommand {
   hidden = true;
@@ -9,7 +8,7 @@ export default class ConfigSet extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    reset: flags.boolean({
+    reset: Flags.boolean({
       char: "r",
       description: "remove value or set to default rpc",
     }),
@@ -18,9 +17,7 @@ export default class ConfigSet extends BaseCommand {
   static args = [
     {
       name: "param",
-      required: true,
       options: ["devnet-rpc", "mainnet-rpc"],
-      parse: (string_: string) => string_ as ConfigParameter,
       description: "configuration parameter to set",
     },
     {
@@ -31,7 +28,7 @@ export default class ConfigSet extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(ConfigSet);
+    const { args, flags } = await this.parse(ConfigSet);
     this.setConfig(args.param, flags.reset ? undefined : args.value);
   }
 

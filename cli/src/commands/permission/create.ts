@@ -1,10 +1,9 @@
-import { PublicKey } from "@solana/web3.js";
+import { prettyPrintPermissions } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleQueueAccount,
   PermissionAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { PermissionClass } from "../../accounts";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
@@ -18,20 +17,18 @@ export default class PermissionCreate extends BaseCommand {
   static args = [
     {
       name: "granter",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the account granting permission",
     },
     {
       name: "grantee",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the account getting permissions",
     },
   ];
 
   async run() {
-    const { args } = this.parse(PermissionCreate);
+    const { args } = await this.parse(PermissionCreate);
     verifyProgramHasPayer(this.program);
 
     // assuming granter is an oracle queue, will need to fix
@@ -70,13 +67,7 @@ export default class PermissionCreate extends BaseCommand {
       this.logger.log(
         `${chalk.green(`${CHECK_ICON}Permission account created successfully`)}`
       );
-      const permission = await PermissionClass.fromPublicKey(
-        this.context,
-        this.program,
-        permissionAccount.publicKey
-      );
-      const printString = permission.prettyPrint();
-      this.logger.log(printString);
+      console.log(await prettyPrintPermissions(permissionAccount));
     }
   }
 

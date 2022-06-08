@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 /* eslint-disable unicorn/new-for-builtins */
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -37,61 +37,61 @@ export default class QueueCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
+    force: Flags.boolean({
       description: "overwrite output file if existing",
       default: false,
     }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description:
         "keypair to delegate authority to for creating permissions targeted at the queue",
     }),
-    name: flags.string({
+    name: Flags.string({
       char: "n",
       description: "name of the queue for easier identification",
       default: "Custom Queue",
     }),
-    minStake: flags.string({
+    minStake: Flags.string({
       description: "minimum stake required by an oracle to join the queue",
       default: "0",
     }),
-    reward: flags.string({
+    reward: Flags.string({
       char: "r",
       description:
         "oracle rewards for successfully responding to an update request",
       default: "0",
     }),
-    crankSize: flags.integer({
+    crankSize: Flags.integer({
       char: "c",
       description: "size of the crank",
       default: 100,
     }),
-    oracleTimeout: flags.integer({
+    oracleTimeout: Flags.integer({
       char: "o",
       description: "number of oracles to add to the queue",
       default: 180,
     }),
-    numOracles: flags.integer({
+    numOracles: Flags.integer({
       char: "o",
       description: "number of oracles to add to the queue",
     }),
-    queueSize: flags.integer({
+    queueSize: Flags.integer({
       description: "maximum number of oracles the queue can support",
       default: 100,
     }),
-    unpermissionedFeeds: flags.boolean({
+    unpermissionedFeeds: Flags.boolean({
       description: "permit unpermissioned feeds",
       default: false,
     }),
-    unpermissionedVrf: flags.boolean({
+    unpermissionedVrf: Flags.boolean({
       description: "permit unpermissioned VRF accounts",
       default: false,
     }),
-    enableBufferRelayers: flags.boolean({
+    enableBufferRelayers: Flags.boolean({
       description: "enable oracles to fulfill buffer relayer requests",
       default: false,
     }),
-    outputFile: flags.string({
+    outputFile: Flags.string({
       char: "f",
       description: "output queue schema to a json file",
       required: false,
@@ -100,7 +100,7 @@ export default class QueueCreate extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { flags, args } = this.parse(QueueCreate);
+    const { flags, args } = await this.parse(QueueCreate);
     const payerKeypair = programWallet(this.program);
     const signers: Keypair[] = [payerKeypair];
 

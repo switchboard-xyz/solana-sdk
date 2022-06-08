@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -12,7 +12,7 @@ export default class AggregatorSetForceReportPeriod extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -21,14 +21,10 @@ export default class AggregatorSetForceReportPeriod extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator",
     },
     {
       name: "forceReportPeriod",
-      required: true,
-      parse: (value: string) => Number.parseInt(value),
       description:
         "Number of seconds for which, even if the variance threshold is not passed, accept new responses from oracles.",
     },
@@ -39,12 +35,12 @@ export default class AggregatorSetForceReportPeriod extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetForceReportPeriod);
+    const { args, flags } = await this.parse(AggregatorSetForceReportPeriod);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
     const authority = await this.loadAuthority(

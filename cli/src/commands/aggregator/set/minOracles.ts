@@ -1,9 +1,10 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
+import { verifyProgramHasPayer } from "@switchboard-xyz/sbv2-utils";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON } from "../../../utils";
 
 export default class AggregatorSetMinOracleResults extends BaseCommand {
   static description =
@@ -11,7 +12,7 @@ export default class AggregatorSetMinOracleResults extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -20,13 +21,10 @@ export default class AggregatorSetMinOracleResults extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
     {
       name: "minOracleResults",
-      required: true,
       description:
         "number of oracles that must respond before a value is accepted on-chain",
     },
@@ -35,12 +33,12 @@ export default class AggregatorSetMinOracleResults extends BaseCommand {
   //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetMinOracleResults);
+    const { args, flags } = await this.parse(AggregatorSetMinOracleResults);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 

@@ -15,8 +15,6 @@ export default class WatchVrf extends BaseCommand {
   static args = [
     {
       name: "vrfKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the vrf account to deserialize",
     },
   ];
@@ -28,11 +26,11 @@ export default class WatchVrf extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(WatchVrf);
+    const { args } = await this.parse(WatchVrf);
 
     const vrfAccount = new VrfAccount({
       program: this.program,
-      publicKey: args.vrfKey,
+      publicKey: new PublicKey(args.vrfKey),
     });
     const vrfData = await vrfAccount.loadData();
 

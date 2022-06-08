@@ -1,13 +1,13 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import { chalkString } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, verifyProgramHasPayer } from "../../utils";
 
@@ -16,7 +16,7 @@ export default class OracleDeposit extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    amount: flags.string({
+    amount: Flags.string({
       required: true,
       description:
         "token amount to load into the oracle escrow. If decimals provided, amount will be normalized to raw tokenAmount",
@@ -26,8 +26,7 @@ export default class OracleDeposit extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle to deposit funds into",
     },
   ];
@@ -38,7 +37,7 @@ export default class OracleDeposit extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args, flags } = this.parse(OracleDeposit);
+    const { args, flags } = await this.parse(OracleDeposit);
 
     const payer = programWallet(this.program);
 
@@ -50,7 +49,7 @@ export default class OracleDeposit extends BaseCommand {
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const oracle = await oracleAccount.loadData();
 

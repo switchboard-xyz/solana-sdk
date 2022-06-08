@@ -1,16 +1,17 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
+import { verifyProgramHasPayer } from "@switchboard-xyz/sbv2-utils";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../../BaseCommand";
-import { CHECK_ICON, verifyProgramHasPayer } from "../../../utils";
+import { CHECK_ICON } from "../../../utils";
 
 export default class AggregatorSetUpdateInterval extends BaseCommand {
   static description = "set an aggregator's minimum update delay";
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -19,14 +20,10 @@ export default class AggregatorSetUpdateInterval extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
     {
       name: "updateInterval",
-      required: true,
-      parse: (newInterval: string) => Number.parseInt(newInterval, 10),
       description: "set an aggregator's minimum update delay",
     },
   ];
@@ -36,12 +33,12 @@ export default class AggregatorSetUpdateInterval extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetUpdateInterval);
+    const { args, flags } = await this.parse(AggregatorSetUpdateInterval);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
@@ -63,7 +60,7 @@ export default class AggregatorSetUpdateInterval extends BaseCommand {
     );
 
     const txn = await aggregatorAccount.setUpdateInterval({
-      newInterval: args.updateInterval,
+      newInterval: Number.parseInt(args.updateInterval, 10),
       authority,
     });
 

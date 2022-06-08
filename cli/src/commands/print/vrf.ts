@@ -17,22 +17,18 @@ export default class VrfPrint extends BaseCommand {
   static args = [
     {
       name: "vrfKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the vrf account to deserialize",
     },
   ];
 
-  static examples = [
-    "$ sbv2 vrf:print SzTvFZLz3hwjZFMwVWzuEnr1oUF6qyvXwXCvsqf7qeA",
-  ];
+  static examples = ["$ sbv2 vrf:print"];
 
   async run() {
-    const { args, flags } = this.parse(VrfPrint);
+    const { args, flags } = await this.parse(VrfPrint);
 
     const vrfAccount = new VrfAccount({
       program: this.program,
-      publicKey: args.vrfKey,
+      publicKey: new PublicKey(args.vrfKey),
     });
 
     this.logger.log(await prettyPrintVrf(vrfAccount, undefined, true));

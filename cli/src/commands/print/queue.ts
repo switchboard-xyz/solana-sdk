@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { prettyPrintQueue } from "@switchboard-xyz/sbv2-utils";
 import { OracleQueueAccount } from "@switchboard-xyz/switchboard-v2";
@@ -13,7 +13,7 @@ export default class QueuePrint extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    oracles: flags.boolean({
+    oracles: Flags.boolean({
       description: "output oracles that are heartbeating on the queue",
       default: false,
     }),
@@ -22,8 +22,6 @@ export default class QueuePrint extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle queue account to deserialize",
     },
   ];
@@ -33,11 +31,11 @@ export default class QueuePrint extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(QueuePrint);
+    const { args, flags } = await this.parse(QueuePrint);
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const data = await queueAccount.loadData();
 

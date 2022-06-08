@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import BaseCommand from "../BaseCommand";
 
@@ -7,7 +7,7 @@ export default class SandboxCommand extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    name: flags.string({
+    name: Flags.string({
       char: "n",
       description: "name of the job account for easier identification",
       default: "",
@@ -23,7 +23,7 @@ export default class SandboxCommand extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(SandboxCommand);
+    const { args, flags } = await this.parse(SandboxCommand);
 
     // const size = this.program.account.vrfAccountData.size;
     // const rentExemption =

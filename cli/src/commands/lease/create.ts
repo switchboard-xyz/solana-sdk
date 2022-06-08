@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { prettyPrintLease } from "@switchboard-xyz/sbv2-utils";
@@ -19,7 +19,7 @@ export default class LeaseCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    amount: flags.string({
+    amount: Flags.string({
       required: false,
       description:
         "token amount to load into the lease escrow. If decimals provided, amount will be normalized to raw tokenAmount",
@@ -29,8 +29,6 @@ export default class LeaseCreate extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator to extend a lease for",
     },
   ];
@@ -40,7 +38,7 @@ export default class LeaseCreate extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(LeaseCreate);
+    const { args, flags } = await this.parse(LeaseCreate);
     verifyProgramHasPayer(this.program);
 
     const payer = programWallet(this.program);
@@ -50,13 +48,14 @@ export default class LeaseCreate extends BaseCommand {
     if (flags.amount) {
       loadAmount = this.getTokenAmount(flags.amount);
     }
+
     if (loadAmount.lt(new anchor.BN(0))) {
       throw new Error("amount to deposit must be greater than or equal to 0");
     }
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 

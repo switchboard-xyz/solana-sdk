@@ -1,6 +1,10 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import {
+  chalkString,
+  verifyProgramHasPayer,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   LeaseAccount,
@@ -8,9 +12,8 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
-import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../utils";
+import { CHECK_ICON, loadKeypair } from "../../utils";
 
 export default class AggregatorLeaseWithdraw extends BaseCommand {
   static description = "withdraw funds from an aggregator lease";
@@ -19,17 +22,17 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    withdrawAddress: flags.string({
+    withdrawAddress: Flags.string({
       required: false,
       description:
         "tokenAccount to withdraw to. If not provided, payer associated token account will be used",
     }),
-    amount: flags.string({
+    amount: Flags.string({
       required: true,
       description:
         "token amount to withdraw from lease account. If decimals provided, amount will be normalized to raw tokenAmount",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description:
         "keypair delegated as the authority for managing the oracle account",
@@ -39,8 +42,7 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the aggregator to extend a lease for",
     },
   ];
@@ -50,12 +52,12 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorLeaseWithdraw);
+    const { args, flags } = await this.parse(AggregatorLeaseWithdraw);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
@@ -113,16 +115,15 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
 
     const lease = await leaseAccount.loadData();
     const escrow: PublicKey = lease.escrow;
-    let amount: anchor.BN;
-    if (flags.amount) {
-      amount = this.getTokenAmount(flags.amount);
-    } else {
-      amount = new anchor.BN(
-        (
-          await this.program.provider.connection.getTokenAccountBalance(escrow)
-        ).value.amount
-      );
-    }
+    const amount: anchor.BN = flags.amount
+      ? this.getTokenAmount(flags.amount)
+      : new anchor.BN(
+          (
+            await this.program.provider.connection.getTokenAccountBalance(
+              escrow
+            )
+          ).value.amount
+        );
 
     const txn = await leaseAccount.withdraw({
       amount: amount,

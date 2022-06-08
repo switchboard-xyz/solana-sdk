@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as spl from "@solana/spl-token";
 import { PublicKey, SYSVAR_RECENT_BLOCKHASHES_PUBKEY } from "@solana/web3.js";
 import {
@@ -20,10 +20,10 @@ export default class VrfRequest extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    funderAuthority: flags.string({
+    funderAuthority: Flags.string({
       description: "alternative keypair to pay for VRF request",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       description: "alternative keypair that is the VRF authority",
     }),
   };
@@ -31,20 +31,19 @@ export default class VrfRequest extends BaseCommand {
   static args = [
     {
       name: "vrfKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the VRF account to request randomness for",
     },
   ];
 
   async run() {
-    const { args, flags } = this.parse(VrfRequest);
+    const { args, flags } = await this.parse(VrfRequest);
     verifyProgramHasPayer(this.program);
     const payerKeypair = programWallet(this.program);
 
     const vrfAccount = new VrfAccount({
       program: this.program,
-      publicKey: args.vrfKey,
+      publicKey: new PublicKey(args.vrfKey),
     });
     const vrf = await vrfAccount.loadData();
     const queueAccount = new OracleQueueAccount({

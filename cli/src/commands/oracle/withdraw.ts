@@ -1,6 +1,7 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
+import { chalkString } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
@@ -8,7 +9,6 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
-import { chalkString } from "../../accounts/utils";
 import BaseCommand from "../../BaseCommand";
 import { CHECK_ICON, loadKeypair, verifyProgramHasPayer } from "../../utils";
 
@@ -17,23 +17,23 @@ export default class OracleWithdraw extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({
+    force: Flags.boolean({
       char: "f",
       description:
         "skip minStake balance check. your oracle may be removed from the queue",
     }),
-    withdrawAccount: flags.string({
+    withdrawAccount: Flags.string({
       char: "w",
       required: false,
       description:
         "optional solana pubkey or keypair filesystem path to withdraw funds to. default destination is oracle authority's token wallet",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description:
         "keypair delegated as the authority for managing the oracle account",
     }),
-    amount: flags.string({
+    amount: Flags.string({
       required: true,
       description:
         "token amount to withdraw from oracle escrow. If decimals provided, amount will be normalized to raw tokenAmount",
@@ -43,8 +43,7 @@ export default class OracleWithdraw extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle to withdraw from",
     },
   ];
@@ -56,7 +55,7 @@ export default class OracleWithdraw extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args, flags } = this.parse(OracleWithdraw);
+    const { args, flags } = await this.parse(OracleWithdraw);
     const payer = programWallet(this.program);
 
     const amount = this.getTokenAmount(flags.amount);
@@ -64,7 +63,7 @@ export default class OracleWithdraw extends BaseCommand {
     // get oracle account
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const oracle = await oracleAccount.loadData();
 

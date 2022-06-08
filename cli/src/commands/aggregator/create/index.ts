@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -40,46 +40,45 @@ export default class AggregatorCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    force: flags.boolean({ description: "skip job confirmation" }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
-    crankKey: flags.string({
+    crankKey: Flags.string({
       description: "public key of the crank to join",
     }),
-    enable: flags.boolean({
+    enable: Flags.boolean({
       description: "set permissions to PERMIT_ORACLE_QUEUE_USAGE",
     }),
-    queueAuthority: flags.string({
+    queueAuthority: Flags.string({
       description: "alternative keypair to use for queue authority",
     }),
-    name: flags.string({
+    name: Flags.string({
       char: "n",
       description: "name of the aggregator",
     }),
-    forceReportPeriod: flags.integer({
+    forceReportPeriod: Flags.integer({
       description:
         "Number of seconds for which, even if the variance threshold is not passed, accept new responses from oracles.",
     }),
-    batchSize: flags.string({
+    batchSize: Flags.integer({
       description: "number of oracles requested for each open round call",
     }),
-    minJobs: flags.string({
+    minJobs: Flags.integer({
       description: "number of jobs that must respond before an oracle responds",
     }),
-    minOracles: flags.string({
+    minOracles: Flags.integer({
       description:
         "number of oracles that must respond before a value is accepted on-chain",
     }),
-    updateInterval: flags.string({
+    updateInterval: Flags.integer({
       description: "set an aggregator's minimum update delay",
     }),
-    varianceThreshold: flags.string({
+    varianceThreshold: Flags.string({
       description:
         "percentage change between a previous accepted result and the next round before an oracle reports a value on-chain. Used to conserve lease cost during low volatility",
     }),
-    job: flags.string({
+    job: Flags.string({
       char: "j",
       description: "filesystem path to job definition file",
       multiple: true,
@@ -89,8 +88,6 @@ export default class AggregatorCreate extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description:
         "public key of the oracle queue account to create aggregator for",
     },
@@ -98,7 +95,7 @@ export default class AggregatorCreate extends BaseCommand {
 
   async run() {
     verifyProgramHasPayer(this.program);
-    const { args, flags } = this.parse(AggregatorCreate);
+    const { args, flags } = await this.parse(AggregatorCreate);
 
     const payerKeypair = programWallet(this.program);
     const feedAuthority = await this.loadAuthority(flags.authority);
@@ -109,7 +106,7 @@ export default class AggregatorCreate extends BaseCommand {
     );
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
     const switchTokenMint = await queueAccount.loadMint();
@@ -135,7 +132,7 @@ export default class AggregatorCreate extends BaseCommand {
           flags.job.map(
             async (
               jobDefinition
-            ): Promise<[TransactionInstruction, Keypair]> => {
+            ): Promise<[TransactionInstruction[], Keypair]> => {
               const jobJson = JSON.parse(
                 fs.readFileSync(
                   jobDefinition.startsWith("/")
@@ -158,6 +155,19 @@ export default class AggregatorCreate extends BaseCommand {
                 ).finish()
               );
 
+              const size = 280 + data.length;
+
+              const allocateAccountIxn = SystemProgram.createAccount({
+                fromPubkey: payerKeypair.publicKey,
+                newAccountPubkey: jobKeypair.publicKey,
+                space: size,
+                lamports:
+                  await this.program.provider.connection.getMinimumBalanceForRentExemption(
+                    size
+                  ),
+                programId: this.program.programId,
+              });
+
               const createJobIxn = await this.program.methods
                 .jobInit({
                   name: Buffer.from("").slice(0, 32),
@@ -175,13 +185,15 @@ export default class AggregatorCreate extends BaseCommand {
                 .signers([feedAuthority])
                 .instruction();
 
-              return [createJobIxn, jobKeypair];
+              return [[allocateAccountIxn, createJobIxn], jobKeypair];
             }
           )
         )
       : [];
-    createAccountInstructions.push(createJobs.map((index) => index[0]));
-    createAccountSigners.push(...createJobs.map((index) => index[1]));
+
+    const createJobIxn = createJobs.map((index) => index[0]);
+    const createJobSigners = createJobs.map((index) => index[1]);
+
     const jobAccounts = createJobs
       .map((index) => index[1])
       .map((jobKeypair) => {
@@ -229,7 +241,7 @@ export default class AggregatorCreate extends BaseCommand {
             varianceThreshold: flags.varianceThreshold
               ? SwitchboardDecimal.fromBig(new Big(flags.varianceThreshold))
               : SwitchboardDecimal.fromBig(new Big(0)),
-            forceReportPeriod: flags.forceReportPeriod ?? 0,
+            forceReportPeriod: new anchor.BN(flags.forceReportPeriod ?? 0),
             stateBump,
           })
           .accounts({
@@ -363,8 +375,8 @@ export default class AggregatorCreate extends BaseCommand {
 
     const createAccountSignatures = packAndSend(
       this.program,
-      [createAccountInstructions, addJobIxns],
-      createAccountSigners,
+      [createJobIxn, createAccountInstructions, addJobIxns],
+      [...createJobSigners, ...createAccountSigners],
       payerKeypair.publicKey
     ).catch((error) => {
       throw error;

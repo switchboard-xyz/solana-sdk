@@ -1,8 +1,9 @@
 {
   "name": "@switchboard-xyz/lease-observer",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "receive pager duty alerts when a switchboard v2 lease crosses a provided threshold",
   "private": true,
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/switchboard-v2",

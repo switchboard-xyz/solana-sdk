@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -24,29 +24,29 @@ export default class VrfCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    vrfKeypair: flags.string({
+    vrfKeypair: Flags.string({
       description: "filesystem path of existing keypair to use for VRF Account",
     }),
-    enable: flags.boolean({
+    enable: Flags.boolean({
       description: "enable vrf permissions",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       description: "alternative keypair to use for VRF authority",
     }),
-    queueAuthority: flags.string({
+    queueAuthority: Flags.string({
       description: "alternative keypair to use for queue authority",
     }),
-    accountMeta: flags.string({
+    accountMeta: Flags.string({
       char: "a",
       description: "account metas for VRF callback",
       multiple: true,
       required: true,
     }),
-    callbackPid: flags.string({
+    callbackPid: Flags.string({
       description: "callback program ID",
       required: true,
     }),
-    ixData: flags.string({
+    ixData: Flags.string({
       description: "instruction data",
       required: true,
     }),
@@ -55,8 +55,7 @@ export default class VrfCreate extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle queue to create VRF account for",
     },
   ];
@@ -67,28 +66,28 @@ export default class VrfCreate extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(VrfCreate);
+    const { args, flags } = await this.parse(VrfCreate);
     verifyProgramHasPayer(this.program);
     const payerKeypair = programWallet(this.program);
 
-    const ixDataStr =
+    const ixDataString =
       flags.ixData.startsWith("[") && flags.ixData.endsWith("]")
         ? flags.ixData.slice(1, -1)
         : flags.ixData;
-    const ixDataArr = ixDataStr.split(",");
-    const ixData = ixDataArr.map((n) => Number.parseInt(n));
+    const ixDataArray = ixDataString.split(",");
+    const ixData = ixDataArray.map((n) => Number.parseInt(n, 10));
     const callback: Callback = {
       programId: new PublicKey(flags.callbackPid),
       accounts: flags.accountMeta.map((a) => {
-        const parsedObj: {
+        const parsedObject: {
           pubkey: string;
           isSigner: boolean;
           isWritable: boolean;
         } = JSON.parse(a);
         return {
-          pubkey: new PublicKey(parsedObj.pubkey),
-          isSigner: Boolean(parsedObj.isSigner),
-          isWritable: Boolean(parsedObj.isWritable),
+          pubkey: new PublicKey(parsedObject.pubkey),
+          isSigner: Boolean(parsedObject.isSigner),
+          isWritable: Boolean(parsedObject.isWritable),
         };
       }),
       ixData: Buffer.from(ixData),
@@ -111,7 +110,7 @@ export default class VrfCreate extends BaseCommand {
     );
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
     const tokenMint = await queueAccount.loadMint();
@@ -191,10 +190,11 @@ export default class VrfCreate extends BaseCommand {
           `Invalid queue authority, received ${queueAuthority.publicKey}, expected ${queue.authority}`
         );
       }
+
       createTxn.add(
         await this.program.methods
           .permissionSet({
-            permission: { permitVrfRequests: null },
+            permission: { permitVrfRequests: undefined },
             enable: true,
           })
           .accounts({

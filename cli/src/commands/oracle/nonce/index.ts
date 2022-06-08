@@ -20,18 +20,16 @@ export default class OracleNonce extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle to check token balance",
     },
   ];
 
   async run() {
-    const { args } = this.parse(OracleNonce);
+    const { args } = await this.parse(OracleNonce);
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const oracleNonceAccounts = await getOracleNonceAccounts(oracleAccount);
     console.log(
@@ -56,21 +54,23 @@ export default class OracleNonce extends BaseCommand {
       )
     );
 
-    let numNonces = 0;
+    let numberNonces = 0;
     if (oracleNonceAccounts?.heartbeatNonce) {
-      numNonces++;
+      numberNonces++;
     }
+
     if (oracleNonceAccounts?.unwrapStakeNonce) {
-      numNonces++;
+      numberNonces++;
     }
-    numNonces += oracleNonceAccounts.queueNonces.length;
+
+    numberNonces += oracleNonceAccounts.queueNonces.length;
 
     const nonceRentExemption =
       await this.program.provider.connection.getMinimumBalanceForRentExemption(
         NONCE_ACCOUNT_LENGTH
       );
 
-    const totalCost = (numNonces * nonceRentExemption) / LAMPORTS_PER_SOL;
+    const totalCost = (numberNonces * nonceRentExemption) / LAMPORTS_PER_SOL;
 
     console.log(chalkString("Total Cost (SOL)", totalCost, 20));
     // if (this.silent) {

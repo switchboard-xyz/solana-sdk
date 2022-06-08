@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -11,7 +11,7 @@ export default class AggregatorLock extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -20,8 +20,6 @@ export default class AggregatorLock extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
   ];
@@ -29,12 +27,12 @@ export default class AggregatorLock extends BaseCommand {
   //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorLock);
+    const { args, flags } = await this.parse(AggregatorLock);
     verifyProgramHasPayer(this.program);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
     const authority = await this.loadAuthority(

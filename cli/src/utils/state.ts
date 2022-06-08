@@ -25,6 +25,7 @@ export const getOrCreateSwitchboardMintTokenAccount = async (
   if (mint) {
     returnAssociatedAddress(mint);
   }
+
   const [programState] = ProgramStateAccount.fromSeed(program);
   mint = await programState.getTokenMint();
   if (mint) {

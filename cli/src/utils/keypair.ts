@@ -65,7 +65,7 @@ export const loadGoogleSecretKeypair = async (
       : `${secretPath}/versions/latest`,
   });
 
-  const secrets = accessResponse?.payload.data;
+  const secrets = accessResponse.payload.data;
   if (secrets === undefined) {
     throw new Error("Google secret not found.");
   }

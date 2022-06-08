@@ -19,19 +19,17 @@ export default class OraclePermissionCreate extends BaseCommand {
   static args = [
     {
       name: "oracleKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the oracle account",
     },
   ];
 
   async run() {
-    const { args } = this.parse(OraclePermissionCreate);
+    const { args } = await this.parse(OraclePermissionCreate);
     verifyProgramHasPayer(this.program);
 
     const oracleAccount = new OracleAccount({
       program: this.program,
-      publicKey: args.oracleKey,
+      publicKey: new PublicKey(args.oracleKey),
     });
     const oracle = await oracleAccount.loadData();
 

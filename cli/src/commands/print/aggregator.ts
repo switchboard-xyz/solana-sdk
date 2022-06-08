@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
@@ -14,11 +14,11 @@ export default class AggregatorPrint extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    jobs: flags.boolean({
+    jobs: Flags.boolean({
       description: "output job definitions",
       default: false,
     }),
-    oraclePubkeysData: flags.boolean({
+    oraclePubkeysData: Flags.boolean({
       char: "o",
       description: "print the assigned oracles for the current round",
     }),
@@ -27,8 +27,6 @@ export default class AggregatorPrint extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account to deserialize",
     },
   ];
@@ -38,11 +36,11 @@ export default class AggregatorPrint extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorPrint);
+    const { args, flags } = await this.parse(AggregatorPrint);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 

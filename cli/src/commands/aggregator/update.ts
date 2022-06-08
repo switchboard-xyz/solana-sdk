@@ -19,8 +19,6 @@ export default class AggregatorUpdate extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account to deserialize",
     },
   ];
@@ -30,11 +28,11 @@ export default class AggregatorUpdate extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(AggregatorUpdate);
+    const { args } = await this.parse(AggregatorUpdate);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 
@@ -79,6 +77,7 @@ export default class AggregatorUpdate extends BaseCommand {
       this.context.logger.info(error.toString());
       this.exit(0);
     }
+
     super.catch(error, "failed to open a new aggregator update round");
   }
 }

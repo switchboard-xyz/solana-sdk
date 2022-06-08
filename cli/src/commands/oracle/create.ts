@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
@@ -27,20 +27,20 @@ export default class OracleCreate extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    name: flags.string({
+    name: Flags.string({
       char: "n",
       description: "name of the oracle for easier identification",
       default: "",
     }),
-    authority: flags.string({
+    authority: Flags.string({
       char: "a",
       description:
         "keypair to delegate authority to for managing the oracle account",
     }),
-    enable: flags.boolean({
+    enable: Flags.boolean({
       description: "enable oracle heartbeat permissions",
     }),
-    queueAuthority: flags.string({
+    queueAuthority: Flags.string({
       description: "alternative keypair to use for queue authority",
     }),
   };
@@ -48,8 +48,7 @@ export default class OracleCreate extends BaseCommand {
   static args = [
     {
       name: "queueKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
+
       description: "public key of the oracle queue to join",
     },
   ];
@@ -61,7 +60,7 @@ export default class OracleCreate extends BaseCommand {
   ];
 
   async run() {
-    const { args, flags } = this.parse(OracleCreate);
+    const { args, flags } = await this.parse(OracleCreate);
     verifyProgramHasPayer(this.program);
     const payerKeypair = programWallet(this.program);
     const signers: Keypair[] = [payerKeypair];
@@ -80,7 +79,7 @@ export default class OracleCreate extends BaseCommand {
 
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.queueKey,
+      publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
     const tokenMint = await queueAccount.loadMint();

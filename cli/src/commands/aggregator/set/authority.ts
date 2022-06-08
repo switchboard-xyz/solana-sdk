@@ -1,4 +1,4 @@
-import { flags } from "@oclif/command";
+import { Flags } from "@oclif/core";
 import { PublicKey } from "@solana/web3.js";
 import { AggregatorAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -10,7 +10,7 @@ export default class AggregatorSetAuthority extends BaseCommand {
 
   static flags = {
     ...BaseCommand.flags,
-    currentAuthority: flags.string({
+    currentAuthority: Flags.string({
       char: "a",
       description: "alternate keypair that is the authority for the aggregator",
     }),
@@ -19,13 +19,10 @@ export default class AggregatorSetAuthority extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of the aggregator account",
     },
     {
       name: "newAuthority",
-      required: true,
       description: "keypair path of new authority",
     },
   ];
@@ -33,13 +30,13 @@ export default class AggregatorSetAuthority extends BaseCommand {
   //   static examples = ["$ sbv2 aggregator:set:authority"];
 
   async run() {
-    const { args, flags } = this.parse(AggregatorSetAuthority);
+    const { args, flags } = await this.parse(AggregatorSetAuthority);
 
     const newAuthority = await loadKeypair(args.newAuthority);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
     const currentAuthority = await this.loadAuthority(

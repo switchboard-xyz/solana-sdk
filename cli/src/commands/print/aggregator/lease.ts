@@ -20,8 +20,6 @@ export default class AggregatorLeasePrint extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description:
         "public key of the aggregator account to fetch permission account and deserialize",
     },
@@ -32,11 +30,11 @@ export default class AggregatorLeasePrint extends BaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(AggregatorLeasePrint);
+    const { args } = await this.parse(AggregatorLeasePrint);
 
     const aggregatorAccount = new AggregatorAccount({
       program: this.program,
-      publicKey: args.aggregatorKey,
+      publicKey: new PublicKey(args.aggregatorKey),
     });
     const aggregator = await aggregatorAccount.loadData();
 

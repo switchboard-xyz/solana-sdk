@@ -13,8 +13,6 @@ export default class Print extends PrintBaseCommand {
   static args = [
     {
       name: "publicKey",
-      required: true,
-      parse: (pubkey: string) => new PublicKey(pubkey),
       description: "public key of a switchboard account to lookup",
     },
   ];
@@ -24,19 +22,19 @@ export default class Print extends PrintBaseCommand {
   ];
 
   async run() {
-    const { args } = this.parse(Print);
+    const { args } = await this.parse(Print);
     const { publicKey } = args;
 
     console.log(`${chalk.green("############ DEVNET ############")}`);
     try {
-      await this.printDevnetAccount(publicKey);
+      await this.printDevnetAccount(new PublicKey(publicKey));
     } catch (error) {
       console.error(error.message);
     }
 
     console.log(`${chalk.green("############ MAINNET ############")}`);
     try {
-      await this.printMainnetAccount(publicKey);
+      await this.printMainnetAccount(new PublicKey(publicKey));
     } catch (error) {
       console.error(error.message);
     }
