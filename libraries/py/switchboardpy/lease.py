@@ -168,15 +168,16 @@ class LeaseAccount:
         job_account_data = await params.aggregator_account.load_jobs()
         aggregator_account_data = await params.aggregator_account.load_data()
         job_pubkeys: list[PublicKey] = aggregator_account_data.job_pubkeys_data[:aggregator_account_data.job_pubkeys_size]
+        print(job_pubkeys)
         job_wallets: list[PublicKey] = []
         wallet_bumps: list[int] = []
         for job in job_account_data:
-            authority = job.authority or PublicKey('11111111111111111111111111111111')
+            authority = job.account.authority or PublicKey('11111111111111111111111111111111')
             pubkey, bump = publickey.PublicKey.find_program_address(
                 [
                     bytes(authority), 
                     bytes(TOKEN_PROGRAM_ID),
-                    bytes(switch_token_mint.public_key),
+                    bytes(switch_token_mint.pubkey),
                 ],
                 ASSOCIATED_TOKEN_PROGRAM_ID
             )
@@ -253,12 +254,12 @@ class LeaseAccount:
         job_wallets: list[PublicKey] = []
         wallet_bumps: list[int] = []
         for job in job_account_data:
-            authority = job.authority or PublicKey('11111111111111111111111111111111')
+            authority = job.account.authority or PublicKey('11111111111111111111111111111111')
             pubkey, bump = publickey.PublicKey.find_program_address(
                 [
                     bytes(authority), 
                     bytes(TOKEN_PROGRAM_ID),
-                    bytes(switch_token_mint.public_key),
+                    bytes(switch_token_mint.pubkey),
                 ],
                 ASSOCIATED_TOKEN_PROGRAM_ID
             )

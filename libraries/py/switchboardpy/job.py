@@ -1,3 +1,4 @@
+import io
 import anchorpy
 
 from dataclasses import dataclass
@@ -6,7 +7,7 @@ from solana.publickey import PublicKey
 from solana.system_program import CreateAccountParams, create_account
 
 from switchboardpy.compiled import OracleJob
-from switchboardpy.common import AccountParams
+from switchboardpy.common import AccountParams, parseOracleJob
 from switchboardpy.program import ProgramStateAccount
 
 from .generated.accounts import JobAccountData
@@ -84,8 +85,8 @@ class JobAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_job(self):
-        job = await self.load_job()
-        return OracleJob.ParseFromString(job.data)
+        job = await self.load_data()
+        return parseOracleJob(job.data);
 
     """
     Load and parse JobAccount data based on the program IDL from a buffer.

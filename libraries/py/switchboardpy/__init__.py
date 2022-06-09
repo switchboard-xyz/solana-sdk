@@ -50,4 +50,6 @@ __all__ = [
     "ProgramInitParams",
     "VaultTransferParams",
     "SwitchboardDecimal",
+    "readRawVarint32",
+    "readDelimitedFrom"
 ]

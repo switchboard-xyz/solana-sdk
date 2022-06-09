@@ -11,14 +11,17 @@ from typing import Optional, Any, NamedTuple
 
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
-from spl.token.async_client import AsyncToken
-from spl.token.constants import TOKEN_PROGRAM_ID
 from solana.transaction import TransactionSignature
-from spl.token.instructions import get_associated_token_address
+from solana.rpc.commitment import Confirmed
 from solana.system_program import CreateAccountParams, create_account
 
+from spl.token.async_client import AsyncToken
+from spl.token.constants import TOKEN_PROGRAM_ID
+from spl.token.instructions import get_associated_token_address
+
 from switchboardpy.compiled import OracleJob
-from switchboardpy.common import AccountParams, SwitchboardDecimal
+from switchboardpy.common import AccountParams, SwitchboardDecimal, parseOracleJob
+
 from switchboardpy.program import ProgramStateAccount
 from switchboardpy.oraclequeue import OracleQueueAccount
 from switchboardpy.oracle import OracleAccount
@@ -95,6 +98,21 @@ class AggregatorOpenRoundParams:
     
     """The token wallet which will receive rewards for calling update on this feed."""
     payout_wallet: PublicKey
+
+# Result of returning loadedJobs
+@dataclass
+class AggregatorLoadedJob:
+
+    """The oracle queue from which oracles are assigned this update."""
+    job: OracleJob
+    
+    """Public Key of a given job"""
+    public_key: PublicKey
+
+    """Job account data"""
+    account: Any
+
+
 
 # Parameters required to set min jobs for Aggregator
 @dataclass
@@ -478,7 +496,7 @@ class AggregatorAccount:
         aggregator (Any): Optional aggregator
 
     Returns:
-        jobs (list[OracleJob]): latest feed timestamp as hex string
+        jobs (list[{ "job": OracleJob, "public_key": PublicKey, "account": JobAccountData }]) 
 
     Raises:
         ValueError: Failed to load feed jobs.
@@ -488,12 +506,12 @@ class AggregatorAccount:
     async def load_jobs(self, aggregator: Optional[Any] = None) -> Decimal:
         coder = anchorpy.AccountsCoder(self.program.idl)
         aggregator = aggregator if aggregator else await self.load_data()
-        job_accounts_raw = await anchorpy.utils.rpc.get_multiple_accounts(self.program.provider, aggregator.job_pubkeys_data)[:aggregator.job_pubkeys_size]
+        job_accounts_raw = await anchorpy.utils.rpc.get_multiple_accounts(self.program.provider.connection, aggregator.job_pubkeys_data[:aggregator.job_pubkeys_size], 10, Confirmed)
         if not job_accounts_raw:
             raise ValueError('Failed to load feed jobs.')
         
         # Deserialize OracleJob objects from each decoded JobAccountData 
-        return [OracleJob.ParseFromString(coder.decode(job)) for job in job_accounts_raw]
+        return [AggregatorLoadedJob(parseOracleJob(coder.decode(job.account.data).data), job.pubkey, coder.decode(job.account.data)) for job in job_accounts_raw]
         
     """
     Load all job hashes for each job stored in this aggregator
@@ -511,12 +529,12 @@ class AggregatorAccount:
     async def load_hashes(self, aggregator: Optional[Any] = None) -> Decimal:
         coder = anchorpy.AccountsCoder(self.program.idl)
         aggregator = aggregator if aggregator else await self.loadData()
-        job_accounts_raw = await anchorpy.utils.rpc.get_multiple_accounts(self.program.provider, aggregator.job_pubkeys_data)[:aggregator.job_pubkeys_size]
+        job_accounts_raw = await anchorpy.utils.rpc.get_multiple_accounts(self.program.provider.connection, aggregator.job_pubkeys_data[:aggregator.job_pubkeys_size])
         if not job_accounts_raw:
             raise ValueError('Failed to load feed jobs.')
         
         # get hashes from each decoded JobAccountData 
-        return [coder.decode(job).hash for job in job_accounts_raw]
+        return [coder.decode(job.account.data).hash for job in job_accounts_raw]
         
     
     """

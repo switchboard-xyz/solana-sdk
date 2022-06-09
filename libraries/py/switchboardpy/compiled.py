@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11job_schemas.proto\"\xf7\x14\n\tOracleJob\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x1a\xe2\x01\n\x08HttpTask\x12\x0b\n\x03url\x18\x01 \x01(\t\x12*\n\x06method\x18\x02 \x01(\x0e\x32\x1a.OracleJob.HttpTask.Method\x12+\n\x07headers\x18\x03 \x03(\x0b\x32\x1a.OracleJob.HttpTask.Header\x12\x0c\n\x04\x62ody\x18\x04 \x01(\t\x1a$\n\x06Header\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"<\n\x06Method\x12\x11\n\rMETHOD_UNKOWN\x10\x00\x12\x0e\n\nMETHOD_GET\x10\x01\x12\x0f\n\x0bMETHOD_POST\x10\x02\x1a\x9f\x01\n\rJsonParseTask\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x46\n\x12\x61ggregation_method\x18\x02 \x01(\x0e\x32*.OracleJob.JsonParseTask.AggregationMethod\"8\n\x11\x41ggregationMethod\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03MIN\x10\x01\x12\x07\n\x03MAX\x10\x02\x12\x07\n\x03SUM\x10\x03\x1a\x46\n\nMedianTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x1a\x44\n\x08MeanTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x1a\x43\n\x07MaxTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x1a\x1a\n\tValueTask\x12\r\n\x05value\x18\x01 \x01(\x01\x1a`\n\rWebsocketTask\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x14\n\x0csubscription\x18\x02 \x01(\t\x12\x1c\n\x14max_data_age_seconds\x18\x03 \x01(\x05\x12\x0e\n\x06\x66ilter\x18\x04 \x01(\t\x1aX\n\x0f\x43onditionalTask\x12 \n\x07\x61ttempt\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12#\n\non_failure\x18\x02 \x03(\x0b\x32\x0f.OracleJob.Task\x1a\x65\n\nDivideTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\r\n\x0b\x44\x65nominator\x1a\x64\n\x0cMultiplyTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\n\n\x08Multiple\x1a_\n\x07\x41\x64\x64Task\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\n\n\x08\x41\x64\x64ition\x1ag\n\x0cSubtractTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\r\n\x0bSubtraction\x1a~\n\x10LpTokenPriceTask\x12 \n\x16mercurial_pool_address\x18\x01 \x01(\tH\x00\x12\x1c\n\x12saber_pool_address\x18\x02 \x01(\tH\x00\x12\x1b\n\x11orca_pool_address\x18\x03 \x01(\tH\x00\x42\r\n\x0bPoolAddress\x1a\xc0\x01\n\x12LpExchangeRateTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12 \n\x16mercurial_pool_address\x18\x03 \x01(\tH\x00\x12\x1c\n\x12saber_pool_address\x18\x04 \x01(\tH\x00\x12&\n\x1corca_pool_token_mint_address\x18\x05 \x01(\tH\x00\x42\r\n\x0bPoolAddress\x1a\x39\n\x10RegexExtractTask\x12\x0f\n\x07pattern\x18\x01 \x01(\t\x12\x14\n\x0cgroup_number\x18\x02 \x01(\x05\x1a\x10\n\x0eXStepPriceTask\x1a\x35\n\x08TwapTask\x12\x19\n\x11\x61ggregator_pubkey\x18\x01 \x01(\t\x12\x0e\n\x06period\x18\x02 \x01(\x05\x1a+\n\rSerumSwapTask\x12\x1a\n\x12serum_pool_address\x18\x01 \x01(\t\x1a\x8c\x07\n\x04Task\x12(\n\thttp_task\x18\x01 \x01(\x0b\x32\x13.OracleJob.HttpTaskH\x00\x12\x33\n\x0fjson_parse_task\x18\x02 \x01(\x0b\x32\x18.OracleJob.JsonParseTaskH\x00\x12,\n\x0bmedian_task\x18\x04 \x01(\x0b\x32\x15.OracleJob.MedianTaskH\x00\x12(\n\tmean_task\x18\x05 \x01(\x0b\x32\x13.OracleJob.MeanTaskH\x00\x12\x32\n\x0ewebsocket_task\x18\x06 \x01(\x0b\x32\x18.OracleJob.WebsocketTaskH\x00\x12,\n\x0b\x64ivide_task\x18\x07 \x01(\x0b\x32\x15.OracleJob.DivideTaskH\x00\x12\x30\n\rmultiply_task\x18\x08 \x01(\x0b\x32\x17.OracleJob.MultiplyTaskH\x00\x12:\n\x13lp_token_price_task\x18\t \x01(\x0b\x32\x1b.OracleJob.LpTokenPriceTaskH\x00\x12>\n\x15lp_exchange_rate_task\x18\n \x01(\x0b\x32\x1d.OracleJob.LpExchangeRateTaskH\x00\x12\x36\n\x10\x63onditional_task\x18\x0b \x01(\x0b\x32\x1a.OracleJob.ConditionalTaskH\x00\x12*\n\nvalue_task\x18\x0c \x01(\x0b\x32\x14.OracleJob.ValueTaskH\x00\x12&\n\x08max_task\x18\r \x01(\x0b\x32\x12.OracleJob.MaxTaskH\x00\x12\x39\n\x12regex_extract_task\x18\x0e \x01(\x0b\x32\x1b.OracleJob.RegexExtractTaskH\x00\x12\x35\n\x10xstep_price_task\x18\x0f \x01(\x0b\x32\x19.OracleJob.XStepPriceTaskH\x00\x12&\n\x08\x61\x64\x64_task\x18\x10 \x01(\x0b\x32\x12.OracleJob.AddTaskH\x00\x12\x30\n\rsubtract_task\x18\x11 \x01(\x0b\x32\x17.OracleJob.SubtractTaskH\x00\x12(\n\ttwap_task\x18\x12 \x01(\x0b\x32\x13.OracleJob.TwapTaskH\x00\x12\x33\n\x0fserum_swap_task\x18\x13 \x01(\x0b\x32\x18.OracleJob.SerumSwapTaskH\x00\x42\x06\n\x04Task\"Q\n\nJobPosting\x12\x1f\n\x17\x61ggregator_state_pubkey\x18\x01 \x01(\x0c\x12\x14\n\x0cnode_pubkeys\x18\x02 \x03(\x0c\x12\x0c\n\x04slot\x18\x03 \x01(\x04\"Q\n\tJobResult\x12\x13\n\x0bnode_pubkey\x18\x02 \x01(\x0c\x12\x0e\n\x06result\x18\x03 \x01(\x01\x12\r\n\x05\x65rror\x18\x04 \x01(\x08J\x04\x08\x01\x10\x02J\x04\x08\x05\x10\x06J\x04\x08\x06\x10\x07')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11job_schemas.proto\"\xbd,\n\tOracleJob\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x1a\xe2\x01\n\x08HttpTask\x12\x0b\n\x03url\x18\x01 \x01(\t\x12*\n\x06method\x18\x02 \x01(\x0e\x32\x1a.OracleJob.HttpTask.Method\x12+\n\x07headers\x18\x03 \x03(\x0b\x32\x1a.OracleJob.HttpTask.Header\x12\x0c\n\x04\x62ody\x18\x04 \x01(\t\x1a$\n\x06Header\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"<\n\x06Method\x12\x11\n\rMETHOD_UNKOWN\x10\x00\x12\x0e\n\nMETHOD_GET\x10\x01\x12\x0f\n\x0bMETHOD_POST\x10\x02\x1a\x9f\x01\n\rJsonParseTask\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x46\n\x12\x61ggregation_method\x18\x02 \x01(\x0e\x32*.OracleJob.JsonParseTask.AggregationMethod\"8\n\x11\x41ggregationMethod\x12\x08\n\x04NONE\x10\x00\x12\x07\n\x03MIN\x10\x01\x12\x07\n\x03MAX\x10\x02\x12\x07\n\x03SUM\x10\x03\x1ag\n\nMedianTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x12\x1f\n\x17min_successful_required\x18\x03 \x01(\x05\x1a\x44\n\x08MeanTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x1a\x43\n\x07MaxTask\x12\x1e\n\x05tasks\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12\x18\n\x04jobs\x18\x02 \x03(\x0b\x32\n.OracleJob\x1a\x42\n\tValueTask\x12\x0f\n\x05value\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x42\x07\n\x05Value\x1a`\n\rWebsocketTask\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x14\n\x0csubscription\x18\x02 \x01(\t\x12\x1c\n\x14max_data_age_seconds\x18\x03 \x01(\x05\x12\x0e\n\x06\x66ilter\x18\x04 \x01(\t\x1aX\n\x0f\x43onditionalTask\x12 \n\x07\x61ttempt\x18\x01 \x03(\x0b\x32\x0f.OracleJob.Task\x12#\n\non_failure\x18\x02 \x03(\x0b\x32\x0f.OracleJob.Task\x1a\x65\n\nDivideTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\r\n\x0b\x44\x65nominator\x1a\x64\n\x0cMultiplyTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\n\n\x08Multiple\x1a_\n\x07\x41\x64\x64Task\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\n\n\x08\x41\x64\x64ition\x1ag\n\x0cSubtractTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x12\x19\n\x03job\x18\x03 \x01(\x0b\x32\n.OracleJobH\x00\x42\r\n\x0bSubtraction\x1a\xf9\x01\n\x10LpTokenPriceTask\x12 \n\x16mercurial_pool_address\x18\x01 \x01(\tH\x00\x12\x1c\n\x12saber_pool_address\x18\x02 \x01(\tH\x00\x12\x1b\n\x11orca_pool_address\x18\x03 \x01(\tH\x00\x12\x1e\n\x14raydium_pool_address\x18\x04 \x01(\tH\x00\x12\x1c\n\x14price_feed_addresses\x18\x05 \x03(\t\x12#\n\x0fprice_feed_jobs\x18\x06 \x03(\x0b\x32\n.OracleJob\x12\x16\n\x0euse_fair_price\x18\x07 \x01(\x08\x42\r\n\x0bPoolAddress\x1a\xe0\x01\n\x12LpExchangeRateTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12 \n\x16mercurial_pool_address\x18\x03 \x01(\tH\x00\x12\x1c\n\x12saber_pool_address\x18\x04 \x01(\tH\x00\x12&\n\x1corca_pool_token_mint_address\x18\x05 \x01(\tH\x00\x12\x1e\n\x14raydium_pool_address\x18\x06 \x01(\tH\x00\x42\r\n\x0bPoolAddress\x1a\x39\n\x10RegexExtractTask\x12\x0f\n\x07pattern\x18\x01 \x01(\t\x12\x14\n\x0cgroup_number\x18\x02 \x01(\x05\x1ak\n\x0eXStepPriceTask\x12)\n\x08step_job\x18\x01 \x01(\x0b\x32\x15.OracleJob.MedianTaskH\x00\x12 \n\x16step_aggregator_pubkey\x18\x02 \x01(\tH\x00\x42\x0c\n\nStepSource\x1a\x8d\x01\n\x08TwapTask\x12\x19\n\x11\x61ggregator_pubkey\x18\x01 \x01(\t\x12\x0e\n\x06period\x18\x02 \x01(\x05\x12\"\n\x1aweight_by_propagation_time\x18\x03 \x01(\x08\x12\x13\n\x0bmin_samples\x18\x04 \x01(\r\x12\x1d\n\x15\x65nding_unix_timestamp\x18\x05 \x01(\x05\x1a+\n\rSerumSwapTask\x12\x1a\n\x12serum_pool_address\x18\x01 \x01(\t\x1a\x44\n\x07PowTask\x12\x10\n\x06scalar\x18\x01 \x01(\x01H\x00\x12\x1b\n\x11\x61ggregator_pubkey\x18\x02 \x01(\tH\x00\x42\n\n\x08\x45xponent\x1a\xa0\x01\n\x0fLendingRateTask\x12\x10\n\x08protocol\x18\x01 \x01(\t\x12\x12\n\nasset_mint\x18\x02 \x01(\t\x12/\n\x05\x66ield\x18\x03 \x01(\x0e\x32 .OracleJob.LendingRateTask.Field\"6\n\x05\x46ield\x12\x16\n\x12\x46IELD_DEPOSIT_RATE\x10\x00\x12\x15\n\x11\x46IELD_BORROW_RATE\x10\x01\x1a\x32\n\x13MangoPerpMarketTask\x12\x1b\n\x13perp_market_address\x18\x01 \x01(\t\x1a[\n\x0fJupiterSwapTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12\x13\n\x0b\x62\x61se_amount\x18\x03 \x01(\x01\x1a\x9d\x01\n\x0ePerpMarketTask\x12\x1e\n\x14mango_market_address\x18\x01 \x01(\tH\x00\x12\x1e\n\x14\x64rift_market_address\x18\x02 \x01(\tH\x00\x12\x1d\n\x13zeta_market_address\x18\x03 \x01(\tH\x00\x12\x1b\n\x11zo_market_address\x18\x04 \x01(\tH\x00\x42\x0f\n\rMarketAddress\x1a\x9f\x01\n\nOracleTask\x12\x1d\n\x13switchboard_address\x18\x01 \x01(\tH\x00\x12\x16\n\x0cpyth_address\x18\x02 \x01(\tH\x00\x12\x1b\n\x11\x63hainlink_address\x18\x03 \x01(\tH\x00\x12(\n pyth_allowed_confidence_interval\x18\x04 \x01(\x01\x42\x13\n\x11\x41ggregatorAddress\x1a>\n\x0f\x41nchorFetchTask\x12\x12\n\nprogram_id\x18\x01 \x01(\t\x12\x17\n\x0f\x61\x63\x63ount_address\x18\x02 \x01(\t\x1a\xbb\x01\n\x10\x44\x65\x66iKingdomsTask\x12\x10\n\x08provider\x18\x01 \x01(\t\x12\x33\n\x08in_token\x18\x02 \x01(\x0b\x32!.OracleJob.DefiKingdomsTask.Token\x12\x34\n\tout_token\x18\x03 \x01(\x0b\x32!.OracleJob.DefiKingdomsTask.Token\x1a*\n\x05Token\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x10\n\x08\x64\x65\x63imals\x18\x02 \x01(\x05\x1a\t\n\x07TpsTask\x1a\"\n\x10SplStakePoolTask\x12\x0e\n\x06pubkey\x18\x01 \x01(\t\x1a^\n\x11SplTokenParseTask\x12\x1f\n\x15token_account_address\x18\x01 \x01(\tH\x00\x12\x16\n\x0cmint_address\x18\x02 \x01(\tH\x00\x42\x10\n\x0e\x41\x63\x63ountAddress\x1a\x8b\x01\n\x17UniswapExchangeRateTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12\x17\n\x0fin_token_amount\x18\x03 \x01(\x01\x12\x10\n\x08slippage\x18\x04 \x01(\x01\x12\x10\n\x08provider\x18\x05 \x01(\t\x1a\x8d\x01\n\x19SushiswapExchangeRateTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12\x17\n\x0fin_token_amount\x18\x03 \x01(\x01\x12\x10\n\x08slippage\x18\x04 \x01(\x01\x12\x10\n\x08provider\x18\x05 \x01(\t\x1a\x8f\x01\n\x1bPancakeswapExchangeRateTask\x12\x18\n\x10in_token_address\x18\x01 \x01(\t\x12\x19\n\x11out_token_address\x18\x02 \x01(\t\x12\x17\n\x0fin_token_amount\x18\x03 \x01(\x01\x12\x10\n\x08slippage\x18\x04 \x01(\x01\x12\x10\n\x08provider\x18\x05 \x01(\t\x1ap\n\tCacheTask\x12\x0c\n\x04name\x18\x01 \x01(\t\x12+\n\x06method\x18\x02 \x01(\x0e\x32\x1b.OracleJob.CacheTask.Method\"(\n\x06Method\x12\x0e\n\nMETHOD_GET\x10\x00\x12\x0e\n\nMETHOD_SET\x10\x01\x1a\x14\n\x12SysclockOffsetTask\x1a\xb8\x0e\n\x04Task\x12(\n\thttp_task\x18\x01 \x01(\x0b\x32\x13.OracleJob.HttpTaskH\x00\x12\x33\n\x0fjson_parse_task\x18\x02 \x01(\x0b\x32\x18.OracleJob.JsonParseTaskH\x00\x12,\n\x0bmedian_task\x18\x04 \x01(\x0b\x32\x15.OracleJob.MedianTaskH\x00\x12(\n\tmean_task\x18\x05 \x01(\x0b\x32\x13.OracleJob.MeanTaskH\x00\x12\x32\n\x0ewebsocket_task\x18\x06 \x01(\x0b\x32\x18.OracleJob.WebsocketTaskH\x00\x12,\n\x0b\x64ivide_task\x18\x07 \x01(\x0b\x32\x15.OracleJob.DivideTaskH\x00\x12\x30\n\rmultiply_task\x18\x08 \x01(\x0b\x32\x17.OracleJob.MultiplyTaskH\x00\x12:\n\x13lp_token_price_task\x18\t \x01(\x0b\x32\x1b.OracleJob.LpTokenPriceTaskH\x00\x12>\n\x15lp_exchange_rate_task\x18\n \x01(\x0b\x32\x1d.OracleJob.LpExchangeRateTaskH\x00\x12\x36\n\x10\x63onditional_task\x18\x0b \x01(\x0b\x32\x1a.OracleJob.ConditionalTaskH\x00\x12*\n\nvalue_task\x18\x0c \x01(\x0b\x32\x14.OracleJob.ValueTaskH\x00\x12&\n\x08max_task\x18\r \x01(\x0b\x32\x12.OracleJob.MaxTaskH\x00\x12\x39\n\x12regex_extract_task\x18\x0e \x01(\x0b\x32\x1b.OracleJob.RegexExtractTaskH\x00\x12\x35\n\x10xstep_price_task\x18\x0f \x01(\x0b\x32\x19.OracleJob.XStepPriceTaskH\x00\x12&\n\x08\x61\x64\x64_task\x18\x10 \x01(\x0b\x32\x12.OracleJob.AddTaskH\x00\x12\x30\n\rsubtract_task\x18\x11 \x01(\x0b\x32\x17.OracleJob.SubtractTaskH\x00\x12(\n\ttwap_task\x18\x12 \x01(\x0b\x32\x13.OracleJob.TwapTaskH\x00\x12\x33\n\x0fserum_swap_task\x18\x13 \x01(\x0b\x32\x18.OracleJob.SerumSwapTaskH\x00\x12&\n\x08pow_task\x18\x14 \x01(\x0b\x32\x12.OracleJob.PowTaskH\x00\x12\x37\n\x11lending_rate_task\x18\x15 \x01(\x0b\x32\x1a.OracleJob.LendingRateTaskH\x00\x12@\n\x16mango_perp_market_task\x18\x16 \x01(\x0b\x32\x1e.OracleJob.MangoPerpMarketTaskH\x00\x12\x37\n\x11jupiter_swap_task\x18\x17 \x01(\x0b\x32\x1a.OracleJob.JupiterSwapTaskH\x00\x12\x35\n\x10perp_market_task\x18\x18 \x01(\x0b\x32\x19.OracleJob.PerpMarketTaskH\x00\x12,\n\x0boracle_task\x18\x19 \x01(\x0b\x32\x15.OracleJob.OracleTaskH\x00\x12\x37\n\x11\x61nchor_fetch_task\x18\x1a \x01(\x0b\x32\x1a.OracleJob.AnchorFetchTaskH\x00\x12\x39\n\x12\x64\x65\x66i_kingdoms_task\x18\x1b \x01(\x0b\x32\x1b.OracleJob.DefiKingdomsTaskH\x00\x12&\n\x08tps_task\x18\x1c \x01(\x0b\x32\x12.OracleJob.TpsTaskH\x00\x12:\n\x13spl_stake_pool_task\x18\x1d \x01(\x0b\x32\x1b.OracleJob.SplStakePoolTaskH\x00\x12<\n\x14spl_token_parse_task\x18\x1e \x01(\x0b\x32\x1c.OracleJob.SplTokenParseTaskH\x00\x12H\n\x1auniswap_exchange_rate_task\x18\x1f \x01(\x0b\x32\".OracleJob.UniswapExchangeRateTaskH\x00\x12L\n\x1csushiswap_exchange_rate_task\x18  \x01(\x0b\x32$.OracleJob.SushiswapExchangeRateTaskH\x00\x12P\n\x1epancakeswap_exchange_rate_task\x18! \x01(\x0b\x32&.OracleJob.PancakeswapExchangeRateTaskH\x00\x12*\n\ncache_task\x18\" \x01(\x0b\x32\x14.OracleJob.CacheTaskH\x00\x12=\n\x14sysclock_offset_task\x18# \x01(\x0b\x32\x1d.OracleJob.SysclockOffsetTaskH\x00\x42\x06\n\x04Task\"Q\n\nJobPosting\x12\x1f\n\x17\x61ggregator_state_pubkey\x18\x01 \x01(\x0c\x12\x14\n\x0cnode_pubkeys\x18\x02 \x03(\x0c\x12\x0c\n\x04slot\x18\x03 \x01(\x04\"Q\n\tJobResult\x12\x13\n\x0bnode_pubkey\x18\x02 \x01(\x0c\x12\x0e\n\x06result\x18\x03 \x01(\x01\x12\r\n\x05\x65rror\x18\x04 \x01(\x08J\x04\x08\x01\x10\x02J\x04\x08\x05\x10\x06J\x04\x08\x06\x10\x07')
 
 
 
@@ -38,11 +38,30 @@ _ORACLEJOB_REGEXEXTRACTTASK = _ORACLEJOB.nested_types_by_name['RegexExtractTask'
 _ORACLEJOB_XSTEPPRICETASK = _ORACLEJOB.nested_types_by_name['XStepPriceTask']
 _ORACLEJOB_TWAPTASK = _ORACLEJOB.nested_types_by_name['TwapTask']
 _ORACLEJOB_SERUMSWAPTASK = _ORACLEJOB.nested_types_by_name['SerumSwapTask']
+_ORACLEJOB_POWTASK = _ORACLEJOB.nested_types_by_name['PowTask']
+_ORACLEJOB_LENDINGRATETASK = _ORACLEJOB.nested_types_by_name['LendingRateTask']
+_ORACLEJOB_MANGOPERPMARKETTASK = _ORACLEJOB.nested_types_by_name['MangoPerpMarketTask']
+_ORACLEJOB_JUPITERSWAPTASK = _ORACLEJOB.nested_types_by_name['JupiterSwapTask']
+_ORACLEJOB_PERPMARKETTASK = _ORACLEJOB.nested_types_by_name['PerpMarketTask']
+_ORACLEJOB_ORACLETASK = _ORACLEJOB.nested_types_by_name['OracleTask']
+_ORACLEJOB_ANCHORFETCHTASK = _ORACLEJOB.nested_types_by_name['AnchorFetchTask']
+_ORACLEJOB_DEFIKINGDOMSTASK = _ORACLEJOB.nested_types_by_name['DefiKingdomsTask']
+_ORACLEJOB_DEFIKINGDOMSTASK_TOKEN = _ORACLEJOB_DEFIKINGDOMSTASK.nested_types_by_name['Token']
+_ORACLEJOB_TPSTASK = _ORACLEJOB.nested_types_by_name['TpsTask']
+_ORACLEJOB_SPLSTAKEPOOLTASK = _ORACLEJOB.nested_types_by_name['SplStakePoolTask']
+_ORACLEJOB_SPLTOKENPARSETASK = _ORACLEJOB.nested_types_by_name['SplTokenParseTask']
+_ORACLEJOB_UNISWAPEXCHANGERATETASK = _ORACLEJOB.nested_types_by_name['UniswapExchangeRateTask']
+_ORACLEJOB_SUSHISWAPEXCHANGERATETASK = _ORACLEJOB.nested_types_by_name['SushiswapExchangeRateTask']
+_ORACLEJOB_PANCAKESWAPEXCHANGERATETASK = _ORACLEJOB.nested_types_by_name['PancakeswapExchangeRateTask']
+_ORACLEJOB_CACHETASK = _ORACLEJOB.nested_types_by_name['CacheTask']
+_ORACLEJOB_SYSCLOCKOFFSETTASK = _ORACLEJOB.nested_types_by_name['SysclockOffsetTask']
 _ORACLEJOB_TASK = _ORACLEJOB.nested_types_by_name['Task']
 _JOBPOSTING = DESCRIPTOR.message_types_by_name['JobPosting']
 _JOBRESULT = DESCRIPTOR.message_types_by_name['JobResult']
 _ORACLEJOB_HTTPTASK_METHOD = _ORACLEJOB_HTTPTASK.enum_types_by_name['Method']
 _ORACLEJOB_JSONPARSETASK_AGGREGATIONMETHOD = _ORACLEJOB_JSONPARSETASK.enum_types_by_name['AggregationMethod']
+_ORACLEJOB_LENDINGRATETASK_FIELD = _ORACLEJOB_LENDINGRATETASK.enum_types_by_name['Field']
+_ORACLEJOB_CACHETASK_METHOD = _ORACLEJOB_CACHETASK.enum_types_by_name['Method']
 OracleJob = _reflection.GeneratedProtocolMessageType('OracleJob', (_message.Message,), {
 
   'HttpTask' : _reflection.GeneratedProtocolMessageType('HttpTask', (_message.Message,), {
@@ -178,6 +197,125 @@ OracleJob = _reflection.GeneratedProtocolMessageType('OracleJob', (_message.Mess
     })
   ,
 
+  'PowTask' : _reflection.GeneratedProtocolMessageType('PowTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_POWTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.PowTask)
+    })
+  ,
+
+  'LendingRateTask' : _reflection.GeneratedProtocolMessageType('LendingRateTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_LENDINGRATETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.LendingRateTask)
+    })
+  ,
+
+  'MangoPerpMarketTask' : _reflection.GeneratedProtocolMessageType('MangoPerpMarketTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_MANGOPERPMARKETTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.MangoPerpMarketTask)
+    })
+  ,
+
+  'JupiterSwapTask' : _reflection.GeneratedProtocolMessageType('JupiterSwapTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_JUPITERSWAPTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.JupiterSwapTask)
+    })
+  ,
+
+  'PerpMarketTask' : _reflection.GeneratedProtocolMessageType('PerpMarketTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_PERPMARKETTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.PerpMarketTask)
+    })
+  ,
+
+  'OracleTask' : _reflection.GeneratedProtocolMessageType('OracleTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_ORACLETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.OracleTask)
+    })
+  ,
+
+  'AnchorFetchTask' : _reflection.GeneratedProtocolMessageType('AnchorFetchTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_ANCHORFETCHTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.AnchorFetchTask)
+    })
+  ,
+
+  'DefiKingdomsTask' : _reflection.GeneratedProtocolMessageType('DefiKingdomsTask', (_message.Message,), {
+
+    'Token' : _reflection.GeneratedProtocolMessageType('Token', (_message.Message,), {
+      'DESCRIPTOR' : _ORACLEJOB_DEFIKINGDOMSTASK_TOKEN,
+      '__module__' : 'job_schemas_pb2'
+      # @@protoc_insertion_point(class_scope:OracleJob.DefiKingdomsTask.Token)
+      })
+    ,
+    'DESCRIPTOR' : _ORACLEJOB_DEFIKINGDOMSTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.DefiKingdomsTask)
+    })
+  ,
+
+  'TpsTask' : _reflection.GeneratedProtocolMessageType('TpsTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_TPSTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.TpsTask)
+    })
+  ,
+
+  'SplStakePoolTask' : _reflection.GeneratedProtocolMessageType('SplStakePoolTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_SPLSTAKEPOOLTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.SplStakePoolTask)
+    })
+  ,
+
+  'SplTokenParseTask' : _reflection.GeneratedProtocolMessageType('SplTokenParseTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_SPLTOKENPARSETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.SplTokenParseTask)
+    })
+  ,
+
+  'UniswapExchangeRateTask' : _reflection.GeneratedProtocolMessageType('UniswapExchangeRateTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_UNISWAPEXCHANGERATETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.UniswapExchangeRateTask)
+    })
+  ,
+
+  'SushiswapExchangeRateTask' : _reflection.GeneratedProtocolMessageType('SushiswapExchangeRateTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_SUSHISWAPEXCHANGERATETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.SushiswapExchangeRateTask)
+    })
+  ,
+
+  'PancakeswapExchangeRateTask' : _reflection.GeneratedProtocolMessageType('PancakeswapExchangeRateTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_PANCAKESWAPEXCHANGERATETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.PancakeswapExchangeRateTask)
+    })
+  ,
+
+  'CacheTask' : _reflection.GeneratedProtocolMessageType('CacheTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_CACHETASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.CacheTask)
+    })
+  ,
+
+  'SysclockOffsetTask' : _reflection.GeneratedProtocolMessageType('SysclockOffsetTask', (_message.Message,), {
+    'DESCRIPTOR' : _ORACLEJOB_SYSCLOCKOFFSETTASK,
+    '__module__' : 'job_schemas_pb2'
+    # @@protoc_insertion_point(class_scope:OracleJob.SysclockOffsetTask)
+    })
+  ,
+
   'Task' : _reflection.GeneratedProtocolMessageType('Task', (_message.Message,), {
     'DESCRIPTOR' : _ORACLEJOB_TASK,
     '__module__' : 'job_schemas_pb2'
@@ -208,6 +346,23 @@ _sym_db.RegisterMessage(OracleJob.RegexExtractTask)
 _sym_db.RegisterMessage(OracleJob.XStepPriceTask)
 _sym_db.RegisterMessage(OracleJob.TwapTask)
 _sym_db.RegisterMessage(OracleJob.SerumSwapTask)
+_sym_db.RegisterMessage(OracleJob.PowTask)
+_sym_db.RegisterMessage(OracleJob.LendingRateTask)
+_sym_db.RegisterMessage(OracleJob.MangoPerpMarketTask)
+_sym_db.RegisterMessage(OracleJob.JupiterSwapTask)
+_sym_db.RegisterMessage(OracleJob.PerpMarketTask)
+_sym_db.RegisterMessage(OracleJob.OracleTask)
+_sym_db.RegisterMessage(OracleJob.AnchorFetchTask)
+_sym_db.RegisterMessage(OracleJob.DefiKingdomsTask)
+_sym_db.RegisterMessage(OracleJob.DefiKingdomsTask.Token)
+_sym_db.RegisterMessage(OracleJob.TpsTask)
+_sym_db.RegisterMessage(OracleJob.SplStakePoolTask)
+_sym_db.RegisterMessage(OracleJob.SplTokenParseTask)
+_sym_db.RegisterMessage(OracleJob.UniswapExchangeRateTask)
+_sym_db.RegisterMessage(OracleJob.SushiswapExchangeRateTask)
+_sym_db.RegisterMessage(OracleJob.PancakeswapExchangeRateTask)
+_sym_db.RegisterMessage(OracleJob.CacheTask)
+_sym_db.RegisterMessage(OracleJob.SysclockOffsetTask)
 _sym_db.RegisterMessage(OracleJob.Task)
 
 JobPosting = _reflection.GeneratedProtocolMessageType('JobPosting', (_message.Message,), {
@@ -228,7 +383,7 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _ORACLEJOB._serialized_start=22
-  _ORACLEJOB._serialized_end=2701
+  _ORACLEJOB._serialized_end=5715
   _ORACLEJOB_HTTPTASK._serialized_start=68
   _ORACLEJOB_HTTPTASK._serialized_end=294
   _ORACLEJOB_HTTPTASK_HEADER._serialized_start=196
@@ -240,41 +395,79 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _ORACLEJOB_JSONPARSETASK_AGGREGATIONMETHOD._serialized_start=400
   _ORACLEJOB_JSONPARSETASK_AGGREGATIONMETHOD._serialized_end=456
   _ORACLEJOB_MEDIANTASK._serialized_start=458
-  _ORACLEJOB_MEDIANTASK._serialized_end=528
-  _ORACLEJOB_MEANTASK._serialized_start=530
-  _ORACLEJOB_MEANTASK._serialized_end=598
-  _ORACLEJOB_MAXTASK._serialized_start=600
-  _ORACLEJOB_MAXTASK._serialized_end=667
-  _ORACLEJOB_VALUETASK._serialized_start=669
-  _ORACLEJOB_VALUETASK._serialized_end=695
-  _ORACLEJOB_WEBSOCKETTASK._serialized_start=697
-  _ORACLEJOB_WEBSOCKETTASK._serialized_end=793
-  _ORACLEJOB_CONDITIONALTASK._serialized_start=795
-  _ORACLEJOB_CONDITIONALTASK._serialized_end=883
-  _ORACLEJOB_DIVIDETASK._serialized_start=885
-  _ORACLEJOB_DIVIDETASK._serialized_end=986
-  _ORACLEJOB_MULTIPLYTASK._serialized_start=988
-  _ORACLEJOB_MULTIPLYTASK._serialized_end=1088
-  _ORACLEJOB_ADDTASK._serialized_start=1090
-  _ORACLEJOB_ADDTASK._serialized_end=1185
-  _ORACLEJOB_SUBTRACTTASK._serialized_start=1187
-  _ORACLEJOB_SUBTRACTTASK._serialized_end=1290
-  _ORACLEJOB_LPTOKENPRICETASK._serialized_start=1292
-  _ORACLEJOB_LPTOKENPRICETASK._serialized_end=1418
-  _ORACLEJOB_LPEXCHANGERATETASK._serialized_start=1421
-  _ORACLEJOB_LPEXCHANGERATETASK._serialized_end=1613
-  _ORACLEJOB_REGEXEXTRACTTASK._serialized_start=1615
-  _ORACLEJOB_REGEXEXTRACTTASK._serialized_end=1672
-  _ORACLEJOB_XSTEPPRICETASK._serialized_start=1674
-  _ORACLEJOB_XSTEPPRICETASK._serialized_end=1690
-  _ORACLEJOB_TWAPTASK._serialized_start=1692
-  _ORACLEJOB_TWAPTASK._serialized_end=1745
-  _ORACLEJOB_SERUMSWAPTASK._serialized_start=1747
-  _ORACLEJOB_SERUMSWAPTASK._serialized_end=1790
-  _ORACLEJOB_TASK._serialized_start=1793
-  _ORACLEJOB_TASK._serialized_end=2701
-  _JOBPOSTING._serialized_start=2703
-  _JOBPOSTING._serialized_end=2784
-  _JOBRESULT._serialized_start=2786
-  _JOBRESULT._serialized_end=2867
+  _ORACLEJOB_MEDIANTASK._serialized_end=561
+  _ORACLEJOB_MEANTASK._serialized_start=563
+  _ORACLEJOB_MEANTASK._serialized_end=631
+  _ORACLEJOB_MAXTASK._serialized_start=633
+  _ORACLEJOB_MAXTASK._serialized_end=700
+  _ORACLEJOB_VALUETASK._serialized_start=702
+  _ORACLEJOB_VALUETASK._serialized_end=768
+  _ORACLEJOB_WEBSOCKETTASK._serialized_start=770
+  _ORACLEJOB_WEBSOCKETTASK._serialized_end=866
+  _ORACLEJOB_CONDITIONALTASK._serialized_start=868
+  _ORACLEJOB_CONDITIONALTASK._serialized_end=956
+  _ORACLEJOB_DIVIDETASK._serialized_start=958
+  _ORACLEJOB_DIVIDETASK._serialized_end=1059
+  _ORACLEJOB_MULTIPLYTASK._serialized_start=1061
+  _ORACLEJOB_MULTIPLYTASK._serialized_end=1161
+  _ORACLEJOB_ADDTASK._serialized_start=1163
+  _ORACLEJOB_ADDTASK._serialized_end=1258
+  _ORACLEJOB_SUBTRACTTASK._serialized_start=1260
+  _ORACLEJOB_SUBTRACTTASK._serialized_end=1363
+  _ORACLEJOB_LPTOKENPRICETASK._serialized_start=1366
+  _ORACLEJOB_LPTOKENPRICETASK._serialized_end=1615
+  _ORACLEJOB_LPEXCHANGERATETASK._serialized_start=1618
+  _ORACLEJOB_LPEXCHANGERATETASK._serialized_end=1842
+  _ORACLEJOB_REGEXEXTRACTTASK._serialized_start=1844
+  _ORACLEJOB_REGEXEXTRACTTASK._serialized_end=1901
+  _ORACLEJOB_XSTEPPRICETASK._serialized_start=1903
+  _ORACLEJOB_XSTEPPRICETASK._serialized_end=2010
+  _ORACLEJOB_TWAPTASK._serialized_start=2013
+  _ORACLEJOB_TWAPTASK._serialized_end=2154
+  _ORACLEJOB_SERUMSWAPTASK._serialized_start=2156
+  _ORACLEJOB_SERUMSWAPTASK._serialized_end=2199
+  _ORACLEJOB_POWTASK._serialized_start=2201
+  _ORACLEJOB_POWTASK._serialized_end=2269
+  _ORACLEJOB_LENDINGRATETASK._serialized_start=2272
+  _ORACLEJOB_LENDINGRATETASK._serialized_end=2432
+  _ORACLEJOB_LENDINGRATETASK_FIELD._serialized_start=2378
+  _ORACLEJOB_LENDINGRATETASK_FIELD._serialized_end=2432
+  _ORACLEJOB_MANGOPERPMARKETTASK._serialized_start=2434
+  _ORACLEJOB_MANGOPERPMARKETTASK._serialized_end=2484
+  _ORACLEJOB_JUPITERSWAPTASK._serialized_start=2486
+  _ORACLEJOB_JUPITERSWAPTASK._serialized_end=2577
+  _ORACLEJOB_PERPMARKETTASK._serialized_start=2580
+  _ORACLEJOB_PERPMARKETTASK._serialized_end=2737
+  _ORACLEJOB_ORACLETASK._serialized_start=2740
+  _ORACLEJOB_ORACLETASK._serialized_end=2899
+  _ORACLEJOB_ANCHORFETCHTASK._serialized_start=2901
+  _ORACLEJOB_ANCHORFETCHTASK._serialized_end=2963
+  _ORACLEJOB_DEFIKINGDOMSTASK._serialized_start=2966
+  _ORACLEJOB_DEFIKINGDOMSTASK._serialized_end=3153
+  _ORACLEJOB_DEFIKINGDOMSTASK_TOKEN._serialized_start=3111
+  _ORACLEJOB_DEFIKINGDOMSTASK_TOKEN._serialized_end=3153
+  _ORACLEJOB_TPSTASK._serialized_start=3155
+  _ORACLEJOB_TPSTASK._serialized_end=3164
+  _ORACLEJOB_SPLSTAKEPOOLTASK._serialized_start=3166
+  _ORACLEJOB_SPLSTAKEPOOLTASK._serialized_end=3200
+  _ORACLEJOB_SPLTOKENPARSETASK._serialized_start=3202
+  _ORACLEJOB_SPLTOKENPARSETASK._serialized_end=3296
+  _ORACLEJOB_UNISWAPEXCHANGERATETASK._serialized_start=3299
+  _ORACLEJOB_UNISWAPEXCHANGERATETASK._serialized_end=3438
+  _ORACLEJOB_SUSHISWAPEXCHANGERATETASK._serialized_start=3441
+  _ORACLEJOB_SUSHISWAPEXCHANGERATETASK._serialized_end=3582
+  _ORACLEJOB_PANCAKESWAPEXCHANGERATETASK._serialized_start=3585
+  _ORACLEJOB_PANCAKESWAPEXCHANGERATETASK._serialized_end=3728
+  _ORACLEJOB_CACHETASK._serialized_start=3730
+  _ORACLEJOB_CACHETASK._serialized_end=3842
+  _ORACLEJOB_CACHETASK_METHOD._serialized_start=3802
+  _ORACLEJOB_CACHETASK_METHOD._serialized_end=3842
+  _ORACLEJOB_SYSCLOCKOFFSETTASK._serialized_start=3844
+  _ORACLEJOB_SYSCLOCKOFFSETTASK._serialized_end=3864
+  _ORACLEJOB_TASK._serialized_start=3867
+  _ORACLEJOB_TASK._serialized_end=5715
+  _JOBPOSTING._serialized_start=5717
+  _JOBPOSTING._serialized_end=5798
+  _JOBRESULT._serialized_start=5800
+  _JOBRESULT._serialized_end=5881
 # @@protoc_insertion_point(module_scope)
