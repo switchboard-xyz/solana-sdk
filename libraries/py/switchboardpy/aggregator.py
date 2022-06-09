@@ -99,6 +99,13 @@ class AggregatorOpenRoundParams:
     """The token wallet which will receive rewards for calling update on this feed."""
     payout_wallet: PublicKey
 
+    """
+    Data feeds on a crank are ordered by their next available update time with some 
+    level of jitter to mitigate oracles being assigned to the same update request upon 
+    each iteration of the queue, which makes them susceptible to a malicous oracle. 
+    """
+    jitter: int = None
+
 # Result of returning loadedJobs
 @dataclass
 class AggregatorLoadedJob:
@@ -580,7 +587,7 @@ class AggregatorAccount:
                 "expiration": aggregator_init_params.expiration or 0,
                 "state_bump": state_bump,
                 "disable_crank": aggregator_init_params.disable_crank or False,
-                "start_after": aggregator_init_params.start_after or 0
+                "start_after": aggregator_init_params.start_after or 0,
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -679,6 +686,7 @@ class AggregatorAccount:
                 "state_bump": state_bump,
                 "lease_bump": lease_bump,
                 "permission_bump": permission_bump,
+                "jitter": params.jitter or 0
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -692,7 +700,7 @@ class AggregatorAccount:
                     "payout_wallet": params.payout_wallet,
                     "token_program": TOKEN_PROGRAM_ID,
                     "data_buffer": queue.data_buffer,
-                    "mint": (await params.oracle_queue_account.load_mint()).public_key,
+                    "mint": (await params.oracle_queue_account.load_mint()).pubkey,
                 },
             )
         )

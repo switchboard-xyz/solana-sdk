@@ -144,11 +144,11 @@ class OracleQueueAccount:
     async def load_mint(self) -> AsyncToken:
         payer_keypair = Keypair.from_secret_key(self.program.provider.wallet.payer.secret_key)
         queue = await self.load_data()
-        mint_key = queue.mint
-        if not mint_key:
-            mint_key = WRAPPED_SOL_MINT
-        token_mint = AsyncToken(self.program.provider.connection, mint_key, TOKEN_PROGRAM_ID, payer_keypair)
-        return token_mint
+        try:
+            mint = AsyncToken(self.program.provider.connection, queue.mint, TOKEN_PROGRAM_ID, payer_keypair)
+            return mint;
+        except AttributeError:
+            return AsyncToken(self.program.provider.connection, WRAPPED_SOL_MINT, TOKEN_PROGRAM_ID, payer_keypair)
 
     """
     Create and initialize the OracleQueueAccount

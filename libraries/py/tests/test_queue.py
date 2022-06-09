@@ -50,6 +50,6 @@ async def test_create():
                 reward=3000,
                 min_stake=300, 
                 authority=program.provider.wallet.public_key, #
-                oracle_timeout=20000, 
+                oracle_timeout=20000,
             )
         )
