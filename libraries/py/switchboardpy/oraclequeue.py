@@ -12,7 +12,6 @@ from solana.publickey import PublicKey
 from solana.keypair import Keypair
 from solana.system_program import CreateAccountParams, create_account
 from switchboardpy.common import SwitchboardDecimal
-
 from switchboardpy.common import AccountParams
 
 from .generated.accounts import OracleQueueAccountData
@@ -184,7 +183,8 @@ class OracleQueueAccount:
                 "minimum_delay_seconds": params.minimum_delay_seconds or 5,
                 "queue_size": params.queue_size or 0,
                 "unpermissioned_feeds": params.unpermissioned_feeds or False,
-                "mint": params.mint
+                "unpermissioned_vrf": params.unpermissioned_feeds or False,
+                "enable_buffer_relayers": False
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -192,7 +192,8 @@ class OracleQueueAccount:
                     "authority": params.authority,
                     "buffer": buffer.public_key,
                     "system_program": system_program.SYS_PROGRAM_ID,
-                    "payer": program.provider.wallet.public_key
+                    "payer": program.provider.wallet.public_key,
+                    "mint": params.mint
                 },
                 signers=[oracle_queue_account, buffer],
                 pre_instructions=[

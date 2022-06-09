@@ -14,6 +14,7 @@ from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
 from anchorpy import Program, Provider, Wallet
+from switchboardpy.program import ProgramStateAccount 
 
 ORACLE_QUEUE_STANDARD_DEVNET = 'F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy' # <-- new key | old key - 'B4yBQ3hYcjnrNLxUnauJqwpFJnjtm7s8gHybgkAdgXhQ';
 
@@ -44,6 +45,8 @@ async def test_load_data():
 @mark.asyncio
 async def test_create():
     async with SwitchboardProgram() as program:
+        program_state_account, state_bump = ProgramStateAccount.from_seed(program)
+        switch_token_mint = await program_state_account.get_token_mint()
         await OracleQueueAccount.create(
             program=program, 
             params=OracleQueueInitParams(
@@ -51,5 +54,6 @@ async def test_create():
                 min_stake=300, 
                 authority=program.provider.wallet.public_key, #
                 oracle_timeout=20000,
+                mint=switch_token_mint.pubkey
             )
         )
