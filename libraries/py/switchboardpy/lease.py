@@ -168,7 +168,6 @@ class LeaseAccount:
         job_account_data = await params.aggregator_account.load_jobs()
         aggregator_account_data = await params.aggregator_account.load_data()
         job_pubkeys: list[PublicKey] = aggregator_account_data.job_pubkeys_data[:aggregator_account_data.job_pubkeys_size]
-        print(job_pubkeys)
         job_wallets: list[PublicKey] = []
         wallet_bumps: list[int] = []
         for job in job_account_data:
@@ -208,7 +207,7 @@ class LeaseAccount:
                     "mint": switch_token_mint.pubkey
                 },
                 signers=[params.funder_authority],
-                remaining_accounts=[AccountMeta(is_signer=False, is_writable=True, pubkey=x) for x in job_pubkeys.extend(job_wallets)]
+                remaining_accounts=[AccountMeta(is_signer=False, is_writable=True, pubkey=x) for x in [*job_pubkeys, *job_wallets]]
             )
         )
         return LeaseAccount(AccountParams(program=program, public_key=lease_account.public_key))

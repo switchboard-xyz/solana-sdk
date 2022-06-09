@@ -183,7 +183,8 @@ class OracleQueueAccount:
                 "consecutive_oracle_failure_limit": params.consecutive_oracle_failure_limit or 1000,
                 "minimum_delay_seconds": params.minimum_delay_seconds or 5,
                 "queue_size": params.queue_size or 0,
-                "unpermissioned_feeds": params.unpermissioned_feeds or False
+                "unpermissioned_feeds": params.unpermissioned_feeds or False,
+                "mint": params.mint
             },
             ctx=anchorpy.Context(
                 accounts={

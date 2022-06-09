@@ -121,7 +121,7 @@ async def test_create():
             1_000_000,
             skip_confirmation=False
         )
-        
+
         # Create lease
         lease = await LeaseAccount.create(
             program=program, 
@@ -146,4 +146,5 @@ async def test_create():
         # Add Aggregator for auto-updates
         await crank.push(CrankPushParams(aggregator_account=aggregator))
 
-        print(f'Feed info at: https://api.switchboard.xyz/api/feed/{aggregator.public_key}?network=devnet')
+
+        print(f'Feed info at: https://switchboard.xyz/explorer/2/{aggregator.public_key}')

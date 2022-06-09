@@ -1,11 +1,15 @@
+import io
+import six
 import anchorpy
-
 from dataclasses import dataclass
 from functools import reduce
-from typing import Any
+from typing import Any, Type
 from decimal import Decimal
 from solana.publickey import PublicKey
 from solana.keypair import Keypair
+from google.protobuf.internal import decoder
+from switchboardpy.compiled import OracleJob
+
 
 # Devnet Program ID.
 SBV2_DEVNET_PID = PublicKey(
@@ -16,6 +20,49 @@ SBV2_DEVNET_PID = PublicKey(
 SBV2_MAINNET_PID = PublicKey(
     'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 )
+
+# https://stackoverflow.com/a/34539706
+def readRawVarint32(stream: io.BytesIO):
+    mask = 0x80 # (1 << 7)
+    raw_varint32 = []
+    while 1:
+        b = stream.read(1)
+        #eof
+        if b == "":
+            break
+        raw_varint32.append(b)
+        if not (ord(b) & mask):
+            #we found a byte starting with a 0, which means it's the last byte of this varint
+            break
+    return raw_varint32
+
+def getSize(raw_varint32):
+    result = 0
+    shift = 0
+    b = six.indexbytes(raw_varint32, 0)
+    result |= ((ord(b) & 0x7f) << shift)
+    return result
+
+def readDelimitedFrom(MessageType: Type[OracleJob], stream: io.BytesIO):
+    raw_varint32 = readRawVarint32(stream)
+    message = None
+    if raw_varint32:
+        size = getSize(raw_varint32)
+
+        data = stream.read(size)
+        if len(data) < size:
+            raise Exception("Unexpected end of file")
+
+        message = MessageType()
+        message.ParseFromString(data)
+
+    return message
+
+# take OracleJob data and return bytes
+def parseOracleJob(data: bytes):
+    dataStream = io.BytesIO(data)
+    return readDelimitedFrom(OracleJob, dataStream);
+
 
 
 # Input parameters for constructing wrapped representations of Switchboard accounts. 
