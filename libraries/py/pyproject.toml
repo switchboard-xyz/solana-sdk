@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "switchboardpy"
-version = "0.0.6"
+version = "0.0.7"
 description = "Switchboard V2 API"
 repository = "https://github.com/switchboard-xyz/switchboard-v2/tree/main/libraries/py"
 homepage = "https://docs.switchboard.xyz"
