@@ -14,6 +14,7 @@ from switchboardpy.program import ProgramStateAccount
 from switchboardpy.common import AccountParams
 from switchboardpy.oraclequeue import OracleQueueAccount
 
+from .generated.accounts import OracleAccountData
 
 # Parameters for an OracleInit request
 @dataclass
@@ -85,9 +86,8 @@ class OracleAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        oracle = await self.program.account["OracleAccountData"].fetch(self.public_key)
-        oracle.ebuf = None
-        return oracle
+        return await OracleAccountData.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Loads a OracleAccount from the expected PDA seed format

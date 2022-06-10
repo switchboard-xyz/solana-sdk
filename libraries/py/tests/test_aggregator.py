@@ -37,37 +37,36 @@ class SwitchboardProgram(object):
 async def test_load_data():
     async with SwitchboardProgram() as program:
     
-        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("88FX4tBstuwBPNhQU4EEBoPX35neSu4Le9zDSwtPRRQz")))
+        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("HMtDNnoCPD6NQRCE2uScEWSvwaZY3hWixCK12TKNtGpc")))
 
         # getting aggregator data
         data = await agg.load_data()
 
-        assert data.min_oracle_results == 3
-        assert data.oracle_request_batch_size == 6
-        assert data.min_job_results == 2
+        assert data.min_oracle_results == 2
+        assert data.oracle_request_batch_size == 3
+        assert data.min_job_results == 1
         print(data)
 
 @mark.asyncio
 async def test_get_latest_value():
     async with SwitchboardProgram() as program:
-        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("88FX4tBstuwBPNhQU4EEBoPX35neSu4Le9zDSwtPRRQz")))
+        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("HMtDNnoCPD6NQRCE2uScEWSvwaZY3hWixCK12TKNtGpc")))
 
         # getting most recent value
         val = await agg.get_latest_value()
-
-        assert Decimal('180.12115') == val
+        assert Decimal('39.792') == val
 
         print('LATEST VALUE:')
         print(val)
 
 @mark.asyncio
-async def test_get_latest_value():
+async def test_get_latest_timestamp():
     async with SwitchboardProgram() as program:
-        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("88FX4tBstuwBPNhQU4EEBoPX35neSu4Le9zDSwtPRRQz")))
+        agg = AggregatorAccount(AccountParams(program=program, public_key=PublicKey("HMtDNnoCPD6NQRCE2uScEWSvwaZY3hWixCK12TKNtGpc")))
 
         # getting most recent value
         val = await agg.get_latest_feed_timestamp()
-        assert Decimal('1639722030') == val
+        assert Decimal('1654626799') == val
         print('LATEST TIMESTAMP:')
         print(val)
 
@@ -87,6 +86,5 @@ async def test_create():
                         public_key=PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy")
                     )
                 ),
-                start_after=0,
             )
         )

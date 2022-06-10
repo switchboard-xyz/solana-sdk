@@ -8,6 +8,8 @@ from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from switchboardpy.common import AccountParams
 
+from .generated.accounts import PermissionAccountData
+
 # Parameters for initializing PermissionAccount
 @dataclass
 class PermissionInitParams:
@@ -91,9 +93,8 @@ class PermissionAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        permission = await self.program.account["PermissionAccountData"].fetch(self.public_key)
-        permission.ebuf = None
-        return permission
+        return await PermissionAccountData.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Get the size of a PermissionAccount on chain

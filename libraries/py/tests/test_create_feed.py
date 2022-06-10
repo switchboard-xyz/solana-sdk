@@ -23,6 +23,8 @@ from decimal import Decimal
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
+from solana.rpc.commitment import Confirmed
+
 from anchorpy import Program, Provider, Wallet
 from spl.token.async_client import AsyncToken
 from spl.token.constants import TOKEN_PROGRAM_ID
@@ -33,7 +35,7 @@ from google.protobuf.internal import encoder
 class SwitchboardProgram(object):
 
     async def __aenter__(self):
-        client = AsyncClient("https://api.devnet.solana.com/", commitment="confirmed")
+        client = AsyncClient("https://api.devnet.solana.com/", commitment=Confirmed)
         provider = Provider(client, Wallet.local())
         self.program = await Program.at(
             SBV2_DEVNET_PID, provider
@@ -42,16 +44,6 @@ class SwitchboardProgram(object):
     
     async def __aexit__(self, exc_t, exc_v, exc_tb):
         await self.program.close()
-
-@mark.asyncio
-async def test_load_data():
-    async with SwitchboardProgram() as program:
-          
-        lease = LeaseAccount(AccountParams(program=program, public_key=PublicKey("qAs3FQX2iUSRCe9WFXbRgH594LSqusTUze8BftxbiHC")))
-
-        # getting aggregator data
-        data = await lease.load_data()
-        print(data)
 
 @mark.asyncio
 async def test_create():
@@ -129,7 +121,7 @@ async def test_create():
             1_000_000,
             skip_confirmation=False
         )
-        
+
         # Create lease
         lease = await LeaseAccount.create(
             program=program, 
@@ -154,4 +146,5 @@ async def test_create():
         # Add Aggregator for auto-updates
         await crank.push(CrankPushParams(aggregator_account=aggregator))
 
-        print(f'Feed info at: https://api.switchboard.xyz/api/feed/{aggregator.public_key}?network=devnet')
+
+        print(f'Feed info at: https://switchboard.xyz/explorer/2/{aggregator.public_key}')

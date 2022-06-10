@@ -19,6 +19,8 @@ from solana.system_program import CreateAccountParams, create_account
 
 from switchboardpy.program import ProgramStateAccount
 
+from .generated.accounts import CrankAccountData
+
 # Parameters for initializing a CrankAccount
 @dataclass
 class CrankInitParams:
@@ -129,9 +131,8 @@ class CrankAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        crank = await self.program.account["CrankAccountData"].fetch(self.public_key)
-        crank.ebuf = None
-        return crank
+        return await CrankAccountData.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Create and initialize the CrankAccount.

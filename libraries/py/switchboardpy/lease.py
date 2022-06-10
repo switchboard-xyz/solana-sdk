@@ -5,16 +5,19 @@ import anchorpy
 from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
-from decimal import Decimal
 from solana import publickey, system_program
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
+from solana.transaction import AccountMeta
+
 from spl.token.constants import ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID
 from spl.token.instructions import get_associated_token_address
 
 from switchboardpy.oraclequeue import OracleQueueAccount
 from switchboardpy.common import AccountParams
 from switchboardpy.program import ProgramStateAccount
+
+from .generated.accounts import LeaseAccountData
 
 if TYPE_CHECKING:
     from switchboardpy.aggregator import AggregatorAccount
@@ -113,9 +116,8 @@ class LeaseAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        lease = await self.program.account["LeaseAccountData"].fetch(self.public_key)
-        lease.ebuf = None
-        return lease
+        return await LeaseAccountData.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Loads a LeaseAccount from the expected PDA seed format
@@ -160,14 +162,34 @@ class LeaseAccount:
             params.oracle_queue_account,
             params.aggregator_account
         )
-     
+
+
+        job_account_data = await params.aggregator_account.load_jobs()
+        aggregator_account_data = await params.aggregator_account.load_data()
+        job_pubkeys: list[PublicKey] = aggregator_account_data.job_pubkeys_data[:aggregator_account_data.job_pubkeys_size]
+        job_wallets: list[PublicKey] = []
+        wallet_bumps: list[int] = []
+        for job in job_account_data:
+            authority = job.account.authority or PublicKey('11111111111111111111111111111111')
+            pubkey, bump = publickey.PublicKey.find_program_address(
+                [
+                    bytes(authority), 
+                    bytes(TOKEN_PROGRAM_ID),
+                    bytes(switch_token_mint.pubkey),
+                ],
+                ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+            job_wallets.append(pubkey)
+            wallet_bumps.append(bump)
+
         escrow = await switch_token_mint.create_associated_token_account(lease_account.public_key, skip_confirmation=False)
         await program.rpc["lease_init"](
             {
                 "load_amount": params.load_amount,
                 "state_bump": state_bump,
                 "lease_bump": lease_bump,
-                "withdraw_authority": params.withdraw_authority or PublicKey('11111111111111111111111111111111')
+                "withdraw_authority": params.withdraw_authority or PublicKey('11111111111111111111111111111111'),
+                "wallet_bumps": bytes(wallet_bumps)
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -181,11 +203,24 @@ class LeaseAccount:
                     "token_program": TOKEN_PROGRAM_ID,
                     "escrow": escrow,
                     "owner": params.funder_authority.public_key,
+                    "mint": switch_token_mint.pubkey
                 },
-                signers=[params.funder_authority]
+                signers=[params.funder_authority],
+                remaining_accounts=[AccountMeta(is_signer=False, is_writable=True, pubkey=x) for x in [*job_pubkeys, *job_wallets]]
             )
         )
         return LeaseAccount(AccountParams(program=program, public_key=lease_account.public_key))
+
+    """
+    Get lease balance
+
+    Args:
+    Returns:
+        int balance
+    """
+    async def get_balance(self):
+        lease = self.load_data()
+        return await self.program.provider.connection.get_balance(lease.escrow)
 
     """
     Adds fund to a LeaseAccount. Note that funds can always be withdrawn by
@@ -205,17 +240,37 @@ class LeaseAccount:
         queue = lease.queue
         aggregator = lease.aggregator
         program_state_account, state_bump = ProgramStateAccount.from_seed(program)
-        switch_token_mint = await program_state_account.get_token_mint()
+        queue_account = OracleQueueAccount(AccountParams(program=program, public_key=queue))
+        switch_token_mint = await queue_account.load_mint()
         lease_account, lease_bump = LeaseAccount.from_seed(
             program,
             OracleQueueAccount(AccountParams(program=program, public_key=queue)),
             AggregatorAccount(AccountParams(program=program, public_key=aggregator))
         )
+        job_account_data = await aggregator.load_jobs()
+        aggregator_account_data = await aggregator.load_data()
+        job_pubkeys: list[PublicKey] = aggregator_account_data.job_pubkeys_data[:aggregator_account_data.job_pubkeys_size]
+        job_wallets: list[PublicKey] = []
+        wallet_bumps: list[int] = []
+        for job in job_account_data:
+            authority = job.account.authority or PublicKey('11111111111111111111111111111111')
+            pubkey, bump = publickey.PublicKey.find_program_address(
+                [
+                    bytes(authority), 
+                    bytes(TOKEN_PROGRAM_ID),
+                    bytes(switch_token_mint.pubkey),
+                ],
+                ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+            job_wallets.append(pubkey)
+            wallet_bumps.append(bump)
+
         return await program.rpc["lease_extend"](
             {
                 "load_amount": params.load_amount,
                 "state_bump": state_bump,
-                "lease_bump": lease_bump
+                "lease_bump": lease_bump,
+                "wallet_bumps": bytes(wallet_bumps)
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -226,9 +281,11 @@ class LeaseAccount:
                     "owner": params.funder_authority.public_key,
                     "token_program": TOKEN_PROGRAM_ID,
                     "escrow": escrow,
-                    "program_state": program_state_account.public_key
+                    "program_state": program_state_account.public_key,
+                    "mint": switch_token_mint.pubkey
                 },
-                signers=[params.funder_authority]
+                signers=[params.funder_authority],
+                remaining_accounts=[AccountMeta(is_signer=False, is_writable=True, pubkey=x) for x in [*job_pubkeys, *job_wallets]]
             )
         )
  
@@ -252,6 +309,8 @@ class LeaseAccount:
         queue = lease.queue
         aggregator = lease.aggregator
         program_state_account, state_bump = ProgramStateAccount.from_seed(program)
+        queue_account = OracleQueueAccount(AccountParams(program=program, public_key=queue))
+        switch_token_mint = await queue_account.load_mint()
         lease_account, lease_bump = LeaseAccount.from_seed(
             program,
             OracleQueueAccount(AccountParams(program=program, public_key=queue)),
@@ -273,6 +332,7 @@ class LeaseAccount:
                     "withdraw_account": params.withdraw_wallet,
                     "token_program": TOKEN_PROGRAM_ID,
                     "program_state": program_state_account.public_key,
+                    "mint": switch_token_mint.pubkey
                 },
                 signers=[params.withdraw_authority]
             )
