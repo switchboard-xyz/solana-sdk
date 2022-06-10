@@ -1,4 +1,3 @@
-import asyncio
 from pytest import fixture, mark
 
 from switchboardpy import (
@@ -8,19 +7,15 @@ from switchboardpy import (
     LeaseInitParams,
     AggregatorAccount,
     AggregatorInitParams,
+    AggregatorOpenRoundParams,
     OracleQueueAccount,
     JobAccount,
     JobInitParams,
-    CrankAccount,
-    CrankPushParams,
     PermissionAccount,
     PermissionInitParams,
     OracleJob,
 )
 
-from contextlib import contextmanager
-from decimal import Decimal
-from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
 from solana.rpc.commitment import Confirmed
@@ -40,6 +35,7 @@ class SwitchboardProgram(object):
         self.program = await Program.at(
             SBV2_DEVNET_PID, provider
         )
+        print(provider.wallet.public_key)
         return self.program
     
     async def __aexit__(self, exc_t, exc_v, exc_tb):
@@ -72,6 +68,7 @@ async def test_create():
                     )
                 ),
                 start_after=0,
+                disable_crank=True
             )
         )
 
@@ -86,7 +83,7 @@ async def test_create():
         parseTask.path = "$.result.price"
         task2.json_parse_task.CopyFrom(parseTask)
         serializedMessage = oracleJob.SerializeToString()
-        delimiter = encoder._VarintBytes(len(serializedMessage)) # Rust Crate Requires Encode Delimited Proto
+        delimiter = encoder._VarintBytes(len(serializedMessage)) # Encode Delimited
         delimitedOJ = delimiter + serializedMessage
 
         # Create Job on Chain
@@ -112,18 +109,18 @@ async def test_create():
             )
         )
 
-        # Create tokenAccount to fund lease
+        # Create tokenAccount to fund lease - this is needed for 
         tokenAccount = await AsyncToken.create_wrapped_native_account(
             program.provider.connection, 
             TOKEN_PROGRAM_ID, 
             program.provider.wallet.public_key, 
             program.provider.wallet.payer, 
-            1_000_000,
+            1_000_000, # start it off with lamports
             skip_confirmation=False
         )
 
-        # Create lease
-        lease = await LeaseAccount.create(
+        # Create lease - this is where funding comes from
+        await LeaseAccount.create(
             program=program, 
             params=LeaseInitParams(
                 withdraw_authority=program.provider.wallet.public_key,
@@ -140,11 +137,12 @@ async def test_create():
             )
         )
 
-        # Get crank
-        crank = CrankAccount(AccountParams(program=program, public_key=PublicKey("GN9jjCy2THzZxhYqZETmPM3my8vg4R5JyNkgULddUMa5")))
-        
-        # Add Aggregator for auto-updates
-        await crank.push(CrankPushParams(aggregator_account=aggregator))
+        await aggregator.open_round(AggregatorOpenRoundParams(OracleQueueAccount(
+            AccountParams(
+                program=program, 
+                public_key=PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy")
+            )
+        ), payout_wallet=tokenAccount))
 
 
         print(f'Feed info at: https://switchboard.xyz/explorer/2/{aggregator.public_key}')

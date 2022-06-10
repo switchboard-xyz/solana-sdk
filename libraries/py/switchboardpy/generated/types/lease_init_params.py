@@ -3,6 +3,8 @@ import typing
 from dataclasses import dataclass
 from construct import Container
 from solana.publickey import PublicKey
+from anchorpy.borsh_extension import BorshPubkey
+
 import borsh_construct as borsh
 
 

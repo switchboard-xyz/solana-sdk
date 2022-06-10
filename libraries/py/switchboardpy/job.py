@@ -1,3 +1,4 @@
+import io
 import anchorpy
 
 from dataclasses import dataclass
@@ -6,8 +7,11 @@ from solana.publickey import PublicKey
 from solana.system_program import CreateAccountParams, create_account
 
 from switchboardpy.compiled import OracleJob
-from switchboardpy.common import AccountParams
+from switchboardpy.common import AccountParams, parseOracleJob
 from switchboardpy.program import ProgramStateAccount
+
+from .generated.accounts import JobAccountData
+
 
 # Parameters for initializing a JobAccount
 @dataclass
@@ -30,9 +34,8 @@ class JobInitParams:
 
     """
     An optional wallet for receiving kickbacks from job usage in feeds.
-    Defaults to token vault.
     """
-    author_wallet: PublicKey = None
+    authority: PublicKey = None
 
 class JobAccount:
     """ A Switchboard account representing a job for an oracle to perform, stored as
@@ -68,9 +71,8 @@ class JobAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        job = await self.program.account["JobAccountData"].fetch(self.public_key)
-        job.ebuf = None
-        return job
+        return await JobAccountData.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Load and parse the protobuf from the raw buffer stored in the JobAccount.
@@ -83,8 +85,8 @@ class JobAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_job(self):
-        job = await self.load_job()
-        return OracleJob.ParseFromString(job.data)
+        job = await self.load_data()
+        return parseOracleJob(job.data);
 
     """
     Load and parse JobAccount data based on the program IDL from a buffer.
@@ -132,7 +134,7 @@ class JobAccount:
             ctx=anchorpy.Context(
                 accounts={
                     "job": job_account.public_key,
-                    "author_wallet": params.author_wallet or state.token_vault,
+                    "authority": params.authority or state.token_vault,
                     "program_state": state_account.public_key
                 },
                 signers=[job_account],

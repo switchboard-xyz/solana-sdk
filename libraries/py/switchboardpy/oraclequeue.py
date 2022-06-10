@@ -3,18 +3,26 @@ import anchorpy
 from dataclasses import dataclass
 from decimal import Decimal
 
+from spl.token.async_client import AsyncToken
+from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
+
 from solana import system_program
 from solana import keypair
 from solana.publickey import PublicKey
 from solana.keypair import Keypair
 from solana.system_program import CreateAccountParams, create_account
 from switchboardpy.common import SwitchboardDecimal
-
 from switchboardpy.common import AccountParams
+
+from .generated.accounts import OracleQueueAccountData
+
 
 # Parameters for initializing OracleQueueAccount
 @dataclass
 class OracleQueueInitParams:
+
+    """Mint for the oracle queue"""
+    mint: PublicKey
 
     """Rewards to provide oracles and round openers on this queue."""
     reward: int
@@ -74,6 +82,13 @@ class OracleQueueInitParams:
     """Buffer for queue metadata."""
     metadata: bytes = None
 
+    """
+    Enabling this setting means data feeds do not need explicit permission
+    to request VRF proofs and verifications from this queue.
+    """
+    unpermissioned_vrf: bool = None
+
+
 class OracleQueueAccount:
     """A Switchboard account representing a queue for distributing oracles to
     permitted data feeds.
@@ -117,9 +132,22 @@ class OracleQueueAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        queue = await self.program.account["OracleQueueAccountData"].fetch(self.public_key)
-        queue.ebuf = None
-        return queue
+        return await OracleQueueAccountData.fetch(self.program.provider.connection, self.public_key)
+
+    """
+    Fetch the token mint for this queue
+    Args:
+    Returns:
+        AsyncToken
+    """
+    async def load_mint(self) -> AsyncToken:
+        payer_keypair = Keypair.from_secret_key(self.program.provider.wallet.payer.secret_key)
+        queue = await self.load_data()
+        try:
+            mint = AsyncToken(self.program.provider.connection, queue.mint, TOKEN_PROGRAM_ID, payer_keypair)
+            return mint;
+        except AttributeError:
+            return AsyncToken(self.program.provider.connection, WRAPPED_SOL_MINT, TOKEN_PROGRAM_ID, payer_keypair)
 
     """
     Create and initialize the OracleQueueAccount
@@ -154,7 +182,9 @@ class OracleQueueAccount:
                 "consecutive_oracle_failure_limit": params.consecutive_oracle_failure_limit or 1000,
                 "minimum_delay_seconds": params.minimum_delay_seconds or 5,
                 "queue_size": params.queue_size or 0,
-                "unpermissioned_feeds": params.unpermissioned_feeds or False
+                "unpermissioned_feeds": params.unpermissioned_feeds or False,
+                "unpermissioned_vrf": params.unpermissioned_feeds or False,
+                "enable_buffer_relayers": False
             },
             ctx=anchorpy.Context(
                 accounts={
@@ -162,7 +192,8 @@ class OracleQueueAccount:
                     "authority": params.authority,
                     "buffer": buffer.public_key,
                     "system_program": system_program.SYS_PROGRAM_ID,
-                    "payer": program.provider.wallet.public_key
+                    "payer": program.provider.wallet.public_key,
+                    "mint": params.mint
                 },
                 signers=[oracle_queue_account, buffer],
                 pre_instructions=[

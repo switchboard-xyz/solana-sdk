@@ -12,10 +12,18 @@ from solana.publickey import PublicKey
 
 from switchboardpy.common import AccountParams
 
+from .generated.accounts import SbState
+
 # Devnet Program ID.
 SBV2_DEVNET_PID = PublicKey(
     '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
 )
+
+# Mainnet-Beta Program ID.
+SBV2_MAINNET_PID = PublicKey(
+    'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+)
+
 
 # Input parameters intitializing program state
 @dataclass
@@ -78,9 +86,8 @@ class ProgramStateAccount:
         AccountInvalidDiscriminator: If the discriminator doesn't match the IDL.
     """
     async def load_data(self):
-        state = await self.program.account["SbState"].fetch(self.public_key)
-        state.ebuf = None
-        return state
+        return await SbState.fetch(self.program.provider.connection, self.public_key)
+
 
     """
     Fetch the Switchboard token mint specified in the program state account.
