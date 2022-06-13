@@ -66,16 +66,11 @@ yarn docs:build
 
 ## Publishing
 
-To check which packages have changed
+See [./Publishing.md](./Publishing.md) for a detailed guide.
 
 ```
-lerna changed
-```
-
-To publish changes to NPM registries
-
-```
-lerna publish
+lerna version patch --no-private --yes
+lerna publish from-git --yes
 ```
 
 ### Localnet Testing Setup
