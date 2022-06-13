@@ -1,3 +1,2 @@
-// eslint-disable-next-line import/extensions
-export { IOracleJob, OracleJob } from "./protos/index.js";
+export { IOracleJob, OracleJob } from "./protos";
 export * from "./sbv2.js";
