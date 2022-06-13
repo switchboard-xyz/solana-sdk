@@ -376,6 +376,38 @@ message OracleJob {
 
   message SysclockOffsetTask {}
 
+  message MarinadeStateTask {}
+
+  message SolanaAccountDataFetchTask {
+    optional string pubkey = 1;
+  }
+
+  message BufferLayoutParseTask {
+    optional uint32 offset = 1;
+    enum Endian {
+      LITTLE_ENDIAN = 0;
+      BIG_ENDIAN = 1;
+    }
+    optional Endian endian = 2;
+    enum BufferParseType {
+      pubkey = 1;
+      bool = 2;
+      u8 = 3;
+      i8 = 4;
+      u16 = 5;
+      i16 = 6;
+      u32 = 7;
+      i32 = 8;
+      f32 = 9;
+      u64 = 10;
+      i64 = 11;
+      f64 = 12;
+      u128 = 13;
+      i128 = 14;
+    }
+    optional BufferParseType type = 3;
+  }
+
   message Task {
     oneof Task {
       HttpTask http_task = 1;
@@ -412,6 +444,9 @@ message OracleJob {
       PancakeswapExchangeRateTask pancakeswap_exchange_rate_task = 33;
       CacheTask cache_task = 34;
       SysclockOffsetTask sysclock_offset_task = 35;
+      MarinadeStateTask marinade_state_task = 36;
+      SolanaAccountDataFetchTask solana_account_data_fetch_task = 37;
+      BufferLayoutParseTask buffer_layout_parse_task = 38;
     }
   }
   // The chain of tasks to perform for this OracleJob.

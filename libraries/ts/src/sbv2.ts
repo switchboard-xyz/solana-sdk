@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import * as anchor from "@project-serum/anchor";
-import { getGovernance } from "@solana/spl-governance";
 import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
@@ -18,12 +18,10 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
-// eslint-disable-next-line import/extensions
-// import { OracleJob } from "./protos/index.js";
-import { OracleJob } from "@switchboard-xyz/switchboard-api";
 import assert from "assert";
 import Big from "big.js";
 import * as crypto from "crypto";
+import { OracleJob } from "./protos";
 
 /**
  * Switchboard Devnet Program ID
@@ -1872,9 +1870,7 @@ export class PermissionAccount {
       .transaction();
   }
 
-  async setVoterWeightTx(
-    params: PermissionSetVoterWeightParams,
-  ) {
+  async setVoterWeightTx(params: PermissionSetVoterWeightParams) {
     const permissionData = await this.loadData();
     const oracleData = await this.program.account.oracleAccountData.fetch(
       permissionData.grantee
@@ -1888,13 +1884,11 @@ export class PermissionAccount {
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
     );
-    let psData = await programStateAccount.loadData();
+    const psData = await programStateAccount.loadData();
 
-    let [addinState, _] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('state'),
-      ],
-      params.addinProgram.programId,
+    const [addinState, _] = await PublicKey.findProgramAddress(
+      [Buffer.from("state")],
+      params.addinProgram.programId
     );
 
     const [realmSpawnRecord] = anchor.utils.publicKey.findProgramAddressSync(
@@ -1917,7 +1911,7 @@ export class PermissionAccount {
       params.govProgram
     );
 
-      return await params.addinProgram.methods
+    return params.addinProgram.methods
       .permissionSetVoterWeight()
       .accounts({
         permission: this.publicKey,
