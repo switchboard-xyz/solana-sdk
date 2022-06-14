@@ -43,6 +43,7 @@ files=(
 "$outputPath/switchboard-oracle/values.yaml"
 )
 
+## Validate env variables
 if [[ -z "${CLUSTER}" ]]; then
   echo "failed to set CLUSTER"
   exit 1
@@ -58,7 +59,7 @@ if [[ -z "${WS_URL}" ]]; then
   WS_URL=""
 fi
 if [[ -z "${BACKUP_MAINNET_RPC}" ]]; then
-  BACKUP_MAINNET_RPC="https://api.mainnet-beta.solana.com"
+  BACKUP_MAINNET_RPC="https://solana-api.projectserum.com"
 fi
 if [[ -z "${ORACLE_KEY}" ]]; then
   echo "failed to set ORACLE_KEY"
@@ -66,6 +67,9 @@ if [[ -z "${ORACLE_KEY}" ]]; then
 fi
 if [[ -z "${HEARTBEAT_INTERVAL}" ]]; then
   HEARTBEAT_INTERVAL="15"
+fi
+if [[ -z "${UNWRAP_STAKE_THRESHOLD}" ]]; then
+  UNWRAP_STAKE_THRESHOLD=""
 fi
 if [[ -z "${GOOGLE_PAYER_SECRET_PATH}" ]]; then
   echo "failed to set GOOGLE_PAYER_SECRET_PATH"
@@ -106,12 +110,24 @@ elif [[ "$METRICS_EXPORTER" != "prometheus" && "$CLUSTER" != "gcp" && "$CLUSTER"
   echo "invalid METRICS_EXPORTER ($METRICS_EXPORTER) - [prometheus, gcp, or opentelemetry-collector]"
   exit 1
 fi
+if [[ -z "${SBV2_NODE_IMAGE}" ]]; then
+  SBV2_NODE_IMAGE="${SBV2_NODE_IMAGE:-dev-v2-06-08-22}"
+fi
 
+## Substitute ENV values
 for f in "${files[@]}"; do
+  UNWRAP_STAKE_THRESHOLD="$UNWRAP_STAKE_THRESHOLD" \
+  NONCE_QUEUE_SIZE="$NONCE_QUEUE_SIZE" \
+  NONCE_FLAG="$NONCE_FLAG" \
   PAGERDUTY_EVENT_KEY="$PAGERDUTY_EVENT_KEY" \
   METRICS_EXPORTER="$METRICS_EXPORTER" \
-  GRAFANA_ADMIN_PASSWORD="$GRAFANA_ADMIN_PASSWORD"\
-  envsubst '$CLUSTER $RPC_URL $WS_URL $BACKUP_MAINNET_RPC $ORACLE_KEY $HEARTBEAT_INTERVAL $GOOGLE_PAYER_SECRET_PATH $GCP_CONFIG_BUCKET $SERVICE_ACCOUNT_BASE64 $EXTERNAL_IP $PAGERDUTY_EVENT_KEY $GRAFANA_HOSTNAME $GRAFANA_ADMIN_PASSWORD $GRAFANA_TLS_CRT $GRAFANA_TLS_KEY $METRICS_EXPORTER' < "$f" \
+  GRAFANA_ADMIN_PASSWORD="$GRAFANA_ADMIN_PASSWORD" \
+  HEARTBEAT_INTERVAL="$HEARTBEAT_INTERVAL" \
+  SBV2_NODE_IMAGE="$SBV2_NODE_IMAGE" \
+  WS_URL="$WS_URL" \
+  GCP_CONFIG_BUCKET="$GCP_CONFIG_BUCKET" \
+  BACKUP_MAINNET_RPC="$BACKUP_MAINNET_RPC" \
+  envsubst '$UNWRAP_STAKE_THRESHOLD $CLUSTER $RPC_URL $WS_URL $BACKUP_MAINNET_RPC $ORACLE_KEY $HEARTBEAT_INTERVAL $GOOGLE_PAYER_SECRET_PATH $GCP_CONFIG_BUCKET $SERVICE_ACCOUNT_BASE64 $EXTERNAL_IP $PAGERDUTY_EVENT_KEY $GRAFANA_HOSTNAME $GRAFANA_ADMIN_PASSWORD $GRAFANA_TLS_CRT $GRAFANA_TLS_KEY $METRICS_EXPORTER $SBV2_NODE_IMAGE' < "$f" \
   | tee "$outputPath/tmp.txt" \
   > /dev/null ;
   cat "$outputPath/tmp.txt" > "$f";
