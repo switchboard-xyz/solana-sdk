@@ -87,6 +87,11 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      algolia: {
+        appId: "XO84KDTPTB",
+        apiKey: "bc1bca7d93098a0d241c000cd8e900aa",
+        indexName: "switchboard",
+      },
       colorMode: {
         disableSwitch: false,
         respectPrefersColorScheme: true,
@@ -118,10 +123,10 @@ const config = {
         },
         items: [
           // Need to bring in Algolia DocSearch https://docsearch.algolia.com/
-          // {
-          //   type: "search",
-          //   position: "right",
-          // },
+          {
+            type: "search",
+            position: "right",
+          },
           {
             type: "doc",
             docId: "introduction",
@@ -168,13 +173,13 @@ const config = {
           },
           {
             to: "https://publish.switchboard.xyz/",
-            label: "Publish",
-            position: "left",
+            label: "Publisher",
+            position: "right",
           },
           {
             to: "https://switchboardxyz.medium.com/",
             label: "Blog",
-            position: "left",
+            position: "right",
           },
           {
             type: "localeDropdown",
