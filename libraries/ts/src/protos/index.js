@@ -8780,8 +8780,7 @@
              * Properties of a CacheTask.
              * @memberof OracleJob
              * @interface ICacheTask
-             * @property {string|null} [name] CacheTask name
-             * @property {OracleJob.CacheTask.Method|null} [method] CacheTask method
+             * @property {Array.<OracleJob.CacheTask.ICacheItem>|null} [cacheItems] CacheTask cacheItems
              */
     
             /**
@@ -8793,6 +8792,7 @@
              * @param {OracleJob.ICacheTask=} [properties] Properties to set
              */
             function CacheTask(properties) {
+                this.cacheItems = [];
                 if (properties)
                     for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
@@ -8800,20 +8800,12 @@
             }
     
             /**
-             * CacheTask name.
-             * @member {string} name
+             * CacheTask cacheItems.
+             * @member {Array.<OracleJob.CacheTask.ICacheItem>} cacheItems
              * @memberof OracleJob.CacheTask
              * @instance
              */
-            CacheTask.prototype.name = "";
-    
-            /**
-             * CacheTask method.
-             * @member {OracleJob.CacheTask.Method} method
-             * @memberof OracleJob.CacheTask
-             * @instance
-             */
-            CacheTask.prototype.method = 0;
+            CacheTask.prototype.cacheItems = $util.emptyArray;
     
             /**
              * Creates a new CacheTask instance using the specified properties.
@@ -8839,10 +8831,9 @@
             CacheTask.encode = function encode(message, writer) {
                 if (!writer)
                     writer = $Writer.create();
-                if (message.name != null && Object.hasOwnProperty.call(message, "name"))
-                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
-                if (message.method != null && Object.hasOwnProperty.call(message, "method"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.method);
+                if (message.cacheItems != null && message.cacheItems.length)
+                    for (var i = 0; i < message.cacheItems.length; ++i)
+                        $root.OracleJob.CacheTask.CacheItem.encode(message.cacheItems[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
                 return writer;
             };
     
@@ -8878,10 +8869,9 @@
                     var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1:
-                        message.name = reader.string();
-                        break;
-                    case 2:
-                        message.method = reader.int32();
+                        if (!(message.cacheItems && message.cacheItems.length))
+                            message.cacheItems = [];
+                        message.cacheItems.push($root.OracleJob.CacheTask.CacheItem.decode(reader, reader.uint32()));
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -8918,17 +8908,15 @@
             CacheTask.verify = function verify(message) {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
-                if (message.name != null && message.hasOwnProperty("name"))
-                    if (!$util.isString(message.name))
-                        return "name: string expected";
-                if (message.method != null && message.hasOwnProperty("method"))
-                    switch (message.method) {
-                    default:
-                        return "method: enum value expected";
-                    case 0:
-                    case 1:
-                        break;
+                if (message.cacheItems != null && message.hasOwnProperty("cacheItems")) {
+                    if (!Array.isArray(message.cacheItems))
+                        return "cacheItems: array expected";
+                    for (var i = 0; i < message.cacheItems.length; ++i) {
+                        var error = $root.OracleJob.CacheTask.CacheItem.verify(message.cacheItems[i]);
+                        if (error)
+                            return "cacheItems." + error;
                     }
+                }
                 return null;
             };
     
@@ -8944,17 +8932,15 @@
                 if (object instanceof $root.OracleJob.CacheTask)
                     return object;
                 var message = new $root.OracleJob.CacheTask();
-                if (object.name != null)
-                    message.name = String(object.name);
-                switch (object.method) {
-                case "METHOD_GET":
-                case 0:
-                    message.method = 0;
-                    break;
-                case "METHOD_SET":
-                case 1:
-                    message.method = 1;
-                    break;
+                if (object.cacheItems) {
+                    if (!Array.isArray(object.cacheItems))
+                        throw TypeError(".OracleJob.CacheTask.cacheItems: array expected");
+                    message.cacheItems = [];
+                    for (var i = 0; i < object.cacheItems.length; ++i) {
+                        if (typeof object.cacheItems[i] !== "object")
+                            throw TypeError(".OracleJob.CacheTask.cacheItems: object expected");
+                        message.cacheItems[i] = $root.OracleJob.CacheTask.CacheItem.fromObject(object.cacheItems[i]);
+                    }
                 }
                 return message;
             };
@@ -8972,14 +8958,13 @@
                 if (!options)
                     options = {};
                 var object = {};
-                if (options.defaults) {
-                    object.name = "";
-                    object.method = options.enums === String ? "METHOD_GET" : 0;
+                if (options.arrays || options.defaults)
+                    object.cacheItems = [];
+                if (message.cacheItems && message.cacheItems.length) {
+                    object.cacheItems = [];
+                    for (var j = 0; j < message.cacheItems.length; ++j)
+                        object.cacheItems[j] = $root.OracleJob.CacheTask.CacheItem.toObject(message.cacheItems[j], options);
                 }
-                if (message.name != null && message.hasOwnProperty("name"))
-                    object.name = message.name;
-                if (message.method != null && message.hasOwnProperty("method"))
-                    object.method = options.enums === String ? $root.OracleJob.CacheTask.Method[message.method] : message.method;
                 return object;
             };
     
@@ -8994,21 +8979,425 @@
                 return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
             };
     
-            /**
-             * Method enum.
-             * @name OracleJob.CacheTask.Method
-             * @enum {number}
-             * @property {number} METHOD_GET=0 METHOD_GET value
-             * @property {number} METHOD_SET=1 METHOD_SET value
-             */
-            CacheTask.Method = (function() {
-                var valuesById = {}, values = Object.create(valuesById);
-                values[valuesById[0] = "METHOD_GET"] = 0;
-                values[valuesById[1] = "METHOD_SET"] = 1;
-                return values;
+            CacheTask.CacheItem = (function() {
+    
+                /**
+                 * Properties of a CacheItem.
+                 * @memberof OracleJob.CacheTask
+                 * @interface ICacheItem
+                 * @property {string|null} [variableName] CacheItem variableName
+                 * @property {Array.<OracleJob.ITask>|null} [tasks] CacheItem tasks
+                 */
+    
+                /**
+                 * Constructs a new CacheItem.
+                 * @memberof OracleJob.CacheTask
+                 * @classdesc Represents a CacheItem.
+                 * @implements ICacheItem
+                 * @constructor
+                 * @param {OracleJob.CacheTask.ICacheItem=} [properties] Properties to set
+                 */
+                function CacheItem(properties) {
+                    this.tasks = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * CacheItem variableName.
+                 * @member {string} variableName
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @instance
+                 */
+                CacheItem.prototype.variableName = "";
+    
+                /**
+                 * CacheItem tasks.
+                 * @member {Array.<OracleJob.ITask>} tasks
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @instance
+                 */
+                CacheItem.prototype.tasks = $util.emptyArray;
+    
+                /**
+                 * Creates a new CacheItem instance using the specified properties.
+                 * @function create
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {OracleJob.CacheTask.ICacheItem=} [properties] Properties to set
+                 * @returns {OracleJob.CacheTask.CacheItem} CacheItem instance
+                 */
+                CacheItem.create = function create(properties) {
+                    return new CacheItem(properties);
+                };
+    
+                /**
+                 * Encodes the specified CacheItem message. Does not implicitly {@link OracleJob.CacheTask.CacheItem.verify|verify} messages.
+                 * @function encode
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {OracleJob.CacheTask.ICacheItem} message CacheItem message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                CacheItem.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.variableName != null && Object.hasOwnProperty.call(message, "variableName"))
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.variableName);
+                    if (message.tasks != null && message.tasks.length)
+                        for (var i = 0; i < message.tasks.length; ++i)
+                            $root.OracleJob.Task.encode(message.tasks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    return writer;
+                };
+    
+                /**
+                 * Encodes the specified CacheItem message, length delimited. Does not implicitly {@link OracleJob.CacheTask.CacheItem.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {OracleJob.CacheTask.ICacheItem} message CacheItem message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                CacheItem.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+    
+                /**
+                 * Decodes a CacheItem message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {OracleJob.CacheTask.CacheItem} CacheItem
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                CacheItem.decode = function decode(reader, length) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.CacheTask.CacheItem();
+                    while (reader.pos < end) {
+                        var tag = reader.uint32();
+                        switch (tag >>> 3) {
+                        case 1:
+                            message.variableName = reader.string();
+                            break;
+                        case 2:
+                            if (!(message.tasks && message.tasks.length))
+                                message.tasks = [];
+                            message.tasks.push($root.OracleJob.Task.decode(reader, reader.uint32()));
+                            break;
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Decodes a CacheItem message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {OracleJob.CacheTask.CacheItem} CacheItem
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                CacheItem.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+    
+                /**
+                 * Verifies a CacheItem message.
+                 * @function verify
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                CacheItem.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.variableName != null && message.hasOwnProperty("variableName"))
+                        if (!$util.isString(message.variableName))
+                            return "variableName: string expected";
+                    if (message.tasks != null && message.hasOwnProperty("tasks")) {
+                        if (!Array.isArray(message.tasks))
+                            return "tasks: array expected";
+                        for (var i = 0; i < message.tasks.length; ++i) {
+                            var error = $root.OracleJob.Task.verify(message.tasks[i]);
+                            if (error)
+                                return "tasks." + error;
+                        }
+                    }
+                    return null;
+                };
+    
+                /**
+                 * Creates a CacheItem message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {OracleJob.CacheTask.CacheItem} CacheItem
+                 */
+                CacheItem.fromObject = function fromObject(object) {
+                    if (object instanceof $root.OracleJob.CacheTask.CacheItem)
+                        return object;
+                    var message = new $root.OracleJob.CacheTask.CacheItem();
+                    if (object.variableName != null)
+                        message.variableName = String(object.variableName);
+                    if (object.tasks) {
+                        if (!Array.isArray(object.tasks))
+                            throw TypeError(".OracleJob.CacheTask.CacheItem.tasks: array expected");
+                        message.tasks = [];
+                        for (var i = 0; i < object.tasks.length; ++i) {
+                            if (typeof object.tasks[i] !== "object")
+                                throw TypeError(".OracleJob.CacheTask.CacheItem.tasks: object expected");
+                            message.tasks[i] = $root.OracleJob.Task.fromObject(object.tasks[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a CacheItem message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @static
+                 * @param {OracleJob.CacheTask.CacheItem} message CacheItem
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                CacheItem.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.tasks = [];
+                    if (options.defaults)
+                        object.variableName = "";
+                    if (message.variableName != null && message.hasOwnProperty("variableName"))
+                        object.variableName = message.variableName;
+                    if (message.tasks && message.tasks.length) {
+                        object.tasks = [];
+                        for (var j = 0; j < message.tasks.length; ++j)
+                            object.tasks[j] = $root.OracleJob.Task.toObject(message.tasks[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this CacheItem to JSON.
+                 * @function toJSON
+                 * @memberof OracleJob.CacheTask.CacheItem
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                CacheItem.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                return CacheItem;
             })();
     
             return CacheTask;
+        })();
+    
+        OracleJob.CacheFetchTask = (function() {
+    
+            /**
+             * Properties of a CacheFetchTask.
+             * @memberof OracleJob
+             * @interface ICacheFetchTask
+             * @property {string|null} [variableName] CacheFetchTask variableName
+             */
+    
+            /**
+             * Constructs a new CacheFetchTask.
+             * @memberof OracleJob
+             * @classdesc Represents a CacheFetchTask.
+             * @implements ICacheFetchTask
+             * @constructor
+             * @param {OracleJob.ICacheFetchTask=} [properties] Properties to set
+             */
+            function CacheFetchTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * CacheFetchTask variableName.
+             * @member {string} variableName
+             * @memberof OracleJob.CacheFetchTask
+             * @instance
+             */
+            CacheFetchTask.prototype.variableName = "";
+    
+            /**
+             * Creates a new CacheFetchTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {OracleJob.ICacheFetchTask=} [properties] Properties to set
+             * @returns {OracleJob.CacheFetchTask} CacheFetchTask instance
+             */
+            CacheFetchTask.create = function create(properties) {
+                return new CacheFetchTask(properties);
+            };
+    
+            /**
+             * Encodes the specified CacheFetchTask message. Does not implicitly {@link OracleJob.CacheFetchTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {OracleJob.ICacheFetchTask} message CacheFetchTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CacheFetchTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.variableName != null && Object.hasOwnProperty.call(message, "variableName"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.variableName);
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified CacheFetchTask message, length delimited. Does not implicitly {@link OracleJob.CacheFetchTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {OracleJob.ICacheFetchTask} message CacheFetchTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CacheFetchTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a CacheFetchTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CacheFetchTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.CacheFetchTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.variableName = reader.string();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a CacheFetchTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CacheFetchTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a CacheFetchTask message.
+             * @function verify
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            CacheFetchTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.variableName != null && message.hasOwnProperty("variableName"))
+                    if (!$util.isString(message.variableName))
+                        return "variableName: string expected";
+                return null;
+            };
+    
+            /**
+             * Creates a CacheFetchTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
+             */
+            CacheFetchTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.CacheFetchTask)
+                    return object;
+                var message = new $root.OracleJob.CacheFetchTask();
+                if (object.variableName != null)
+                    message.variableName = String(object.variableName);
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a CacheFetchTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.CacheFetchTask
+             * @static
+             * @param {OracleJob.CacheFetchTask} message CacheFetchTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            CacheFetchTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults)
+                    object.variableName = "";
+                if (message.variableName != null && message.hasOwnProperty("variableName"))
+                    object.variableName = message.variableName;
+                return object;
+            };
+    
+            /**
+             * Converts this CacheFetchTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.CacheFetchTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            CacheFetchTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return CacheFetchTask;
         })();
     
         OracleJob.SysclockOffsetTask = (function() {
