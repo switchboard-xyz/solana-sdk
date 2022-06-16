@@ -1779,6 +1779,7 @@
              * @interface IValueTask
              * @property {number|null} [value] ValueTask value
              * @property {string|null} [aggregatorPubkey] ValueTask aggregatorPubkey
+             * @property {string|null} [big] ValueTask big
              */
     
             /**
@@ -1812,17 +1813,25 @@
              */
             ValueTask.prototype.aggregatorPubkey = null;
     
+            /**
+             * ValueTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.ValueTask
+             * @instance
+             */
+            ValueTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * ValueTask Value.
-             * @member {"value"|"aggregatorPubkey"|undefined} Value
+             * @member {"value"|"aggregatorPubkey"|"big"|undefined} Value
              * @memberof OracleJob.ValueTask
              * @instance
              */
             Object.defineProperty(ValueTask.prototype, "Value", {
-                get: $util.oneOfGetter($oneOfFields = ["value", "aggregatorPubkey"]),
+                get: $util.oneOfGetter($oneOfFields = ["value", "aggregatorPubkey", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -1854,6 +1863,8 @@
                     writer.uint32(/* id 1, wireType 1 =*/9).double(message.value);
                 if (message.aggregatorPubkey != null && Object.hasOwnProperty.call(message, "aggregatorPubkey"))
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 3, wireType 2 =*/26).string(message.big);
                 return writer;
             };
     
@@ -1893,6 +1904,9 @@
                         break;
                     case 2:
                         message.aggregatorPubkey = reader.string();
+                        break;
+                    case 3:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -1942,6 +1956,13 @@
                     if (!$util.isString(message.aggregatorPubkey))
                         return "aggregatorPubkey: string expected";
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Value === 1)
+                        return "Value: multiple values";
+                    properties.Value = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -1961,6 +1982,8 @@
                     message.value = Number(object.value);
                 if (object.aggregatorPubkey != null)
                     message.aggregatorPubkey = String(object.aggregatorPubkey);
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -1986,6 +2009,11 @@
                     object.aggregatorPubkey = message.aggregatorPubkey;
                     if (options.oneofs)
                         object.Value = "aggregatorPubkey";
+                }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Value = "big";
                 }
                 return object;
             };
@@ -2519,6 +2547,7 @@
              * @property {number|null} [scalar] DivideTask scalar
              * @property {string|null} [aggregatorPubkey] DivideTask aggregatorPubkey
              * @property {IOracleJob|null} [job] DivideTask job
+             * @property {string|null} [big] DivideTask big
              */
     
             /**
@@ -2560,17 +2589,25 @@
              */
             DivideTask.prototype.job = null;
     
+            /**
+             * DivideTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.DivideTask
+             * @instance
+             */
+            DivideTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * DivideTask Denominator.
-             * @member {"scalar"|"aggregatorPubkey"|"job"|undefined} Denominator
+             * @member {"scalar"|"aggregatorPubkey"|"job"|"big"|undefined} Denominator
              * @memberof OracleJob.DivideTask
              * @instance
              */
             Object.defineProperty(DivideTask.prototype, "Denominator", {
-                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job"]),
+                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -2604,6 +2641,8 @@
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
                 if (message.job != null && Object.hasOwnProperty.call(message, "job"))
                     $root.OracleJob.encode(message.job, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 4, wireType 2 =*/34).string(message.big);
                 return writer;
             };
     
@@ -2646,6 +2685,9 @@
                         break;
                     case 3:
                         message.job = $root.OracleJob.decode(reader, reader.uint32());
+                        break;
+                    case 4:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -2705,6 +2747,13 @@
                             return "job." + error;
                     }
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Denominator === 1)
+                        return "Denominator: multiple values";
+                    properties.Denominator = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -2729,6 +2778,8 @@
                         throw TypeError(".OracleJob.DivideTask.job: object expected");
                     message.job = $root.OracleJob.fromObject(object.job);
                 }
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -2760,6 +2811,11 @@
                     if (options.oneofs)
                         object.Denominator = "job";
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Denominator = "big";
+                }
                 return object;
             };
     
@@ -2786,6 +2842,7 @@
              * @property {number|null} [scalar] MultiplyTask scalar
              * @property {string|null} [aggregatorPubkey] MultiplyTask aggregatorPubkey
              * @property {IOracleJob|null} [job] MultiplyTask job
+             * @property {string|null} [big] MultiplyTask big
              */
     
             /**
@@ -2827,17 +2884,25 @@
              */
             MultiplyTask.prototype.job = null;
     
+            /**
+             * MultiplyTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.MultiplyTask
+             * @instance
+             */
+            MultiplyTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * MultiplyTask Multiple.
-             * @member {"scalar"|"aggregatorPubkey"|"job"|undefined} Multiple
+             * @member {"scalar"|"aggregatorPubkey"|"job"|"big"|undefined} Multiple
              * @memberof OracleJob.MultiplyTask
              * @instance
              */
             Object.defineProperty(MultiplyTask.prototype, "Multiple", {
-                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job"]),
+                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -2871,6 +2936,8 @@
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
                 if (message.job != null && Object.hasOwnProperty.call(message, "job"))
                     $root.OracleJob.encode(message.job, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 4, wireType 2 =*/34).string(message.big);
                 return writer;
             };
     
@@ -2913,6 +2980,9 @@
                         break;
                     case 3:
                         message.job = $root.OracleJob.decode(reader, reader.uint32());
+                        break;
+                    case 4:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -2972,6 +3042,13 @@
                             return "job." + error;
                     }
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Multiple === 1)
+                        return "Multiple: multiple values";
+                    properties.Multiple = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -2996,6 +3073,8 @@
                         throw TypeError(".OracleJob.MultiplyTask.job: object expected");
                     message.job = $root.OracleJob.fromObject(object.job);
                 }
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -3027,6 +3106,11 @@
                     if (options.oneofs)
                         object.Multiple = "job";
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Multiple = "big";
+                }
                 return object;
             };
     
@@ -3053,6 +3137,7 @@
              * @property {number|null} [scalar] AddTask scalar
              * @property {string|null} [aggregatorPubkey] AddTask aggregatorPubkey
              * @property {IOracleJob|null} [job] AddTask job
+             * @property {string|null} [big] AddTask big
              */
     
             /**
@@ -3094,17 +3179,25 @@
              */
             AddTask.prototype.job = null;
     
+            /**
+             * AddTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.AddTask
+             * @instance
+             */
+            AddTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * AddTask Addition.
-             * @member {"scalar"|"aggregatorPubkey"|"job"|undefined} Addition
+             * @member {"scalar"|"aggregatorPubkey"|"job"|"big"|undefined} Addition
              * @memberof OracleJob.AddTask
              * @instance
              */
             Object.defineProperty(AddTask.prototype, "Addition", {
-                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job"]),
+                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -3138,6 +3231,8 @@
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
                 if (message.job != null && Object.hasOwnProperty.call(message, "job"))
                     $root.OracleJob.encode(message.job, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 4, wireType 2 =*/34).string(message.big);
                 return writer;
             };
     
@@ -3180,6 +3275,9 @@
                         break;
                     case 3:
                         message.job = $root.OracleJob.decode(reader, reader.uint32());
+                        break;
+                    case 4:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -3239,6 +3337,13 @@
                             return "job." + error;
                     }
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Addition === 1)
+                        return "Addition: multiple values";
+                    properties.Addition = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -3263,6 +3368,8 @@
                         throw TypeError(".OracleJob.AddTask.job: object expected");
                     message.job = $root.OracleJob.fromObject(object.job);
                 }
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -3294,6 +3401,11 @@
                     if (options.oneofs)
                         object.Addition = "job";
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Addition = "big";
+                }
                 return object;
             };
     
@@ -3320,6 +3432,7 @@
              * @property {number|null} [scalar] SubtractTask scalar
              * @property {string|null} [aggregatorPubkey] SubtractTask aggregatorPubkey
              * @property {IOracleJob|null} [job] SubtractTask job
+             * @property {string|null} [big] SubtractTask big
              */
     
             /**
@@ -3361,17 +3474,25 @@
              */
             SubtractTask.prototype.job = null;
     
+            /**
+             * SubtractTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.SubtractTask
+             * @instance
+             */
+            SubtractTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * SubtractTask Subtraction.
-             * @member {"scalar"|"aggregatorPubkey"|"job"|undefined} Subtraction
+             * @member {"scalar"|"aggregatorPubkey"|"job"|"big"|undefined} Subtraction
              * @memberof OracleJob.SubtractTask
              * @instance
              */
             Object.defineProperty(SubtractTask.prototype, "Subtraction", {
-                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job"]),
+                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "job", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -3405,6 +3526,8 @@
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
                 if (message.job != null && Object.hasOwnProperty.call(message, "job"))
                     $root.OracleJob.encode(message.job, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 4, wireType 2 =*/34).string(message.big);
                 return writer;
             };
     
@@ -3447,6 +3570,9 @@
                         break;
                     case 3:
                         message.job = $root.OracleJob.decode(reader, reader.uint32());
+                        break;
+                    case 4:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -3506,6 +3632,13 @@
                             return "job." + error;
                     }
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Subtraction === 1)
+                        return "Subtraction: multiple values";
+                    properties.Subtraction = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -3530,6 +3663,8 @@
                         throw TypeError(".OracleJob.SubtractTask.job: object expected");
                     message.job = $root.OracleJob.fromObject(object.job);
                 }
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -3560,6 +3695,11 @@
                     object.job = $root.OracleJob.toObject(message.job, options);
                     if (options.oneofs)
                         object.Subtraction = "job";
+                }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Subtraction = "big";
                 }
                 return object;
             };
@@ -5228,6 +5368,7 @@
              * @interface IPowTask
              * @property {number|null} [scalar] PowTask scalar
              * @property {string|null} [aggregatorPubkey] PowTask aggregatorPubkey
+             * @property {string|null} [big] PowTask big
              */
     
             /**
@@ -5261,17 +5402,25 @@
              */
             PowTask.prototype.aggregatorPubkey = null;
     
+            /**
+             * PowTask big.
+             * @member {string|null|undefined} big
+             * @memberof OracleJob.PowTask
+             * @instance
+             */
+            PowTask.prototype.big = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * PowTask Exponent.
-             * @member {"scalar"|"aggregatorPubkey"|undefined} Exponent
+             * @member {"scalar"|"aggregatorPubkey"|"big"|undefined} Exponent
              * @memberof OracleJob.PowTask
              * @instance
              */
             Object.defineProperty(PowTask.prototype, "Exponent", {
-                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey"]),
+                get: $util.oneOfGetter($oneOfFields = ["scalar", "aggregatorPubkey", "big"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -5303,6 +5452,8 @@
                     writer.uint32(/* id 1, wireType 1 =*/9).double(message.scalar);
                 if (message.aggregatorPubkey != null && Object.hasOwnProperty.call(message, "aggregatorPubkey"))
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.aggregatorPubkey);
+                if (message.big != null && Object.hasOwnProperty.call(message, "big"))
+                    writer.uint32(/* id 3, wireType 2 =*/26).string(message.big);
                 return writer;
             };
     
@@ -5342,6 +5493,9 @@
                         break;
                     case 2:
                         message.aggregatorPubkey = reader.string();
+                        break;
+                    case 3:
+                        message.big = reader.string();
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -5391,6 +5545,13 @@
                     if (!$util.isString(message.aggregatorPubkey))
                         return "aggregatorPubkey: string expected";
                 }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    if (properties.Exponent === 1)
+                        return "Exponent: multiple values";
+                    properties.Exponent = 1;
+                    if (!$util.isString(message.big))
+                        return "big: string expected";
+                }
                 return null;
             };
     
@@ -5410,6 +5571,8 @@
                     message.scalar = Number(object.scalar);
                 if (object.aggregatorPubkey != null)
                     message.aggregatorPubkey = String(object.aggregatorPubkey);
+                if (object.big != null)
+                    message.big = String(object.big);
                 return message;
             };
     
@@ -5435,6 +5598,11 @@
                     object.aggregatorPubkey = message.aggregatorPubkey;
                     if (options.oneofs)
                         object.Exponent = "aggregatorPubkey";
+                }
+                if (message.big != null && message.hasOwnProperty("big")) {
+                    object.big = message.big;
+                    if (options.oneofs)
+                        object.Exponent = "big";
                 }
                 return object;
             };
@@ -6914,458 +7082,6 @@
             return AnchorFetchTask;
         })();
     
-        OracleJob.DefiKingdomsTask = (function() {
-    
-            /**
-             * Properties of a DefiKingdomsTask.
-             * @memberof OracleJob
-             * @interface IDefiKingdomsTask
-             * @property {string|null} [provider] DefiKingdomsTask provider
-             * @property {OracleJob.DefiKingdomsTask.IToken|null} [inToken] DefiKingdomsTask inToken
-             * @property {OracleJob.DefiKingdomsTask.IToken|null} [outToken] DefiKingdomsTask outToken
-             */
-    
-            /**
-             * Constructs a new DefiKingdomsTask.
-             * @memberof OracleJob
-             * @classdesc Represents a DefiKingdomsTask.
-             * @implements IDefiKingdomsTask
-             * @constructor
-             * @param {OracleJob.IDefiKingdomsTask=} [properties] Properties to set
-             */
-            function DefiKingdomsTask(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-    
-            /**
-             * DefiKingdomsTask provider.
-             * @member {string} provider
-             * @memberof OracleJob.DefiKingdomsTask
-             * @instance
-             */
-            DefiKingdomsTask.prototype.provider = "";
-    
-            /**
-             * DefiKingdomsTask inToken.
-             * @member {OracleJob.DefiKingdomsTask.IToken|null|undefined} inToken
-             * @memberof OracleJob.DefiKingdomsTask
-             * @instance
-             */
-            DefiKingdomsTask.prototype.inToken = null;
-    
-            /**
-             * DefiKingdomsTask outToken.
-             * @member {OracleJob.DefiKingdomsTask.IToken|null|undefined} outToken
-             * @memberof OracleJob.DefiKingdomsTask
-             * @instance
-             */
-            DefiKingdomsTask.prototype.outToken = null;
-    
-            /**
-             * Creates a new DefiKingdomsTask instance using the specified properties.
-             * @function create
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {OracleJob.IDefiKingdomsTask=} [properties] Properties to set
-             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask instance
-             */
-            DefiKingdomsTask.create = function create(properties) {
-                return new DefiKingdomsTask(properties);
-            };
-    
-            /**
-             * Encodes the specified DefiKingdomsTask message. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
-             * @function encode
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {OracleJob.IDefiKingdomsTask} message DefiKingdomsTask message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            DefiKingdomsTask.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.provider != null && Object.hasOwnProperty.call(message, "provider"))
-                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.provider);
-                if (message.inToken != null && Object.hasOwnProperty.call(message, "inToken"))
-                    $root.OracleJob.DefiKingdomsTask.Token.encode(message.inToken, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
-                if (message.outToken != null && Object.hasOwnProperty.call(message, "outToken"))
-                    $root.OracleJob.DefiKingdomsTask.Token.encode(message.outToken, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
-                return writer;
-            };
-    
-            /**
-             * Encodes the specified DefiKingdomsTask message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {OracleJob.IDefiKingdomsTask} message DefiKingdomsTask message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            DefiKingdomsTask.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-    
-            /**
-             * Decodes a DefiKingdomsTask message from the specified reader or buffer.
-             * @function decode
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            DefiKingdomsTask.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.DefiKingdomsTask();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1:
-                        message.provider = reader.string();
-                        break;
-                    case 2:
-                        message.inToken = $root.OracleJob.DefiKingdomsTask.Token.decode(reader, reader.uint32());
-                        break;
-                    case 3:
-                        message.outToken = $root.OracleJob.DefiKingdomsTask.Token.decode(reader, reader.uint32());
-                        break;
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-    
-            /**
-             * Decodes a DefiKingdomsTask message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            DefiKingdomsTask.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-    
-            /**
-             * Verifies a DefiKingdomsTask message.
-             * @function verify
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            DefiKingdomsTask.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.provider != null && message.hasOwnProperty("provider"))
-                    if (!$util.isString(message.provider))
-                        return "provider: string expected";
-                if (message.inToken != null && message.hasOwnProperty("inToken")) {
-                    var error = $root.OracleJob.DefiKingdomsTask.Token.verify(message.inToken);
-                    if (error)
-                        return "inToken." + error;
-                }
-                if (message.outToken != null && message.hasOwnProperty("outToken")) {
-                    var error = $root.OracleJob.DefiKingdomsTask.Token.verify(message.outToken);
-                    if (error)
-                        return "outToken." + error;
-                }
-                return null;
-            };
-    
-            /**
-             * Creates a DefiKingdomsTask message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
-             */
-            DefiKingdomsTask.fromObject = function fromObject(object) {
-                if (object instanceof $root.OracleJob.DefiKingdomsTask)
-                    return object;
-                var message = new $root.OracleJob.DefiKingdomsTask();
-                if (object.provider != null)
-                    message.provider = String(object.provider);
-                if (object.inToken != null) {
-                    if (typeof object.inToken !== "object")
-                        throw TypeError(".OracleJob.DefiKingdomsTask.inToken: object expected");
-                    message.inToken = $root.OracleJob.DefiKingdomsTask.Token.fromObject(object.inToken);
-                }
-                if (object.outToken != null) {
-                    if (typeof object.outToken !== "object")
-                        throw TypeError(".OracleJob.DefiKingdomsTask.outToken: object expected");
-                    message.outToken = $root.OracleJob.DefiKingdomsTask.Token.fromObject(object.outToken);
-                }
-                return message;
-            };
-    
-            /**
-             * Creates a plain object from a DefiKingdomsTask message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof OracleJob.DefiKingdomsTask
-             * @static
-             * @param {OracleJob.DefiKingdomsTask} message DefiKingdomsTask
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            DefiKingdomsTask.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults) {
-                    object.provider = "";
-                    object.inToken = null;
-                    object.outToken = null;
-                }
-                if (message.provider != null && message.hasOwnProperty("provider"))
-                    object.provider = message.provider;
-                if (message.inToken != null && message.hasOwnProperty("inToken"))
-                    object.inToken = $root.OracleJob.DefiKingdomsTask.Token.toObject(message.inToken, options);
-                if (message.outToken != null && message.hasOwnProperty("outToken"))
-                    object.outToken = $root.OracleJob.DefiKingdomsTask.Token.toObject(message.outToken, options);
-                return object;
-            };
-    
-            /**
-             * Converts this DefiKingdomsTask to JSON.
-             * @function toJSON
-             * @memberof OracleJob.DefiKingdomsTask
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            DefiKingdomsTask.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-    
-            DefiKingdomsTask.Token = (function() {
-    
-                /**
-                 * Properties of a Token.
-                 * @memberof OracleJob.DefiKingdomsTask
-                 * @interface IToken
-                 * @property {string|null} [address] Token address
-                 * @property {number|null} [decimals] Token decimals
-                 */
-    
-                /**
-                 * Constructs a new Token.
-                 * @memberof OracleJob.DefiKingdomsTask
-                 * @classdesc Represents a Token.
-                 * @implements IToken
-                 * @constructor
-                 * @param {OracleJob.DefiKingdomsTask.IToken=} [properties] Properties to set
-                 */
-                function Token(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Token address.
-                 * @member {string} address
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @instance
-                 */
-                Token.prototype.address = "";
-    
-                /**
-                 * Token decimals.
-                 * @member {number} decimals
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @instance
-                 */
-                Token.prototype.decimals = 0;
-    
-                /**
-                 * Creates a new Token instance using the specified properties.
-                 * @function create
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {OracleJob.DefiKingdomsTask.IToken=} [properties] Properties to set
-                 * @returns {OracleJob.DefiKingdomsTask.Token} Token instance
-                 */
-                Token.create = function create(properties) {
-                    return new Token(properties);
-                };
-    
-                /**
-                 * Encodes the specified Token message. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
-                 * @function encode
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {OracleJob.DefiKingdomsTask.IToken} message Token message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Token.encode = function encode(message, writer) {
-                    if (!writer)
-                        writer = $Writer.create();
-                    if (message.address != null && Object.hasOwnProperty.call(message, "address"))
-                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
-                    if (message.decimals != null && Object.hasOwnProperty.call(message, "decimals"))
-                        writer.uint32(/* id 2, wireType 0 =*/16).int32(message.decimals);
-                    return writer;
-                };
-    
-                /**
-                 * Encodes the specified Token message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
-                 * @function encodeDelimited
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {OracleJob.DefiKingdomsTask.IToken} message Token message or plain object to encode
-                 * @param {$protobuf.Writer} [writer] Writer to encode to
-                 * @returns {$protobuf.Writer} Writer
-                 */
-                Token.encodeDelimited = function encodeDelimited(message, writer) {
-                    return this.encode(message, writer).ldelim();
-                };
-    
-                /**
-                 * Decodes a Token message from the specified reader or buffer.
-                 * @function decode
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @param {number} [length] Message length if known beforehand
-                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Token.decode = function decode(reader, length) {
-                    if (!(reader instanceof $Reader))
-                        reader = $Reader.create(reader);
-                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.DefiKingdomsTask.Token();
-                    while (reader.pos < end) {
-                        var tag = reader.uint32();
-                        switch (tag >>> 3) {
-                        case 1:
-                            message.address = reader.string();
-                            break;
-                        case 2:
-                            message.decimals = reader.int32();
-                            break;
-                        default:
-                            reader.skipType(tag & 7);
-                            break;
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Decodes a Token message from the specified reader or buffer, length delimited.
-                 * @function decodeDelimited
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
-                 * @throws {Error} If the payload is not a reader or valid buffer
-                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
-                 */
-                Token.decodeDelimited = function decodeDelimited(reader) {
-                    if (!(reader instanceof $Reader))
-                        reader = new $Reader(reader);
-                    return this.decode(reader, reader.uint32());
-                };
-    
-                /**
-                 * Verifies a Token message.
-                 * @function verify
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {Object.<string,*>} message Plain object to verify
-                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
-                 */
-                Token.verify = function verify(message) {
-                    if (typeof message !== "object" || message === null)
-                        return "object expected";
-                    if (message.address != null && message.hasOwnProperty("address"))
-                        if (!$util.isString(message.address))
-                            return "address: string expected";
-                    if (message.decimals != null && message.hasOwnProperty("decimals"))
-                        if (!$util.isInteger(message.decimals))
-                            return "decimals: integer expected";
-                    return null;
-                };
-    
-                /**
-                 * Creates a Token message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
-                 */
-                Token.fromObject = function fromObject(object) {
-                    if (object instanceof $root.OracleJob.DefiKingdomsTask.Token)
-                        return object;
-                    var message = new $root.OracleJob.DefiKingdomsTask.Token();
-                    if (object.address != null)
-                        message.address = String(object.address);
-                    if (object.decimals != null)
-                        message.decimals = object.decimals | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Token message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @static
-                 * @param {OracleJob.DefiKingdomsTask.Token} message Token
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Token.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.address = "";
-                        object.decimals = 0;
-                    }
-                    if (message.address != null && message.hasOwnProperty("address"))
-                        object.address = message.address;
-                    if (message.decimals != null && message.hasOwnProperty("decimals"))
-                        object.decimals = message.decimals;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Token to JSON.
-                 * @function toJSON
-                 * @memberof OracleJob.DefiKingdomsTask.Token
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Token.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                return Token;
-            })();
-    
-            return DefiKingdomsTask;
-        })();
-    
         OracleJob.TpsTask = (function() {
     
             /**
@@ -7944,6 +7660,458 @@
             };
     
             return SplTokenParseTask;
+        })();
+    
+        OracleJob.DefiKingdomsTask = (function() {
+    
+            /**
+             * Properties of a DefiKingdomsTask.
+             * @memberof OracleJob
+             * @interface IDefiKingdomsTask
+             * @property {string|null} [provider] DefiKingdomsTask provider
+             * @property {OracleJob.DefiKingdomsTask.IToken|null} [inToken] DefiKingdomsTask inToken
+             * @property {OracleJob.DefiKingdomsTask.IToken|null} [outToken] DefiKingdomsTask outToken
+             */
+    
+            /**
+             * Constructs a new DefiKingdomsTask.
+             * @memberof OracleJob
+             * @classdesc Represents a DefiKingdomsTask.
+             * @implements IDefiKingdomsTask
+             * @constructor
+             * @param {OracleJob.IDefiKingdomsTask=} [properties] Properties to set
+             */
+            function DefiKingdomsTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * DefiKingdomsTask provider.
+             * @member {string} provider
+             * @memberof OracleJob.DefiKingdomsTask
+             * @instance
+             */
+            DefiKingdomsTask.prototype.provider = "";
+    
+            /**
+             * DefiKingdomsTask inToken.
+             * @member {OracleJob.DefiKingdomsTask.IToken|null|undefined} inToken
+             * @memberof OracleJob.DefiKingdomsTask
+             * @instance
+             */
+            DefiKingdomsTask.prototype.inToken = null;
+    
+            /**
+             * DefiKingdomsTask outToken.
+             * @member {OracleJob.DefiKingdomsTask.IToken|null|undefined} outToken
+             * @memberof OracleJob.DefiKingdomsTask
+             * @instance
+             */
+            DefiKingdomsTask.prototype.outToken = null;
+    
+            /**
+             * Creates a new DefiKingdomsTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {OracleJob.IDefiKingdomsTask=} [properties] Properties to set
+             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask instance
+             */
+            DefiKingdomsTask.create = function create(properties) {
+                return new DefiKingdomsTask(properties);
+            };
+    
+            /**
+             * Encodes the specified DefiKingdomsTask message. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {OracleJob.IDefiKingdomsTask} message DefiKingdomsTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            DefiKingdomsTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.provider != null && Object.hasOwnProperty.call(message, "provider"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.provider);
+                if (message.inToken != null && Object.hasOwnProperty.call(message, "inToken"))
+                    $root.OracleJob.DefiKingdomsTask.Token.encode(message.inToken, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                if (message.outToken != null && Object.hasOwnProperty.call(message, "outToken"))
+                    $root.OracleJob.DefiKingdomsTask.Token.encode(message.outToken, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified DefiKingdomsTask message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {OracleJob.IDefiKingdomsTask} message DefiKingdomsTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            DefiKingdomsTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a DefiKingdomsTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            DefiKingdomsTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.DefiKingdomsTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.provider = reader.string();
+                        break;
+                    case 2:
+                        message.inToken = $root.OracleJob.DefiKingdomsTask.Token.decode(reader, reader.uint32());
+                        break;
+                    case 3:
+                        message.outToken = $root.OracleJob.DefiKingdomsTask.Token.decode(reader, reader.uint32());
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a DefiKingdomsTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            DefiKingdomsTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a DefiKingdomsTask message.
+             * @function verify
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            DefiKingdomsTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.provider != null && message.hasOwnProperty("provider"))
+                    if (!$util.isString(message.provider))
+                        return "provider: string expected";
+                if (message.inToken != null && message.hasOwnProperty("inToken")) {
+                    var error = $root.OracleJob.DefiKingdomsTask.Token.verify(message.inToken);
+                    if (error)
+                        return "inToken." + error;
+                }
+                if (message.outToken != null && message.hasOwnProperty("outToken")) {
+                    var error = $root.OracleJob.DefiKingdomsTask.Token.verify(message.outToken);
+                    if (error)
+                        return "outToken." + error;
+                }
+                return null;
+            };
+    
+            /**
+             * Creates a DefiKingdomsTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.DefiKingdomsTask} DefiKingdomsTask
+             */
+            DefiKingdomsTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.DefiKingdomsTask)
+                    return object;
+                var message = new $root.OracleJob.DefiKingdomsTask();
+                if (object.provider != null)
+                    message.provider = String(object.provider);
+                if (object.inToken != null) {
+                    if (typeof object.inToken !== "object")
+                        throw TypeError(".OracleJob.DefiKingdomsTask.inToken: object expected");
+                    message.inToken = $root.OracleJob.DefiKingdomsTask.Token.fromObject(object.inToken);
+                }
+                if (object.outToken != null) {
+                    if (typeof object.outToken !== "object")
+                        throw TypeError(".OracleJob.DefiKingdomsTask.outToken: object expected");
+                    message.outToken = $root.OracleJob.DefiKingdomsTask.Token.fromObject(object.outToken);
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a DefiKingdomsTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.DefiKingdomsTask
+             * @static
+             * @param {OracleJob.DefiKingdomsTask} message DefiKingdomsTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            DefiKingdomsTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.provider = "";
+                    object.inToken = null;
+                    object.outToken = null;
+                }
+                if (message.provider != null && message.hasOwnProperty("provider"))
+                    object.provider = message.provider;
+                if (message.inToken != null && message.hasOwnProperty("inToken"))
+                    object.inToken = $root.OracleJob.DefiKingdomsTask.Token.toObject(message.inToken, options);
+                if (message.outToken != null && message.hasOwnProperty("outToken"))
+                    object.outToken = $root.OracleJob.DefiKingdomsTask.Token.toObject(message.outToken, options);
+                return object;
+            };
+    
+            /**
+             * Converts this DefiKingdomsTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.DefiKingdomsTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            DefiKingdomsTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            DefiKingdomsTask.Token = (function() {
+    
+                /**
+                 * Properties of a Token.
+                 * @memberof OracleJob.DefiKingdomsTask
+                 * @interface IToken
+                 * @property {string|null} [address] Token address
+                 * @property {number|null} [decimals] Token decimals
+                 */
+    
+                /**
+                 * Constructs a new Token.
+                 * @memberof OracleJob.DefiKingdomsTask
+                 * @classdesc Represents a Token.
+                 * @implements IToken
+                 * @constructor
+                 * @param {OracleJob.DefiKingdomsTask.IToken=} [properties] Properties to set
+                 */
+                function Token(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Token address.
+                 * @member {string} address
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @instance
+                 */
+                Token.prototype.address = "";
+    
+                /**
+                 * Token decimals.
+                 * @member {number} decimals
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @instance
+                 */
+                Token.prototype.decimals = 0;
+    
+                /**
+                 * Creates a new Token instance using the specified properties.
+                 * @function create
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {OracleJob.DefiKingdomsTask.IToken=} [properties] Properties to set
+                 * @returns {OracleJob.DefiKingdomsTask.Token} Token instance
+                 */
+                Token.create = function create(properties) {
+                    return new Token(properties);
+                };
+    
+                /**
+                 * Encodes the specified Token message. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
+                 * @function encode
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {OracleJob.DefiKingdomsTask.IToken} message Token message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                Token.encode = function encode(message, writer) {
+                    if (!writer)
+                        writer = $Writer.create();
+                    if (message.address != null && Object.hasOwnProperty.call(message, "address"))
+                        writer.uint32(/* id 1, wireType 2 =*/10).string(message.address);
+                    if (message.decimals != null && Object.hasOwnProperty.call(message, "decimals"))
+                        writer.uint32(/* id 2, wireType 0 =*/16).int32(message.decimals);
+                    return writer;
+                };
+    
+                /**
+                 * Encodes the specified Token message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
+                 * @function encodeDelimited
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {OracleJob.DefiKingdomsTask.IToken} message Token message or plain object to encode
+                 * @param {$protobuf.Writer} [writer] Writer to encode to
+                 * @returns {$protobuf.Writer} Writer
+                 */
+                Token.encodeDelimited = function encodeDelimited(message, writer) {
+                    return this.encode(message, writer).ldelim();
+                };
+    
+                /**
+                 * Decodes a Token message from the specified reader or buffer.
+                 * @function decode
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @param {number} [length] Message length if known beforehand
+                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                Token.decode = function decode(reader, length) {
+                    if (!(reader instanceof $Reader))
+                        reader = $Reader.create(reader);
+                    var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.DefiKingdomsTask.Token();
+                    while (reader.pos < end) {
+                        var tag = reader.uint32();
+                        switch (tag >>> 3) {
+                        case 1:
+                            message.address = reader.string();
+                            break;
+                        case 2:
+                            message.decimals = reader.int32();
+                            break;
+                        default:
+                            reader.skipType(tag & 7);
+                            break;
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Decodes a Token message from the specified reader or buffer, length delimited.
+                 * @function decodeDelimited
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
+                 * @throws {Error} If the payload is not a reader or valid buffer
+                 * @throws {$protobuf.util.ProtocolError} If required fields are missing
+                 */
+                Token.decodeDelimited = function decodeDelimited(reader) {
+                    if (!(reader instanceof $Reader))
+                        reader = new $Reader(reader);
+                    return this.decode(reader, reader.uint32());
+                };
+    
+                /**
+                 * Verifies a Token message.
+                 * @function verify
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {Object.<string,*>} message Plain object to verify
+                 * @returns {string|null} `null` if valid, otherwise the reason why it is not
+                 */
+                Token.verify = function verify(message) {
+                    if (typeof message !== "object" || message === null)
+                        return "object expected";
+                    if (message.address != null && message.hasOwnProperty("address"))
+                        if (!$util.isString(message.address))
+                            return "address: string expected";
+                    if (message.decimals != null && message.hasOwnProperty("decimals"))
+                        if (!$util.isInteger(message.decimals))
+                            return "decimals: integer expected";
+                    return null;
+                };
+    
+                /**
+                 * Creates a Token message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {OracleJob.DefiKingdomsTask.Token} Token
+                 */
+                Token.fromObject = function fromObject(object) {
+                    if (object instanceof $root.OracleJob.DefiKingdomsTask.Token)
+                        return object;
+                    var message = new $root.OracleJob.DefiKingdomsTask.Token();
+                    if (object.address != null)
+                        message.address = String(object.address);
+                    if (object.decimals != null)
+                        message.decimals = object.decimals | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Token message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @static
+                 * @param {OracleJob.DefiKingdomsTask.Token} message Token
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Token.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.address = "";
+                        object.decimals = 0;
+                    }
+                    if (message.address != null && message.hasOwnProperty("address"))
+                        object.address = message.address;
+                    if (message.decimals != null && message.hasOwnProperty("decimals"))
+                        object.decimals = message.decimals;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Token to JSON.
+                 * @function toJSON
+                 * @memberof OracleJob.DefiKingdomsTask.Token
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Token.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                return Token;
+            })();
+    
+            return DefiKingdomsTask;
         })();
     
         OracleJob.UniswapExchangeRateTask = (function() {
@@ -8986,7 +9154,7 @@
                  * @memberof OracleJob.CacheTask
                  * @interface ICacheItem
                  * @property {string|null} [variableName] CacheItem variableName
-                 * @property {Array.<OracleJob.ITask>|null} [tasks] CacheItem tasks
+                 * @property {IOracleJob|null} [job] CacheItem job
                  */
     
                 /**
@@ -8998,7 +9166,6 @@
                  * @param {OracleJob.CacheTask.ICacheItem=} [properties] Properties to set
                  */
                 function CacheItem(properties) {
-                    this.tasks = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -9014,12 +9181,12 @@
                 CacheItem.prototype.variableName = "";
     
                 /**
-                 * CacheItem tasks.
-                 * @member {Array.<OracleJob.ITask>} tasks
+                 * CacheItem job.
+                 * @member {IOracleJob|null|undefined} job
                  * @memberof OracleJob.CacheTask.CacheItem
                  * @instance
                  */
-                CacheItem.prototype.tasks = $util.emptyArray;
+                CacheItem.prototype.job = null;
     
                 /**
                  * Creates a new CacheItem instance using the specified properties.
@@ -9047,9 +9214,8 @@
                         writer = $Writer.create();
                     if (message.variableName != null && Object.hasOwnProperty.call(message, "variableName"))
                         writer.uint32(/* id 1, wireType 2 =*/10).string(message.variableName);
-                    if (message.tasks != null && message.tasks.length)
-                        for (var i = 0; i < message.tasks.length; ++i)
-                            $root.OracleJob.Task.encode(message.tasks[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
+                    if (message.job != null && Object.hasOwnProperty.call(message, "job"))
+                        $root.OracleJob.encode(message.job, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
                     return writer;
                 };
     
@@ -9088,9 +9254,7 @@
                             message.variableName = reader.string();
                             break;
                         case 2:
-                            if (!(message.tasks && message.tasks.length))
-                                message.tasks = [];
-                            message.tasks.push($root.OracleJob.Task.decode(reader, reader.uint32()));
+                            message.job = $root.OracleJob.decode(reader, reader.uint32());
                             break;
                         default:
                             reader.skipType(tag & 7);
@@ -9130,14 +9294,10 @@
                     if (message.variableName != null && message.hasOwnProperty("variableName"))
                         if (!$util.isString(message.variableName))
                             return "variableName: string expected";
-                    if (message.tasks != null && message.hasOwnProperty("tasks")) {
-                        if (!Array.isArray(message.tasks))
-                            return "tasks: array expected";
-                        for (var i = 0; i < message.tasks.length; ++i) {
-                            var error = $root.OracleJob.Task.verify(message.tasks[i]);
-                            if (error)
-                                return "tasks." + error;
-                        }
+                    if (message.job != null && message.hasOwnProperty("job")) {
+                        var error = $root.OracleJob.verify(message.job);
+                        if (error)
+                            return "job." + error;
                     }
                     return null;
                 };
@@ -9156,15 +9316,10 @@
                     var message = new $root.OracleJob.CacheTask.CacheItem();
                     if (object.variableName != null)
                         message.variableName = String(object.variableName);
-                    if (object.tasks) {
-                        if (!Array.isArray(object.tasks))
-                            throw TypeError(".OracleJob.CacheTask.CacheItem.tasks: array expected");
-                        message.tasks = [];
-                        for (var i = 0; i < object.tasks.length; ++i) {
-                            if (typeof object.tasks[i] !== "object")
-                                throw TypeError(".OracleJob.CacheTask.CacheItem.tasks: object expected");
-                            message.tasks[i] = $root.OracleJob.Task.fromObject(object.tasks[i]);
-                        }
+                    if (object.job != null) {
+                        if (typeof object.job !== "object")
+                            throw TypeError(".OracleJob.CacheTask.CacheItem.job: object expected");
+                        message.job = $root.OracleJob.fromObject(object.job);
                     }
                     return message;
                 };
@@ -9182,17 +9337,14 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.arrays || options.defaults)
-                        object.tasks = [];
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.variableName = "";
+                        object.job = null;
+                    }
                     if (message.variableName != null && message.hasOwnProperty("variableName"))
                         object.variableName = message.variableName;
-                    if (message.tasks && message.tasks.length) {
-                        object.tasks = [];
-                        for (var j = 0; j < message.tasks.length; ++j)
-                            object.tasks[j] = $root.OracleJob.Task.toObject(message.tasks[j], options);
-                    }
+                    if (message.job != null && message.hasOwnProperty("job"))
+                        object.job = $root.OracleJob.toObject(message.job, options);
                     return object;
                 };
     
@@ -9211,193 +9363,6 @@
             })();
     
             return CacheTask;
-        })();
-    
-        OracleJob.CacheFetchTask = (function() {
-    
-            /**
-             * Properties of a CacheFetchTask.
-             * @memberof OracleJob
-             * @interface ICacheFetchTask
-             * @property {string|null} [variableName] CacheFetchTask variableName
-             */
-    
-            /**
-             * Constructs a new CacheFetchTask.
-             * @memberof OracleJob
-             * @classdesc Represents a CacheFetchTask.
-             * @implements ICacheFetchTask
-             * @constructor
-             * @param {OracleJob.ICacheFetchTask=} [properties] Properties to set
-             */
-            function CacheFetchTask(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-    
-            /**
-             * CacheFetchTask variableName.
-             * @member {string} variableName
-             * @memberof OracleJob.CacheFetchTask
-             * @instance
-             */
-            CacheFetchTask.prototype.variableName = "";
-    
-            /**
-             * Creates a new CacheFetchTask instance using the specified properties.
-             * @function create
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {OracleJob.ICacheFetchTask=} [properties] Properties to set
-             * @returns {OracleJob.CacheFetchTask} CacheFetchTask instance
-             */
-            CacheFetchTask.create = function create(properties) {
-                return new CacheFetchTask(properties);
-            };
-    
-            /**
-             * Encodes the specified CacheFetchTask message. Does not implicitly {@link OracleJob.CacheFetchTask.verify|verify} messages.
-             * @function encode
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {OracleJob.ICacheFetchTask} message CacheFetchTask message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            CacheFetchTask.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.variableName != null && Object.hasOwnProperty.call(message, "variableName"))
-                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.variableName);
-                return writer;
-            };
-    
-            /**
-             * Encodes the specified CacheFetchTask message, length delimited. Does not implicitly {@link OracleJob.CacheFetchTask.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {OracleJob.ICacheFetchTask} message CacheFetchTask message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            CacheFetchTask.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-    
-            /**
-             * Decodes a CacheFetchTask message from the specified reader or buffer.
-             * @function decode
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            CacheFetchTask.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.CacheFetchTask();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1:
-                        message.variableName = reader.string();
-                        break;
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-    
-            /**
-             * Decodes a CacheFetchTask message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            CacheFetchTask.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-    
-            /**
-             * Verifies a CacheFetchTask message.
-             * @function verify
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            CacheFetchTask.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.variableName != null && message.hasOwnProperty("variableName"))
-                    if (!$util.isString(message.variableName))
-                        return "variableName: string expected";
-                return null;
-            };
-    
-            /**
-             * Creates a CacheFetchTask message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {OracleJob.CacheFetchTask} CacheFetchTask
-             */
-            CacheFetchTask.fromObject = function fromObject(object) {
-                if (object instanceof $root.OracleJob.CacheFetchTask)
-                    return object;
-                var message = new $root.OracleJob.CacheFetchTask();
-                if (object.variableName != null)
-                    message.variableName = String(object.variableName);
-                return message;
-            };
-    
-            /**
-             * Creates a plain object from a CacheFetchTask message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof OracleJob.CacheFetchTask
-             * @static
-             * @param {OracleJob.CacheFetchTask} message CacheFetchTask
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            CacheFetchTask.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults)
-                    object.variableName = "";
-                if (message.variableName != null && message.hasOwnProperty("variableName"))
-                    object.variableName = message.variableName;
-                return object;
-            };
-    
-            /**
-             * Converts this CacheFetchTask to JSON.
-             * @function toJSON
-             * @memberof OracleJob.CacheFetchTask
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            CacheFetchTask.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-    
-            return CacheFetchTask;
         })();
     
         OracleJob.SysclockOffsetTask = (function() {

@@ -714,6 +714,9 @@ export namespace OracleJob {
 
         /** ValueTask aggregatorPubkey */
         aggregatorPubkey?: (string|null);
+
+        /** ValueTask big */
+        big?: (string|null);
     }
 
     /** Represents a ValueTask. */
@@ -731,8 +734,11 @@ export namespace OracleJob {
         /** ValueTask aggregatorPubkey. */
         public aggregatorPubkey?: (string|null);
 
+        /** ValueTask big. */
+        public big?: (string|null);
+
         /** ValueTask Value. */
-        public Value?: ("value"|"aggregatorPubkey");
+        public Value?: ("value"|"aggregatorPubkey"|"big");
 
         /**
          * Creates a new ValueTask instance using the specified properties.
@@ -1020,6 +1026,9 @@ export namespace OracleJob {
 
         /** DivideTask job */
         job?: (IOracleJob|null);
+
+        /** DivideTask big */
+        big?: (string|null);
     }
 
     /** Represents a DivideTask. */
@@ -1040,8 +1049,11 @@ export namespace OracleJob {
         /** DivideTask job. */
         public job?: (IOracleJob|null);
 
+        /** DivideTask big. */
+        public big?: (string|null);
+
         /** DivideTask Denominator. */
-        public Denominator?: ("scalar"|"aggregatorPubkey"|"job");
+        public Denominator?: ("scalar"|"aggregatorPubkey"|"job"|"big");
 
         /**
          * Creates a new DivideTask instance using the specified properties.
@@ -1125,6 +1137,9 @@ export namespace OracleJob {
 
         /** MultiplyTask job */
         job?: (IOracleJob|null);
+
+        /** MultiplyTask big */
+        big?: (string|null);
     }
 
     /** Represents a MultiplyTask. */
@@ -1145,8 +1160,11 @@ export namespace OracleJob {
         /** MultiplyTask job. */
         public job?: (IOracleJob|null);
 
+        /** MultiplyTask big. */
+        public big?: (string|null);
+
         /** MultiplyTask Multiple. */
-        public Multiple?: ("scalar"|"aggregatorPubkey"|"job");
+        public Multiple?: ("scalar"|"aggregatorPubkey"|"job"|"big");
 
         /**
          * Creates a new MultiplyTask instance using the specified properties.
@@ -1230,6 +1248,9 @@ export namespace OracleJob {
 
         /** AddTask job */
         job?: (IOracleJob|null);
+
+        /** AddTask big */
+        big?: (string|null);
     }
 
     /** Represents an AddTask. */
@@ -1250,8 +1271,11 @@ export namespace OracleJob {
         /** AddTask job. */
         public job?: (IOracleJob|null);
 
+        /** AddTask big. */
+        public big?: (string|null);
+
         /** AddTask Addition. */
-        public Addition?: ("scalar"|"aggregatorPubkey"|"job");
+        public Addition?: ("scalar"|"aggregatorPubkey"|"job"|"big");
 
         /**
          * Creates a new AddTask instance using the specified properties.
@@ -1335,6 +1359,9 @@ export namespace OracleJob {
 
         /** SubtractTask job */
         job?: (IOracleJob|null);
+
+        /** SubtractTask big */
+        big?: (string|null);
     }
 
     /** Represents a SubtractTask. */
@@ -1355,8 +1382,11 @@ export namespace OracleJob {
         /** SubtractTask job. */
         public job?: (IOracleJob|null);
 
+        /** SubtractTask big. */
+        public big?: (string|null);
+
         /** SubtractTask Subtraction. */
-        public Subtraction?: ("scalar"|"aggregatorPubkey"|"job");
+        public Subtraction?: ("scalar"|"aggregatorPubkey"|"job"|"big");
 
         /**
          * Creates a new SubtractTask instance using the specified properties.
@@ -2088,6 +2118,9 @@ export namespace OracleJob {
 
         /** PowTask aggregatorPubkey */
         aggregatorPubkey?: (string|null);
+
+        /** PowTask big */
+        big?: (string|null);
     }
 
     /** Represents a PowTask. */
@@ -2105,8 +2138,11 @@ export namespace OracleJob {
         /** PowTask aggregatorPubkey. */
         public aggregatorPubkey?: (string|null);
 
+        /** PowTask big. */
+        public big?: (string|null);
+
         /** PowTask Exponent. */
-        public Exponent?: ("scalar"|"aggregatorPubkey");
+        public Exponent?: ("scalar"|"aggregatorPubkey"|"big");
 
         /**
          * Creates a new PowTask instance using the specified properties.
@@ -2800,207 +2836,6 @@ export namespace OracleJob {
         public toJSON(): { [k: string]: any };
     }
 
-    /** Properties of a DefiKingdomsTask. */
-    interface IDefiKingdomsTask {
-
-        /** DefiKingdomsTask provider */
-        provider?: (string|null);
-
-        /** DefiKingdomsTask inToken */
-        inToken?: (OracleJob.DefiKingdomsTask.IToken|null);
-
-        /** DefiKingdomsTask outToken */
-        outToken?: (OracleJob.DefiKingdomsTask.IToken|null);
-    }
-
-    /** Represents a DefiKingdomsTask. */
-    class DefiKingdomsTask implements IDefiKingdomsTask {
-
-        /**
-         * Constructs a new DefiKingdomsTask.
-         * @param [properties] Properties to set
-         */
-        constructor(properties?: OracleJob.IDefiKingdomsTask);
-
-        /** DefiKingdomsTask provider. */
-        public provider: string;
-
-        /** DefiKingdomsTask inToken. */
-        public inToken?: (OracleJob.DefiKingdomsTask.IToken|null);
-
-        /** DefiKingdomsTask outToken. */
-        public outToken?: (OracleJob.DefiKingdomsTask.IToken|null);
-
-        /**
-         * Creates a new DefiKingdomsTask instance using the specified properties.
-         * @param [properties] Properties to set
-         * @returns DefiKingdomsTask instance
-         */
-        public static create(properties?: OracleJob.IDefiKingdomsTask): OracleJob.DefiKingdomsTask;
-
-        /**
-         * Encodes the specified DefiKingdomsTask message. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
-         * @param message DefiKingdomsTask message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encode(message: OracleJob.IDefiKingdomsTask, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Encodes the specified DefiKingdomsTask message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
-         * @param message DefiKingdomsTask message or plain object to encode
-         * @param [writer] Writer to encode to
-         * @returns Writer
-         */
-        public static encodeDelimited(message: OracleJob.IDefiKingdomsTask, writer?: $protobuf.Writer): $protobuf.Writer;
-
-        /**
-         * Decodes a DefiKingdomsTask message from the specified reader or buffer.
-         * @param reader Reader or buffer to decode from
-         * @param [length] Message length if known beforehand
-         * @returns DefiKingdomsTask
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.DefiKingdomsTask;
-
-        /**
-         * Decodes a DefiKingdomsTask message from the specified reader or buffer, length delimited.
-         * @param reader Reader or buffer to decode from
-         * @returns DefiKingdomsTask
-         * @throws {Error} If the payload is not a reader or valid buffer
-         * @throws {$protobuf.util.ProtocolError} If required fields are missing
-         */
-        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.DefiKingdomsTask;
-
-        /**
-         * Verifies a DefiKingdomsTask message.
-         * @param message Plain object to verify
-         * @returns `null` if valid, otherwise the reason why it is not
-         */
-        public static verify(message: { [k: string]: any }): (string|null);
-
-        /**
-         * Creates a DefiKingdomsTask message from a plain object. Also converts values to their respective internal types.
-         * @param object Plain object
-         * @returns DefiKingdomsTask
-         */
-        public static fromObject(object: { [k: string]: any }): OracleJob.DefiKingdomsTask;
-
-        /**
-         * Creates a plain object from a DefiKingdomsTask message. Also converts values to other types if specified.
-         * @param message DefiKingdomsTask
-         * @param [options] Conversion options
-         * @returns Plain object
-         */
-        public static toObject(message: OracleJob.DefiKingdomsTask, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-        /**
-         * Converts this DefiKingdomsTask to JSON.
-         * @returns JSON object
-         */
-        public toJSON(): { [k: string]: any };
-    }
-
-    namespace DefiKingdomsTask {
-
-        /** Properties of a Token. */
-        interface IToken {
-
-            /** Token address */
-            address?: (string|null);
-
-            /** Token decimals */
-            decimals?: (number|null);
-        }
-
-        /** Represents a Token. */
-        class Token implements IToken {
-
-            /**
-             * Constructs a new Token.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: OracleJob.DefiKingdomsTask.IToken);
-
-            /** Token address. */
-            public address: string;
-
-            /** Token decimals. */
-            public decimals: number;
-
-            /**
-             * Creates a new Token instance using the specified properties.
-             * @param [properties] Properties to set
-             * @returns Token instance
-             */
-            public static create(properties?: OracleJob.DefiKingdomsTask.IToken): OracleJob.DefiKingdomsTask.Token;
-
-            /**
-             * Encodes the specified Token message. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
-             * @param message Token message or plain object to encode
-             * @param [writer] Writer to encode to
-             * @returns Writer
-             */
-            public static encode(message: OracleJob.DefiKingdomsTask.IToken, writer?: $protobuf.Writer): $protobuf.Writer;
-
-            /**
-             * Encodes the specified Token message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
-             * @param message Token message or plain object to encode
-             * @param [writer] Writer to encode to
-             * @returns Writer
-             */
-            public static encodeDelimited(message: OracleJob.DefiKingdomsTask.IToken, writer?: $protobuf.Writer): $protobuf.Writer;
-
-            /**
-             * Decodes a Token message from the specified reader or buffer.
-             * @param reader Reader or buffer to decode from
-             * @param [length] Message length if known beforehand
-             * @returns Token
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.DefiKingdomsTask.Token;
-
-            /**
-             * Decodes a Token message from the specified reader or buffer, length delimited.
-             * @param reader Reader or buffer to decode from
-             * @returns Token
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.DefiKingdomsTask.Token;
-
-            /**
-             * Verifies a Token message.
-             * @param message Plain object to verify
-             * @returns `null` if valid, otherwise the reason why it is not
-             */
-            public static verify(message: { [k: string]: any }): (string|null);
-
-            /**
-             * Creates a Token message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Token
-             */
-            public static fromObject(object: { [k: string]: any }): OracleJob.DefiKingdomsTask.Token;
-
-            /**
-             * Creates a plain object from a Token message. Also converts values to other types if specified.
-             * @param message Token
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: OracleJob.DefiKingdomsTask.Token, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Token to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-    }
-
     /** Properties of a TpsTask. */
     interface ITpsTask {
     }
@@ -3272,6 +3107,207 @@ export namespace OracleJob {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+    }
+
+    /** Properties of a DefiKingdomsTask. */
+    interface IDefiKingdomsTask {
+
+        /** DefiKingdomsTask provider */
+        provider?: (string|null);
+
+        /** DefiKingdomsTask inToken */
+        inToken?: (OracleJob.DefiKingdomsTask.IToken|null);
+
+        /** DefiKingdomsTask outToken */
+        outToken?: (OracleJob.DefiKingdomsTask.IToken|null);
+    }
+
+    /** Represents a DefiKingdomsTask. */
+    class DefiKingdomsTask implements IDefiKingdomsTask {
+
+        /**
+         * Constructs a new DefiKingdomsTask.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: OracleJob.IDefiKingdomsTask);
+
+        /** DefiKingdomsTask provider. */
+        public provider: string;
+
+        /** DefiKingdomsTask inToken. */
+        public inToken?: (OracleJob.DefiKingdomsTask.IToken|null);
+
+        /** DefiKingdomsTask outToken. */
+        public outToken?: (OracleJob.DefiKingdomsTask.IToken|null);
+
+        /**
+         * Creates a new DefiKingdomsTask instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns DefiKingdomsTask instance
+         */
+        public static create(properties?: OracleJob.IDefiKingdomsTask): OracleJob.DefiKingdomsTask;
+
+        /**
+         * Encodes the specified DefiKingdomsTask message. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
+         * @param message DefiKingdomsTask message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: OracleJob.IDefiKingdomsTask, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified DefiKingdomsTask message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.verify|verify} messages.
+         * @param message DefiKingdomsTask message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: OracleJob.IDefiKingdomsTask, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a DefiKingdomsTask message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns DefiKingdomsTask
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.DefiKingdomsTask;
+
+        /**
+         * Decodes a DefiKingdomsTask message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns DefiKingdomsTask
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.DefiKingdomsTask;
+
+        /**
+         * Verifies a DefiKingdomsTask message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a DefiKingdomsTask message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns DefiKingdomsTask
+         */
+        public static fromObject(object: { [k: string]: any }): OracleJob.DefiKingdomsTask;
+
+        /**
+         * Creates a plain object from a DefiKingdomsTask message. Also converts values to other types if specified.
+         * @param message DefiKingdomsTask
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: OracleJob.DefiKingdomsTask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this DefiKingdomsTask to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    namespace DefiKingdomsTask {
+
+        /** Properties of a Token. */
+        interface IToken {
+
+            /** Token address */
+            address?: (string|null);
+
+            /** Token decimals */
+            decimals?: (number|null);
+        }
+
+        /** Represents a Token. */
+        class Token implements IToken {
+
+            /**
+             * Constructs a new Token.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: OracleJob.DefiKingdomsTask.IToken);
+
+            /** Token address. */
+            public address: string;
+
+            /** Token decimals. */
+            public decimals: number;
+
+            /**
+             * Creates a new Token instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns Token instance
+             */
+            public static create(properties?: OracleJob.DefiKingdomsTask.IToken): OracleJob.DefiKingdomsTask.Token;
+
+            /**
+             * Encodes the specified Token message. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
+             * @param message Token message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: OracleJob.DefiKingdomsTask.IToken, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified Token message, length delimited. Does not implicitly {@link OracleJob.DefiKingdomsTask.Token.verify|verify} messages.
+             * @param message Token message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: OracleJob.DefiKingdomsTask.IToken, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a Token message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns Token
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.DefiKingdomsTask.Token;
+
+            /**
+             * Decodes a Token message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns Token
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.DefiKingdomsTask.Token;
+
+            /**
+             * Verifies a Token message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a Token message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Token
+             */
+            public static fromObject(object: { [k: string]: any }): OracleJob.DefiKingdomsTask.Token;
+
+            /**
+             * Creates a plain object from a Token message. Also converts values to other types if specified.
+             * @param message Token
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: OracleJob.DefiKingdomsTask.Token, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Token to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+        }
     }
 
     /** Properties of an UniswapExchangeRateTask. */
@@ -3619,11 +3655,8 @@ export namespace OracleJob {
     /** Properties of a CacheTask. */
     interface ICacheTask {
 
-        /** CacheTask name */
-        name?: (string|null);
-
-        /** CacheTask method */
-        method?: (OracleJob.CacheTask.Method|null);
+        /** CacheTask cacheItems */
+        cacheItems?: (OracleJob.CacheTask.ICacheItem[]|null);
     }
 
     /** Represents a CacheTask. */
@@ -3635,11 +3668,8 @@ export namespace OracleJob {
          */
         constructor(properties?: OracleJob.ICacheTask);
 
-        /** CacheTask name. */
-        public name: string;
-
-        /** CacheTask method. */
-        public method: OracleJob.CacheTask.Method;
+        /** CacheTask cacheItems. */
+        public cacheItems: OracleJob.CacheTask.ICacheItem[];
 
         /**
          * Creates a new CacheTask instance using the specified properties.
@@ -3714,10 +3744,100 @@ export namespace OracleJob {
 
     namespace CacheTask {
 
-        /** Method enum. */
-        enum Method {
-            METHOD_GET = 0,
-            METHOD_SET = 1
+        /** Properties of a CacheItem. */
+        interface ICacheItem {
+
+            /** CacheItem variableName */
+            variableName?: (string|null);
+
+            /** CacheItem job */
+            job?: (IOracleJob|null);
+        }
+
+        /** Represents a CacheItem. */
+        class CacheItem implements ICacheItem {
+
+            /**
+             * Constructs a new CacheItem.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: OracleJob.CacheTask.ICacheItem);
+
+            /** CacheItem variableName. */
+            public variableName: string;
+
+            /** CacheItem job. */
+            public job?: (IOracleJob|null);
+
+            /**
+             * Creates a new CacheItem instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns CacheItem instance
+             */
+            public static create(properties?: OracleJob.CacheTask.ICacheItem): OracleJob.CacheTask.CacheItem;
+
+            /**
+             * Encodes the specified CacheItem message. Does not implicitly {@link OracleJob.CacheTask.CacheItem.verify|verify} messages.
+             * @param message CacheItem message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(message: OracleJob.CacheTask.ICacheItem, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Encodes the specified CacheItem message, length delimited. Does not implicitly {@link OracleJob.CacheTask.CacheItem.verify|verify} messages.
+             * @param message CacheItem message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(message: OracleJob.CacheTask.ICacheItem, writer?: $protobuf.Writer): $protobuf.Writer;
+
+            /**
+             * Decodes a CacheItem message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns CacheItem
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.CacheTask.CacheItem;
+
+            /**
+             * Decodes a CacheItem message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns CacheItem
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.CacheTask.CacheItem;
+
+            /**
+             * Verifies a CacheItem message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: { [k: string]: any }): (string|null);
+
+            /**
+             * Creates a CacheItem message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns CacheItem
+             */
+            public static fromObject(object: { [k: string]: any }): OracleJob.CacheTask.CacheItem;
+
+            /**
+             * Creates a plain object from a CacheItem message. Also converts values to other types if specified.
+             * @param message CacheItem
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: OracleJob.CacheTask.CacheItem, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this CacheItem to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
         }
     }
 

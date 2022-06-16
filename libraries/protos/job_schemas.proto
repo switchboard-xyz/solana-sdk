@@ -57,8 +57,7 @@ message OracleJob {
     optional AggregationMethod aggregation_method = 2;
   }
 
-  // Returns the median of all the results returned by the provided subtasks and subjobs. Nested 
-  // tasks must return a Number.
+  // Returns the median of all the results returned by the provided subtasks and subjobs. Nested tasks must return a Number.
   message MedianTask {
     // A list of subtasks to process and produce a list of result values.
     repeated Task tasks = 1;
@@ -90,6 +89,8 @@ message OracleJob {
       double value = 1;
       // Specifies an aggregatorr to pull the value of.
       string aggregator_pubkey = 2;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 3;
     }
   }
 
@@ -126,11 +127,12 @@ message OracleJob {
       string aggregator_pubkey = 2;
       // A job whose result is computed before dividing our numerical input by that result.
       OracleJob job = 3;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 4;
     }
   }
 
-  // This task will multiply a numerical input by a scalar value or by another
-  // aggregate.
+  // This task will multiply a numerical input by a scalar value or by another aggregator.
   message MultiplyTask {
     oneof Multiple {
       // Specifies a scalar to multiply by.
@@ -139,6 +141,8 @@ message OracleJob {
       string aggregator_pubkey = 2;
       // A job whose result is computed before multiplying our numerical input by that result.
       OracleJob job = 3;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 4;
     }
   }
 
@@ -152,6 +156,8 @@ message OracleJob {
       string aggregator_pubkey = 2;
       // A job whose result is computed before adding our numerical input by that result.
       OracleJob job = 3;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 4;
     }
   }
 
@@ -165,6 +171,8 @@ message OracleJob {
       string aggregator_pubkey = 2;
       // A job whose result is computed before subtracting our numerical input by that result.
       OracleJob job = 3;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 4;
     }
   }
 
@@ -250,6 +258,8 @@ message OracleJob {
       double scalar = 1;
       // Take the working value to the exponent of the aggregators value.
       string aggregator_pubkey = 2;
+      // A stringified big.js. `Accepts variable expansion syntax.`
+      string big = 3;
     }
   }
 
@@ -274,13 +284,17 @@ message OracleJob {
     optional string perp_market_address = 1;
   }
   
+  // Fetch the simulated price for a swap on JupiterSwap.
   message JupiterSwapTask {
+    // The input token address.
     optional string in_token_address = 1;
+    // The output token address.
     optional string out_token_address = 2;
+    // The amount of tokens to swap.
     optional double base_amount = 3;
   }
 
-  // Fetch the current price of a perpetual market
+  // Fetch the current price of a perpetual market.
   message PerpMarketTask {
     oneof MarketAddress {
       // Market address for a mango perpetual market. A full list can be found here: https://github.com/blockworks-foundation/mango-client-v3/blob/main/src/ids.json
@@ -294,14 +308,14 @@ message OracleJob {
     }
   }
 
-  // Fetch the current price of a Solana oracle protocol
+  // Fetch the current price of a Solana oracle protocol.
   message OracleTask {
     oneof AggregatorAddress {
       // Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer
       string switchboard_address = 1;
       // Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/
       string pyth_address = 2;
-      // Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana
+      // Mainnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana
       string chainlink_address = 3;
     }
     // Value (as a percentage) that the lower bound confidence interval is of the actual value.
@@ -317,94 +331,148 @@ message OracleJob {
     optional string account_address = 2;
   }
 
-  message DefiKingdomsTask {
-    message Token {
-      optional string address = 1;
-      optional int32 decimals = 2;
-    }
-    optional string provider = 1;
-    optional Token in_token = 2;
-    optional Token out_token = 3;
-  }
 
+  // Fetch the current transactions per second.
   message TpsTask {}
-
+  // Fetch the JSON representation of an SPL Stake Pool account.
   message SplStakePoolTask {
-    // The pubkey of the SPL Stake Pool.``
+    // The pubkey of the SPL Stake Pool.
     optional string pubkey = 1;
   }
 
+  // Fetch the JSON representation of an SPL token mint.
   message SplTokenParseTask {
     oneof AccountAddress {
+      // The publicKey of a token account to fetch the mintInfo for.
       string token_account_address = 1;
+      // The publicKey of the token mint address.
       string mint_address = 2;
     }
   }
 
-  message UniswapExchangeRateTask {
-    optional string in_token_address = 1;
-    optional string out_token_address = 2;
-    optional double in_token_amount = 3;
-    optional double slippage = 4;
-    optional string provider = 5;
-  }
-
-  message SushiswapExchangeRateTask {
-    optional string in_token_address = 1;
-    optional string out_token_address = 2;
-    optional double in_token_amount = 3;
-    optional double slippage = 4;
-    optional string provider = 5;
-  }
-
-  message PancakeswapExchangeRateTask {
-    optional string in_token_address = 1;
-    optional string out_token_address = 2;
-    optional double in_token_amount = 3;
-    optional double slippage = 4;
-    optional string provider = 5;
-  }
-
-  message CacheTask {
-    optional string name = 1;
-    enum Method {
-      METHOD_GET = 0;
-      METHOD_SET = 1;
+  // Fetch the swap price from DefiKingdoms.
+  message DefiKingdomsTask {
+    message Token {
+      // The address of the token.
+      optional string address = 1;
+      // The number of decimal places for a token.
+      optional int32 decimals = 2;
     }
-    optional Method method = 2;
+    // The RPC provider to use for the swap.
+    optional string provider = 1;
+    // The input token of the swap.
+    optional Token in_token = 2;
+    // The output token of the swap.
+    optional Token out_token = 3;
   }
 
+  // Fetch the swap price from UniSwap.
+  message UniswapExchangeRateTask {
+    // The input token address.
+    optional string in_token_address = 1;
+    // The output token address.
+    optional string out_token_address = 2;
+    // The amount of tokens to swap.
+    optional double in_token_amount = 3;
+    // The allowable slippage in percent for the swap.
+    optional double slippage = 4;
+    // The RPC provider to use for the swap.
+    optional string provider = 5;
+  }
+
+  // Fetch the swap price from SushiSwap.
+  message SushiswapExchangeRateTask {
+     // The input token address.
+    optional string in_token_address = 1;
+    // The output token address.
+    optional string out_token_address = 2;
+    // The amount of tokens to swap.
+    optional double in_token_amount = 3;
+    // The allowable slippage in percent for the swap.
+    optional double slippage = 4;
+    // The RPC provider to use for the swap.
+    optional string provider = 5;
+  }
+
+  // Fetch the swap price from PancakeSwap.
+  message PancakeswapExchangeRateTask {
+     // The input token address.
+    optional string in_token_address = 1;
+    // The output token address.
+    optional string out_token_address = 2;
+    // The amount of tokens to swap.
+    optional double in_token_amount = 3;
+    // The allowable slippage in percent for the swap.
+    optional double slippage = 4;
+    // The RPC provider to use for the swap.
+    optional string provider = 5;
+  }
+
+
+  // Execute a job and store the result in a variable to reference later.
+  message CacheTask {
+    message CacheItem {
+      // The name of the variable to store in cache to reference later with `${VARIABLE_NAME}`.
+      optional string variable_name = 1;
+      // The OracleJob to execute to yield the value to store in cache.
+      optional OracleJob job = 2;
+    }
+    // A list of cached variables to reference in the job with `${VARIABLE_NAME}`.
+    repeated CacheItem cache_items = 1;
+  }
+  
+  // Return the difference between an oracle's clock and the current timestamp at `SYSVAR_CLOCK_PUBKEY`.
   message SysclockOffsetTask {}
 
   message MarinadeStateTask {}
 
+  // Fetch the account data in a stringified buffer format.
   message SolanaAccountDataFetchTask {
+    // The on-chain account to fetch the account data from.
     optional string pubkey = 1;
   }
 
+  // Return the deserialized value from a stringified buffer.
   message BufferLayoutParseTask {
+    // The buffer offset to start deserializing from.
     optional uint32 offset = 1;
     enum Endian {
       LITTLE_ENDIAN = 0;
       BIG_ENDIAN = 1;
     }
+    // The endianness of the stored value.
     optional Endian endian = 2;
     enum BufferParseType {
+      // A public key.
       pubkey = 1;
+      // A boolean.
       bool = 2;
+      // An 8-bit unsigned value.
       u8 = 3;
+      // An 8-bit signed value.
       i8 = 4;
+      // A 16-bit unsigned value.
       u16 = 5;
+      // A 16-bit signed value.
       i16 = 6;
+      // A 32-bit unsigned value.
       u32 = 7;
+      // A 32-bit signed value.
       i32 = 8;
+      // A 32-bit IEEE floating point value.
       f32 = 9;
+      // A 64-bit unsigned value.
       u64 = 10;
+       // A 64-bit signed value.
       i64 = 11;
+      // A 64-bit IEEE floating point value.
       f64 = 12;
+      // A 128-bit unsigned value.
       u128 = 13;
+      // A 128-bit signed value.
       i128 = 14;
     }
+    // The type of value to deserialize.
     optional BufferParseType type = 3;
   }
 

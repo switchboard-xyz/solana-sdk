@@ -4,12 +4,12 @@
 ## Table of Contents
 
 - [job_schemas.proto](#job_schemas.proto)
-    - [JobPosting](#.JobPosting)
-    - [JobResult](#.JobResult)
     - [OracleJob](#.OracleJob)
     - [OracleJob.AddTask](#.OracleJob.AddTask)
     - [OracleJob.AnchorFetchTask](#.OracleJob.AnchorFetchTask)
+    - [OracleJob.BufferLayoutParseTask](#.OracleJob.BufferLayoutParseTask)
     - [OracleJob.CacheTask](#.OracleJob.CacheTask)
+    - [OracleJob.CacheTask.CacheItem](#.OracleJob.CacheTask.CacheItem)
     - [OracleJob.ConditionalTask](#.OracleJob.ConditionalTask)
     - [OracleJob.DefiKingdomsTask](#.OracleJob.DefiKingdomsTask)
     - [OracleJob.DefiKingdomsTask.Token](#.OracleJob.DefiKingdomsTask.Token)
@@ -22,6 +22,7 @@
     - [OracleJob.LpExchangeRateTask](#.OracleJob.LpExchangeRateTask)
     - [OracleJob.LpTokenPriceTask](#.OracleJob.LpTokenPriceTask)
     - [OracleJob.MangoPerpMarketTask](#.OracleJob.MangoPerpMarketTask)
+    - [OracleJob.MarinadeStateTask](#.OracleJob.MarinadeStateTask)
     - [OracleJob.MaxTask](#.OracleJob.MaxTask)
     - [OracleJob.MeanTask](#.OracleJob.MeanTask)
     - [OracleJob.MedianTask](#.OracleJob.MedianTask)
@@ -32,6 +33,7 @@
     - [OracleJob.PowTask](#.OracleJob.PowTask)
     - [OracleJob.RegexExtractTask](#.OracleJob.RegexExtractTask)
     - [OracleJob.SerumSwapTask](#.OracleJob.SerumSwapTask)
+    - [OracleJob.SolanaAccountDataFetchTask](#.OracleJob.SolanaAccountDataFetchTask)
     - [OracleJob.SplStakePoolTask](#.OracleJob.SplStakePoolTask)
     - [OracleJob.SplTokenParseTask](#.OracleJob.SplTokenParseTask)
     - [OracleJob.SubtractTask](#.OracleJob.SubtractTask)
@@ -45,7 +47,8 @@
     - [OracleJob.WebsocketTask](#.OracleJob.WebsocketTask)
     - [OracleJob.XStepPriceTask](#.OracleJob.XStepPriceTask)
   
-    - [OracleJob.CacheTask.Method](#.OracleJob.CacheTask.Method)
+    - [OracleJob.BufferLayoutParseTask.BufferParseType](#.OracleJob.BufferLayoutParseTask.BufferParseType)
+    - [OracleJob.BufferLayoutParseTask.Endian](#.OracleJob.BufferLayoutParseTask.Endian)
     - [OracleJob.HttpTask.Method](#.OracleJob.HttpTask.Method)
     - [OracleJob.JsonParseTask.AggregationMethod](#.OracleJob.JsonParseTask.AggregationMethod)
     - [OracleJob.LendingRateTask.Field](#.OracleJob.LendingRateTask.Field)
@@ -58,40 +61,6 @@
 <p align="right"><a href="#top">Top</a></p>
 
 ## job_schemas.proto
-
-
-
-<a name=".JobPosting"></a>
-
-### JobPosting
-The schema Oracle nodes receive when they are notified to fulfill a job.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| aggregator_state_pubkey | [bytes](#bytes) | optional | Pubkey of the aggregator to fulfill the job for. |
-| node_pubkeys | [bytes](#bytes) | repeated | The pubkey of the nodes this job is assigned to. |
-| slot | [uint64](#uint64) | optional | Slot number of the job posting. |
-
-
-
-
-
-
-<a name=".JobResult"></a>
-
-### JobResult
-This schema Oracle nodes respond with when fulfilling a job.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| node_pubkey | [bytes](#bytes) | optional | The public key of the responding node. |
-| result | [double](#double) | optional | The median value of the jobs the node has fulfilled successfully. |
-| error | [bool](#bool) | optional | True if the node failed to decide on an answer to the job. |
-
-
-
 
 
 
@@ -122,6 +91,7 @@ aggregate.
 | scalar | [double](#double) | optional | Specifies a scalar to add by. |
 | aggregator_pubkey | [string](#string) | optional | Specifies an aggregator to add by. |
 | job | [OracleJob](#OracleJob) | optional | A job whose result is computed before adding our numerical input by that result. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -144,16 +114,48 @@ Load a parse an Anchor based solana account.
 
 
 
+<a name=".OracleJob.BufferLayoutParseTask"></a>
+
+### OracleJob.BufferLayoutParseTask
+Return the deserialized value from a stringified buffer.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| offset | [uint32](#uint32) | optional | The buffer offset to start deserializing from. |
+| endian | [OracleJob.BufferLayoutParseTask.Endian](#OracleJob.BufferLayoutParseTask.Endian) | optional | The endianness of the stored value. |
+| type | [OracleJob.BufferLayoutParseTask.BufferParseType](#OracleJob.BufferLayoutParseTask.BufferParseType) | optional | The type of value to deserialize. |
+
+
+
+
+
+
 <a name=".OracleJob.CacheTask"></a>
 
 ### OracleJob.CacheTask
+Execute a job and store the result in a variable to reference later.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| cache_items | [OracleJob.CacheTask.CacheItem](#OracleJob.CacheTask.CacheItem) | repeated | A list of cached variables to reference in the job with `${VARIABLE_NAME}`. |
+
+
+
+
+
+
+<a name=".OracleJob.CacheTask.CacheItem"></a>
+
+### OracleJob.CacheTask.CacheItem
 
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) | optional |  |
-| method | [OracleJob.CacheTask.Method](#OracleJob.CacheTask.Method) | optional |  |
+| variable_name | [string](#string) | optional | The name of the variable to store in cache to reference later with `${VARIABLE_NAME}`. |
+| job | [OracleJob](#OracleJob) | optional | The OracleJob to execute to yield the value to store in cache. |
 
 
 
@@ -180,14 +182,14 @@ This task will run the `attempt` subtasks in an effort to produce a valid numeri
 <a name=".OracleJob.DefiKingdomsTask"></a>
 
 ### OracleJob.DefiKingdomsTask
-
+Fetch the swap price from DefiKingdoms.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| provider | [string](#string) | optional |  |
-| in_token | [OracleJob.DefiKingdomsTask.Token](#OracleJob.DefiKingdomsTask.Token) | optional |  |
-| out_token | [OracleJob.DefiKingdomsTask.Token](#OracleJob.DefiKingdomsTask.Token) | optional |  |
+| provider | [string](#string) | optional | The RPC provider to use for the swap. |
+| in_token | [OracleJob.DefiKingdomsTask.Token](#OracleJob.DefiKingdomsTask.Token) | optional | The input token of the swap. |
+| out_token | [OracleJob.DefiKingdomsTask.Token](#OracleJob.DefiKingdomsTask.Token) | optional | The output token of the swap. |
 
 
 
@@ -202,8 +204,8 @@ This task will run the `attempt` subtasks in an effort to produce a valid numeri
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| address | [string](#string) | optional |  |
-| decimals | [int32](#int32) | optional |  |
+| address | [string](#string) | optional | The address of the token. |
+| decimals | [int32](#int32) | optional | The number of decimal places for a token. |
 
 
 
@@ -222,6 +224,7 @@ aggregate.
 | scalar | [double](#double) | optional | Specifies a basic scalar denominator to divide by. |
 | aggregator_pubkey | [string](#string) | optional | Specifies another aggregator resut to divide by. |
 | job | [OracleJob](#OracleJob) | optional | A job whose result is computed before dividing our numerical input by that result. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -285,14 +288,14 @@ response.
 <a name=".OracleJob.JupiterSwapTask"></a>
 
 ### OracleJob.JupiterSwapTask
-
+Fetch the simulated price for a swap on JupiterSwap.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| in_token_address | [string](#string) | optional |  |
-| out_token_address | [string](#string) | optional |  |
-| base_amount | [double](#double) | optional |  |
+| in_token_address | [string](#string) | optional | The input token address. |
+| out_token_address | [string](#string) | optional | The output token address. |
+| base_amount | [double](#double) | optional | The amount of tokens to swap. |
 
 
 
@@ -372,6 +375,16 @@ Fetch the current price for a Mango perpetual market
 
 
 
+<a name=".OracleJob.MarinadeStateTask"></a>
+
+### OracleJob.MarinadeStateTask
+
+
+
+
+
+
+
 <a name=".OracleJob.MaxTask"></a>
 
 ### OracleJob.MaxTask
@@ -407,8 +420,7 @@ Returns the mean of all the results returned by the provided subtasks and subjob
 <a name=".OracleJob.MedianTask"></a>
 
 ### OracleJob.MedianTask
-Returns the median of all the results returned by the provided subtasks and subjobs. Nested 
-tasks must return a Number.
+Returns the median of all the results returned by the provided subtasks and subjobs. Nested tasks must return a Number.
 
 
 | Field | Type | Label | Description |
@@ -425,8 +437,7 @@ tasks must return a Number.
 <a name=".OracleJob.MultiplyTask"></a>
 
 ### OracleJob.MultiplyTask
-This task will multiply a numerical input by a scalar value or by another
-aggregate.
+This task will multiply a numerical input by a scalar value or by another aggregator.
 
 
 | Field | Type | Label | Description |
@@ -434,6 +445,7 @@ aggregate.
 | scalar | [double](#double) | optional | Specifies a scalar to multiply by. |
 | aggregator_pubkey | [string](#string) | optional | Specifies an aggregator to multiply by. |
 | job | [OracleJob](#OracleJob) | optional | A job whose result is computed before multiplying our numerical input by that result. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -443,14 +455,14 @@ aggregate.
 <a name=".OracleJob.OracleTask"></a>
 
 ### OracleJob.OracleTask
-Fetch the current price of a Solana oracle protocol
+Fetch the current price of a Solana oracle protocol.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | switchboard_address | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
 | pyth_address | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/ |
-| chainlink_address | [string](#string) | optional | Devnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana |
+| chainlink_address | [string](#string) | optional | Mainnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana |
 | pyth_allowed_confidence_interval | [double](#double) | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected. |
 
 
@@ -461,16 +473,16 @@ Fetch the current price of a Solana oracle protocol
 <a name=".OracleJob.PancakeswapExchangeRateTask"></a>
 
 ### OracleJob.PancakeswapExchangeRateTask
-
+Fetch the swap price from PancakeSwap.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| in_token_address | [string](#string) | optional |  |
-| out_token_address | [string](#string) | optional |  |
-| in_token_amount | [double](#double) | optional |  |
-| slippage | [double](#double) | optional |  |
-| provider | [string](#string) | optional |  |
+| in_token_address | [string](#string) | optional | The input token address. |
+| out_token_address | [string](#string) | optional | The output token address. |
+| in_token_amount | [double](#double) | optional | The amount of tokens to swap. |
+| slippage | [double](#double) | optional | The allowable slippage in percent for the swap. |
+| provider | [string](#string) | optional | The RPC provider to use for the swap. |
 
 
 
@@ -480,7 +492,7 @@ Fetch the current price of a Solana oracle protocol
 <a name=".OracleJob.PerpMarketTask"></a>
 
 ### OracleJob.PerpMarketTask
-Fetch the current price of a perpetual market
+Fetch the current price of a perpetual market.
 
 
 | Field | Type | Label | Description |
@@ -505,6 +517,7 @@ Take the power of the working value.
 | ----- | ---- | ----- | ----------- |
 | scalar | [double](#double) | optional | Take the working value to the exponent of value. |
 | aggregator_pubkey | [string](#string) | optional | Take the working value to the exponent of the aggregators value. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -542,15 +555,30 @@ Fetch the latest swap price on Serum&#39;s orderbook
 
 
 
-<a name=".OracleJob.SplStakePoolTask"></a>
+<a name=".OracleJob.SolanaAccountDataFetchTask"></a>
 
-### OracleJob.SplStakePoolTask
-
+### OracleJob.SolanaAccountDataFetchTask
+Fetch the account data in a stringified buffer format.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| pubkey | [string](#string) | optional | The pubkey of the SPL Stake Pool.`` |
+| pubkey | [string](#string) | optional | The on-chain account to fetch the account data from. |
+
+
+
+
+
+
+<a name=".OracleJob.SplStakePoolTask"></a>
+
+### OracleJob.SplStakePoolTask
+Fetch the JSON representation of an SPL Stake Pool account.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| pubkey | [string](#string) | optional | The pubkey of the SPL Stake Pool. |
 
 
 
@@ -560,13 +588,13 @@ Fetch the latest swap price on Serum&#39;s orderbook
 <a name=".OracleJob.SplTokenParseTask"></a>
 
 ### OracleJob.SplTokenParseTask
-
+Fetch the JSON representation of an SPL token mint.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| token_account_address | [string](#string) | optional |  |
-| mint_address | [string](#string) | optional |  |
+| token_account_address | [string](#string) | optional | The publicKey of a token account to fetch the mintInfo for. |
+| mint_address | [string](#string) | optional | The publicKey of the token mint address. |
 
 
 
@@ -585,6 +613,7 @@ aggregate.
 | scalar | [double](#double) | optional | Specifies a scalar to subtract by. |
 | aggregator_pubkey | [string](#string) | optional | Specifies an aggregator to subtract by. |
 | job | [OracleJob](#OracleJob) | optional | A job whose result is computed before subtracting our numerical input by that result. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -594,16 +623,16 @@ aggregate.
 <a name=".OracleJob.SushiswapExchangeRateTask"></a>
 
 ### OracleJob.SushiswapExchangeRateTask
-
+Fetch the swap price from SushiSwap.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| in_token_address | [string](#string) | optional |  |
-| out_token_address | [string](#string) | optional |  |
-| in_token_amount | [double](#double) | optional |  |
-| slippage | [double](#double) | optional |  |
-| provider | [string](#string) | optional |  |
+| in_token_address | [string](#string) | optional | The input token address. |
+| out_token_address | [string](#string) | optional | The output token address. |
+| in_token_amount | [double](#double) | optional | The amount of tokens to swap. |
+| slippage | [double](#double) | optional | The allowable slippage in percent for the swap. |
+| provider | [string](#string) | optional | The RPC provider to use for the swap. |
 
 
 
@@ -613,7 +642,7 @@ aggregate.
 <a name=".OracleJob.SysclockOffsetTask"></a>
 
 ### OracleJob.SysclockOffsetTask
-
+Return the difference between an oracle&#39;s clock and the current timestamp at `SYSVAR_CLOCK_PUBKEY`.
 
 
 
@@ -662,6 +691,9 @@ aggregate.
 | pancakeswap_exchange_rate_task | [OracleJob.PancakeswapExchangeRateTask](#OracleJob.PancakeswapExchangeRateTask) | optional |  |
 | cache_task | [OracleJob.CacheTask](#OracleJob.CacheTask) | optional |  |
 | sysclock_offset_task | [OracleJob.SysclockOffsetTask](#OracleJob.SysclockOffsetTask) | optional |  |
+| marinade_state_task | [OracleJob.MarinadeStateTask](#OracleJob.MarinadeStateTask) | optional |  |
+| solana_account_data_fetch_task | [OracleJob.SolanaAccountDataFetchTask](#OracleJob.SolanaAccountDataFetchTask) | optional |  |
+| buffer_layout_parse_task | [OracleJob.BufferLayoutParseTask](#OracleJob.BufferLayoutParseTask) | optional |  |
 
 
 
@@ -671,7 +703,7 @@ aggregate.
 <a name=".OracleJob.TpsTask"></a>
 
 ### OracleJob.TpsTask
-
+Fetch the current transactions per second.
 
 
 
@@ -700,16 +732,16 @@ Takes a twap over a set period for a certain aggregator.
 <a name=".OracleJob.UniswapExchangeRateTask"></a>
 
 ### OracleJob.UniswapExchangeRateTask
-
+Fetch the swap price from UniSwap.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| in_token_address | [string](#string) | optional |  |
-| out_token_address | [string](#string) | optional |  |
-| in_token_amount | [double](#double) | optional |  |
-| slippage | [double](#double) | optional |  |
-| provider | [string](#string) | optional |  |
+| in_token_address | [string](#string) | optional | The input token address. |
+| out_token_address | [string](#string) | optional | The output token address. |
+| in_token_amount | [double](#double) | optional | The amount of tokens to swap. |
+| slippage | [double](#double) | optional | The allowable slippage in percent for the swap. |
+| provider | [string](#string) | optional | The RPC provider to use for the swap. |
 
 
 
@@ -726,6 +758,7 @@ Returns a specified value.
 | ----- | ---- | ----- | ----------- |
 | value | [double](#double) | optional | The value that will be returned from this task. |
 | aggregator_pubkey | [string](#string) | optional | Specifies an aggregatorr to pull the value of. |
+| big | [string](#string) | optional | A stringified big.js. `Accepts variable expansion syntax.` |
 
 
 
@@ -768,15 +801,39 @@ Opens and maintains a websocket for light speed data retrieval.
  
 
 
-<a name=".OracleJob.CacheTask.Method"></a>
+<a name=".OracleJob.BufferLayoutParseTask.BufferParseType"></a>
 
-### OracleJob.CacheTask.Method
+### OracleJob.BufferLayoutParseTask.BufferParseType
 
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
-| METHOD_GET | 0 |  |
-| METHOD_SET | 1 |  |
+| pubkey | 1 | A public key. |
+| bool | 2 | A boolean. |
+| u8 | 3 | An 8-bit unsigned value. |
+| i8 | 4 | An 8-bit signed value. |
+| u16 | 5 | A 16-bit unsigned value. |
+| i16 | 6 | A 16-bit signed value. |
+| u32 | 7 | A 32-bit unsigned value. |
+| i32 | 8 | A 32-bit signed value. |
+| f32 | 9 | A 32-bit IEEE floating point value. |
+| u64 | 10 | A 64-bit unsigned value. |
+| i64 | 11 | A 64-bit signed value. |
+| f64 | 12 | A 64-bit IEEE floating point value. |
+| u128 | 13 | A 128-bit unsigned value. |
+| i128 | 14 | A 128-bit signed value. |
+
+
+
+<a name=".OracleJob.BufferLayoutParseTask.Endian"></a>
+
+### OracleJob.BufferLayoutParseTask.Endian
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| LITTLE_ENDIAN | 0 |  |
+| BIG_ENDIAN | 1 |  |
 
 
 
