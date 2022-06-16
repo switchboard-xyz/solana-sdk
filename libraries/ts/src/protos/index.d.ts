@@ -729,13 +729,13 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IValueTask);
 
         /** ValueTask value. */
-        public value?: (number|null);
+        public value: number;
 
         /** ValueTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** ValueTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** ValueTask Value. */
         public Value?: ("value"|"aggregatorPubkey"|"big");
@@ -1041,16 +1041,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IDivideTask);
 
         /** DivideTask scalar. */
-        public scalar?: (number|null);
+        public scalar: number;
 
         /** DivideTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** DivideTask job. */
         public job?: (IOracleJob|null);
 
         /** DivideTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** DivideTask Denominator. */
         public Denominator?: ("scalar"|"aggregatorPubkey"|"job"|"big");
@@ -1152,16 +1152,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IMultiplyTask);
 
         /** MultiplyTask scalar. */
-        public scalar?: (number|null);
+        public scalar: number;
 
         /** MultiplyTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** MultiplyTask job. */
         public job?: (IOracleJob|null);
 
         /** MultiplyTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** MultiplyTask Multiple. */
         public Multiple?: ("scalar"|"aggregatorPubkey"|"job"|"big");
@@ -1263,16 +1263,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IAddTask);
 
         /** AddTask scalar. */
-        public scalar?: (number|null);
+        public scalar: number;
 
         /** AddTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** AddTask job. */
         public job?: (IOracleJob|null);
 
         /** AddTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** AddTask Addition. */
         public Addition?: ("scalar"|"aggregatorPubkey"|"job"|"big");
@@ -1374,16 +1374,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.ISubtractTask);
 
         /** SubtractTask scalar. */
-        public scalar?: (number|null);
+        public scalar: number;
 
         /** SubtractTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** SubtractTask job. */
         public job?: (IOracleJob|null);
 
         /** SubtractTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** SubtractTask Subtraction. */
         public Subtraction?: ("scalar"|"aggregatorPubkey"|"job"|"big");
@@ -1494,16 +1494,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.ILpTokenPriceTask);
 
         /** LpTokenPriceTask mercurialPoolAddress. */
-        public mercurialPoolAddress?: (string|null);
+        public mercurialPoolAddress: string;
 
         /** LpTokenPriceTask saberPoolAddress. */
-        public saberPoolAddress?: (string|null);
+        public saberPoolAddress: string;
 
         /** LpTokenPriceTask orcaPoolAddress. */
-        public orcaPoolAddress?: (string|null);
+        public orcaPoolAddress: string;
 
         /** LpTokenPriceTask raydiumPoolAddress. */
-        public raydiumPoolAddress?: (string|null);
+        public raydiumPoolAddress: string;
 
         /** LpTokenPriceTask priceFeedAddresses. */
         public priceFeedAddresses: string[];
@@ -1626,16 +1626,16 @@ export namespace OracleJob {
         public outTokenAddress: string;
 
         /** LpExchangeRateTask mercurialPoolAddress. */
-        public mercurialPoolAddress?: (string|null);
+        public mercurialPoolAddress: string;
 
         /** LpExchangeRateTask saberPoolAddress. */
-        public saberPoolAddress?: (string|null);
+        public saberPoolAddress: string;
 
         /** LpExchangeRateTask orcaPoolTokenMintAddress. */
-        public orcaPoolTokenMintAddress?: (string|null);
+        public orcaPoolTokenMintAddress: string;
 
         /** LpExchangeRateTask raydiumPoolAddress. */
-        public raydiumPoolAddress?: (string|null);
+        public raydiumPoolAddress: string;
 
         /** LpExchangeRateTask PoolAddress. */
         public PoolAddress?: ("mercurialPoolAddress"|"saberPoolAddress"|"orcaPoolTokenMintAddress"|"raydiumPoolAddress");
@@ -1830,7 +1830,7 @@ export namespace OracleJob {
         public stepJob?: (OracleJob.IMedianTask|null);
 
         /** XStepPriceTask stepAggregatorPubkey. */
-        public stepAggregatorPubkey?: (string|null);
+        public stepAggregatorPubkey: string;
 
         /** XStepPriceTask StepSource. */
         public StepSource?: ("stepJob"|"stepAggregatorPubkey");
@@ -2133,13 +2133,13 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IPowTask);
 
         /** PowTask scalar. */
-        public scalar?: (number|null);
+        public scalar: number;
 
         /** PowTask aggregatorPubkey. */
-        public aggregatorPubkey?: (string|null);
+        public aggregatorPubkey: string;
 
         /** PowTask big. */
-        public big?: (string|null);
+        public big: string;
 
         /** PowTask Exponent. */
         public Exponent?: ("scalar"|"aggregatorPubkey"|"big");
@@ -2544,16 +2544,16 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IPerpMarketTask);
 
         /** PerpMarketTask mangoMarketAddress. */
-        public mangoMarketAddress?: (string|null);
+        public mangoMarketAddress: string;
 
         /** PerpMarketTask driftMarketAddress. */
-        public driftMarketAddress?: (string|null);
+        public driftMarketAddress: string;
 
         /** PerpMarketTask zetaMarketAddress. */
-        public zetaMarketAddress?: (string|null);
+        public zetaMarketAddress: string;
 
         /** PerpMarketTask zoMarketAddress. */
-        public zoMarketAddress?: (string|null);
+        public zoMarketAddress: string;
 
         /** PerpMarketTask MarketAddress. */
         public MarketAddress?: ("mangoMarketAddress"|"driftMarketAddress"|"zetaMarketAddress"|"zoMarketAddress");
@@ -2655,13 +2655,13 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.IOracleTask);
 
         /** OracleTask switchboardAddress. */
-        public switchboardAddress?: (string|null);
+        public switchboardAddress: string;
 
         /** OracleTask pythAddress. */
-        public pythAddress?: (string|null);
+        public pythAddress: string;
 
         /** OracleTask chainlinkAddress. */
-        public chainlinkAddress?: (string|null);
+        public chainlinkAddress: string;
 
         /** OracleTask pythAllowedConfidenceInterval. */
         public pythAllowedConfidenceInterval: number;
@@ -3030,10 +3030,10 @@ export namespace OracleJob {
         constructor(properties?: OracleJob.ISplTokenParseTask);
 
         /** SplTokenParseTask tokenAccountAddress. */
-        public tokenAccountAddress?: (string|null);
+        public tokenAccountAddress: string;
 
         /** SplTokenParseTask mintAddress. */
-        public mintAddress?: (string|null);
+        public mintAddress: string;
 
         /** SplTokenParseTask AccountAddress. */
         public AccountAddress?: ("tokenAccountAddress"|"mintAddress");

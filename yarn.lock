@@ -4836,6 +4836,57 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
+"@switchboard-xyz/switchboard-api@^0.2.201":
+  version "0.2.201"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-api/-/switchboard-api-0.2.201.tgz#d082206d521d24dbcdeb06a77e6637a56ab883eb"
+  integrity sha512-hlxgeYmO6dbOEcmQzT1SqRxdiCFyVOMpyW4HFPgmPKT0+wSVkjsLc+BKkMGYPDaO0sWMLTJrj0FGhhTsrqd8Mg==
+  dependencies:
+    "@solana/web3.js" "^1.17.0"
+    form-data "^4.0.0"
+    protobufjs "^6.10.2"
+    rpc-websockets "^7.4.12"
+    typedoc "^0.22.15"
+    ws "^7.4.6"
+
+"@switchboard-xyz/switchboard-v2@^0.0.108":
+  version "0.0.108"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.108.tgz#9e0a69cf4e8f8fef79cca8eeb1bede0ee1435e53"
+  integrity sha512-mJi/WS3ZWhXwet+lZvIKfdntw7ltX43GiYbEaAhS/WIHFN+iPIdIoI3mjEpka5Ptws3bDCZe3c6+ZDHdfJ0PFg==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@switchboard-xyz/eslint-config" "^0.1.1"
+    "@switchboard-xyz/switchboard-api" "^0.2.201"
+    assert "^2.0.0"
+    big.js "^6.1.1"
+    bs58 "^4.0.1"
+    buffer-layout "^1.2.0"
+    chalk "^4.1.2"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    dotenv "^16.0.0"
+    long "^4.0.0"
+    mocha "^9.1.1"
+    node-fetch "^3.2.3"
+    protobufjs "^6.10.2"
+
+"@switchboard-xyz/switchboard-v2@^0.0.109":
+  version "0.0.109"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.109.tgz#83b4f1310b0b15a2a9aef5d22adbac8ffac99bbb"
+  integrity sha512-NbGie6mZcMBAbRMOoUeh89M8EeA99g8CUz5im3PAAUvUFJ3BkkmP4rqtoQkVsW83G5ZZax5wBvLA1E5BOa9aYA==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    assert "^2.0.0"
+    big.js "^6.1.1"
+    bs58 "^4.0.1"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    long "^4.0.0"
+    mocha "^9.1.1"
+    node-fetch "^3.2.3"
+    protobufjs "^6.11.3"
+
 "@switchboard-xyz/switchboardv2-cli@^0.1.25":
   version "0.1.28"
   resolved "https://registry.npmjs.org/@switchboard-xyz/switchboardv2-cli/-/switchboardv2-cli-0.1.28.tgz#a63388225a874e252a9868b6b3b291d1954b9327"
@@ -7267,7 +7318,7 @@ combine-promises@^1.1.0:
   resolved "https://registry.npmjs.org/combine-promises/-/combine-promises-1.1.0.tgz"
   integrity sha512-ZI9jvcLDxqwaXEixOhArm3r7ReIivsXkpbyEWyeOhzz1QS0iSgBPnWvEqvIQtYyamGCYA88gFhmUrs9hrrQ0pg==
 
-combined-stream@^1.0.6, combined-stream@~1.0.6:
+combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   version "1.0.8"
   resolved "https://registry.npmjs.org/combined-stream/-/combined-stream-1.0.8.tgz"
   integrity sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==
@@ -9670,6 +9721,15 @@ fork-ts-checker-webpack-plugin@^6.5.0:
     schema-utils "2.7.0"
     semver "^7.3.2"
     tapable "^1.0.0"
+
+form-data@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/form-data/-/form-data-4.0.0.tgz#93919daeaf361ee529584b9b31664dc12c9fa452"
+  integrity sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww==
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    mime-types "^2.1.12"
 
 form-data@~2.3.2:
   version "2.3.3"
@@ -14377,7 +14437,7 @@ proto3-json-serializer@^0.1.8:
   dependencies:
     protobufjs "^6.11.2"
 
-protobufjs@6.11.3, protobufjs@^6.11.2, protobufjs@^6.11.3:
+protobufjs@6.11.3, protobufjs@^6.10.2, protobufjs@^6.11.2, protobufjs@^6.11.3:
   version "6.11.3"
   resolved "https://registry.npmjs.org/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
   integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
@@ -15331,6 +15391,19 @@ rimraf@^3.0.0, rimraf@^3.0.2:
   integrity sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==
   dependencies:
     glob "^7.1.3"
+
+rpc-websockets@^7.4.12:
+  version "7.5.0"
+  resolved "https://registry.npmjs.org/rpc-websockets/-/rpc-websockets-7.5.0.tgz#bbeb87572e66703ff151e50af1658f98098e2748"
+  integrity sha512-9tIRi1uZGy7YmDjErf1Ax3wtqdSSLIlnmL5OtOzgd5eqPKbsPpwDP5whUDO2LQay3Xp0CcHlcNSGzacNRluBaQ==
+  dependencies:
+    "@babel/runtime" "^7.17.2"
+    eventemitter3 "^4.0.7"
+    uuid "^8.3.2"
+    ws "^8.5.0"
+  optionalDependencies:
+    bufferutil "^4.0.1"
+    utf-8-validate "^5.0.2"
 
 rpc-websockets@^7.4.2:
   version "7.4.18"
@@ -16886,7 +16959,7 @@ typescript@^4.2.4, typescript@^4.3.2, typescript@^4.3.5, typescript@^4.6.3:
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.6.3.tgz"
   integrity sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==
 
-typescript@^4.4.3:
+typescript@^4.4.3, typescript@^4.7:
   version "4.7.3"
   resolved "https://registry.npmjs.org/typescript/-/typescript-4.7.3.tgz#8364b502d5257b540f9de4c40be84c98e23a129d"
   integrity sha512-WOkT3XYvrpXx4vMMqlD+8R8R37fZkjyLGlxavMc4iB8lrl8L0DeTcHbYgw/v0N/z9wAFsgBhcsF0ruoySS22mA==
@@ -17807,6 +17880,11 @@ ws@^7.0.0, ws@^7.3.1, ws@^7.4.5:
   version "7.5.7"
   resolved "https://registry.npmjs.org/ws/-/ws-7.5.7.tgz"
   integrity sha512-KMvVuFzpKBuiIXW3E4u3mySRO2/mCHSyZDJQM5NQ9Q9KHWHWh0NHgfbRMLLrceUK5qAL4ytALJbpRMjixFZh8A==
+
+ws@^7.4.6:
+  version "7.5.8"
+  resolved "https://registry.npmjs.org/ws/-/ws-7.5.8.tgz#ac2729881ab9e7cbaf8787fe3469a48c5c7f636a"
+  integrity sha512-ri1Id1WinAX5Jqn9HejiGb8crfRio0Qgu8+MtL36rlTA6RLsMdWt1Az/19A2Qij6uSHUMphEFaTKa4WG+UNHNw==
 
 ws@^8.4.2, ws@^8.5.0:
   version "8.5.0"

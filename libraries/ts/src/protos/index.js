@@ -1799,27 +1799,27 @@
     
             /**
              * ValueTask value.
-             * @member {number|null|undefined} value
+             * @member {number} value
              * @memberof OracleJob.ValueTask
              * @instance
              */
-            ValueTask.prototype.value = null;
+            ValueTask.prototype.value = 0;
     
             /**
              * ValueTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.ValueTask
              * @instance
              */
-            ValueTask.prototype.aggregatorPubkey = null;
+            ValueTask.prototype.aggregatorPubkey = "";
     
             /**
              * ValueTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.ValueTask
              * @instance
              */
-            ValueTask.prototype.big = null;
+            ValueTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -2567,19 +2567,19 @@
     
             /**
              * DivideTask scalar.
-             * @member {number|null|undefined} scalar
+             * @member {number} scalar
              * @memberof OracleJob.DivideTask
              * @instance
              */
-            DivideTask.prototype.scalar = null;
+            DivideTask.prototype.scalar = 0;
     
             /**
              * DivideTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.DivideTask
              * @instance
              */
-            DivideTask.prototype.aggregatorPubkey = null;
+            DivideTask.prototype.aggregatorPubkey = "";
     
             /**
              * DivideTask job.
@@ -2591,11 +2591,11 @@
     
             /**
              * DivideTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.DivideTask
              * @instance
              */
-            DivideTask.prototype.big = null;
+            DivideTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -2862,19 +2862,19 @@
     
             /**
              * MultiplyTask scalar.
-             * @member {number|null|undefined} scalar
+             * @member {number} scalar
              * @memberof OracleJob.MultiplyTask
              * @instance
              */
-            MultiplyTask.prototype.scalar = null;
+            MultiplyTask.prototype.scalar = 0;
     
             /**
              * MultiplyTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.MultiplyTask
              * @instance
              */
-            MultiplyTask.prototype.aggregatorPubkey = null;
+            MultiplyTask.prototype.aggregatorPubkey = "";
     
             /**
              * MultiplyTask job.
@@ -2886,11 +2886,11 @@
     
             /**
              * MultiplyTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.MultiplyTask
              * @instance
              */
-            MultiplyTask.prototype.big = null;
+            MultiplyTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -3157,19 +3157,19 @@
     
             /**
              * AddTask scalar.
-             * @member {number|null|undefined} scalar
+             * @member {number} scalar
              * @memberof OracleJob.AddTask
              * @instance
              */
-            AddTask.prototype.scalar = null;
+            AddTask.prototype.scalar = 0;
     
             /**
              * AddTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.AddTask
              * @instance
              */
-            AddTask.prototype.aggregatorPubkey = null;
+            AddTask.prototype.aggregatorPubkey = "";
     
             /**
              * AddTask job.
@@ -3181,11 +3181,11 @@
     
             /**
              * AddTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.AddTask
              * @instance
              */
-            AddTask.prototype.big = null;
+            AddTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -3452,19 +3452,19 @@
     
             /**
              * SubtractTask scalar.
-             * @member {number|null|undefined} scalar
+             * @member {number} scalar
              * @memberof OracleJob.SubtractTask
              * @instance
              */
-            SubtractTask.prototype.scalar = null;
+            SubtractTask.prototype.scalar = 0;
     
             /**
              * SubtractTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.SubtractTask
              * @instance
              */
-            SubtractTask.prototype.aggregatorPubkey = null;
+            SubtractTask.prototype.aggregatorPubkey = "";
     
             /**
              * SubtractTask job.
@@ -3476,11 +3476,11 @@
     
             /**
              * SubtractTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.SubtractTask
              * @instance
              */
-            SubtractTask.prototype.big = null;
+            SubtractTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -3752,35 +3752,35 @@
     
             /**
              * LpTokenPriceTask mercurialPoolAddress.
-             * @member {string|null|undefined} mercurialPoolAddress
+             * @member {string} mercurialPoolAddress
              * @memberof OracleJob.LpTokenPriceTask
              * @instance
              */
-            LpTokenPriceTask.prototype.mercurialPoolAddress = null;
+            LpTokenPriceTask.prototype.mercurialPoolAddress = "";
     
             /**
              * LpTokenPriceTask saberPoolAddress.
-             * @member {string|null|undefined} saberPoolAddress
+             * @member {string} saberPoolAddress
              * @memberof OracleJob.LpTokenPriceTask
              * @instance
              */
-            LpTokenPriceTask.prototype.saberPoolAddress = null;
+            LpTokenPriceTask.prototype.saberPoolAddress = "";
     
             /**
              * LpTokenPriceTask orcaPoolAddress.
-             * @member {string|null|undefined} orcaPoolAddress
+             * @member {string} orcaPoolAddress
              * @memberof OracleJob.LpTokenPriceTask
              * @instance
              */
-            LpTokenPriceTask.prototype.orcaPoolAddress = null;
+            LpTokenPriceTask.prototype.orcaPoolAddress = "";
     
             /**
              * LpTokenPriceTask raydiumPoolAddress.
-             * @member {string|null|undefined} raydiumPoolAddress
+             * @member {string} raydiumPoolAddress
              * @memberof OracleJob.LpTokenPriceTask
              * @instance
              */
-            LpTokenPriceTask.prototype.raydiumPoolAddress = null;
+            LpTokenPriceTask.prototype.raydiumPoolAddress = "";
     
             /**
              * LpTokenPriceTask priceFeedAddresses.
@@ -4160,35 +4160,35 @@
     
             /**
              * LpExchangeRateTask mercurialPoolAddress.
-             * @member {string|null|undefined} mercurialPoolAddress
+             * @member {string} mercurialPoolAddress
              * @memberof OracleJob.LpExchangeRateTask
              * @instance
              */
-            LpExchangeRateTask.prototype.mercurialPoolAddress = null;
+            LpExchangeRateTask.prototype.mercurialPoolAddress = "";
     
             /**
              * LpExchangeRateTask saberPoolAddress.
-             * @member {string|null|undefined} saberPoolAddress
+             * @member {string} saberPoolAddress
              * @memberof OracleJob.LpExchangeRateTask
              * @instance
              */
-            LpExchangeRateTask.prototype.saberPoolAddress = null;
+            LpExchangeRateTask.prototype.saberPoolAddress = "";
     
             /**
              * LpExchangeRateTask orcaPoolTokenMintAddress.
-             * @member {string|null|undefined} orcaPoolTokenMintAddress
+             * @member {string} orcaPoolTokenMintAddress
              * @memberof OracleJob.LpExchangeRateTask
              * @instance
              */
-            LpExchangeRateTask.prototype.orcaPoolTokenMintAddress = null;
+            LpExchangeRateTask.prototype.orcaPoolTokenMintAddress = "";
     
             /**
              * LpExchangeRateTask raydiumPoolAddress.
-             * @member {string|null|undefined} raydiumPoolAddress
+             * @member {string} raydiumPoolAddress
              * @memberof OracleJob.LpExchangeRateTask
              * @instance
              */
-            LpExchangeRateTask.prototype.raydiumPoolAddress = null;
+            LpExchangeRateTask.prototype.raydiumPoolAddress = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -4693,11 +4693,11 @@
     
             /**
              * XStepPriceTask stepAggregatorPubkey.
-             * @member {string|null|undefined} stepAggregatorPubkey
+             * @member {string} stepAggregatorPubkey
              * @memberof OracleJob.XStepPriceTask
              * @instance
              */
-            XStepPriceTask.prototype.stepAggregatorPubkey = null;
+            XStepPriceTask.prototype.stepAggregatorPubkey = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -5388,27 +5388,27 @@
     
             /**
              * PowTask scalar.
-             * @member {number|null|undefined} scalar
+             * @member {number} scalar
              * @memberof OracleJob.PowTask
              * @instance
              */
-            PowTask.prototype.scalar = null;
+            PowTask.prototype.scalar = 0;
     
             /**
              * PowTask aggregatorPubkey.
-             * @member {string|null|undefined} aggregatorPubkey
+             * @member {string} aggregatorPubkey
              * @memberof OracleJob.PowTask
              * @instance
              */
-            PowTask.prototype.aggregatorPubkey = null;
+            PowTask.prototype.aggregatorPubkey = "";
     
             /**
              * PowTask big.
-             * @member {string|null|undefined} big
+             * @member {string} big
              * @memberof OracleJob.PowTask
              * @instance
              */
-            PowTask.prototype.big = null;
+            PowTask.prototype.big = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -6328,35 +6328,35 @@
     
             /**
              * PerpMarketTask mangoMarketAddress.
-             * @member {string|null|undefined} mangoMarketAddress
+             * @member {string} mangoMarketAddress
              * @memberof OracleJob.PerpMarketTask
              * @instance
              */
-            PerpMarketTask.prototype.mangoMarketAddress = null;
+            PerpMarketTask.prototype.mangoMarketAddress = "";
     
             /**
              * PerpMarketTask driftMarketAddress.
-             * @member {string|null|undefined} driftMarketAddress
+             * @member {string} driftMarketAddress
              * @memberof OracleJob.PerpMarketTask
              * @instance
              */
-            PerpMarketTask.prototype.driftMarketAddress = null;
+            PerpMarketTask.prototype.driftMarketAddress = "";
     
             /**
              * PerpMarketTask zetaMarketAddress.
-             * @member {string|null|undefined} zetaMarketAddress
+             * @member {string} zetaMarketAddress
              * @memberof OracleJob.PerpMarketTask
              * @instance
              */
-            PerpMarketTask.prototype.zetaMarketAddress = null;
+            PerpMarketTask.prototype.zetaMarketAddress = "";
     
             /**
              * PerpMarketTask zoMarketAddress.
-             * @member {string|null|undefined} zoMarketAddress
+             * @member {string} zoMarketAddress
              * @memberof OracleJob.PerpMarketTask
              * @instance
              */
-            PerpMarketTask.prototype.zoMarketAddress = null;
+            PerpMarketTask.prototype.zoMarketAddress = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
@@ -6617,27 +6617,27 @@
     
             /**
              * OracleTask switchboardAddress.
-             * @member {string|null|undefined} switchboardAddress
+             * @member {string} switchboardAddress
              * @memberof OracleJob.OracleTask
              * @instance
              */
-            OracleTask.prototype.switchboardAddress = null;
+            OracleTask.prototype.switchboardAddress = "";
     
             /**
              * OracleTask pythAddress.
-             * @member {string|null|undefined} pythAddress
+             * @member {string} pythAddress
              * @memberof OracleJob.OracleTask
              * @instance
              */
-            OracleTask.prototype.pythAddress = null;
+            OracleTask.prototype.pythAddress = "";
     
             /**
              * OracleTask chainlinkAddress.
-             * @member {string|null|undefined} chainlinkAddress
+             * @member {string} chainlinkAddress
              * @memberof OracleJob.OracleTask
              * @instance
              */
-            OracleTask.prototype.chainlinkAddress = null;
+            OracleTask.prototype.chainlinkAddress = "";
     
             /**
              * OracleTask pythAllowedConfidenceInterval.
@@ -7456,19 +7456,19 @@
     
             /**
              * SplTokenParseTask tokenAccountAddress.
-             * @member {string|null|undefined} tokenAccountAddress
+             * @member {string} tokenAccountAddress
              * @memberof OracleJob.SplTokenParseTask
              * @instance
              */
-            SplTokenParseTask.prototype.tokenAccountAddress = null;
+            SplTokenParseTask.prototype.tokenAccountAddress = "";
     
             /**
              * SplTokenParseTask mintAddress.
-             * @member {string|null|undefined} mintAddress
+             * @member {string} mintAddress
              * @memberof OracleJob.SplTokenParseTask
              * @instance
              */
-            SplTokenParseTask.prototype.mintAddress = null;
+            SplTokenParseTask.prototype.mintAddress = "";
     
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
