@@ -32,6 +32,7 @@ jobs:
       - name: Build website
         run: |
           yarn install --frozen-lockfile
+          yarn workspaces run build
           yarn docs:build
       # Popular action to deploy to GitHub Pages:
       # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
