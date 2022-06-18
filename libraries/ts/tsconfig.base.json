@@ -1,0 +1,24 @@
+{
+  "include": ["./src/**/*"],
+  "exclude": ["tests/**/*", "lib", "node_modules"],
+  "files": ["src/index.ts"],
+  "compilerOptions": {
+    "composite": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationMap": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["mocha", "node", "long"],
+    "allowJs": true,
+    "checkJs": false,
+    // strict
+    "strict": false,
+    "noImplicitAny": false
+  }
+}

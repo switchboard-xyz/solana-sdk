@@ -1,12 +1,11 @@
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
-import { getIdlAddress, getProgramDataAddress } from "../anchor";
+import { getIdlAddress, getProgramDataAddress } from "../anchor.js";
 
 const LATEST_DOCKER_VERSION = "dev-v2-06-08-22";
 
@@ -297,7 +296,7 @@ secrets:
     });
 
     const programId = alternateProgramId ?? sbv2.getSwitchboardPid("devnet");
-    const wallet = new NodeWallet(payerKeypair);
+    const wallet = new sbv2.AnchorWallet(payerKeypair);
     const provider = new anchor.AnchorProvider(connection, wallet, {});
 
     const anchorIdl = await anchor.Program.fetchIdl(programId, provider);

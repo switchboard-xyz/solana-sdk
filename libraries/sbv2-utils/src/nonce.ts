@@ -174,6 +174,7 @@ export async function getOracleNonceQueueAccounts(
       if (nonceAccountExists(nonce.accountInfo ?? undefined)) {
         return nonce.pubkey;
       }
+      return undefined;
     })
     .filter(Boolean) as PublicKey[];
   return nonceQueuePubkeys;

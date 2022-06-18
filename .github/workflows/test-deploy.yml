@@ -32,4 +32,5 @@ jobs:
       - name: Test build
         run: |
           yarn install --frozen-lockfile
+          yarn workspaces run build
           yarn docs:build

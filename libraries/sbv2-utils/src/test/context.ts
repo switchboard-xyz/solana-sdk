@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
-import type NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import fs from "fs";
 import path from "path";
-import { awaitOpenRound, createAggregator } from "../feed";
+import { awaitOpenRound, createAggregator } from "../feed.js";
 
 export interface ISwitchboardTestContext {
   program: anchor.Program;
@@ -56,7 +55,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     provider: anchor.AnchorProvider,
     queueKey = "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
   ) {
-    const payerKeypair = (provider.wallet as NodeWallet).payer;
+    const payerKeypair = (provider.wallet as sbv2.AnchorWallet).payer;
     let program: anchor.Program;
     try {
       program = await sbv2.loadSwitchboardProgram(

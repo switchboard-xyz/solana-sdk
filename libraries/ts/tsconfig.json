@@ -1,40 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "moduleResolution": "node",
-    "target": "es2019",
-    "module": "ES2020",
-    "rootDir": "src",
-    "noImplicitAny": false,
-    "outDir": "lib/esm",
-    "skipLibCheck": true,
     "esModuleInterop": true,
-    "noImplicitReturns": false,
-    "importsNotUsedAsValues": "preserve",
-    "strict": false,
-    "allowSyntheticDefaultImports": true,
-    "noEmit": false,
-    "emitDeclarationOnly": false,
-    "types": ["mocha", "node", "long"],
-    "allowJs": true,
-    "checkJs": false,
-    "sourceMap": true,
-    "inlineSources": true,
-    "lib": ["esnext"],
-    "listEmittedFiles": false,
-    "listFiles": false,
-    "noFallthroughCasesInSwitch": true,
-    "pretty": true,
-    "resolveJsonModule": true,
-    "traceResolution": false,
-    "downlevelIteration": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["tests/**/*", "lib", "node_modules"],
-  "files": ["src/index.ts"],
-  "typedocOptions": {
-    "entryPoints": ["src/index.ts"],
-    "out": "../../website/static/api/ts"
+    "moduleResolution": "node",
+    "module": "es2022",
+    "target": "es2019",
+    "outDir": "lib/esm/",
+    "rootDir": "./src"
   }
 }

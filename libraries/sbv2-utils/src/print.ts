@@ -1,4 +1,4 @@
-import { BN, Program } from "@project-serum/anchor";
+import * as anchor from "@project-serum/anchor";
 import { AccountMeta, PublicKey, TokenAmount } from "@solana/web3.js";
 import {
   AggregatorAccount,
@@ -17,12 +17,12 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import type Big from "big.js";
 import chalk from "chalk";
-import { anchorBNtoDateTimeString } from "./date";
-import type { SwitchboardAccountType } from "./switchboard";
+import { anchorBNtoDateTimeString } from "./date.js";
+import type { SwitchboardAccountType } from "./switchboard.js";
 
 export const chalkString = (
   label: string,
-  value: string | number | boolean | PublicKey | Big | BN,
+  value: string | number | boolean | PublicKey | Big | anchor.BN,
   padding = 16
 ): string => {
   let valueString = "";
@@ -384,7 +384,7 @@ export async function prettyPrintAggregator(
     .toString();
 
   const resultTimestamp = anchorBNtoDateTimeString(
-    data.latestConfirmedRound.roundOpenTimestamp ?? new BN(0)
+    data.latestConfirmedRound.roundOpenTimestamp ?? new anchor.BN(0)
   );
 
   const varianceThreshold = parseFloat(
@@ -663,7 +663,7 @@ export async function prettyPrintCrank(
 }
 
 export async function prettyPrintSwitchboardAccount(
-  program: Program,
+  program: anchor.Program,
   publicKey: PublicKey,
   accountType: SwitchboardAccountType
 ): Promise<string> {

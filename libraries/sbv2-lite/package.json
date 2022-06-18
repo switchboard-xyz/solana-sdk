@@ -22,11 +22,10 @@
     }
   },
   "scripts": {
-    "docgen": "yarn build && npx typedoc",
+    "docgen": "typedoc --entryPoints src/index.ts --out ../../website/static/api/ts-lite",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
-    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
-    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
-    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm",
+    "build": "shx rm -rf lib && tsc && tsc -p tsconfig.cjs.json",
+    "watch": "tsc -p tsconfig.cjs.json --watch",
     "prepublishOnly": "yarn build && yarn test"
   },
   "author": "",
