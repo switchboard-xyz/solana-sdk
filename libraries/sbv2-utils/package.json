@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/sbv2-utils",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "description": "some basic utility functions when working with switchboard-v2",
   "author": "",
   "license": "ISC",
@@ -16,19 +16,13 @@
   ],
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
-  "exports": {
-    ".": {
-      "require": "./lib/cjs/index.js",
-      "import": "./lib/esm/index.js"
-    }
-  },
+  "types": "lib/cjs/index.d.ts",
   "scripts": {
-    "docgen": "yarn build && npx typedoc",
+    "docgen": "typedoc --entryPoints src/index.ts --out ../../website/static/api/sbv2-utils",
     "test": "echo \"No test script for @switchboard-xyz/sbv2-utils\" && exit 0",
-    "build:cjs": "shx rm -rf lib/cjs && tsc -p tsconfig.cjs.json && shx echo '{\"type\": \"commonjs\"}' > lib/cjs/package.json",
-    "build:esm": "shx rm -rf lib/esm && tsc -p tsconfig.esm.json && shx echo '{\"type\": \"module\"}' > lib/esm/package.json",
-    "build": "shx rm -rf lib && yarn build:cjs && yarn build:esm && shx rm lib/*.tsbuildinfo",
-    "prepublishOnly": "yarn build"
+    "build": "shx rm -rf lib && tsc && tsc -p tsconfig.cjs.json",
+    "watch": "tsc -p tsconfig.cjs.json --watch",
+    "prepublishOnly": "shx rm -rf lib && yarn build"
   },
   "dependencies": {
     "@orca-so/sdk": "^1.2.24",
@@ -36,7 +30,7 @@
     "@saberhq/token-utils": "^1.12.68",
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.42.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.109",
+    "@switchboard-xyz/switchboard-v2": "^0.0.111",
     "big.js": "^6.1.1",
     "chalk": "4",
     "decimal.js": "^10.3.1",

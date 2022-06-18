@@ -12,7 +12,7 @@ import {
   ProgramStateAccount,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import { InvalidSwitchboardAccount } from "./errors";
+import { InvalidSwitchboardAccount } from "./errors.js";
 
 export const SWITCHBOARD_ACCOUNT_TYPES = [
   "JobAccountData",

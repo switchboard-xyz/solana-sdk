@@ -21,7 +21,8 @@ import {
 import assert from "assert";
 import Big from "big.js";
 import * as crypto from "crypto";
-import { OracleJob } from "./protos";
+/*eslint-disable import/extensions */
+import protos from "./protos/index.js";
 
 /**
  * Switchboard Devnet Program ID
@@ -530,9 +531,9 @@ export interface AggregatorSaveResultParams {
    */
   maxResponse: Big;
   /**
-   *  List of OracleJobs that were performed to produce this result.
+   *  List of protos.OracleJobs that were performed to produce this result.
    */
-  jobs: Array<OracleJob>;
+  jobs: Array<protos.OracleJob>;
   /**
    *  Authority of the queue the aggregator is attached to.
    */
@@ -886,11 +887,11 @@ export class AggregatorAccount {
    * Produces a hash of all the jobs currently in the aggregator
    * @return hash of all the feed jobs.
    */
-  produceJobsHash(jobs: Array<OracleJob>): crypto.Hash {
+  produceJobsHash(jobs: Array<protos.OracleJob>): crypto.Hash {
     const hash = crypto.createHash("sha256");
     for (const job of jobs) {
       const jobHasher = crypto.createHash("sha256");
-      jobHasher.update(OracleJob.encodeDelimited(job).finish());
+      jobHasher.update(protos.OracleJob.encodeDelimited(job).finish());
       hash.update(jobHasher.digest());
     }
     return hash;
@@ -936,9 +937,9 @@ export class AggregatorAccount {
 
   /**
    * Load and deserialize all jobs stored in this aggregator
-   * @return Array<OracleJob>
+   * @return Array<protos.OracleJob>
    */
-  async loadJobs(aggregator?: any): Promise<Array<OracleJob>> {
+  async loadJobs(aggregator?: any): Promise<Array<protos.OracleJob>> {
     const coder = new anchor.BorshAccountsCoder(this.program.idl);
 
     aggregator = aggregator ?? (await this.loadData());
@@ -952,7 +953,7 @@ export class AggregatorAccount {
     }
     const jobs = jobAccountDatas.map((item) => {
       const decoded = coder.decode("JobAccountData", item.account.data);
-      return OracleJob.decodeDelimited(decoded.data);
+      return protos.OracleJob.decodeDelimited(decoded.data);
     });
     return jobs;
   }
@@ -1537,11 +1538,11 @@ export class JobAccount {
 
   /**
    * Load and parse the protobuf from the raw buffer stored in the JobAccount.
-   * @return OracleJob
+   * @return protos.OracleJob
    */
-  async loadJob(): Promise<OracleJob> {
+  async loadJob(): Promise<protos.OracleJob> {
     const job = await this.loadData();
-    return OracleJob.decodeDelimited(job.data);
+    return protos.OracleJob.decodeDelimited(job.data);
   }
 
   /**
@@ -1609,8 +1610,8 @@ export class JobAccount {
   static decodeJob(
     program: anchor.Program,
     accountInfo: AccountInfo<Buffer>
-  ): OracleJob {
-    return OracleJob.decodeDelimited(
+  ): protos.OracleJob {
+    return protos.OracleJob.decodeDelimited(
       JobAccount.decode(program, accountInfo).data!
     );
   }

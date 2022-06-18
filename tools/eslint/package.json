@@ -13,6 +13,7 @@
   "main": "index.js",
   "scripts": {
     "build": "echo \"No build script required for workspace eslint-config\" && exit 0",
+    "watch": "echo \"No watch script required for workspace eslint-config\" && exit 0",
     "test": "echo \"No test script required for workspace eslint-config\" && exit 0"
   },
   "peerDependencies": {

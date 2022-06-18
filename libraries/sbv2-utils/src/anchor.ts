@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey";
+/*eslint-disable import/extensions */
+import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey.js";
 import {
   Cluster,
   clusterApiUrl,
@@ -8,14 +8,15 @@ import {
   Keypair,
   PublicKey,
 } from "@solana/web3.js";
+import { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
 import fs from "fs";
 import path from "path";
 import toml from "toml";
-import { DEFAULT_KEYPAIR } from "./const";
-import { NoPayerKeypairProvided } from "./errors";
+import { DEFAULT_KEYPAIR } from "./const.js";
+import { NoPayerKeypairProvided } from "./errors.js";
 
 export function programWallet(program: anchor.Program): Keypair {
-  return ((program.provider as anchor.AnchorProvider).wallet as NodeWallet)
+  return ((program.provider as anchor.AnchorProvider).wallet as AnchorWallet)
     .payer;
 }
 
@@ -29,7 +30,7 @@ export const getDefaultProvider = (
 ): anchor.AnchorProvider => {
   return new anchor.AnchorProvider(
     connection,
-    new NodeWallet(DEFAULT_KEYPAIR),
+    new AnchorWallet(DEFAULT_KEYPAIR),
     anchor.AnchorProvider.defaultOptions()
   );
 };

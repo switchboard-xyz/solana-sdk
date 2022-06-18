@@ -1,40 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "rootDir": "src",
-    "noImplicitAny": false,
-    "outDir": "lib/esm",
-    "skipLibCheck": true,
     "esModuleInterop": true,
-    "noImplicitReturns": false,
-    "importsNotUsedAsValues": "preserve",
-    "noEmit": false,
-    "emitDeclarationOnly": false,
-    "strict": true,
-    // "strictNullChecks": false,
-
-    "inlineSources": true,
-    "lib": ["esnext"],
-    "listEmittedFiles": false,
-    "listFiles": false,
-    "noFallthroughCasesInSwitch": true,
-    "pretty": true,
-    "resolveJsonModule": true,
-    "traceResolution": false,
-    "downlevelIteration": true,
-    "sourceMap": true,
-
-    "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../ts"]
-    }
-  },
-  "include": ["src/**/*"],
-  "exclude": ["esbuild.js", "lib"],
-  "references": [{ "path": "../ts" }],
-  "files": ["src/index.ts"],
-  "typedocOptions": {
-    "entryPoints": ["src/index.ts"],
-    "out": "../../website/static/api/sbv2-utils"
+    "moduleResolution": "node",
+    "module": "es2022",
+    "target": "es2019",
+    "outDir": "lib/esm/",
+    "rootDir": "./src"
   }
 }

@@ -13,6 +13,7 @@
     "website"
   ],
   "scripts": {
+    "watch": "yarn workspace website start & yarn workspaces run watch",
     "start": "echo \"Error: no start script specified\" && exit 1",
     "anchor:setup": "anchor build && node ./tools/scripts/setup-example-programs.js",
     "test:anchor": "yarn workspace anchor-feed-parser anchor:test && yarn workspace spl-feed-parser anchor:test && yarn workspace anchor-vrf-parser anchor:test",

@@ -16,8 +16,8 @@ import {
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
-import { chalkString } from "./print";
-import { packAndSend } from "./transaction";
+import { chalkString } from "./print.js";
+import { packAndSend } from "./transaction.js";
 
 export interface CreateQueueParams {
   authority?: PublicKey;

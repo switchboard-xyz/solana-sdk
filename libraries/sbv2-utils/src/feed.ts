@@ -18,7 +18,7 @@ import {
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
-import { promiseWithTimeout } from "./async";
+import { promiseWithTimeout } from "./async.js";
 
 export async function awaitOpenRound(
   aggregatorAccount: AggregatorAccount,
