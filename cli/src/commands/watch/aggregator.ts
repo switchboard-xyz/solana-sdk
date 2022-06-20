@@ -50,22 +50,27 @@ export default class WatchAggregator extends BaseCommand {
         ) + "\r\n"
       )
     );
-    const ws = this.program.addEventListener(
-      "AggregatorValueUpdateEvent",
-      (event, slot) => {
-        if (aggregatorAccount.publicKey.equals(event.feedPubkey)) {
-          const decimal = SwitchboardDecimal.from(event.value);
-          const big = decimal.toBig();
-          const timestamp = anchorBNtoDateTimeString(event.timestamp);
-          process.stdout.moveCursor(0, -1); // up one line
-          process.stdout.clearLine(1); // from cursor to end
-          process.stdout.write(chalkString(timestamp, big, 30) + "\r\n");
-        }
-      }
-    );
+
+    printAggregator(aggregator);
+
+    const ws = aggregatorAccount.onChange((aggregator) => {
+      printAggregator(aggregator);
+    });
   }
 
   async catch(error) {
     super.catch(error, "failed to watch aggregator");
   }
+}
+
+function printAggregator(aggregator: any) {
+  const result = SwitchboardDecimal.from(
+    aggregator.latestConfirmedRound.result
+  ).toBig();
+  const timestamp = anchorBNtoDateTimeString(
+    aggregator.latestConfirmedRound.roundOpenTimestamp
+  );
+  process.stdout.moveCursor(0, -1); // up one line
+  process.stdout.clearLine(1); // from cursor to end
+  process.stdout.write(chalkString(timestamp, result, 30) + "\r\n");
 }
