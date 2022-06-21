@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { AccountInfo, Context, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { chalkString } from "@switchboard-xyz/sbv2-utils";
 import { VrfAccount } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -39,19 +39,13 @@ export default class WatchVrf extends BaseCommand {
     );
     printVrf(vrfData);
 
-    const accountCoder = new anchor.BorshAccountsCoder(this.program.idl);
-
-    const watchWs = this.program.provider.connection.onAccountChange(
-      vrfAccount.publicKey,
-      (accountInfo: AccountInfo<Buffer>, context: Context) => {
-        const vrf = accountCoder.decode("VrfAccountData", accountInfo.data);
-        printVrf(vrf);
-      }
-    );
+    const watchWs = vrfAccount.onChange((vrf) => {
+      printVrf(vrf);
+    });
   }
 
   async catch(error) {
-    super.catch(error, "failed to watch aggregator");
+    super.catch(error, "failed to watch vrf account");
   }
 }
 

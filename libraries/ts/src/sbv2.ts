@@ -97,6 +97,53 @@ export async function loadSwitchboardProgram(
   return new anchor.Program(anchorIdl, programId, provider);
 }
 
+// should also check if pubkey is a token account
+export const findAccountName = (
+  program: anchor.Program,
+  accountInfo: AccountInfo<Buffer>
+): string => {
+  const accountDiscriminator = accountInfo.data.slice(
+    0,
+    anchor.ACCOUNT_DISCRIMINATOR_SIZE
+  );
+
+  for (const accountDef of program.idl.accounts) {
+    const typeDiscriminator = anchor.BorshAccountsCoder.accountDiscriminator(
+      accountDef.name
+    );
+    if (Buffer.compare(accountDiscriminator, typeDiscriminator) === 0) {
+      return accountDef.name;
+    }
+  }
+
+  throw new Error("failed to match account type by discriminator");
+};
+
+/** Callback to pass deserialized account data when updated on-chain */
+export type OnAccountChangeCallback = (accountData: any) => void;
+
+export function watchSwitchboardAccount(
+  program: anchor.Program,
+  publicKey: PublicKey,
+  accountName: string,
+  callback: OnAccountChangeCallback
+): number {
+  // const accountName = await findAccountName(program, publicKey);
+  const accountDef = program.idl.accounts.find((a) => a.name === accountName);
+  if (!accountDef) {
+    throw new Error(`Failed to find account ${accountName} in switchboard IDL`);
+  }
+  const coder = new anchor.BorshAccountsCoder(program.idl);
+
+  return program.provider.connection.onAccountChange(
+    publicKey,
+    (accountInfo, context) => {
+      const data = coder.decode(accountName, accountInfo?.data);
+      callback(data);
+    }
+  );
+}
+
 /**
  * Switchboard precisioned representation of numbers.
  */
@@ -238,6 +285,8 @@ export interface VaultTransferParams {
  * Account type representing Switchboard global program state.
  */
 export class ProgramStateAccount {
+  static accountName = "SbState";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -678,9 +727,11 @@ export interface AggregatorSetUpdateIntervalParams {
  * Account type representing an aggregator (data feed).
  */
 export class AggregatorAccount {
+  static accountName = "AggregatorAccountData";
+
   program: anchor.Program;
 
-  publicKey?: PublicKey;
+  publicKey: PublicKey;
 
   keypair?: Keypair;
 
@@ -711,8 +762,10 @@ export class AggregatorAccount {
     accountInfo: AccountInfo<Buffer>
   ): any {
     const coder = new anchor.BorshAccountsCoder(program.idl);
-    const key = "AggregatorAccountData";
-    const aggregator = coder.decode(key, accountInfo?.data!);
+    const aggregator = coder.decode(
+      AggregatorAccount.accountName,
+      accountInfo?.data!
+    );
     return aggregator;
   }
 
@@ -736,6 +789,49 @@ export class AggregatorAccount {
       await this.program.account.aggregatorAccountData.fetch(this.publicKey);
     aggregator.ebuf = undefined;
     return aggregator;
+  }
+
+  onChange(callback: OnAccountChangeCallback): number {
+    const coder = new anchor.BorshAccountsCoder(this.program.idl);
+    return this.program.provider.connection.onAccountChange(
+      this.publicKey,
+      (accountInfo, context) => {
+        const aggregator = coder.decode(
+          AggregatorAccount.accountName,
+          accountInfo?.data
+        );
+        callback(aggregator);
+      }
+    );
+  }
+
+  async onResult(
+    callback: (result: {
+      feedPubkey: PublicKey;
+      result: Big;
+      slot: anchor.BN;
+      timestamp: anchor.BN;
+      oracleValues: Big[];
+    }) => Promise<void>
+  ): Promise<number> {
+    return this.program.addEventListener(
+      "AggregatorValueUpdateEvent",
+      (event, slot) => {
+        const result = SwitchboardDecimal.from(
+          event.value as { mantissa: anchor.BN; scale: number }
+        ).toBig();
+        const oracleValues: Big[] = (
+          event.oracleValues as { mantissa: anchor.BN; scale: number }[]
+        ).map((v) => SwitchboardDecimal.from(v).toBig());
+        callback({
+          feedPubkey: event.feedPubkey as PublicKey,
+          result,
+          slot: event.slot as anchor.BN,
+          timestamp: event.timestamp as anchor.BN,
+          oracleValues,
+        });
+      }
+    );
   }
 
   async loadHistory(aggregator?: any): Promise<Array<AggregatorHistoryRow>> {
@@ -930,7 +1026,7 @@ export class AggregatorAccount {
       throw new Error("Failed to load feed jobs.");
     }
     const jobs = jobAccountDatas.map((item) => {
-      return coder.decode("JobAccountData", item.account.data);
+      return coder.decode(JobAccount.accountName, item.account.data);
     });
     return jobs;
   }
@@ -952,7 +1048,7 @@ export class AggregatorAccount {
       throw new Error("Failed to load feed jobs.");
     }
     const jobs = jobAccountDatas.map((item) => {
-      const decoded = coder.decode("JobAccountData", item.account.data);
+      const decoded = coder.decode(JobAccount.accountName, item.account.data);
       return protos.OracleJob.decodeDelimited(decoded.data);
     });
     return jobs;
@@ -971,7 +1067,7 @@ export class AggregatorAccount {
       throw new Error("Failed to load feed jobs.");
     }
     const jobs = jobAccountDatas.map((item) => {
-      const decoded = coder.decode("JobAccountData", item.account.data);
+      const decoded = coder.decode(JobAccount.accountName, item.account.data);
       return decoded.hash;
     });
     return jobs;
@@ -1498,6 +1594,8 @@ export interface JobInitParams {
  * a protocol buffer.
  */
 export class JobAccount {
+  static accountName = "JobAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -1602,8 +1700,7 @@ export class JobAccount {
     accountInfo: AccountInfo<Buffer>
   ): any {
     const coder = new anchor.BorshAccountsCoder(program.idl);
-    const key = "JobAccountData";
-    const data = coder.decode(key, accountInfo?.data!);
+    const data = coder.decode(JobAccount.accountName, accountInfo?.data!);
     return data;
   }
 
@@ -1679,6 +1776,8 @@ export enum SwitchboardPermissionValue {
  * account signer to another account.
  */
 export class PermissionAccount {
+  static accountName = "PermissionAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -2025,6 +2124,8 @@ export interface OracleQueueSetVrfSettingsParams {
  * permitted data feeds.
  */
 export class OracleQueueAccount {
+  static accountName = "OracleQueueAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -2699,6 +2800,8 @@ export class CrankRow {
  * A Switchboard account representing a crank of aggregators ordered by next update time.
  */
 export class CrankAccount {
+  static accountName = "CrankAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -3077,6 +3180,8 @@ export interface OracleWithdrawParams {
  * and escrow account.
  */
 export class OracleAccount {
+  static accountName = "OracleAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -3428,6 +3533,8 @@ export interface VrfProveParams {
  * A Switchboard VRF account.
  */
 export class VrfAccount {
+  static accountName = "VrfAccountData";
+
   program: anchor.Program;
 
   publicKey: PublicKey;
@@ -3468,6 +3575,17 @@ export class VrfAccount {
     vrf.ebuf = undefined;
     vrf.builders = vrf.builders.slice(0, vrf.buildersLen);
     return vrf;
+  }
+
+  onChange(callback: OnAccountChangeCallback): number {
+    const coder = new anchor.BorshAccountsCoder(this.program.idl);
+    return this.program.provider.connection.onAccountChange(
+      this.publicKey,
+      (accountInfo, context) => {
+        const vrf = coder.decode(VrfAccount.accountName, accountInfo?.data);
+        callback(vrf);
+      }
+    );
   }
 
   /**
