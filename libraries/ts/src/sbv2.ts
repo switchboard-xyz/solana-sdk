@@ -731,7 +731,7 @@ export class AggregatorAccount {
 
   program: anchor.Program;
 
-  publicKey: PublicKey; // why was this optional
+  publicKey: PublicKey;
 
   keypair?: Keypair;
 
