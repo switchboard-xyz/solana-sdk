@@ -313,7 +313,7 @@ message OracleJob {
     oneof AggregatorAddress {
       // Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer
       string switchboard_address = 1;
-      // Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/
+      // Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/price-feeds/
       string pyth_address = 2;
       // Mainnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana
       string chainlink_address = 3;
