@@ -513,6 +513,8 @@ message OracleJob {
       CacheTask cache_task = 34;
       SysclockOffsetTask sysclock_offset_task = 35;
       MarinadeStateTask marinade_state_task = 36;
+      SolanaAccountDataFetchTask solana_account_data_fetch_task = 37;
+      BufferLayoutParseTask buffer_layout_parse_task = 38;
     }
   }
   // The chain of tasks to perform for this OracleJob.

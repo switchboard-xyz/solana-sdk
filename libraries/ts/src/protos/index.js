@@ -9685,6 +9685,563 @@
             return MarinadeStateTask;
         })();
     
+        OracleJob.SolanaAccountDataFetchTask = (function() {
+    
+            /**
+             * Properties of a SolanaAccountDataFetchTask.
+             * @memberof OracleJob
+             * @interface ISolanaAccountDataFetchTask
+             * @property {string|null} [pubkey] SolanaAccountDataFetchTask pubkey
+             */
+    
+            /**
+             * Constructs a new SolanaAccountDataFetchTask.
+             * @memberof OracleJob
+             * @classdesc Represents a SolanaAccountDataFetchTask.
+             * @implements ISolanaAccountDataFetchTask
+             * @constructor
+             * @param {OracleJob.ISolanaAccountDataFetchTask=} [properties] Properties to set
+             */
+            function SolanaAccountDataFetchTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * SolanaAccountDataFetchTask pubkey.
+             * @member {string} pubkey
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @instance
+             */
+            SolanaAccountDataFetchTask.prototype.pubkey = "";
+    
+            /**
+             * Creates a new SolanaAccountDataFetchTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {OracleJob.ISolanaAccountDataFetchTask=} [properties] Properties to set
+             * @returns {OracleJob.SolanaAccountDataFetchTask} SolanaAccountDataFetchTask instance
+             */
+            SolanaAccountDataFetchTask.create = function create(properties) {
+                return new SolanaAccountDataFetchTask(properties);
+            };
+    
+            /**
+             * Encodes the specified SolanaAccountDataFetchTask message. Does not implicitly {@link OracleJob.SolanaAccountDataFetchTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {OracleJob.ISolanaAccountDataFetchTask} message SolanaAccountDataFetchTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SolanaAccountDataFetchTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.pubkey != null && Object.hasOwnProperty.call(message, "pubkey"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.pubkey);
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified SolanaAccountDataFetchTask message, length delimited. Does not implicitly {@link OracleJob.SolanaAccountDataFetchTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {OracleJob.ISolanaAccountDataFetchTask} message SolanaAccountDataFetchTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            SolanaAccountDataFetchTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a SolanaAccountDataFetchTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.SolanaAccountDataFetchTask} SolanaAccountDataFetchTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SolanaAccountDataFetchTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.SolanaAccountDataFetchTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.pubkey = reader.string();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a SolanaAccountDataFetchTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.SolanaAccountDataFetchTask} SolanaAccountDataFetchTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            SolanaAccountDataFetchTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a SolanaAccountDataFetchTask message.
+             * @function verify
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            SolanaAccountDataFetchTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.pubkey != null && message.hasOwnProperty("pubkey"))
+                    if (!$util.isString(message.pubkey))
+                        return "pubkey: string expected";
+                return null;
+            };
+    
+            /**
+             * Creates a SolanaAccountDataFetchTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.SolanaAccountDataFetchTask} SolanaAccountDataFetchTask
+             */
+            SolanaAccountDataFetchTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.SolanaAccountDataFetchTask)
+                    return object;
+                var message = new $root.OracleJob.SolanaAccountDataFetchTask();
+                if (object.pubkey != null)
+                    message.pubkey = String(object.pubkey);
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a SolanaAccountDataFetchTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @static
+             * @param {OracleJob.SolanaAccountDataFetchTask} message SolanaAccountDataFetchTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            SolanaAccountDataFetchTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults)
+                    object.pubkey = "";
+                if (message.pubkey != null && message.hasOwnProperty("pubkey"))
+                    object.pubkey = message.pubkey;
+                return object;
+            };
+    
+            /**
+             * Converts this SolanaAccountDataFetchTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.SolanaAccountDataFetchTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            SolanaAccountDataFetchTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            return SolanaAccountDataFetchTask;
+        })();
+    
+        OracleJob.BufferLayoutParseTask = (function() {
+    
+            /**
+             * Properties of a BufferLayoutParseTask.
+             * @memberof OracleJob
+             * @interface IBufferLayoutParseTask
+             * @property {number|null} [offset] BufferLayoutParseTask offset
+             * @property {OracleJob.BufferLayoutParseTask.Endian|null} [endian] BufferLayoutParseTask endian
+             * @property {OracleJob.BufferLayoutParseTask.BufferParseType|null} [type] BufferLayoutParseTask type
+             */
+    
+            /**
+             * Constructs a new BufferLayoutParseTask.
+             * @memberof OracleJob
+             * @classdesc Represents a BufferLayoutParseTask.
+             * @implements IBufferLayoutParseTask
+             * @constructor
+             * @param {OracleJob.IBufferLayoutParseTask=} [properties] Properties to set
+             */
+            function BufferLayoutParseTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * BufferLayoutParseTask offset.
+             * @member {number} offset
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @instance
+             */
+            BufferLayoutParseTask.prototype.offset = 0;
+    
+            /**
+             * BufferLayoutParseTask endian.
+             * @member {OracleJob.BufferLayoutParseTask.Endian} endian
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @instance
+             */
+            BufferLayoutParseTask.prototype.endian = 0;
+    
+            /**
+             * BufferLayoutParseTask type.
+             * @member {OracleJob.BufferLayoutParseTask.BufferParseType} type
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @instance
+             */
+            BufferLayoutParseTask.prototype.type = 1;
+    
+            /**
+             * Creates a new BufferLayoutParseTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {OracleJob.IBufferLayoutParseTask=} [properties] Properties to set
+             * @returns {OracleJob.BufferLayoutParseTask} BufferLayoutParseTask instance
+             */
+            BufferLayoutParseTask.create = function create(properties) {
+                return new BufferLayoutParseTask(properties);
+            };
+    
+            /**
+             * Encodes the specified BufferLayoutParseTask message. Does not implicitly {@link OracleJob.BufferLayoutParseTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {OracleJob.IBufferLayoutParseTask} message BufferLayoutParseTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            BufferLayoutParseTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.offset != null && Object.hasOwnProperty.call(message, "offset"))
+                    writer.uint32(/* id 1, wireType 0 =*/8).uint32(message.offset);
+                if (message.endian != null && Object.hasOwnProperty.call(message, "endian"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.endian);
+                if (message.type != null && Object.hasOwnProperty.call(message, "type"))
+                    writer.uint32(/* id 3, wireType 0 =*/24).int32(message.type);
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified BufferLayoutParseTask message, length delimited. Does not implicitly {@link OracleJob.BufferLayoutParseTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {OracleJob.IBufferLayoutParseTask} message BufferLayoutParseTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            BufferLayoutParseTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a BufferLayoutParseTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.BufferLayoutParseTask} BufferLayoutParseTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            BufferLayoutParseTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.BufferLayoutParseTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.offset = reader.uint32();
+                        break;
+                    case 2:
+                        message.endian = reader.int32();
+                        break;
+                    case 3:
+                        message.type = reader.int32();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a BufferLayoutParseTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.BufferLayoutParseTask} BufferLayoutParseTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            BufferLayoutParseTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a BufferLayoutParseTask message.
+             * @function verify
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            BufferLayoutParseTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.offset != null && message.hasOwnProperty("offset"))
+                    if (!$util.isInteger(message.offset))
+                        return "offset: integer expected";
+                if (message.endian != null && message.hasOwnProperty("endian"))
+                    switch (message.endian) {
+                    default:
+                        return "endian: enum value expected";
+                    case 0:
+                    case 1:
+                        break;
+                    }
+                if (message.type != null && message.hasOwnProperty("type"))
+                    switch (message.type) {
+                    default:
+                        return "type: enum value expected";
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    case 11:
+                    case 12:
+                    case 13:
+                    case 14:
+                        break;
+                    }
+                return null;
+            };
+    
+            /**
+             * Creates a BufferLayoutParseTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.BufferLayoutParseTask} BufferLayoutParseTask
+             */
+            BufferLayoutParseTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.BufferLayoutParseTask)
+                    return object;
+                var message = new $root.OracleJob.BufferLayoutParseTask();
+                if (object.offset != null)
+                    message.offset = object.offset >>> 0;
+                switch (object.endian) {
+                case "LITTLE_ENDIAN":
+                case 0:
+                    message.endian = 0;
+                    break;
+                case "BIG_ENDIAN":
+                case 1:
+                    message.endian = 1;
+                    break;
+                }
+                switch (object.type) {
+                case "pubkey":
+                case 1:
+                    message.type = 1;
+                    break;
+                case "bool":
+                case 2:
+                    message.type = 2;
+                    break;
+                case "u8":
+                case 3:
+                    message.type = 3;
+                    break;
+                case "i8":
+                case 4:
+                    message.type = 4;
+                    break;
+                case "u16":
+                case 5:
+                    message.type = 5;
+                    break;
+                case "i16":
+                case 6:
+                    message.type = 6;
+                    break;
+                case "u32":
+                case 7:
+                    message.type = 7;
+                    break;
+                case "i32":
+                case 8:
+                    message.type = 8;
+                    break;
+                case "f32":
+                case 9:
+                    message.type = 9;
+                    break;
+                case "u64":
+                case 10:
+                    message.type = 10;
+                    break;
+                case "i64":
+                case 11:
+                    message.type = 11;
+                    break;
+                case "f64":
+                case 12:
+                    message.type = 12;
+                    break;
+                case "u128":
+                case 13:
+                    message.type = 13;
+                    break;
+                case "i128":
+                case 14:
+                    message.type = 14;
+                    break;
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a BufferLayoutParseTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @static
+             * @param {OracleJob.BufferLayoutParseTask} message BufferLayoutParseTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            BufferLayoutParseTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.offset = 0;
+                    object.endian = options.enums === String ? "LITTLE_ENDIAN" : 0;
+                    object.type = options.enums === String ? "pubkey" : 1;
+                }
+                if (message.offset != null && message.hasOwnProperty("offset"))
+                    object.offset = message.offset;
+                if (message.endian != null && message.hasOwnProperty("endian"))
+                    object.endian = options.enums === String ? $root.OracleJob.BufferLayoutParseTask.Endian[message.endian] : message.endian;
+                if (message.type != null && message.hasOwnProperty("type"))
+                    object.type = options.enums === String ? $root.OracleJob.BufferLayoutParseTask.BufferParseType[message.type] : message.type;
+                return object;
+            };
+    
+            /**
+             * Converts this BufferLayoutParseTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.BufferLayoutParseTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            BufferLayoutParseTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            /**
+             * Endian enum.
+             * @name OracleJob.BufferLayoutParseTask.Endian
+             * @enum {number}
+             * @property {number} LITTLE_ENDIAN=0 LITTLE_ENDIAN value
+             * @property {number} BIG_ENDIAN=1 BIG_ENDIAN value
+             */
+            BufferLayoutParseTask.Endian = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "LITTLE_ENDIAN"] = 0;
+                values[valuesById[1] = "BIG_ENDIAN"] = 1;
+                return values;
+            })();
+    
+            /**
+             * BufferParseType enum.
+             * @name OracleJob.BufferLayoutParseTask.BufferParseType
+             * @enum {number}
+             * @property {number} pubkey=1 pubkey value
+             * @property {number} bool=2 bool value
+             * @property {number} u8=3 u8 value
+             * @property {number} i8=4 i8 value
+             * @property {number} u16=5 u16 value
+             * @property {number} i16=6 i16 value
+             * @property {number} u32=7 u32 value
+             * @property {number} i32=8 i32 value
+             * @property {number} f32=9 f32 value
+             * @property {number} u64=10 u64 value
+             * @property {number} i64=11 i64 value
+             * @property {number} f64=12 f64 value
+             * @property {number} u128=13 u128 value
+             * @property {number} i128=14 i128 value
+             */
+            BufferLayoutParseTask.BufferParseType = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[1] = "pubkey"] = 1;
+                values[valuesById[2] = "bool"] = 2;
+                values[valuesById[3] = "u8"] = 3;
+                values[valuesById[4] = "i8"] = 4;
+                values[valuesById[5] = "u16"] = 5;
+                values[valuesById[6] = "i16"] = 6;
+                values[valuesById[7] = "u32"] = 7;
+                values[valuesById[8] = "i32"] = 8;
+                values[valuesById[9] = "f32"] = 9;
+                values[valuesById[10] = "u64"] = 10;
+                values[valuesById[11] = "i64"] = 11;
+                values[valuesById[12] = "f64"] = 12;
+                values[valuesById[13] = "u128"] = 13;
+                values[valuesById[14] = "i128"] = 14;
+                return values;
+            })();
+    
+            return BufferLayoutParseTask;
+        })();
+    
         OracleJob.Task = (function() {
     
             /**
@@ -9726,6 +10283,8 @@
              * @property {OracleJob.ICacheTask|null} [cacheTask] Task cacheTask
              * @property {OracleJob.ISysclockOffsetTask|null} [sysclockOffsetTask] Task sysclockOffsetTask
              * @property {OracleJob.IMarinadeStateTask|null} [marinadeStateTask] Task marinadeStateTask
+             * @property {OracleJob.ISolanaAccountDataFetchTask|null} [solanaAccountDataFetchTask] Task solanaAccountDataFetchTask
+             * @property {OracleJob.IBufferLayoutParseTask|null} [bufferLayoutParseTask] Task bufferLayoutParseTask
              */
     
             /**
@@ -10023,17 +10582,33 @@
              */
             Task.prototype.marinadeStateTask = null;
     
+            /**
+             * Task solanaAccountDataFetchTask.
+             * @member {OracleJob.ISolanaAccountDataFetchTask|null|undefined} solanaAccountDataFetchTask
+             * @memberof OracleJob.Task
+             * @instance
+             */
+            Task.prototype.solanaAccountDataFetchTask = null;
+    
+            /**
+             * Task bufferLayoutParseTask.
+             * @member {OracleJob.IBufferLayoutParseTask|null|undefined} bufferLayoutParseTask
+             * @memberof OracleJob.Task
+             * @instance
+             */
+            Task.prototype.bufferLayoutParseTask = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * Task Task.
-             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|undefined} Task
+             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|"solanaAccountDataFetchTask"|"bufferLayoutParseTask"|undefined} Task
              * @memberof OracleJob.Task
              * @instance
              */
             Object.defineProperty(Task.prototype, "Task", {
-                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask", "cacheTask", "sysclockOffsetTask", "marinadeStateTask"]),
+                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask", "cacheTask", "sysclockOffsetTask", "marinadeStateTask", "solanaAccountDataFetchTask", "bufferLayoutParseTask"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -10131,6 +10706,10 @@
                     $root.OracleJob.SysclockOffsetTask.encode(message.sysclockOffsetTask, writer.uint32(/* id 35, wireType 2 =*/282).fork()).ldelim();
                 if (message.marinadeStateTask != null && Object.hasOwnProperty.call(message, "marinadeStateTask"))
                     $root.OracleJob.MarinadeStateTask.encode(message.marinadeStateTask, writer.uint32(/* id 36, wireType 2 =*/290).fork()).ldelim();
+                if (message.solanaAccountDataFetchTask != null && Object.hasOwnProperty.call(message, "solanaAccountDataFetchTask"))
+                    $root.OracleJob.SolanaAccountDataFetchTask.encode(message.solanaAccountDataFetchTask, writer.uint32(/* id 37, wireType 2 =*/298).fork()).ldelim();
+                if (message.bufferLayoutParseTask != null && Object.hasOwnProperty.call(message, "bufferLayoutParseTask"))
+                    $root.OracleJob.BufferLayoutParseTask.encode(message.bufferLayoutParseTask, writer.uint32(/* id 38, wireType 2 =*/306).fork()).ldelim();
                 return writer;
             };
     
@@ -10269,6 +10848,12 @@
                         break;
                     case 36:
                         message.marinadeStateTask = $root.OracleJob.MarinadeStateTask.decode(reader, reader.uint32());
+                        break;
+                    case 37:
+                        message.solanaAccountDataFetchTask = $root.OracleJob.SolanaAccountDataFetchTask.decode(reader, reader.uint32());
+                        break;
+                    case 38:
+                        message.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.decode(reader, reader.uint32());
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -10654,6 +11239,26 @@
                             return "marinadeStateTask." + error;
                     }
                 }
+                if (message.solanaAccountDataFetchTask != null && message.hasOwnProperty("solanaAccountDataFetchTask")) {
+                    if (properties.Task === 1)
+                        return "Task: multiple values";
+                    properties.Task = 1;
+                    {
+                        var error = $root.OracleJob.SolanaAccountDataFetchTask.verify(message.solanaAccountDataFetchTask);
+                        if (error)
+                            return "solanaAccountDataFetchTask." + error;
+                    }
+                }
+                if (message.bufferLayoutParseTask != null && message.hasOwnProperty("bufferLayoutParseTask")) {
+                    if (properties.Task === 1)
+                        return "Task: multiple values";
+                    properties.Task = 1;
+                    {
+                        var error = $root.OracleJob.BufferLayoutParseTask.verify(message.bufferLayoutParseTask);
+                        if (error)
+                            return "bufferLayoutParseTask." + error;
+                    }
+                }
                 return null;
             };
     
@@ -10843,6 +11448,16 @@
                     if (typeof object.marinadeStateTask !== "object")
                         throw TypeError(".OracleJob.Task.marinadeStateTask: object expected");
                     message.marinadeStateTask = $root.OracleJob.MarinadeStateTask.fromObject(object.marinadeStateTask);
+                }
+                if (object.solanaAccountDataFetchTask != null) {
+                    if (typeof object.solanaAccountDataFetchTask !== "object")
+                        throw TypeError(".OracleJob.Task.solanaAccountDataFetchTask: object expected");
+                    message.solanaAccountDataFetchTask = $root.OracleJob.SolanaAccountDataFetchTask.fromObject(object.solanaAccountDataFetchTask);
+                }
+                if (object.bufferLayoutParseTask != null) {
+                    if (typeof object.bufferLayoutParseTask !== "object")
+                        throw TypeError(".OracleJob.Task.bufferLayoutParseTask: object expected");
+                    message.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.fromObject(object.bufferLayoutParseTask);
                 }
                 return message;
             };
@@ -11034,6 +11649,16 @@
                     object.marinadeStateTask = $root.OracleJob.MarinadeStateTask.toObject(message.marinadeStateTask, options);
                     if (options.oneofs)
                         object.Task = "marinadeStateTask";
+                }
+                if (message.solanaAccountDataFetchTask != null && message.hasOwnProperty("solanaAccountDataFetchTask")) {
+                    object.solanaAccountDataFetchTask = $root.OracleJob.SolanaAccountDataFetchTask.toObject(message.solanaAccountDataFetchTask, options);
+                    if (options.oneofs)
+                        object.Task = "solanaAccountDataFetchTask";
+                }
+                if (message.bufferLayoutParseTask != null && message.hasOwnProperty("bufferLayoutParseTask")) {
+                    object.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.toObject(message.bufferLayoutParseTask, options);
+                    if (options.oneofs)
+                        object.Task = "bufferLayoutParseTask";
                 }
                 return object;
             };
