@@ -346,14 +346,12 @@ export class ProgramStateAccount {
    * Fetch the Switchboard token mint specified in the program state account.
    * @return Switchboard token mint.
    */
-  async getTokenMint(): Promise<spl.Token> {
+  async getTokenMint(): Promise<spl.Mint> {
     const payerKeypair = programWallet(this.program);
     const state = await this.loadData();
-    const switchTokenMint = new spl.Token(
+    const switchTokenMint = spl.getMint(
       this.program.provider.connection,
-      state.tokenMint,
-      spl.TOKEN_PROGRAM_ID,
-      payerKeypair
+      state.tokenMint
     );
     return switchTokenMint;
   }
@@ -405,32 +403,36 @@ export class ProgramStateAccount {
     let vault = null;
     if (params.mint === undefined) {
       const decimals = 9;
-      const token = await spl.Token.createMint(
+      let mint = await spl.createMint(
         program.provider.connection,
         payerKeypair,
         payerKeypair.publicKey,
         null,
-        decimals,
-        spl.TOKEN_PROGRAM_ID
+        decimals
       );
-      const tokenVault = await token.createAccount(payerKeypair.publicKey);
-      mint = token.publicKey;
-      await token.mintTo(
+      const tokenVault = await spl.createAccount(
+        program.provider.connection,
+        payerKeypair,
+        mint,
+        Keypair.generate().publicKey
+      );
+      await spl.mintTo(
+        program.provider.connection,
+        payerKeypair,
+        mint,
         tokenVault,
         payerKeypair.publicKey,
-        [payerKeypair],
         100_000_000
       );
       vault = tokenVault;
     } else {
       mint = params.mint;
-      const token = new spl.Token(
+      vault = await spl.createAccount(
         program.provider.connection,
+        payerKeypair,
         mint,
-        spl.TOKEN_PROGRAM_ID,
-        payerKeypair
+        payerKeypair.publicKey
       );
-      vault = await token.createAccount(payerKeypair.publicKey);
     }
     await program.methods
       .programInit({
@@ -1426,7 +1428,7 @@ export class AggregatorAccount {
         payoutWallet: params.payoutWallet,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         dataBuffer: queue.dataBuffer,
-        mint: (await params.oracleQueueAccount.loadMint()).publicKey,
+        mint: (await params.oracleQueueAccount.loadMint()).address,
       })
       .rpc();
   }
@@ -1489,15 +1491,12 @@ export class AggregatorAccount {
       queueAccount,
       this
     );
-    // const escrow = await spl.Token.getAssociatedTokenAddress(
-    // spl.ASSOCIATED_TOKEN_PROGRAM_ID,
+    // const escrow = await spl.getAssociatedTokenAddress(
     // params.tokenMint,
     // this.program.programId,
     // leaseAccount.publicKey
     // );
-    const escrow = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
+    const escrow = await spl.getAssociatedTokenAddress(
       params.tokenMint,
       leaseAccount.publicKey,
       true
@@ -2154,19 +2153,13 @@ export class OracleQueueAccount {
     this.publicKey = params.publicKey ?? this.keypair.publicKey;
   }
 
-  async loadMint(): Promise<spl.Token> {
-    const payerKeypair = programWallet(this.program);
+  async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();
     let mintKey = queue.mint ?? PublicKey.default;
     if (mintKey.equals(PublicKey.default)) {
       mintKey = spl.NATIVE_MINT;
     }
-    return new spl.Token(
-      this.program.provider.connection,
-      mintKey,
-      spl.TOKEN_PROGRAM_ID,
-      payerKeypair
-    );
+    return spl.getMint(this.program.provider.connection, mintKey);
   }
 
   /**
@@ -2468,10 +2461,8 @@ export class LeaseAccount {
       params.oracleQueueAccount,
       params.aggregatorAccount
     );
-    const escrow = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
-      switchTokenMint.publicKey,
+    const escrow = await spl.getAssociatedTokenAddress(
+      switchTokenMint.address,
       leaseAccount.publicKey,
       true
     );
@@ -2494,7 +2485,7 @@ export class LeaseAccount {
         [
           authority.toBuffer(),
           spl.TOKEN_PROGRAM_ID.toBuffer(),
-          switchTokenMint.publicKey.toBuffer(),
+          switchTokenMint.address.toBuffer(),
         ],
         spl.ASSOCIATED_TOKEN_PROGRAM_ID
       );
@@ -2521,7 +2512,7 @@ export class LeaseAccount {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         escrow,
         owner: params.funderAuthority.publicKey,
-        mint: switchTokenMint.publicKey,
+        mint: switchTokenMint.address,
       })
       .signers([params.funderAuthority])
       .remainingAccounts(
@@ -2535,23 +2526,12 @@ export class LeaseAccount {
   }
 
   async getBalance(): Promise<number> {
-    // const [programStateAccount] = ProgramStateAccount.fromSeed(this.program);
-    // const switchTokenMint = await programStateAccount.getTokenMint();
-    // const mintData = await this.program.provider.connection.getAccountInfo(
-    // switchTokenMint.publicKey
-    // );
-    // const mintInfo = spl.TokenLayout.decode(mintData);
-    // const decimals = spl.u8.fromBuffer(mintInfo.decimals).toNumber();
     const lease = await this.loadData();
-    const escrowInfo = await this.program.provider.connection.getAccountInfo(
+    const escrow = await spl.getAccount(
+      this.program.provider.connection,
       lease.escrow
     );
-    const data = Buffer.from(escrowInfo.data);
-    const accountInfo = spl.AccountLayout.decode(data);
-    const balance = (
-      spl.u64.fromBuffer(accountInfo.amount) as anchor.BN
-    ).toNumber();
-    return balance; // / mintInfo.decimals;
+    return Number(escrow.amount);
   }
 
   /**
@@ -2578,14 +2558,7 @@ export class LeaseAccount {
     const updatesPerDay = (60 * 60 * 24) / minUpdateDelaySeconds;
     const costPerDay = batchSize * queue.reward * updatesPerDay;
     const oneDay = 24 * 60 * 60 * 1000; // ms in a day
-    const escrowInfo = await this.program.provider.connection.getAccountInfo(
-      lease.escrow
-    );
-    const data = Buffer.from(escrowInfo.data);
-    const accountInfo = spl.AccountLayout.decode(data);
-    const balance = (
-      spl.u64.fromBuffer(accountInfo.amount) as anchor.BN
-    ).toNumber();
+    const balance = await this.getBalance();
     const endDate = new Date();
     endDate.setTime(endDate.getTime() + (balance * oneDay) / costPerDay);
     const timeLeft = endDate.getTime() - new Date().getTime();
@@ -2633,7 +2606,7 @@ export class LeaseAccount {
         [
           authority.toBuffer(),
           spl.TOKEN_PROGRAM_ID.toBuffer(),
-          switchTokenMint.publicKey.toBuffer(),
+          switchTokenMint.address.toBuffer(),
         ],
         spl.ASSOCIATED_TOKEN_PROGRAM_ID
       );
@@ -2656,7 +2629,7 @@ export class LeaseAccount {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         escrow,
         programState: programStateAccount.publicKey,
-        mint: (await queueAccount.loadMint()).publicKey,
+        mint: (await queueAccount.loadMint()).address,
       })
       .signers([params.funderAuthority])
       .remainingAccounts(
@@ -2702,7 +2675,7 @@ export class LeaseAccount {
         withdrawAccount: params.withdrawWallet,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         programState: programStateAccount.publicKey,
-        mint: (await queueAccount.loadMint()).publicKey,
+        mint: (await queueAccount.loadMint()).address,
       })
       .signers([params.withdrawAuthority])
       .rpc();
@@ -3009,9 +2982,7 @@ export class CrankAccount {
         params.queuePubkey,
         row
       );
-      const escrow = await spl.Token.getAssociatedTokenAddress(
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-        spl.TOKEN_PROGRAM_ID,
+      const escrow = await spl.getAssociatedTokenAddress(
         params.tokenMint,
         leaseAccount.publicKey,
         true
@@ -3248,13 +3219,20 @@ export class OracleAccount {
       ProgramStateAccount.fromSeed(program);
 
     const mint = await params.queueAccount.loadMint();
-    const wallet = await mint.createAccount(programWallet(program).publicKey);
-    await mint.setAuthority(
-      wallet,
-      programStateAccount.publicKey,
-      "AccountOwner",
+    const wallet = await spl.createAccount(
+      program.provider.connection,
       payerKeypair,
-      []
+      mint.address,
+      programWallet(program).publicKey,
+      Keypair.generate()
+    );
+    await spl.setAuthority(
+      program.provider.connection,
+      programWallet(program),
+      wallet,
+      programWallet(program),
+      spl.AuthorityType.AccountOwner,
+      programStateAccount.publicKey
     );
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       program,
@@ -3467,15 +3445,11 @@ export class OracleAccount {
 
   async getBalance(): Promise<number> {
     const oracle = await this.loadData();
-    const escrowInfo = await this.program.provider.connection.getAccountInfo(
-      oracle.tokenAccount
+    const escrow = await spl.getAccount(
+      this.program.provider.connection,
+      oracle.escrow
     );
-    const data = Buffer.from(escrowInfo.data);
-    const accountInfo = spl.AccountLayout.decode(data);
-    const balance = (
-      spl.u64.fromBuffer(accountInfo.amount) as anchor.BN
-    ).toNumber();
-    return balance; // / mintInfo.decimals;
+    return Number(escrow.amount);
   }
 }
 
@@ -3611,28 +3585,23 @@ export class VrfAccount {
     const keypair = params.keypair;
     const size = program.account.vrfAccountData.size;
     const switchTokenMint = await params.queue.loadMint();
-    const escrow = await spl.Token.getAssociatedTokenAddress(
-      switchTokenMint.associatedProgramId,
-      switchTokenMint.programId,
-      switchTokenMint.publicKey,
-      keypair.publicKey,
-      true
-    );
-
-    try {
-      await (switchTokenMint as any).createAssociatedTokenAccountInternal(
+    const escrow = (
+      await spl.getOrCreateAssociatedTokenAccount(
+        program.provider.connection,
+        programWallet(program),
+        switchTokenMint.address,
         keypair.publicKey,
-        escrow
-      );
-    } catch (e) {
-      console.log(e);
-    }
-    await switchTokenMint.setAuthority(
+        true
+      )
+    ).address;
+
+    await spl.setAuthority(
+      program.provider.connection,
+      programWallet(program),
       escrow,
-      programStateAccount.publicKey,
-      "AccountOwner",
       keypair,
-      []
+      spl.AuthorityType.AccountOwner,
+      programStateAccount.publicKey
     );
     await program.methods
       .vrfInit({
@@ -3958,10 +3927,8 @@ export class BufferRelayerAccount {
       ProgramStateAccount.fromSeed(program);
     const switchTokenMint = await params.queueAccount.loadMint();
     const keypair = Keypair.generate();
-    const escrow = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
-      switchTokenMint.publicKey,
+    const escrow = await spl.getAssociatedTokenAddress(
+      switchTokenMint.address,
       keypair.publicKey
     );
     const size = 2048;
@@ -3980,7 +3947,7 @@ export class BufferRelayerAccount {
           queue: params.queueAccount.publicKey,
           job: params.jobAccount.publicKey,
           programState: programStateAccount.publicKey,
-          mint: switchTokenMint.publicKey,
+          mint: switchTokenMint.address,
           payer: payer.publicKey,
           tokenProgram: spl.TOKEN_PROGRAM_ID,
           associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -4016,16 +3983,15 @@ export class BufferRelayerAccount {
       publicKey: queue,
     });
     const switchTokenMint = await queueAccount.loadMint();
-    await switchTokenMint.getOrCreateAssociatedAccountInfo(
-      programWallet(this.program).publicKey
-    );
-    const source = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
-      switchTokenMint.publicKey,
-      programWallet(this.program).publicKey,
-      true
-    );
+    const source = (
+      await spl.getOrCreateAssociatedTokenAccount(
+        this.program.provider.connection,
+        programWallet(this.program),
+        switchTokenMint.address,
+        programWallet(this.program).publicKey,
+        true
+      )
+    ).address;
     const bufferRelayer = this.publicKey;
     const escrow = relayerData.escrow;
     const queueData = await queueAccount.loadData();
@@ -4037,12 +4003,10 @@ export class BufferRelayerAccount {
       this.publicKey
     );
     const payer = programWallet(this.program);
-    const transferIx = spl.Token.createTransferInstruction(
-      spl.TOKEN_PROGRAM_ID,
+    const transferIx = spl.createTransferInstruction(
       source,
       escrow,
       programWallet(this.program).publicKey,
-      [],
       queueData.reward.toNumber()
     );
     const openRoundIx = this.program.instruction.bufferRelayerOpenRound(
@@ -4330,58 +4294,6 @@ export function signTransactions(
     }
   }
   return transactions;
-}
-
-// Create mint with a pre-generated keypair.
-export async function createMint(
-  connection: Connection,
-  payer: Signer,
-  mintAuthority: PublicKey,
-  freezeAuthority: PublicKey | null,
-  decimals: number,
-  programId: PublicKey,
-  mintAccount: Keypair
-): Promise<spl.Token> {
-  const tkn = new spl.Token(
-    connection,
-    mintAccount.publicKey,
-    programId,
-    payer
-  );
-
-  // Allocate memory for the account
-  const balanceNeeded = await spl.Token.getMinBalanceRentForExemptMint(
-    connection
-  );
-
-  const transaction = new Transaction();
-  transaction.add(
-    SystemProgram.createAccount({
-      fromPubkey: payer.publicKey,
-      newAccountPubkey: mintAccount.publicKey,
-      lamports: balanceNeeded,
-      space: spl.MintLayout.span,
-      programId,
-    })
-  );
-
-  transaction.add(
-    spl.Token.createInitMintInstruction(
-      programId,
-      mintAccount.publicKey,
-      decimals,
-      mintAuthority,
-      freezeAuthority
-    )
-  );
-
-  // Send the two instructions
-  await sendAndConfirmTransaction(connection, transaction, [
-    payer,
-    mintAccount,
-  ]);
-
-  return tkn;
 }
 
 export function programWallet(program: anchor.Program): Keypair {

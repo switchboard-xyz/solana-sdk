@@ -12,6 +12,7 @@ import {
   OracleQueueAccount,
   PermissionAccount,
   ProgramStateAccount,
+  programWallet,
   SwitchboardPermission,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
@@ -71,7 +72,13 @@ async function main() {
   const [programStateAccount] = ProgramStateAccount.fromSeed(program);
   console.log(toAccountString("Program State", programStateAccount.publicKey));
   const switchTokenMint = await programStateAccount.getTokenMint();
-  const tokenAccount = await switchTokenMint.createAccount(authority.publicKey);
+  const tokenAccount = await spl.createAccount(
+    program.provider.connection,
+    programWallet(program),
+    switchTokenMint.address,
+    authority.publicKey,
+    Keypair.generate()
+  );
 
   // Oracle Queue
   const queueAccount = await OracleQueueAccount.create(program, {
@@ -218,7 +225,7 @@ async function main() {
           nonce: 0,
           crank,
           queue,
-          tokenMint: switchTokenMint.publicKey,
+          tokenMint: switchTokenMint.address,
         });
         console.log(chalk.green("\u2714 Crank turned"));
         return 0;
