@@ -1,16 +1,19 @@
 Initiates a heartbeat for an OracleAccount, signifying oracle is still healthy.
 
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| oracle | TRUE | FALSE | The [OracleAccountData](/idl/accounts/OracleAccountData) that is heartbeating on-chain. | 
-| oracleAuthority | FALSE | TRUE | The [OracleAccountData](/idl/accounts/OracleAccountData) authority that is permitted to heartbeat. | 
-| tokenAccount | FALSE | FALSE | The token wallet for the oracle. | 
-| gcOracle | TRUE | FALSE | The current garbage collection oracle that may be swapped in the buffer periodically. | 
-| oracleQueue | TRUE | FALSE | The [OracleQueueAccountData](/idl/accounts/OracleQueueAccountData) that an oracle is heartbeating for. | 
-| permission | FALSE | FALSE | The [PermissionAccountData](/idl/accounts/PermissionAccountData) that grants an oracle heartbeat permissions. | 
-| dataBuffer | TRUE | FALSE | The OracleQueueBuffer account holding a collection of Oracle pubkeys. | 
-## Params
-|Field|Type|Description|
-|--|--|--|
-| permissionBump |  u8 |  |
+
+| Name            | isMut | isSigner | Description |
+| --------------- | ----- | -------- | ----------- |
+| oracle          | true  | false    |             |
+| oracleAuthority | false | true     |             |
+| tokenAccount    | false | false    |             |
+| gcOracle        | true  | false    |             |
+| oracleQueue     | true  | false    |             |
+| permission      | false | false    |             |
+| dataBuffer      | true  | false    |             |
+
+## Args
+
+| Field          | Type | Description |
+| -------------- | ---- | ----------- |
+| permissionBump | u8   |             |

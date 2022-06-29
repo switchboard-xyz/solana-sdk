@@ -1,6 +1,4 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| proof |  bytes |  |
-| alpha |  bytes |  |
+| Field | Type  | Description |
+| ----- | ----- | ----------- |
+| proof | bytes |             |
+| alpha | bytes |             |

@@ -1,5 +1,3 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| unpermissionedVrfEnabled |  bool |  |
+| Field                    | Type | Description |
+| ------------------------ | ---- | ----------- |
+| unpermissionedVrfEnabled | bool |             |

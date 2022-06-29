@@ -1,23 +1,24 @@
-
-
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| bufferRelayer | TRUE | FALSE |  | 
-| oracleAuthority | FALSE | TRUE |  | 
-| oracle | FALSE | FALSE |  | 
-| oracleQueue | TRUE | FALSE |  | 
-| dataBuffer | TRUE | FALSE |  | 
-| queueAuthority | FALSE | FALSE |  | 
-| permission | TRUE | FALSE |  | 
-| escrow | TRUE | FALSE |  | 
-| oracleWallet | TRUE | FALSE |  | 
-| programState | FALSE | FALSE |  | 
-| tokenProgram | FALSE | FALSE |  | 
-## Params
-|Field|Type|Description|
-|--|--|--|
-| stateBump |  u8 |  |
-| permissionBump |  u8 |  |
-| result |  bytes |  |
-| success |  bool |  |
+
+| Name            | isMut | isSigner | Description |
+| --------------- | ----- | -------- | ----------- |
+| bufferRelayer   | true  | false    |             |
+| oracleAuthority | false | true     |             |
+| oracle          | false | false    |             |
+| oracleQueue     | true  | false    |             |
+| dataBuffer      | true  | false    |             |
+| queueAuthority  | false | false    |             |
+| permission      | true  | false    |             |
+| escrow          | true  | false    |             |
+| oracleWallet    | true  | false    |             |
+| programState    | false | false    |             |
+| tokenProgram    | false | false    |             |
+
+## Args
+
+| Field          | Type  | Description |
+| -------------- | ----- | ----------- |
+| stateBump      | u8    |             |
+| permissionBump | u8    |             |
+| result         | bytes |             |
+| success        | bool  |             |

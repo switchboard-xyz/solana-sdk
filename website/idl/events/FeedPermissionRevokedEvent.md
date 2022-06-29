@@ -1,6 +1,4 @@
-
-
-| Name | Type | Description |
-|--|--|--|
-| feedPubkey | publicKey |  |
-| timestamp | i64 |  |
+| Name       | Type      | Description |
+| ---------- | --------- | ----------- |
+| feedPubkey | publicKey |             |
+| timestamp  | i64       |             |

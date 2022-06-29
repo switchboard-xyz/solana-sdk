@@ -1608,6 +1608,9 @@ export namespace OracleJob {
 
         /** LpExchangeRateTask raydiumPoolAddress */
         raydiumPoolAddress?: (string|null);
+
+        /** LpExchangeRateTask orcaPoolAddress */
+        orcaPoolAddress?: (string|null);
     }
 
     /** Represents a LpExchangeRateTask. */
@@ -1637,8 +1640,11 @@ export namespace OracleJob {
         /** LpExchangeRateTask raydiumPoolAddress. */
         public raydiumPoolAddress?: (string|null);
 
+        /** LpExchangeRateTask orcaPoolAddress. */
+        public orcaPoolAddress?: (string|null);
+
         /** LpExchangeRateTask PoolAddress. */
-        public PoolAddress?: ("mercurialPoolAddress"|"saberPoolAddress"|"orcaPoolTokenMintAddress"|"raydiumPoolAddress");
+        public PoolAddress?: ("mercurialPoolAddress"|"saberPoolAddress"|"orcaPoolTokenMintAddress"|"raydiumPoolAddress"|"orcaPoolAddress");
 
         /**
          * Creates a new LpExchangeRateTask instance using the specified properties.

@@ -244,7 +244,15 @@
         },
         {
           "name": "referenceCount",
+          "description": "The number of data feeds referencing the job account."
+        },
+        {
+          "name": "totalSpent",
           "description": ""
+        },
+        {
+          "name": "createdAt",
+          "description": "Timestamp when the job account was created."
         }
       ]
     },
@@ -406,11 +414,11 @@
         },
         {
           "name": "curatorRewardCut",
-          "description": ""
+          "description": "Not implemented yet. Revenue percentage rewarded to job curators overall."
         },
         {
           "name": "lockLeaseFunding",
-          "description": ""
+          "description": "Prevent new leases from being funded n this queue. Useful to turn down a queue for migrations, since authority is always immutable."
         },
         {
           "name": "mint",
@@ -553,11 +561,11 @@
       "children": [
         {
           "name": "timestamp",
-          "description": ""
+          "description": "The timestamp of the sample."
         },
         {
           "name": "value",
-          "description": ""
+          "description": "The value of the sample."
         }
       ]
     },
@@ -878,6 +886,24 @@
       ]
     },
     {
+      "name": "Callback",
+      "description": "",
+      "children": [
+        {
+          "name": "programId",
+          "description": "The program ID of the callback program being invoked."
+        },
+        {
+          "name": "accounts",
+          "description": "The accounts being used in the callback instruction."
+        },
+        {
+          "name": "ixData",
+          "description": "The serialized instruction data."
+        }
+      ]
+    },
+    {
       "name": "CrankInitParams",
       "description": "Parameters to create and initialize the CrankAccount.",
       "children": [
@@ -991,7 +1017,7 @@
       "children": [
         {
           "name": "data",
-          "description": ""
+          "description": "The bytes used to derive the hash."
         }
       ]
     },
@@ -1515,27 +1541,27 @@
       "children": [
         {
           "name": "StatusNone",
-          "description": ""
+          "description": "VRF Account has not requested randomness yet."
         },
         {
           "name": "StatusRequesting",
-          "description": ""
+          "description": "VRF Account has requested randomness but has yet to receive an oracle response."
         },
         {
           "name": "StatusVerifying",
-          "description": ""
+          "description": "VRF Account has received a VRF proof that has yet to be verified on-chain."
         },
         {
           "name": "StatusVerified",
-          "description": ""
+          "description": "VRF Account has successfully requested and verified randomness on-chain."
         },
         {
           "name": "StatusCallbackSuccess",
-          "description": ""
+          "description": "VRF Account's callback was invoked successfully."
         },
         {
           "name": "StatusVerifyFailure",
-          "description": ""
+          "description": "Failed to verify VRF proof."
         }
       ]
     },
@@ -1545,7 +1571,7 @@
       "children": [
         {
           "name": "vrfProducer",
-          "description": ""
+          "description": "The oracle assigned to the VRF request."
         },
         {
           "name": "reprProof",

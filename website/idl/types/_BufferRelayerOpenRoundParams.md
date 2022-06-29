@@ -1,6 +1,4 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| stateBump |  u8 |  |
-| permissionBump |  u8 |  |
+| Field          | Type | Description |
+| -------------- | ---- | ----------- |
+| stateBump      | u8   |             |
+| permissionBump | u8   |             |

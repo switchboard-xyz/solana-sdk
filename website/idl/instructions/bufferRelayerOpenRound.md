@@ -1,16 +1,17 @@
-
-
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| bufferRelayer | TRUE | FALSE |  | 
-| oracleQueue | TRUE | FALSE |  | 
-| dataBuffer | TRUE | FALSE |  | 
-| permission | TRUE | FALSE |  | 
-| escrow | TRUE | FALSE |  | 
-| programState | FALSE | FALSE |  | 
-## Params
-|Field|Type|Description|
-|--|--|--|
-| stateBump |  u8 |  |
-| permissionBump |  u8 |  |
+
+| Name          | isMut | isSigner | Description |
+| ------------- | ----- | -------- | ----------- |
+| bufferRelayer | true  | false    |             |
+| oracleQueue   | true  | false    |             |
+| dataBuffer    | true  | false    |             |
+| permission    | true  | false    |             |
+| escrow        | true  | false    |             |
+| programState  | false | false    |             |
+
+## Args
+
+| Field          | Type | Description |
+| -------------- | ---- | ----------- |
+| stateBump      | u8   |             |
+| permissionBump | u8   |             |

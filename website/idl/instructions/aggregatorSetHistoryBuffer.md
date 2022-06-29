@@ -1,11 +1,12 @@
-
-
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| aggregator | TRUE | FALSE |  | 
-| authority | FALSE | TRUE |  | 
-| buffer | TRUE | FALSE |  | 
-## Params
-|Field|Type|Description|
-|--|--|--|
+
+| Name       | isMut | isSigner | Description |
+| ---------- | ----- | -------- | ----------- |
+| aggregator | true  | false    |             |
+| authority  | false | true     |             |
+| buffer     | true  | false    |             |
+
+## Args
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |

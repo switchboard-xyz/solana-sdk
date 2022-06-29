@@ -1,5 +1,3 @@
-
-
-| Name | Type | Description |
-|--|--|--|
-| queuePubkey | publicKey |  |
+| Name        | Type      | Description |
+| ----------- | --------- | ----------- |
+| queuePubkey | publicKey |             |

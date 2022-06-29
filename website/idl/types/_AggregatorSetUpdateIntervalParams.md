@@ -1,5 +1,3 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| newInterval |  u32 |  |
+| Field       | Type | Description |
+| ----------- | ---- | ----------- |
+| newInterval | u32  |             |

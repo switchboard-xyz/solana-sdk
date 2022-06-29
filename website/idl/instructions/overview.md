@@ -42,7 +42,5 @@ slug: .
 - [programInit](/idl/instructions/programInit)
 - [vaultTransfer](/idl/instructions/vaultTransfer)
 - [vrfInit](/idl/instructions/vrfInit)
-- [vrfProve](/idl/instructions/vrfProve)
 - [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify)
 - [vrfRequestRandomness](/idl/instructions/vrfRequestRandomness)
-- [vrfVerify](/idl/instructions/vrfVerify)

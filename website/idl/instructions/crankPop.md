@@ -2,19 +2,19 @@ Pops an aggregator from the crank.
 
 ## Accounts
 
-| Name            | isMut | isSigner | Description                                                                                                       |
-| --------------- | ----- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| crank           | TRUE  | FALSE    |                                                                                                                   |
-| oracleQueue     | TRUE  | FALSE    |                                                                                                                   |
-| queueAuthority  | FALSE | FALSE    | The account delegated as the authority for making account changes or assigning permissions targeted at the queue. |
-| programState    | FALSE | FALSE    | The Switchboard [SbState](/idl/accounts/SbState) account.                                                         |
-| payoutWallet    | TRUE  | FALSE    |                                                                                                                   |
-| tokenProgram    | FALSE | FALSE    | The Solana token program account.                                                                                 |
-| crankDataBuffer | TRUE  | FALSE    |                                                                                                                   |
-| queueDataBuffer | FALSE | FALSE    |                                                                                                                   |
-| mint            | FALSE | FALSE    |                                                                                                                   |
+| Name            | isMut | isSigner | Description |
+| --------------- | ----- | -------- | ----------- |
+| crank           | true  | false    |             |
+| oracleQueue     | true  | false    |             |
+| queueAuthority  | false | false    |             |
+| programState    | false | false    |             |
+| payoutWallet    | true  | false    |             |
+| tokenProgram    | false | false    |             |
+| crankDataBuffer | true  | false    |             |
+| queueDataBuffer | false | false    |             |
+| mint            | false | false    |             |
 
-## Params
+## Args
 
 | Field                     | Type               | Description                                                              |
 | ------------------------- | ------------------ | ------------------------------------------------------------------------ |

@@ -1,6 +1,4 @@
-
-
-| Name | Type | Description |
-|--|--|--|
-| vrfPubkey | publicKey |  |
-| oraclePubkeys | publicKey[] |  |
+| Name          | Type        | Description |
+| ------------- | ----------- | ----------- |
+| vrfPubkey     | publicKey   |             |
+| oraclePubkeys | publicKey[] |             |

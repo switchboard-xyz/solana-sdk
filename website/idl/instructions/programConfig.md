@@ -1,14 +1,15 @@
-
-
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| authority | FALSE | TRUE | The [SbState](/idl/accounts/SbState) authority that permits account changes. | 
-| programState | FALSE | FALSE | The Switchboard [SbState](/idl/accounts/SbState) account. | 
-| daoMint | FALSE | FALSE |  | 
-## Params
-|Field|Type|Description|
-|--|--|--|
-| token |  publicKey |  |
-| bump |  u8 |  |
-| daoMint |  publicKey |  |
+
+| Name         | isMut | isSigner | Description |
+| ------------ | ----- | -------- | ----------- |
+| authority    | false | true     |             |
+| programState | false | false    |             |
+| daoMint      | false | false    |             |
+
+## Args
+
+| Field   | Type      | Description |
+| ------- | --------- | ----------- |
+| token   | publicKey |             |
+| bump    | u8        |             |
+| daoMint | publicKey |             |

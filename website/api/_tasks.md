@@ -327,12 +327,13 @@ Fetch the current swap price for a given liquidity pool
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| in_token_address | [string](#string) | optional | Not Used |
-| out_token_address | [string](#string) | optional | Not Used |
+| in_token_address | [string](#string) | optional | Used alongside mercurial_pool_address to specify the input token for a swap. |
+| out_token_address | [string](#string) | optional | Used alongside mercurial_pool_address to specify the output token for a swap. |
 | mercurial_pool_address | [string](#string) | optional | Mercurial finance pool address. A full list can be found here: https://github.com/mercurial-finance/stable-swap-n-pool-js |
 | saber_pool_address | [string](#string) | optional | Saber pool address. A full list can be found here: https://github.com/saber-hq/saber-registry-dist |
-| orca_pool_token_mint_address | [string](#string) | optional | Orca pool address. A full list can be found here: https://www.orca.so/pools |
+| orca_pool_token_mint_address | [string](#string) | optional | **Deprecated.** Orca pool address. |
 | raydium_pool_address | [string](#string) | optional | The Raydium liquidity pool ammId. A full list can be found here: https://sdk.raydium.io/liquidity/mainnet.json |
+| orca_pool_address | [string](#string) | optional | Pool address for an Orca LP pool or whirlpool. A full list of Orca LP pools can be found here: https://www.orca.so/pools |
 
 
 
@@ -461,7 +462,7 @@ Fetch the current price of a Solana oracle protocol.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | switchboard_address | [string](#string) | optional | Mainnet address of a Switchboard V2 feed. Switchboard is decentralized and allows anyone to build their own feed. A small subset of feeds is available here: https://switchboard.xyz/explorer |
-| pyth_address | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/markets/ |
+| pyth_address | [string](#string) | optional | Mainnet address for a Pyth feed. A full list can be found here: https://pyth.network/price-feeds/ |
 | chainlink_address | [string](#string) | optional | Mainnet address for a Chainlink feed. A full list can be found here: https://docs.chain.link/docs/solana/data-feeds-solana |
 | pyth_allowed_confidence_interval | [double](#double) | optional | Value (as a percentage) that the lower bound confidence interval is of the actual value. Confidence intervals that are larger that this treshold are rejected. |
 

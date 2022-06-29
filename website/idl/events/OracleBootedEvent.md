@@ -1,6 +1,4 @@
-
-
-| Name | Type | Description |
-|--|--|--|
-| queuePubkey | publicKey |  |
-| oraclePubkey | publicKey |  |
+| Name         | Type      | Description |
+| ------------ | --------- | ----------- |
+| queuePubkey  | publicKey |             |
+| oraclePubkey | publicKey |             |

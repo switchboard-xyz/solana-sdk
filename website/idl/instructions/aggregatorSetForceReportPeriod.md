@@ -1,11 +1,12 @@
-
-
 ## Accounts
-|Name|isMut|isSigner|Description|
-|--|--|--|--|
-| aggregator | TRUE | FALSE |  | 
-| authority | FALSE | TRUE |  | 
-## Params
-|Field|Type|Description|
-|--|--|--|
-| forceReportPeriod |  u32 |  |
+
+| Name       | isMut | isSigner | Description |
+| ---------- | ----- | -------- | ----------- |
+| aggregator | true  | false    |             |
+| authority  | false | true     |             |
+
+## Args
+
+| Field             | Type | Description |
+| ----------------- | ---- | ----------- |
+| forceReportPeriod | u32  |             |

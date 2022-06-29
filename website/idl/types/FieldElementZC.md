@@ -1,5 +1,3 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| bytes |  u64[5] |  |
+| Field | Type   | Description |
+| ----- | ------ | ----------- |
+| bytes | u64[5] |             |

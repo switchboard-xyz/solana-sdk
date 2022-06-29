@@ -1,5 +1,3 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| forceReportPeriod |  u32 |  |
+| Field             | Type | Description |
+| ----------------- | ---- | ----------- |
+| forceReportPeriod | u32  |             |

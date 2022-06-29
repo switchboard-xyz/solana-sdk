@@ -8,6 +8,6 @@
 | expiration     | i64       | Timestamp when the job is considered invalid                                     |
 | hash           | u8[32]    | [Hash](/idl/types/Hash) of the serialized data to prevent tampering              |
 | data           | bytes     | Serialized protobuf containing the collection of task to retrieve data off-chain |
-| referenceCount | u32       |                                                                                  |
+| referenceCount | u32       | The number of data feeds referencing the job account.                            |
 | totalSpent     | u64       |                                                                                  |
-| createdAt      | i64       |                                                                                  |
+| createdAt      | i64       | Timestamp when the job account was created.                                      |

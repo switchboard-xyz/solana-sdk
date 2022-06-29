@@ -22,8 +22,7 @@ import Link from "@docusaurus/Link";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import VrfAccountData from "/idl/accounts/VrfAccountData.md";
 import VrfInit from "/idl/instructions/vrfInit.md";
-import VrfProve from "/idl/instructions/vrfProve.md";
-import VrfVerify from "/idl/instructions/vrfVerify.md";
+import vrfProveAndVerify from "/idl/instructions/vrfProveAndVerify.md";
 import VrfRequestRandomness from "/idl/instructions/vrfRequestRandomness.md";
 
 import CallbackZC from "/idl/types/CallbackZC.md";
@@ -76,9 +75,7 @@ msg!("Current VRF Value [0 - {}) = {}!", max_result, result);
 
 ## Update Cost
 
-The Switchboard VRF implementation requires an oracle to submit 277 instructions on-chain, which can tie up an oracle's resources for fulfilling other update request on the queue. Because of this the initial update cost was hard coded to `0.1 wrapped SOL` in order to assess the impact on the oracle network. The oracle fulfilling the VRF request receives 90& of the reward when the proof is verified on-chain and the remaining 10% if the callback is successfully invoked.
-
-The Switchboard team is currently testing a few options to significantly lower this cost. If you are concerned about the update cost and are interested in integrating the VRF into your application, reach out to the team to discuss some available options.
+A VRF Account is required to have `0.002 wrapped SOL` in their `vrf.escrow` before requesting randomness. If the `vrf.escrow` has insufficient funds, the difference will be deducted from the requesters token wallet. The oracle fulfilling the request receives 90% of the reward when the proof is verified on-chain and the remaining 10% if the callback is successfully invoked.
 
 ## Update Lifecycle
 
@@ -96,9 +93,9 @@ The Switchboard team is currently testing a few options to significantly lower t
 ### Oracle Execution
 
 - Oracle watches the chain for a [VrfRequestRandomnessEvent](/idl/events/VrfRequestRandomnessEvent) with the oracle's public key assigned to the update request
-- Oracle calculates the VRF proof and submits a [vrfProve](/idl/instructions/vrfProve) instruction on-chain
+- Oracle calculates the VRF proof and submits a [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify) instruction on-chain
 - sbv2 program sets the current `vrf.status` to **_StatusVerifying_**
-- Oracle submits 276 × [vrfVerify](/idl/instructions/vrfVerify) instructions on-chain
+- Oracle submits 276 × [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify) instructions on-chain
 - If proof verification fails,
   - sbv2 program sets `vrf.status` to **_StatusVerifyFailure_**
 - If proof verification succeeds,

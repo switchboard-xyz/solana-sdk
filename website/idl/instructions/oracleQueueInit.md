@@ -2,16 +2,16 @@ Create and initialize the OracleQueueAccount.
 
 ## Accounts
 
-| Name          | isMut | isSigner | Description                                                                                                       |
-| ------------- | ----- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| oracleQueue   | TRUE  | TRUE     |                                                                                                                   |
-| authority     | FALSE | FALSE    | The account delegated as the authority for making account changes or assigning permissions targeted at the queue. |
-| buffer        | TRUE  | FALSE    |                                                                                                                   |
-| payer         | TRUE  | TRUE     |                                                                                                                   |
-| systemProgram | FALSE | FALSE    | The Solana system program account.                                                                                |
-| mint          | FALSE | FALSE    |                                                                                                                   |
+| Name          | isMut | isSigner | Description |
+| ------------- | ----- | -------- | ----------- |
+| oracleQueue   | true  | true     |             |
+| authority     | false | false    |             |
+| buffer        | true  | false    |             |
+| payer         | true  | true     |             |
+| systemProgram | false | false    |             |
+| mint          | false | false    |             |
 
-## Params
+## Args
 
 | Field                         | Type                                    | Description                                                                                                                                                                    |
 | ----------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

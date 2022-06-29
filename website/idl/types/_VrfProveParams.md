@@ -1,6 +1,4 @@
-
-
-| Field | Type | Description |
-|--|--|--|
-| proof |  bytes |  |
-| idx |  u32 |  |
+| Field | Type  | Description |
+| ----- | ----- | ----------- |
+| proof | bytes |             |
+| idx   | u32   |             |
