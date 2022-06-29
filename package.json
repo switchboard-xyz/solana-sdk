@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "watch": "yarn workspace website start & yarn workspaces run watch",
+    "build": "yarn workspaces run build",
     "build:ts": "yarn workspace @switchboard-xyz/switchboard-v2 build",
     "build:cli": "yarn workspace @switchboard-xyz/switchboardv2-cli build",
     "start": "echo \"Error: no start script specified\" && exit 1",

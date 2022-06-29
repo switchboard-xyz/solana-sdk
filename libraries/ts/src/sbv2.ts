@@ -347,7 +347,6 @@ export class ProgramStateAccount {
    * @return Switchboard token mint.
    */
   async getTokenMint(): Promise<spl.Mint> {
-    const payerKeypair = programWallet(this.program);
     const state = await this.loadData();
     const switchTokenMint = spl.getMint(
       this.program.provider.connection,
@@ -403,7 +402,7 @@ export class ProgramStateAccount {
     let vault = null;
     if (params.mint === undefined) {
       const decimals = 9;
-      let mint = await spl.createMint(
+      const mint = await spl.createMint(
         program.provider.connection,
         payerKeypair,
         payerKeypair.publicKey,

@@ -12,13 +12,15 @@
   "homepage": "https://docs.switchboard.xyz",
   "files": [
     "lib",
-    "src"
+    "src",
+    "package.json"
   ],
   "exports": {
     ".": {
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",

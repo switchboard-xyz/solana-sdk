@@ -34,7 +34,7 @@
     "@solana/spl-token": "^0.1.8",
     "@solana/web3.js": "^1.43.5",
     "@switchboard-xyz/sbv2-utils": "^0.1.24",
-    "@switchboard-xyz/switchboard-v2": "link:libraries/ts",
+    "@switchboard-xyz/switchboard-v2": "^0.0.113",
     "assert": "^2.0.0",
     "big.js": "^6.2.0",
     "bs58": "^5.0.0",
