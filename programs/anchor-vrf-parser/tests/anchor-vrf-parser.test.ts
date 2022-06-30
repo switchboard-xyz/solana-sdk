@@ -1,4 +1,5 @@
 import * as anchor from "@project-serum/anchor";
+import { AnchorProvider, Program } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
@@ -23,7 +24,7 @@ import {
 import fs from "fs";
 import "mocha";
 import path from "path";
-import { IDL } from "../../../target/types/anchor_vrf_parser";
+import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
 // const expect = chai.expect;
 
 interface VrfClientState {
@@ -54,18 +55,18 @@ function getProgramId(): PublicKey {
 }
 
 describe("anchor-vrf-parser test", () => {
-  const provider = anchor.AnchorProvider.env();
+  const provider = AnchorProvider.env();
   anchor.setProvider(provider);
 
   // const vrfClientProgram = anchor.workspace
   //   .AnchorVrfParser as Program<AnchorVrfParser>;
-  const vrfClientProgram = new anchor.Program(
+
+  const vrfClientProgram = new Program(
     IDL,
     getProgramId(),
     provider,
     new anchor.BorshCoder(IDL)
-  );
-  // as anchor.Program<AnchorVrfParser>;
+  ) as anchor.Program<AnchorVrfParser>;
 
   const payer = (provider.wallet as AnchorWallet).payer;
 
@@ -197,7 +198,7 @@ describe("anchor-vrf-parser test", () => {
 
     // Request randomness
     console.log(`Sending RequestRandomness instruction`);
-    const requestTxn = await vrfClientProgram.methods.requestResult!({
+    const requestTxn = vrfClientProgram.methods.requestResult!({
       switchboardStateBump: programStateBump,
       permissionBump,
     })
@@ -231,28 +232,24 @@ describe("anchor-vrf-parser test", () => {
         resolve: (result: anchor.BN) => void,
         reject: (reason: string) => void
       ) => {
-        try {
-          ws = vrfClientProgram.provider.connection.onAccountChange(
-            vrfClientKey,
-            async (accountInfo: AccountInfo<Buffer>, context: Context) => {
-              const clientState: VrfClientState = vrfClientAccountCoder.decode(
-                "VrfClient",
-                accountInfo.data
-              );
-              if (clientState.result.gt(new anchor.BN(0))) {
-                resolve(clientState.result);
-              }
+        ws = vrfClientProgram.provider.connection.onAccountChange(
+          vrfClientKey,
+          async (accountInfo: AccountInfo<Buffer>, context: Context) => {
+            const clientState: VrfClientState = vrfClientAccountCoder.decode(
+              "VrfClient",
+              accountInfo.data
+            );
+            if (clientState.result.gt(new anchor.BN(0))) {
+              resolve(clientState.result);
             }
-          );
-        } catch (error: any) {
-          reject(error);
-        }
+          }
+        );
       }
     );
 
     let result: anchor.BN;
     try {
-      result = await promiseWithTimeout(30_000, waitForResultPromise);
+      result = await promiseWithTimeout(45_000, waitForResultPromise);
     } catch (error) {
       throw error;
     } finally {

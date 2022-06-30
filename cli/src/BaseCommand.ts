@@ -111,11 +111,11 @@ abstract class BaseCommand extends Command {
 
     try {
       this.connection = new Connection(url, {
-        commitment: "finalized",
+        commitment: "confirmed",
       });
     } catch {
       this.connection = new Connection(clusterApiUrl(this.cluster), {
-        commitment: "finalized",
+        commitment: "confirmed",
       });
       this.logger.log(
         `resetting rpc url for ${this.cluster}. invalid URL ${url}`
@@ -136,7 +136,7 @@ abstract class BaseCommand extends Command {
 
     const wallet = new AnchorWallet(this.payerKeypair);
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      commitment: "finalized",
+      commitment: "confirmed",
       // preflightCommitment: "finalized",
     });
 

@@ -19,7 +19,8 @@
   "include": [
     "tests/**/*",
     "client/**/*",
-    "../../../target/types/anchor_vrf_parser"
+    "../../../target/types/anchor_vrf_parser",
+    "../../../target/idl/anchor_vrf_parser"
   ],
   "references": [
     { "path": "../../libraries/ts" },

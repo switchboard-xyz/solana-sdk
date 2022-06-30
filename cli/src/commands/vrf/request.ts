@@ -32,7 +32,6 @@ export default class VrfRequest extends BaseCommand {
   static args = [
     {
       name: "vrfKey",
-
       description: "public key of the VRF account to request randomness for",
     },
   ];
