@@ -328,11 +328,19 @@ secrets:
       programState = await switchboardProgramState.loadData();
     }
 
-    const switchboardMint = await switchboardProgramState.getTokenMint();
+    const mint = await switchboardProgramState.getTokenMint();
 
     const payerSwitchboardWallet = (
-      await switchboardMint.getOrCreateAssociatedAccountInfo(
-        payerKeypair.publicKey
+      await spl.getOrCreateAssociatedTokenAccount(
+        connection,
+        payerKeypair,
+        mint.address,
+        payerKeypair.publicKey,
+        undefined,
+        undefined,
+        undefined,
+        spl.TOKEN_PROGRAM_ID,
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
       )
     ).address;
 
@@ -393,7 +401,7 @@ secrets:
       idlAddress,
       programState: switchboardProgramState.publicKey,
       switchboardVault: programState.tokenVault,
-      switchboardMint: switchboardMint.publicKey,
+      switchboardMint: mint.address,
       tokenWallet: payerSwitchboardWallet,
       queue: queueAccount.publicKey,
       queueAuthority: queue.authority,

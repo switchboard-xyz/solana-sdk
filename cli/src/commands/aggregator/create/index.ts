@@ -109,12 +109,18 @@ export default class AggregatorCreate extends BaseCommand {
       publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
-    const switchTokenMint = await queueAccount.loadMint();
-    const tokenWallet = (
-      await switchTokenMint.getOrCreateAssociatedAccountInfo(
-        payerKeypair.publicKey
-      )
-    ).address;
+    const mint = await queueAccount.loadMint();
+    const tokenWallet = await spl.getOrCreateAssociatedTokenAccount(
+      this.program.provider.connection,
+      payerKeypair,
+      mint.address,
+      payerKeypair.publicKey,
+      undefined,
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+    );
 
     const createAccountInstructions: (
       | TransactionInstruction
@@ -178,7 +184,7 @@ export default class AggregatorCreate extends BaseCommand {
                 })
                 .accounts({
                   job: jobKeypair.publicKey,
-                  authorWallet: tokenWallet,
+                  authorWallet: tokenWallet.address,
                   authority: feedAuthority.publicKey,
                   programState: programStateAccount.publicKey,
                 })
@@ -248,7 +254,7 @@ export default class AggregatorCreate extends BaseCommand {
             aggregator: aggregatorKeypair.publicKey,
             authority: feedAuthority.publicKey,
             queue: queueAccount.publicKey,
-            authorWallet: tokenWallet,
+            authorWallet: tokenWallet.address,
             programState: programStateAccount.publicKey,
           })
           .instruction(),
@@ -286,22 +292,22 @@ export default class AggregatorCreate extends BaseCommand {
       queueAccount,
       aggregatorAccount
     );
-    const leaseEscrow = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
-      switchTokenMint.publicKey,
+    const leaseEscrow = await spl.getAssociatedTokenAddress(
+      mint.address,
       leaseAccount.publicKey,
-      true
+      true,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
     createAccountInstructions.push(
       [
-        spl.Token.createAssociatedTokenAccountInstruction(
-          spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-          spl.TOKEN_PROGRAM_ID,
-          switchTokenMint.publicKey,
+        spl.createAssociatedTokenAccountInstruction(
+          payerKeypair.publicKey,
           leaseEscrow,
-          leaseAccount.publicKey,
-          payerKeypair.publicKey
+          payerKeypair.publicKey,
+          mint.address,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
         ),
         await this.program.methods
           .leaseInit({
@@ -317,12 +323,12 @@ export default class AggregatorCreate extends BaseCommand {
             queue: queueAccount.publicKey,
             aggregator: aggregatorAccount.publicKey,
             systemProgram: SystemProgram.programId,
-            funder: tokenWallet,
+            funder: tokenWallet.address,
             payer: payerKeypair.publicKey,
             tokenProgram: spl.TOKEN_PROGRAM_ID,
             escrow: leaseEscrow,
             owner: payerKeypair.publicKey,
-            mint: switchTokenMint.publicKey,
+            mint: mint.address,
           })
           // .remainingAccounts(
           //   jobPubkeys.concat(jobWallets).map((pubkey: PublicKey) => {

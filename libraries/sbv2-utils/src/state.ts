@@ -1,5 +1,5 @@
 import type * as anchor from "@project-serum/anchor";
-import type * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token";
 import type { PublicKey } from "@solana/web3.js";
 import {
   ProgramStateAccount,
@@ -8,15 +8,22 @@ import {
 
 export const getOrCreateSwitchboardMintTokenAccount = async (
   program: anchor.Program,
-  switchboardMint?: spl.Token
+  switchboardMint?: spl.Mint,
+  payer = programWallet(program)
 ): Promise<PublicKey> => {
-  const payer = programWallet(program);
-
   const returnAssociatedAddress = async (
-    mint: spl.Token
+    mint: spl.Mint
   ): Promise<PublicKey> => {
-    const tokenAccount = await mint.getOrCreateAssociatedAccountInfo(
-      payer.publicKey
+    const tokenAccount = await spl.getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      payer,
+      mint.address,
+      payer.publicKey,
+      undefined,
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
     return tokenAccount.address;
   };

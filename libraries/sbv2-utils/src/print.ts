@@ -17,6 +17,7 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import type Big from "big.js";
 import chalk from "chalk";
+import { getIdlAddress, getProgramDataAddress } from "./anchor.js";
 import { anchorBNtoDateTimeString } from "./date.js";
 import type { SwitchboardAccountType } from "./switchboard.js";
 
@@ -100,6 +101,8 @@ export const toVrfStatusString = (status: Record<string, unknown>): string => {
 export async function prettyPrintProgramState(
   programState: ProgramStateAccount,
   accountData?: any,
+  printIdlAddress = false,
+  printDataAddress = false,
   SPACING = 24
 ): Promise<string> {
   const data = accountData ?? (await programState.loadData());
@@ -110,7 +113,19 @@ export async function prettyPrintProgramState(
   );
   outputString += chalkString("authority", data.authority, SPACING) + "\r\n";
   outputString += chalkString("tokenMint", data.tokenMint, SPACING) + "\r\n";
-  outputString += chalkString("tokenVault", data.tokenVault, SPACING);
+  outputString += chalkString("tokenVault", data.tokenVault, SPACING) + "\r\n";
+  outputString += chalkString("daoMint", data.daoMint, SPACING);
+
+  if (printIdlAddress) {
+    const idlAddress = await getIdlAddress(programState.program.programId);
+    outputString += "\r\n" + chalkString("idlAddress", idlAddress, SPACING);
+  }
+  if (printDataAddress) {
+    const dataAddress = getProgramDataAddress(programState.program.programId);
+    outputString +=
+      "\r\n" + chalkString("programDataAddress", dataAddress, SPACING);
+  }
+
   return outputString;
 }
 

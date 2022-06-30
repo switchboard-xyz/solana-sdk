@@ -34,6 +34,24 @@ td:last-child {
   width: 100%;
 }
 
+/* .table_no_border table {
+  margin-left: 0;
+  padding-left: 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
+} */
+
+.table_no_border td,
+.table_no_border tr {
+  border: none;
+  border-collapse: collapse;
+  padding: 0.5em 2em;
+}
+
+.centeredText {
+  text-align: center;
+}
+
 html[data-theme="dark"] a {
   font-weight: 800;
 }

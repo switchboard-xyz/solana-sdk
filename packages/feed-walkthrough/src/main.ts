@@ -71,11 +71,11 @@ async function main() {
   // Program State Account and token mint for payout rewards
   const [programStateAccount] = ProgramStateAccount.fromSeed(program);
   console.log(toAccountString("Program State", programStateAccount.publicKey));
-  const switchTokenMint = await programStateAccount.getTokenMint();
+  const mint = await programStateAccount.getTokenMint();
   const tokenAccount = await spl.createAccount(
     program.provider.connection,
     programWallet(program),
-    switchTokenMint.address,
+    mint.address,
     authority.publicKey,
     Keypair.generate()
   );
@@ -225,7 +225,7 @@ async function main() {
           nonce: 0,
           crank,
           queue,
-          tokenMint: switchTokenMint.address,
+          tokenMint: mint.address,
         });
         console.log(chalk.green("\u2714 Crank turned"));
         return 0;

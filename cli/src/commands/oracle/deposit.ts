@@ -1,7 +1,11 @@
 import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
+import * as spl from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
-import { chalkString } from "@switchboard-xyz/sbv2-utils";
+import {
+  chalkString,
+  getOrCreateSwitchboardMintTokenAccount,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
@@ -68,14 +72,15 @@ export default class OracleDeposit extends BaseCommand {
       ).value.amount
     );
 
-    const funderTokenAccount = (
-      await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
-    ).address;
+    const funderTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+      this.program,
+      mint
+    );
 
     const funderTokenBalance = new anchor.BN(
       (
         await this.program.provider.connection.getTokenAccountBalance(
-          funderTokenAccount
+          funderTokenAddress
         )
       ).value.amount
     );
@@ -86,12 +91,17 @@ export default class OracleDeposit extends BaseCommand {
       );
     }
 
-    const txn = await mint.transfer(
-      funderTokenAccount,
+    const txn = await spl.transfer(
+      this.program.provider.connection,
+      payer,
+      funderTokenAddress,
       oracle.tokenAccount,
       payer,
-      [],
-      amount.toNumber()
+
+      amount.toNumber(),
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID
     );
 
     if (this.silent) {

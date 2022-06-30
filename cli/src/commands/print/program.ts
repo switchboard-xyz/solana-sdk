@@ -17,7 +17,9 @@ export default class ProgramPrint extends BaseCommand {
   async run() {
     const [programState] = ProgramStateAccount.fromSeed(this.program);
 
-    this.logger.log(await prettyPrintProgramState(programState));
+    this.logger.log(
+      await prettyPrintProgramState(programState, undefined, true, true)
+    );
   }
 
   async catch(error) {

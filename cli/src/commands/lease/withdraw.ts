@@ -3,13 +3,13 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
+  getOrCreateSwitchboardMintTokenAccount,
   verifyProgramHasPayer,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   LeaseAccount,
   OracleQueueAccount,
-  programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import BaseCommand from "../../BaseCommand";
@@ -82,11 +82,11 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
       } catch {
         try {
           const withdrawKeypair = await loadKeypair(flags.withdrawAddress);
-          withdrawAddress = (
-            await mint.getOrCreateAssociatedAccountInfo(
-              withdrawKeypair.publicKey
-            )
-          ).address;
+          withdrawAddress = await getOrCreateSwitchboardMintTokenAccount(
+            this.program,
+            mint,
+            withdrawKeypair
+          );
         } catch {
           throw new Error(
             `failed to parse withdrawAccount flag ${flags.withdrawAddress}`
@@ -94,11 +94,10 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
         }
       }
     } else {
-      withdrawAddress = (
-        await mint.getOrCreateAssociatedAccountInfo(
-          programWallet(this.program).publicKey
-        )
-      ).address;
+      withdrawAddress = await getOrCreateSwitchboardMintTokenAccount(
+        this.program,
+        mint
+      );
     }
 
     const [leaseAccount] = LeaseAccount.fromSeed(

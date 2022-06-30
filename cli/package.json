@@ -31,7 +31,7 @@
     "@oclif/plugin-version": "^1.0.4",
     "@oclif/plugin-warn-if-update-available": "^2.0.4",
     "@project-serum/anchor": "^0.24.2",
-    "@solana/spl-token": "^0.1.8",
+    "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.43.5",
     "@switchboard-xyz/sbv2-utils": "^0.1.25",
     "@switchboard-xyz/switchboard-v2": "^0.0.114",

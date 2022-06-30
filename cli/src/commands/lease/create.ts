@@ -1,7 +1,10 @@
 import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { prettyPrintLease } from "@switchboard-xyz/sbv2-utils";
+import {
+  getOrCreateSwitchboardMintTokenAccount,
+  prettyPrintLease,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   LeaseAccount,
@@ -66,11 +69,15 @@ export default class LeaseCreate extends BaseCommand {
     const mint = await oracleQueueAccount.loadMint();
 
     // check funder has enough balance for the request
-    const funder = (
-      await mint.getOrCreateAssociatedAccountInfo(payer.publicKey)
-    ).address;
+    const funderTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+      this.program,
+      mint,
+      payer
+    );
     const funderBalanceResponse =
-      await this.program.provider.connection.getTokenAccountBalance(funder);
+      await this.program.provider.connection.getTokenAccountBalance(
+        funderTokenAddress
+      );
     const funderBalance = new anchor.BN(funderBalanceResponse.value.amount);
     if (loadAmount.gt(funderBalance)) {
       throw new Error(
@@ -99,7 +106,7 @@ export default class LeaseCreate extends BaseCommand {
       oracleQueueAccount,
       funderAuthority: payer,
       withdrawAuthority: payer.publicKey,
-      funder,
+      funder: funderTokenAddress,
       loadAmount,
     });
 

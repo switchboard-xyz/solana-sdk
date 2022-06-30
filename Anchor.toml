@@ -1,18 +1,18 @@
 [provider]
-# cluster = "devnet"
-cluster = "localnet"
+cluster = "devnet"
+# cluster = "localnet"
 wallet = "../payer-keypair.json"
 # wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-anchor_feed_parser = "7Th37Bvb7u2sS4Xe6YkvCkHSHDAakRUeobRBNXuf2PFD"
-anchor_vrf_parser = "GCam9zJ6soszC4K69Gy84krGdeALxwS2noeBwqLmP6JH"
+anchor_feed_parser = "FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh"
+anchor_vrf_parser = "HjjRFjCyQH3ne6Gg8Yn3TQafrrYecRrphwLwnh2A26vM"
 
 [registry]
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./programs/*/tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./programs/anchor-vrf-parser/tests/*.test.ts"
 
 
 [test.validator]

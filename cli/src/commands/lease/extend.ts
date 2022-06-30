@@ -3,6 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
+  getOrCreateSwitchboardMintTokenAccount,
   verifyProgramHasPayer,
 } from "@switchboard-xyz/sbv2-utils";
 import {
@@ -81,12 +82,13 @@ export default class LeaseExtend extends BaseCommand {
     const initialLeaseBalance =
       await this.program.provider.connection.getTokenAccountBalance(escrow);
 
-    const funderTokenAccount = (
-      await mint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
-    ).address;
+    const funderTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+      this.program,
+      mint
+    );
     const initialFunderBalance =
       await this.program.provider.connection.getTokenAccountBalance(
-        funderTokenAccount
+        funderTokenAddress
       );
 
     if (!this.silent) {
@@ -108,7 +110,7 @@ export default class LeaseExtend extends BaseCommand {
 
     const txn = await leaseAccount.extend({
       loadAmount: amount,
-      funder: funderTokenAccount,
+      funder: funderTokenAddress,
       funderAuthority: payerKeypair,
     });
 

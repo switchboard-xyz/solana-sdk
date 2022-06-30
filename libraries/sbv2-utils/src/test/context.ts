@@ -11,7 +11,7 @@ import { awaitOpenRound, createAggregator } from "../feed.js";
 
 export interface ISwitchboardTestContext {
   program: anchor.Program;
-  mint: spl.Token;
+  mint: spl.Mint;
   payerTokenWallet: PublicKey;
   queue: sbv2.OracleQueueAccount;
   oracle?: sbv2.OracleAccount;
@@ -20,7 +20,7 @@ export interface ISwitchboardTestContext {
 export class SwitchboardTestContext implements ISwitchboardTestContext {
   program: anchor.Program;
 
-  mint: spl.Token;
+  mint: spl.Mint;
 
   payerTokenWallet: PublicKey;
 
@@ -42,12 +42,14 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     amount = 1_000_000
   ): Promise<PublicKey> {
     const payerKeypair = sbv2.programWallet(program);
-    return spl.Token.createWrappedNativeAccount(
+    return spl.createWrappedNativeAccount(
       program.provider.connection,
-      spl.TOKEN_PROGRAM_ID,
-      payerKeypair.publicKey,
       payerKeypair,
-      amount
+      payerKeypair.publicKey,
+      amount,
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID
     );
   }
 
@@ -84,7 +86,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         `Failed to load the SBV2 queue for the given cluster, ${error.message}`
       );
     }
-    let mint: spl.Token;
+    let mint: spl.Mint;
     try {
       mint = await queue.loadMint();
     } catch (error: any) {
@@ -95,7 +97,17 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     let payerTokenWallet: PublicKey;
     try {
       payerTokenWallet = (
-        await mint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
+        await spl.getOrCreateAssociatedTokenAccount(
+          provider.connection,
+          payerKeypair,
+          mint.address,
+          payerKeypair.publicKey,
+          undefined,
+          undefined,
+          undefined,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        )
       ).address;
     } catch (error: any) {
       throw new Error(

@@ -1,6 +1,7 @@
 import { Flags } from "@oclif/core";
 import * as spl from "@solana/spl-token";
 import { PublicKey, SYSVAR_RECENT_BLOCKHASHES_PUBKEY } from "@solana/web3.js";
+import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleQueueAccount,
   PermissionAccount,
@@ -51,7 +52,7 @@ export default class VrfRequest extends BaseCommand {
       publicKey: vrf.oracleQueue,
     });
     const queue = await queueAccount.loadData();
-    const tokenMint = await queueAccount.loadMint();
+    const mint = await queueAccount.loadMint();
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
     );
@@ -67,11 +68,10 @@ export default class VrfRequest extends BaseCommand {
       ? await loadKeypair(flags.funderAuthority)
       : payerKeypair;
 
-    const funderTokenWallet = (
-      await tokenMint.getOrCreateAssociatedAccountInfo(
-        funderAuthority.publicKey
-      )
-    ).address;
+    const funderTokenWallet = await getOrCreateSwitchboardMintTokenAccount(
+      this.program,
+      mint
+    );
 
     // const signature = await vrfAccount.requestRandomness({
     //   authority,

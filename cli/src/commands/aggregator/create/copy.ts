@@ -145,9 +145,19 @@ export default class AggregatorCreateCopy extends BaseCommand {
       publicKey: new PublicKey(flags.queueKey),
     });
     const queue = await queueAccount.loadData();
-    const tokenMint = await queueAccount.loadMint();
+    const mint = await queueAccount.loadMint();
     const tokenWallet = (
-      await tokenMint.getOrCreateAssociatedAccountInfo(payerKeypair.publicKey)
+      await spl.getOrCreateAssociatedTokenAccount(
+        this.program.provider.connection,
+        payerKeypair,
+        mint.address,
+        payerKeypair.publicKey,
+        undefined,
+        undefined,
+        undefined,
+        spl.TOKEN_PROGRAM_ID,
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      )
     ).address;
 
     const createAccountInstructions: (
@@ -183,12 +193,12 @@ export default class AggregatorCreateCopy extends BaseCommand {
       queueAccount,
       aggregatorAccount
     );
-    const leaseEscrow = await spl.Token.getAssociatedTokenAddress(
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-      spl.TOKEN_PROGRAM_ID,
-      tokenMint.publicKey,
+    const leaseEscrow = await spl.getAssociatedTokenAddress(
+      mint.address,
       leaseAccount.publicKey,
-      true
+      true,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
     createAccountInstructions.push(
@@ -260,13 +270,13 @@ export default class AggregatorCreateCopy extends BaseCommand {
 
     createAccountInstructions.push(
       [
-        spl.Token.createAssociatedTokenAccountInstruction(
-          spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-          spl.TOKEN_PROGRAM_ID,
-          tokenMint.publicKey,
+        spl.createAssociatedTokenAccountInstruction(
+          payerKeypair.publicKey,
           leaseEscrow,
-          leaseAccount.publicKey,
-          payerKeypair.publicKey
+          payerKeypair.publicKey,
+          mint.address,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
         ),
         await this.program.methods
           .leaseInit({
@@ -287,7 +297,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
             tokenProgram: spl.TOKEN_PROGRAM_ID,
             escrow: leaseEscrow,
             owner: payerKeypair.publicKey,
-            mint: tokenMint.publicKey,
+            mint: mint.address,
           })
           // .remainingAccounts(
           //   jobPubkeys.concat(jobWallets).map((pubkey: PublicKey) => {

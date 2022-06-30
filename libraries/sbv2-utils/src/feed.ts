@@ -2,6 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
   PublicKey,
+  sendAndConfirmTransaction,
   SystemProgram,
   Transaction,
   TransactionInstruction,
@@ -85,17 +86,25 @@ export async function createAggregator(
 ) {
   const payerKeypair = programWallet(program);
   const queue = await queueAccount.loadData();
-  const switchTokenMint = await queueAccount.loadMint();
+  const mint = await queueAccount.loadMint();
   const payerTokenWallet = (
-    await switchTokenMint.getOrCreateAssociatedAccountInfo(
-      payerKeypair.publicKey
+    await spl.getOrCreateAssociatedTokenAccount(
+      program.provider.connection,
+      payerKeypair,
+      mint.address,
+      payerKeypair.publicKey,
+      undefined,
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     )
   ).address;
 
   // Aggregator params
   const aggregatorKeypair = params.keypair ?? anchor.web3.Keypair.generate();
   const authority = params.authority ?? payerKeypair.publicKey;
-  const size = program.account.aggregatorAccountData!.size;
+  const size = program.account.aggregatorAccountData.size;
   const [programStateAccount, stateBump] =
     ProgramStateAccount.fromSeed(program);
   const state = await programStateAccount.loadData();
@@ -118,12 +127,12 @@ export async function createAggregator(
     queueAccount,
     aggregatorAccount
   );
-  const leaseEscrow = await spl.Token.getAssociatedTokenAddress(
-    spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-    spl.TOKEN_PROGRAM_ID,
-    switchTokenMint.publicKey,
+  const leaseEscrow = await spl.getAssociatedTokenAddress(
+    mint.address,
     leaseAccount.publicKey,
-    true
+    true,
+    spl.TOKEN_PROGRAM_ID,
+    spl.ASSOCIATED_TOKEN_PROGRAM_ID
   );
 
   // const jobPubkeys: Array<PublicKey> = [];
@@ -134,7 +143,7 @@ export async function createAggregator(
   //     [
   //       payerKeypair.publicKey.toBuffer(),
   //       spl.TOKEN_PROGRAM_ID.toBuffer(),
-  //       switchTokenMint.publicKey.toBuffer(),
+  //       mint.address.toBuffer(),
   //     ],
   //     spl.ASSOCIATED_TOKEN_PROGRAM_ID
   //   );
@@ -159,20 +168,21 @@ export async function createAggregator(
         programId: program.programId,
       }),
       // create aggregator
-      await program.methods!.aggregatorInit!({
-        name: (params.name ?? Buffer.from("")).slice(0, 32),
-        metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
-        batchSize: params.batchSize,
-        minOracleResults: params.minRequiredOracleResults,
-        minJobResults: params.minRequiredJobResults,
-        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
-        varianceThreshold: SwitchboardDecimal.fromBig(
-          new Big(params.varianceThreshold ?? 0)
-        ),
-        forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
-        expiration: params.expiration ?? new anchor.BN(0),
-        stateBump,
-      })
+      await program.methods
+        .aggregatorInit({
+          name: (params.name ?? Buffer.from("")).slice(0, 32),
+          metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
+          batchSize: params.batchSize,
+          minOracleResults: params.minRequiredOracleResults,
+          minJobResults: params.minRequiredJobResults,
+          minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+          varianceThreshold: SwitchboardDecimal.fromBig(
+            new Big(params.varianceThreshold ?? 0)
+          ),
+          forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
+          expiration: params.expiration ?? new anchor.BN(0),
+          stateBump,
+        })
         .accounts({
           aggregator: aggregatorKeypair.publicKey,
           authority,
@@ -181,7 +191,8 @@ export async function createAggregator(
           programState: programStateAccount.publicKey,
         })
         .instruction(),
-      await program.methods.permissionInit!({})
+      await program.methods
+        .permissionInit({})
         .accounts({
           permission: permissionAccount.publicKey,
           authority: params.authority,
@@ -192,31 +203,33 @@ export async function createAggregator(
         })
         .instruction(),
       payerKeypair.publicKey.equals(queue.authority)
-        ? await program.methods.permissionSet!({
-            permission: { permitOracleQueueUsage: null },
-            enable: true,
-          })
+        ? await program.methods
+            .permissionSet({
+              permission: { permitOracleQueueUsage: null },
+              enable: true,
+            })
             .accounts({
               permission: permissionAccount.publicKey,
               authority: queue.authority,
             })
             .instruction()
         : undefined,
-      spl.Token.createAssociatedTokenAccountInstruction(
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-        spl.TOKEN_PROGRAM_ID,
-        switchTokenMint.publicKey,
+      spl.createAssociatedTokenAccountInstruction(
+        payerKeypair.publicKey,
         leaseEscrow,
-        leaseAccount.publicKey,
-        payerKeypair.publicKey
+        payerKeypair.publicKey,
+        mint.address,
+        spl.TOKEN_PROGRAM_ID,
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
       ),
-      await program.methods.leaseInit!({
-        loadAmount: new anchor.BN(0),
-        stateBump,
-        leaseBump,
-        withdrawAuthority: payerKeypair.publicKey,
-        walletBumps: Buffer.from([]),
-      })
+      await program.methods
+        .leaseInit({
+          loadAmount: new anchor.BN(0),
+          stateBump,
+          leaseBump,
+          withdrawAuthority: payerKeypair.publicKey,
+          walletBumps: Buffer.from([]),
+        })
         .accounts({
           programState: programStateAccount.publicKey,
           lease: leaseAccount.publicKey,
@@ -228,7 +241,7 @@ export async function createAggregator(
           tokenProgram: spl.TOKEN_PROGRAM_ID,
           escrow: leaseEscrow,
           owner: payerKeypair.publicKey,
-          mint: switchTokenMint.publicKey,
+          mint: mint.address,
         })
         // .remainingAccounts(
         //   jobPubkeys.concat(jobWallets).map((pubkey: PublicKey) => {
@@ -238,9 +251,10 @@ export async function createAggregator(
         .instruction(),
       ...(await Promise.all(
         jobs.map(async ([jobAccount, weight]) => {
-          return program.methods.aggregatorAddJob!({
-            weight,
-          })
+          return program.methods
+            .aggregatorAddJob({
+              weight,
+            })
             .accounts({
               aggregator: aggregatorKeypair.publicKey,
               authority: payerKeypair.publicKey,
@@ -252,9 +266,11 @@ export async function createAggregator(
     ].filter(Boolean) as TransactionInstruction[])
   );
 
-  const createSig = await program.provider.sendAndConfirm!(
+  const createSig = await sendAndConfirmTransaction(
+    program.provider.connection,
     new Transaction().add(...createIxns),
     [payerKeypair, aggregatorKeypair]
   );
+
   return aggregatorAccount;
 }

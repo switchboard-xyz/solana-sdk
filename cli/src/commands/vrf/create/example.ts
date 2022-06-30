@@ -116,14 +116,15 @@ export default class VrfCreateExample extends BaseCommand {
       publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
-    const tokenMint = await queueAccount.loadMint();
-    const vrfEscrowPubkey = await spl.Token.getAssociatedTokenAddress(
-      tokenMint.associatedProgramId,
-      tokenMint.programId,
-      tokenMint.publicKey,
+    const mint = await queueAccount.loadMint();
+    const vrfEscrowPubkey = await spl.getAssociatedTokenAddress(
+      mint.address,
       vrfSecret.publicKey,
-      true
+      true,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
+
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
       queue.authority,
@@ -134,21 +135,21 @@ export default class VrfCreateExample extends BaseCommand {
     // create account txns
     const createTxn = new Transaction();
     createTxn.add(
-      spl.Token.createAssociatedTokenAccountInstruction(
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID,
-        spl.TOKEN_PROGRAM_ID,
-        tokenMint.publicKey,
+      spl.createAssociatedTokenAccountInstruction(
+        payerKeypair.publicKey,
         vrfEscrowPubkey,
         vrfSecret.publicKey,
-        payerKeypair.publicKey
+        mint.address,
+        spl.TOKEN_PROGRAM_ID,
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
       ),
-      spl.Token.createSetAuthorityInstruction(
-        spl.TOKEN_PROGRAM_ID,
+      spl.createSetAuthorityInstruction(
         vrfEscrowPubkey,
-        programStateAccount.publicKey,
-        "AccountOwner",
         vrfSecret.publicKey,
-        [payerKeypair, vrfSecret]
+        spl.AuthorityType.AccountOwner,
+        programStateAccount.publicKey,
+        [payerKeypair, vrfSecret],
+        spl.TOKEN_PROGRAM_ID
       ),
       SystemProgram.createAccount({
         fromPubkey: payerKeypair.publicKey,

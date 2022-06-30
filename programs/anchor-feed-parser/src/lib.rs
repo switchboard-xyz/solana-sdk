@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use std::convert::TryInto;
 pub use switchboard_v2::AggregatorAccountData;
 
-declare_id!("7Th37Bvb7u2sS4Xe6YkvCkHSHDAakRUeobRBNXuf2PFD");
+declare_id!("FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh");
 
 #[derive(Accounts)]
 pub struct ReadResult<'info> {

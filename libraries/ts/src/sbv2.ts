@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
@@ -402,7 +403,7 @@ export class ProgramStateAccount {
     let vault = null;
     if (params.mint === undefined) {
       const decimals = 9;
-      const mint = await spl.createMint(
+      mint = await spl.createMint(
         program.provider.connection,
         payerKeypair,
         payerKeypair.publicKey,
@@ -1984,6 +1985,7 @@ export class PermissionAccount {
     );
     const psData = await programStateAccount.loadData();
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const [addinState, _] = await PublicKey.findProgramAddress(
       [Buffer.from("state")],
       params.addinProgram.programId
@@ -4107,16 +4109,16 @@ export async function sendAll(
     let txs = reqs.map((r: any) => {
       if (r === null || r === undefined) return new Transaction();
       const tx = r.tx;
-      let signers = r.signers;
+      let rSigners = r.signers;
 
-      if (signers === undefined) {
-        signers = [];
+      if (rSigners === undefined) {
+        rSigners = [];
       }
 
       tx.feePayer = (provider as anchor.AnchorProvider).wallet.publicKey;
       tx.recentBlockhash = blockhash.blockhash;
 
-      signers
+      rSigners
         .filter((s: any): s is Signer => s !== undefined)
         .forEach((kp: any) => {
           tx.partialSign(kp);
@@ -4172,11 +4174,11 @@ export function packInstructions(
   currentTransaction.feePayer = feePayer;
 
   const encodeLength = (bytes: Array<number>, len: number) => {
-    let rem_len = len;
+    let remLen = len;
     for (;;) {
-      let elem = rem_len & 0x7f;
-      rem_len >>= 7;
-      if (rem_len == 0) {
+      let elem = remLen & 0x7f;
+      remLen >>= 7;
+      if (remLen == 0) {
         bytes.push(elem);
         break;
       } else {
@@ -4205,7 +4207,7 @@ export function packInstructions(
     ) {
       // If the aggregator transaction fits, it will serialize without error. We can then push it ahead no problem
       const trimmedInstructions = ixs
-        .map(() => currentTransaction.instructions.pop()!)
+        .map(() => currentTransaction.instructions.pop())
         .reverse();
 
       // Every serialize adds the instruction signatures as dependencies
@@ -4277,8 +4279,8 @@ export function signTransactions(
     // Get pubkeys of signers needed
     const sigsNeeded = transaction.instructions
       .map((instruction) => {
-        const signers = instruction.keys.filter((meta) => meta.isSigner);
-        return signers.map((signer) => signer.pubkey);
+        const ixnSigners = instruction.keys.filter((meta) => meta.isSigner);
+        return ixnSigners.map((signer) => signer.pubkey);
       })
       .flat();
 

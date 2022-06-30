@@ -1,9 +1,9 @@
 import * as anchor from "@project-serum/anchor";
-import type NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
   Context,
+  Keypair,
   PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
@@ -13,17 +13,18 @@ import {
   SwitchboardTestContext,
 } from "@switchboard-xyz/sbv2-utils";
 import {
+  AnchorWallet,
   Callback,
   PermissionAccount,
   ProgramStateAccount,
   SwitchboardPermission,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import chai from "chai";
+import fs from "fs";
 import "mocha";
-import type { AnchorVrfParser } from "../../../target/types/anchor_vrf_parser";
-
-const expect = chai.expect;
+import path from "path";
+import { IDL } from "../../../target/types/anchor_vrf_parser";
+// const expect = chai.expect;
 
 interface VrfClientState {
   bump: number;
@@ -35,13 +36,38 @@ interface VrfClientState {
   vrf: PublicKey;
 }
 
-describe("anchor-vrf-parser test", async () => {
-  anchor.setProvider(anchor.AnchorProvider.env());
+function getProgramId(): PublicKey {
+  const programKeypairPath = path.join(
+    __dirname,
+    "..",
+    "..",
+    "..",
+    "target",
+    "deploy",
+    "anchor_vrf_parser-keypair.json"
+  );
+  const PROGRAM_ID = Keypair.fromSecretKey(
+    new Uint8Array(JSON.parse(fs.readFileSync(programKeypairPath, "utf8")))
+  ).publicKey;
 
-  const vrfClientProgram = anchor.workspace
-    .AnchorVrfParser as anchor.Program<AnchorVrfParser>;
-  const provider = vrfClientProgram.provider as anchor.AnchorProvider;
-  const payer = (provider.wallet as NodeWallet).payer;
+  return PROGRAM_ID;
+}
+
+describe("anchor-vrf-parser test", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  // const vrfClientProgram = anchor.workspace
+  //   .AnchorVrfParser as Program<AnchorVrfParser>;
+  const vrfClientProgram = new anchor.Program(
+    IDL,
+    getProgramId(),
+    provider,
+    new anchor.BorshCoder(IDL)
+  );
+  // as anchor.Program<AnchorVrfParser>;
+
+  const payer = (provider.wallet as AnchorWallet).payer;
 
   let switchboard: SwitchboardTestContext;
 
@@ -133,20 +159,18 @@ describe("anchor-vrf-parser test", async () => {
     }
 
     // Create VRF Client account
-    await vrfClientProgram.rpc.initState(
-      {
+    await vrfClientProgram.methods
+      .initState({
         maxResult: new anchor.BN(1),
-      },
-      {
-        accounts: {
-          state: vrfClientKey,
-          vrf: vrfAccount.publicKey,
-          payer: payer.publicKey,
-          authority: payer.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-      }
-    );
+      })
+      .accounts({
+        state: vrfClientKey,
+        vrf: vrfAccount.publicKey,
+        payer: payer.publicKey,
+        authority: payer.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
     console.log(`Created VrfClient Account: ${vrfClientKey}`);
 
     // Get required switchboard accounts
@@ -158,17 +182,25 @@ describe("anchor-vrf-parser test", async () => {
       queue.publicKey,
       vrfAccount.publicKey
     );
-    const switchboardMint = await programStateAccount.getTokenMint();
-    const payerTokenAccount =
-      await switchboardMint.getOrCreateAssociatedAccountInfo(payer.publicKey);
+    const mint = await programStateAccount.getTokenMint();
+    const payerTokenAccount = await spl.getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      payer,
+      mint.address,
+      payer.publicKey,
+      undefined,
+      undefined,
+      undefined,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+    );
 
     // Request randomness
     console.log(`Sending RequestRandomness instruction`);
-    const requestTxn = await vrfClientProgram.methods
-      .requestResult({
-        switchboardStateBump: programStateBump,
-        permissionBump,
-      })
+    const requestTxn = await vrfClientProgram.methods.requestResult!({
+      switchboardStateBump: programStateBump,
+      permissionBump,
+    })
       .accounts({
         state: vrfClientKey,
         authority: payer.publicKey,

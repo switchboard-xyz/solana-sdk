@@ -1,7 +1,10 @@
 import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { chalkString } from "@switchboard-xyz/sbv2-utils";
+import {
+  chalkString,
+  getOrCreateSwitchboardMintTokenAccount,
+} from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
   OracleQueueAccount,
@@ -119,11 +122,11 @@ export default class OracleWithdraw extends BaseCommand {
       } catch {
         try {
           const withdrawKeypair = await loadKeypair(flags.withdrawAccount);
-          withdrawAccount = (
-            await mint.getOrCreateAssociatedAccountInfo(
-              withdrawKeypair.publicKey
-            )
-          ).address;
+          withdrawAccount = await getOrCreateSwitchboardMintTokenAccount(
+            this.program,
+            mint,
+            withdrawKeypair
+          );
         } catch {
           throw new Error(
             `failed to parse withdrawAccount flag ${flags.withdrawAccount}`
@@ -131,11 +134,10 @@ export default class OracleWithdraw extends BaseCommand {
         }
       }
     } else {
-      withdrawAccount = (
-        await mint.getOrCreateAssociatedAccountInfo(
-          programWallet(this.program).publicKey
-        )
-      ).address;
+      withdrawAccount = await getOrCreateSwitchboardMintTokenAccount(
+        this.program,
+        mint
+      );
     }
 
     const txn = await oracleAccount.withdraw({

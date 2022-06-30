@@ -124,11 +124,12 @@ export default class QueueCreate extends BaseCommand {
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
     );
-    const tokenMint = new spl.Token(
+
+    const mint = await spl.getMint(
       this.program.provider.connection,
       spl.NATIVE_MINT,
-      spl.TOKEN_PROGRAM_ID,
-      payerKeypair
+      undefined,
+      spl.TOKEN_PROGRAM_ID
     );
 
     const createQueueTxns: (
@@ -152,11 +153,11 @@ export default class QueueCreate extends BaseCommand {
           space: spl.AccountLayout.span,
           programId: spl.TOKEN_PROGRAM_ID,
         }),
-        spl.Token.createInitAccountInstruction(
-          spl.TOKEN_PROGRAM_ID,
-          tokenMint.publicKey,
+        spl.createInitializeAccountInstruction(
           vaultKeypair.publicKey,
-          payerKeypair.publicKey
+          mint.address,
+          payerKeypair.publicKey,
+          spl.TOKEN_PROGRAM_ID
         ),
         await this.program.methods
           .programInit({
@@ -165,12 +166,12 @@ export default class QueueCreate extends BaseCommand {
           .accounts({
             state: programStateAccount.publicKey,
             authority: payerKeypair.publicKey,
-            tokenMint: tokenMint.publicKey,
+            tokenMint: mint.address,
             vault: vaultKeypair.publicKey,
             payer: payerKeypair.publicKey,
             systemProgram: SystemProgram.programId,
             tokenProgram: spl.TOKEN_PROGRAM_ID,
-            daoMint: tokenMint.publicKey,
+            daoMint: mint.address,
           })
           .instruction(),
       ]);
@@ -227,7 +228,7 @@ export default class QueueCreate extends BaseCommand {
           buffer: queueBuffer.publicKey,
           systemProgram: SystemProgram.programId,
           payer: payerKeypair.publicKey,
-          mint: tokenMint.publicKey,
+          mint: mint.address,
         })
         .instruction()
     );
@@ -320,11 +321,11 @@ export default class QueueCreate extends BaseCommand {
             space: spl.AccountLayout.span,
             programId: spl.TOKEN_PROGRAM_ID,
           }),
-          spl.Token.createInitAccountInstruction(
-            spl.TOKEN_PROGRAM_ID,
-            tokenMint.publicKey,
+          spl.createInitializeAccountInstruction(
             tokenWalletKeypair.publicKey,
-            programStateAccount.publicKey
+            mint.address,
+            programStateAccount.publicKey,
+            spl.TOKEN_PROGRAM_ID
           ),
           await this.program.methods
             .oracleInit({

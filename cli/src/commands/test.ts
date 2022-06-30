@@ -1,8 +1,6 @@
-/* eslint-disable new-cap */
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   LAMPORTS_PER_SOL,
   NONCE_ACCOUNT_LENGTH,
   PublicKey,
@@ -65,7 +63,7 @@ export default class TestCommand extends BaseCommand {
       publicKey: oracle.queuePubkey,
     });
     const queue = await queueAccount.loadData();
-    const tokenMint = await queueAccount.loadMint();
+    const mint = await queueAccount.loadMint();
     const [programState, stateBump] = ProgramStateAccount.fromSeed(
       oracleAccount.program
     );
@@ -75,7 +73,7 @@ export default class TestCommand extends BaseCommand {
       queueAccount.publicKey,
       oracleAccount.publicKey
     );
-    const balanceNeeded = await spl.Token.getMinBalanceRentForExemptAccount(
+    const balanceNeeded = await spl.getMinimumBalanceForRentExemptAccount(
       oracleAccount.program.provider.connection
     );
 
@@ -189,11 +187,11 @@ export default class TestCommand extends BaseCommand {
               space: spl.AccountLayout.span,
               programId: spl.TOKEN_PROGRAM_ID,
             }),
-            spl.Token.createInitAccountInstruction(
-              spl.TOKEN_PROGRAM_ID,
-              spl.NATIVE_MINT,
+            spl.createInitializeAccountInstruction(
               newAccount.publicKey,
-              oracleAuthority.publicKey
+              mint.address,
+              oracleAuthority.publicKey,
+              spl.TOKEN_PROGRAM_ID
             ),
             await oracleAccount.program.methods
               .oracleWithdraw({
@@ -214,12 +212,12 @@ export default class TestCommand extends BaseCommand {
                 payer: oracleAuthority.publicKey,
               })
               .instruction(),
-            spl.Token.createCloseAccountInstruction(
-              spl.TOKEN_PROGRAM_ID,
+            spl.createCloseAccountInstruction(
               newAccount.publicKey,
               oracleAuthority.publicKey,
               oracleAuthority.publicKey,
-              [newAccount]
+              [newAccount],
+              spl.TOKEN_PROGRAM_ID
             )
           );
 
@@ -242,56 +240,4 @@ export default class TestCommand extends BaseCommand {
   async catch(error) {
     super.catch(error, "test command failed");
   }
-}
-
-function decodeTokenAccount(
-  info: AccountInfo<Buffer>,
-  pubkey: PublicKey
-): spl.AccountInfo {
-  if (info === null) {
-    throw new Error("FAILED_TO_FIND_ACCOUNT");
-  }
-
-  if (!info.owner.equals(spl.TOKEN_PROGRAM_ID)) {
-    throw new Error("INVALID_ACCOUNT_OWNER");
-  }
-
-  if (info.data.length !== spl.AccountLayout.span) {
-    throw new Error(`Invalid account size`);
-  }
-
-  const data = Buffer.from(info.data);
-  const accountInfo = spl.AccountLayout.decode(data);
-  accountInfo.address = pubkey;
-  accountInfo.mint = new PublicKey(accountInfo.mint);
-  accountInfo.owner = new PublicKey(accountInfo.owner);
-  accountInfo.amount = spl.u64.fromBuffer(accountInfo.amount);
-
-  if (accountInfo.delegateOption === 0) {
-    accountInfo.delegate = undefined;
-    accountInfo.delegatedAmount = new spl.u64(0);
-  } else {
-    accountInfo.delegate = new PublicKey(accountInfo.delegate);
-    accountInfo.delegatedAmount = spl.u64.fromBuffer(
-      accountInfo.delegatedAmount
-    );
-  }
-
-  accountInfo.isInitialized = accountInfo.state !== 0;
-  accountInfo.isFrozen = accountInfo.state === 2;
-
-  if (accountInfo.isNativeOption === 1) {
-    accountInfo.rentExemptReserve = spl.u64.fromBuffer(accountInfo.isNative);
-    accountInfo.isNative = true;
-  } else {
-    accountInfo.rentExemptReserve = undefined;
-    accountInfo.isNative = false;
-  }
-
-  accountInfo.closeAuthority =
-    accountInfo.closeAuthorityOption === 0
-      ? undefined
-      : new PublicKey(accountInfo.closeAuthority);
-
-  return accountInfo;
 }

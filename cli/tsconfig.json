@@ -3,7 +3,11 @@
   "compilerOptions": {
     "paths": {
       "@switchboard-xyz/switchboard-v2": ["../libraries/ts"],
-      "@switchboard-xyz/sbv2-utils": ["../libraries/sbv2-utils"]
+      "@switchboard-xyz/sbv2-utils": ["../libraries/sbv2-utils"],
+      "@solana/spl-token": [
+        "../node_modules/@solana/spl-token",
+        "./node_modules/@solana/spl-token"
+      ]
     }
   },
   "references": [

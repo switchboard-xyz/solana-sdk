@@ -2,7 +2,7 @@ import { PublicKey } from "@solana/web3.js"
 
 // Program ID passed with the cli --program-id flag when running the code generator. Do not edit, it will get overwritten.
 export const PROGRAM_ID_CLI = new PublicKey(
-  "7Th37Bvb7u2sS4Xe6YkvCkHSHDAakRUeobRBNXuf2PFD"
+  "FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh"
 )
 
 // This constant will not get overwritten on subsequent code generations and it's safe to modify it's value.

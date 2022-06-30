@@ -82,7 +82,7 @@ export default class OracleCreate extends BaseCommand {
       publicKey: new PublicKey(args.queueKey),
     });
     const queue = await queueAccount.loadData();
-    const tokenMint = await queueAccount.loadMint();
+    const mint = await queueAccount.loadMint();
 
     const [programStateAccount, stateBump] = ProgramStateAccount.fromSeed(
       this.program
@@ -118,11 +118,11 @@ export default class OracleCreate extends BaseCommand {
         space: spl.AccountLayout.span,
         programId: spl.TOKEN_PROGRAM_ID,
       }),
-      spl.Token.createInitAccountInstruction(
-        spl.TOKEN_PROGRAM_ID,
-        tokenMint.publicKey,
+      spl.createInitializeAccountInstruction(
         tokenWalletKeypair.publicKey,
-        programStateAccount.publicKey
+        mint.address,
+        programStateAccount.publicKey,
+        spl.TOKEN_PROGRAM_ID
       ),
       await this.program.methods
         .oracleInit({

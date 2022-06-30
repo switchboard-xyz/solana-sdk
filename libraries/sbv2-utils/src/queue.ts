@@ -48,11 +48,11 @@ export async function createQueue(
 
   const [programStateAccount, stateBump] =
     ProgramStateAccount.fromSeed(program);
-  const tokenMint = new spl.Token(
+  const mint = await spl.getMint(
     program.provider.connection,
     spl.NATIVE_MINT,
-    spl.TOKEN_PROGRAM_ID,
-    payerKeypair
+    undefined,
+    spl.TOKEN_PROGRAM_ID
   );
 
   const ixns: (TransactionInstruction | TransactionInstruction[])[] = [];
@@ -73,24 +73,25 @@ export async function createQueue(
         space: spl.AccountLayout.span,
         programId: spl.TOKEN_PROGRAM_ID,
       }),
-      spl.Token.createInitAccountInstruction(
-        spl.TOKEN_PROGRAM_ID,
-        tokenMint.publicKey,
+      spl.createInitializeAccountInstruction(
         vaultKeypair.publicKey,
-        payerKeypair.publicKey
+        mint.address,
+        payerKeypair.publicKey,
+        spl.TOKEN_PROGRAM_ID
       ),
-      await program.methods.programInit!({
-        stateBump,
-      })
+      await program.methods
+        .programInit({
+          stateBump,
+        })
         .accounts({
           state: programStateAccount.publicKey,
           authority: payerKeypair.publicKey,
-          tokenMint: tokenMint.publicKey,
+          tokenMint: mint.address,
           vault: vaultKeypair.publicKey,
           payer: payerKeypair.publicKey,
           systemProgram: SystemProgram.programId,
           tokenProgram: spl.TOKEN_PROGRAM_ID,
-          daoMint: tokenMint.publicKey,
+          daoMint: mint.address,
         })
         .instruction(),
     ]);
@@ -132,32 +133,33 @@ export async function createQueue(
         ),
       programId: program.programId,
     }),
-    await program.methods.oracleQueueInit!({
-      name: Buffer.from(params.name ?? "").slice(0, 32),
-      metadata: Buffer.from("").slice(0, 64),
-      reward: params.reward ? new anchor.BN(params.reward) : new anchor.BN(0),
-      minStake: params.minStake
-        ? new anchor.BN(params.minStake)
-        : new anchor.BN(0),
-      // feedProbationPeriod: 0,
-      oracleTimeout: params.oracleTimeout,
-      slashingEnabled: false,
-      varianceToleranceMultiplier: SwitchboardDecimal.fromBig(new Big(2)),
-      authority: authorityKeypair.publicKey,
-      // consecutiveFeedFailureLimit: new anchor.BN(1000),
-      // consecutiveOracleFailureLimit: new anchor.BN(1000),
-      minimumDelaySeconds: 5,
-      queueSize: queueSize,
-      unpermissionedFeeds: params.unpermissionedFeeds ?? false,
-      unpermissionedVrf: params.unpermissionedVrf ?? false,
-    })
+    await program.methods
+      .oracleQueueInit({
+        name: Buffer.from(params.name ?? "").slice(0, 32),
+        metadata: Buffer.from("").slice(0, 64),
+        reward: params.reward ? new anchor.BN(params.reward) : new anchor.BN(0),
+        minStake: params.minStake
+          ? new anchor.BN(params.minStake)
+          : new anchor.BN(0),
+        // feedProbationPeriod: 0,
+        oracleTimeout: params.oracleTimeout,
+        slashingEnabled: false,
+        varianceToleranceMultiplier: SwitchboardDecimal.fromBig(new Big(2)),
+        authority: authorityKeypair.publicKey,
+        // consecutiveFeedFailureLimit: new anchor.BN(1000),
+        // consecutiveOracleFailureLimit: new anchor.BN(1000),
+        minimumDelaySeconds: 5,
+        queueSize: queueSize,
+        unpermissionedFeeds: params.unpermissionedFeeds ?? false,
+        unpermissionedVrf: params.unpermissionedVrf ?? false,
+      })
       .accounts({
         oracleQueue: queueKeypair.publicKey,
         authority: authorityKeypair.publicKey,
         buffer: queueBuffer.publicKey,
         systemProgram: SystemProgram.programId,
         payer: payerKeypair.publicKey,
-        mint: tokenMint.publicKey,
+        mint: mint.address,
       })
       .instruction(),
     anchor.web3.SystemProgram.createAccount({
@@ -170,11 +172,12 @@ export async function createQueue(
         ),
       programId: program.programId,
     }),
-    await program.methods.crankInit!({
-      name: Buffer.from("Crank").slice(0, 32),
-      metadata: Buffer.from("").slice(0, 64),
-      crankSize: params.crankSize,
-    })
+    await program.methods
+      .crankInit({
+        name: Buffer.from("Crank").slice(0, 32),
+        metadata: Buffer.from("").slice(0, 64),
+        crankSize: params.crankSize,
+      })
       .accounts({
         crank: crankKeypair.publicKey,
         queue: queueKeypair.publicKey,
@@ -224,18 +227,19 @@ export async function createQueue(
           space: spl.AccountLayout.span,
           programId: spl.TOKEN_PROGRAM_ID,
         }),
-        spl.Token.createInitAccountInstruction(
-          spl.TOKEN_PROGRAM_ID,
-          tokenMint.publicKey,
+        spl.createInitializeAccountInstruction(
           tokenWalletKeypair.publicKey,
-          programStateAccount.publicKey
+          mint.address,
+          programStateAccount.publicKey,
+          spl.TOKEN_PROGRAM_ID
         ),
-        await program.methods.oracleInit!({
-          name: Buffer.from(name).slice(0, 32),
-          metadata: Buffer.from("").slice(0, 128),
-          stateBump,
-          oracleBump,
-        })
+        await program.methods
+          .oracleInit({
+            name: Buffer.from(name).slice(0, 32),
+            metadata: Buffer.from("").slice(0, 128),
+            stateBump,
+            oracleBump,
+          })
           .accounts({
             oracle: oracleAccount.publicKey,
             oracleAuthority: authorityKeypair.publicKey,
@@ -246,7 +250,8 @@ export async function createQueue(
             payer: payerKeypair.publicKey,
           })
           .instruction(),
-        await program.methods.permissionInit!({})
+        await program.methods
+          .permissionInit({})
           .accounts({
             permission: permissionAccount.publicKey,
             authority: authorityKeypair.publicKey,
@@ -256,10 +261,11 @@ export async function createQueue(
             systemProgram: SystemProgram.programId,
           })
           .instruction(),
-        await program.methods.permissionSet!({
-          permission: { permitOracleHeartbeat: null },
-          enable: true,
-        })
+        await program.methods
+          .permissionSet({
+            permission: { permitOracleHeartbeat: null },
+            enable: true,
+          })
           .accounts({
             permission: permissionAccount.publicKey,
             authority: authorityKeypair.publicKey,

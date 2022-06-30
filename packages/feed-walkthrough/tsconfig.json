@@ -4,7 +4,11 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
+      "@solana/spl-token": [
+        "../../node_modules/@solana/spl-token",
+        "./node_modules/@solana/spl-token"
+      ]
     }
   },
   "include": ["src/**/*"],
