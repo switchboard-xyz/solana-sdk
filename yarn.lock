@@ -4164,6 +4164,27 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
+"@switchboard-xyz/switchboard-v2@^0.0.114":
+  version "0.0.114"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.114.tgz#94b6b2d2500d26997142e316ae4d7f910513eac6"
+  integrity sha512-LqBZSO2iGJZ+Vb6CgyANPaTWGbpthei5Ea+PBPvwsrvQQs1MFqKmhV9E5KrNr3VjOkYBCW1wwhSrbWDwkSi/8A==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@solana/spl-token" "^0.2.0"
+    "@solana/web3.js" "^1.44.3"
+    "@types/big.js" "^6.1.4"
+    assert "^2.0.0"
+    big.js "^6.2.0"
+    bs58 "^4.0.1"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    glob "^8.0.3"
+    long "^4.0.0"
+    mocha "^9.1.1"
+    node-fetch "^3.2.3"
+    protobufjs "^6.11.3"
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"
