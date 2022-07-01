@@ -1731,14 +1731,14 @@
     "@types/react" "*"
     prop-types "^15.6.2"
 
-"@docusaurus/remark-plugin-npm2yarn@2.0.0-beta.18":
-  version "2.0.0-beta.18"
-  resolved "https://registry.yarnpkg.com/@docusaurus/remark-plugin-npm2yarn/-/remark-plugin-npm2yarn-2.0.0-beta.18.tgz#f898f186ffb4d5e7938be050c71be222c55f4d03"
-  integrity sha512-GmlbPzB8ImH6ey0LhOTe5NOIY30TwVNXarpm63zG1HYEUOT/H8X8w2NQPlT6RyhH9FtDi4bKMzfEP4ImpJGgCQ==
+"@docusaurus/remark-plugin-npm2yarn@2.0.0-beta.21":
+  version "2.0.0-beta.21"
+  resolved "https://registry.yarnpkg.com/@docusaurus/remark-plugin-npm2yarn/-/remark-plugin-npm2yarn-2.0.0-beta.21.tgz#10eb88a2dab6193568eff76b6a83b79e313ef765"
+  integrity sha512-CqvmoFEj05NzaQBKxnsfI90aM8KHJZWyCzED/Qg5odUD9VtR9zNQJ1Nu/X1ctqCN7FBIxBYk2tz1Xb1+zCP8gg==
   dependencies:
     npm-to-yarn "^1.0.1"
-    tslib "^2.3.1"
-    unist-util-visit "^2.0.2"
+    tslib "^2.4.0"
+    unist-util-visit "^2.0.3"
 
 "@docusaurus/theme-classic@2.0.0-beta.18":
   version "2.0.0-beta.18"
