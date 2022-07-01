@@ -2933,6 +2933,8 @@ export class CrankAccount {
       .crankPush({
         stateBump,
         permissionBump,
+        nofitiRef: null,
+        notifiRef: null,
       })
       .accounts({
         crank: this.publicKey,
@@ -3763,10 +3765,11 @@ export class VrfAccount {
     for (let i = 0; i < tryCount; ++i) {
       txs.push({
         tx: await this.program.methods
-          .vrfVerify({
+          .vrfProveAndVerify({
             nonce: i,
             stateBump,
             idx,
+            proof: Buffer.from(""),
           })
           .accounts({
             vrf: this.publicKey,
