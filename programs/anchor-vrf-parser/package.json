@@ -19,7 +19,7 @@
     "@switchboard-xyz/switchboard-v2": "^0.0.114",
     "chalk": "^4.1.2",
     "child_process": "^1.0.2",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.1"
   },
   "devDependencies": {
     "@switchboard-xyz/switchboardv2-cli": "^0.2.4",

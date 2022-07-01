@@ -22,7 +22,7 @@
     "@solana/web3.js": "^1.37.1",
     "@switchboard-xyz/switchboard-v2": "^0.0.114",
     "chalk": "^4.1.2",
-    "dotenv": "^16.0.0",
+    "dotenv": "^16.0.1",
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
