@@ -37,7 +37,7 @@
     "@project-serum/anchor": "^0.24.2",
     "@saberhq/token-utils": "^1.12.68",
     "@solana/spl-token": "^0.2.0",
-    "@solana/web3.js": "^1.42.0",
+    "@solana/web3.js": "^1.47.1",
     "@switchboard-xyz/switchboard-v2": "^0.0.116",
     "big.js": "^6.1.1",
     "chalk": "4",
