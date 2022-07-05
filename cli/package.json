@@ -39,7 +39,7 @@
     "big.js": "^6.2.0",
     "bs58": "^5.0.0",
     "chalk": "4",
-    "node-fetch": "^2.6.6",
+    "node-fetch": "^3.2.6",
     "winston": "^3.3.3"
   },
   "devDependencies": {
