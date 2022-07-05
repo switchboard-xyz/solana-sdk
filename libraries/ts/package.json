@@ -71,7 +71,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "^17.0.35",
     "shx": "^0.3.4",
-    "ts-proto": "^1.115.4",
+    "ts-proto": "^1.117.0",
     "typedoc": "^0.23.3",
     "typescript": "^4.7"
   }
