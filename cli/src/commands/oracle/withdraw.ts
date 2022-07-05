@@ -3,7 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
-  getOrCreateSwitchboardMintTokenAccount,
+  getOrCreateSwitchboardTokenAccount,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
@@ -122,7 +122,7 @@ export default class OracleWithdraw extends BaseCommand {
       } catch {
         try {
           const withdrawKeypair = await loadKeypair(flags.withdrawAccount);
-          withdrawAccount = await getOrCreateSwitchboardMintTokenAccount(
+          withdrawAccount = await getOrCreateSwitchboardTokenAccount(
             this.program,
             mint,
             withdrawKeypair
@@ -134,7 +134,7 @@ export default class OracleWithdraw extends BaseCommand {
         }
       }
     } else {
-      withdrawAccount = await getOrCreateSwitchboardMintTokenAccount(
+      withdrawAccount = await getOrCreateSwitchboardTokenAccount(
         this.program,
         mint
       );

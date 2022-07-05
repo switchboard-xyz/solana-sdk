@@ -3,7 +3,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
-  getOrCreateSwitchboardMintTokenAccount,
+  getOrCreateSwitchboardTokenAccount,
   verifyProgramHasPayer,
 } from "@switchboard-xyz/sbv2-utils";
 import {
@@ -82,7 +82,7 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
       } catch {
         try {
           const withdrawKeypair = await loadKeypair(flags.withdrawAddress);
-          withdrawAddress = await getOrCreateSwitchboardMintTokenAccount(
+          withdrawAddress = await getOrCreateSwitchboardTokenAccount(
             this.program,
             mint,
             withdrawKeypair
@@ -94,7 +94,7 @@ export default class AggregatorLeaseWithdraw extends BaseCommand {
         }
       }
     } else {
-      withdrawAddress = await getOrCreateSwitchboardMintTokenAccount(
+      withdrawAddress = await getOrCreateSwitchboardTokenAccount(
         this.program,
         mint
       );

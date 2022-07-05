@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/sbv2-utils";
+import { getOrCreateSwitchboardTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
   CrankAccount,
   OracleQueueAccount,
@@ -56,7 +56,7 @@ export default class CrankTurn extends BaseCommand {
 
     // get payer payout wallet
     const mint = await programStateAccount.getTokenMint();
-    const payoutTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+    const payoutTokenAddress = await getOrCreateSwitchboardTokenAccount(
       this.program,
       mint,
       payer

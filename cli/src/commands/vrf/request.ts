@@ -1,7 +1,7 @@
 import { Flags } from "@oclif/core";
 import * as spl from "@solana/spl-token";
 import { PublicKey, SYSVAR_RECENT_BLOCKHASHES_PUBKEY } from "@solana/web3.js";
-import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/sbv2-utils";
+import { getOrCreateSwitchboardTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleQueueAccount,
   PermissionAccount,
@@ -67,7 +67,7 @@ export default class VrfRequest extends BaseCommand {
       ? await loadKeypair(flags.funderAuthority)
       : payerKeypair;
 
-    const funderTokenWallet = await getOrCreateSwitchboardMintTokenAccount(
+    const funderTokenWallet = await getOrCreateSwitchboardTokenAccount(
       this.program,
       mint
     );

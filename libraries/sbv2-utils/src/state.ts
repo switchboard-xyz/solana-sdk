@@ -6,14 +6,12 @@ import {
   programWallet,
 } from "@switchboard-xyz/switchboard-v2";
 
-export const getOrCreateSwitchboardMintTokenAccount = async (
+export const getOrCreateSwitchboardTokenAccount = async (
   program: anchor.Program,
   switchboardMint?: spl.Mint,
   payer = programWallet(program)
 ): Promise<PublicKey> => {
-  const returnAssociatedAddress = async (
-    mint: spl.Mint
-  ): Promise<PublicKey> => {
+  const getAssociatedAddress = async (mint: spl.Mint): Promise<PublicKey> => {
     const tokenAccount = await spl.getOrCreateAssociatedTokenAccount(
       program.provider.connection,
       payer,
@@ -30,12 +28,12 @@ export const getOrCreateSwitchboardMintTokenAccount = async (
 
   let mint = switchboardMint;
   if (mint) {
-    returnAssociatedAddress(mint);
+    return getAssociatedAddress(mint);
   }
   const [programState] = ProgramStateAccount.fromSeed(program);
   mint = await programState.getTokenMint();
   if (mint) {
-    returnAssociatedAddress(mint);
+    return getAssociatedAddress(mint);
   }
 
   throw new Error(`failed to get associated token account`);
