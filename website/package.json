@@ -42,7 +42,7 @@
     "@mui/system": "^5.6.2",
     "@solana/web3.js": "^1.35.1",
     "@svgr/webpack": "^5.5.0",
-    "clsx": "^1.1.1",
+    "clsx": "^1.2.0",
     "file-loader": "^6.2.0",
     "hast-util-is-element": "1.1.0",
     "my-loaders": "file:plugins/my-loaders",
