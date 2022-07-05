@@ -49,7 +49,7 @@
     "@types/node": "^16.9.4",
     "@typescript-eslint/eslint-plugin": "^5.30.3",
     "@typescript-eslint/parser": "^5.5.0",
-    "aws-sdk": "^2.1116.0",
+    "aws-sdk": "^2.1167.0",
     "chai": "^4",
     "eslint": "^8.18.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
