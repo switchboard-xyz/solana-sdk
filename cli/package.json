@@ -51,7 +51,7 @@
     "@typescript-eslint/parser": "^5.5.0",
     "aws-sdk": "^2.1116.0",
     "chai": "^4",
-    "eslint": "^8.3.0",
+    "eslint": "^8.18.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^1.0.2",
