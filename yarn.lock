@@ -11525,10 +11525,10 @@ markdown-escapes@^1.0.0:
   resolved "https://registry.yarnpkg.com/markdown-escapes/-/markdown-escapes-1.0.4.tgz#c95415ef451499d7602b91095f3c8e8975f78535"
   integrity sha512-8z4efJYk43E0upd0NbVXwgSTQs6cT3T06etieCMEg7dRbzCbxUCK/GHlX8mhHRDcp+OLlHkPKsvqQTCvsRl2cg==
 
-marked@^4.0.12:
-  version "4.0.14"
-  resolved "https://registry.npmjs.org/marked/-/marked-4.0.14.tgz"
-  integrity sha512-HL5sSPE/LP6U9qKgngIIPTthuxC0jrfxpYMZ3LdGDD3vTnLs59m2Z7r6+LNDR3ToqEQdkKd6YaaEfJhodJmijQ==
+marked@^4.0.16:
+  version "4.0.17"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.17.tgz#1186193d85bb7882159cdcfc57d1dfccaffb3fe9"
+  integrity sha512-Wfk0ATOK5iPxM4ptrORkFemqroz0ZDxp5MWfYA7H/F+wO17NRWV5Ypxi6p3g2Xmw2bKeiYOl6oVnLHKxBA0VhA==
 
 mdast-squeeze-paragraphs@^4.0.0:
   version "4.0.0"
@@ -11761,10 +11761,10 @@ minimatch@^3.0.4, minimatch@^3.1.1, minimatch@^3.1.2:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimatch@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.npmjs.org/minimatch/-/minimatch-5.0.1.tgz"
-  integrity sha512-nLDxIFRyhDblz3qMuq+SoRZED4+miJ/G+tdDrjkkkRnjAsBexeGpgjLEQ0blJy7rHhR2b93rhQY4SvyWu9v03g==
+minimatch@^5.0.1, minimatch@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.0.tgz#1717b464f4971b144f6aabe8f2d0b8e4511e09c7"
+  integrity sha512-9TPBGGak4nHfGZsPBohm9AWg6NoT7QTCehS3BIJABslyZbzxfV78QM2Y6+i741OPZIafFAaiiEMh5OyIrJPgtg==
   dependencies:
     brace-expansion "^2.0.1"
 
@@ -16165,15 +16165,14 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
-typedoc@^0.22.13, typedoc@^0.22.15:
-  version "0.22.15"
-  resolved "https://registry.npmjs.org/typedoc/-/typedoc-0.22.15.tgz"
-  integrity sha512-CMd1lrqQbFvbx6S9G6fL4HKp3GoIuhujJReWqlIvSb2T26vGai+8Os3Mde7Pn832pXYemd9BMuuYWhFpL5st0Q==
+typedoc@^0.23.3:
+  version "0.23.3"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.23.3.tgz#52a3e2395b61ce050dbf28695954ed66d8455f7e"
+  integrity sha512-klFzfV8hV1Vu5BE95BRY5lN1a/GmuMRPebhW7yeY3JERcu1O6X3HZE4pahkNHmmVpe77/O2lRtNVFnmb5+47ZA==
   dependencies:
-    glob "^7.2.0"
     lunr "^2.3.9"
-    marked "^4.0.12"
-    minimatch "^5.0.1"
+    marked "^4.0.16"
+    minimatch "^5.1.0"
     shiki "^0.10.1"
 
 typescript@^4.2.4, typescript@^4.6.3:
