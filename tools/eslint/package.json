@@ -17,12 +17,12 @@
     "test": "echo \"No test script required for workspace eslint-config\" && exit 0"
   },
   "peerDependencies": {
-    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint": "^8.18.0",
     "eslint-plugin-import": "^2.25.3",
     "prettier": ">=2.0.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0 || ^8.2.0",
+    "eslint": "^8.18.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",

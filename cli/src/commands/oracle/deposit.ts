@@ -4,7 +4,7 @@ import * as spl from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import {
   chalkString,
-  getOrCreateSwitchboardMintTokenAccount,
+  getOrCreateSwitchboardTokenAccount,
 } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleAccount,
@@ -72,7 +72,7 @@ export default class OracleDeposit extends BaseCommand {
       ).value.amount
     );
 
-    const funderTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+    const funderTokenAddress = await getOrCreateSwitchboardTokenAccount(
       this.program,
       mint
     );

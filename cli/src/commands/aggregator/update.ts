@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import { getOrCreateSwitchboardMintTokenAccount } from "@switchboard-xyz/sbv2-utils";
+import { getOrCreateSwitchboardTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
   OracleQueueAccount,
@@ -44,7 +44,7 @@ export default class AggregatorUpdate extends BaseCommand {
 
     const mint = await oracleQueueAccount.loadMint();
 
-    const payoutWallet = await getOrCreateSwitchboardMintTokenAccount(
+    const payoutWallet = await getOrCreateSwitchboardTokenAccount(
       this.program,
       mint
     );

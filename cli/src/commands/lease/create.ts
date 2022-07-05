@@ -2,7 +2,7 @@ import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import {
-  getOrCreateSwitchboardMintTokenAccount,
+  getOrCreateSwitchboardTokenAccount,
   prettyPrintLease,
 } from "@switchboard-xyz/sbv2-utils";
 import {
@@ -69,7 +69,7 @@ export default class LeaseCreate extends BaseCommand {
     const mint = await oracleQueueAccount.loadMint();
 
     // check funder has enough balance for the request
-    const funderTokenAddress = await getOrCreateSwitchboardMintTokenAccount(
+    const funderTokenAddress = await getOrCreateSwitchboardTokenAccount(
       this.program,
       mint,
       payer
