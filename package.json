@@ -54,6 +54,6 @@
     "npm": ">=8"
   },
   "dependencies": {
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.1"
   }
 }
