@@ -1,6 +1,31 @@
 import * as anchor from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import Big from "big.js";
+
+export class AnchorWallet implements anchor.Wallet {
+  constructor(readonly payer: anchor.web3.Keypair) {
+    this.payer = payer;
+  }
+
+  async signTransaction(
+    tx: anchor.web3.Transaction
+  ): Promise<anchor.web3.Transaction> {
+    tx.partialSign(this.payer);
+    return tx;
+  }
+
+  async signAllTransactions(
+    txs: anchor.web3.Transaction[]
+  ): Promise<anchor.web3.Transaction[]> {
+    return txs.map((t) => {
+      t.partialSign(this.payer);
+      return t;
+    });
+  }
+
+  get publicKey(): anchor.web3.PublicKey {
+    return this.payer.publicKey;
+  }
+}
 
 /** A Switchboard V2 wrapper to assist in decoding onchain accounts */
 export default class SwitchboardProgram {
@@ -55,7 +80,9 @@ export default class SwitchboardProgram {
   ): Promise<SwitchboardProgram> {
     const provider = new anchor.AnchorProvider(
       connection,
-      new NodeWallet(anchor.web3.Keypair.fromSeed(new Uint8Array(32).fill(1))),
+      new AnchorWallet(
+        anchor.web3.Keypair.fromSeed(new Uint8Array(32).fill(1))
+      ),
       confirmOptions
     );
 
@@ -91,7 +118,9 @@ export default class SwitchboardProgram {
   ): Promise<SwitchboardProgram> {
     const provider = new anchor.AnchorProvider(
       connection,
-      new NodeWallet(anchor.web3.Keypair.fromSeed(new Uint8Array(32).fill(1))),
+      new AnchorWallet(
+        anchor.web3.Keypair.fromSeed(new Uint8Array(32).fill(1))
+      ),
       confirmOptions
     );
 
