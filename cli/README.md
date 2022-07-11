@@ -1999,7 +1999,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.11/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.12/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2346,7 +2346,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 print vrf [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 print vrf [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2359,6 +2359,9 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
@@ -2545,7 +2548,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.11/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.12/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2612,7 +2615,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.11/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.12/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
@@ -2751,7 +2754,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 vrf print [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2764,6 +2767,9 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
