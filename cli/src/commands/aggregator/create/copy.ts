@@ -273,7 +273,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
         spl.createAssociatedTokenAccountInstruction(
           payerKeypair.publicKey,
           leaseEscrow,
-          payerKeypair.publicKey,
+          leaseAccount.publicKey,
           mint.address,
           spl.TOKEN_PROGRAM_ID,
           spl.ASSOCIATED_TOKEN_PROGRAM_ID
