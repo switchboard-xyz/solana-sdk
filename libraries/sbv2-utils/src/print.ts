@@ -666,13 +666,12 @@ export async function prettyPrintCrank(
     outputString += chalk.underline(
       chalkString("## Crank Buffer", data.dataBuffer, SPACING) + "\r\n"
     );
-    const rowStrings = (data.pqData as CrankRow[]).map(
-      (row) =>
-        `${anchorBNtoDateTimeString(row.nextTimestamp).padEnd(
-          16
-        )} - ${row.pubkey.toString()}\r\n`
-    );
-    outputString.concat(...rowStrings);
+    const rowStrings = data.pqData.map((row) => {
+      return `${anchorBNtoDateTimeString(row.nextTimestamp as anchor.BN).padEnd(
+        16
+      )} - ${(row.pubkey as PublicKey).toString()}`;
+    });
+    outputString = outputString.concat(...rowStrings.join("\n"));
   }
   return outputString;
 }

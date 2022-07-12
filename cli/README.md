@@ -2346,7 +2346,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 print vrf [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 print vrf [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2359,9 +2359,6 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
-
-GLOBAL FLAGS
-  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
@@ -2754,7 +2751,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 vrf print [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2767,9 +2764,6 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
-
-GLOBAL FLAGS
-  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
