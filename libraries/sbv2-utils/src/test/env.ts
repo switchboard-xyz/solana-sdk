@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 import { getIdlAddress, getProgramDataAddress } from "../anchor.js";
 
-const LATEST_DOCKER_VERSION = "dev-v2-06-08-22";
+const LATEST_DOCKER_VERSION = "dev-v2-07-11-22";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;

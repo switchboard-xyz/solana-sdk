@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   switchboard:
-    image: "switchboardlabs/node:${SBV2_ORACLE_VERSION:-dev-v2-06-08-22}" # https://hub.docker.com/r/switchboardlabs/node/tags
+    image: "switchboardlabs/node:${SBV2_ORACLE_VERSION:-dev-v2-07-11-22}" # https://hub.docker.com/r/switchboardlabs/node/tags
     network_mode: host
     restart: always
     environment:

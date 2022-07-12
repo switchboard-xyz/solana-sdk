@@ -1,3 +1,3 @@
 The latest oracle docker image is:
 
-dev-v2-06-08-22
+dev-v2-07-11-22
