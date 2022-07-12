@@ -111,7 +111,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       ).address;
     } catch (error: any) {
       throw new Error(
-        `Failed to load the SBV2 mint for the given cluster, ${error.message}`
+        `Failed to load the token wallet for SBV2 mint on the given cluster, ${error.message}`
       );
     }
     return new SwitchboardTestContext({
@@ -121,21 +121,6 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       payerTokenWallet,
     });
   }
-
-  // public static async depositSwitchboardWallet(
-  //   program: anchor.Program,
-  //   wallet: PublicKey,
-  //   amount: number
-  // ) {
-  //   const payerKeypair = sbv2.programWallet(program);
-
-  //   const requestTxn = await program.provider.connection.requestAirdrop(
-  //     wallet,
-  //     amount
-  //   );
-
-  //   // TODO: Figure out how to wrap from spl.Token
-  // }
 
   /** Recursively loop through directories and return the filepath of switchboard.env
    * @param envFileName alternative filename to search for. defaults to switchboard.env
@@ -189,6 +174,9 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     if (!process.env.SWITCHBOARD_PROGRAM_ID) {
       throw new Error(`your env file must have $SWITCHBOARD_PROGRAM_ID set`);
     }
+
+    const payerKeypair = (provider.wallet as sbv2.AnchorWallet).payer;
+
     const SWITCHBOARD_PID = new PublicKey(process.env.SWITCHBOARD_PROGRAM_ID);
     const switchboardIdl = await anchor.Program.fetchIdl(
       SWITCHBOARD_PID,
@@ -223,16 +211,38 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
         })
       : undefined;
 
-    const [switchboardProgramState] =
-      sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
-    const switchboardMint = await switchboardProgramState.getTokenMint();
-
-    const payerTokenWallet =
-      await SwitchboardTestContext.createSwitchboardWallet(switchboardProgram);
+    let mint: spl.Mint;
+    try {
+      mint = await queue.loadMint();
+    } catch (error: any) {
+      throw new Error(
+        `Failed to load the SBV2 mint for the given cluster, ${error.message}`
+      );
+    }
+    let payerTokenWallet: PublicKey;
+    try {
+      payerTokenWallet = (
+        await spl.getOrCreateAssociatedTokenAccount(
+          provider.connection,
+          payerKeypair,
+          mint.address,
+          payerKeypair.publicKey,
+          undefined,
+          undefined,
+          undefined,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        )
+      ).address;
+    } catch (error: any) {
+      throw new Error(
+        `Failed to load the token wallet for SBV2 mint on the given cluster, ${error.message}`
+      );
+    }
 
     const context: ISwitchboardTestContext = {
       program: switchboardProgram,
-      mint: switchboardMint,
+      mint: mint,
       payerTokenWallet,
       queue,
       oracle,
