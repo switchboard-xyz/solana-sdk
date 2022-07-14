@@ -13,16 +13,17 @@
   },
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
+    "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.42.0",
-    "@switchboard-xyz/sbv2-utils": "^0.1.25",
-    "@switchboard-xyz/switchboard-v2": "^0.0.114",
+    "@switchboard-xyz/sbv2-utils": "^0.1.32",
+    "@switchboard-xyz/switchboard-v2": "^0.0.116",
     "chalk": "^4.1.2",
     "child_process": "^1.0.2",
     "dotenv": "^16.0.1"
   },
   "devDependencies": {
-    "@switchboard-xyz/switchboardv2-cli": "^0.2.4",
+    "@switchboard-xyz/switchboardv2-cli": "^0.2.14",
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.0.0",
     "@types/node": "^17.0.45",

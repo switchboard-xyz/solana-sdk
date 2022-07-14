@@ -2,8 +2,6 @@ import * as anchor from "@project-serum/anchor";
 import { AnchorProvider, Program } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
-  Context,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -25,6 +23,7 @@ import fs from "fs";
 import "mocha";
 import path from "path";
 import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
+import { VrfClient } from "../client/accounts";
 // const expect = chai.expect;
 
 interface VrfClientState {
@@ -221,44 +220,11 @@ describe("anchor-vrf-parser test", () => {
       .signers([payer, payer])
       .rpc();
 
-    const vrfClientAccountCoder = new anchor.BorshAccountsCoder(
-      vrfClientProgram.idl
+    const result = await awaitCallback(
+      vrfClientProgram.provider.connection,
+      vrfClientKey,
+      55_000
     );
-
-    // watch VrfClientState for a populated result
-    let ws: number | undefined = undefined;
-    const waitForResultPromise = new Promise(
-      (
-        resolve: (result: anchor.BN) => void,
-        reject: (reason: string) => void
-      ) => {
-        ws = vrfClientProgram.provider.connection.onAccountChange(
-          vrfClientKey,
-          async (accountInfo: AccountInfo<Buffer>, context: Context) => {
-            const clientState: VrfClientState = vrfClientAccountCoder.decode(
-              "VrfClient",
-              accountInfo.data
-            );
-            if (clientState.result.gt(new anchor.BN(0))) {
-              resolve(clientState.result);
-            }
-          }
-        );
-      }
-    );
-
-    let result: anchor.BN;
-    try {
-      result = await promiseWithTimeout(45_000, waitForResultPromise);
-    } catch (error) {
-      throw error;
-    } finally {
-      if (ws) {
-        await vrfClientProgram.provider.connection.removeAccountChangeListener(
-          ws
-        );
-      }
-    }
 
     if (!result) {
       throw new Error(`failed to get a VRF result`);
@@ -267,3 +233,47 @@ describe("anchor-vrf-parser test", () => {
     console.log(`VrfClient Result: ${result}`);
   });
 });
+
+async function awaitCallback(
+  connection: anchor.web3.Connection,
+  vrfClientKey: anchor.web3.PublicKey,
+  timeoutInterval: number,
+  errorMsg = "Timed out waiting for VRF Client callback"
+) {
+  let ws: number | undefined = undefined;
+  const result: anchor.BN = await promiseWithTimeout(
+    timeoutInterval,
+    new Promise(
+      (
+        resolve: (result: anchor.BN) => void,
+        reject: (reason: string) => void
+      ) => {
+        ws = connection.onAccountChange(
+          vrfClientKey,
+          async (
+            accountInfo: anchor.web3.AccountInfo<Buffer>,
+            context: anchor.web3.Context
+          ) => {
+            const clientState = VrfClient.decode(accountInfo.data);
+            if (clientState.result.gt(new anchor.BN(0))) {
+              resolve(clientState.result);
+            }
+          }
+        );
+      }
+    ).finally(async () => {
+      if (ws) {
+        await connection.removeAccountChangeListener(ws);
+      }
+      ws = undefined;
+    }),
+    new Error(errorMsg)
+  ).finally(async () => {
+    if (ws) {
+      await connection.removeAccountChangeListener(ws);
+    }
+    ws = undefined;
+  });
+
+  return result;
+}

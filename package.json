@@ -35,7 +35,7 @@
     "docs:deploy": "yarn workspace website deploy",
     "gen:idl": "rawrtools gen:anchor SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f -o website/idl -p /idl",
     "gen:idl:devnet": "rawrtools gen:anchor --devnet 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG -o website/idl -p /idl",
-    "nuke": "shx rm -rf {./programs/*,./packages/*,./website,./libraries/*,.}/{node_modules,yarn*.log,build,dist,lib,.anchor,Cargo.lock,.docusaurus}"
+    "nuke": "shx rm -rf {./programs/*,./packages/*,./website,./libraries/*,.}/{node_modules,yarn*.log,build,dist,lib,.anchor,Cargo.lock,.docusaurus,target/release,target/rls, target/bpfel-unknown-unknown}"
   },
   "devDependencies": {
     "@gallynaut/rawrtools": "^0.0.1",
