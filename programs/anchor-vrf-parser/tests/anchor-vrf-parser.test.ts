@@ -164,28 +164,6 @@ describe("anchor-vrf-parser test", () => {
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    // watch VrfClientState for a populated result
-    let ws: number | undefined = undefined;
-    const waitForResultPromise = new Promise(
-      (
-        resolve: (result: anchor.BN) => void,
-        reject: (reason: string) => void
-      ) => {
-        ws = vrfClientProgram.provider.connection.onAccountChange(
-          vrfClientKey,
-          async (accountInfo: AccountInfo<Buffer>, context: Context) => {
-            const clientState: VrfClientState = vrfClientAccountCoder.decode(
-              "VrfClient",
-              accountInfo.data
-            );
-            if (clientState.result.gt(new anchor.BN(0))) {
-              resolve(clientState.result);
-            }
-          }
-        );
-      }
-    );
-
     // Request randomness
     console.log(`Sending RequestRandomness instruction`);
     const requestTxn = vrfClientProgram.methods.requestResult!({
@@ -216,10 +194,6 @@ describe("anchor-vrf-parser test", () => {
       vrfClientKey,
       55_000
     );
-
-    if (!result) {
-      throw new Error(`failed to get a VRF result`);
-    }
 
     console.log(`VrfClient Result: ${result}`);
   });
