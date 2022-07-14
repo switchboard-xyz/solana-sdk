@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.119",
+  "version": "0.0.120",
   "license": "MIT",
   "author": "mitch@switchboard.xyz",
   "description": "API wrapper for intergating with the Switchboardv2 program",
