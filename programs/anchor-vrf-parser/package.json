@@ -7,6 +7,9 @@
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
     "directory": "programs/anchor-vrf-parser"
   },
+  "bin": {
+    "sbv2-vrf-example": "./sbv2-vrf-example.sh"
+  },
   "scripts": {
     "build": "echo \"For workspace anchor-vrf-parser, run 'anchor build' from the project root\" && exit 0",
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
@@ -20,7 +23,8 @@
     "@switchboard-xyz/switchboard-v2": "^0.0.120",
     "chalk": "^4.1.2",
     "child_process": "^1.0.2",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@switchboard-xyz/switchboardv2-cli": "^0.2.14",
@@ -43,7 +47,7 @@
     "prettier-plugin-organize-imports": "^2.3.4",
     "shx": "^0.3.4",
     "ts-mocha": "^9.0.2",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.3.5"
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.3"
   }
 }

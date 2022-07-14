@@ -6,6 +6,8 @@ import BaseCommand from "../../BaseCommand";
 export default class VrfPrint extends BaseCommand {
   outputFile?: string;
 
+  static enableJsonFlag = true;
+
   static description = "Print the deserialized Switchboard VRF account";
 
   static aliases = ["vrf:print"];

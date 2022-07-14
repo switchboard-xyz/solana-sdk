@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { AnchorProvider, Program } from "@project-serum/anchor";
+import { AnchorProvider } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
   SystemProgram,
@@ -29,7 +29,7 @@ describe("anchor-vrf-parser test", () => {
   // const vrfClientProgram = anchor.workspace
   //   .AnchorVrfParser as Program<AnchorVrfParser>;
 
-  const vrfClientProgram = new Program(
+  const vrfClientProgram = new anchor.Program(
     IDL,
     PROGRAM_ID,
     provider,
@@ -194,10 +194,6 @@ describe("anchor-vrf-parser test", () => {
       vrfClientKey,
       55_000
     );
-
-    if (!result) {
-      throw new Error(`failed to get a VRF result`);
-    }
 
     console.log(`VrfClient Result: ${result}`);
   });

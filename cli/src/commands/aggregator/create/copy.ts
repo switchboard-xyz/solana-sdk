@@ -196,9 +196,7 @@ export default class AggregatorCreateCopy extends BaseCommand {
     const leaseEscrow = await spl.getAssociatedTokenAddress(
       mint.address,
       leaseAccount.publicKey,
-      true,
-      spl.TOKEN_PROGRAM_ID,
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      true
     );
 
     createAccountInstructions.push(
@@ -310,6 +308,8 @@ export default class AggregatorCreateCopy extends BaseCommand {
               .crankPush({
                 stateBump,
                 permissionBump,
+                nofitiRef: null,
+                notifiRef: null,
               })
               .accounts({
                 crank: new PublicKey(flags.crankKey),

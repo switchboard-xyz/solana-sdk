@@ -4,5 +4,6 @@
   },
   "files.eol": "\n",
   "editor.formatOnSave": true,
-  "editor.wordWrap": "on"
+  "editor.wordWrap": "on",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
