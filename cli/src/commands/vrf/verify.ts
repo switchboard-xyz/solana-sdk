@@ -38,7 +38,7 @@ export default class VrfVerify extends BaseCommand {
     const vrf = await vrfAccount.loadData();
 
     const status = toVrfStatusString(vrf.status);
-    if (status !== "statusVerifying") {
+    if (status !== "StatusVerifying") {
       throw new Error(`Vrf not ready to be verified, current status ${status}`);
     }
 

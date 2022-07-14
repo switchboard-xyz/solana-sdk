@@ -111,6 +111,9 @@ impl RequestResult<'_> {
             state_seeds,
         )?;
 
+        let mut client_state = ctx.accounts.state.load_mut()?;
+        client_state.result = 0;
+
         emit!(RequestingRandomness{
             vrf_client: ctx.accounts.state.key(),
             max_result: max_result,

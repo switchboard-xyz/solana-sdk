@@ -341,6 +341,8 @@ export default class AggregatorCreate extends BaseCommand {
               .crankPush({
                 stateBump,
                 permissionBump,
+                nofitiRef: null,
+                notifiRef: null,
               })
               .accounts({
                 crank: new PublicKey(flags.crankKey),

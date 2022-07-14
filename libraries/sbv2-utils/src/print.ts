@@ -73,10 +73,18 @@ export const toPermissionString = (
   }
 };
 
-export const toVrfStatusString = (status: Record<string, unknown>): string => {
-  if (status === undefined) {
-    return "";
-  }
+export type VrfStatusString =
+  | ""
+  | "StatusNone"
+  | "StatusRequesting"
+  | "StatusVerifying"
+  | "StatusVerified"
+  | "StatusCallbackSuccess"
+  | "StatusVerifyFailure";
+
+export const toVrfStatusString = (
+  status: Record<string, unknown>
+): VrfStatusString => {
   if ("statusNone" in status) {
     return "StatusNone";
   }
@@ -95,7 +103,7 @@ export const toVrfStatusString = (status: Record<string, unknown>): string => {
   if ("statusVerifyFailure" in status) {
     return "StatusVerifyFailure";
   }
-  return "Unknown";
+  return "";
 };
 
 export async function prettyPrintProgramState(
@@ -582,10 +590,14 @@ export async function prettyPrintVrf(
     "latestResult",
     JSON.stringify(
       {
-        producer: data.builders[0]?.producer.toString() ?? "",
         status: toVrfStatusString(data.builders[0]?.status) ?? "",
         verified: data.builders[0]?.verified ?? "",
         txRemaining: data.builders[0]?.txRemaining ?? "",
+        producer: data.builders[0]?.producer.toString() ?? "",
+        reprProof: `[${data.builders[0].reprProof.map((value) =>
+          value.toString()
+        )}]`,
+        reprProofHex: Buffer.from(data.builders[0].reprProof).toString("hex"),
         currentRound: {
           result: `[${data.currentRound.result.map((value) =>
             value.toString()
@@ -593,6 +605,7 @@ export async function prettyPrintVrf(
           alpha: `[${data.currentRound.alpha.map((value) =>
             value.toString()
           )}]`,
+          alphaHex: Buffer.from(data.currentRound.alpha).toString("hex"),
           requestSlot: data.currentRound?.requestSlot?.toString() ?? "",
           requestTimestamp: anchorBNtoDateTimeString(
             data.currentRound.requestTimestamp

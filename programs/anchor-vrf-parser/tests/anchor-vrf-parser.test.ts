@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import { AnchorProvider, Program } from "@project-serum/anchor";
+import { AnchorProvider } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
   SystemProgram,
@@ -29,7 +29,7 @@ describe("anchor-vrf-parser test", () => {
   // const vrfClientProgram = anchor.workspace
   //   .AnchorVrfParser as Program<AnchorVrfParser>;
 
-  const vrfClientProgram = new Program(
+  const vrfClientProgram = new anchor.Program(
     IDL,
     PROGRAM_ID,
     provider,
@@ -162,6 +162,28 @@ describe("anchor-vrf-parser test", () => {
       undefined,
       spl.TOKEN_PROGRAM_ID,
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    // watch VrfClientState for a populated result
+    let ws: number | undefined = undefined;
+    const waitForResultPromise = new Promise(
+      (
+        resolve: (result: anchor.BN) => void,
+        reject: (reason: string) => void
+      ) => {
+        ws = vrfClientProgram.provider.connection.onAccountChange(
+          vrfClientKey,
+          async (accountInfo: AccountInfo<Buffer>, context: Context) => {
+            const clientState: VrfClientState = vrfClientAccountCoder.decode(
+              "VrfClient",
+              accountInfo.data
+            );
+            if (clientState.result.gt(new anchor.BN(0))) {
+              resolve(clientState.result);
+            }
+          }
+        );
+      }
     );
 
     // Request randomness
