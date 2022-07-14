@@ -1491,19 +1491,11 @@ export class AggregatorAccount {
       queueAccount,
       this
     );
-    // const escrow = await spl.getAssociatedTokenAddress(
-    // params.tokenMint,
-    // this.program.programId,
-    // leaseAccount.publicKey
-    // );
-    // const escrow = await spl.getAssociatedTokenAddress(
-    // params.tokenMint,
-    // leaseAccount.publicKey,
-    // true
-    // );
-    const escrow = (await leaseAccount.loadData()).escrow;
-    console.log(`ESCROW: ${escrow.toBase58()}`);
-    console.log(`ESCROW: ${escrow.toBase58()}`);
+    const escrow = await spl.getAssociatedTokenAddress(
+      params.tokenMint,
+      leaseAccount.publicKey,
+      true
+    );
     const [feedPermissionAccount, feedPermissionBump] =
       PermissionAccount.fromSeed(
         this.program,
