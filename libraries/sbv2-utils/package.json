@@ -38,7 +38,7 @@
     "@saberhq/token-utils": "^1.13.32",
     "@solana/spl-token": "^0.2.0",
     "@solana/web3.js": "^1.42.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.116",
+    "@switchboard-xyz/switchboard-v2": "^0.0.120",
     "big.js": "^6.1.1",
     "bn.js": "^5.2.1",
     "chalk": "4",
