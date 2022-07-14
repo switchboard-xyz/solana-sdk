@@ -2,8 +2,6 @@ import * as anchor from "@project-serum/anchor";
 import { AnchorProvider, Program } from "@project-serum/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  Keypair,
-  PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
 } from "@solana/web3.js";
@@ -19,39 +17,10 @@ import {
   SwitchboardPermission,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import fs from "fs";
 import "mocha";
-import path from "path";
 import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
 import { VrfClient } from "../client/accounts";
-// const expect = chai.expect;
-
-interface VrfClientState {
-  bump: number;
-  maxResult: anchor.BN;
-  resultBuffer: number[];
-  result: anchor.BN;
-  lastTimestamp: anchor.BN;
-  authority: PublicKey;
-  vrf: PublicKey;
-}
-
-function getProgramId(): PublicKey {
-  const programKeypairPath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "target",
-    "deploy",
-    "anchor_vrf_parser-keypair.json"
-  );
-  const PROGRAM_ID = Keypair.fromSecretKey(
-    new Uint8Array(JSON.parse(fs.readFileSync(programKeypairPath, "utf8")))
-  ).publicKey;
-
-  return PROGRAM_ID;
-}
+import { PROGRAM_ID } from "../client/programId";
 
 describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
@@ -62,7 +31,7 @@ describe("anchor-vrf-parser test", () => {
 
   const vrfClientProgram = new Program(
     IDL,
-    getProgramId(),
+    PROGRAM_ID,
     provider,
     new anchor.BorshCoder(IDL)
   ) as anchor.Program<AnchorVrfParser>;

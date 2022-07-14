@@ -43,7 +43,7 @@ const anchorFeedKeypairPath = path.join(
 const splFeedKeypairPath = path.join(
   targetDir,
   "deploy",
-  "spl_feed_parser-keypair.json"
+  "native_feed_parser-keypair.json"
 );
 
 async function main() {
@@ -118,12 +118,12 @@ async function main() {
     "-i",
     /declare_id!(.*);/,
     `declare_id!("${splFeedParserPid.toString()}");`,
-    path.join(projectRoot, "programs", "spl-feed-parser", "src", "lib.rs")
+    path.join(projectRoot, "programs", "native-feed-parser", "src", "lib.rs")
   );
   shell.sed(
     "-i",
-    /spl_feed_parser = "(.*)"/,
-    `spl_feed_parser = "${splFeedParserPid.toString()}"`,
+    /native_feed_parser = "(.*)"/,
+    `native_feed_parser = "${splFeedParserPid.toString()}"`,
     anchorToml
   );
 

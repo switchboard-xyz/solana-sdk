@@ -5,6 +5,7 @@ export * from "./const.js";
 export * from "./date.js";
 export * from "./errors.js";
 export * from "./feed.js";
+export * from "./json.js";
 export * from "./nonce.js";
 export * from "./print.js";
 export * from "./state.js";

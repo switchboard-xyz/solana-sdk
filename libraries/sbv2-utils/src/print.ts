@@ -672,6 +672,19 @@ export async function prettyPrintCrank(
       )} - ${(row.pubkey as PublicKey).toString()}`;
     });
     outputString = outputString.concat(...rowStrings.join("\n"));
+
+    // const feedNames: string[] = [];
+    // for await (const row of data.pqData) {
+    //   const agg = new AggregatorAccount({
+    //     program: crankAccount.program,
+    //     publicKey: row.pubkey,
+    //   });
+    //   const aggData = await agg.loadData();
+    //   const aggName = buffer2string(aggData.name as any);
+    //   feedNames.push(`${(row.pubkey as PublicKey).toString()} # ${aggName}`);
+    // }
+
+    // outputString = outputString.concat("\n", ...feedNames.join("\n"));
   }
   return outputString;
 }

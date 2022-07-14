@@ -2,7 +2,7 @@
 members = [
     "programs/anchor-feed-parser",
     "programs/anchor-vrf-parser",
-    "programs/spl-feed-parser"
+    "programs/native-feed-parser"
 ]
 
 [provider]
@@ -19,7 +19,7 @@ anchor_vrf_parser = "HjjRFjCyQH3ne6Gg8Yn3TQafrrYecRrphwLwnh2A26vM"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./programs/anchor-vrf-parser/tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./programs/*/tests/*.test.ts"
 
 
 [test.validator]

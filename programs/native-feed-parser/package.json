@@ -1,17 +1,17 @@
 {
-  "name": "spl-feed-parser",
+  "name": "native-feed-parser",
   "version": "1.0.0",
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
-    "directory": "programs/spl-feed-parser"
+    "directory": "programs/native-feed-parser"
   },
   "scripts": {
-    "build": "echo \"For workspace spl-feed-parser, run 'anchor build' from the project root\" && exit 0",
+    "build": "echo \"For workspace native-feed-parser, run 'anchor build' from the project root\" && exit 0",
     "build:bpf": "cargo build-bpf --manifest-path=Cargo.toml",
-    "deploy": "solana program deploy target/deploy/spl_feed_parser.so",
-    "test": "echo \"For workspace spl-feed-parser, use the anchor:test script\" && exit 0"
+    "deploy": "solana program deploy target/deploy/native_feed_parser.so",
+    "test": "echo \"For workspace native-feed-parser, use the anchor:test script\" && exit 0"
   },
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",

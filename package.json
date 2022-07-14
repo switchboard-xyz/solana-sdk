@@ -19,7 +19,7 @@
     "build:cli": "yarn workspace @switchboard-xyz/switchboardv2-cli build",
     "start": "echo \"Error: no start script specified\" && exit 1",
     "anchor:setup": "anchor build && node ./tools/scripts/setup-example-programs.js",
-    "test:anchor": "yarn workspace anchor-feed-parser anchor:test && yarn workspace spl-feed-parser anchor:test && yarn workspace anchor-vrf-parser anchor:test",
+    "test:anchor": "yarn workspace anchor-feed-parser anchor:test && yarn workspace native-feed-parser anchor:test && yarn workspace anchor-vrf-parser anchor:test",
     "test:libraries:ts": "yarn workspace @switchboard-xyz/sbv2-lite test && yarn workspace @switchboard-xyz/switchboard-v2 test",
     "test:libraries:py": "cd libraries/py && poetry run pytest",
     "test:libraries:rs": "cd libraries/rs && cargo test",

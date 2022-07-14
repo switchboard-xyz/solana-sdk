@@ -1,11 +1,11 @@
 [package]
-name = "spl-feed-parser"
+name = "native-feed-parser"
 version = "0.1.0"
 edition = "2018"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "spl_feed_parser"
+name = "native_feed_parser"
 
 [features]
 no-entrypoint = []
@@ -13,5 +13,5 @@ no-entrypoint = []
 [dependencies]
 switchboard-v2 = { path = "../../libraries/rs" }
 # switchboard-v2 = "^0.1.10"
-solana-program = "~1.9.13"
+solana-program = "1.9.29"
 

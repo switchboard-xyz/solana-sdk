@@ -40,6 +40,7 @@
     "@solana/web3.js": "^1.42.0",
     "@switchboard-xyz/switchboard-v2": "^0.0.116",
     "big.js": "^6.1.1",
+    "bn.js": "^5.2.1",
     "chalk": "4",
     "decimal.js": "^10.3.1",
     "dotenv": "^16.0.1",

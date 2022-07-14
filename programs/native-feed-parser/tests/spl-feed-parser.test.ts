@@ -17,7 +17,7 @@ function getProgramId(): PublicKey {
     "..",
     "target",
     "deploy",
-    "spl_feed_parser-keypair.json"
+    "native_feed_parser-keypair.json"
   );
   const PROGRAM_ID = Keypair.fromSecretKey(
     new Uint8Array(JSON.parse(fs.readFileSync(programKeypairPath, "utf8")))
@@ -34,7 +34,7 @@ const DEFAULT_SOL_USD_FEED = new PublicKey(
   "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
 );
 
-describe("spl-feed-parser test", () => {
+describe("native-feed-parser test", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 

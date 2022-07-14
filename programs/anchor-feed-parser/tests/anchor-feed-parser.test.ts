@@ -1,8 +1,12 @@
-import type { Program } from "@project-serum/anchor";
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
-import type { AnchorFeedParser } from "../../../target/types/anchor_feed_parser";
+import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
+import {
+  AnchorFeedParser,
+  IDL,
+} from "../../../target/types/anchor_feed_parser";
+import { PROGRAM_ID } from "../client/programId";
 
 const sleep = (ms: number): Promise<any> =>
   new Promise((s) => setTimeout(s, ms));
@@ -16,8 +20,17 @@ describe("anchor-feed-parser test", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const feedParserProgram = anchor.workspace
-    .AnchorFeedParser as Program<AnchorFeedParser>;
+  // const feedParserProgram = anchor.workspace
+  //   .AnchorFeedParser as Program<AnchorFeedParser>;
+
+  const feedParserProgram = new anchor.Program(
+    IDL,
+    PROGRAM_ID,
+    provider,
+    new anchor.BorshCoder(IDL)
+  ) as anchor.Program<AnchorFeedParser>;
+
+  const payer = (provider.wallet as AnchorWallet).payer;
 
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
