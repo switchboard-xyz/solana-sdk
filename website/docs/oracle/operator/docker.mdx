@@ -28,6 +28,8 @@ services:
     image: "switchboardlabs/node:dev-v2-07-11-22"
     network_mode: host
     restart: always
+    secrets:
+      - PAYER_SECRETS
     environment:
       - LIVE=1
       - CLUSTER=devnet
