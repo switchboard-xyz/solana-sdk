@@ -58,6 +58,7 @@ node bin/dev print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 * [`sbv2 crank add aggregator [CRANKKEY] [AGGREGATORKEY]`](#sbv2-crank-add-aggregator-crankkey-aggregatorkey)
 * [`sbv2 crank create [QUEUEKEY]`](#sbv2-crank-create-queuekey)
 * [`sbv2 crank list [CRANKKEY]`](#sbv2-crank-list-crankkey)
+* [`sbv2 crank pop [CRANKKEY]`](#sbv2-crank-pop-crankkey)
 * [`sbv2 crank print [CRANKKEY]`](#sbv2-crank-print-crankkey)
 * [`sbv2 crank push [CRANKKEY] [AGGREGATORKEY]`](#sbv2-crank-push-crankkey-aggregatorkey)
 * [`sbv2 crank turn [CRANKKEY]`](#sbv2-crank-turn-crankkey)
@@ -541,8 +542,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 aggregator print [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
-    [--jobs] [-o]
+  $ sbv2 aggregator print [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -557,6 +558,9 @@ FLAGS
   --jobs                   output job definitions
   --mainnetBeta            WARNING: use mainnet-beta solana cluster
   --programId=<value>      alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard aggregator account
@@ -1263,6 +1267,30 @@ FLAGS
 
 DESCRIPTION
   list the pubkeys currently on the crank
+```
+
+## `sbv2 crank pop [CRANKKEY]`
+
+pop the crank
+
+```
+USAGE
+  $ sbv2 crank pop [CRANKKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+
+ARGUMENTS
+  CRANKKEY  public key of the crank
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  pop the crank
 ```
 
 ## `sbv2 crank print [CRANKKEY]`
@@ -1999,7 +2027,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.14/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2007,8 +2035,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 print aggregator [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
-    [--jobs] [-o]
+  $ sbv2 print aggregator [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -2023,6 +2051,9 @@ FLAGS
   --jobs                   output job definitions
   --mainnetBeta            WARNING: use mainnet-beta solana cluster
   --programId=<value>      alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard aggregator account
@@ -2545,7 +2576,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.14/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2612,7 +2643,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.14/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
