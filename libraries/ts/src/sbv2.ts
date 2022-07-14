@@ -1503,6 +1503,7 @@ export class AggregatorAccount {
     // );
     const escrow = (await leaseAccount.loadData()).escrow;
     console.log(`ESCROW: ${escrow.toBase58()}`);
+    console.log(`ESCROW: ${escrow.toBase58()}`);
     const [feedPermissionAccount, feedPermissionBump] =
       PermissionAccount.fromSeed(
         this.program,
