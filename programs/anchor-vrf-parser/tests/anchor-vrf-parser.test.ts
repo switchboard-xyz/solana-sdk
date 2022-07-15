@@ -66,7 +66,10 @@ describe("anchor-vrf-parser test", () => {
   before(async () => {
     // First, attempt to load the switchboard devnet PID
     try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(
+        provider,
+        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+      );
       console.log("devnet detected");
       return;
     } catch (error: any) {

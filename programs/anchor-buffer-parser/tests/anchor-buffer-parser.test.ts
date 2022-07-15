@@ -1,6 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import {
   promiseWithTimeout,
+  sleep,
   SwitchboardTestContext,
 } from "@switchboard-xyz/sbv2-utils";
 import {
@@ -16,11 +17,6 @@ import {
   IDL,
 } from "../../../target/types/anchor_buffer_parser";
 import { PROGRAM_ID } from "../client/programId";
-
-const sleep = (ms: number): Promise<any> =>
-  new Promise((s) => setTimeout(s, ms));
-
-// Anchor.toml will copy this to localnet when we start our tests
 
 describe("anchor-buffer-parser test", () => {
   const provider = anchor.AnchorProvider.env();
@@ -51,7 +47,7 @@ describe("anchor-buffer-parser test", () => {
     }
     // If fails, throw error
     throw new Error(
-      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
+      `Failed to load the SwitchboardTestContext from a switchboard.env file`
     );
   });
 

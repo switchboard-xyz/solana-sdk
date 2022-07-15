@@ -40,12 +40,14 @@ describe("native-feed-parser test", () => {
 
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
-  let localnet = false;
 
   before(async () => {
     // First, attempt to load the switchboard devnet PID
     try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(
+        provider,
+        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+      );
       aggregatorKey = DEFAULT_SOL_USD_FEED;
       console.log("devnet detected");
       return;
@@ -57,8 +59,7 @@ describe("native-feed-parser test", () => {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       const aggregatorAccount = await switchboard.createStaticFeed(100);
       aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
-      localnet = true;
-      console.log("localnet detected");
+      console.log("local env detected");
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);

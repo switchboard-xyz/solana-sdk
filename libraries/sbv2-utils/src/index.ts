@@ -8,7 +8,7 @@ export * from "./feed.js";
 export * from "./json.js";
 export * from "./nonce.js";
 export * from "./print.js";
-export * from "./state.js";
 export * from "./switchboard.js";
 export * from "./test/index.js";
+export * from "./token.js";
 export * from "./transaction.js";

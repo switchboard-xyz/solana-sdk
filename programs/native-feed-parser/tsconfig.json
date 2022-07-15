@@ -9,10 +9,14 @@
     "esModuleInterop": true,
     "noEmit": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"]
+      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
+      "@switchboard-xyz/sbv2-utils": ["../../libraries/sbv2-utils"]
     }
   },
   // "include": ["oldtests/**/**/*"],
   "exclude": ["target"],
-  "references": [{ "path": "../../libraries/ts" }]
+  "references": [
+    { "path": "../../libraries/ts" },
+    { "path": "../../libraries/sbv2-utils" }
+  ]
 }

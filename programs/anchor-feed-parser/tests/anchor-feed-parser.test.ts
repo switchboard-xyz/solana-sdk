@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
+import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
 import assert from "assert";
 import {
@@ -8,9 +8,6 @@ import {
   IDL,
 } from "../../../target/types/anchor_feed_parser";
 import { PROGRAM_ID } from "../client/programId";
-
-const sleep = (ms: number): Promise<any> =>
-  new Promise((s) => setTimeout(s, ms));
 
 // Anchor.toml will copy this to localnet when we start our tests
 const DEFAULT_SOL_USD_FEED = new PublicKey(
@@ -35,12 +32,14 @@ describe("anchor-feed-parser test", () => {
 
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
-  let localnet = false;
 
   before(async () => {
     // First, attempt to load the switchboard devnet PID
     try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(
+        provider,
+        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+      );
       aggregatorKey = DEFAULT_SOL_USD_FEED;
       console.log("devnet detected");
       return;
@@ -52,8 +51,7 @@ describe("anchor-feed-parser test", () => {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       const aggregatorAccount = await switchboard.createStaticFeed(100);
       aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
-      localnet = true;
-      console.log("localnet detected");
+      console.log("local env detected");
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);
