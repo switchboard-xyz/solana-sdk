@@ -3455,7 +3455,7 @@ export class OracleAccount {
     const oracle = await this.loadData();
     const escrow = await spl.getAccount(
       this.program.provider.connection,
-      oracle.escrow
+      oracle.tokenAccount
     );
     return Number(escrow.amount);
   }
