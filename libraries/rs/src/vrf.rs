@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
-use super::error::SwitchboardError;
 #[allow(unaligned_references)]
-use crate::*;
+use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
+use anchor_spl::token::TokenAccount;
 use bytemuck::{Pod, Zeroable};
 use solana_program::account_info::AccountInfo;
 use solana_program::instruction::Instruction;
@@ -316,6 +316,8 @@ pub struct Callback {
 #[zero_copy]
 #[repr(packed)]
 pub struct VrfRound {
+    // pub producer_pubkeys: [Pubkey; 16],
+    // pub producer_pubkeys_len: u32,
     pub alpha: [u8; 256],
     pub alpha_len: u32,
     pub request_slot: u64,
@@ -356,7 +358,6 @@ pub struct VrfAccountData {
     pub test_mode: bool,
     // pub last_verified_round: VrfRound,
     pub current_round: VrfRound,
-    //
     pub _ebuf: [u8; 1024], // Buffer for future info
 }
 impl Default for VrfAccountData {
@@ -366,6 +367,19 @@ impl Default for VrfAccountData {
 }
 
 impl VrfAccountData {
+    /// Returns the deserialized Switchboard VRF account
+    ///
+    /// # Arguments
+    ///
+    /// * `switchboard_vrf` - A Solana AccountInfo referencing an existing Switchboard VRF account
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::VrfAccountData;
+    ///
+    /// let vrf = VrfAccountData::new(vrf_account_info)?;
+    /// ```
     pub fn new<'info>(
         switchboard_vrf: &'info AccountInfo,
     ) -> anchor_lang::Result<Ref<'info, VrfAccountData>> {
@@ -374,17 +388,27 @@ impl VrfAccountData {
         let mut disc_bytes = [0u8; 8];
         disc_bytes.copy_from_slice(&data[..8]);
         if disc_bytes != VrfAccountData::discriminator() {
-            msg!("{:?}", disc_bytes);
             return Err(error!(SwitchboardError::AccountDiscriminatorMismatch));
         }
 
         Ok(Ref::map(data, |data| bytemuck::from_bytes(&data[8..])))
     }
-
+    /// Returns the current VRF round ID
     pub fn get_current_randomness_round_id(&self) -> u128 {
         self.counter
     }
 
+    /// If sufficient oracle responses, returns the latest on-chain result in SwitchboardDecimal format
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::AggregatorAccountData;
+    /// use std::convert::TryInto;
+    ///
+    /// let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
+    /// let decimal: f64 = feed_result.try_into()?;
+    /// ```
     pub fn get_result(&self) -> anchor_lang::Result<[u8; 32]> {
         if self.current_round.result == [0u8; 32] {
             return Err(error!(SwitchboardError::VrfEmptyError));

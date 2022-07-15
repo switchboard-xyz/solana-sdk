@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.10"
+version = "0.1.11"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 data feeds."
 readme = "README.md"
@@ -13,6 +13,7 @@ documentation = "https://docs.rs/switchboard-v2/"
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "switchboard_v2"
+doctest = false
 
 [features]
 default = ["cpi"]

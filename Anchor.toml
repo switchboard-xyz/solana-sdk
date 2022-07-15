@@ -2,6 +2,7 @@
 members = [
     "programs/anchor-feed-parser",
     "programs/anchor-vrf-parser",
+    "programs/anchor-buffer-parser",
     "programs/native-feed-parser"
 ]
 
@@ -14,6 +15,7 @@ wallet = "../payer-keypair.json"
 [programs.localnet]
 anchor_feed_parser = "FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh"
 anchor_vrf_parser = "HjjRFjCyQH3ne6Gg8Yn3TQafrrYecRrphwLwnh2A26vM"
+anchor_buffer_parser = "96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP"
 
 [registry]
 url = "https://anchor.projectserum.com"

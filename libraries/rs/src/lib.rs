@@ -1,15 +1,16 @@
-use anchor_spl::token::TokenAccount;
-
 pub mod aggregator;
+pub mod buffer_relayer;
 pub mod decimal;
 pub mod error;
 pub mod history_buffer;
 pub mod vrf;
 
-pub use aggregator::AggregatorAccountData;
-pub use history_buffer::AggregatorHistoryBuffer;
-pub use vrf::VrfAccountData;
-pub use vrf::VrfRequestRandomness;
+pub use aggregator::{AggregatorAccountData, AggregatorRound};
+pub use buffer_relayer::{BufferRelayerAccountData, BufferRelayerRound};
+pub use decimal::SwitchboardDecimal;
+pub use error::SwitchboardError;
+pub use history_buffer::{AggregatorHistoryBuffer, AggregatorHistoryRow};
+pub use vrf::{VrfAccountData, VrfRequestRandomness, VrfRound, VrfStatus};
 
 /// Mainnet program id for Switchboard v2. Prints out as "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 pub const SWITCHBOARD_V2_MAINNET: solana_program::pubkey::Pubkey =

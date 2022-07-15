@@ -1,11 +1,19 @@
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
+import {
+  CrankAccount,
+  OracleAccount,
+  PermissionAccount,
+  ProgramStateAccount,
+} from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import { getIdlAddress, getProgramDataAddress } from "../anchor.js";
+import { anchorBNtoDateString } from "../date.js";
+import { createQueue } from "../queue.js";
+import { getOrCreateSwitchboardTokenAccount } from "../state.js";
 
 const LATEST_DOCKER_VERSION = "dev-v2-07-11-22";
 
@@ -315,95 +323,150 @@ secrets:
     );
     const idlAddress = await getIdlAddress(switchboardProgram.programId);
 
-    const [switchboardProgramState] =
-      sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
-    let programState: any;
-    try {
-      programState = await switchboardProgramState.loadData();
-    } catch {
-      await sbv2.ProgramStateAccount.create(switchboardProgram, {
-        mint: spl.NATIVE_MINT,
-        daoMint: spl.NATIVE_MINT,
-      });
-      programState = await switchboardProgramState.loadData();
-    }
+    // const [switchboardProgramState] =
+    //   sbv2.ProgramStateAccount.fromSeed(switchboardProgram);
+    // let programState: any;
+    // try {
+    //   programState = await switchboardProgramState.loadData();
+    // } catch {
+    //   await sbv2.ProgramStateAccount.create(switchboardProgram, {
+    //     mint: spl.NATIVE_MINT,
+    //     daoMint: spl.NATIVE_MINT,
+    //   });
+    //   programState = await switchboardProgramState.loadData();
+    // }
 
-    const mint = await switchboardProgramState.getTokenMint();
+    // const mint = await switchboardProgramState.getTokenMint();
 
-    const payerSwitchboardWallet = (
-      await spl.getOrCreateAssociatedTokenAccount(
-        connection,
-        payerKeypair,
-        mint.address,
-        payerKeypair.publicKey,
-        undefined,
-        undefined,
-        undefined,
-        spl.TOKEN_PROGRAM_ID,
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
-      )
-    ).address;
+    // const payerSwitchboardWallet = (
+    //   await spl.getOrCreateAssociatedTokenAccount(
+    //     connection,
+    //     payerKeypair,
+    //     mint.address,
+    //     payerKeypair.publicKey,
+    //     undefined,
+    //     undefined,
+    //     undefined,
+    //     spl.TOKEN_PROGRAM_ID,
+    //     spl.ASSOCIATED_TOKEN_PROGRAM_ID
+    //   )
+    // ).address;
 
-    // create queue with unpermissioned VRF accounts enabled
-    const queueAccount = await sbv2.OracleQueueAccount.create(
+    // // create queue with unpermissioned VRF accounts enabled
+    // const queueAccount = await sbv2.OracleQueueAccount.create(
+    //   switchboardProgram,
+    //   {
+    //     name: Buffer.from("My Test Queue"),
+    //     mint: spl.NATIVE_MINT,
+    //     authority: payerKeypair.publicKey, // Approve new participants
+    //     minStake: new anchor.BN(0), // Oracle minStake to heartbeat
+    //     reward: new anchor.BN(0), // Oracle rewards per request (non-VRF)
+    //     queueSize: 10, // Number of active oracles a queue can support
+    //     unpermissionedFeeds: true, // Whether feeds need PERMIT_ORACLE_QUEUE_USAGE permissions
+    //     unpermissionedVrf: true, // Whether VRF accounts need PERMIT_VRF_REQUESTS permissions
+    //     enableBufferRelayers: true,
+    //   }
+    // );
+    // await queueAccount.setVrfSettings({
+    //   authority: payerKeypair,
+    //   unpermissionedVrf: true,
+    // });
+    // const queue = await queueAccount.loadData();
+
+    // // create a crank for the queue
+    // const crankAccount = await sbv2.CrankAccount.create(switchboardProgram, {
+    //   name: Buffer.from("My Crank"),
+    //   maxRows: 100,
+    //   queueAccount,
+    // });
+    // const crank = await crankAccount.loadData();
+
+    // // create oracle to run locally
+    // const oracleAccount = await sbv2.OracleAccount.create(switchboardProgram, {
+    //   name: Buffer.from("My Oracle"),
+    //   oracleAuthority: payerKeypair,
+    //   queueAccount,
+    // });
+    // const oracle = await oracleAccount.loadData();
+
+    // // grant oracle heartbeat permissions
+    // const oraclePermissionAccount = await sbv2.PermissionAccount.create(
+    //   switchboardProgram,
+    //   {
+    //     authority: queue.authority,
+    //     granter: queueAccount.publicKey,
+    //     grantee: oracleAccount.publicKey,
+    //   }
+    // );
+    // await oraclePermissionAccount.set({
+    //   authority: payerKeypair,
+    //   enable: true,
+    //   permission: sbv2.SwitchboardPermission.PERMIT_ORACLE_HEARTBEAT,
+    // });
+
+    const queueResponse = await createQueue(
       switchboardProgram,
       {
-        name: Buffer.from("My Test Queue"),
-        mint: spl.NATIVE_MINT,
-        authority: payerKeypair.publicKey, // Approve new participants
-        minStake: new anchor.BN(0), // Oracle minStake to heartbeat
-        reward: new anchor.BN(0), // Oracle rewards per request (non-VRF)
-        queueSize: 10, // Number of active oracles a queue can support
-        unpermissionedFeeds: true, // Whether feeds need PERMIT_ORACLE_QUEUE_USAGE permissions
-        unpermissionedVrf: true, // Whether VRF accounts need PERMIT_VRF_REQUESTS permissions
-      }
+        authority: payerKeypair.publicKey,
+        name: "Test Queue",
+        metadata: `created ${anchorBNtoDateString(
+          new anchor.BN(Math.floor(Date.now() / 1000))
+        )}`,
+        minStake: new anchor.BN(0),
+        reward: new anchor.BN(0),
+        crankSize: 10,
+        oracleTimeout: 180,
+        numOracles: 1,
+        unpermissionedFeeds: true,
+        unpermissionedVrf: true,
+        enableBufferRelayers: true,
+      },
+      10
     );
-    await queueAccount.setVrfSettings({
-      authority: payerKeypair,
-      unpermissionedVrf: true,
-    });
+
+    const queueAccount = queueResponse.queueAccount;
     const queue = await queueAccount.loadData();
 
-    // create a crank for the queue
-    const crankAccount = await sbv2.CrankAccount.create(switchboardProgram, {
-      name: Buffer.from("My Crank"),
-      maxRows: 100,
-      queueAccount,
+    const [programStateAccount, stateBump] =
+      ProgramStateAccount.fromSeed(switchboardProgram);
+    const programState = await programStateAccount.loadData();
+
+    const mint = await queueAccount.loadMint();
+
+    const payerSwitchboardWallet = await getOrCreateSwitchboardTokenAccount(
+      switchboardProgram,
+      mint
+    );
+
+    const crankAccount = new CrankAccount({
+      program: switchboardProgram,
+      publicKey: queueResponse.crankPubkey,
     });
     const crank = await crankAccount.loadData();
 
-    // create oracle to run locally
-    const oracleAccount = await sbv2.OracleAccount.create(switchboardProgram, {
-      name: Buffer.from("My Oracle"),
-      oracleAuthority: payerKeypair,
-      queueAccount,
+    const oracleAccount = new OracleAccount({
+      program: switchboardProgram,
+      publicKey: queueResponse.oracles[0],
     });
     const oracle = await oracleAccount.loadData();
 
-    // grant oracle heartbeat permissions
-    const oraclePermissionAccount = await sbv2.PermissionAccount.create(
+    const [permissionAccount] = PermissionAccount.fromSeed(
       switchboardProgram,
-      {
-        authority: queue.authority,
-        granter: queueAccount.publicKey,
-        grantee: oracleAccount.publicKey,
-      }
+      queue.authority,
+      queueAccount.publicKey,
+      oracleAccount.publicKey
     );
-    await oraclePermissionAccount.set({
-      authority: payerKeypair,
-      enable: true,
-      permission: sbv2.SwitchboardPermission.PERMIT_ORACLE_HEARTBEAT,
-    });
+    const permission = await permissionAccount.loadData();
 
     const ctx: ISwitchboardTestEnvironment = {
       programId: switchboardProgram.programId,
       programDataAddress,
       idlAddress,
-      programState: switchboardProgramState.publicKey,
+      programState: programStateAccount.publicKey,
       switchboardVault: programState.tokenVault,
       switchboardMint: mint.address,
       tokenWallet: payerSwitchboardWallet,
-      queue: queueAccount.publicKey,
+      queue: queueResponse.queueAccount.publicKey,
       queueAuthority: queue.authority,
       queueBuffer: queue.dataBuffer,
       crank: crankAccount.publicKey,
@@ -411,7 +474,7 @@ secrets:
       oracle: oracleAccount.publicKey,
       oracleAuthority: oracle.oracleAuthority,
       oracleEscrow: oracle.tokenAccount,
-      oraclePermissions: oraclePermissionAccount.publicKey,
+      oraclePermissions: permissionAccount.publicKey,
       payerKeypairPath: fullKeypairPath,
       additionalClonedAccounts,
     };

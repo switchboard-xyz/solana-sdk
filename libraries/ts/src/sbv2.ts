@@ -2092,15 +2092,19 @@ export interface OracleQueueInitParams {
    */
   queueSize?: number;
   /**
-   * Eanbling this setting means data feeds do not need explicit permission
+   * Enabling this setting means data feeds do not need explicit permission
    * to join the queue.
    */
   unpermissionedFeeds?: boolean;
   /**
-   * Eanbling this setting means data feeds do not need explicit permission
+   * Enabling this setting means data feeds do not need explicit permission
    * to request VRF proofs and verifications from this queue.
    */
   unpermissionedVrf?: boolean;
+  /**
+   * Enabling this setting will allow buffer relayer accounts to call openRound.
+   */
+  enableBufferRelayers?: boolean;
   mint: PublicKey;
 }
 
@@ -2236,6 +2240,7 @@ export class OracleQueueAccount {
         minimumDelaySeconds: params.minimumDelaySeconds ?? 5,
         queueSize: params.queueSize,
         unpermissionedFeeds: params.unpermissionedFeeds ?? false,
+        enableBufferRelayers: params.enableBufferRelayers ?? false,
       })
       .accounts({
         oracleQueue: oracleQueueAccount.publicKey,
@@ -3217,25 +3222,13 @@ export class OracleAccount {
       ProgramStateAccount.fromSeed(program);
 
     const mint = await params.queueAccount.loadMint();
-    const wallet = await spl.createAccount(
-      program.provider.connection,
-      payerKeypair,
-      mint.address,
-      programWallet(program).publicKey,
-      Keypair.generate()
-    );
-    await spl.setAuthority(
-      program.provider.connection,
-      programWallet(program),
-      wallet,
-      programWallet(program),
-      spl.AuthorityType.AccountOwner,
-      programStateAccount.publicKey
-    );
+
+    const walletKeypair = Keypair.generate();
+
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       program,
       params.queueAccount,
-      wallet
+      walletKeypair.publicKey
     );
 
     await program.methods
@@ -3249,11 +3242,28 @@ export class OracleAccount {
         oracle: oracleAccount.publicKey,
         oracleAuthority: authorityKeypair.publicKey,
         queue: params.queueAccount.publicKey,
-        wallet,
+        wallet: walletKeypair.publicKey,
         programState: programStateAccount.publicKey,
         systemProgram: SystemProgram.programId,
         payer: programWallet(program).publicKey,
       })
+      .preInstructions([
+        spl.createInitializeAccountInstruction(
+          walletKeypair.publicKey,
+          mint.address,
+          programWallet(program).publicKey,
+          spl.TOKEN_PROGRAM_ID
+        ),
+        spl.createSetAuthorityInstruction(
+          walletKeypair.publicKey,
+          programWallet(program).publicKey,
+          spl.AuthorityType.AccountOwner,
+          programStateAccount.publicKey,
+          [programWallet(program), walletKeypair],
+          spl.TOKEN_PROGRAM_ID
+        ),
+      ])
+      .signers([walletKeypair])
       .rpc();
 
     return new OracleAccount({ program, publicKey: oracleAccount.publicKey });
@@ -3583,24 +3593,15 @@ export class VrfAccount {
     const keypair = params.keypair;
     const size = program.account.vrfAccountData.size;
     const switchTokenMint = await params.queue.loadMint();
-    const escrow = (
-      await spl.getOrCreateAssociatedTokenAccount(
-        program.provider.connection,
-        programWallet(program),
-        switchTokenMint.address,
-        keypair.publicKey,
-        true
-      )
-    ).address;
 
-    await spl.setAuthority(
-      program.provider.connection,
-      programWallet(program),
-      escrow,
-      keypair,
-      spl.AuthorityType.AccountOwner,
-      programStateAccount.publicKey
+    const escrow = await spl.getAssociatedTokenAddress(
+      switchTokenMint.address,
+      keypair.publicKey,
+      true,
+      spl.TOKEN_PROGRAM_ID,
+      spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
+
     await program.methods
       .vrfInit({
         stateBump,
@@ -3615,6 +3616,22 @@ export class VrfAccount {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
       })
       .preInstructions([
+        spl.createAssociatedTokenAccountInstruction(
+          programWallet(program).publicKey,
+          escrow,
+          keypair.publicKey,
+          switchTokenMint.address,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        ),
+        spl.createSetAuthorityInstruction(
+          escrow,
+          keypair.publicKey,
+          spl.AuthorityType.AccountOwner,
+          programStateAccount.publicKey,
+          [programWallet(program), keypair],
+          spl.TOKEN_PROGRAM_ID
+        ),
         anchor.web3.SystemProgram.createAccount({
           fromPubkey: programWallet(program).publicKey,
           newAccountPubkey: keypair.publicKey,
@@ -3631,21 +3648,6 @@ export class VrfAccount {
 
     return new VrfAccount({ program, keypair, publicKey: keypair.publicKey });
   }
-
-  /**
-   * Set the callback CPI when vrf verification is successful.
-   */
-  // async setCallback(
-  // params: VrfSetCallbackParams
-  // ): Promise<TransactionSignature> {
-  // return await this.program.rpc.vrfSetCallback(params, {
-  // accounts: {
-  // vrf: this.publicKey,
-  // authority: params.authority.publicKey,
-  // },
-  // signers: [params.authority],
-  // });
-  // }
 
   /**
    * Trigger new randomness production on the vrf account

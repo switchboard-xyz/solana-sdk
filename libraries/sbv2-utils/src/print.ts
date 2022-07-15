@@ -2,6 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { AccountMeta, PublicKey, TokenAmount } from "@solana/web3.js";
 import {
   AggregatorAccount,
+  BufferRelayerAccount,
   CrankAccount,
   CrankRow,
   JobAccount,
@@ -15,7 +16,7 @@ import {
   SwitchboardPermissionValue,
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
-import type Big from "big.js";
+import Big from "big.js";
 import chalk from "chalk";
 import { getIdlAddress, getProgramDataAddress } from "./anchor.js";
 import { anchorBNtoDateTimeString } from "./date.js";
@@ -45,6 +46,28 @@ export const chalkString = (
   return `${chalk.blue(label.padEnd(padding, " "))}${chalk.yellow(
     valueString
   )}`;
+};
+
+// JSON.stringify: Object => String
+export const pubKeyConverter = (key: any, value: any): any => {
+  if (value instanceof PublicKey || key.toLowerCase().endsWith("publickey")) {
+    return value.toString() ?? "";
+  }
+  if (value instanceof Uint8Array) {
+    return `[${value.toString()}]`;
+  }
+  if (value instanceof anchor.BN) {
+    return value.toString();
+  }
+  if (value instanceof Big) {
+    return value.toString();
+  }
+  if (value instanceof SwitchboardDecimal) {
+    return new Big(value.mantissa.toString())
+      .div(new Big(10).pow(value.scale))
+      .toString();
+  }
+  return value;
 };
 
 export const tokenAmountString = (value: TokenAmount): string => {
@@ -379,8 +402,7 @@ export async function prettyPrintJob(
   outputString +=
     chalkString("metadata", buffer2string(data.metadata as any), SPACING) +
     "\r\n";
-  outputString +=
-    chalkString("authorWallet", data.authorWallet, SPACING) + "\r\n";
+  outputString += chalkString("authority", data.authority, SPACING) + "\r\n";
   outputString += chalkString("expiration", data.expiration, SPACING) + "\r\n";
   outputString += chalkString(
     "tasks",
@@ -416,7 +438,11 @@ export async function prettyPrintAggregator(
 
   let outputString = "";
   outputString += chalk.underline(
-    chalkString("## Aggregator", aggregatorAccount.publicKey!, SPACING) + "\r\n"
+    chalkString(
+      "## Aggregator",
+      aggregatorAccount.publicKey ?? PublicKey.default,
+      SPACING
+    ) + "\r\n"
   );
 
   outputString +=
@@ -477,7 +503,7 @@ export async function prettyPrintAggregator(
         aggregatorAccount.program,
         queue.authority,
         queueAccount.publicKey,
-        aggregatorAccount.publicKey!
+        aggregatorAccount.publicKey ?? PublicKey.default
       );
       const permissionData = await permissionAccount.loadData();
       outputString +=
@@ -702,6 +728,56 @@ export async function prettyPrintCrank(
   return outputString;
 }
 
+export async function prettyPrintBufferRelayer(
+  bufferRelayerAccount: BufferRelayerAccount,
+  accountData?: any,
+  printJob = false,
+  SPACING = 24
+): Promise<string> {
+  const data = accountData ?? (await bufferRelayerAccount.loadData());
+
+  let outputString = "";
+
+  outputString += chalk.underline(
+    chalkString("## BufferRelayer", bufferRelayerAccount.publicKey, SPACING) +
+      "\r\n"
+  );
+  outputString +=
+    chalkString("name", buffer2string(data.name as any), SPACING) + "\r\n";
+  outputString +=
+    chalkString("queuePubkey", data.queuePubkey, SPACING) + "\r\n";
+  outputString += chalkString("escrow", data.escrow, SPACING) + "\r\n";
+  outputString += chalkString("authority", data.authority, SPACING) + "\r\n";
+  outputString += chalkString("jobPubkey", data.jobPubkey, SPACING) + "\r\n";
+  outputString +=
+    chalkString("minUpdateDelaySeconds", data.minUpdateDelaySeconds, SPACING) +
+    "\r\n";
+
+  const result = data.result as number[];
+  outputString +=
+    chalkString(
+      "result",
+      `[${result.map((r) => r.toString()).join(",")}]`,
+      SPACING
+    ) + "\r\n";
+  outputString +=
+    chalkString(
+      "currentRound",
+      JSON.stringify(data.currentRound, pubKeyConverter, 2),
+      SPACING
+    ) + "\r\n";
+
+  if (printJob) {
+    const jobAccount = new JobAccount({
+      program: bufferRelayerAccount.program,
+      publicKey: data.jobPubkey,
+    });
+    outputString += "\r\n" + (await prettyPrintJob(jobAccount));
+  }
+
+  return outputString;
+}
+
 export async function prettyPrintSwitchboardAccount(
   program: anchor.Program,
   publicKey: PublicKey,
@@ -744,6 +820,13 @@ export async function prettyPrintSwitchboardAccount(
     case "VrfAccountData": {
       const vrfAccount = new VrfAccount({ program, publicKey });
       return prettyPrintVrf(vrfAccount, undefined);
+    }
+    case "BufferRelayerAccountData": {
+      const bufferRelayerAccount = new BufferRelayerAccount({
+        program,
+        publicKey,
+      });
+      return prettyPrintBufferRelayer(bufferRelayerAccount, undefined);
     }
     case "BUFFERxx": {
       return `Found buffer account but dont know which one`;

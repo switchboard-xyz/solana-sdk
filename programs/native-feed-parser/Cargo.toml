@@ -12,6 +12,6 @@ no-entrypoint = []
 
 [dependencies]
 switchboard-v2 = { path = "../../libraries/rs" }
-# switchboard-v2 = "^0.1.10"
+# switchboard-v2 = "^0.1.11"
 solana-program = "1.9.29"
 

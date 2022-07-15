@@ -27,6 +27,7 @@ export default class QueueAddCrank extends BaseCommand {
     }),
     maxRows: Flags.integer({
       char: "r",
+      default: 100,
       description: "maximum number of rows a crank can support",
     }),
     queueAuthority: Flags.string({

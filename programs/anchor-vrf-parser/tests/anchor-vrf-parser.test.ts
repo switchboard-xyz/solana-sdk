@@ -66,7 +66,10 @@ describe("anchor-vrf-parser test", () => {
   before(async () => {
     // First, attempt to load the switchboard devnet PID
     try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(provider);
+      switchboard = await SwitchboardTestContext.loadDevnetQueue(
+        provider,
+        "9e8rQPoyVZeGA1mD2BBVqDthbFwircnfLTB5JE6yUFQR"
+      );
       console.log("devnet detected");
       return;
     } catch (error: any) {
@@ -98,7 +101,7 @@ describe("anchor-vrf-parser test", () => {
       authority: vrfClientKey, // vrf authority
       keypair: vrfSecret,
     });
-    const { escrow } = await vrfAccount.loadData();
+
     console.log(`Created VRF Account: ${vrfAccount.publicKey}`);
 
     const permissionAccount = await PermissionAccount.create(
@@ -164,9 +167,10 @@ describe("anchor-vrf-parser test", () => {
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
+    const { escrow } = await vrfAccount.loadData();
+
     // Request randomness
-    console.log(`Sending RequestRandomness instruction`);
-    const requestTxn = vrfClientProgram.methods.requestResult!({
+    vrfClientProgram.methods.requestResult!({
       switchboardStateBump: programStateBump,
       permissionBump,
     })
@@ -187,7 +191,10 @@ describe("anchor-vrf-parser test", () => {
         tokenProgram: spl.TOKEN_PROGRAM_ID,
       })
       .signers([payer, payer])
-      .rpc();
+      .rpc()
+      .then((sig) => {
+        console.log(`RequestRandomness Txn: ${sig}`);
+      });
 
     const result = await awaitCallback(
       vrfClientProgram.provider.connection,

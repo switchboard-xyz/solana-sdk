@@ -11,13 +11,13 @@ import BaseCommand from "../../../BaseCommand";
 import { verifyProgramHasPayer } from "../../../utils";
 
 export default class JobCreate extends BaseCommand {
-  static description = "create a buffer relayer account";
+  static description = "create a job account";
 
   static flags = {
     ...BaseCommand.flags,
     authority: Flags.string({
       char: "a",
-      description: "alternate keypair that will be the aggregator authority",
+      description: "alternate keypair that will be the account authority",
     }),
     name: Flags.string({
       char: "n",
@@ -49,22 +49,10 @@ export default class JobCreate extends BaseCommand {
     const oracleJob = OracleJob.create(
       JSON.parse(fs.readFileSync(jobDefinitionPath, "utf-8"))
     );
-    if (!("tasks" in oracleJob)) {
-      throw new Error("Must provide tasks in job definition");
-    }
-
-    const data = Buffer.from(
-      OracleJob.encodeDelimited(
-        OracleJob.create({
-          tasks: oracleJob.tasks,
-        })
-      ).finish()
-    );
-    console.log(`DATA: [${data.join(",")}]`);
     const jobAccount = await JobAccount.create(this.program, {
       authority: authority.publicKey,
       name: flags.name ? Buffer.from(flags.name) : Buffer.from(""),
-      data,
+      data: Buffer.from(OracleJob.encodeDelimited(oracleJob).finish()),
     });
 
     if (this.silent) {
@@ -72,13 +60,11 @@ export default class JobCreate extends BaseCommand {
       return;
     }
 
-    const job = await jobAccount.loadData();
-    this.logger.info(await prettyPrintJob(jobAccount, job));
-
-    console.log(`DATA: [${job.data.join(",")}]`);
+    const jobData = await jobAccount.loadData();
+    this.logger.info(await prettyPrintJob(jobAccount, jobData));
   }
 
   async catch(error) {
-    super.catch(error, "failed to create buffer relayer account");
+    super.catch(error, "failed to create job account");
   }
 }
