@@ -21,7 +21,7 @@ from a provided data feed AccountInfo.
 ```rust
 use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
-use switchboard_v2::{AggregatorAccountData, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET};
+use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET};
 
 // check feed owner
 let owner = *aggregator.owner;
@@ -39,7 +39,7 @@ let decimal: f64 = feed.get_result()?.try_into()?;
 feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
 
 // check if feed exceeds a confidence interval of +/i $0.80
-feed.check_confidence_interval(0.80)?;
+feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
 ### Aggregator History

@@ -39,25 +39,12 @@ describe("anchor-buffer-parser test", () => {
   const payer = (provider.wallet as AnchorWallet).payer;
 
   let switchboard: SwitchboardTestContext;
-  let localnet = false;
 
   before(async () => {
-    // First, attempt to load the switchboard devnet PID
-    try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        provider,
-        "9e8rQPoyVZeGA1mD2BBVqDthbFwircnfLTB5JE6yUFQR"
-      );
-      console.log("devnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Devnet - ${error.message}`);
-    }
-    // If fails, fallback to looking for a local env file
+    // Attempt to load the env from a local file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      localnet = true;
-      console.log("localnet detected");
+      console.log("local env file detected");
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);

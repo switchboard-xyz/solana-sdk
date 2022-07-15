@@ -18,11 +18,12 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 
 ### Program Examples
 
-| Package                                             | Description                                                                                                               |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [anchor-feed-parser](./programs/anchor-feed-parser) | Anchor example program demonstrating how to deserialize and read an onchain aggregator.                                   |
-| [native-feed-parser](./programs/native-feed-parser) | Solana Program Library example demonstrating how to deserialize and read an onchain aggregator.                           |
-| [anchor-vrf-parser](./programs/anchor-vrf-parser)   | Anchor example program demonstrating how to deserialize and read an onchain verifiable randomness function (VRF) account. |
+| Package                                                 | Description                                                                                                               |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [anchor-feed-parser](./programs/anchor-feed-parser)     | Anchor example program demonstrating how to deserialize and read an onchain aggregator account.                           |
+| [native-feed-parser](./programs/native-feed-parser)     | Solana Program Library example demonstrating how to deserialize and read an onchain aggregator account.                   |
+| [anchor-vrf-parser](./programs/anchor-vrf-parser)       | Anchor example program demonstrating how to deserialize and read an onchain verifiable randomness function (VRF) account. |
+| [anchor-buffer-parser](./programs/anchor-buffer-parser) | Anchor example program demonstrating how to deserialize and read an onchain buffer relayer account.                       |
 
 ### Client Examples
 
