@@ -40,7 +40,13 @@ const anchorFeedKeypairPath = path.join(
   "anchor_feed_parser-keypair.json"
 );
 
-const splFeedKeypairPath = path.join(
+const anchorBufferKeypairPath = path.join(
+  targetDir,
+  "deploy",
+  "anchor_buffer_parser-keypair.json"
+);
+
+const nativeFeedKeypairPath = path.join(
   targetDir,
   "deploy",
   "native_feed_parser-keypair.json"
@@ -80,8 +86,11 @@ async function main() {
   const anchorFeedParserPid = web3.Keypair.fromSecretKey(
     new Uint8Array(JSON.parse(fs.readFileSync(anchorFeedKeypairPath, "utf8")))
   ).publicKey;
-  const splFeedParserPid = web3.Keypair.fromSecretKey(
-    new Uint8Array(JSON.parse(fs.readFileSync(splFeedKeypairPath, "utf8")))
+  const anchorBufferParserPid = web3.Keypair.fromSecretKey(
+    new Uint8Array(JSON.parse(fs.readFileSync(anchorBufferKeypairPath, "utf8")))
+  ).publicKey;
+  const nativeFeedParserPid = web3.Keypair.fromSecretKey(
+    new Uint8Array(JSON.parse(fs.readFileSync(nativeFeedKeypairPath, "utf8")))
   ).publicKey;
 
   // REPLACE ANCHOR-VRF-PROGRAM IDS
@@ -113,17 +122,31 @@ async function main() {
     anchorToml
   );
 
-  console.log(`SPL Feed Parser PID:      ${splFeedParserPid}`);
+  console.log(`Anchor Buffer Parser PID:   ${anchorBufferParserPid}`);
   shell.sed(
     "-i",
     /declare_id!(.*);/,
-    `declare_id!("${splFeedParserPid.toString()}");`,
+    `declare_id!("${anchorBufferParserPid.toString()}");`,
+    path.join(projectRoot, "programs", "anchor-buffer-parser", "src", "lib.rs")
+  );
+  shell.sed(
+    "-i",
+    /anchor_buffer_parser = "(.*)"/,
+    `anchor_buffer_parser = "${anchorBufferParserPid.toString()}"`,
+    anchorToml
+  );
+
+  console.log(`Native Feed Parser PID:      ${nativeFeedParserPid}`);
+  shell.sed(
+    "-i",
+    /declare_id!(.*);/,
+    `declare_id!("${nativeFeedParserPid.toString()}");`,
     path.join(projectRoot, "programs", "native-feed-parser", "src", "lib.rs")
   );
   shell.sed(
     "-i",
     /native_feed_parser = "(.*)"/,
-    `native_feed_parser = "${splFeedParserPid.toString()}"`,
+    `native_feed_parser = "${nativeFeedParserPid.toString()}"`,
     anchorToml
   );
 
@@ -142,6 +165,7 @@ async function main() {
       "anchor_vrf_parser.json"
     )} ${vrfClientPath} --program-id ${anchorVrfParserPid.toString()}`
   );
+
   const feedClientPath = path.join(
     projectRoot,
     "programs",
@@ -155,6 +179,21 @@ async function main() {
       idlDir,
       "anchor_feed_parser.json"
     )} ${feedClientPath} --program-id ${anchorFeedParserPid.toString()}`
+  );
+
+  const bufferClientPath = path.join(
+    projectRoot,
+    "programs",
+    "anchor-buffer-parser",
+    "client"
+  );
+  shell.rm("-rf", bufferClientPath);
+  fs.mkdirSync(bufferClientPath, { recursive: true });
+  execSync(
+    `node ${anchorClientGen} ${path.join(
+      idlDir,
+      "anchor_buffer_parser.json"
+    )} ${bufferClientPath} --program-id ${anchorBufferParserPid.toString()}`
   );
 }
 

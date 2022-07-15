@@ -2,6 +2,7 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
+import assert from "assert";
 import {
   AnchorFeedParser,
   IDL,
@@ -65,7 +66,7 @@ describe("anchor-feed-parser test", () => {
 
   it("Read SOL/USD Feed", async () => {
     const signature = await feedParserProgram.methods
-      .readResult()
+      .readResult({ maxConfidenceInterval: 0.25 })
       .accounts({ aggregator: aggregatorKey })
       .rpc();
 
@@ -78,5 +79,19 @@ describe("anchor-feed-parser test", () => {
     );
 
     console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
+  });
+
+  it("Fails to read feed if confidence interval is exceeded", async () => {
+    await assert
+      .rejects(async function () {
+        await feedParserProgram.methods
+          .readResult({ maxConfidenceInterval: 0.0000000001 })
+          .accounts({ aggregator: aggregatorKey })
+          .rpc();
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err;
+      });
   });
 });

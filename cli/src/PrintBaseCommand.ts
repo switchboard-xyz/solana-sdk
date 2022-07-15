@@ -3,7 +3,9 @@ import * as anchor from "@project-serum/anchor";
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@project-serum/anchor/dist/cjs/coder";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
+  DEFAULT_KEYPAIR,
   prettyPrintAggregator,
+  prettyPrintBufferRelayer,
   prettyPrintCrank,
   prettyPrintJob,
   prettyPrintLease,
@@ -17,6 +19,7 @@ import {
 } from "@switchboard-xyz/sbv2-utils";
 import {
   AggregatorAccount,
+  BufferRelayerAccount,
   CrankAccount,
   JobAccount,
   LeaseAccount,
@@ -159,7 +162,14 @@ abstract class PrintBaseCommand extends Command {
         this.logger.log(await prettyPrintVrf(vrfAccount));
         break;
       }
-
+      case "BufferRelayerAccountData": {
+        const bufferRelayerAccount = new BufferRelayerAccount({
+          program,
+          publicKey,
+        });
+        this.logger.log(await prettyPrintBufferRelayer(bufferRelayerAccount));
+        break;
+      }
       case "BUFFERxx": {
         console.log(`Found buffer account but dont know which one`);
         break;

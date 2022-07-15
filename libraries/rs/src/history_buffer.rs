@@ -23,6 +23,11 @@ pub struct AggregatorHistoryBuffer<'a> {
     pub rows: Ref<'a, [AggregatorHistoryRow]>,
 }
 impl<'a> AggregatorHistoryBuffer<'a> {
+    /// Returns the deserialized Switchboard history buffer account
+    ///
+    /// # Arguments
+    ///
+    /// * `history_buffer` - A Solana AccountInfo referencing an existing Switchboard history buffer account
     pub fn new(
         history_buffer: &'a AccountInfo,
     ) -> anchor_lang::Result<AggregatorHistoryBuffer<'a>> {
@@ -41,7 +46,11 @@ impl<'a> AggregatorHistoryBuffer<'a> {
         });
     }
 
-    /// return the previous row in the history buffer for a given timestamp
+    /// Return the previous row in the history buffer for a given timestamp
+    ///
+    /// # Arguments
+    ///
+    /// * `timestamp` - A unix timestamp to search in the history buffer
     pub fn lower_bound(&self, timestamp: i64) -> Option<AggregatorHistoryRow> {
         if self.rows[self.insertion_idx].timestamp == 0 {
             return None;

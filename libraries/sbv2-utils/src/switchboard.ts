@@ -3,6 +3,7 @@ import { ACCOUNT_DISCRIMINATOR_SIZE } from "@project-serum/anchor";
 import type { PublicKey } from "@solana/web3.js";
 import {
   AggregatorAccount,
+  BufferRelayerAccount,
   CrankAccount,
   JobAccount,
   LeaseAccount,
@@ -26,6 +27,7 @@ export const SWITCHBOARD_ACCOUNT_TYPES = [
   "SbState",
   "BUFFERxx",
   "CrankAccountData",
+  "BufferRelayerAccountData",
 ] as const;
 
 export type SwitchboardAccount =
@@ -37,7 +39,8 @@ export type SwitchboardAccount =
   | LeaseAccount
   | ProgramStateAccount
   | VrfAccount
-  | CrankAccount;
+  | CrankAccount
+  | BufferRelayerAccount;
 
 export type SwitchboardAccountType = typeof SWITCHBOARD_ACCOUNT_TYPES[number];
 
@@ -108,6 +111,9 @@ export const loadSwitchboardAccount = async (
     }
     case "VrfAccountData": {
       return [accountType, new VrfAccount({ program, publicKey })];
+    }
+    case "BufferRelayerAccountData": {
+      return [accountType, new BufferRelayerAccount({ program, publicKey })];
     }
   }
 

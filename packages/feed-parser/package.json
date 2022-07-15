@@ -12,7 +12,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "ts-node src/main",
-    "build": "rimraf dist && ./esbuild.js",
+    "build": "shx rm -rf dist && ./esbuild.js",
     "test": "echo \"No test script for @switchboard-xyz/v2-feed-parser\" && exit 0"
   },
   "author": "",
@@ -27,8 +27,8 @@
     "@types/big.js": "^6.1.3",
     "esbuild-node-externals": "^1.4.1",
     "estrella": "^1.4.1",
-    "rimraf": "^3.0.2",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.3",
+    "shx": "^0.3.4"
   }
 }

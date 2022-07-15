@@ -34,10 +34,10 @@ pub struct AggregatorRound {
     pub min_response: SwitchboardDecimal,
     // Maintains the maximum node response this round.
     pub max_response: SwitchboardDecimal,
-    // pub lease_key: Option<Pubkey>,
+    // pub lease_key: Pubkey,
     // Pubkeys of the oracles fulfilling this round.
     pub oracle_pubkeys_data: [Pubkey; 16],
-    // pub oracle_pubkeys_size: Option<u32>, IMPLIED BY ORACLE_REQUEST_BATCH_SIZE
+    // pub oracle_pubkeys_size: u32, IMPLIED BY ORACLE_REQUEST_BATCH_SIZE
     // Represents all successful node responses this round. `NaN` if empty.
     pub medians_data: [SwitchboardDecimal; 16],
     // Current rewards/slashes oracles have received this round.
@@ -55,39 +55,54 @@ pub struct AggregatorRound {
 pub struct AggregatorAccountData {
     pub name: [u8; 32],
     pub metadata: [u8; 128],
-    pub author_wallet: Pubkey,
+    pub _reserved1: [u8; 32],
     pub queue_pubkey: Pubkey,
     // CONFIGS
-    // affects update price, shouldnt be changeable
     pub oracle_request_batch_size: u32,
     pub min_oracle_results: u32,
     pub min_job_results: u32,
-    // affects update price, shouldnt be changeable
     pub min_update_delay_seconds: u32,
-    // timestamp to start feed updates at
-    pub start_after: i64,
+    pub start_after: i64, // timestamp to start feed updates at
     pub variance_threshold: SwitchboardDecimal,
-    // If no feed results after this period, trigger nodes to report
-    pub force_report_period: i64,
+    pub force_report_period: i64, // If no feed results after this period, trigger nodes to report
     pub expiration: i64,
     //
     pub consecutive_failure_count: u64,
     pub next_allowed_update_time: i64,
     pub is_locked: bool,
-    pub _schedule: [u8; 32],
+    pub crank_pubkey: Pubkey,
     pub latest_confirmed_round: AggregatorRound,
     pub current_round: AggregatorRound,
     pub job_pubkeys_data: [Pubkey; 16],
     pub job_hashes: [Hash; 16],
     pub job_pubkeys_size: u32,
-    // Used to confirm with oracles they are answering what they think theyre answering
-    pub jobs_checksum: [u8; 32],
+    pub jobs_checksum: [u8; 32], // Used to confirm with oracles they are answering what they think theyre answering
     //
     pub authority: Pubkey,
-    pub _ebuf: [u8; 224], // Buffer for future info
+    pub history_buffer: Pubkey,
+    pub previous_confirmed_round_result: SwitchboardDecimal,
+    pub previous_confirmed_round_slot: u64,
+    pub disable_crank: bool,
+    pub job_weights: [u8; 16],
+    pub _ebuf: [u8; 147], // Buffer for future info
 }
+unsafe impl Pod for AggregatorAccountData {}
+unsafe impl Zeroable for AggregatorAccountData {}
 
 impl AggregatorAccountData {
+    /// Returns the deserialized Switchboard Aggregator account
+    ///
+    /// # Arguments
+    ///
+    /// * `switchboard_feed` - A Solana AccountInfo referencing an existing Switchboard Aggregator
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::AggregatorAccountData;
+    ///
+    /// let data_feed = AggregatorAccountData::new(feed_account_info)?;
+    /// ```
     pub fn new<'info>(
         switchboard_feed: &'info AccountInfo,
     ) -> anchor_lang::Result<Ref<'info, AggregatorAccountData>> {
@@ -96,13 +111,22 @@ impl AggregatorAccountData {
         let mut disc_bytes = [0u8; 8];
         disc_bytes.copy_from_slice(&data[..8]);
         if disc_bytes != AggregatorAccountData::discriminator() {
-            msg!("{:?}", disc_bytes);
             return Err(SwitchboardError::AccountDiscriminatorMismatch.into());
         }
 
         Ok(Ref::map(data, |data| bytemuck::from_bytes(&data[8..])))
     }
-
+    /// If sufficient oracle responses, returns the latest on-chain result in SwitchboardDecimal format
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::AggregatorAccountData;
+    /// use std::convert::TryInto;
+    ///
+    /// let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
+    /// let decimal: f64 = feed_result.try_into()?;
+    /// ```
     pub fn get_result(&self) -> anchor_lang::Result<SwitchboardDecimal> {
         if self.min_oracle_results > self.latest_confirmed_round.num_success {
             return Err(SwitchboardError::InvalidAggregatorRound.into());
@@ -110,12 +134,53 @@ impl AggregatorAccountData {
         Ok(self.latest_confirmed_round.result)
     }
 
+    /// Check whether the confidence interval exceeds a given threshold
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal};
+    ///
+    /// let feed = AggregatorAccountData::new(feed_account_info)?;
+    /// feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
+    /// ```
+    pub fn check_confidence_interval(
+        &self,
+        max_confidence_interval: SwitchboardDecimal,
+    ) -> anchor_lang::Result<()> {
+        if self.latest_confirmed_round.std_deviation > max_confidence_interval {
+            return Err(SwitchboardError::ConfidenceIntervalExceeded.into());
+        }
+        Ok(())
+    }
+
+    /// Check whether the feed has been updated in the last max_staleness seconds
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::AggregatorAccountData;
+    ///
+    /// let feed = AggregatorAccountData::new(feed_account_info)?;
+    /// feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
+    /// ```
+    pub fn check_staleness(
+        &self,
+        unix_timestamp: i64,
+        max_staleness: i64,
+    ) -> anchor_lang::Result<()> {
+        let staleness = unix_timestamp - self.latest_confirmed_round.round_open_timestamp;
+        if staleness > max_staleness {
+            msg!("Feed has not been updated in {} seconds!", staleness);
+            return Err(SwitchboardError::StaleFeed.into());
+        }
+        Ok(())
+    }
+
     fn discriminator() -> [u8; 8] {
         return [217, 230, 65, 101, 201, 162, 27, 125];
     }
 }
-unsafe impl Pod for AggregatorAccountData {}
-unsafe impl Zeroable for AggregatorAccountData {}
 
 #[cfg(test)]
 mod tests {

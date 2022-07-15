@@ -30,6 +30,7 @@ export interface CreateQueueParams {
   numOracles?: number;
   unpermissionedFeeds?: boolean;
   unpermissionedVrf?: boolean;
+  enableBufferRelayers?: boolean;
 }
 
 export interface CreateQueueResponse {
@@ -152,6 +153,7 @@ export async function createQueue(
         queueSize: queueSize,
         unpermissionedFeeds: params.unpermissionedFeeds ?? false,
         unpermissionedVrf: params.unpermissionedVrf ?? false,
+        enableBufferRelayers: params.enableBufferRelayers ?? false,
       })
       .accounts({
         oracleQueue: queueKeypair.publicKey,
@@ -282,16 +284,16 @@ export async function createQueue(
     })
   );
 
-  const createAccountSignatures = packAndSend(
+  const createAccountSignatures = await packAndSend(
     program,
     [ixns, finalTransactions],
     signers,
     payerKeypair.publicKey
   );
 
-  const result = await program.provider.connection.confirmTransaction(
-    createAccountSignatures[-1]
-  );
+  // const result = await program.provider.connection.confirmTransaction(
+  //   createAccountSignatures[-1]
+  // );
 
   return {
     queueAccount,

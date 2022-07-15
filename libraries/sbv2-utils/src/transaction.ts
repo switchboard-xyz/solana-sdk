@@ -37,14 +37,10 @@ export async function packAndSend(
         sendAndConfirmRawTransaction(program.provider.connection, rawTx, {
           maxRetries: 10,
           commitment: "processed",
+        }).catch((error) => {
+          console.error(error);
+          throw error;
         })
-          .then((sig) => {
-            return sig;
-          })
-          .catch((error) => {
-            console.error(error);
-            throw error;
-          })
       );
     }
 

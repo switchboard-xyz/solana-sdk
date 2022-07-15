@@ -17,7 +17,7 @@ default = []
 
 [dependencies]
 switchboard-v2 = { path = "../../libraries/rs" }
-# switchboard-v2 = "^0.1.10"
+# switchboard-v2 = "^0.1.11"
 anchor-lang = "^0.24.2"
 anchor-spl = "^0.24.2"
 solana-program = "~1.9.13"
