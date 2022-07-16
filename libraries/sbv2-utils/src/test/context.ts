@@ -48,9 +48,13 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     tokenAmount: number
   ): Promise<PublicKey> {
     const payerKeypair = sbv2.programWallet(program);
-    const balance = await program.provider.connection.getBalance(
-      payerKeypair.publicKey
-    );
+
+    if (tokenAmount <= 0) {
+      return spl.getAssociatedTokenAddress(
+        mint.address,
+        payerKeypair.publicKey
+      );
+    }
 
     const associatedTokenAccount = await spl.getOrCreateAssociatedTokenAccount(
       program.provider.connection,
@@ -59,7 +63,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       payerKeypair.publicKey
     );
 
-    if (tokenAmount <= 0 || tokenAmount <= associatedTokenAccount.amount) {
+    if (tokenAmount <= associatedTokenAccount.amount) {
       return associatedTokenAccount.address;
     }
 
@@ -67,6 +71,10 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     if (amountNeeded <= 0) {
       return associatedTokenAccount.address;
     }
+
+    const balance = await program.provider.connection.getBalance(
+      payerKeypair.publicKey
+    );
 
     if (amountNeeded > balance) {
       throw new Error(
@@ -94,6 +102,19 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     tokenAmount = 0
   ) {
     const payerKeypair = (provider.wallet as sbv2.AnchorWallet).payer;
+
+    const balance = await provider.connection.getBalance(
+      payerKeypair.publicKey
+    );
+    if (!balance) {
+      try {
+        await provider.connection.requestAirdrop(
+          payerKeypair.publicKey,
+          1_000_000_000
+        );
+      } catch {}
+    }
+
     let program: anchor.Program;
     try {
       program = await sbv2.loadSwitchboardProgram(
@@ -201,6 +222,18 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     }
 
     const payerKeypair = (provider.wallet as sbv2.AnchorWallet).payer;
+
+    const balance = await provider.connection.getBalance(
+      payerKeypair.publicKey
+    );
+    if (!balance) {
+      try {
+        await provider.connection.requestAirdrop(
+          payerKeypair.publicKey,
+          1_000_000_000
+        );
+      } catch {}
+    }
 
     const SWITCHBOARD_PID = new PublicKey(process.env.SWITCHBOARD_PROGRAM_ID);
     const switchboardIdl = await anchor.Program.fetchIdl(

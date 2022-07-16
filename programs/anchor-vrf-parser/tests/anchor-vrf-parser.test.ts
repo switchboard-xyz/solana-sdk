@@ -68,16 +68,22 @@ describe("anchor-vrf-parser test", () => {
     try {
       switchboard = await SwitchboardTestContext.loadDevnetQueue(
         provider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy",
+        5_000_000 // .005 wSOL
       );
       console.log("devnet detected");
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Devnet - ${error.message}`);
+      console.error(error);
     }
     // If fails, fallback to looking for a local env file
     try {
-      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
+      switchboard = await SwitchboardTestContext.loadFromEnv(
+        provider,
+        undefined,
+        5_000_000 // .005 wSOL
+      );
       console.log("localnet detected");
       return;
     } catch (error: any) {
@@ -170,7 +176,7 @@ describe("anchor-vrf-parser test", () => {
     const { escrow } = await vrfAccount.loadData();
 
     // Request randomness
-    vrfClientProgram.methods.requestResult!({
+    await vrfClientProgram.methods.requestResult!({
       switchboardStateBump: programStateBump,
       permissionBump,
     })
@@ -190,11 +196,10 @@ describe("anchor-vrf-parser test", () => {
         programState: programStateAccount.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
       })
-      .signers([payer, payer])
-      .rpc()
-      .then((sig) => {
-        console.log(`RequestRandomness Txn: ${sig}`);
-      });
+      .rpc();
+    // .then((sig) => {
+    //   console.log(`RequestRandomness Txn: ${sig}`);
+    // });
 
     const result = await awaitCallback(
       vrfClientProgram.provider.connection,

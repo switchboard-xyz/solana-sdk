@@ -3588,6 +3588,7 @@ export class VrfAccount {
     program: anchor.Program,
     params: VrfInitParams
   ): Promise<VrfAccount> {
+    const payerKeypair = programWallet(program);
     const [programStateAccount, stateBump] =
       ProgramStateAccount.fromSeed(program);
     const keypair = params.keypair;
@@ -3597,9 +3598,7 @@ export class VrfAccount {
     const escrow = await spl.getAssociatedTokenAddress(
       switchTokenMint.address,
       keypair.publicKey,
-      true,
-      spl.TOKEN_PROGRAM_ID,
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      true
     );
 
     await program.methods
@@ -3617,23 +3616,20 @@ export class VrfAccount {
       })
       .preInstructions([
         spl.createAssociatedTokenAccountInstruction(
-          programWallet(program).publicKey,
+          payerKeypair.publicKey,
           escrow,
           keypair.publicKey,
-          switchTokenMint.address,
-          spl.TOKEN_PROGRAM_ID,
-          spl.ASSOCIATED_TOKEN_PROGRAM_ID
+          switchTokenMint.address
         ),
         spl.createSetAuthorityInstruction(
           escrow,
           keypair.publicKey,
           spl.AuthorityType.AccountOwner,
           programStateAccount.publicKey,
-          [programWallet(program), keypair],
-          spl.TOKEN_PROGRAM_ID
+          [payerKeypair, keypair]
         ),
         anchor.web3.SystemProgram.createAccount({
-          fromPubkey: programWallet(program).publicKey,
+          fromPubkey: payerKeypair.publicKey,
           newAccountPubkey: keypair.publicKey,
           space: size,
           lamports:
@@ -3643,7 +3639,7 @@ export class VrfAccount {
           programId: program.programId,
         }),
       ])
-      .signers([keypair])
+      .signers([payerKeypair, keypair])
       .rpc();
 
     return new VrfAccount({ program, keypair, publicKey: keypair.publicKey });

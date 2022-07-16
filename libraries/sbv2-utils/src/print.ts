@@ -108,24 +108,26 @@ export type VrfStatusString =
 export const toVrfStatusString = (
   status: Record<string, unknown>
 ): VrfStatusString => {
-  if ("statusNone" in status) {
-    return "StatusNone";
-  }
-  if ("statusRequesting" in status) {
-    return "StatusRequesting";
-  }
-  if ("statusVerifying" in status) {
-    return "StatusVerifying";
-  }
-  if ("statusVerified" in status) {
-    return "StatusVerified";
-  }
-  if ("statusCallbackSuccess" in status) {
-    return "StatusCallbackSuccess";
-  }
-  if ("statusVerifyFailure" in status) {
-    return "StatusVerifyFailure";
-  }
+  try {
+    if ("statusNone" in status) {
+      return "StatusNone";
+    }
+    if ("statusRequesting" in status) {
+      return "StatusRequesting";
+    }
+    if ("statusVerifying" in status) {
+      return "StatusVerifying";
+    }
+    if ("statusVerified" in status) {
+      return "StatusVerified";
+    }
+    if ("statusCallbackSuccess" in status) {
+      return "StatusCallbackSuccess";
+    }
+    if ("statusVerifyFailure" in status) {
+      return "StatusVerifyFailure";
+    }
+  } catch {}
   return "";
 };
 
@@ -594,17 +596,6 @@ export async function prettyPrintVrf(
             .join(",")}]`,
         },
         undefined,
-        // (key, value) => {
-        //   if (Array.isArray(value)) {
-        //     return `[${value
-        //       .map((v) =>
-        //         typeof v === "object" ? JSON.stringify(v) : v.toString()
-        //       )
-        //       .join(",")}]`;
-        //   }
-
-        //   return value;
-        // },
         2
       ),
       SPACING
@@ -620,17 +611,19 @@ export async function prettyPrintVrf(
         verified: data.builders[0]?.verified ?? "",
         txRemaining: data.builders[0]?.txRemaining ?? "",
         producer: data.builders[0]?.producer.toString() ?? "",
-        reprProof: `[${data.builders[0].reprProof.map((value) =>
-          value.toString()
-        )}]`,
-        reprProofHex: Buffer.from(data.builders[0].reprProof).toString("hex"),
+        reprProof: data.builders[0].reprProof
+          ? `[${data.builders[0].reprProof.map((value) => value.toString())}]`
+          : "",
+        reprProofHex: data.builders[0].reprProof
+          ? Buffer.from(data.builders[0].reprProof).toString("hex")
+          : "",
         currentRound: {
-          result: `[${data.currentRound.result.map((value) =>
-            value.toString()
-          )}]`,
-          alpha: `[${data.currentRound.alpha.map((value) =>
-            value.toString()
-          )}]`,
+          result: data.currentRound.result
+            ? `[${data.currentRound.result.map((value) => value.toString())}]`
+            : "",
+          alpha: data.currentRound.alpha
+            ? `[${data.currentRound.alpha.map((value) => value.toString())}]`
+            : "",
           alphaHex: Buffer.from(data.currentRound.alpha).toString("hex"),
           requestSlot: data.currentRound?.requestSlot?.toString() ?? "",
           requestTimestamp: anchorBNtoDateTimeString(

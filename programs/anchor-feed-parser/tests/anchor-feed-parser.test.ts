@@ -3,11 +3,13 @@ import { PublicKey } from "@solana/web3.js";
 import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
 import assert from "assert";
+import chai from "chai";
 import {
   AnchorFeedParser,
   IDL,
 } from "../../../target/types/anchor_feed_parser";
 import { PROGRAM_ID } from "../client/programId";
+const expect = chai.expect;
 
 // Anchor.toml will copy this to localnet when we start our tests
 const DEFAULT_SOL_USD_FEED = new PublicKey(
@@ -81,14 +83,19 @@ describe("anchor-feed-parser test", () => {
 
   it("Fails to read feed if confidence interval is exceeded", async () => {
     await assert
-      .rejects(async function () {
-        await feedParserProgram.methods
-          .readResult({ maxConfidenceInterval: 0.0000000001 })
-          .accounts({ aggregator: aggregatorKey })
-          .rpc();
-      })
+      .rejects(
+        (async () => {
+          await feedParserProgram.methods
+            .readResult({ maxConfidenceInterval: 0.0000000001 })
+            .accounts({ aggregator: aggregatorKey })
+            .rpc();
+          // .catch((err) => {
+          //   throw err;
+          // });
+        })()
+        // { code: 6002 }
+      )
       .catch((err) => {
-        console.error(err);
         throw err;
       });
   });

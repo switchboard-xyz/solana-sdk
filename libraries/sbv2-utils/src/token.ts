@@ -65,38 +65,35 @@ export async function transferWrappedSol(
   const ephemeralAccount = Keypair.generate();
   const ephemeralWallet = await spl.getAssociatedTokenAddress(
     spl.NATIVE_MINT,
-    ephemeralAccount.publicKey
+    ephemeralAccount.publicKey,
+    false
   );
 
   const tx = new Transaction().add(
     spl.createAssociatedTokenAccountInstruction(
       payerKeypair.publicKey,
       ephemeralWallet,
-      payerKeypair.publicKey,
-      spl.NATIVE_MINT,
-      spl.TOKEN_PROGRAM_ID,
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      ephemeralAccount.publicKey,
+      spl.NATIVE_MINT
     ),
     SystemProgram.transfer({
       fromPubkey: payerKeypair.publicKey,
       toPubkey: ephemeralWallet,
       lamports: amount,
     }),
-    spl.createSyncNativeInstruction(ephemeralWallet, spl.TOKEN_PROGRAM_ID),
+    spl.createSyncNativeInstruction(ephemeralWallet),
     spl.createTransferInstruction(
       ephemeralWallet,
       payerAssociatedWallet,
-      payerKeypair.publicKey,
+      ephemeralAccount.publicKey,
       amount,
-      [payerKeypair, ephemeralAccount],
-      spl.TOKEN_PROGRAM_ID
+      [payerKeypair, ephemeralAccount]
     ),
     spl.createCloseAccountInstruction(
       ephemeralWallet,
       payerKeypair.publicKey,
-      payerKeypair.publicKey,
-      [payerKeypair, ephemeralAccount],
-      spl.TOKEN_PROGRAM_ID
+      ephemeralAccount.publicKey,
+      [payerKeypair, ephemeralAccount]
     )
   );
 
@@ -104,6 +101,8 @@ export async function transferWrappedSol(
     payerKeypair,
     ephemeralAccount,
   ]);
+
+  console.log(`WRAP SOL TRANSFER TXN = ${txn}`);
 
   const finalBalance = await spl.getAccount(connection, payerAssociatedWallet);
   return Number(finalBalance.amount);
