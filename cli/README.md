@@ -53,6 +53,8 @@ node bin/dev print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 * [`sbv2 aggregator set varianceThreshold [AGGREGATORKEY] [VARIANCETHRESHOLD]`](#sbv2-aggregator-set-variancethreshold-aggregatorkey-variancethreshold)
 * [`sbv2 aggregator update [AGGREGATORKEY]`](#sbv2-aggregator-update-aggregatorkey)
 * [`sbv2 aggregator watch [AGGREGATORKEY]`](#sbv2-aggregator-watch-aggregatorkey)
+* [`sbv2 buffer create [QUEUEKEY]`](#sbv2-buffer-create-queuekey)
+* [`sbv2 buffer print [BUFFERRELAYERKEY]`](#sbv2-buffer-print-bufferrelayerkey)
 * [`sbv2 config print`](#sbv2-config-print)
 * [`sbv2 config set [PARAM] [VALUE]`](#sbv2-config-set-param-value)
 * [`sbv2 crank add aggregator [CRANKKEY] [AGGREGATORKEY]`](#sbv2-crank-add-aggregator-crankkey-aggregatorkey)
@@ -88,6 +90,7 @@ node bin/dev print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 * [`sbv2 print aggregator history [AGGREGATORKEY]`](#sbv2-print-aggregator-history-aggregatorkey)
 * [`sbv2 print aggregator lease [AGGREGATORKEY]`](#sbv2-print-aggregator-lease-aggregatorkey)
 * [`sbv2 print aggregator permission [AGGREGATORKEY]`](#sbv2-print-aggregator-permission-aggregatorkey)
+* [`sbv2 print buffer [BUFFERRELAYERKEY]`](#sbv2-print-buffer-bufferrelayerkey)
 * [`sbv2 print crank [CRANKKEY]`](#sbv2-print-crank-crankkey)
 * [`sbv2 print job [JOBKEY]`](#sbv2-print-job-jobkey)
 * [`sbv2 print oracle [ORACLEKEY]`](#sbv2-print-oracle-oraclekey)
@@ -1130,6 +1133,68 @@ EXAMPLES
   $ sbv2 watch:aggregator J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa
 ```
 
+## `sbv2 buffer create [QUEUEKEY]`
+
+create a buffer relayer account
+
+```
+USAGE
+  $ sbv2 buffer create [QUEUEKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [-a
+    <value>] [-n <value>] [--minUpdateDelaySeconds <value>] [--jobDefinition <value> | --jobKey <value>]
+
+ARGUMENTS
+  QUEUEKEY  oracle queue to create BufferRelayer account on
+
+FLAGS
+  -a, --authority=<value>          alternate keypair that will be the aggregator authority
+  -k, --keypair=<value>            keypair that will pay for onchain transactions. defaults to new account authority if
+                                   no alternate authority provided
+  -n, --name=<value>               name of the buffer account
+  -s, --silent                     suppress cli prompts
+  -u, --rpcUrl=<value>             alternate RPC url
+  -v, --verbose                    log everything
+  --jobDefinition=<value>          filesystem path to job definition
+  --jobKey=<value>                 public key of existing job account
+  --mainnetBeta                    WARNING: use mainnet-beta solana cluster
+  --minUpdateDelaySeconds=<value>  [default: 30] minimum number of seconds between update calls
+  --programId=<value>              alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  create a buffer relayer account
+```
+
+## `sbv2 buffer print [BUFFERRELAYERKEY]`
+
+Print the deserialized Switchboard buffer relayer account
+
+```
+USAGE
+  $ sbv2 buffer print [BUFFERRELAYERKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--job]
+
+ARGUMENTS
+  BUFFERRELAYERKEY  public key of the buffer relayer account to deserialize
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --job                  output job definitions
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  Print the deserialized Switchboard buffer relayer account
+
+ALIASES
+  $ sbv2 buffer print
+
+EXAMPLES
+  $ sbv2 buffer:print 23GvzENjwgqqaLejsAtAWgTkSzWjSMo2LUYTAETT8URp
+```
+
 ## `sbv2 config print`
 
 print cli config
@@ -1227,7 +1292,7 @@ FLAGS
   -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
                             alternate authority provided
   -n, --name=<value>        name of the crank for easier identification
-  -r, --maxRows=<value>     maximum number of rows a crank can support
+  -r, --maxRows=<value>     [default: 100] maximum number of rows a crank can support
   -s, --silent              suppress cli prompts
   -u, --rpcUrl=<value>      alternate RPC url
   -v, --verbose             log everything
@@ -1441,7 +1506,7 @@ _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.1
 
 ## `sbv2 job create JOBDEFINITION`
 
-create a buffer relayer account
+create a job account
 
 ```
 USAGE
@@ -1452,7 +1517,7 @@ ARGUMENTS
   JOBDEFINITION  filesystem path to job definition
 
 FLAGS
-  -a, --authority=<value>  alternate keypair that will be the aggregator authority
+  -a, --authority=<value>  alternate keypair that will be the account authority
   -k, --keypair=<value>    keypair that will pay for onchain transactions. defaults to new account authority if no
                            alternate authority provided
   -n, --name=<value>       name of the buffer account
@@ -1463,7 +1528,7 @@ FLAGS
   --programId=<value>      alternative Switchboard program ID to interact with
 
 DESCRIPTION
-  create a buffer relayer account
+  create a job account
 ```
 
 ## `sbv2 job print [JOBKEY]`
@@ -2027,7 +2092,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.16/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2159,6 +2224,38 @@ ALIASES
 
 EXAMPLES
   $ sbv2 aggregator:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
+```
+
+## `sbv2 print buffer [BUFFERRELAYERKEY]`
+
+Print the deserialized Switchboard buffer relayer account
+
+```
+USAGE
+  $ sbv2 print buffer [BUFFERRELAYERKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--job]
+
+ARGUMENTS
+  BUFFERRELAYERKEY  public key of the buffer relayer account to deserialize
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --job                  output job definitions
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  Print the deserialized Switchboard buffer relayer account
+
+ALIASES
+  $ sbv2 buffer print
+
+EXAMPLES
+  $ sbv2 buffer:print 23GvzENjwgqqaLejsAtAWgTkSzWjSMo2LUYTAETT8URp
 ```
 
 ## `sbv2 print crank [CRANKKEY]`
@@ -2377,7 +2474,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 print vrf [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 print vrf [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2390,6 +2487,9 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
@@ -2576,7 +2676,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.16/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2643,7 +2743,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.15/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.16/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
@@ -2782,7 +2882,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 vrf print [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2795,6 +2895,9 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
