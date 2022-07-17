@@ -1,4 +1,3 @@
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
@@ -7,10 +6,6 @@ pub use switchboard_v2::{
 };
 
 declare_id!("FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh");
-
-#[account(zero_copy)]
-#[derive(AnchorDeserialize, Debug)]
-pub struct FeedClient {}
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]

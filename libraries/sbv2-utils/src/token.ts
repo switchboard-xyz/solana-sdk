@@ -52,6 +52,11 @@ export async function transferWrappedSol(
   amount: number
 ): Promise<number> {
   const payerBalance = await connection.getBalance(payerKeypair.publicKey);
+  if (payerBalance < amount) {
+    throw new Error(
+      `TransferWrappedSolError: Payer has insufficient funds, need ${amount}, have ${payerBalance}`
+    );
+  }
   const payerAssociatedWallet = (
     await spl.getOrCreateAssociatedTokenAccount(
       connection,
@@ -101,8 +106,6 @@ export async function transferWrappedSol(
     payerKeypair,
     ephemeralAccount,
   ]);
-
-  console.log(`WRAP SOL TRANSFER TXN = ${txn}`);
 
   const finalBalance = await spl.getAccount(connection, payerAssociatedWallet);
   return Number(finalBalance.amount);

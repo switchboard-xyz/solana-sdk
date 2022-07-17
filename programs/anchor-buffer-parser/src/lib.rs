@@ -1,13 +1,8 @@
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 pub use switchboard_v2::{BufferRelayerAccountData, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET};
 
 declare_id!("96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP");
-
-#[account(zero_copy)]
-#[derive(AnchorDeserialize, Debug)]
-pub struct BufferClient {}
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]

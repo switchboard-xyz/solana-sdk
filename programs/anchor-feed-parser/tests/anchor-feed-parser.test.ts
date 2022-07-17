@@ -82,21 +82,24 @@ describe("anchor-feed-parser test", () => {
   });
 
   it("Fails to read feed if confidence interval is exceeded", async () => {
-    await assert
-      .rejects(
-        (async () => {
-          await feedParserProgram.methods
-            .readResult({ maxConfidenceInterval: 0.0000000001 })
-            .accounts({ aggregator: aggregatorKey })
-            .rpc();
-          // .catch((err) => {
-          //   throw err;
-          // });
-        })()
-        // { code: 6002 }
-      )
-      .catch((err) => {
-        throw err;
-      });
+    // await assertThrowsAsync(
+    //   async () =>
+    //     feedParserProgram.methods
+    //       .readResult({ maxConfidenceInterval: 0.0000000001 })
+    //       .accounts({ aggregator: aggregatorKey })
+    //       .rpc(),
+    //   /Error/
+    // );
+
+    await assert.rejects(
+      async () => {
+        await feedParserProgram.methods
+          .readResult({ maxConfidenceInterval: 0.0000000001 })
+          .accounts({ aggregator: aggregatorKey })
+          .rpc();
+      },
+      /ConfidenceIntervalExceeded/,
+      "Confidence interval was not exceeded"
+    );
   });
 });
