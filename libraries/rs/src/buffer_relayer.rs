@@ -1,6 +1,5 @@
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
-use solana_program::pubkey::Pubkey;
 
 #[derive(AnchorDeserialize, Default, Debug)]
 pub struct BufferRelayerAccountData {

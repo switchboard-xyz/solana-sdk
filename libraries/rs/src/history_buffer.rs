@@ -4,7 +4,6 @@ use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
 use bytemuck::{try_cast_slice, try_from_bytes};
 use bytemuck::{Pod, Zeroable};
-use solana_program::account_info::AccountInfo;
 use std::cell::Ref;
 use superslice::*;
 

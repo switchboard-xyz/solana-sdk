@@ -4,10 +4,8 @@ use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 use bytemuck::{Pod, Zeroable};
-use solana_program::account_info::AccountInfo;
 use solana_program::instruction::Instruction;
 use solana_program::program::{invoke, invoke_signed};
-use solana_program::pubkey::Pubkey;
 use std::cell::Ref;
 
 #[zero_copy]
