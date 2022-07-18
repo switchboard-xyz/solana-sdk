@@ -32,7 +32,7 @@ then
     "$script_dir"/scripts/save-env-value.sh "$project" "GRAFANA_TLS_KEY" "$grafana_tls_key" > /dev/null
     grafana_tls_crt=$(base64 "$crt_file")
     printf "\nGRAFANA_TLS_CRT=\"%s\"\n" "$grafana_tls_crt"
-    "$script_dir"/scripts/save-env-value.sh "$project" "GRAFANA_TLS_CRT" "$grafana_tls_key" > /dev/null
+    "$script_dir"/scripts/save-env-value.sh "$project" "GRAFANA_TLS_CRT" "$grafana_tls_crt" > /dev/null
     exit 0
 fi
 
