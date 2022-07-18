@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.11"
+version = "0.1.12"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 data feeds."
 readme = "README.md"
@@ -23,7 +23,6 @@ cpi = ["no-entrypoint"]
 [dependencies]
 anchor-lang = "0.25.0"
 anchor-spl = "0.25.0"
-# borsh = { version = "0.9.1", features = ["const-generics"] }
 rust_decimal = { version = "1.18.0" }
 solana-program = "~1.10.29"
 bytemuck = "1.7.2"
