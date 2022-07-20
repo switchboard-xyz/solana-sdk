@@ -41,8 +41,8 @@ export const SBV2_MAINNET_PID = new PublicKey(
 );
 
 export const GOVERNANCE_PID = new PublicKey(
-  //"GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw"
-  "2iNnEMZuLk2TysefLvXtS6kyvCFC7CDUTLLeatVgRend"
+  "GovER5Lthms3bLBqWub97yVrMmEogzX7xNjdXpPPCVZw"
+  // "2iNnEMZuLk2TysefLvXtS6kyvCFC7CDUTLLeatVgRend"
 );
 
 /**

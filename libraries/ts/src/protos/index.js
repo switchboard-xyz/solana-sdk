@@ -4936,6 +4936,7 @@
              * @property {boolean|null} [weightByPropagationTime] TwapTask weightByPropagationTime
              * @property {number|null} [minSamples] TwapTask minSamples
              * @property {number|null} [endingUnixTimestamp] TwapTask endingUnixTimestamp
+             * @property {OracleJob.ICronParseTask|null} [endingUnixTimestampTask] TwapTask endingUnixTimestampTask
              */
     
             /**
@@ -4994,6 +4995,14 @@
             TwapTask.prototype.endingUnixTimestamp = 0;
     
             /**
+             * TwapTask endingUnixTimestampTask.
+             * @member {OracleJob.ICronParseTask|null|undefined} endingUnixTimestampTask
+             * @memberof OracleJob.TwapTask
+             * @instance
+             */
+            TwapTask.prototype.endingUnixTimestampTask = null;
+    
+            /**
              * Creates a new TwapTask instance using the specified properties.
              * @function create
              * @memberof OracleJob.TwapTask
@@ -5027,6 +5036,8 @@
                     writer.uint32(/* id 4, wireType 0 =*/32).uint32(message.minSamples);
                 if (message.endingUnixTimestamp != null && Object.hasOwnProperty.call(message, "endingUnixTimestamp"))
                     writer.uint32(/* id 5, wireType 0 =*/40).int32(message.endingUnixTimestamp);
+                if (message.endingUnixTimestampTask != null && Object.hasOwnProperty.call(message, "endingUnixTimestampTask"))
+                    $root.OracleJob.CronParseTask.encode(message.endingUnixTimestampTask, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
                 return writer;
             };
     
@@ -5075,6 +5086,9 @@
                         break;
                     case 5:
                         message.endingUnixTimestamp = reader.int32();
+                        break;
+                    case 6:
+                        message.endingUnixTimestampTask = $root.OracleJob.CronParseTask.decode(reader, reader.uint32());
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -5126,6 +5140,11 @@
                 if (message.endingUnixTimestamp != null && message.hasOwnProperty("endingUnixTimestamp"))
                     if (!$util.isInteger(message.endingUnixTimestamp))
                         return "endingUnixTimestamp: integer expected";
+                if (message.endingUnixTimestampTask != null && message.hasOwnProperty("endingUnixTimestampTask")) {
+                    var error = $root.OracleJob.CronParseTask.verify(message.endingUnixTimestampTask);
+                    if (error)
+                        return "endingUnixTimestampTask." + error;
+                }
                 return null;
             };
     
@@ -5151,6 +5170,11 @@
                     message.minSamples = object.minSamples >>> 0;
                 if (object.endingUnixTimestamp != null)
                     message.endingUnixTimestamp = object.endingUnixTimestamp | 0;
+                if (object.endingUnixTimestampTask != null) {
+                    if (typeof object.endingUnixTimestampTask !== "object")
+                        throw TypeError(".OracleJob.TwapTask.endingUnixTimestampTask: object expected");
+                    message.endingUnixTimestampTask = $root.OracleJob.CronParseTask.fromObject(object.endingUnixTimestampTask);
+                }
                 return message;
             };
     
@@ -5173,6 +5197,7 @@
                     object.weightByPropagationTime = false;
                     object.minSamples = 0;
                     object.endingUnixTimestamp = 0;
+                    object.endingUnixTimestampTask = null;
                 }
                 if (message.aggregatorPubkey != null && message.hasOwnProperty("aggregatorPubkey"))
                     object.aggregatorPubkey = message.aggregatorPubkey;
@@ -5184,6 +5209,8 @@
                     object.minSamples = message.minSamples;
                 if (message.endingUnixTimestamp != null && message.hasOwnProperty("endingUnixTimestamp"))
                     object.endingUnixTimestamp = message.endingUnixTimestamp;
+                if (message.endingUnixTimestampTask != null && message.hasOwnProperty("endingUnixTimestampTask"))
+                    object.endingUnixTimestampTask = $root.OracleJob.CronParseTask.toObject(message.endingUnixTimestampTask, options);
                 return object;
             };
     
@@ -9900,6 +9927,265 @@
             return SolanaAccountDataFetchTask;
         })();
     
+        OracleJob.CronParseTask = (function() {
+    
+            /**
+             * Properties of a CronParseTask.
+             * @memberof OracleJob
+             * @interface ICronParseTask
+             * @property {string|null} [cronPattern] CronParseTask cronPattern
+             * @property {number|null} [clockOffset] CronParseTask clockOffset
+             * @property {OracleJob.CronParseTask.ClockType|null} [clock] CronParseTask clock
+             */
+    
+            /**
+             * Constructs a new CronParseTask.
+             * @memberof OracleJob
+             * @classdesc Represents a CronParseTask.
+             * @implements ICronParseTask
+             * @constructor
+             * @param {OracleJob.ICronParseTask=} [properties] Properties to set
+             */
+            function CronParseTask(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+    
+            /**
+             * CronParseTask cronPattern.
+             * @member {string} cronPattern
+             * @memberof OracleJob.CronParseTask
+             * @instance
+             */
+            CronParseTask.prototype.cronPattern = "";
+    
+            /**
+             * CronParseTask clockOffset.
+             * @member {number} clockOffset
+             * @memberof OracleJob.CronParseTask
+             * @instance
+             */
+            CronParseTask.prototype.clockOffset = 0;
+    
+            /**
+             * CronParseTask clock.
+             * @member {OracleJob.CronParseTask.ClockType} clock
+             * @memberof OracleJob.CronParseTask
+             * @instance
+             */
+            CronParseTask.prototype.clock = 0;
+    
+            /**
+             * Creates a new CronParseTask instance using the specified properties.
+             * @function create
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {OracleJob.ICronParseTask=} [properties] Properties to set
+             * @returns {OracleJob.CronParseTask} CronParseTask instance
+             */
+            CronParseTask.create = function create(properties) {
+                return new CronParseTask(properties);
+            };
+    
+            /**
+             * Encodes the specified CronParseTask message. Does not implicitly {@link OracleJob.CronParseTask.verify|verify} messages.
+             * @function encode
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {OracleJob.ICronParseTask} message CronParseTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CronParseTask.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.cronPattern != null && Object.hasOwnProperty.call(message, "cronPattern"))
+                    writer.uint32(/* id 1, wireType 2 =*/10).string(message.cronPattern);
+                if (message.clockOffset != null && Object.hasOwnProperty.call(message, "clockOffset"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.clockOffset);
+                if (message.clock != null && Object.hasOwnProperty.call(message, "clock"))
+                    writer.uint32(/* id 3, wireType 0 =*/24).int32(message.clock);
+                return writer;
+            };
+    
+            /**
+             * Encodes the specified CronParseTask message, length delimited. Does not implicitly {@link OracleJob.CronParseTask.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {OracleJob.ICronParseTask} message CronParseTask message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            CronParseTask.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+    
+            /**
+             * Decodes a CronParseTask message from the specified reader or buffer.
+             * @function decode
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {OracleJob.CronParseTask} CronParseTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CronParseTask.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.OracleJob.CronParseTask();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.cronPattern = reader.string();
+                        break;
+                    case 2:
+                        message.clockOffset = reader.int32();
+                        break;
+                    case 3:
+                        message.clock = reader.int32();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+    
+            /**
+             * Decodes a CronParseTask message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {OracleJob.CronParseTask} CronParseTask
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            CronParseTask.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+    
+            /**
+             * Verifies a CronParseTask message.
+             * @function verify
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            CronParseTask.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.cronPattern != null && message.hasOwnProperty("cronPattern"))
+                    if (!$util.isString(message.cronPattern))
+                        return "cronPattern: string expected";
+                if (message.clockOffset != null && message.hasOwnProperty("clockOffset"))
+                    if (!$util.isInteger(message.clockOffset))
+                        return "clockOffset: integer expected";
+                if (message.clock != null && message.hasOwnProperty("clock"))
+                    switch (message.clock) {
+                    default:
+                        return "clock: enum value expected";
+                    case 0:
+                    case 1:
+                        break;
+                    }
+                return null;
+            };
+    
+            /**
+             * Creates a CronParseTask message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {OracleJob.CronParseTask} CronParseTask
+             */
+            CronParseTask.fromObject = function fromObject(object) {
+                if (object instanceof $root.OracleJob.CronParseTask)
+                    return object;
+                var message = new $root.OracleJob.CronParseTask();
+                if (object.cronPattern != null)
+                    message.cronPattern = String(object.cronPattern);
+                if (object.clockOffset != null)
+                    message.clockOffset = object.clockOffset | 0;
+                switch (object.clock) {
+                case "ORACLE":
+                case 0:
+                    message.clock = 0;
+                    break;
+                case "SYSCLOCK":
+                case 1:
+                    message.clock = 1;
+                    break;
+                }
+                return message;
+            };
+    
+            /**
+             * Creates a plain object from a CronParseTask message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof OracleJob.CronParseTask
+             * @static
+             * @param {OracleJob.CronParseTask} message CronParseTask
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            CronParseTask.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    object.cronPattern = "";
+                    object.clockOffset = 0;
+                    object.clock = options.enums === String ? "ORACLE" : 0;
+                }
+                if (message.cronPattern != null && message.hasOwnProperty("cronPattern"))
+                    object.cronPattern = message.cronPattern;
+                if (message.clockOffset != null && message.hasOwnProperty("clockOffset"))
+                    object.clockOffset = message.clockOffset;
+                if (message.clock != null && message.hasOwnProperty("clock"))
+                    object.clock = options.enums === String ? $root.OracleJob.CronParseTask.ClockType[message.clock] : message.clock;
+                return object;
+            };
+    
+            /**
+             * Converts this CronParseTask to JSON.
+             * @function toJSON
+             * @memberof OracleJob.CronParseTask
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            CronParseTask.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+    
+            /**
+             * ClockType enum.
+             * @name OracleJob.CronParseTask.ClockType
+             * @enum {number}
+             * @property {number} ORACLE=0 ORACLE value
+             * @property {number} SYSCLOCK=1 SYSCLOCK value
+             */
+            CronParseTask.ClockType = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "ORACLE"] = 0;
+                values[valuesById[1] = "SYSCLOCK"] = 1;
+                return values;
+            })();
+    
+            return CronParseTask;
+        })();
+    
         OracleJob.BufferLayoutParseTask = (function() {
     
             /**
@@ -10313,6 +10599,7 @@
              * @property {OracleJob.IMarinadeStateTask|null} [marinadeStateTask] Task marinadeStateTask
              * @property {OracleJob.ISolanaAccountDataFetchTask|null} [solanaAccountDataFetchTask] Task solanaAccountDataFetchTask
              * @property {OracleJob.IBufferLayoutParseTask|null} [bufferLayoutParseTask] Task bufferLayoutParseTask
+             * @property {OracleJob.ICronParseTask|null} [cronParseTask] Task cronParseTask
              */
     
             /**
@@ -10626,17 +10913,25 @@
              */
             Task.prototype.bufferLayoutParseTask = null;
     
+            /**
+             * Task cronParseTask.
+             * @member {OracleJob.ICronParseTask|null|undefined} cronParseTask
+             * @memberof OracleJob.Task
+             * @instance
+             */
+            Task.prototype.cronParseTask = null;
+    
             // OneOf field names bound to virtual getters and setters
             var $oneOfFields;
     
             /**
              * Task Task.
-             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|"solanaAccountDataFetchTask"|"bufferLayoutParseTask"|undefined} Task
+             * @member {"httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|"solanaAccountDataFetchTask"|"bufferLayoutParseTask"|"cronParseTask"|undefined} Task
              * @memberof OracleJob.Task
              * @instance
              */
             Object.defineProperty(Task.prototype, "Task", {
-                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask", "cacheTask", "sysclockOffsetTask", "marinadeStateTask", "solanaAccountDataFetchTask", "bufferLayoutParseTask"]),
+                get: $util.oneOfGetter($oneOfFields = ["httpTask", "jsonParseTask", "medianTask", "meanTask", "websocketTask", "divideTask", "multiplyTask", "lpTokenPriceTask", "lpExchangeRateTask", "conditionalTask", "valueTask", "maxTask", "regexExtractTask", "xstepPriceTask", "addTask", "subtractTask", "twapTask", "serumSwapTask", "powTask", "lendingRateTask", "mangoPerpMarketTask", "jupiterSwapTask", "perpMarketTask", "oracleTask", "anchorFetchTask", "defiKingdomsTask", "tpsTask", "splStakePoolTask", "splTokenParseTask", "uniswapExchangeRateTask", "sushiswapExchangeRateTask", "pancakeswapExchangeRateTask", "cacheTask", "sysclockOffsetTask", "marinadeStateTask", "solanaAccountDataFetchTask", "bufferLayoutParseTask", "cronParseTask"]),
                 set: $util.oneOfSetter($oneOfFields)
             });
     
@@ -10738,6 +11033,8 @@
                     $root.OracleJob.SolanaAccountDataFetchTask.encode(message.solanaAccountDataFetchTask, writer.uint32(/* id 37, wireType 2 =*/298).fork()).ldelim();
                 if (message.bufferLayoutParseTask != null && Object.hasOwnProperty.call(message, "bufferLayoutParseTask"))
                     $root.OracleJob.BufferLayoutParseTask.encode(message.bufferLayoutParseTask, writer.uint32(/* id 38, wireType 2 =*/306).fork()).ldelim();
+                if (message.cronParseTask != null && Object.hasOwnProperty.call(message, "cronParseTask"))
+                    $root.OracleJob.CronParseTask.encode(message.cronParseTask, writer.uint32(/* id 39, wireType 2 =*/314).fork()).ldelim();
                 return writer;
             };
     
@@ -10882,6 +11179,9 @@
                         break;
                     case 38:
                         message.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.decode(reader, reader.uint32());
+                        break;
+                    case 39:
+                        message.cronParseTask = $root.OracleJob.CronParseTask.decode(reader, reader.uint32());
                         break;
                     default:
                         reader.skipType(tag & 7);
@@ -11287,6 +11587,16 @@
                             return "bufferLayoutParseTask." + error;
                     }
                 }
+                if (message.cronParseTask != null && message.hasOwnProperty("cronParseTask")) {
+                    if (properties.Task === 1)
+                        return "Task: multiple values";
+                    properties.Task = 1;
+                    {
+                        var error = $root.OracleJob.CronParseTask.verify(message.cronParseTask);
+                        if (error)
+                            return "cronParseTask." + error;
+                    }
+                }
                 return null;
             };
     
@@ -11486,6 +11796,11 @@
                     if (typeof object.bufferLayoutParseTask !== "object")
                         throw TypeError(".OracleJob.Task.bufferLayoutParseTask: object expected");
                     message.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.fromObject(object.bufferLayoutParseTask);
+                }
+                if (object.cronParseTask != null) {
+                    if (typeof object.cronParseTask !== "object")
+                        throw TypeError(".OracleJob.Task.cronParseTask: object expected");
+                    message.cronParseTask = $root.OracleJob.CronParseTask.fromObject(object.cronParseTask);
                 }
                 return message;
             };
@@ -11687,6 +12002,11 @@
                     object.bufferLayoutParseTask = $root.OracleJob.BufferLayoutParseTask.toObject(message.bufferLayoutParseTask, options);
                     if (options.oneofs)
                         object.Task = "bufferLayoutParseTask";
+                }
+                if (message.cronParseTask != null && message.hasOwnProperty("cronParseTask")) {
+                    object.cronParseTask = $root.OracleJob.CronParseTask.toObject(message.cronParseTask, options);
+                    if (options.oneofs)
+                        object.Task = "cronParseTask";
                 }
                 return object;
             };

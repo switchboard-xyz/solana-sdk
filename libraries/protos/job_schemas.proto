@@ -246,6 +246,8 @@ message OracleJob {
     optional uint32 min_samples = 4;
     // Ending unix timestamp to collect values up to
     optional int32 ending_unix_timestamp = 5;
+    // Execute the task to get the ending unix timestamp
+    optional CronParseTask ending_unix_timestamp_task = 6;
   }
 
   // Fetch the latest swap price on Serum's orderbook
@@ -435,6 +437,21 @@ message OracleJob {
     optional string pubkey = 1;
   }
 
+  // return a timestamp from a crontab instruction
+  message CronParseTask {
+    // the cron pattern to parse
+    optional string cron_pattern = 1;
+    // the timestamp offset 
+    // to calculate the next run
+    optional int32 clock_offset = 2;
+    // which type of clock to use
+    enum ClockType {
+      ORACLE = 0;
+      SYSCLOCK = 1;
+    }
+    optional ClockType clock = 3;
+  }
+
   // Return the deserialized value from a stringified buffer.
   message BufferLayoutParseTask {
     // The buffer offset to start deserializing from.
@@ -518,6 +535,7 @@ message OracleJob {
       MarinadeStateTask marinade_state_task = 36;
       SolanaAccountDataFetchTask solana_account_data_fetch_task = 37;
       BufferLayoutParseTask buffer_layout_parse_task = 38;
+      CronParseTask cron_parse_task = 39;
     }
   }
   // The chain of tasks to perform for this OracleJob.

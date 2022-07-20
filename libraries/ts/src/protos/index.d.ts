@@ -1929,6 +1929,9 @@ export namespace OracleJob {
 
         /** TwapTask endingUnixTimestamp */
         endingUnixTimestamp?: (number|null);
+
+        /** TwapTask endingUnixTimestampTask */
+        endingUnixTimestampTask?: (OracleJob.ICronParseTask|null);
     }
 
     /** Represents a TwapTask. */
@@ -1954,6 +1957,9 @@ export namespace OracleJob {
 
         /** TwapTask endingUnixTimestamp. */
         public endingUnixTimestamp: number;
+
+        /** TwapTask endingUnixTimestampTask. */
+        public endingUnixTimestampTask?: (OracleJob.ICronParseTask|null);
 
         /**
          * Creates a new TwapTask instance using the specified properties.
@@ -4105,6 +4111,117 @@ export namespace OracleJob {
         public toJSON(): { [k: string]: any };
     }
 
+    /** Properties of a CronParseTask. */
+    interface ICronParseTask {
+
+        /** CronParseTask cronPattern */
+        cronPattern?: (string|null);
+
+        /** CronParseTask clockOffset */
+        clockOffset?: (number|null);
+
+        /** CronParseTask clock */
+        clock?: (OracleJob.CronParseTask.ClockType|null);
+    }
+
+    /** Represents a CronParseTask. */
+    class CronParseTask implements ICronParseTask {
+
+        /**
+         * Constructs a new CronParseTask.
+         * @param [properties] Properties to set
+         */
+        constructor(properties?: OracleJob.ICronParseTask);
+
+        /** CronParseTask cronPattern. */
+        public cronPattern: string;
+
+        /** CronParseTask clockOffset. */
+        public clockOffset: number;
+
+        /** CronParseTask clock. */
+        public clock: OracleJob.CronParseTask.ClockType;
+
+        /**
+         * Creates a new CronParseTask instance using the specified properties.
+         * @param [properties] Properties to set
+         * @returns CronParseTask instance
+         */
+        public static create(properties?: OracleJob.ICronParseTask): OracleJob.CronParseTask;
+
+        /**
+         * Encodes the specified CronParseTask message. Does not implicitly {@link OracleJob.CronParseTask.verify|verify} messages.
+         * @param message CronParseTask message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encode(message: OracleJob.ICronParseTask, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Encodes the specified CronParseTask message, length delimited. Does not implicitly {@link OracleJob.CronParseTask.verify|verify} messages.
+         * @param message CronParseTask message or plain object to encode
+         * @param [writer] Writer to encode to
+         * @returns Writer
+         */
+        public static encodeDelimited(message: OracleJob.ICronParseTask, writer?: $protobuf.Writer): $protobuf.Writer;
+
+        /**
+         * Decodes a CronParseTask message from the specified reader or buffer.
+         * @param reader Reader or buffer to decode from
+         * @param [length] Message length if known beforehand
+         * @returns CronParseTask
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decode(reader: ($protobuf.Reader|Uint8Array), length?: number): OracleJob.CronParseTask;
+
+        /**
+         * Decodes a CronParseTask message from the specified reader or buffer, length delimited.
+         * @param reader Reader or buffer to decode from
+         * @returns CronParseTask
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        public static decodeDelimited(reader: ($protobuf.Reader|Uint8Array)): OracleJob.CronParseTask;
+
+        /**
+         * Verifies a CronParseTask message.
+         * @param message Plain object to verify
+         * @returns `null` if valid, otherwise the reason why it is not
+         */
+        public static verify(message: { [k: string]: any }): (string|null);
+
+        /**
+         * Creates a CronParseTask message from a plain object. Also converts values to their respective internal types.
+         * @param object Plain object
+         * @returns CronParseTask
+         */
+        public static fromObject(object: { [k: string]: any }): OracleJob.CronParseTask;
+
+        /**
+         * Creates a plain object from a CronParseTask message. Also converts values to other types if specified.
+         * @param message CronParseTask
+         * @param [options] Conversion options
+         * @returns Plain object
+         */
+        public static toObject(message: OracleJob.CronParseTask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+        /**
+         * Converts this CronParseTask to JSON.
+         * @returns JSON object
+         */
+        public toJSON(): { [k: string]: any };
+    }
+
+    namespace CronParseTask {
+
+        /** ClockType enum. */
+        enum ClockType {
+            ORACLE = 0,
+            SYSCLOCK = 1
+        }
+    }
+
     /** Properties of a BufferLayoutParseTask. */
     interface IBufferLayoutParseTask {
 
@@ -4347,6 +4464,9 @@ export namespace OracleJob {
 
         /** Task bufferLayoutParseTask */
         bufferLayoutParseTask?: (OracleJob.IBufferLayoutParseTask|null);
+
+        /** Task cronParseTask */
+        cronParseTask?: (OracleJob.ICronParseTask|null);
     }
 
     /** Represents a Task. */
@@ -4469,8 +4589,11 @@ export namespace OracleJob {
         /** Task bufferLayoutParseTask. */
         public bufferLayoutParseTask?: (OracleJob.IBufferLayoutParseTask|null);
 
+        /** Task cronParseTask. */
+        public cronParseTask?: (OracleJob.ICronParseTask|null);
+
         /** Task Task. */
-        public Task?: ("httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|"solanaAccountDataFetchTask"|"bufferLayoutParseTask");
+        public Task?: ("httpTask"|"jsonParseTask"|"medianTask"|"meanTask"|"websocketTask"|"divideTask"|"multiplyTask"|"lpTokenPriceTask"|"lpExchangeRateTask"|"conditionalTask"|"valueTask"|"maxTask"|"regexExtractTask"|"xstepPriceTask"|"addTask"|"subtractTask"|"twapTask"|"serumSwapTask"|"powTask"|"lendingRateTask"|"mangoPerpMarketTask"|"jupiterSwapTask"|"perpMarketTask"|"oracleTask"|"anchorFetchTask"|"defiKingdomsTask"|"tpsTask"|"splStakePoolTask"|"splTokenParseTask"|"uniswapExchangeRateTask"|"sushiswapExchangeRateTask"|"pancakeswapExchangeRateTask"|"cacheTask"|"sysclockOffsetTask"|"marinadeStateTask"|"solanaAccountDataFetchTask"|"bufferLayoutParseTask"|"cronParseTask");
 
         /**
          * Creates a new Task instance using the specified properties.
