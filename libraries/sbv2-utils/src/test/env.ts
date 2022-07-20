@@ -15,7 +15,7 @@ import { anchorBNtoDateString } from "../date.js";
 import { createQueue } from "../queue.js";
 import { getOrCreateSwitchboardTokenAccount } from "../token.js";
 
-const LATEST_DOCKER_VERSION = "dev-v2-07-11-22";
+const LATEST_DOCKER_VERSION = "dev-v2-07-18-22";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;
