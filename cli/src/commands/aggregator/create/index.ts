@@ -34,8 +34,6 @@ import { verifyProgramHasPayer } from "../../../utils";
 
 // TODO: Finish
 export default class AggregatorCreate extends BaseCommand {
-  static hidden = true;
-
   static description = "create an aggregator account";
 
   static flags = {

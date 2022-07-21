@@ -4191,27 +4191,6 @@
     node-fetch "^3.2.6"
     protobufjs "^6.11.3"
 
-"@switchboard-xyz/switchboard-v2@^0.0.122":
-  version "0.0.122"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.122.tgz#11713cd909e17c52cab424f1c13f037a7eac89ec"
-  integrity sha512-LAjAEHq3VSRyJxGJj/FF9Q48tCST0+F56H2/nZ66UhpALucuKs1ppOlAKoqrFeTC4KYoQhcK2cE+B9WmTxA1pg==
-  dependencies:
-    "@project-serum/anchor" "^0.24.2"
-    "@solana/spl-governance" "^0.0.34"
-    "@solana/spl-token" "^0.2.0"
-    "@solana/web3.js" "^1.44.3"
-    "@types/big.js" "^6.1.4"
-    assert "^2.0.0"
-    big.js "^6.2.0"
-    bs58 "^4.0.1"
-    chan "^0.6.1"
-    crypto-js "^4.0.0"
-    glob "^8.0.3"
-    long "^4.0.0"
-    mocha "^9.1.1"
-    node-fetch "^3.2.6"
-    protobufjs "^6.11.3"
-
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"

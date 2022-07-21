@@ -63,7 +63,7 @@ export default class AggregatorUpdate extends BaseCommand {
         )}`
       );
       this.logger.log(
-        `https://solscan.io/tx/${aggregatorUpdateTxn}?cluster=${this.cluster}`
+        `https://explorer.solana.com/tx/${aggregatorUpdateTxn}?cluster=${this.cluster}`
       );
     }
   }

@@ -35,7 +35,9 @@ export default class AggregatorUpdate extends OutputFileBaseCommand {
       history.map((r) => {
         return {
           timestamp: Number.parseInt(r.timestamp.toString(10)),
-          datetime: new Date(r.timestamp.toNumber() * 1000).toUTCString(),
+          datetime: `"${new Date(
+            r.timestamp.toNumber() * 1000
+          ).toUTCString()}"`,
           value: r.value,
         };
       }),
