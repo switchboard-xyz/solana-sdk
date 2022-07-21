@@ -242,6 +242,10 @@ export class SwitchboardDecimal {
     result.e = e;
     return result;
   }
+
+  toString() {
+    this.toBig().toString();
+  }
 }
 
 /**

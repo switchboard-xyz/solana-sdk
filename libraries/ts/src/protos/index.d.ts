@@ -408,7 +408,9 @@ export namespace OracleJob {
             NONE = 0,
             MIN = 1,
             MAX = 2,
-            SUM = 3
+            SUM = 3,
+            MEAN = 4,
+            MEDIAN = 5
         }
     }
 

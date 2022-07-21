@@ -896,6 +896,8 @@
                     case 1:
                     case 2:
                     case 3:
+                    case 4:
+                    case 5:
                         break;
                     }
                 return null;
@@ -931,6 +933,14 @@
                 case "SUM":
                 case 3:
                     message.aggregationMethod = 3;
+                    break;
+                case "MEAN":
+                case 4:
+                    message.aggregationMethod = 4;
+                    break;
+                case "MEDIAN":
+                case 5:
+                    message.aggregationMethod = 5;
                     break;
                 }
                 return message;
@@ -979,6 +989,8 @@
              * @property {number} MIN=1 MIN value
              * @property {number} MAX=2 MAX value
              * @property {number} SUM=3 SUM value
+             * @property {number} MEAN=4 MEAN value
+             * @property {number} MEDIAN=5 MEDIAN value
              */
             JsonParseTask.AggregationMethod = (function() {
                 var valuesById = {}, values = Object.create(valuesById);
@@ -986,6 +998,8 @@
                 values[valuesById[1] = "MIN"] = 1;
                 values[valuesById[2] = "MAX"] = 2;
                 values[valuesById[3] = "SUM"] = 3;
+                values[valuesById[4] = "MEAN"] = 4;
+                values[valuesById[5] = "MEDIAN"] = 5;
                 return values;
             })();
     

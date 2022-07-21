@@ -51,6 +51,10 @@ message OracleJob {
       MAX = 2;
       // Sum up all of the results.
       SUM = 3;
+      // Average all of the results.
+      MEAN = 4;
+      // Grab the median of the results.
+      MEDIAN = 5;
     } 
     // The technique that will be used to aggregate the results if walking the specified path
     // returns multiple numerical results.
