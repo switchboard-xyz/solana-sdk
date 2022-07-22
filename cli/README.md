@@ -24,6 +24,7 @@ node bin/dev print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 * [`sbv2 aggregator add crank [CRANKKEY] [AGGREGATORKEY]`](#sbv2-aggregator-add-crank-crankkey-aggregatorkey)
 * [`sbv2 aggregator add history [AGGREGATORKEY] [SIZE]`](#sbv2-aggregator-add-history-aggregatorkey-size)
 * [`sbv2 aggregator add job [AGGREGATORKEY]`](#sbv2-aggregator-add-job-aggregatorkey)
+* [`sbv2 aggregator create [QUEUEKEY]`](#sbv2-aggregator-create-queuekey)
 * [`sbv2 aggregator create copy [AGGREGATORSOURCE]`](#sbv2-aggregator-create-copy-aggregatorsource)
 * [`sbv2 aggregator create json [DEFINITIONFILE]`](#sbv2-aggregator-create-json-definitionfile)
 * [`sbv2 aggregator history print [AGGREGATORKEY]`](#sbv2-aggregator-history-print-aggregatorkey)
@@ -211,6 +212,47 @@ DESCRIPTION
 
 EXAMPLES
   $ sbv2 aggregator:add:job
+```
+
+## `sbv2 aggregator create [QUEUEKEY]`
+
+create an aggregator account
+
+```
+USAGE
+  $ sbv2 aggregator create [QUEUEKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [-a
+    <value>] [--crankKey <value>] [--enable] [--queueAuthority <value>] [-n <value>] [--forceReportPeriod <value>]
+    [--batchSize <value>] [--minJobs <value>] [--minOracles <value>] [--updateInterval <value>] [--varianceThreshold
+    <value>] [-j <value>]
+
+ARGUMENTS
+  QUEUEKEY  public key of the oracle queue account to create aggregator for
+
+FLAGS
+  -a, --authority=<value>      alternate keypair that is the authority for the aggregator
+  -j, --job=<value>...         filesystem path to job definition file
+  -k, --keypair=<value>        keypair that will pay for onchain transactions. defaults to new account authority if no
+                               alternate authority provided
+  -n, --name=<value>           name of the aggregator
+  -s, --silent                 suppress cli prompts
+  -u, --rpcUrl=<value>         alternate RPC url
+  -v, --verbose                log everything
+  --batchSize=<value>          number of oracles requested for each open round call
+  --crankKey=<value>           public key of the crank to join
+  --enable                     set permissions to PERMIT_ORACLE_QUEUE_USAGE
+  --forceReportPeriod=<value>  Number of seconds for which, even if the variance threshold is not passed, accept new
+                               responses from oracles.
+  --mainnetBeta                WARNING: use mainnet-beta solana cluster
+  --minJobs=<value>            number of jobs that must respond before an oracle responds
+  --minOracles=<value>         number of oracles that must respond before a value is accepted on-chain
+  --programId=<value>          alternative Switchboard program ID to interact with
+  --queueAuthority=<value>     alternative keypair to use for queue authority
+  --updateInterval=<value>     set an aggregator's minimum update delay
+  --varianceThreshold=<value>  percentage change between a previous accepted result and the next round before an oracle
+                               reports a value on-chain. Used to conserve lease cost during low volatility
+
+DESCRIPTION
+  create an aggregator account
 ```
 
 ## `sbv2 aggregator create copy [AGGREGATORSOURCE]`
