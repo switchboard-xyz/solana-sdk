@@ -70,7 +70,7 @@ impl RequestResult<'_> {
     pub fn actuate(ctx: &Context<Self>, params: &RequestResultParams) -> Result<()> {
         let client_state = ctx.accounts.state.load()?;
         let bump = client_state.bump.clone();
-        let max_result = client_state.max_result.clone();
+        let max_result = client_state.max_result;
         drop(client_state);
 
         let switchboard_program = ctx.accounts.switchboard_program.to_account_info();

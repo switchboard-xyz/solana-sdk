@@ -18,20 +18,20 @@ A monorepo containing APIs, Utils, and examples for Switchboard V2.
 
 ### Program Examples
 
-| Package                                                 | Description                                                                                                               |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| [anchor-feed-parser](./programs/anchor-feed-parser)     | Anchor example program demonstrating how to deserialize and read an onchain aggregator account.                           |
-| [native-feed-parser](./programs/native-feed-parser)     | Solana Program Library example demonstrating how to deserialize and read an onchain aggregator account.                   |
-| [anchor-vrf-parser](./programs/anchor-vrf-parser)       | Anchor example program demonstrating how to deserialize and read an onchain verifiable randomness function (VRF) account. |
-| [anchor-buffer-parser](./programs/anchor-buffer-parser) | Anchor example program demonstrating how to deserialize and read an onchain buffer relayer account.                       |
+| Package                                                          | Description                                                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| [anchor-feed-parser](./examples/programs/anchor-feed-parser)     | Anchor example program demonstrating how to deserialize and read an onchain aggregator account.                           |
+| [native-feed-parser](./examples/programs/native-feed-parser)     | Solana Program Library example demonstrating how to deserialize and read an onchain aggregator account.                   |
+| [anchor-vrf-parser](./examples/programs/anchor-vrf-parser)       | Anchor example program demonstrating how to deserialize and read an onchain verifiable randomness function (VRF) account. |
+| [anchor-buffer-parser](./examples/programs/anchor-buffer-parser) | Anchor example program demonstrating how to deserialize and read an onchain buffer relayer account.                       |
 
 ### Client Examples
 
-| Package                                         | Description                                                                                               |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [feed-parser](./packages/feed-parser)           | Typescript example demonstrating how to read an aggregator account.                                       |
-| [feed-walkthrough](./packages/feed-walkthrough) | Typescript example demonstrating how to create and manage your own oracle queue.                          |
-| [lease-observer](./packages/lease-observer)     | Typescript example demonstrating how to send PagerDuty alerts when your aggregator lease is low on funds. |
+| Package                                                 | Description                                                                                               |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [feed-parser](./examples/clients/feed-parser)           | Typescript example demonstrating how to read an aggregator account.                                       |
+| [feed-walkthrough](./examples/clients/feed-walkthrough) | Typescript example demonstrating how to create and manage your own oracle queue.                          |
+| [lease-observer](./examples/clients/lease-observer)     | Typescript example demonstrating how to send PagerDuty alerts when your aggregator lease is low on funds. |
 
 ## Dependencies
 

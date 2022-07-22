@@ -8,8 +8,8 @@
     "libraries/ts",
     "libraries/sbv2-utils",
     "cli",
-    "packages/*",
-    "programs/*",
+    "examples/clients/*",
+    "examples/programs/*",
     "website"
   ],
   "scripts": {

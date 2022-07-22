@@ -99,7 +99,14 @@ async function main() {
     "-i",
     /declare_id!(.*);/,
     `declare_id!("${anchorVrfParserPid.toString()}");`,
-    path.join(projectRoot, "programs", "anchor-vrf-parser", "src", "lib.rs")
+    path.join(
+      projectRoot,
+      "examples",
+      "programs",
+      "anchor-vrf-parser",
+      "src",
+      "lib.rs"
+    )
   );
   shell.sed(
     "-i",
@@ -113,7 +120,14 @@ async function main() {
     "-i",
     /declare_id!(.*);/,
     `declare_id!("${anchorFeedParserPid.toString()}");`,
-    path.join(projectRoot, "programs", "anchor-feed-parser", "src", "lib.rs")
+    path.join(
+      projectRoot,
+      "examples",
+      "programs",
+      "anchor-feed-parser",
+      "src",
+      "lib.rs"
+    )
   );
   shell.sed(
     "-i",
@@ -127,7 +141,14 @@ async function main() {
     "-i",
     /declare_id!(.*);/,
     `declare_id!("${anchorBufferParserPid.toString()}");`,
-    path.join(projectRoot, "programs", "anchor-buffer-parser", "src", "lib.rs")
+    path.join(
+      projectRoot,
+      "examples",
+      "programs",
+      "anchor-buffer-parser",
+      "src",
+      "lib.rs"
+    )
   );
   shell.sed(
     "-i",
@@ -141,7 +162,14 @@ async function main() {
     "-i",
     /declare_id!(.*);/,
     `declare_id!("${nativeFeedParserPid.toString()}");`,
-    path.join(projectRoot, "programs", "native-feed-parser", "src", "lib.rs")
+    path.join(
+      projectRoot,
+      "examples",
+      "programs",
+      "native-feed-parser",
+      "src",
+      "lib.rs"
+    )
   );
   shell.sed(
     "-i",
@@ -153,6 +181,7 @@ async function main() {
   // Build Anchor APIs
   const vrfClientPath = path.join(
     projectRoot,
+    "examples",
     "programs",
     "anchor-vrf-parser",
     "client"
@@ -168,6 +197,7 @@ async function main() {
 
   const feedClientPath = path.join(
     projectRoot,
+    "examples",
     "programs",
     "anchor-feed-parser",
     "client"
@@ -183,6 +213,7 @@ async function main() {
 
   const bufferClientPath = path.join(
     projectRoot,
+    "examples",
     "programs",
     "anchor-buffer-parser",
     "client"
@@ -195,6 +226,8 @@ async function main() {
       "anchor_buffer_parser.json"
     )} ${bufferClientPath} --program-id ${anchorBufferParserPid.toString()}`
   );
+
+  // TODO: Deploy / Upgrade IDL
 }
 
 main()

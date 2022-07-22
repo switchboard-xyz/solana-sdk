@@ -15,7 +15,7 @@ import fetch from "node-fetch";
 import {
   AnchorBufferParser,
   IDL,
-} from "../../../target/types/anchor_buffer_parser";
+} from "../../../../target/types/anchor_buffer_parser";
 import { PROGRAM_ID } from "../client/programId";
 
 describe("anchor-buffer-parser test", () => {

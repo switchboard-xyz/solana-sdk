@@ -15,6 +15,7 @@ function getProgramId(): PublicKey {
     "..",
     "..",
     "..",
+    "..",
     "target",
     "deploy",
     "native_feed_parser-keypair.json"

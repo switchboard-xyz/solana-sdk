@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "types": ["mocha", "chai"],
     "typeRoots": ["./node_modules/@types"],
@@ -9,14 +9,14 @@
     "esModuleInterop": true,
     "noEmit": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
-      "@switchboard-xyz/sbv2-utils": ["../../libraries/sbv2-utils"]
+      "@switchboard-xyz/switchboard-v2": ["../../../libraries/ts"],
+      "@switchboard-xyz/sbv2-utils": ["../../../libraries/sbv2-utils"]
     }
   },
   // "include": ["oldtests/**/**/*"],
   "exclude": ["target"],
   "references": [
-    { "path": "../../libraries/ts" },
-    { "path": "../../libraries/sbv2-utils" }
+    { "path": "../../../libraries/ts" },
+    { "path": "../../../libraries/sbv2-utils" }
   ]
 }

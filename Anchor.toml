@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "programs/anchor-feed-parser",
-    "programs/anchor-vrf-parser",
-    "programs/anchor-buffer-parser",
-    "programs/native-feed-parser"
+    "examples/programs/anchor-feed-parser",
+    "examples/programs/anchor-vrf-parser",
+    "examples/programs/anchor-buffer-parser",
+    "examples/programs/native-feed-parser"
 ]
 
 [provider]
@@ -21,7 +21,7 @@ anchor_buffer_parser = "96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./programs/*/tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.testing.json -t 1000000 ./examples/programs/*/tests/*.test.ts"
 
 
 [test.validator]

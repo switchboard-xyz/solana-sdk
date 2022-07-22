@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "programs/*",
+    "examples/programs/*",
 ]
 exclude = [
     "libraries/rs"

@@ -7,7 +7,7 @@ import chai from "chai";
 import {
   AnchorFeedParser,
   IDL,
-} from "../../../target/types/anchor_feed_parser";
+} from "../../../../target/types/anchor_feed_parser";
 import { PROGRAM_ID } from "../client/programId";
 const expect = chai.expect;
 

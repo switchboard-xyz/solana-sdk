@@ -5,8 +5,8 @@
     "libraries/ts",
     "libraries/sbv2-utils",
     "cli",
-    "packages/*",
-    "programs/*",
+    "examples/clients/*",
+    "examples/programs/*",
     "website"
   ],
   "npmClient": "yarn",
@@ -18,8 +18,8 @@
   "ignoreChanges": [
     "**/README.md",
     "website/**/*",
-    "programs/**/*",
-    "packages/**/*",
+    "examples/programs/**/*",
+    "examples/clients/**/*",
     "libraries/rs",
     "libraries/py",
     "cli/!(src)",

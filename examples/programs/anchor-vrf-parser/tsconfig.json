@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../../tsconfig.json",
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"
@@ -14,10 +14,10 @@
     "strict": false,
     "strictNullChecks": false,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../libraries/ts"],
-      "@switchboard-xyz/sbv2-utils": ["../../libraries/sbv2-utils"],
+      "@switchboard-xyz/switchboard-v2": ["../../../libraries/ts"],
+      "@switchboard-xyz/sbv2-utils": ["../../../libraries/sbv2-utils"],
       "@solana/spl-token": [
-        "../../node_modules/@solana/spl-token",
+        "../../../node_modules/@solana/spl-token",
         "./node_modules/@solana/spl-token"
       ]
     }
@@ -25,7 +25,7 @@
   "include": ["tests/**/*", "./cli.ts", "./client/**/*"],
   "exclude": ["target", "lib"],
   "references": [
-    { "path": "../../libraries/ts" },
-    { "path": "../../libraries/sbv2-utils" }
+    { "path": "../../../libraries/ts" },
+    { "path": "../../../libraries/sbv2-utils" }
   ]
 }

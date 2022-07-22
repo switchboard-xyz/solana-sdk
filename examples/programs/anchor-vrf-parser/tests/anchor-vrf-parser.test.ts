@@ -18,7 +18,10 @@ import {
   VrfAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import "mocha";
-import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
+import {
+  AnchorVrfParser,
+  IDL,
+} from "../../../../target/types/anchor_vrf_parser";
 import { VrfClient } from "../client/accounts";
 import { PROGRAM_ID } from "../client/programId";
 
