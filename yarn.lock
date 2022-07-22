@@ -4149,48 +4149,6 @@
     "@svgr/plugin-jsx" "^6.2.1"
     "@svgr/plugin-svgo" "^6.2.0"
 
-"@switchboard-xyz/switchboard-v2@^0.0.120":
-  version "0.0.120"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.120.tgz#b48d2292489771535dc4e9c6b5241115096291ec"
-  integrity sha512-BCdKacL4osK32SYo/OlNcSMO8rAwdo7ArtUQ0BTSKqce6wgL2naXFg82KmGIG4+SuoxNLFvkbG0/zT8UYliwgw==
-  dependencies:
-    "@project-serum/anchor" "^0.24.2"
-    "@solana/spl-governance" "^0.0.34"
-    "@solana/spl-token" "^0.2.0"
-    "@solana/web3.js" "^1.44.3"
-    "@types/big.js" "^6.1.4"
-    assert "^2.0.0"
-    big.js "^6.2.0"
-    bs58 "^4.0.1"
-    chan "^0.6.1"
-    crypto-js "^4.0.0"
-    glob "^8.0.3"
-    long "^4.0.0"
-    mocha "^9.1.1"
-    node-fetch "^3.2.6"
-    protobufjs "^6.11.3"
-
-"@switchboard-xyz/switchboard-v2@^0.0.121":
-  version "0.0.121"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.121.tgz#5df38491feba9262a13fb071c86179f9acfdc865"
-  integrity sha512-IPA3QD/nThH57ekJaD3aov/5fa/JLETNb3TeHKx8mfRSE/P2b94nosvXsYiDpXE05v/zS4oDk6FD1YOO+fZXzQ==
-  dependencies:
-    "@project-serum/anchor" "^0.24.2"
-    "@solana/spl-governance" "^0.0.34"
-    "@solana/spl-token" "^0.2.0"
-    "@solana/web3.js" "^1.44.3"
-    "@types/big.js" "^6.1.4"
-    assert "^2.0.0"
-    big.js "^6.2.0"
-    bs58 "^4.0.1"
-    chan "^0.6.1"
-    crypto-js "^4.0.0"
-    glob "^8.0.3"
-    long "^4.0.0"
-    mocha "^9.1.1"
-    node-fetch "^3.2.6"
-    protobufjs "^6.11.3"
-
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"
@@ -16154,6 +16112,16 @@ typedoc@^0.23.3:
   version "0.23.3"
   resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.23.3.tgz#52a3e2395b61ce050dbf28695954ed66d8455f7e"
   integrity sha512-klFzfV8hV1Vu5BE95BRY5lN1a/GmuMRPebhW7yeY3JERcu1O6X3HZE4pahkNHmmVpe77/O2lRtNVFnmb5+47ZA==
+  dependencies:
+    lunr "^2.3.9"
+    marked "^4.0.16"
+    minimatch "^5.1.0"
+    shiki "^0.10.1"
+
+typedoc@^0.23.8:
+  version "0.23.8"
+  resolved "https://registry.npmjs.org/typedoc/-/typedoc-0.23.8.tgz#6837fb2732f73e7aa61b46a4fbe77a301473998d"
+  integrity sha512-NLRTY/7XSrhiowR3xnH/nlfTnHk+dkzhHWAMT8guoZ6RHCQZIu3pJREMCqzdkWVCC5+dr9We7TtNeprR3Qy6Ag==
   dependencies:
     lunr "^2.3.9"
     marked "^4.0.16"
