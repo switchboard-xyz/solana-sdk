@@ -32,7 +32,6 @@ pub mod anchor_vrf_parser {
 
 #[repr(packed)]
 #[account(zero_copy)]
-#[derive(AnchorDeserialize, Debug)]
 pub struct VrfClient {
     pub bump: u8,
     pub max_result: u64,
