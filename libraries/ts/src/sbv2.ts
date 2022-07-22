@@ -2021,7 +2021,7 @@ export class PermissionAccount {
         systemProgram: SystemProgram.programId,
         sbState: programStateAccount.publicKey,
         programState: addinState,
-        govProgram: GOVERNANCE_PID,
+        govProgram: params.govProgram,
         daoMint: psData.daoMint,
         spawnRecord: realmSpawnRecord,
         voterWeight: voterWeightRecord,
