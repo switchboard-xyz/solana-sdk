@@ -266,12 +266,14 @@ response.
 
 The methods of combining a list of numerical results.
 
-| Name | Number | Description                            |
-| ---- | ------ | -------------------------------------- |
-| NONE | 0      |                                        |
-| MIN  | 1      | Grab the minimum value of the results. |
-| MAX  | 2      | Grab the maximum value of the results. |
-| SUM  | 3      | Sum up all of the results.             |
+| Name   | Number | Description                            |
+| ------ | ------ | -------------------------------------- |
+| NONE   | 0      |                                        |
+| MIN    | 1      | Grab the minimum value of the results. |
+| MAX    | 2      | Grab the maximum value of the results. |
+| SUM    | 3      | Sum up all of the results.             |
+| MEAN   | 4      | Average all of the results.            |
+| MEDIAN | 5      | Grab the median of the results.        |
 
 ### 🛠RegexExtractTask
 
@@ -351,6 +353,25 @@ Execute a job and store the result in a variable to reference later.
 
 Return the difference between an oracle&#39;s clock and the current timestamp at `SYSVAR_CLOCK_PUBKEY`.
 
+### CronParseTask
+
+Return a timestamp from a crontab instruction.
+
+| Field        | Type                    | Label    | Description                                                      |
+| ------------ | ----------------------- | -------- | ---------------------------------------------------------------- |
+| cron_pattern | [string](#string)       | optional | The cron pattern to parse                                        |
+| clock_offset | [int32](#int32)         | optional | The timestamp offset to calculate the next run                   |
+| clock        | [ClockType](#ClockType) | optional | The type of clock to use, oracle or the solana cluster sysclock. |
+
+#### ClockType
+
+The type of clock.
+
+| Name     | Number | Description                    |
+| -------- | ------ | ------------------------------ |
+| ORACLE   | 0      | The oracles current clock.     |
+| SYSCLOCK | 1      | The solana cluster's sysclock. |
+
 ### 🛠TpsTask
 
 Fetch the current transactions per second.
@@ -361,13 +382,14 @@ Fetch the current transactions per second.
 
 Takes a twap over a set period for a certain aggregator.
 
-| Field                      | Type              | Label    | Description                                                          |
-| -------------------------- | ----------------- | -------- | -------------------------------------------------------------------- |
-| aggregator_pubkey          | [string](#string) | optional | The target aggregator for the TWAP.                                  |
-| period                     | [int32](#int32)   | optional | Period, in seconds, the twap should account for                      |
-| weight_by_propagation_time | [bool](#bool)     | optional | Weight samples by their propagation time                             |
-| min_samples                | [uint32](#uint32) | optional | Minimum number of samples in the history to calculate a valid result |
-| ending_unix_timestamp      | [int32](#int32)   | optional | Ending unix timestamp to collect values up to                        |
+| Field                      | Type                            | Label    | Description                                                          |
+| -------------------------- | ------------------------------- | -------- | -------------------------------------------------------------------- |
+| aggregator_pubkey          | [string](#string)               | optional | The target aggregator for the TWAP.                                  |
+| period                     | [int32](#int32)                 | optional | Period, in seconds, the twap should account for                      |
+| weight_by_propagation_time | [bool](#bool)                   | optional | Weight samples by their propagation time                             |
+| min_samples                | [uint32](#uint32)               | optional | Minimum number of samples in the history to calculate a valid result |
+| ending_unix_timestamp      | [int32](#int32)                 | optional | Ending unix timestamp to collect values up to                        |
+| ending_unix_timestamp_task | [CronParseTask](#CronParseTask) | optional | Execute the task to get the ending unix timestamp                    |
 
 ### 🛠MaxTask
 

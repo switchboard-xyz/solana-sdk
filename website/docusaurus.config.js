@@ -158,6 +158,10 @@ const config = {
                 to: "https://docs.switchboard.xyz/api/ts-lite",
               },
               {
+                label: "Sbv2 Utils",
+                to: "https://docs.switchboard.xyz/api/sbv2-utils",
+              },
+              {
                 label: "Python",
                 to: "https://docs.switchboard.xyz/api/py",
               },

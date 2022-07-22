@@ -11,6 +11,7 @@
     - [OracleJob.CacheTask](#.OracleJob.CacheTask)
     - [OracleJob.CacheTask.CacheItem](#.OracleJob.CacheTask.CacheItem)
     - [OracleJob.ConditionalTask](#.OracleJob.ConditionalTask)
+    - [OracleJob.CronParseTask](#.OracleJob.CronParseTask)
     - [OracleJob.DefiKingdomsTask](#.OracleJob.DefiKingdomsTask)
     - [OracleJob.DefiKingdomsTask.Token](#.OracleJob.DefiKingdomsTask.Token)
     - [OracleJob.DivideTask](#.OracleJob.DivideTask)
@@ -49,6 +50,7 @@
   
     - [OracleJob.BufferLayoutParseTask.BufferParseType](#.OracleJob.BufferLayoutParseTask.BufferParseType)
     - [OracleJob.BufferLayoutParseTask.Endian](#.OracleJob.BufferLayoutParseTask.Endian)
+    - [OracleJob.CronParseTask.ClockType](#.OracleJob.CronParseTask.ClockType)
     - [OracleJob.HttpTask.Method](#.OracleJob.HttpTask.Method)
     - [OracleJob.JsonParseTask.AggregationMethod](#.OracleJob.JsonParseTask.AggregationMethod)
     - [OracleJob.LendingRateTask.Field](#.OracleJob.LendingRateTask.Field)
@@ -173,6 +175,23 @@ This task will run the `attempt` subtasks in an effort to produce a valid numeri
 | ----- | ---- | ----- | ----------- |
 | attempt | [OracleJob.Task](#OracleJob.Task) | repeated | A list of subtasks to process in an attempt to produce a valid numerical result. |
 | on_failure | [OracleJob.Task](#OracleJob.Task) | repeated | A list of subtasks that will be run if `attempt` subtasks are unable to produce an acceptable result. |
+
+
+
+
+
+
+<a name=".OracleJob.CronParseTask"></a>
+
+### OracleJob.CronParseTask
+return a timestamp from a crontab instruction
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| cron_pattern | [string](#string) | optional | the cron pattern to parse |
+| clock_offset | [int32](#int32) | optional | the timestamp offset to calculate the next run |
+| clock | [OracleJob.CronParseTask.ClockType](#OracleJob.CronParseTask.ClockType) | optional |  |
 
 
 
@@ -695,6 +714,7 @@ Return the difference between an oracle&#39;s clock and the current timestamp at
 | marinade_state_task | [OracleJob.MarinadeStateTask](#OracleJob.MarinadeStateTask) | optional |  |
 | solana_account_data_fetch_task | [OracleJob.SolanaAccountDataFetchTask](#OracleJob.SolanaAccountDataFetchTask) | optional |  |
 | buffer_layout_parse_task | [OracleJob.BufferLayoutParseTask](#OracleJob.BufferLayoutParseTask) | optional |  |
+| cron_parse_task | [OracleJob.CronParseTask](#OracleJob.CronParseTask) | optional |  |
 
 
 
@@ -724,6 +744,7 @@ Takes a twap over a set period for a certain aggregator.
 | weight_by_propagation_time | [bool](#bool) | optional | Weight samples by their propagation time |
 | min_samples | [uint32](#uint32) | optional | Minimum number of samples in the history to calculate a valid result |
 | ending_unix_timestamp | [int32](#int32) | optional | Ending unix timestamp to collect values up to |
+| ending_unix_timestamp_task | [OracleJob.CronParseTask](#OracleJob.CronParseTask) | optional | Execute the task to get the ending unix timestamp |
 
 
 
@@ -838,6 +859,18 @@ Opens and maintains a websocket for light speed data retrieval.
 
 
 
+<a name=".OracleJob.CronParseTask.ClockType"></a>
+
+### OracleJob.CronParseTask.ClockType
+which type of clock to use
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| ORACLE | 0 |  |
+| SYSCLOCK | 1 |  |
+
+
+
 <a name=".OracleJob.HttpTask.Method"></a>
 
 ### OracleJob.HttpTask.Method
@@ -862,6 +895,8 @@ The methods of combining a list of numerical results.
 | MIN | 1 | Grab the minimum value of the results. |
 | MAX | 2 | Grab the maximum value of the results. |
 | SUM | 3 | Sum up all of the results. |
+| MEAN | 4 | Average all of the results. |
+| MEDIAN | 5 | Grab the median of the results. |
 
 
 

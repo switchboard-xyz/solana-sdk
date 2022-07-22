@@ -27,6 +27,11 @@ module.exports = {
         },
         {
           type: "link",
+          label: "Sbv2 Utils",
+          href: "https://docs.switchboard.xyz/api/sbv2-utils/",
+        },
+        {
+          type: "link",
           label: "Python",
           href: "https://docs.switchboard.xyz/api/py/",
         },
