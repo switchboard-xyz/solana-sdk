@@ -4,6 +4,7 @@ interact with a switchboard crank account
 * [`sbv2 crank add aggregator [CRANKKEY] [AGGREGATORKEY]`](#sbv2-crank-add-aggregator-crankkey-aggregatorkey)
 * [`sbv2 crank create [QUEUEKEY]`](#sbv2-crank-create-queuekey)
 * [`sbv2 crank list [CRANKKEY]`](#sbv2-crank-list-crankkey)
+* [`sbv2 crank pop [CRANKKEY]`](#sbv2-crank-pop-crankkey)
 * [`sbv2 crank print [CRANKKEY]`](#sbv2-crank-print-crankkey)
 * [`sbv2 crank push [CRANKKEY] [AGGREGATORKEY]`](#sbv2-crank-push-crankkey-aggregatorkey)
 * [`sbv2 crank turn [CRANKKEY]`](#sbv2-crank-turn-crankkey)
@@ -54,7 +55,7 @@ FLAGS
   -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
                             alternate authority provided
   -n, --name=<value>        name of the crank for easier identification
-  -r, --maxRows=<value>     maximum number of rows a crank can support
+  -r, --maxRows=<value>     [default: 100] maximum number of rows a crank can support
   -s, --silent              suppress cli prompts
   -u, --rpcUrl=<value>      alternate RPC url
   -v, --verbose             log everything
@@ -94,6 +95,30 @@ FLAGS
 
 DESCRIPTION
   list the pubkeys currently on the crank
+```
+
+## `sbv2 crank pop [CRANKKEY]`
+
+pop the crank
+
+```
+USAGE
+  $ sbv2 crank pop [CRANKKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+
+ARGUMENTS
+  CRANKKEY  public key of the crank
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  pop the crank
 ```
 
 ## `sbv2 crank print [CRANKKEY]`

@@ -6,7 +6,7 @@ interact with a switchboard job account
 
 ## `sbv2 job create JOBDEFINITION`
 
-create a buffer relayer account
+create a job account
 
 ```
 USAGE
@@ -17,7 +17,7 @@ ARGUMENTS
   JOBDEFINITION  filesystem path to job definition
 
 FLAGS
-  -a, --authority=<value>  alternate keypair that will be the aggregator authority
+  -a, --authority=<value>  alternate keypair that will be the account authority
   -k, --keypair=<value>    keypair that will pay for onchain transactions. defaults to new account authority if no
                            alternate authority provided
   -n, --name=<value>       name of the buffer account
@@ -28,7 +28,7 @@ FLAGS
   --programId=<value>      alternative Switchboard program ID to interact with
 
 DESCRIPTION
-  create a buffer relayer account
+  create a job account
 ```
 
 ## `sbv2 job print [JOBKEY]`

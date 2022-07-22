@@ -4,6 +4,7 @@ interact with a switchboard aggregator account
 * [`sbv2 aggregator add crank [CRANKKEY] [AGGREGATORKEY]`](#sbv2-aggregator-add-crank-crankkey-aggregatorkey)
 * [`sbv2 aggregator add history [AGGREGATORKEY] [SIZE]`](#sbv2-aggregator-add-history-aggregatorkey-size)
 * [`sbv2 aggregator add job [AGGREGATORKEY]`](#sbv2-aggregator-add-job-aggregatorkey)
+* [`sbv2 aggregator create [QUEUEKEY]`](#sbv2-aggregator-create-queuekey)
 * [`sbv2 aggregator create copy [AGGREGATORSOURCE]`](#sbv2-aggregator-create-copy-aggregatorsource)
 * [`sbv2 aggregator create json [DEFINITIONFILE]`](#sbv2-aggregator-create-json-definitionfile)
 * [`sbv2 aggregator history print [AGGREGATORKEY]`](#sbv2-aggregator-history-print-aggregatorkey)
@@ -19,6 +20,7 @@ interact with a switchboard aggregator account
 * [`sbv2 aggregator print lease [AGGREGATORKEY]`](#sbv2-aggregator-print-lease-aggregatorkey)
 * [`sbv2 aggregator print permission [AGGREGATORKEY]`](#sbv2-aggregator-print-permission-aggregatorkey)
 * [`sbv2 aggregator remove job [AGGREGATORKEY] [JOBKEY]`](#sbv2-aggregator-remove-job-aggregatorkey-jobkey)
+* [`sbv2 aggregator save history [AGGREGATORKEY]`](#sbv2-aggregator-save-history-aggregatorkey)
 * [`sbv2 aggregator set [AGGREGATORKEY]`](#sbv2-aggregator-set-aggregatorkey)
 * [`sbv2 aggregator set authority [AGGREGATORKEY] [NEWAUTHORITY]`](#sbv2-aggregator-set-authority-aggregatorkey-newauthority)
 * [`sbv2 aggregator set batchSize [AGGREGATORKEY] BATCHSIZE`](#sbv2-aggregator-set-batchsize-aggregatorkey-batchsize)
@@ -126,6 +128,47 @@ DESCRIPTION
 
 EXAMPLES
   $ sbv2 aggregator:add:job
+```
+
+## `sbv2 aggregator create [QUEUEKEY]`
+
+create an aggregator account
+
+```
+USAGE
+  $ sbv2 aggregator create [QUEUEKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [-a
+    <value>] [--crankKey <value>] [--enable] [--queueAuthority <value>] [-n <value>] [--forceReportPeriod <value>]
+    [--batchSize <value>] [--minJobs <value>] [--minOracles <value>] [--updateInterval <value>] [--varianceThreshold
+    <value>] [-j <value>]
+
+ARGUMENTS
+  QUEUEKEY  public key of the oracle queue account to create aggregator for
+
+FLAGS
+  -a, --authority=<value>      alternate keypair that is the authority for the aggregator
+  -j, --job=<value>...         filesystem path to job definition file
+  -k, --keypair=<value>        keypair that will pay for onchain transactions. defaults to new account authority if no
+                               alternate authority provided
+  -n, --name=<value>           name of the aggregator
+  -s, --silent                 suppress cli prompts
+  -u, --rpcUrl=<value>         alternate RPC url
+  -v, --verbose                log everything
+  --batchSize=<value>          number of oracles requested for each open round call
+  --crankKey=<value>           public key of the crank to join
+  --enable                     set permissions to PERMIT_ORACLE_QUEUE_USAGE
+  --forceReportPeriod=<value>  Number of seconds for which, even if the variance threshold is not passed, accept new
+                               responses from oracles.
+  --mainnetBeta                WARNING: use mainnet-beta solana cluster
+  --minJobs=<value>            number of jobs that must respond before an oracle responds
+  --minOracles=<value>         number of oracles that must respond before a value is accepted on-chain
+  --programId=<value>          alternative Switchboard program ID to interact with
+  --queueAuthority=<value>     alternative keypair to use for queue authority
+  --updateInterval=<value>     set an aggregator's minimum update delay
+  --varianceThreshold=<value>  percentage change between a previous accepted result and the next round before an oracle
+                               reports a value on-chain. Used to conserve lease cost during low volatility
+
+DESCRIPTION
+  create an aggregator account
 ```
 
 ## `sbv2 aggregator create copy [AGGREGATORSOURCE]`
@@ -461,8 +504,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 aggregator print [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
-    [--jobs] [-o]
+  $ sbv2 aggregator print [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -477,6 +520,9 @@ FLAGS
   --jobs                   output job definitions
   --mainnetBeta            WARNING: use mainnet-beta solana cluster
   --programId=<value>      alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard aggregator account
@@ -612,6 +658,38 @@ DESCRIPTION
 
 EXAMPLES
   $ sbv2 aggregator:remove:job
+```
+
+## `sbv2 aggregator save history [AGGREGATORKEY]`
+
+request a new aggregator result from a set of oracles
+
+```
+USAGE
+  $ sbv2 aggregator save history [AGGREGATORKEY] -f <value> [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--force] [--json] [--csv]
+
+ARGUMENTS
+  AGGREGATORKEY  public key of the aggregator account to deserialize
+
+FLAGS
+  -f, --outputFile=<value>  (required) output file to save aggregator pubkeys to
+  -k, --keypair=<value>     keypair that will pay for onchain transactions. defaults to new account authority if no
+                            alternate authority provided
+  -s, --silent              suppress cli prompts
+  -u, --rpcUrl=<value>      alternate RPC url
+  -v, --verbose             log everything
+  --csv                     output aggregator accounts in csv format
+  --force                   overwrite output file if exists
+  --json                    output aggregator accounts in json format
+  --mainnetBeta             WARNING: use mainnet-beta solana cluster
+  --programId=<value>       alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  request a new aggregator result from a set of oracles
+
+EXAMPLES
+  $ sbv2 aggregator:save:history --outputFile ../aggregator-history.json --csv
 ```
 
 ## `sbv2 aggregator set [AGGREGATORKEY]`

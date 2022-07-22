@@ -6,6 +6,7 @@ find and print a switchboard account by public key for a given cluster
 * [`sbv2 print aggregator history [AGGREGATORKEY]`](#sbv2-print-aggregator-history-aggregatorkey)
 * [`sbv2 print aggregator lease [AGGREGATORKEY]`](#sbv2-print-aggregator-lease-aggregatorkey)
 * [`sbv2 print aggregator permission [AGGREGATORKEY]`](#sbv2-print-aggregator-permission-aggregatorkey)
+* [`sbv2 print buffer [BUFFERRELAYERKEY]`](#sbv2-print-buffer-bufferrelayerkey)
 * [`sbv2 print crank [CRANKKEY]`](#sbv2-print-crank-crankkey)
 * [`sbv2 print job [JOBKEY]`](#sbv2-print-job-jobkey)
 * [`sbv2 print oracle [ORACLEKEY]`](#sbv2-print-oracle-oraclekey)
@@ -37,7 +38,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.0/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.18/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -45,8 +46,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 print aggregator [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
-    [--jobs] [-o]
+  $ sbv2 print aggregator [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
+    <value>] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -61,6 +62,9 @@ FLAGS
   --jobs                   output job definitions
   --mainnetBeta            WARNING: use mainnet-beta solana cluster
   --programId=<value>      alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard aggregator account
@@ -166,6 +170,38 @@ ALIASES
 
 EXAMPLES
   $ sbv2 aggregator:permission:print 9CmLriMhykZ8xAoNTSHjHbk6SkuMhie1NCZn9P6LCuZ4
+```
+
+## `sbv2 print buffer [BUFFERRELAYERKEY]`
+
+Print the deserialized Switchboard buffer relayer account
+
+```
+USAGE
+  $ sbv2 print buffer [BUFFERRELAYERKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--job]
+
+ARGUMENTS
+  BUFFERRELAYERKEY  public key of the buffer relayer account to deserialize
+
+FLAGS
+  -k, --keypair=<value>  keypair that will pay for onchain transactions. defaults to new account authority if no
+                         alternate authority provided
+  -s, --silent           suppress cli prompts
+  -u, --rpcUrl=<value>   alternate RPC url
+  -v, --verbose          log everything
+  --job                  output job definitions
+  --mainnetBeta          WARNING: use mainnet-beta solana cluster
+  --programId=<value>    alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  Print the deserialized Switchboard buffer relayer account
+
+ALIASES
+  $ sbv2 buffer print
+
+EXAMPLES
+  $ sbv2 buffer:print 23GvzENjwgqqaLejsAtAWgTkSzWjSMo2LUYTAETT8URp
 ```
 
 ## `sbv2 print crank [CRANKKEY]`
@@ -384,7 +420,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 print vrf [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 print vrf [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -397,6 +433,9 @@ FLAGS
   -v, --verbose          log everything
   --mainnetBeta          WARNING: use mainnet-beta solana cluster
   --programId=<value>    alternative Switchboard program ID to interact with
+
+GLOBAL FLAGS
+  --json  Format output as json.
 
 DESCRIPTION
   Print the deserialized Switchboard VRF account
