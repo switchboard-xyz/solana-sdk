@@ -33,6 +33,8 @@ While Switchboard V2's oracle network is fully audited, the VRF implementation i
 
 :::
 
+While true-randomness on some computers can be made possible via atmospheric noise and special hardware modules, such solutions on blockchains are not possible since they are virtual machines without physical hardware. Thus, pseudorandom-functions are needed to close this gap. **_You should be skeptical of teams claiming they offer true randomness._**
+
 Random numbers are crucial for many DeFi applications whether its fair NFT launches, gambling, gaming, or assigning user roles in a DAO. Without an element of randomness, each of the above could be exploited and the final outcome predicted.
 
 A Verifiable Random Function (VRF) is a public-key pseudorandom function that provides proofs that its outputs were calculated correctly. This means we can use a cryptographic keypair to generate a random number with a proof, which can then be validated by anyone to ensure the value was calculated correctly without the possibility of leaking the producer’s secret key. You can read more about VRF from the Algorand team, whose founder was one of the authors on the original VRF paper - [Algorand Releases First Open Source Code of Verifiable Random Functions](https://medium.com/algorand/algorand-releases-first-open-source-code-of-verifiable-random-function-93c2960abd61).
