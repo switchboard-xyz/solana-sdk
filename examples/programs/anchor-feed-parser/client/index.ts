@@ -1,14 +1,13 @@
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import fs from "fs";
 import { readResult } from "./instructions/readResult";
 
 async function main() {
   const payer = Keypair.fromSecretKey(
-    new Uint8Array(
-      JSON.parse(require("fs").readFileSync(process.argv[2], "utf8"))
-    )
+    new Uint8Array(JSON.parse(fs.readFileSync(process.argv[2], "utf8")))
   );
   const connection = new Connection(
-    "https://switchboard.devnet.rpcpool.com/f9fe774d81ba4527a418f5b19477",
+    "https://devnet.genesysgo.net",
     "confirmed"
   );
   const ix = readResult(
@@ -24,4 +23,4 @@ async function main() {
   console.log(`https://explorer.solana.com/tx/${sig}?cluster=devnet`);
 }
 
-(async () => await main())();
+(async () => main())();
