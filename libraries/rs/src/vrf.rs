@@ -354,15 +354,15 @@ impl Default for VrfRound {
 pub enum VrfStatus {
     /// VRF Account has not requested randomness yet.
     StatusNone,
-    /// 	VRF Account has requested randomness but has yet to receive an oracle response.
+    /// VRF Account has requested randomness but has yet to receive an oracle response.
     StatusRequesting,
     /// VRF Account has received a VRF proof that has yet to be verified on-chain.
     StatusVerifying,
-    /// 	VRF Account has successfully requested and verified randomness on-chain.
+    /// VRF Account has successfully requested and verified randomness on-chain.
     StatusVerified,
-    /// 	VRF Account's callback was invoked successfully.
+    /// VRF Account's callback was invoked successfully.
     StatusCallbackSuccess,
-    /// 	Failed to verify VRF proof.
+    /// Failed to verify VRF proof.
     StatusVerifyFailure,
 }
 
@@ -381,7 +381,7 @@ pub struct VrfAccountData {
     pub escrow: Pubkey,
     /// The callback that is invoked when an update request is successfully verified.
     pub callback: CallbackZC,
-    /// 	The number of oracles assigned to a VRF update request.
+    /// The number of oracles assigned to a VRF update request.
     pub batch_size: u32,
     /// Struct containing the intermediate state between VRF crank actions.
     pub builders: [VrfBuilder; 8],
