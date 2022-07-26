@@ -9,13 +9,13 @@ pub use solana_program::{
     sysvar::Sysvar,
 };
 use std::convert::TryInto;
-pub use switchboard_v2::{AggregatorAccountData, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET};
+pub use switchboard_v2::{AggregatorAccountData, SWITCHBOARD_PROGRAM_ID};
 
 entrypoint!(process_instruction);
 
 fn process_instruction<'a>(
     _program_id: &'a Pubkey,
-    accounts: &'a [AccountInfo],
+    accounts: &'a [AccountInfo<'a>],
     _instruction_data: &'a [u8],
 ) -> ProgramResult {
     let accounts_iter = &mut accounts.iter();
@@ -25,7 +25,7 @@ fn process_instruction<'a>(
 
     // check feed owner
     let owner = *aggregator.owner;
-    if owner != SWITCHBOARD_V2_DEVNET && owner != SWITCHBOARD_V2_MAINNET {
+    if owner != SWITCHBOARD_PROGRAM_ID {
         return Err(ProgramError::IncorrectProgramId);
     }
 

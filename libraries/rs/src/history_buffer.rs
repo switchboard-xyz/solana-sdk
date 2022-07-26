@@ -1,6 +1,6 @@
+#[allow(unaligned_references)]
 use super::decimal::SwitchboardDecimal;
 use super::error::SwitchboardError;
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 use bytemuck::{try_cast_slice, try_from_bytes};
 use bytemuck::{Pod, Zeroable};
@@ -11,14 +11,18 @@ use superslice::*;
 #[derive(Default)]
 #[repr(packed)]
 pub struct AggregatorHistoryRow {
+    /// The timestamp of the sample.
     pub timestamp: i64,
+    /// The value of the sample.
     pub value: SwitchboardDecimal,
 }
 unsafe impl Pod for AggregatorHistoryRow {}
 unsafe impl Zeroable for AggregatorHistoryRow {}
 
 pub struct AggregatorHistoryBuffer<'a> {
+    /// The current index of the round robin buffer.
     pub insertion_idx: usize,
+    /// The array of samples collected from the aggregator.
     pub rows: Ref<'a, [AggregatorHistoryRow]>,
 }
 impl<'a> AggregatorHistoryBuffer<'a> {

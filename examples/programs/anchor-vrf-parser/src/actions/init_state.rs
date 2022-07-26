@@ -22,9 +22,13 @@ pub struct InitState<'info> {
     pub authority: AccountInfo<'info>,
     /// CHECK:
     #[account(mut, signer)]
-    pub payer: AccountInfo<'info>,
     /// CHECK:
-    pub vrf: AccountInfo<'info>,
+    pub payer: AccountInfo<'info>,
+    #[account(
+        constraint = 
+            *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub vrf: AccountLoader<'info, VrfAccountData>,
     #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
@@ -48,20 +52,19 @@ impl InitState<'_> {
         msg!("Actuate init");
 
         msg!("Checking VRF Account");
-        let vrf_account_info = &ctx.accounts.vrf;
-        let vrf = VrfAccountData::new(vrf_account_info)
-            .map_err(|_| VrfErrorCode::InvalidSwitchboardVrfAccount)?;
+        let vrf = ctx.accounts.vrf.load()?;
         // client state needs to be authority in order to sign request randomness instruction
         if vrf.authority != ctx.accounts.state.key() {
-            return Err(error!(VrfErrorCode::InvalidSwitchboardVrfAccount));
+            return Err(error!(VrfErrorCode::InvalidAuthorityError));
         }
+        drop(vrf);
 
         msg!("Setting VrfClient state");
         let mut state = ctx.accounts.state.load_init()?;
         *state = VrfClient::default();
         state.bump = ctx.bumps.get("state").unwrap().clone();
         state.authority =  ctx.accounts.authority.key.clone();
-        state.vrf = ctx.accounts.vrf.key.clone();
+        state.vrf = ctx.accounts.vrf.key();
         
         msg!("Setting VrfClient max_result");
         if params.max_result == 0 {
