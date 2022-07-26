@@ -7,8 +7,8 @@ members = [
 ]
 
 [provider]
-# cluster = "devnet"
-cluster = "localnet"
+cluster = "devnet"
+# cluster = "localnet"
 wallet = "../payer-keypair.json"
 # wallet = "~/.config/solana/id.json"
 
