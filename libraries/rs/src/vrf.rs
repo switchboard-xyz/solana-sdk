@@ -4,6 +4,7 @@ use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 use bytemuck::{Pod, Zeroable};
+use solana_program::entrypoint::ProgramResult;
 use solana_program::instruction::Instruction;
 use solana_program::program::{invoke, invoke_signed};
 use std::cell::Ref;
@@ -227,8 +228,11 @@ unsafe impl Zeroable for EcvrfIntermediate {}
 #[zero_copy]
 #[repr(packed)]
 pub struct VrfBuilder {
+    /// The OracleAccountData that is producing the randomness.
     pub producer: Pubkey,
+    /// The current status of the VRF verification.
     pub status: VrfStatus,
+    /// The VRF proof sourced from the producer.
     pub repr_proof: [u8; 80],
     pub proof: EcvrfProofZC,
     pub Y_point: Pubkey,
@@ -262,8 +266,11 @@ pub struct VrfBuilder {
     pub c_prime_hashbuf: [u8; 16],
     pub m1: FieldElementZC,
     pub m2: FieldElementZC,
+    /// The number of transactions remaining to verify the VRF proof.
     pub tx_remaining: u32,
+    /// Whether the VRF proof has been verified on-chain.
     pub verified: bool,
+    /// The VRF proof verification result. Will be zeroized if still awaiting fulfillment.
     pub result: [u8; 32],
 }
 impl Default for VrfBuilder {
@@ -292,10 +299,15 @@ pub struct AccountMetaBorsh {
 #[zero_copy]
 #[repr(packed)]
 pub struct CallbackZC {
+    /// The program ID of the callback program being invoked.
     pub program_id: Pubkey,
+    /// The accounts being used in the callback instruction.
     pub accounts: [AccountMetaZC; 32],
+    /// The number of accounts used in the callback
     pub accounts_len: u32,
+    /// The serialized instruction data.
     pub ix_data: [u8; 1024],
+    /// The number of serialized bytes in the instruction data.
     pub ix_data_len: u32,
 }
 impl Default for CallbackZC {
@@ -306,23 +318,31 @@ impl Default for CallbackZC {
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct Callback {
+    /// The program ID of the callback program being invoked.
     pub program_id: Pubkey,
+    /// The accounts being used in the callback instruction.
     pub accounts: Vec<AccountMetaBorsh>,
+    /// The serialized instruction data.
     pub ix_data: Vec<u8>,
 }
 
 #[zero_copy]
 #[repr(packed)]
 pub struct VrfRound {
-    // pub producer_pubkeys: [Pubkey; 16],
-    // pub producer_pubkeys_len: u32,
+    /// The alpha bytes used to calculate the VRF proof.
     pub alpha: [u8; 256],
+    /// The number of bytes in the alpha buffer.
     pub alpha_len: u32,
+    /// The Slot when the VRF round was opened.
     pub request_slot: u64,
+    /// The unix timestamp when the VRF round was opened.
     pub request_timestamp: i64,
+    /// The VRF round result. Will be zeroized if still awaiting fulfillment.
     pub result: [u8; 32],
+    /// The number of builders who verified the VRF proof.
     pub num_verified: u32,
-    pub _ebuf: [u8; 256], // Buffer for future info
+    /// Reserved for future info.
+    pub _ebuf: [u8; 256],
 }
 impl Default for VrfRound {
     fn default() -> Self {
@@ -332,31 +352,46 @@ impl Default for VrfRound {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum VrfStatus {
+    /// VRF Account has not requested randomness yet.
     StatusNone,
+    /// 	VRF Account has requested randomness but has yet to receive an oracle response.
     StatusRequesting,
+    /// VRF Account has received a VRF proof that has yet to be verified on-chain.
     StatusVerifying,
+    /// 	VRF Account has successfully requested and verified randomness on-chain.
     StatusVerified,
+    /// 	VRF Account's callback was invoked successfully.
     StatusCallbackSuccess,
+    /// 	Failed to verify VRF proof.
     StatusVerifyFailure,
 }
 
-// #[derive(Copy, Clone)]
-#[zero_copy]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct VrfAccountData {
+    /// The current status of the VRF account.
     pub status: VrfStatus,
+    /// Incremental counter for tracking VRF rounds.
     pub counter: u128,
+    /// On-chain account delegated for making account changes.
     pub authority: Pubkey,
+    /// The OracleQueueAccountData that is assigned to fulfill VRF update request.
     pub oracle_queue: Pubkey,
+    /// The token account used to hold funds for VRF update request.
     pub escrow: Pubkey,
+    /// The callback that is invoked when an update request is successfully verified.
     pub callback: CallbackZC,
+    /// 	The number of oracles assigned to a VRF update request.
     pub batch_size: u32,
+    /// Struct containing the intermediate state between VRF crank actions.
     pub builders: [VrfBuilder; 8],
+    /// The number of builders.
     pub builders_len: u32,
     pub test_mode: bool,
-    // pub last_verified_round: VrfRound,
+    /// Oracle results from the current round of update request that has not been accepted as valid yet
     pub current_round: VrfRound,
-    pub _ebuf: [u8; 1024], // Buffer for future info
+    /// Reserved for future info.
+    pub _ebuf: [u8; 1024],
 }
 impl Default for VrfAccountData {
     fn default() -> Self {
@@ -382,15 +417,21 @@ impl VrfAccountData {
         switchboard_vrf: &'info AccountInfo,
     ) -> anchor_lang::Result<Ref<'info, VrfAccountData>> {
         let data = switchboard_vrf.try_borrow_data()?;
+        if data.len() < VrfAccountData::discriminator().len() {
+            return Err(ErrorCode::AccountDiscriminatorNotFound.into());
+        }
 
         let mut disc_bytes = [0u8; 8];
         disc_bytes.copy_from_slice(&data[..8]);
         if disc_bytes != VrfAccountData::discriminator() {
-            return Err(error!(SwitchboardError::AccountDiscriminatorMismatch));
+            return Err(ErrorCode::AccountDiscriminatorMismatch.into());
         }
 
-        Ok(Ref::map(data, |data| bytemuck::from_bytes(&data[8..])))
+        Ok(Ref::map(data, |data| {
+            bytemuck::from_bytes(&data[8..std::mem::size_of::<VrfAccountData>() + 8])
+        }))
     }
+
     /// Returns the current VRF round ID
     pub fn get_current_randomness_round_id(&self) -> u128 {
         self.counter
@@ -401,11 +442,8 @@ impl VrfAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AggregatorAccountData;
-    /// use std::convert::TryInto;
+    /// use switchboard_v2::VrfAccountData;
     ///
-    /// let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
-    /// let decimal: f64 = feed_result.try_into()?;
     /// ```
     pub fn get_result(&self) -> anchor_lang::Result<[u8; 32]> {
         if self.current_round.result == [0u8; 32] {
@@ -414,13 +452,10 @@ impl VrfAccountData {
         Ok(self.current_round.result)
     }
 
-    // Need to log and update to actual value
     fn discriminator() -> [u8; 8] {
-        return [101, 35, 62, 239, 103, 151, 6, 18];
+        [101, 35, 62, 239, 103, 151, 6, 18]
     }
 }
-unsafe impl Pod for VrfAccountData {}
-unsafe impl Zeroable for VrfAccountData {}
 
 #[derive(Accounts)]
 #[instruction(params: VrfRequestRandomnessParams)] // rpc parameters hint
@@ -464,7 +499,7 @@ pub struct VrfRequestRandomnessParams {
 
 impl<'info> VrfRequestRandomness<'info> {
     fn discriminator() -> [u8; 8] {
-        return [230, 121, 14, 164, 28, 222, 117, 118];
+        [230, 121, 14, 164, 28, 222, 117, 118]
     }
 
     pub fn get_instruction(
@@ -487,7 +522,7 @@ impl<'info> VrfRequestRandomness<'info> {
         program: AccountInfo<'info>,
         state_bump: u8,
         permission_bump: u8,
-    ) -> anchor_lang::Result<()> {
+    ) -> ProgramResult {
         let cpi_params = VrfRequestRandomnessParams {
             permission_bump: permission_bump,
             state_bump: state_bump,
@@ -495,7 +530,8 @@ impl<'info> VrfRequestRandomness<'info> {
         let instruction = self.get_instruction(program.key.clone(), cpi_params)?;
         let account_infos = self.to_account_infos();
 
-        invoke(&instruction, &account_infos[..]).map_err(|_| error!(SwitchboardError::VrfCpiError))
+        invoke(&instruction, &account_infos[..])
+        // .map_err(|_| error!(SwitchboardError::VrfCpiError))
     }
 
     pub fn invoke_signed(
@@ -504,7 +540,7 @@ impl<'info> VrfRequestRandomness<'info> {
         state_bump: u8,
         permission_bump: u8,
         signer_seeds: &[&[&[u8]]],
-    ) -> anchor_lang::Result<()> {
+    ) -> ProgramResult {
         let cpi_params = VrfRequestRandomnessParams {
             permission_bump: permission_bump,
             state_bump: state_bump,
@@ -513,7 +549,7 @@ impl<'info> VrfRequestRandomness<'info> {
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
-            .map_err(|_| error!(SwitchboardError::VrfCpiSignedError))
+        // .map_err(|_| error!(SwitchboardError::VrfCpiSignedError))
     }
 
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {

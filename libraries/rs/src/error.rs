@@ -25,4 +25,6 @@ pub enum SwitchboardError {
     StaleFeed,
     #[msg("Switchboard feed exceeded the confidence interval threshold")]
     ConfidenceIntervalExceeded,
+    #[msg("Invalid authority provided to Switchboard account")]
+    InvalidAuthority,
 }

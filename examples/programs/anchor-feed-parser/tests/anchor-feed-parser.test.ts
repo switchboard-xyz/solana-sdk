@@ -2,7 +2,6 @@ import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
-import assert from "assert";
 import chai from "chai";
 import {
   AnchorFeedParser,
@@ -82,24 +81,26 @@ describe("anchor-feed-parser test", () => {
   });
 
   it("Fails to read feed if confidence interval is exceeded", async () => {
-    // await assertThrowsAsync(
-    //   async () =>
-    //     feedParserProgram.methods
+    // await assert.rejects(
+    //   async () => {
+    //     await feedParserProgram.methods
     //       .readResult({ maxConfidenceInterval: 0.0000000001 })
     //       .accounts({ aggregator: aggregatorKey })
-    //       .rpc(),
-    //   /Error/
+    //       .rpc();
+    //   },
+    //   /ConfidenceIntervalExceeded/,
+    //   "Confidence interval was not exceeded"
     // );
 
-    await assert.rejects(
-      async () => {
-        await feedParserProgram.methods
-          .readResult({ maxConfidenceInterval: 0.0000000001 })
-          .accounts({ aggregator: aggregatorKey })
-          .rpc();
-      },
-      /ConfidenceIntervalExceeded/,
-      "Confidence interval was not exceeded"
-    );
+    try {
+      await feedParserProgram.methods
+        .readResult({ maxConfidenceInterval: 0.0000000001 })
+        .accounts({ aggregator: aggregatorKey })
+        .rpc();
+    } catch (error: any) {
+      if (!error.toString().includes("ConfidenceIntervalExceeded")) {
+        throw error;
+      }
+    }
   });
 });

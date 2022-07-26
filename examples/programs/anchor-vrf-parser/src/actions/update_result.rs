@@ -5,10 +5,15 @@ pub use switchboard_v2::VrfAccountData;
 
 #[derive(Accounts)]
 pub struct UpdateResult<'info> {
-    #[account(mut)]
+    #[account(mut, 
+        has_one = vrf @ VrfErrorCode::InvalidVrfAccount
+    )]
     pub state: AccountLoader<'info, VrfClient>,
-    /// CHECK:
-    pub vrf: AccountInfo<'info>,
+    #[account(
+        constraint = 
+            *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub vrf: AccountLoader<'info, VrfAccountData>,
 }
 
 impl UpdateResult<'_> {
@@ -26,8 +31,7 @@ impl UpdateResult<'_> {
             timestamp: clock.unix_timestamp,
         });
 
-        let vrf_account_info = &ctx.accounts.vrf;
-        let vrf = VrfAccountData::new(vrf_account_info)?;
+        let vrf = ctx.accounts.vrf.load()?;
         let result_buffer = vrf.get_result()?;
         if result_buffer == [0u8; 32] {
             msg!("vrf buffer empty");

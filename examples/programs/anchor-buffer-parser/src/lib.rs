@@ -1,13 +1,17 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
-pub use switchboard_v2::{BufferRelayerAccountData, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET};
+pub use switchboard_v2::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
 
 declare_id!("96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP");
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]
 pub struct ReadResult<'info> {
-    /// CHECK:
+    /// CHECK
+    #[account(mut,
+        constraint = 
+            *buffer.owner == SWITCHBOARD_PROGRAM_ID @ BufferErrorCode::InvalidSwitchboardAccount
+    )]
     pub buffer: AccountInfo<'info>,
 }
 
@@ -25,13 +29,6 @@ pub mod anchor_buffer_parser {
         params: ReadResultParams,
     ) -> anchor_lang::Result<()> {
         let buffer_account = &ctx.accounts.buffer;
-
-        // check buffer owner
-        let owner = *buffer_account.owner;
-        if owner != SWITCHBOARD_V2_DEVNET && owner != SWITCHBOARD_V2_MAINNET {
-            msg!("Feed owner = {:?}", owner);
-            return Err(error!(BufferErrorCode::InvalidSwitchboardAccount));
-        }
 
         // load and deserialize buffer
         let buffer = BufferRelayerAccountData::new(buffer_account)?;
