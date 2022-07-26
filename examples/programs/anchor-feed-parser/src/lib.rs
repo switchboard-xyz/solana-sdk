@@ -1,17 +1,20 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
+// use anchor_lang::{Discriminator, Owner, ZeroCopy};
+// use bytemuck::{Pod, Zeroable};
 use std::convert::TryInto;
-pub use switchboard_v2::{
-    AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_V2_DEVNET, SWITCHBOARD_V2_MAINNET,
-};
+pub use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID};
 
 declare_id!("FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh");
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]
 pub struct ReadResult<'info> {
-    /// CHECK:
-    pub aggregator: AccountInfo<'info>,
+    #[account(
+        constraint = 
+            *aggregator.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ FeedErrorCode::InvalidSwitchboardAccount
+    )]
+    pub aggregator: AccountLoader<'info, AggregatorAccountData>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -27,16 +30,7 @@ pub mod anchor_feed_parser {
         ctx: Context<ReadResult>,
         params: ReadResultParams,
     ) -> anchor_lang::Result<()> {
-        let aggregator = &ctx.accounts.aggregator;
-
-        // check feed owner
-        let owner = *aggregator.owner;
-        if owner != SWITCHBOARD_V2_DEVNET && owner != SWITCHBOARD_V2_MAINNET {
-            return Err(error!(FeedErrorCode::InvalidSwitchboardAccount));
-        }
-
-        // load and deserialize feed
-        let feed = AggregatorAccountData::new(aggregator)?;
+        let feed = &ctx.accounts.aggregator.load()?;
 
         // get result
         let val: f64 = feed.get_result()?.try_into()?;

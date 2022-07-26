@@ -4,6 +4,8 @@ pub use actions::*;
 pub use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
+pub use switchboard_v2::SWITCHBOARD_PROGRAM_ID;
+
 declare_id!("HjjRFjCyQH3ne6Gg8Yn3TQafrrYecRrphwLwnh2A26vM");
 
 const MAX_RESULT: u64 = u64::MAX;
@@ -71,12 +73,14 @@ pub struct VrfClientResultUpdated {
 #[error_code]
 #[derive(Eq, PartialEq)]
 pub enum VrfErrorCode {
-    #[msg("Not a valid Switchboard VRF account")]
-    InvalidSwitchboardVrfAccount,
+    #[msg("Not a valid Switchboard account")]
+    InvalidSwitchboardAccount,
     #[msg("The max result must not exceed u64")]
     MaxResultExceedsMaximum,
     #[msg("Current round result is empty")]
     EmptyCurrentRoundResult,
     #[msg("Invalid authority account provided.")]
     InvalidAuthorityError,
+    #[msg("Invalid VRF account provided.")]
+    InvalidVrfAccount,
 }

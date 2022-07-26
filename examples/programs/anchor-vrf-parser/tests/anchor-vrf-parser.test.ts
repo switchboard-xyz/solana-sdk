@@ -78,7 +78,7 @@ describe("anchor-vrf-parser test", () => {
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Devnet - ${error.message}`);
-      console.error(error);
+      // console.error(error);
     }
     // If fails, fallback to looking for a local env file
     try {

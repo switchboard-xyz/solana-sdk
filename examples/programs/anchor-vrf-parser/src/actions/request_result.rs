@@ -1,6 +1,6 @@
 use crate::*;
 use anchor_lang::prelude::*;
-pub use switchboard_v2::{VrfAccountData, VrfRequestRandomness};
+pub use switchboard_v2::{VrfAccountData, VrfRequestRandomness, OracleQueueAccountData, PermissionAccountData, SbState};
 use anchor_spl::token::Token;
 use anchor_lang::solana_program::clock;
 
@@ -15,43 +15,78 @@ pub struct RequestResult<'info> {
             authority.key().as_ref(),
         ],
         bump = state.load()?.bump,
-        has_one = vrf,
-        has_one = authority
+        has_one = vrf @ VrfErrorCode::InvalidVrfAccount,
+        has_one = authority @ VrfErrorCode::InvalidAuthorityError
     )]
     pub state: AccountLoader<'info, VrfClient>,
     /// CHECK:
     #[account(signer)] // client authority needs to sign
     pub authority: AccountInfo<'info>,
-    /// CHECK:
-    #[account(constraint = switchboard_program.executable == true)]
-    pub switchboard_program: AccountInfo<'info>,
-    /// CHECK: Will be checked in the CPI instruction
-    #[account(mut, constraint = vrf.owner.as_ref() == switchboard_program.key().as_ref())]
-    pub vrf: AccountInfo<'info>,
-    /// CHECK: Will be checked in the CPI instruction
-    #[account(mut, constraint = oracle_queue.owner.as_ref() == switchboard_program.key().as_ref())]
-    pub oracle_queue: AccountInfo<'info>,
+
+    // SWITCHBOARD ACCOUNTS
+    #[account(mut,
+        has_one = escrow,
+        constraint = 
+            *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub vrf: AccountLoader<'info, VrfAccountData>,
+    /// CHECK
+    #[account(mut, 
+        has_one = data_buffer,
+        constraint = 
+            oracle_queue.load()?.authority == queue_authority.key()
+            && *oracle_queue.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub oracle_queue: AccountLoader<'info, OracleQueueAccountData>,
     /// CHECK: Will be checked in the CPI instruction
     pub queue_authority: UncheckedAccount<'info>,
-    /// CHECK: Will be checked in the CPI instruction
-    #[account(constraint = data_buffer.owner.as_ref() == switchboard_program.key().as_ref())]
+    /// CHECK
+    #[account(mut, 
+        constraint = 
+            *data_buffer.owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
     pub data_buffer: AccountInfo<'info>,
-    /// CHECK: Will be checked in the CPI instruction
-    #[account(mut, constraint = permission.owner.as_ref() == switchboard_program.key().as_ref())]
-    pub permission: AccountInfo<'info>,
-    #[account(mut, constraint = escrow.owner == program_state.key())]
+    /// CHECK
+    #[account(mut, 
+        constraint = 
+            *permission.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub permission: AccountLoader<'info, PermissionAccountData>,
+    #[account(mut, 
+        constraint = 
+            escrow.owner == program_state.key() 
+            && escrow.mint == program_state.load()?.token_mint
+    )]
     pub escrow: Account<'info, TokenAccount>,
-    #[account(mut, constraint = payer_wallet.owner == payer_authority.key())]
+    /// CHECK: Will be checked in the CPI instruction
+    #[account(mut, 
+        constraint = 
+            *program_state.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub program_state: AccountLoader<'info, SbState>,
+    /// CHECK: 
+    #[account(
+        constraint = 
+            switchboard_program.executable == true 
+            && *switchboard_program.key == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
+    )]
+    pub switchboard_program: AccountInfo<'info>,
+
+    // PAYER ACCOUNTS
+    #[account(mut, 
+        constraint = 
+            payer_wallet.owner == payer_authority.key()
+            && escrow.mint == program_state.load()?.token_mint
+    )]
     pub payer_wallet: Account<'info, TokenAccount>,
     /// CHECK:
     #[account(signer)]
     pub payer_authority: AccountInfo<'info>,
+
+    // SYSTEM ACCOUNTS
     /// CHECK:
     #[account(address = solana_program::sysvar::recent_blockhashes::ID)]
     pub recent_blockhashes: AccountInfo<'info>,
-    /// CHECK: Will be checked in the CPI instruction
-    #[account(constraint = program_state.owner.as_ref() == switchboard_program.key().as_ref())]
-    pub program_state: AccountInfo<'info>,
     #[account(address = anchor_spl::token::ID)]
     pub token_program: Program<'info, Token>,
 }
@@ -90,7 +125,7 @@ impl RequestResult<'_> {
             token_program: ctx.accounts.token_program.to_account_info(),
         };
 
-        let vrf_key = ctx.accounts.vrf.key.clone();
+        let vrf_key = ctx.accounts.vrf.key();
         let authority_key = ctx.accounts.authority.key.clone();
 
         msg!("bump: {}", bump);
