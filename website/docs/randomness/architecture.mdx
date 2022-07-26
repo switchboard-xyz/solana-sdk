@@ -77,7 +77,7 @@ msg!("Current VRF Value [0 - {}) = {}!", max_result, result);
 
 ## Update Cost
 
-A VRF Account is required to have `0.002 wrapped SOL` in their `vrf.escrow` before requesting randomness. If the `vrf.escrow` has insufficient funds, the difference will be deducted from the requesters token wallet. The oracle fulfilling the request receives 90% of the reward when the proof is verified on-chain and the remaining 10% if the callback is successfully invoked.
+A VRF Account is required to have `0.002 wrapped SOL` in their `vrf.escrow` before requesting randomness. If the `vrf.escrow` has insufficient funds, the difference will be deducted from the requesters token wallet. The oracle fulfilling the crank will receive `0.002 / 277 wrapped SOL` upon submitting the proof, with the remaining amount being dispersed to the account who turned the VRF crank, which is typically the oracle.
 
 ## Update Lifecycle
 
@@ -96,17 +96,17 @@ A VRF Account is required to have `0.002 wrapped SOL` in their `vrf.escrow` befo
 
 - Oracle watches the chain for a [VrfRequestRandomnessEvent](/idl/events/VrfRequestRandomnessEvent) with the oracle's public key assigned to the update request
 - Oracle calculates the VRF proof and submits a [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify) instruction on-chain
+  - Oracle receives 1 / 277 of the reward
 - sbv2 program sets the current `vrf.status` to **_StatusVerifying_**
 - Oracle submits 276 × [vrfProveAndVerify](/idl/instructions/vrfProveAndVerify) instructions on-chain
+  - Invoker receives 1 / 277 of the reward per each successful instruction
 - If proof verification fails,
   - sbv2 program sets `vrf.status` to **_StatusVerifyFailure_**
 - If proof verification succeeds,
   - sbv2 program sets `vrf.status` to **_StatusVerified_**
-  - 90% of `vrf.escrow` transferred to oracles staking wallet
   - Oracle invokes `vrf.callback`
   - If `vrf.callback` is successfully invoked,
     - sbv2 program sets `vrf.status` to **_StatusCallbackSuccess_**
-    - The remaining 10% of `vrf.escrow` transferred to the oracle
 
 ## More Information
 
