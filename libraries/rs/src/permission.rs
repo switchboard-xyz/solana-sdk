@@ -55,7 +55,7 @@ pub struct PermissionSetParams {
 
 impl<'info> PermissionSet<'info> {
     fn discriminator() -> [u8; 8] {
-        [47, 83, 96, 86, 228, 90, 153, 179]
+        [211, 122, 185, 120, 129, 182, 55, 103]
     }
 
     pub fn get_instruction(
