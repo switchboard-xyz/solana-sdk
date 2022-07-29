@@ -217,6 +217,8 @@ message OracleJob {
       // Pool address for an Orca LP pool or whirlpool. 
       // A full list of Orca LP pools can be found here: https://www.orca.so/pools
       string orca_pool_address = 7;
+      // The Port reserve pubkey. A full list can be found here: https://api-v1.port.finance/reserves
+      string port_reserve_address = 8;
     }
   }
 
