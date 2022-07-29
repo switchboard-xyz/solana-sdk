@@ -588,8 +588,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 aggregator print [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
-    <value>] [--jobs] [-o]
+  $ sbv2 aggregator print [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--json] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -2167,7 +2167,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.18/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.19/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2175,8 +2175,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 print aggregator [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
-    <value>] [--jobs] [-o]
+  $ sbv2 print aggregator [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--json] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
@@ -2549,7 +2549,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 print vrf [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 print vrf [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [--json]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
@@ -2751,7 +2751,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.18/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.19/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2818,7 +2818,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.18/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.19/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
@@ -2957,7 +2957,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 vrf print [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [--json]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize
