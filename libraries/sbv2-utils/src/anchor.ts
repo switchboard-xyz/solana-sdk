@@ -176,7 +176,7 @@ export function getWorkspace(
     cluster === "localnet" ? "http://localhost:8899" : clusterApiUrl(cluster);
   const provider = new anchor.AnchorProvider(
     new Connection(url, { commitment: "confirmed" }),
-    new anchor.Wallet(wallet),
+    new AnchorWallet(wallet),
     { commitment: "confirmed" }
   );
   return new anchor.Program(idl, programId, provider);
