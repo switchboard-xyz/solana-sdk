@@ -4141,6 +4141,48 @@
     "@svgr/plugin-jsx" "^6.3.1"
     "@svgr/plugin-svgo" "^6.3.1"
 
+"@switchboard-xyz/switchboard-v2@^0.0.124":
+  version "0.0.124"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.124.tgz#ea97d2aa7f492414f2b477be97f56b35ce61e44d"
+  integrity sha512-qgk4oT4avP/LIpEqkGxcKY6UPJrguqtaYX3GVlLTL4jm0tkjJl5GJRv2bsrQdKqTWloSTKeYsIvH8VF3GmkJLQ==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@solana/spl-token" "^0.2.0"
+    "@solana/web3.js" "^1.44.3"
+    "@types/big.js" "^6.1.4"
+    assert "^2.0.0"
+    big.js "^6.2.0"
+    bs58 "^4.0.1"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    glob "^8.0.3"
+    long "^4.0.0"
+    mocha "^9.1.1"
+    node-fetch "^3.2.6"
+    protobufjs "^6.11.3"
+
+"@switchboard-xyz/switchboard-v2@^0.0.125":
+  version "0.0.125"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.125.tgz#02ad03637026f8420e8da5f6d404cf1b44cf304f"
+  integrity sha512-W/xzVMR1cCO/5gY7sO9yKXgIabqqg3eNVet7QVOKhFQQAX4JKsEdZgITZEwlm7/mgb/OGTpvqWzWae45O1ZWAg==
+  dependencies:
+    "@project-serum/anchor" "^0.24.2"
+    "@solana/spl-governance" "^0.0.34"
+    "@solana/spl-token" "^0.2.0"
+    "@solana/web3.js" "^1.44.3"
+    "@types/big.js" "^6.1.4"
+    assert "^2.0.0"
+    big.js "^6.2.0"
+    bs58 "^5.0.0"
+    chan "^0.6.1"
+    crypto-js "^4.0.0"
+    glob "^8.0.3"
+    long "^4.0.0"
+    mocha "^9.1.1"
+    node-fetch "^3.2.6"
+    protobufjs "^6.11.3"
+
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"

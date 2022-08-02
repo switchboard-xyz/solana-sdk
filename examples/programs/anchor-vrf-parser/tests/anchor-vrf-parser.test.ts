@@ -142,7 +142,7 @@ describe("anchor-vrf-parser test", () => {
     // Create VRF Client account
     await vrfClientProgram.methods
       .initState({
-        maxResult: new anchor.BN(1),
+        maxResult: new anchor.BN(1337000),
       })
       .accounts({
         state: vrfClientKey,
@@ -168,12 +168,7 @@ describe("anchor-vrf-parser test", () => {
       provider.connection,
       payer,
       mint.address,
-      payer.publicKey,
-      undefined,
-      undefined,
-      undefined,
-      spl.TOKEN_PROGRAM_ID,
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      payer.publicKey
     );
 
     const { escrow } = await vrfAccount.loadData();
