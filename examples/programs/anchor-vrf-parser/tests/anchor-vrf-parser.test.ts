@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { AnchorProvider } from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import {
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,

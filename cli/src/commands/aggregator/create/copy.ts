@@ -1,7 +1,7 @@
 /* eslint-disable unicorn/no-array-push-push */
 import { Flags } from "@oclif/core";
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import {
   AccountInfo,
   Keypair,

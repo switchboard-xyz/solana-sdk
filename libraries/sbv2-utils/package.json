@@ -36,7 +36,7 @@
     "@orca-so/sdk": "^1.2.24",
     "@project-serum/anchor": "^0.24.2",
     "@saberhq/token-utils": "^1.13.32",
-    "@solana/spl-token": "^0.2.0",
+    "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.43.5",
     "@switchboard-xyz/switchboard-v2": "^0.0.126",
     "big.js": "^6.1.1",

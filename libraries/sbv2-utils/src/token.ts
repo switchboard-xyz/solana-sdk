@@ -1,5 +1,5 @@
 import type * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import {
   Connection,
   Keypair,

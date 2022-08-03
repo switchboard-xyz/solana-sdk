@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import {
   LAMPORTS_PER_SOL,
   NONCE_ACCOUNT_LENGTH,

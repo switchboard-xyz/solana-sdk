@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import {
   AccountInfo,
   AccountMeta,
@@ -24,6 +24,8 @@ import Big from "big.js";
 import * as crypto from "crypto";
 /*eslint-disable import/extensions */
 import protos from "./protos/index.js";
+
+export type SwitchboardProgram = anchor.Program;
 
 /**
  * Switchboard Devnet Program ID
@@ -78,7 +80,7 @@ export async function loadSwitchboardProgram(
   confirmOptions: ConfirmOptions = {
     commitment: "confirmed",
   }
-): Promise<anchor.Program> {
+): Promise<SwitchboardProgram> {
   const DEFAULT_KEYPAIR = Keypair.fromSeed(new Uint8Array(32).fill(1));
   const programId = getSwitchboardPid(cluster);
   const wallet: AnchorWallet = payerKeypair
@@ -100,7 +102,7 @@ export async function loadSwitchboardProgram(
 
 // should also check if pubkey is a token account
 export const findAccountName = (
-  program: anchor.Program,
+  program: SwitchboardProgram,
   accountInfo: AccountInfo<Buffer>
 ): string => {
   const accountDiscriminator = accountInfo.data.slice(
@@ -124,7 +126,7 @@ export const findAccountName = (
 export type OnAccountChangeCallback = (accountData: any) => void;
 
 export function watchSwitchboardAccount(
-  program: anchor.Program,
+  program: SwitchboardProgram,
   publicKey: PublicKey,
   accountName: string,
   callback: OnAccountChangeCallback
@@ -255,7 +257,7 @@ export interface AccountParams {
   /**
    * program referencing the Switchboard program and IDL.
    */
-  program: anchor.Program;
+  program: SwitchboardProgram;
   /**
    * Public key of the account being referenced. This will always be populated
    * within the account wrapper.
@@ -292,7 +294,7 @@ export interface VaultTransferParams {
 export class ProgramStateAccount {
   static accountName = "SbState";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -324,7 +326,7 @@ export class ProgramStateAccount {
    * Constructs ProgramStateAccount from the static seed from which it was generated.
    * @return ProgramStateAccount and PDA bump tuple.
    */
-  static fromSeed(program: anchor.Program): [ProgramStateAccount, number] {
+  static fromSeed(program: SwitchboardProgram): [ProgramStateAccount, number] {
     const [statePubkey, stateBump] =
       anchor.utils.publicKey.findProgramAddressSync(
         [Buffer.from("STATE")],
@@ -368,7 +370,7 @@ export class ProgramStateAccount {
   }
 
   static async getOrCreate(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: ProgramInitParams
   ): Promise<[ProgramStateAccount, number]> {
     const [account, seed] = ProgramStateAccount.fromSeed(program);
@@ -389,7 +391,7 @@ export class ProgramStateAccount {
    * @return newly generated ProgramStateAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: ProgramInitParams
   ): Promise<ProgramStateAccount> {
     const payerKeypair = programWallet(program);
@@ -638,7 +640,7 @@ export class SwitchboardError {
   /**
    *  The program containing the Switchboard IDL specifying error codes.
    */
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   /**
    *  Stringified name of the error type.
@@ -662,7 +664,7 @@ export class SwitchboardError {
    * @param code Error code to convert to a SwitchboardError object.
    * @return SwitchboardError
    */
-  static fromCode(program: anchor.Program, code: number): SwitchboardError {
+  static fromCode(program: SwitchboardProgram, code: number): SwitchboardError {
     for (const e of program.idl.errors ?? []) {
       if (code === e.code) {
         const r = new SwitchboardError();
@@ -735,7 +737,7 @@ export interface AggregatorSetUpdateIntervalParams {
 export class AggregatorAccount {
   static accountName = "AggregatorAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -764,7 +766,7 @@ export class AggregatorAccount {
   }
 
   static decode(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     accountInfo: AccountInfo<Buffer>
   ): any {
     const coder = new anchor.BorshAccountsCoder(program.idl);
@@ -1094,7 +1096,7 @@ export class AggregatorAccount {
    * @return newly generated AggregatorAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: AggregatorInitParams
   ): Promise<AggregatorAccount> {
     const payerKeypair = programWallet(program);
@@ -1594,7 +1596,7 @@ export interface JobInitParams {
 export class JobAccount {
   static accountName = "JobAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -1648,7 +1650,7 @@ export class JobAccount {
    * @return newly generated JobAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: JobInitParams
   ): Promise<JobAccount> {
     const payerKeypair = programWallet(program);
@@ -1694,7 +1696,7 @@ export class JobAccount {
   }
 
   static decode(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     accountInfo: AccountInfo<Buffer>
   ): any {
     const coder = new anchor.BorshAccountsCoder(program.idl);
@@ -1703,7 +1705,7 @@ export class JobAccount {
   }
 
   static decodeJob(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     accountInfo: AccountInfo<Buffer>
   ): protos.OracleJob {
     return protos.OracleJob.decodeDelimited(
@@ -1752,7 +1754,7 @@ export interface PermissionSetParams {
 export interface PermissionSetVoterWeightParams {
   govProgram: PublicKey;
   pubkeySigner?: PublicKey;
-  addinProgram: anchor.Program;
+  addinProgram: SwitchboardProgram;
   realm: PublicKey;
 }
 
@@ -1776,7 +1778,7 @@ export enum SwitchboardPermissionValue {
 export class PermissionAccount {
   static accountName = "PermissionAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -1841,7 +1843,7 @@ export class PermissionAccount {
    * @return newly generated PermissionAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: PermissionInitParams
   ): Promise<PermissionAccount> {
     const authorityInfo = await program.provider.connection.getAccountInfo(
@@ -1882,7 +1884,7 @@ export class PermissionAccount {
    * @return PermissionAccount and PDA bump.
    */
   static fromSeed(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     authority: PublicKey,
     granter: PublicKey,
     grantee: PublicKey
@@ -2129,7 +2131,7 @@ export interface OracleQueueSetVrfSettingsParams {
 export class OracleQueueAccount {
   static accountName = "OracleQueueAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -2212,7 +2214,7 @@ export class OracleQueueAccount {
    * @return newly generated OracleQueueAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: OracleQueueInitParams
   ): Promise<OracleQueueAccount> {
     const payerKeypair = programWallet(program);
@@ -2376,7 +2378,7 @@ export interface LeaseWithdrawParams {
  * for fulfilling feed updates.
  */
 export class LeaseAccount {
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -2411,7 +2413,7 @@ export class LeaseAccount {
    * @return LeaseAccount and PDA bump.
    */
   static fromSeed(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     queueAccount: OracleQueueAccount,
     aggregatorAccount: AggregatorAccount
   ): [LeaseAccount, number] {
@@ -2454,7 +2456,7 @@ export class LeaseAccount {
    * @return newly generated LeaseAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: LeaseInitParams
   ): Promise<LeaseAccount> {
     const payerKeypair = programWallet(program);
@@ -2780,7 +2782,7 @@ export class CrankRow {
 export class CrankAccount {
   static accountName = "CrankAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -2850,7 +2852,7 @@ export class CrankAccount {
    * @return newly generated CrankAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: CrankInitParams
   ): Promise<CrankAccount> {
     const payerKeypair = programWallet(program);
@@ -3160,7 +3162,7 @@ export interface OracleWithdrawParams {
 export class OracleAccount {
   static accountName = "OracleAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -3216,7 +3218,7 @@ export class OracleAccount {
    * @return newly generated OracleAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: OracleInitParams
   ): Promise<OracleAccount> {
     const payerKeypair = programWallet(program);
@@ -3274,7 +3276,7 @@ export class OracleAccount {
   }
 
   static decode(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     accountInfo: AccountInfo<Buffer>
   ): any {
     const coder = new anchor.BorshAccountsCoder(program.idl);
@@ -3288,7 +3290,7 @@ export class OracleAccount {
    * @return OracleAccount and PDA bump tuple.
    */
   static fromSeed(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     queueAccount: OracleQueueAccount,
     wallet: PublicKey
   ): [OracleAccount, number] {
@@ -3521,7 +3523,7 @@ export interface VrfProveParams {
 export class VrfAccount {
   static accountName = "VrfAccountData";
 
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -3589,7 +3591,7 @@ export class VrfAccount {
    * @return newly generated VrfAccount.
    */
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: VrfInitParams
   ): Promise<VrfAccount> {
     const payerKeypair = programWallet(program);
@@ -3869,7 +3871,7 @@ export class VrfAccount {
 }
 
 export class BufferRelayerAccount {
-  program: anchor.Program;
+  program: SwitchboardProgram;
 
   publicKey: PublicKey;
 
@@ -3915,7 +3917,7 @@ export class BufferRelayerAccount {
   }
 
   static async create(
-    program: anchor.Program,
+    program: SwitchboardProgram,
     params: {
       name: Buffer;
       minUpdateDelaySeconds: number;
@@ -4297,7 +4299,7 @@ export function signTransactions(
   return transactions;
 }
 
-export function programWallet(program: anchor.Program): Keypair {
+export function programWallet(program: SwitchboardProgram): Keypair {
   return ((program.provider as anchor.AnchorProvider).wallet as AnchorWallet)
     .payer;
 }

@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import {
   AggregatorAccount,
