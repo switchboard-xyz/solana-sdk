@@ -1,5 +1,5 @@
 import { Flags } from "@oclif/core";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import { PublicKey, SYSVAR_RECENT_BLOCKHASHES_PUBKEY } from "@solana/web3.js";
 import { getOrCreateSwitchboardTokenAccount } from "@switchboard-xyz/sbv2-utils";
 import {
