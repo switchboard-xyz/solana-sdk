@@ -3921,7 +3921,7 @@
     tweetnacl "^1.0.0"
     ws "^7.0.0"
 
-"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.20.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.22.0", "@solana/web3.js@^1.24.1", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.33.0", "@solana/web3.js@^1.35.1", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.37.1", "@solana/web3.js@^1.42.0", "@solana/web3.js@^1.43.5", "@solana/web3.js@^1.44.3", "@solana/web3.js@^1.50.1":
+"@solana/web3.js@^1.17.0", "@solana/web3.js@^1.20.0", "@solana/web3.js@^1.21.0", "@solana/web3.js@^1.22.0", "@solana/web3.js@^1.24.1", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.33.0", "@solana/web3.js@^1.35.1", "@solana/web3.js@^1.36.0", "@solana/web3.js@^1.42.0", "@solana/web3.js@^1.43.5", "@solana/web3.js@^1.44.3", "@solana/web3.js@^1.50.1":
   version "1.50.1"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.50.1.tgz#dae726a06267d1bcd88b1e3cd8ae44c709302dcf"
   integrity sha512-1l9N/nS8pJEA2YibNT8wa072718O0/A1eKWE0+pdWC5wDGQgBNxZSLuv7Cq5Dcn46WsZ5J5ZstK89q8J/ZZaQA==

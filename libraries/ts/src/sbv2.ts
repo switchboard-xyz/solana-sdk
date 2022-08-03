@@ -2473,10 +2473,7 @@ export class LeaseAccount {
       leaseAccount.publicKey,
       true
     );
-    await (switchTokenMint as any).createAssociatedTokenAccountInternal(
-      leaseAccount.publicKey,
-      escrow
-    );
+
     const jobAccountDatas = await params.aggregatorAccount.loadJobAccounts();
     const aggregatorData = await params.aggregatorAccount.loadData();
     const jobPubkeys = aggregatorData.jobPubkeysData.slice(
@@ -2521,6 +2518,14 @@ export class LeaseAccount {
         owner: params.funderAuthority.publicKey,
         mint: switchTokenMint.address,
       })
+      .preInstructions([
+        spl.createAssociatedTokenAccountInstruction(
+          payerKeypair.publicKey,
+          escrow,
+          leaseAccount.publicKey,
+          switchTokenMint.address
+        ),
+      ])
       .signers([params.funderAuthority])
       .remainingAccounts(
         jobPubkeys.concat(jobWallets).map((pubkey: PublicKey) => {
@@ -3237,6 +3242,11 @@ export class OracleAccount {
       walletKeypair.publicKey
     );
 
+    const tokenRent =
+      await program.provider.connection.getMinimumBalanceForRentExemption(
+        spl.ACCOUNT_SIZE
+      );
+
     await program.methods
       .oracleInit({
         name: (params.name ?? Buffer.from("")).slice(0, 32),
@@ -3254,11 +3264,17 @@ export class OracleAccount {
         payer: programWallet(program).publicKey,
       })
       .preInstructions([
+        SystemProgram.createAccount({
+          fromPubkey: payerKeypair.publicKey,
+          newAccountPubkey: walletKeypair.publicKey,
+          space: spl.ACCOUNT_SIZE,
+          lamports: tokenRent,
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
         spl.createInitializeAccountInstruction(
           walletKeypair.publicKey,
           mint.address,
-          programWallet(program).publicKey,
-          spl.TOKEN_PROGRAM_ID
+          programWallet(program).publicKey
         ),
         spl.createSetAuthorityInstruction(
           walletKeypair.publicKey,

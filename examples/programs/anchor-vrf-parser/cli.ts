@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token";
+import * as spl from "@solana/spl-token-v2";
 import type {
   Connection,
   ParsedTransactionWithMeta,
@@ -19,7 +19,7 @@ const { hideBin } = require("yargs/helpers");
 // import { hideBin } from "yargs/helpers";
 import fs from "fs";
 import path from "path";
-import { AnchorVrfParser, IDL } from "../../target/types/anchor_vrf_parser";
+import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
 import { VrfClient } from "./client/accounts";
 import { PROGRAM_ID } from "./client/programId";
 
@@ -59,12 +59,13 @@ yargs(hideBin(process.argv))
           describe: "publicKey of the oracle queue to create a VRF for",
           default: "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy",
         })
-        .option("option", {
+        .option("maxResult", {
           description: "test",
+          type: "number",
         });
     },
     async function (argv: any) {
-      const { queueKey, rpcUrl, cluster } = argv;
+      const { queueKey, rpcUrl, cluster, maxResult } = argv;
 
       const { vrfClientProgram, switchboardProgram, payer, provider } =
         await loadCli(rpcUrl, cluster);
@@ -138,7 +139,7 @@ yargs(hideBin(process.argv))
       // Create VRF Client account
       await vrfClientProgram.methods
         .initState({
-          maxResult: new anchor.BN(1),
+          maxResult: new anchor.BN(maxResult),
         })
         .accounts({
           state: vrfClientKey,

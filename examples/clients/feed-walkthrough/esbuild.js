@@ -13,7 +13,7 @@ build({
   // outdir: "lib",
   outfile: "dist/main.js",
   bundle: true,
-  minify: true,
+  minify: false,
   platform: "node",
   target: "node16",
   tslint: true,
