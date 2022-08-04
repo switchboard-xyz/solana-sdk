@@ -47,7 +47,11 @@ export default class JobCreate extends BaseCommand {
     }
 
     const oracleJob = OracleJob.create(
-      JSON.parse(fs.readFileSync(jobDefinitionPath, "utf-8"))
+      JSON.parse(
+        fs
+          .readFileSync(jobDefinitionPath, "utf-8")
+          .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/g, "")
+      )
     );
     const jobAccount = await JobAccount.create(this.program, {
       authority: authority.publicKey,
