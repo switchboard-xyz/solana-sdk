@@ -29,7 +29,6 @@ export default class PermissionSet extends BaseCommand {
   static args = [
     {
       name: "permissionKey",
-
       description: "public key of the permission account",
     },
   ];
@@ -40,7 +39,7 @@ export default class PermissionSet extends BaseCommand {
 
     const permissionAccount = new PermissionAccount({
       program: this.program,
-      publicKey: args.permissionKey,
+      publicKey: new PublicKey(args.permissionKey),
     });
     const permission = await permissionAccount.loadData();
 

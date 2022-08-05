@@ -1,3 +1,4 @@
+import { PublicKey } from "@solana/web3.js";
 import { prettyPrintPermissions } from "@switchboard-xyz/sbv2-utils";
 import {
   OracleQueueAccount,
@@ -17,12 +18,10 @@ export default class PermissionCreate extends BaseCommand {
   static args = [
     {
       name: "granter",
-
       description: "public key of the account granting permission",
     },
     {
       name: "grantee",
-
       description: "public key of the account getting permissions",
     },
   ];
@@ -31,10 +30,13 @@ export default class PermissionCreate extends BaseCommand {
     const { args } = await this.parse(PermissionCreate);
     verifyProgramHasPayer(this.program);
 
+    const granter = new PublicKey(args.granter);
+    const grantee = new PublicKey(args.grantee);
+
     // assuming granter is an oracle queue, will need to fix
     const queueAccount = new OracleQueueAccount({
       program: this.program,
-      publicKey: args.granter,
+      publicKey: granter,
     });
     const queue = await queueAccount.loadData();
 
@@ -44,8 +46,8 @@ export default class PermissionCreate extends BaseCommand {
       [permissionAccount] = PermissionAccount.fromSeed(
         this.program,
         queue.authority,
-        args.granter,
-        args.grantee
+        granter,
+        grantee
       );
       const permData = await permissionAccount.loadData();
       if (!this.silent) {
@@ -55,8 +57,8 @@ export default class PermissionCreate extends BaseCommand {
       }
     } catch {
       permissionAccount = await PermissionAccount.create(this.program, {
-        granter: args.granter,
-        grantee: args.grantee,
+        granter: granter,
+        grantee: grantee,
         authority: queue.authority,
       });
     }
