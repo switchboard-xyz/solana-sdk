@@ -228,10 +228,11 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     );
     if (!balance) {
       try {
-        await provider.connection.requestAirdrop(
+        const airdropSignature = await provider.connection.requestAirdrop(
           payerKeypair.publicKey,
           1_000_000_000
         );
+        await provider.connection.confirmTransaction(airdropSignature);
       } catch {}
     }
 

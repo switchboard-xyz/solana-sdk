@@ -258,7 +258,7 @@ export async function createAggregatorReq(
           aggregator: aggregatorKeypair.publicKey,
           authority,
           queue: params.queueAccount.publicKey,
-          authorWallet: params.authorWallet ?? state.tokenVault,
+          // authorWallet: params.authorWallet ?? state.tokenVault,
           programState: programStateAccount.publicKey,
         })
         .instruction(),
@@ -266,7 +266,7 @@ export async function createAggregatorReq(
         .permissionInit({})
         .accounts({
           permission: permissionAccount.publicKey,
-          authority: params.authority,
+          authority: queue.authority,
           granter: queueAccount.publicKey,
           grantee: aggregatorKeypair.publicKey,
           payer: payerPubkey,
@@ -289,9 +289,7 @@ export async function createAggregatorReq(
         payerPubkey,
         leaseEscrow,
         leaseAccount.publicKey,
-        mint.address,
-        spl.TOKEN_PROGRAM_ID,
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        mint.address
       ),
       await program.methods
         .leaseInit({
@@ -328,7 +326,7 @@ export async function createAggregatorReq(
             })
             .accounts({
               aggregator: aggregatorKeypair.publicKey,
-              authority: payerPubkey,
+              authority,
               job: jobAccount.publicKey,
             })
             .instruction();
