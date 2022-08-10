@@ -137,7 +137,8 @@ describe("Feed tests", () => {
     let retryCount = 10;
     while (retryCount) {
       try {
-        const job1Data = await job1.loadData();
+        await job1.loadData();
+        await job2.loadData();
         break;
       } catch {
         await sleep(1000);
