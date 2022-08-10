@@ -45,7 +45,7 @@ export async function awaitOpenRound(
             return;
           }
           if (!expectedValue) {
-            resolve(latestResult!);
+            resolve(latestResult);
           } else if (latestResult?.eq(expectedValue)) {
             resolve(latestResult);
           } else {
