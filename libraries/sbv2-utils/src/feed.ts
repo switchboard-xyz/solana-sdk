@@ -6,10 +6,11 @@ import {
   JobAccount,
   LeaseAccount,
   OracleQueueAccount,
-  packTransactions,
+  packInstructions,
   PermissionAccount,
   ProgramStateAccount,
   programWallet,
+  signTransactions,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
@@ -19,7 +20,7 @@ export async function awaitOpenRound(
   aggregatorAccount: AggregatorAccount,
   queueAccount: OracleQueueAccount,
   payerTokenWallet: anchor.web3.PublicKey,
-  expectedValue: Big | undefined,
+  expectedValue: Big | undefined = undefined,
   timeout = 30
 ): Promise<Big> {
   // call open round and wait for new value
@@ -28,23 +29,34 @@ export async function awaitOpenRound(
   );
 
   let accountWs: number;
-  const awaitUpdatePromise = new Promise((resolve: (value: Big) => void) => {
-    accountWs = aggregatorAccount.program.provider.connection.onAccountChange(
-      aggregatorAccount?.publicKey ?? anchor.web3.PublicKey.default,
-      async (accountInfo) => {
-        const aggregator = accountsCoder.decode(
-          "AggregatorAccountData",
-          accountInfo.data
-        );
-        const latestResult = await aggregatorAccount.getLatestValue(aggregator);
-        if (!expectedValue) {
-          resolve(new Big(0));
-        } else if (latestResult?.eq(expectedValue)) {
-          resolve(latestResult);
+  const awaitUpdatePromise = new Promise(
+    (resolve: (value: Big) => void, reject: (reason?: string) => void) => {
+      accountWs = aggregatorAccount.program.provider.connection.onAccountChange(
+        aggregatorAccount?.publicKey ?? anchor.web3.PublicKey.default,
+        async (accountInfo) => {
+          const aggregator = accountsCoder.decode(
+            "AggregatorAccountData",
+            accountInfo.data
+          );
+          const latestResult = await aggregatorAccount.getLatestValue(
+            aggregator
+          );
+          if (!latestResult) {
+            return;
+          }
+          if (!expectedValue) {
+            resolve(latestResult!);
+          } else if (latestResult?.eq(expectedValue)) {
+            resolve(latestResult);
+          } else {
+            reject(
+              `Value mismatch, expected ${expectedValue}, received ${latestResult}`
+            );
+          }
         }
-      }
-    );
-  });
+      );
+    }
+  );
 
   const updatedValuePromise = promiseWithTimeout(
     timeout * 1000,
@@ -80,7 +92,7 @@ async function signAndConfirmTransactions(
     program.provider as anchor.AnchorProvider
   ).wallet.signAllTransactions(transactions);
   for (const transaction of signedTxs) {
-    console.log(`Blockhash: ${transaction.recentBlockhash}`);
+    // console.log(`Blockhash: ${transaction.recentBlockhash}`);
     const sig = await program.provider.connection.sendRawTransaction(
       transaction.serialize(),
       { skipPreflight: false, maxRetries: 10 }
@@ -93,16 +105,27 @@ export async function createAggregator(
   program: anchor.Program,
   queueAccount: OracleQueueAccount,
   params: AggregatorInitParams,
-  jobs: [JobAccount, number][]
+  jobs: [JobAccount, number][],
+  fundLeaseAmount = new anchor.BN(0)
 ): Promise<AggregatorAccount> {
-  const req = await createAggregatorReq(program, queueAccount, params, jobs);
-  const packedTxns = await packTransactions(
-    program.provider.connection,
-    [new anchor.web3.Transaction().add(...req.ixns)],
-    req.signers as anchor.web3.Keypair[],
-    programWallet(program as any).publicKey
+  const req = await createAggregatorReq(
+    program,
+    queueAccount,
+    params,
+    jobs,
+    fundLeaseAmount
   );
-  await signAndConfirmTransactions(program, packedTxns);
+  const { blockhash } = await program.provider.connection.getLatestBlockhash();
+  const packedTxns = packInstructions(
+    req.ixns,
+    programWallet(program).publicKey,
+    blockhash
+  );
+  const signedTxns = signTransactions(
+    packedTxns,
+    req.signers as anchor.web3.Keypair[]
+  );
+  await signAndConfirmTransactions(program, signedTxns);
   return req.account;
 }
 
@@ -156,6 +179,7 @@ export async function createAggregatorReq(
   queueAccount: OracleQueueAccount,
   params: AggregatorInitParams,
   jobs: [JobAccount, number][],
+  fundLeaseAmount = new anchor.BN(0),
   payerPubkey = programWallet(program as any).publicKey
 ): Promise<{
   ixns: anchor.web3.TransactionInstruction[];
@@ -224,7 +248,11 @@ export async function createAggregatorReq(
     payerPubkey,
     mint.address
   );
-  if (payerTokenAcct.ixn) ixns.push(payerTokenAcct.ixn);
+  if (payerTokenAcct.ixn) {
+    ixns.push(payerTokenAcct.ixn);
+  }
+
+  // TODO: if fundLeaseAmount, check payer has enough funds
 
   ixns.push(
     ...([
@@ -294,7 +322,7 @@ export async function createAggregatorReq(
       ),
       await program.methods
         .leaseInit({
-          loadAmount: new anchor.BN(0),
+          loadAmount: fundLeaseAmount,
           stateBump,
           leaseBump,
           withdrawAuthority: payerPubkey,

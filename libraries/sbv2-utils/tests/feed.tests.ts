@@ -9,6 +9,7 @@ import "mocha";
 import {
   awaitOpenRound,
   createAggregator,
+  sleep,
   SwitchboardTestContext,
 } from "../lib/cjs";
 
@@ -31,7 +32,7 @@ describe("Feed tests", () => {
       const provider = new anchor.AnchorProvider(
         localnetConnection,
         new AnchorWallet(payer),
-        { commitment: "processed" }
+        { commitment: "confirmed" }
       );
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       console.log("local env detected");
@@ -45,7 +46,7 @@ describe("Feed tests", () => {
       const provider = new anchor.AnchorProvider(
         devnetConnection,
         new AnchorWallet(payer),
-        { commitment: "processed" }
+        { commitment: "confirmed" }
       );
       // const airdropSignature = await devnetConnection.requestAirdrop(
       //   payer.publicKey,
@@ -103,6 +104,7 @@ describe("Feed tests", () => {
         ).finish()
       ),
     });
+
     const job2 = await JobAccount.create(switchboard.program, {
       name: Buffer.from("Job1"),
       authority: payer.publicKey,
@@ -131,6 +133,18 @@ describe("Feed tests", () => {
         ).finish()
       ),
     });
+
+    let retryCount = 10;
+    while (retryCount) {
+      try {
+        const job1Data = await job1.loadData();
+        break;
+      } catch {
+        await sleep(1000);
+        --retryCount;
+      }
+    }
+
     try {
       const newAggregator = await createAggregator(
         switchboard.program,
@@ -146,7 +160,8 @@ describe("Feed tests", () => {
         [
           [job1, 1],
           [job2, 1],
-        ]
+        ],
+        new anchor.BN(12500 * 5)
       );
 
       console.log(`Created Aggregator: ${newAggregator.publicKey}`);
