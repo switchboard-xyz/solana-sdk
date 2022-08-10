@@ -80,6 +80,7 @@ async function signAndConfirmTransactions(
     program.provider as anchor.AnchorProvider
   ).wallet.signAllTransactions(transactions);
   for (const transaction of signedTxs) {
+    console.log(`Blockhash: ${transaction.recentBlockhash}`);
     const sig = await program.provider.connection.sendRawTransaction(
       transaction.serialize(),
       { skipPreflight: false, maxRetries: 10 }

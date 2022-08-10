@@ -4275,7 +4275,7 @@ export async function packTransactions(
 ): Promise<Transaction[]> {
   const instructions = transactions.map((t) => t.instructions).flat();
   const txs = packInstructions(instructions, feePayer);
-  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const { blockhash } = await connection.getLatestBlockhash();
   txs.forEach((t) => {
     t.recentBlockhash = blockhash;
   });

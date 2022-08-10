@@ -31,7 +31,7 @@ describe("Feed tests", () => {
       const provider = new anchor.AnchorProvider(
         localnetConnection,
         new AnchorWallet(payer),
-        { commitment: "confirmed" }
+        { commitment: "processed" }
       );
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
       console.log("local env detected");
@@ -40,12 +40,12 @@ describe("Feed tests", () => {
 
     try {
       const devnetConnection = new anchor.web3.Connection(
-        "https://devnet.genesysgo.net/"
+        "https://switchboard.devnet.rpcpool.com/f9fe774d81ba4527a418f5b19477"
       );
       const provider = new anchor.AnchorProvider(
         devnetConnection,
         new AnchorWallet(payer),
-        { commitment: "confirmed" }
+        { commitment: "processed" }
       );
       // const airdropSignature = await devnetConnection.requestAirdrop(
       //   payer.publicKey,

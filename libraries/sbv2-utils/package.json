@@ -27,6 +27,7 @@
   "types": "lib/cjs/index.d.ts",
   "scripts": {
     "docgen": "typedoc --entryPoints src/index.ts --out ../../website/static/api/sbv2-utils",
+    "pretest": "yarn build",
     "test": "ts-mocha -p ./tsconfig.cjs.json -t 1000000 ./tests/*.tests.ts",
     "build": "shx rm -rf lib && tsc && tsc -p tsconfig.cjs.json",
     "watch": "tsc -p tsconfig.cjs.json --watch",
