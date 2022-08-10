@@ -4,7 +4,7 @@ import {
   JobAccount,
   OracleJob,
 } from "@switchboard-xyz/switchboard-v2";
-import fs from "fs";
+// import fs from "fs";
 import "mocha";
 import {
   awaitOpenRound,
@@ -14,13 +14,13 @@ import {
 } from "../lib/cjs";
 
 describe("Feed tests", () => {
-  // const payer = anchor.web3.Keypair.generate();
+  const payer = anchor.web3.Keypair.generate();
 
-  const payer = anchor.web3.Keypair.fromSecretKey(
-    new Uint8Array(
-      JSON.parse(fs.readFileSync("../../../payer-keypair.json", "utf8"))
-    )
-  );
+  // const payer = anchor.web3.Keypair.fromSecretKey(
+  //   new Uint8Array(
+  //     JSON.parse(fs.readFileSync("../../../payer-keypair.json", "utf8"))
+  //   )
+  // );
 
   let switchboard: SwitchboardTestContext;
 
