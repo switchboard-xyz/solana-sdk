@@ -1,7 +1,10 @@
 import * as anchor from "@project-serum/anchor";
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
-import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
+import type {
+  AggregatorAccount,
+  AnchorWallet,
+} from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
 import {
   AnchorFeedParser,
@@ -16,7 +19,12 @@ const DEFAULT_SOL_USD_FEED = new PublicKey(
 );
 
 describe("anchor-feed-parser test", () => {
-  const provider = anchor.AnchorProvider.env();
+  const tomlProvider = anchor.AnchorProvider.env();
+  const provider = new anchor.AnchorProvider(
+    new Connection("http://localhost:8899"),
+    tomlProvider.wallet,
+    {}
+  );
   anchor.setProvider(provider);
 
   // const feedParserProgram = anchor.workspace
@@ -32,41 +40,31 @@ describe("anchor-feed-parser test", () => {
   const payer = (provider.wallet as AnchorWallet).payer;
 
   let switchboard: SwitchboardTestContext;
-  let aggregatorKey: PublicKey;
+  let aggregatorAccount: AggregatorAccount;
 
   before(async () => {
-    // First, attempt to load the switchboard devnet PID
-    try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        provider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
-      );
-      aggregatorKey = DEFAULT_SOL_USD_FEED;
-      console.log("devnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Devnet - ${error.message}`);
-    }
-    // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      const aggregatorAccount = await switchboard.createStaticFeed(100);
-      aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
       console.log("local env detected");
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);
+      console.error(error);
     }
-    // If fails, throw error
-    throw new Error(
-      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
-    );
+
+    throw new Error(`Failed to load the localnet Switchboard environment`);
   });
 
-  it("Read SOL/USD Feed", async () => {
+  it("Creates a static feed that resolves to 100", async () => {
+    aggregatorAccount = await switchboard.createStaticFeed(100);
+
+    console.log(`Created Feed: ${aggregatorAccount.publicKey}`);
+  });
+
+  it("Reads the static feed", async () => {
     const signature = await feedParserProgram.methods
       .readResult({ maxConfidenceInterval: 0.25 })
-      .accounts({ aggregator: aggregatorKey })
+      .accounts({ aggregator: aggregatorAccount.publicKey })
       .rpc();
 
     // wait for RPC
@@ -77,30 +75,42 @@ describe("anchor-feed-parser test", () => {
       "confirmed"
     );
 
+    // TODO: grep logs and verify the price
+
     console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
   });
 
   it("Fails to read feed if confidence interval is exceeded", async () => {
-    // await assert.rejects(
-    //   async () => {
-    //     await feedParserProgram.methods
-    //       .readResult({ maxConfidenceInterval: 0.0000000001 })
-    //       .accounts({ aggregator: aggregatorKey })
-    //       .rpc();
-    //   },
-    //   /ConfidenceIntervalExceeded/,
-    //   "Confidence interval was not exceeded"
-    // );
-
     try {
       await feedParserProgram.methods
         .readResult({ maxConfidenceInterval: 0.0000000001 })
-        .accounts({ aggregator: aggregatorKey })
+        .accounts({ aggregator: aggregatorAccount.publicKey })
         .rpc();
     } catch (error: any) {
       if (!error.toString().includes("ConfidenceIntervalExceeded")) {
         throw error;
       }
     }
+  });
+
+  it("Updates static feed to resolve to 110", async () => {
+    await switchboard.updateStaticFeed(aggregatorAccount, 110, 45);
+
+    const signature = await feedParserProgram.methods
+      .readResult({ maxConfidenceInterval: 0.25 })
+      .accounts({ aggregator: aggregatorAccount.publicKey })
+      .rpc();
+
+    // wait for RPC
+    await sleep(2000);
+
+    const logs = await provider.connection.getParsedTransaction(
+      signature,
+      "confirmed"
+    );
+
+    // TODO: grep logs and verify the price
+
+    console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
   });
 });

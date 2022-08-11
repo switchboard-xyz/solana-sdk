@@ -258,7 +258,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       publicKey: SWITCHBOARD_QUEUE,
     });
     const queueData = await queue.loadData();
-    if (queueData.queue.length < 1) {
+    if (queueData.queue.length === 0) {
       throw new Error(`OracleQueue has no active oracles heartbeating`);
     }
 

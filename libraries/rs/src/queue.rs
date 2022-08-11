@@ -57,4 +57,40 @@ pub struct OracleQueueAccountData {
     pub data_buffer: Pubkey,
 }
 
-impl OracleQueueAccountData {}
+
+impl OracleQueueAccountData {
+    pub fn size() -> usize {
+        std::mem::size_of::<OracleQueueAccountData>() + 8
+    }
+
+    pub fn convert_buffer(buf: &mut [u8]) -> &mut [Pubkey] {
+        try_cast_slice_mut(&mut buf[8..]).unwrap()
+    }
+
+    pub fn len(&self) -> u32 {
+        self.size
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.size == 0
+    }
+
+    pub fn get_mint(&self) -> Pubkey {
+        if self.mint == Pubkey::default() {
+            return spl_token::native_mint::ID;
+        }
+        self.mint
+    }
+
+    pub fn max_round_rewards(&self, batch_size: u32) -> u64 {
+        self.reward
+            .checked_mul(batch_size.checked_add(1).unwrap().into())
+            .unwrap()
+    }
+}
+impl Default for OracleQueueAccountData {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
