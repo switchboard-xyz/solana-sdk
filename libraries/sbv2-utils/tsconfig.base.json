@@ -1,9 +1,12 @@
 {
   "include": ["./src/**/*"],
+  "exclude": ["tests/**/*", "lib", "node_modules"],
   "files": ["./src/index.ts"],
   "compilerOptions": {
-    "target": "es2019",
+    // "target": "es2019",
+    "composite": true,
     "sourceMap": true,
+    "inlineSources": true,
     "declaration": true,
     "declarationMap": true,
     "allowSyntheticDefaultImports": true,
@@ -11,8 +14,8 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "composite": true,
     "skipLibCheck": true,
+    "types": ["mocha", "node", "long"],
     // strict
     "strict": true,
     "noImplicitThis": true,
@@ -23,11 +26,7 @@
     "noImplicitReturns": true,
     "strictPropertyInitialization": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../ts"],
-      "@solana/spl-token": [
-        "../../node_modules/@solana/spl-token",
-        "./node_modules/@solana/spl-token"
-      ]
+      "@switchboard-xyz/switchboard-v2": ["../ts"]
     }
   },
   "references": [{ "path": "../ts" }]

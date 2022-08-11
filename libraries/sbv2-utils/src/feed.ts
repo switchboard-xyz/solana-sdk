@@ -1,21 +1,16 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
 import {
-  PublicKey,
-  sendAndConfirmTransaction,
-  SystemProgram,
-  Transaction,
-  TransactionInstruction,
-} from "@solana/web3.js";
-import {
   AggregatorAccount,
   AggregatorInitParams,
   JobAccount,
   LeaseAccount,
   OracleQueueAccount,
+  packInstructions,
   PermissionAccount,
   ProgramStateAccount,
   programWallet,
+  signTransactions,
   SwitchboardDecimal,
 } from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
@@ -24,8 +19,8 @@ import { promiseWithTimeout } from "./async.js";
 export async function awaitOpenRound(
   aggregatorAccount: AggregatorAccount,
   queueAccount: OracleQueueAccount,
-  payerTokenWallet: PublicKey,
-  expectedValue: Big | undefined,
+  payerTokenWallet: anchor.web3.PublicKey,
+  expectedValue: Big | undefined = undefined,
   timeout = 30
 ): Promise<Big> {
   // call open round and wait for new value
@@ -34,23 +29,34 @@ export async function awaitOpenRound(
   );
 
   let accountWs: number;
-  const awaitUpdatePromise = new Promise((resolve: (value: Big) => void) => {
-    accountWs = aggregatorAccount.program.provider.connection.onAccountChange(
-      aggregatorAccount?.publicKey ?? PublicKey.default,
-      async (accountInfo) => {
-        const aggregator = accountsCoder.decode(
-          "AggregatorAccountData",
-          accountInfo.data
-        );
-        const latestResult = await aggregatorAccount.getLatestValue(aggregator);
-        if (!expectedValue) {
-          resolve(new Big(0));
-        } else if (latestResult?.eq(expectedValue)) {
-          resolve(latestResult);
+  const awaitUpdatePromise = new Promise(
+    (resolve: (value: Big) => void, reject: (reason?: string) => void) => {
+      accountWs = aggregatorAccount.program.provider.connection.onAccountChange(
+        aggregatorAccount?.publicKey ?? anchor.web3.PublicKey.default,
+        async (accountInfo) => {
+          const aggregator = accountsCoder.decode(
+            "AggregatorAccountData",
+            accountInfo.data
+          );
+          const latestResult = await aggregatorAccount.getLatestValue(
+            aggregator
+          );
+          if (!latestResult) {
+            return;
+          }
+          if (!expectedValue) {
+            resolve(latestResult);
+          } else if (latestResult?.eq(expectedValue)) {
+            resolve(latestResult);
+          } else {
+            reject(
+              `Value mismatch, expected ${expectedValue}, received ${latestResult}`
+            );
+          }
         }
-      }
-    );
-  });
+      );
+    }
+  );
 
   const updatedValuePromise = promiseWithTimeout(
     timeout * 1000,
@@ -78,32 +84,114 @@ export async function awaitOpenRound(
   return result;
 }
 
+async function signAndConfirmTransactions(
+  program: anchor.Program,
+  transactions: anchor.web3.Transaction[]
+) {
+  const signedTxs = await (
+    program.provider as anchor.AnchorProvider
+  ).wallet.signAllTransactions(transactions);
+  for (const transaction of signedTxs) {
+    // console.log(`Blockhash: ${transaction.recentBlockhash}`);
+    const sig = await program.provider.connection.sendRawTransaction(
+      transaction.serialize(),
+      { skipPreflight: false, maxRetries: 10 }
+    );
+    await program.provider.connection.confirmTransaction(sig);
+  }
+}
+
 export async function createAggregator(
   program: anchor.Program,
   queueAccount: OracleQueueAccount,
   params: AggregatorInitParams,
-  jobs: [JobAccount, number][]
-) {
-  const payerKeypair = programWallet(program);
+  jobs: [JobAccount, number][],
+  fundLeaseAmount = new anchor.BN(0)
+): Promise<AggregatorAccount> {
+  const req = await createAggregatorReq(
+    program,
+    queueAccount,
+    params,
+    jobs,
+    fundLeaseAmount
+  );
+  const { blockhash } = await program.provider.connection.getLatestBlockhash();
+  const packedTxns = packInstructions(
+    req.ixns,
+    programWallet(program).publicKey,
+    blockhash
+  );
+  const signedTxns = signTransactions(
+    packedTxns,
+    req.signers as anchor.web3.Keypair[]
+  );
+  await signAndConfirmTransactions(program, signedTxns);
+  return req.account;
+}
+
+/**
+ * Retrieve information about the payer's associated token account. If it does not exist, an
+ * instruction to create it will be returned with the account's {@linkcode PublicKey}.
+ */
+async function getPayerTokenAccount(
+  connection: anchor.web3.Connection,
+  payer: anchor.web3.PublicKey,
+  mint: anchor.web3.PublicKey
+): Promise<{
+  /**
+   * The {@linkcode PublicKey} of the associated token account for this payer.
+   */
+  publicKey: anchor.web3.PublicKey;
+  /**
+   * If the token account doesn't currently exist on-chain, it needs to be created using this ixn.
+   */
+  ixn?: anchor.web3.TransactionInstruction;
+}> {
+  const publicKey = await spl.getAssociatedTokenAddress(
+    mint,
+    payer,
+    undefined,
+    spl.TOKEN_PROGRAM_ID,
+    spl.ASSOCIATED_TOKEN_PROGRAM_ID
+  );
+  const accountExists = await connection
+    .getAccountInfo(publicKey)
+    .then((info) => info !== null)
+    .catch(() => false);
+
+  return {
+    publicKey,
+    ixn: accountExists
+      ? undefined // Account exists, so theres no need to create it.
+      : spl.createAssociatedTokenAccountInstruction(
+          payer,
+          publicKey,
+          payer,
+          mint,
+          spl.TOKEN_PROGRAM_ID,
+          spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        ),
+  };
+}
+
+export async function createAggregatorReq(
+  program: anchor.Program,
+  queueAccount: OracleQueueAccount,
+  params: AggregatorInitParams,
+  jobs: [JobAccount, number][],
+  fundLeaseAmount = new anchor.BN(0),
+  payerPubkey = programWallet(program as any).publicKey
+): Promise<{
+  ixns: anchor.web3.TransactionInstruction[];
+  signers: anchor.web3.Signer[];
+  account: AggregatorAccount;
+}> {
   const queue = await queueAccount.loadData();
   const mint = await queueAccount.loadMint();
-  const payerTokenWallet = (
-    await spl.getOrCreateAssociatedTokenAccount(
-      program.provider.connection,
-      payerKeypair,
-      mint.address,
-      payerKeypair.publicKey,
-      undefined,
-      undefined,
-      undefined,
-      spl.TOKEN_PROGRAM_ID,
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
-    )
-  ).address;
 
   // Aggregator params
   const aggregatorKeypair = params.keypair ?? anchor.web3.Keypair.generate();
-  const authority = params.authority ?? payerKeypair.publicKey;
+  const authority = params.authority ?? payerPubkey;
   const size = program.account.aggregatorAccountData.size;
   const [programStateAccount, stateBump] =
     ProgramStateAccount.fromSeed(program);
@@ -152,9 +240,21 @@ export async function createAggregator(
   //   walletBumps.push(bump);
   // }
 
-  const createIxns: TransactionInstruction[] = [];
+  const ixns: anchor.web3.TransactionInstruction[] = [];
 
-  createIxns.push(
+  // Check if the user has created a user token account. If not, they'll need to do that first.
+  const payerTokenAcct = await getPayerTokenAccount(
+    program.provider.connection,
+    payerPubkey,
+    mint.address
+  );
+  if (payerTokenAcct.ixn) {
+    ixns.push(payerTokenAcct.ixn);
+  }
+
+  // TODO: if fundLeaseAmount, check payer has enough funds
+
+  ixns.push(
     ...([
       // allocate aggregator account
       anchor.web3.SystemProgram.createAccount({
@@ -187,7 +287,7 @@ export async function createAggregator(
           aggregator: aggregatorKeypair.publicKey,
           authority,
           queue: params.queueAccount.publicKey,
-          authorWallet: params.authorWallet ?? state.tokenVault,
+          // authorWallet: params.authorWallet ?? state.tokenVault,
           programState: programStateAccount.publicKey,
         })
         .instruction(),
@@ -195,14 +295,14 @@ export async function createAggregator(
         .permissionInit({})
         .accounts({
           permission: permissionAccount.publicKey,
-          authority: params.authority,
+          authority: queue.authority,
           granter: queueAccount.publicKey,
           grantee: aggregatorKeypair.publicKey,
-          payer: payerKeypair.publicKey,
-          systemProgram: SystemProgram.programId,
+          payer: payerPubkey,
+          systemProgram: anchor.web3.SystemProgram.programId,
         })
         .instruction(),
-      payerKeypair.publicKey.equals(queue.authority)
+      payerPubkey.equals(queue.authority)
         ? await program.methods
             .permissionSet({
               permission: { permitOracleQueueUsage: null },
@@ -215,19 +315,17 @@ export async function createAggregator(
             .instruction()
         : undefined,
       spl.createAssociatedTokenAccountInstruction(
-        payerKeypair.publicKey,
+        payerPubkey,
         leaseEscrow,
         leaseAccount.publicKey,
-        mint.address,
-        spl.TOKEN_PROGRAM_ID,
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
+        mint.address
       ),
       await program.methods
         .leaseInit({
-          loadAmount: new anchor.BN(0),
+          loadAmount: fundLeaseAmount,
           stateBump,
           leaseBump,
-          withdrawAuthority: payerKeypair.publicKey,
+          withdrawAuthority: payerPubkey,
           walletBumps: Buffer.from([]),
         })
         .accounts({
@@ -235,12 +333,12 @@ export async function createAggregator(
           lease: leaseAccount.publicKey,
           queue: queueAccount.publicKey,
           aggregator: aggregatorAccount.publicKey,
-          systemProgram: SystemProgram.programId,
-          funder: payerTokenWallet,
-          payer: payerKeypair.publicKey,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          funder: payerTokenAcct.publicKey,
+          payer: payerPubkey,
           tokenProgram: spl.TOKEN_PROGRAM_ID,
           escrow: leaseEscrow,
-          owner: payerKeypair.publicKey,
+          owner: payerPubkey,
           mint: mint.address,
         })
         // .remainingAccounts(
@@ -257,20 +355,18 @@ export async function createAggregator(
             })
             .accounts({
               aggregator: aggregatorKeypair.publicKey,
-              authority: payerKeypair.publicKey,
+              authority,
               job: jobAccount.publicKey,
             })
             .instruction();
         })
       )),
-    ].filter(Boolean) as TransactionInstruction[])
+    ].filter(Boolean) as anchor.web3.TransactionInstruction[])
   );
 
-  const createSig = await sendAndConfirmTransaction(
-    program.provider.connection,
-    new Transaction().add(...createIxns),
-    [payerKeypair, aggregatorKeypair]
-  );
-
-  return aggregatorAccount;
+  return {
+    ixns: ixns,
+    signers: [aggregatorKeypair],
+    account: aggregatorAccount,
+  };
 }
