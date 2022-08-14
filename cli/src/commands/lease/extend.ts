@@ -33,7 +33,6 @@ export default class LeaseExtend extends BaseCommand {
   static args = [
     {
       name: "aggregatorKey",
-
       description: "public key of the aggregator to extend a lease for",
     },
   ];

@@ -2177,6 +2177,13 @@ export class OracleQueueAccount {
     const queue: any = await this.program.account.oracleQueueAccountData.fetch(
       this.publicKey
     );
+    if (
+      !("mint" in queue) ||
+      queue.mint === undefined ||
+      queue.mint === PublicKey.default
+    ) {
+      queue.mint = spl.NATIVE_MINT;
+    }
     const queueData = [];
     const buffer =
       (
@@ -3025,7 +3032,7 @@ export class CrankAccount {
     );
     const payerKeypair = programWallet(this.program);
     let mint: PublicKey = queue.mint;
-    if (mint.equals(PublicKey.default)) {
+    if (!mint || mint.equals(PublicKey.default)) {
       mint = spl.NATIVE_MINT;
     }
     // const promises: Array<Promise<TransactionSignature>> = [];
