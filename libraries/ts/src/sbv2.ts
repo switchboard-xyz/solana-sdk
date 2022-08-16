@@ -1673,9 +1673,10 @@ export class JobAccount {
         })
         .accounts({
           job: jobAccount.publicKey,
-          authorWallet: params.authority,
           authority: params.authority,
           programState: stateAccount.publicKey,
+          payer: payerKeypair.publicKey,
+          systemProgram: SystemProgram.programId,
         })
         .signers([jobAccount])
         .rpc();
@@ -1706,7 +1707,7 @@ export class JobAccount {
             authority: payerKeypair.publicKey,
             programState: stateAccount.publicKey,
             payer: payerKeypair.publicKey,
-            systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: SystemProgram.programId,
           })
           .signers([jobAccount])
           .rpc()
