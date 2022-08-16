@@ -1686,7 +1686,6 @@ export class JobAccount {
           i + CHUNK_SIZE >= params.data.byteLength
             ? params.data.byteLength
             : i + CHUNK_SIZE;
-        // console.log(`[ ${i}, ${end} ]`);
         chunks.push(params.data.slice(i, end));
         i = end;
       }
