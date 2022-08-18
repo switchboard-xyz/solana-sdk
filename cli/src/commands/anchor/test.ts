@@ -76,7 +76,7 @@ export default class AnchorTest extends BaseCommand {
   ) {
     this.dockerOracleProcess = spawn(
       "docker",
-      ["start", "--attach", `sbv2-localnet-oracle-${nodeImage}`],
+      ["start", "--attach", `sbv2-localnet-${nodeImage}`],
       {
         shell: true,
         env: process.env,
@@ -131,7 +131,7 @@ export default class AnchorTest extends BaseCommand {
       "docker",
       [
         "run",
-        `--name sbv2-localnet-oracle-${nodeImage}`,
+        `--name sbv2-localnet-${nodeImage}`,
         `--platform=${platform}`,
         `-e ORACLE_KEY=${oracleKey}`,
         `-e CLUSTER=localnet`,
@@ -145,10 +145,10 @@ export default class AnchorTest extends BaseCommand {
       }
     );
 
-    let logs: string[] = [];
+    // let logs: string[] = [];
 
     this.dockerOracleProcess.stdout.on("data", (data) => {
-      logs.push(`\x1b[34m${data}\x1b[0m`);
+      // logs.push(`\x1b[34m${data}\x1b[0m`);
       console.log(`\x1b[34m${data}\x1b[0m`);
       allLogs.push(data);
     });
@@ -159,10 +159,10 @@ export default class AnchorTest extends BaseCommand {
         !error
           .toString()
           .includes(
-            `The container name "/sbv2-localnet-oracle-${nodeImage}" is already in use by container`
+            `The container name "/sbv2-localnet-${nodeImage}" is already in use by container`
           )
       ) {
-        logs.push(`\x1b[31m${error.toString()}\x1b[0m`);
+        // logs.push(`\x1b[31m${error.toString()}\x1b[0m`);
         console.error(`\x1b[31m${error.toString()}\x1b[0m`);
         allLogs.push(error.toString());
       }
@@ -186,21 +186,6 @@ export default class AnchorTest extends BaseCommand {
         console.error(`\x1b[31mDocker image exited with code ${code}\x1b[0m`);
       }
     });
-
-    // const flushLogs = () => {
-    //   if (logs.length > 0) {
-    //     console.log(logs.join(""));
-    //     logs = [];
-    //   }
-
-    //   setTimeout(() => {
-    //     flushLogs();
-    //   }, 2500);
-    // };
-
-    // if (!silent) {
-    //   flushLogs();
-    // }
   }
 
   async run() {
@@ -220,7 +205,10 @@ export default class AnchorTest extends BaseCommand {
 
     let isFinished = false;
 
-    const keypairPath = path.join(process.cwd(), flags.keypair);
+    const keypairPath =
+      flags.keypair.charAt(0) === "/" || flags.keypair.startsWith("C:")
+        ? flags.keypair
+        : path.join(process.cwd(), flags.keypair);
     const oracleKey = oraclePubkey;
 
     // start docker oracle first
@@ -241,7 +229,7 @@ export default class AnchorTest extends BaseCommand {
 
     this.anchorChildProcess.on("message", (data) => {
       if (data.toString().includes("✨  Done")) {
-        exec(`docker kill sbv2-localnet-oracle-${flags.nodeImage}`);
+        exec(`docker kill sbv2-localnet-${flags.nodeImage}`);
         this.dockerOracleProcess.kill();
         isFinished = true;
       }
@@ -249,7 +237,7 @@ export default class AnchorTest extends BaseCommand {
 
     this.anchorChildProcess.on("close", (code) => {
       // console.log(`anchor test process closing ...`);
-      exec(`docker stop sbv2-localnet-oracle-${flags.nodeImage}`);
+      exec(`docker stop sbv2-localnet-${flags.nodeImage}`);
       isFinished = true;
     });
 
