@@ -7,6 +7,7 @@ import * as sbv2 from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import fs from "fs";
 import path from "path";
+import { sleep } from "../async.js";
 import { awaitOpenRound, createAggregator } from "../feed.js";
 import { transferWrappedSol } from "../token.js";
 
@@ -200,7 +201,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
 
       currentDirectory = path.join(currentDirectory, "../");
 
-      retryCount--;
+      --retryCount;
     }
 
     throw NotFoundError;
@@ -258,10 +259,6 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       program: switchboardProgram,
       publicKey: SWITCHBOARD_QUEUE,
     });
-    const queueData = await queue.loadData();
-    if (queueData.queue.length === 0) {
-      throw new Error(`OracleQueue has no active oracles heartbeating`);
-    }
 
     const oracle = process.env.ORACLE
       ? new sbv2.OracleAccount({
@@ -412,5 +409,40 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       expectedValue,
       timeout
     );
+  }
+
+  /** Checks whether the queue has any active oracles heartbeating */
+  public async isQueueReady(): Promise<boolean> {
+    const queueData = await this.queue.loadData();
+    return queueData.queue.length > 0;
+  }
+
+  /** Awaits the specified timeout for an oracle to start heartbeating on the queue
+   * @param timeout number of seconds to wait for an oracle to start heartbeating
+   */
+  public async oracleHeartbeat(timeout = 30): Promise<void> {
+    const delay = Math.ceil(timeout / 10) * 1000;
+    let retryCount = 10;
+    while (retryCount) {
+      try {
+        if (await this.isQueueReady()) {
+          return;
+        }
+      } catch (error) {
+        if (
+          !(error instanceof Error) ||
+          !error.toString().includes("connection refused")
+        ) {
+          throw error;
+        }
+      }
+      await sleep(delay);
+      --retryCount;
+    }
+    if (timeout <= 0) {
+      throw new Error(
+        `Timed out waiting for the OracleQueue to have an active oracle heartbeating`
+      );
+    }
   }
 }

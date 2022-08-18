@@ -15,7 +15,7 @@ import { anchorBNtoDateString } from "../date.js";
 import { createQueue } from "../queue.js";
 import { getOrCreateSwitchboardTokenAccount } from "../token.js";
 
-const LATEST_DOCKER_VERSION = "dev-v2-07-18-22";
+export const LATEST_DOCKER_VERSION = "dev-v2-07-18-22";
 
 export interface ISwitchboardTestEnvironment {
   programId: PublicKey;
@@ -148,7 +148,8 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     this.writeEnv(outputDir);
     this.writeJSON(outputDir);
     this.writeScripts(outputDir);
-    this.writeDockerCompose(this.oracle, outputDir);
+    this.writeDockerCompose(outputDir);
+    this.writeAnchorToml(outputDir);
   }
 
   /** Write the env file to filesystem */
@@ -245,7 +246,7 @@ docker-compose -f  "$script_dir"/docker-compose.switchboard.yml up
     );
   }
 
-  public writeDockerCompose(oracleKey: PublicKey, outputDir: string): void {
+  public writeDockerCompose(outputDir: string): void {
     const DOCKER_COMPOSE_FILEPATH = path.join(
       outputDir,
       "docker-compose.switchboard.yml"
@@ -263,7 +264,7 @@ services:
       - LIVE=1
       - CLUSTER=\${CLUSTER:-localnet}
       - HEARTBEAT_INTERVAL=30 # Seconds
-      - ORACLE_KEY=${oracleKey.toBase58()}
+      - ORACLE_KEY=${this.oracle.toBase58()}
     #  - RPC_URL=\${RPC_URL}
 secrets:
   PAYER_SECRETS:
@@ -274,6 +275,73 @@ secrets:
       `${chalk.green(
         "Docker-Compose saved to:"
       )} ${DOCKER_COMPOSE_FILEPATH.replace(process.cwd(), ".")}`
+    );
+  }
+
+  public writeAnchorToml(outputDir: string): void {
+    const ANCHOR_TOML_FILEPATH = path.join(
+      outputDir,
+      "Anchor.switchboard.toml"
+    );
+    const anchorTomlString = `[provider]
+cluster = "localnet"
+wallet = "${this.payerKeypairPath}"
+
+[test]
+startup_wait = 10000
+
+[test.validator]
+url = "https://devnet.genesysgo.net/"
+
+[[test.validator.clone]] # programID
+address = "${this.programId}"
+
+[[test.validator.clone]] # idlAddress
+address = "${this.idlAddress}"
+
+[[test.validator.clone]] # programState
+address = "${this.programState}"
+
+[[test.validator.clone]] # switchboardVault
+address = "${this.switchboardVault}"
+
+[[test.validator.clone]] # tokenWallet
+address = "${this.tokenWallet}"
+
+[[test.validator.clone]] # queue
+address = "${this.queue}"
+
+[[test.validator.clone]] # queueAuthority
+address = "${this.queueAuthority}"
+
+[[test.validator.clone]] # queueBuffer
+address = "${this.queueBuffer}"
+
+[[test.validator.clone]] # crank
+address = "${this.crank}"
+
+[[test.validator.clone]] # crankBuffer
+address = "${this.crankBuffer}"
+
+[[test.validator.clone]] # oracle
+address = "${this.oracle}"
+
+[[test.validator.clone]] # oracleAuthority
+address = "${this.oracleAuthority}"
+
+[[test.validator.clone]] # oracleEscrow
+address = "${this.oracleEscrow}"
+
+[[test.validator.clone]] # oraclePermissions
+address = "${this.oraclePermissions}"
+`;
+
+    fs.writeFileSync(ANCHOR_TOML_FILEPATH, anchorTomlString);
+    console.log(
+      `${chalk.green("Anchor.toml saved to:")} ${ANCHOR_TOML_FILEPATH.replace(
+        process.cwd(),
+        "."
+      )}`
     );
   }
 
