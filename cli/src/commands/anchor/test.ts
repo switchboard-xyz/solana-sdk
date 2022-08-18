@@ -135,6 +135,7 @@ export default class AnchorTest extends BaseCommand {
         `--platform=${platform}`,
         `-e ORACLE_KEY=${oracleKey}`,
         `-e CLUSTER=localnet`,
+        `-e VERBOSE=1`,
         `--mount type=bind,source=${keypairPath},target=/home/payer_secrets.json`,
         `switchboardlabs/node:${nodeImage}`,
       ],
