@@ -88,7 +88,7 @@ Print the deserialized Switchboard VRF account
 
 ```
 USAGE
-  $ sbv2 vrf print [VRFKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+  $ sbv2 vrf print [VRFKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [--json]
 
 ARGUMENTS
   VRFKEY  public key of the vrf account to deserialize

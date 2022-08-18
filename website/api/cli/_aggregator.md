@@ -504,8 +504,8 @@ Print the deserialized Switchboard aggregator account
 
 ```
 USAGE
-  $ sbv2 aggregator print [AGGREGATORKEY] [--json] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k
-    <value>] [--jobs] [-o]
+  $ sbv2 aggregator print [AGGREGATORKEY] [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>]
+    [--json] [--jobs] [-o]
 
 ARGUMENTS
   AGGREGATORKEY  public key of the aggregator account to deserialize
