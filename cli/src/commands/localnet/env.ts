@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/prevent-abbreviations */
 
 import { Flags } from "@oclif/core";
-import { PublicKey } from "@solana/web3.js";
 import { SwitchboardTestEnvironment } from "@switchboard-xyz/sbv2-utils";
 import { programWallet } from "@switchboard-xyz/switchboard-v2";
+import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
 import BaseCommand from "../../BaseCommand";
@@ -35,38 +35,18 @@ export default class LocalnetEnvironment extends BaseCommand {
 
     // TODO: Check paths and force flags
     if (!flags.force) {
-      if (fs.existsSync(path.join(outputDir, "switchboard.env"))) {
-        throw new Error(
-          "switchboard.env already exists, use --force to overwrite"
-        );
-      }
-
-      if (fs.existsSync(path.join(outputDir, "switchboard.json"))) {
-        throw new Error(
-          "switchboard.json already exists, use --force to overwrite"
-        );
-      }
-
-      if (fs.existsSync(path.join(outputDir, "start-local-validator.sh"))) {
-        throw new Error(
-          "start-local-validator.sh already exists, use --force to overwrite"
-        );
-      }
-
-      if (fs.existsSync(path.join(outputDir, "start-oracle.sh"))) {
-        throw new Error(
-          "start-oracle.sh already exists, use --force to overwrite"
-        );
-      }
-
-      if (
-        fs.existsSync(
-          path.join(process.cwd(), "docker-compose.switchboard.yml")
-        )
-      ) {
-        throw new Error(
-          "start-oracle.sh already exists, use --force to overwrite"
-        );
+      const files = [
+        "switchboard.env",
+        "switchboard.json",
+        "start-local-validator.sh",
+        "start-oracle.sh",
+        "Anchor.switchboard.toml",
+        "docker-compose.switchboard.yml",
+      ];
+      for (const file of files) {
+        if (fs.existsSync(path.join(outputDir, file))) {
+          throw new Error(`${file} already exists, use --force to overwrite`);
+        }
       }
     }
 
@@ -74,17 +54,27 @@ export default class LocalnetEnvironment extends BaseCommand {
     // TODO: Pass keypair path and add as env variable
     const testEnvironment = await SwitchboardTestEnvironment.create(
       flags.keypair,
-      {
-        USDC_MINT: new PublicKey(
-          "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU"
-        ),
-      },
+      undefined,
       flags.programId ? this.program.programId : undefined
     );
     testEnvironment.writeAll(outputDir);
+
+    console.log(
+      chalk.blue(
+        `\nYou may also copy the accounts from Anchor.switchboard.toml into your projects Anchor.toml and run the following command to create an oracle and run 'anchor test' with a local validator running:`
+      )
+    );
+    console.log(
+      chalk.yellow(
+        `\tsbv2 anchor test \\
+  --keypair ${testEnvironment.payerKeypairPath} \\
+  --oracleKey ${testEnvironment.oracle} \\
+  --switchboardDir ${outputDir}`
+      )
+    );
   }
 
   async catch(error) {
-    super.catch(error, "Failed to create localnet test environment");
+    super.catch(error, "Failed to start localnet environment");
   }
 }
