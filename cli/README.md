@@ -55,6 +55,7 @@ node bin/dev print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR
 * [`sbv2 aggregator set varianceThreshold [AGGREGATORKEY] [VARIANCETHRESHOLD]`](#sbv2-aggregator-set-variancethreshold-aggregatorkey-variancethreshold)
 * [`sbv2 aggregator update [AGGREGATORKEY]`](#sbv2-aggregator-update-aggregatorkey)
 * [`sbv2 aggregator watch [AGGREGATORKEY]`](#sbv2-aggregator-watch-aggregatorkey)
+* [`sbv2 anchor test`](#sbv2-anchor-test)
 * [`sbv2 buffer create [QUEUEKEY]`](#sbv2-buffer-create-queuekey)
 * [`sbv2 buffer print [BUFFERRELAYERKEY]`](#sbv2-buffer-print-bufferrelayerkey)
 * [`sbv2 config print`](#sbv2-config-print)
@@ -1208,6 +1209,33 @@ EXAMPLES
   $ sbv2 watch:aggregator J7j9xX8JP2B2ErvUzuqGAKBGeggsxPyFXj5MqZcYDxfa
 ```
 
+## `sbv2 anchor test`
+
+run anchor test and a switchboard oracle in parallel
+
+```
+USAGE
+  $ sbv2 anchor test [-v] [-s] [--mainnetBeta] [-u <value>] [--programId <value>] [-k <value>] [-d <value>]
+    [--oracleKey <value>] [--nodeImage <value>] [--arm] [-t <value>]
+
+FLAGS
+  -d, --switchboardDir=<value>  directory with switchboard.env to load a switchboard environment
+  -k, --keypair=<value>         keypair that will pay for onchain transactions. defaults to new account authority if no
+                                alternate authority provided
+  -s, --silent                  suppress docker logging
+  -t, --timeout=<value>         [default: 120] number of seconds before timing out
+  -u, --rpcUrl=<value>          alternate RPC url
+  -v, --verbose                 log everything
+  --arm                         apple silicon needs to use a docker image for linux/arm64
+  --mainnetBeta                 WARNING: use mainnet-beta solana cluster
+  --nodeImage=<value>           [default: dev-v2-08-14-22a-mc-beta] public key of the oracle to start-up
+  --oracleKey=<value>           public key of the oracle to start-up
+  --programId=<value>           alternative Switchboard program ID to interact with
+
+DESCRIPTION
+  run anchor test and a switchboard oracle in parallel
+```
+
 ## `sbv2 buffer create [QUEUEKEY]`
 
 create a buffer relayer account
@@ -2167,7 +2195,7 @@ EXAMPLES
   $ sbv2 print GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U
 ```
 
-_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.24/dist/commands/print/index.ts)_
+_See code: [dist/commands/print/index.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.25/dist/commands/print/index.ts)_
 
 ## `sbv2 print aggregator [AGGREGATORKEY]`
 
@@ -2751,7 +2779,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.24/dist/commands/sandbox.ts)_
+_See code: [dist/commands/sandbox.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.25/dist/commands/sandbox.ts)_
 
 ## `sbv2 set aggregator [AGGREGATORKEY]`
 
@@ -2818,7 +2846,7 @@ DESCRIPTION
   sandbox
 ```
 
-_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.24/dist/commands/test.ts)_
+_See code: [dist/commands/test.ts](https://github.com/switchboard-xyz/switchboard-v2/blob/v0.2.25/dist/commands/test.ts)_
 
 ## `sbv2 update [CHANNEL]`
 
