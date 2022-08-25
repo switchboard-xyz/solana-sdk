@@ -76,7 +76,7 @@ pub struct RequestResult<'info> {
     #[account(mut, 
         constraint = 
             payer_wallet.owner == payer_authority.key()
-            && escrow.mint == program_state.load()?.token_mint
+            && payer_wallet.mint == program_state.load()?.token_mint
     )]
     pub payer_wallet: Account<'info, TokenAccount>,
     /// CHECK:
