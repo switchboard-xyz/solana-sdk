@@ -1,6 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
   CrankAccount,
@@ -8,7 +9,6 @@ import {
   LeaseAccount,
   loadSwitchboardProgram,
   OracleAccount,
-  OracleJob,
   OracleQueueAccount,
   PermissionAccount,
   ProgramStateAccount,

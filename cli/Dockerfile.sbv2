@@ -1,4 +1,0 @@
-FROM node:16-alpine
-ARG SBV2_VERSION=latest
-RUN npm i -g @switchboard-xyz/switchboardv2-cli@$SBV2_VERSION
-RUN sbv2 print GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR --verbose

@@ -1,5 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import { AccountMeta, PublicKey, TokenAmount } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
   BufferRelayerAccount,
@@ -8,7 +9,6 @@ import {
   JobAccount,
   LeaseAccount,
   OracleAccount,
-  OracleJob,
   OracleQueueAccount,
   PermissionAccount,
   ProgramStateAccount,

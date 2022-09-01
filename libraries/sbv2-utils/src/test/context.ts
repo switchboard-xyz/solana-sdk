@@ -3,6 +3,7 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
 import { Keypair, PublicKey } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
 import Big from "big.js";
 import fs from "fs";
@@ -305,11 +306,11 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       name: Buffer.from(`Value ${value}`),
       authority: this.payerTokenWallet,
       data: Buffer.from(
-        sbv2.OracleJob.encodeDelimited(
-          sbv2.OracleJob.create({
+        OracleJob.encodeDelimited(
+          OracleJob.create({
             tasks: [
-              sbv2.OracleJob.Task.create({
-                valueTask: sbv2.OracleJob.ValueTask.create({
+              OracleJob.Task.create({
+                valueTask: OracleJob.ValueTask.create({
                   value,
                 }),
               }),
@@ -387,11 +388,11 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
       name: Buffer.from(`Value ${value}`),
       authority: Keypair.generate().publicKey,
       data: Buffer.from(
-        sbv2.OracleJob.encodeDelimited(
-          sbv2.OracleJob.create({
+        OracleJob.encodeDelimited(
+          OracleJob.create({
             tasks: [
-              sbv2.OracleJob.Task.create({
-                valueTask: sbv2.OracleJob.ValueTask.create({
+              OracleJob.Task.create({
+                valueTask: OracleJob.ValueTask.create({
                   value,
                 }),
               }),

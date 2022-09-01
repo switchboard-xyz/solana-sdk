@@ -4,7 +4,6 @@
     "libraries/sbv2-lite",
     "libraries/ts",
     "libraries/sbv2-utils",
-    "cli",
     "examples/clients/*",
     "examples/programs/*",
     "website"
@@ -22,7 +21,6 @@
     "examples/clients/**/*",
     "libraries/rs",
     "libraries/py",
-    "cli/!(src)",
     "libraries/sbv2-utils/!(src)",
     "libraries/sbv2-lite/!(src)",
     "libraries/ts/!(src)",
