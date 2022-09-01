@@ -3,7 +3,6 @@ import * as anchor from "@project-serum/anchor";
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@project-serum/anchor/dist/cjs/coder";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import {
-  DEFAULT_KEYPAIR,
   prettyPrintAggregator,
   prettyPrintBufferRelayer,
   prettyPrintCrank,
@@ -31,6 +30,7 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import * as path from "path";
+import { CURRENT_ANNOUNCEMENT } from "./announcement";
 import { CliConfig } from "./config";
 import { FsProvider } from "./types";
 import { CommandContext } from "./types/context/context";
@@ -63,6 +63,8 @@ abstract class PrintBaseCommand extends Command {
   async init() {
     const { flags } = (await this.parse(this.constructor as any)) as any;
     // this.flags = flags;
+
+    console.log(CURRENT_ANNOUNCEMENT);
 
     // setup logging
     const level = flags.silent ? "error" : flags.verbose ? "debug" : "info";

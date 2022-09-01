@@ -18,6 +18,7 @@ import Big from "big.js";
 import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
+import { CURRENT_ANNOUNCEMENT } from "./announcement";
 import { CliConfig, ConfigParameter, DEFAULT_CONFIG } from "./config";
 import { AuthorityMismatch } from "./types";
 import { CommandContext } from "./types/context/context";
@@ -73,6 +74,8 @@ abstract class BaseCommand extends Command {
   async init() {
     const { flags } = await this.parse((<Input<any>>this.constructor) as any);
     BaseCommand.flags = flags as any;
+
+    console.log(CURRENT_ANNOUNCEMENT);
 
     // setup logging
     this.silent = (flags as any).silent;
