@@ -46,7 +46,7 @@ export default class JobCreate extends BaseCommand {
       throw new Error(`jobDefinitionPath does not exist, ${jobDefinitionPath}`);
     }
 
-    const oracleJob = OracleJob.create(
+    const oracleJob = OracleJob.fromObject(
       JSON.parse(
         fs
           .readFileSync(jobDefinitionPath, "utf-8")

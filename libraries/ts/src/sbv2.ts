@@ -246,7 +246,7 @@ export class SwitchboardDecimal {
   }
 
   toString() {
-    this.toBig().toString();
+    return this.toBig().toString();
   }
 }
 

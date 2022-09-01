@@ -5,10 +5,11 @@ export * from "./sbv2.js";
 
 import protobuf from "protobufjs/minimal.js";
 
-// prevent enums from being converted to strings
 protobuf.util.toJSONOptions = {
   longs: String,
-  enums: Number,
+  enums: String,
   bytes: String,
   json: true,
 };
+
+// protobuf.util.toObject.

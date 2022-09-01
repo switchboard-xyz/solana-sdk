@@ -3,7 +3,8 @@
   "exclude": ["tests/**/*", "lib", "node_modules"],
   "files": ["./src/index.ts"],
   "compilerOptions": {
-    // "target": "es2019",
+    "target": "es2019",
+    "moduleResolution": "node",
     "composite": true,
     "sourceMap": true,
     "inlineSources": true,

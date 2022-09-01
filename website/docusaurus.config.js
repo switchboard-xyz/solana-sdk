@@ -150,28 +150,24 @@ const config = {
                 to: "/api/tasks",
               },
               {
-                label: "Typescript",
+                label: "Command Line",
+                to: "/api/cli",
+              },
+              {
+                label: "Solana Typescript",
                 to: "https://docs.switchboard.xyz/api/ts",
               },
               {
-                label: "Typescript Lite",
-                to: "https://docs.switchboard.xyz/api/ts-lite",
-              },
-              {
-                label: "Sbv2 Utils",
-                to: "https://docs.switchboard.xyz/api/sbv2-utils",
-              },
-              {
-                label: "Python",
+                label: "Solana Python",
                 to: "https://docs.switchboard.xyz/api/py",
               },
               {
-                label: "Rust",
+                label: "Solana Rust",
                 to: "https://docs.rs/switchboard-v2/latest/switchboard_v2/",
               },
               {
-                label: "CLI",
-                to: "/api/cli",
+                label: "Aptos Typescript",
+                to: "https://docs.switchboard.xyz/api/aptos",
               },
             ],
           },
