@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/sbv2-utils",
-  "version": "0.1.44",
+  "version": "0.1.45",
   "description": "some basic utility functions when working with switchboard-v2",
   "author": "",
   "license": "ISC",
@@ -40,7 +40,7 @@
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.43.5",
     "@switchboard-xyz/common": "^2.0.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.131",
+    "@switchboard-xyz/switchboard-v2": "^0.0.132",
     "big.js": "^6.2.1",
     "bn.js": "^5.2.1",
     "chalk": "4",
