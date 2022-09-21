@@ -17,7 +17,7 @@ import {
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   Transaction,
   TransactionInstruction,
-  TransactionSignature,
+  TransactionSignature
 } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -4210,12 +4210,15 @@ export function packInstructions(
     const sigCount: number[] = [];
     encodeLength(sigCount, currentTransaction.signatures.length);
 
-    if (
-      anchor.web3.PACKET_DATA_SIZE <=
-      currentTransaction.serializeMessage().length +
+    let currentTransactionSize = Number.MAX_SAFE_INTEGER;
+    try {
+      currentTransactionSize =
+        currentTransaction.serializeMessage().length +
         currentTransaction.signatures.length * 64 +
-        sigCount.length
-    ) {
+        sigCount.length;
+    } catch (err) {} /* Ignore */
+
+    if (anchor.web3.PACKET_DATA_SIZE <= currentTransactionSize) {
       // If the aggregator transaction fits, it will serialize without error. We can then push it ahead no problem
       const trimmedInstructions = ixs
         .map(() => currentTransaction.instructions.pop())
