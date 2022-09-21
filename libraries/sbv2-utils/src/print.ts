@@ -20,6 +20,7 @@ import Big from "big.js";
 import chalk from "chalk";
 import { getIdlAddress, getProgramDataAddress } from "./anchor.js";
 import { anchorBNtoDateTimeString } from "./date.js";
+import { InvalidSwitchboardAccount } from "./errors.js";
 import type { SwitchboardAccountType } from "./switchboard.js";
 
 export const chalkString = (
@@ -777,44 +778,44 @@ export async function prettyPrintSwitchboardAccount(
   accountType: SwitchboardAccountType
 ): Promise<string> {
   switch (accountType) {
-    case "JobAccountData": {
+    case JobAccount.accountName: {
       const job = new JobAccount({ program, publicKey });
       return prettyPrintJob(job);
     }
-    case "AggregatorAccountData": {
+    case AggregatorAccount.accountName: {
       const aggregator = new AggregatorAccount({ program, publicKey });
       return prettyPrintAggregator(aggregator, undefined);
     }
-    case "OracleAccountData": {
+    case OracleAccount.accountName: {
       const oracle = new OracleAccount({ program, publicKey });
       return prettyPrintOracle(oracle, undefined);
     }
-    case "PermissionAccountData": {
+    case PermissionAccount.accountName: {
       const permission = new PermissionAccount({ program, publicKey });
       return prettyPrintPermissions(permission, undefined);
     }
-    case "LeaseAccountData": {
+    case LeaseAccount.accountName: {
       const lease = new LeaseAccount({ program, publicKey });
       return prettyPrintLease(lease, undefined);
     }
-    case "OracleQueueAccountData": {
+    case OracleQueueAccount.accountName: {
       const queue = new OracleQueueAccount({ program, publicKey });
       return prettyPrintQueue(queue, undefined);
     }
-    case "CrankAccountData": {
+    case CrankAccount.accountName: {
       const crank = new CrankAccount({ program, publicKey });
       return prettyPrintCrank(crank, undefined);
     }
     case "SbState":
-    case "ProgramStateAccountData": {
+    case ProgramStateAccount.accountName: {
       const [programState] = ProgramStateAccount.fromSeed(program);
       return prettyPrintProgramState(programState);
     }
-    case "VrfAccountData": {
+    case VrfAccount.accountName: {
       const vrfAccount = new VrfAccount({ program, publicKey });
       return prettyPrintVrf(vrfAccount, undefined);
     }
-    case "BufferRelayerAccountData": {
+    case BufferRelayerAccount.accountName: {
       const bufferRelayerAccount = new BufferRelayerAccount({
         program,
         publicKey,
@@ -825,4 +826,5 @@ export async function prettyPrintSwitchboardAccount(
       return `Found buffer account but dont know which one`;
     }
   }
+  throw new InvalidSwitchboardAccount();
 }

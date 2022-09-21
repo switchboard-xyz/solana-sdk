@@ -678,6 +678,12 @@ export class SwitchboardError {
   }
 }
 
+export type TxnResponse<T = unknown> = {
+  created?: T;
+  ixns: anchor.web3.TransactionInstruction[];
+  signers: anchor.web3.Signer[];
+};
+
 /**
  * Row structure of elements in the aggregator history buffer.
  */
@@ -703,6 +709,17 @@ export class AggregatorHistoryRow {
     res.value = decimal.toBig();
     return res;
   }
+}
+
+export interface AggregatorSetConfigParams {
+  name?: Buffer;
+  metadata?: Buffer;
+  batchSize: number;
+  minOracleResults: number;
+  minJobResults: number;
+  minUpdateDelaySeconds: number;
+  forceReportPeriod?: number;
+  varianceThreshold?: number;
 }
 
 export interface AggregatorSetBatchSizeParams {
@@ -1098,7 +1115,6 @@ export class AggregatorAccount {
     program: SwitchboardProgram,
     params: AggregatorInitParams
   ): Promise<AggregatorAccount> {
-    const payerKeypair = programWallet(program);
     const aggregatorAccount = params.keypair ?? anchor.web3.Keypair.generate();
     const authority = params.authority ?? aggregatorAccount.publicKey;
     const size = program.account.aggregatorAccountData.size;
@@ -1144,79 +1160,44 @@ export class AggregatorAccount {
     return new AggregatorAccount({ program, keypair: aggregatorAccount });
   }
 
-  async setBatchSize(
-    params: AggregatorSetBatchSizeParams
-  ): Promise<TransactionSignature> {
+  async setConfigTxn(
+    params: AggregatorSetConfigParams & { authority?: Keypair }
+  ): Promise<anchor.web3.Transaction> {
     const program = this.program;
     const authority =
       params.authority ?? this.keypair ?? programWallet(this.program);
     return program.methods
-      .aggregatorSetBatchSize({
+      .aggregatorSetConfig({
+        name: (params.name ?? Buffer.from("")).slice(0, 32),
+        metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
         batchSize: params.batchSize,
-      })
-      .accounts({
-        aggregator: this.publicKey,
-        authority: authority.publicKey,
-      })
-      .signers([authority])
-      .rpc();
-  }
-
-  async setVarianceThreshold(params: {
-    authority: Keypair;
-    threshold: Big;
-  }): Promise<TransactionSignature> {
-    const program = this.program;
-    const authority =
-      params.authority ?? this.keypair ?? programWallet(this.program);
-    return program.rpc.aggregatorSetVarianceThreshold(
-      {
-        varianceThreshold: SwitchboardDecimal.fromBig(params.threshold),
-      },
-      {
-        accounts: {
-          aggregator: this.publicKey,
-          authority: authority.publicKey,
-        },
-        signers: [authority],
-      }
-    );
-  }
-
-  async setMinJobs(
-    params: AggregatorSetMinJobsParams
-  ): Promise<TransactionSignature> {
-    const program = this.program;
-    const authority =
-      params.authority ?? this.keypair ?? programWallet(this.program);
-    return program.methods
-      .aggregatorSetMinJobs({
-        minJobResults: params.minJobResults,
-      })
-      .accounts({
-        aggregator: this.publicKey,
-        authority: authority.publicKey,
-      })
-      .signers([authority])
-      .rpc();
-  }
-
-  async setMinOracles(
-    params: AggregatorSetMinOraclesParams
-  ): Promise<TransactionSignature> {
-    const program = this.program;
-    const authority =
-      params.authority ?? this.keypair ?? programWallet(this.program);
-    return program.methods
-      .aggregatorSetMinOracles({
         minOracleResults: params.minOracleResults,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+        minJobResults: params.minJobResults,
+        forceReportPeriod: new anchor.BN(params.forceReportPeriod ?? 0),
+        varianceThreshold: params.varianceThreshold
+          ? SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
+          : undefined,
       })
       .accounts({
         aggregator: this.publicKey,
         authority: authority.publicKey,
       })
       .signers([authority])
-      .rpc();
+      .transaction();
+  }
+
+  async setConfig(
+    params: AggregatorSetConfigParams
+  ): Promise<TransactionSignature> {
+    return (
+      await this.program.provider.sendAll([
+        {
+          tx: await this.setConfigTxn(params),
+          signers: [this.keypair ?? programWallet(this.program)],
+        },
+      ])
+    )[0];
   }
 
   async setHistoryBuffer(
@@ -1251,23 +1232,6 @@ export class AggregatorAccount {
           programId: program.programId,
         }),
       ])
-      .rpc();
-  }
-
-  async setUpdateInterval(
-    params: AggregatorSetUpdateIntervalParams
-  ): Promise<TransactionSignature> {
-    const authority =
-      params.authority ?? this.keypair ?? programWallet(this.program);
-    return this.program.methods
-      .aggregatorSetUpdateInterval({
-        newInterval: params.newInterval,
-      })
-      .accounts({
-        aggregator: this.publicKey,
-        authority: authority.publicKey,
-      })
-      .signers([authority])
       .rpc();
   }
 
@@ -2422,6 +2386,8 @@ export interface LeaseWithdrawParams {
  * for fulfilling feed updates.
  */
 export class LeaseAccount {
+  static accountName = "LeaseAccountData";
+
   program: SwitchboardProgram;
 
   publicKey: PublicKey;
@@ -3931,6 +3897,8 @@ export class VrfAccount {
 }
 
 export class BufferRelayerAccount {
+  static accountName = "BufferRelayerAccountData";
+
   program: SwitchboardProgram;
 
   publicKey: PublicKey;

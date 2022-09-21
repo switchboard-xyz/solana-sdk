@@ -16,18 +16,18 @@ import {
 import { InvalidSwitchboardAccount } from "./errors.js";
 
 export const SWITCHBOARD_ACCOUNT_TYPES = [
-  "JobAccountData",
-  "AggregatorAccountData",
-  "OracleAccountData",
-  "OracleQueueAccountData",
-  "PermissionAccountData",
-  "LeaseAccountData",
-  "ProgramStateAccountData",
-  "VrfAccountData",
+  JobAccount.accountName,
+  AggregatorAccount.accountName,
+  OracleAccount.accountName,
+  OracleQueueAccount.accountName,
+  PermissionAccount.accountName,
+  LeaseAccount.accountName,
+  ProgramStateAccount.accountName,
+  VrfAccount.accountName,
+  CrankAccount.accountName,
+  BufferRelayerAccount.accountName,
   "SbState",
   "BUFFERxx",
-  "CrankAccountData",
-  "BufferRelayerAccountData",
 ] as const;
 
 export type SwitchboardAccount =
@@ -84,35 +84,35 @@ export const loadSwitchboardAccount = async (
 ): Promise<[SwitchboardAccountType, SwitchboardAccount]> => {
   const accountType = await findAccountType(program, publicKey);
   switch (accountType) {
-    case "JobAccountData": {
+    case JobAccount.accountName: {
       return [accountType, new JobAccount({ program, publicKey })];
     }
-    case "AggregatorAccountData": {
+    case AggregatorAccount.accountName: {
       return [accountType, new AggregatorAccount({ program, publicKey })];
     }
-    case "OracleAccountData": {
+    case OracleAccount.accountName: {
       return [accountType, new OracleAccount({ program, publicKey })];
     }
-    case "PermissionAccountData": {
+    case PermissionAccount.accountName: {
       return [accountType, new PermissionAccount({ program, publicKey })];
     }
-    case "LeaseAccountData": {
+    case LeaseAccount.accountName: {
       return [accountType, new LeaseAccount({ program, publicKey })];
     }
-    case "OracleQueueAccountData": {
+    case OracleQueueAccount.accountName: {
       return [accountType, new OracleQueueAccount({ program, publicKey })];
     }
-    case "CrankAccountData": {
+    case CrankAccount.accountName: {
       return [accountType, new CrankAccount({ program, publicKey })];
     }
     case "SbState":
-    case "ProgramStateAccountData": {
+    case ProgramStateAccount.accountName: {
       return [accountType, new ProgramStateAccount({ program, publicKey })];
     }
-    case "VrfAccountData": {
+    case VrfAccount.accountName: {
       return [accountType, new VrfAccount({ program, publicKey })];
     }
-    case "BufferRelayerAccountData": {
+    case BufferRelayerAccount.accountName: {
       return [accountType, new BufferRelayerAccount({ program, publicKey })];
     }
   }
