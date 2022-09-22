@@ -1170,14 +1170,9 @@ export class AggregatorAccount {
   async setConfig(
     params: AggregatorSetConfigParams
   ): Promise<TransactionSignature> {
-    return (
-      await this.program.provider.sendAll([
-        {
-          tx: await this.setConfigTxn(params),
-          signers: [this.keypair ?? programWallet(this.program)],
-        },
-      ])
-    )[0];
+    return this.program.provider.send(await this.setConfigTxn(params), [
+      this.keypair ?? programWallet(this.program),
+    ]);
   }
 
   async setHistoryBuffer(
@@ -2095,15 +2090,20 @@ export interface OracleQueueInitParams {
   mint: PublicKey;
 }
 
-export interface OracleQueueSetRewardsParams {
-  rewards: anchor.BN;
-  authority?: Keypair;
-}
-
-export interface OracleQueueSetVrfSettingsParams {
-  unpermissionedVrf: boolean;
-  authority?: Keypair;
-}
+export type OracleQueueSetConfigParams = Partial<{
+  name: Buffer;
+  metadata: Buffer;
+  unpermissionedFeedsEnabled: boolean;
+  unpermissionedVrfEnabled: boolean;
+  enableBufferRelayers: boolean;
+  slashingEnabled: boolean;
+  reward: number;
+  minStake: number;
+  varianceToleranceMultiplier: number;
+  oracleTimeout: number;
+  consecutiveFeedFailureLimit: number;
+  consecutiveOracleFailureLimit: number;
+}>;
 
 /**
  * A Switchboard account representing a queue for distributing oracles to
@@ -2262,36 +2262,55 @@ export class OracleQueueAccount {
     return new OracleQueueAccount({ program, keypair: oracleQueueAccount });
   }
 
-  async setRewards(
-    params: OracleQueueSetRewardsParams
-  ): Promise<TransactionSignature> {
+  async setConfigTxn(
+    params: OracleQueueSetConfigParams & { authority?: Keypair }
+  ): Promise<anchor.web3.Transaction> {
+    const program = this.program;
     const authority =
       params.authority ?? this.keypair ?? programWallet(this.program);
-    return this.program.methods
-      .oracleQueueSetRewards({
-        rewards: params.rewards,
+    return program.methods
+      .oracleQueueSetConfig({
+        name: findKeyInObject(params, "name"),
+        metadata: findKeyInObject(params, "metadata"),
+        unpermissionedFeedsEnabled: findKeyInObject(
+          params,
+          "unpermissionedFeedsEnabled"
+        ),
+        unpermissionedVrfEnabled: findKeyInObject(
+          params,
+          "unpermissionedVrfEnabled"
+        ),
+        enableBufferRelayers: findKeyInObject(params, "enableBufferRelayers"),
+        slashingEnabled: findKeyInObject(params, "slashingEnabled"),
+
+        reward: findKeyInObject(params, "reward"),
+        minStake: findKeyInObject(params, "minStake"),
+        oracleTimeout: findKeyInObject(params, "oracleTimeout"),
+        consecutiveFeedFailureLimit: findKeyInObject(
+          params,
+          "consecutiveFeedFailureLimit"
+        ),
+        consecutiveOracleFailureLimit: findKeyInObject(
+          params,
+          "consecutiveOracleFailureLimit"
+        ),
+        varianceToleranceMultiplier: findKeyInObject(
+          params,
+          "varianceToleranceMultiplier",
+          (o) => SwitchboardDecimal.fromBig(new Big(o))
+        ),
       })
       .accounts({ queue: this.publicKey, authority: authority.publicKey })
       .signers([authority])
-      .rpc();
+      .transaction();
   }
 
-  async setVrfSettings(
-    params: OracleQueueSetVrfSettingsParams
+  async setConfig(
+    params: OracleQueueSetConfigParams
   ): Promise<TransactionSignature> {
-    const authority =
-      params.authority ?? this.keypair ?? programWallet(this.program);
-
-    return this.program.methods
-      .oracleQueueVrfConfig({
-        unpermissionedVrfEnabled: params.unpermissionedVrf,
-      })
-      .accounts({
-        queue: this.publicKey,
-        authority: authority.publicKey,
-      })
-      .signers([authority])
-      .rpc();
+    return this.program.provider.send(await this.setConfigTxn(params), [
+      this.keypair ?? programWallet(this.program),
+    ]);
   }
 }
 
