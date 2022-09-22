@@ -23,6 +23,7 @@ import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
 import Big from "big.js";
 import * as crypto from "crypto";
+import lodash from "lodash";
 
 export type SwitchboardProgram = anchor.Program;
 
@@ -711,39 +712,19 @@ export class AggregatorHistoryRow {
   }
 }
 
-export interface AggregatorSetConfigParams {
-  name?: Buffer;
-  metadata?: Buffer;
+export type AggregatorSetConfigParams = Partial<{
+  name: Buffer;
+  metadata: Buffer;
   batchSize: number;
   minOracleResults: number;
   minJobResults: number;
   minUpdateDelaySeconds: number;
-  forceReportPeriod?: number;
-  varianceThreshold?: number;
-}
-
-export interface AggregatorSetBatchSizeParams {
-  batchSize: number;
-  authority?: Keypair;
-}
-
-export interface AggregatorSetMinJobsParams {
-  minJobResults: number;
-  authority?: Keypair;
-}
-
-export interface AggregatorSetMinOraclesParams {
-  minOracleResults: number;
-  authority?: Keypair;
-}
+  forceReportPeriod: number;
+  varianceThreshold: number;
+}>;
 
 export interface AggregatorSetQueueParams {
   queueAccount: OracleQueueAccount;
-  authority?: Keypair;
-}
-
-export interface AggregatorSetUpdateIntervalParams {
-  newInterval: number;
   authority?: Keypair;
 }
 
@@ -1168,16 +1149,16 @@ export class AggregatorAccount {
       params.authority ?? this.keypair ?? programWallet(this.program);
     return program.methods
       .aggregatorSetConfig({
-        name: (params.name ?? Buffer.from("")).slice(0, 32),
-        metadata: (params.metadata ?? Buffer.from("")).slice(0, 128),
-        batchSize: params.batchSize,
-        minOracleResults: params.minOracleResults,
-        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
-        minJobResults: params.minJobResults,
-        forceReportPeriod: new anchor.BN(params.forceReportPeriod ?? 0),
-        varianceThreshold: params.varianceThreshold
-          ? SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
-          : undefined,
+        name: findKeyInObject(params, "name"),
+        metadata: findKeyInObject(params, "metadata"),
+        batchSize: findKeyInObject(params, "batchSize"),
+        minOracleResults: findKeyInObject(params, "minOracleResults"),
+        minUpdateDelaySeconds: findKeyInObject(params, "minUpdateDelaySeconds"),
+        minJobResults: findKeyInObject(params, "minJobResults"),
+        forceReportPeriod: findKeyInObject(params, "forceReportPeriod"),
+        varianceThreshold: findKeyInObject(params, "varianceThreshold", (o) =>
+          SwitchboardDecimal.fromBig(new Big(o))
+        ),
       })
       .accounts({
         aggregator: this.publicKey,
@@ -4338,6 +4319,26 @@ function safeDiv(number_: Big, denominator: Big, decimals = 20): Big {
   const result = number_.div(denominator);
   Big.DP = oldDp;
   return result;
+}
+
+/**
+ * Given an {@linkcode object} and a {@linkcode key}, try to produce a value.
+ *
+ * @param object    _REQUIRED_: The object search for value output.
+ * @param key       _REQUIRED_: A key of {@linkcode object} to check for value output.
+ * @param transform _OPTIONAL_: A hook that can be used to transform the result value if it is found.
+ *
+ * @returns The (optionally transformed) keyed object found in {@linkcode object}.
+ */
+function findKeyInObject<T extends Record<string, unknown>>(
+  object: T,
+  key: keyof T,
+  transform?: (obj: any) => any
+) {
+  const obj = lodash.get<T, keyof T, null>(object, key, null);
+  return lodash.isNull(obj) || lodash.isUndefined(transform)
+    ? obj
+    : transform(obj);
 }
 
 export class AnchorWallet implements anchor.Wallet {
