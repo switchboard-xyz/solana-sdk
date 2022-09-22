@@ -16,7 +16,7 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   Transaction,
-  TransactionSignature,
+  TransactionSignature
 } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -778,10 +778,16 @@ export class AggregatorAccount {
    * @param aggregator A preloaded aggregator object.
    * @return The name of the aggregator.
    */
-  static getName(aggregator: any): string {
-    // eslint-disable-next-line no-control-regex
-    return String.fromCharCode(...aggregator.name).replace(/\u0000/g, "");
-  }
+  static getName = (aggregator: any) =>
+    String.fromCharCode(...aggregator.name).replace(/\u0000/g, "");
+
+  /**
+   * Returns the aggregator's metadata buffer in a stringified format.
+   * @param aggregator A preloaded aggregator object.
+   * @return The stringified metadata of the aggregator.
+   */
+  static getMetadata = (aggregator: any) =>
+    String.fromCharCode(...aggregator.metadata).replace(/\u0000/g, "");
 
   /**
    * Load and parse AggregatorAccount state based on the program IDL.
@@ -1170,7 +1176,8 @@ export class AggregatorAccount {
   async setConfig(
     params: AggregatorSetConfigParams
   ): Promise<TransactionSignature> {
-    return this.program.provider.send(await this.setConfigTxn(params), [
+    const provider = this.program.provider as anchor.AnchorProvider;
+    return provider.sendAndConfirm(await this.setConfigTxn(params), [
       this.keypair ?? programWallet(this.program),
     ]);
   }
@@ -2140,6 +2147,22 @@ export class OracleQueueAccount {
     this.publicKey = params.publicKey ?? this.keypair.publicKey;
   }
 
+  /**
+   * Returns the queue's name buffer in a stringified format.
+   * @param queue A preloaded queue object.
+   * @return The name of the queue.
+   */
+  static getName = (queue: any) =>
+    String.fromCharCode(...queue.name).replace(/\u0000/g, "");
+
+  /**
+   * Returns the queue's metadata buffer in a stringified format.
+   * @param queue A preloaded queue object.
+   * @return The stringified metadata of the queue.
+   */
+  static getMetadata = (queue: any) =>
+    String.fromCharCode(...queue.metadata).replace(/\u0000/g, "");
+
   async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();
     let mintKey = queue.mint ?? PublicKey.default;
@@ -2308,7 +2331,8 @@ export class OracleQueueAccount {
   async setConfig(
     params: OracleQueueSetConfigParams
   ): Promise<TransactionSignature> {
-    return this.program.provider.send(await this.setConfigTxn(params), [
+    const provider = this.program.provider as anchor.AnchorProvider;
+    return provider.sendAndConfirm(await this.setConfigTxn(params), [
       this.keypair ?? programWallet(this.program),
     ]);
   }
