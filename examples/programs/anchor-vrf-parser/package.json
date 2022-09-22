@@ -20,7 +20,7 @@
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.42.0",
     "@switchboard-xyz/sbv2-utils": "^0.1.43",
-    "@switchboard-xyz/switchboard-v2": "^0.0.130",
+    "@switchboard-xyz/switchboard-v2": "^0.0.134",
     "chalk": "^4.1.2",
     "child_process": "^1.0.2",
     "dotenv": "^16.0.1",

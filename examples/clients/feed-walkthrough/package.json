@@ -21,7 +21,7 @@
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.50.1",
     "@switchboard-xyz/common": "^2.0.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.130",
+    "@switchboard-xyz/switchboard-v2": "^0.0.134",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",
     "readline-sync": "^1.4.10"

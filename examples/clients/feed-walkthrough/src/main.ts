@@ -1,7 +1,7 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/common";
+import { IOracleJob, OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
   CrankAccount,
@@ -161,26 +161,26 @@ async function main() {
   console.log(toAccountString(`  Lease`, leaseContract.publicKey));
 
   // Job
-  const tasks: OracleJob.Task[] = [
-    OracleJob.Task.create({
-      httpTask: OracleJob.HttpTask.create({
-        url: `https://ftx.us/api/markets/SOL_USD`,
-      }),
-    }),
-    OracleJob.Task.create({
-      jsonParseTask: OracleJob.JsonParseTask.create({ path: "$.result.price" }),
-    }),
-  ];
-  const jobData = Buffer.from(
-    OracleJob.encodeDelimited(
-      OracleJob.create({
-        tasks,
-      })
-    ).finish()
-  );
+  const jobDefinition: IOracleJob = {
+    tasks: [
+      {
+        httpTask: {
+          url: `https://ftx.us/api/markets/SOL_USD`,
+        },
+      },
+      {
+        jsonParseTask: { path: "$.result.price" },
+      },
+    ],
+  };
+
+  // using OracleJob.fromObject will convert string enums to the correct format
+  // using OracleJob.create will not
+  const oracleJob = OracleJob.fromObject(jobDefinition);
+
   const jobKeypair = anchor.web3.Keypair.generate();
   const jobAccount = await JobAccount.create(program, {
-    data: jobData,
+    data: Buffer.from(OracleJob.encodeDelimited(oracleJob).finish()),
     keypair: jobKeypair,
     authority: authority.publicKey,
   });
