@@ -2109,12 +2109,12 @@ export type OracleQueueSetConfigParams = Partial<{
   unpermissionedVrfEnabled: boolean;
   enableBufferRelayers: boolean;
   slashingEnabled: boolean;
-  reward: number;
-  minStake: number;
   varianceToleranceMultiplier: number;
   oracleTimeout: number;
-  consecutiveFeedFailureLimit: number;
-  consecutiveOracleFailureLimit: number;
+  reward: anchor.BN;
+  minStake: anchor.BN;
+  consecutiveFeedFailureLimit: anchor.BN;
+  consecutiveOracleFailureLimit: anchor.BN;
 }>;
 
 /**
@@ -2334,11 +2334,13 @@ export class OracleQueueAccount {
   }
 
   async setConfig(
-    params: OracleQueueSetConfigParams
+    params: OracleQueueSetConfigParams & { authority?: Keypair }
   ): Promise<TransactionSignature> {
     const provider = this.program.provider as anchor.AnchorProvider;
+    const authority =
+      params.authority ?? this.keypair ?? programWallet(this.program);
     return provider.sendAndConfirm(await this.setConfigTxn(params), [
-      this.keypair ?? programWallet(this.program),
+      authority,
     ]);
   }
 }
