@@ -522,13 +522,9 @@ export interface AggregatorInitParams {
    */
   minUpdateDelaySeconds: number;
   /**
-   *  The queue to which this aggregator will be linked
-   */
-  queueAccount: OracleQueueAccount;
-  /**
    *  unix_timestamp for which no feed update will occur before.
    */
-  startAfter?: number;
+  startAfter?: anchor.BN;
   /**
    *  Change percentage required between a previous round and the current round.
    *  If variance percentage is not met, reject new oracle responses.
@@ -545,6 +541,10 @@ export interface AggregatorInitParams {
    */
   expiration?: anchor.BN;
   /**
+   *  If true, this aggregator is disallowed from being updated by a crank on the queue.
+   */
+  disableCrank?: boolean;
+  /**
    *  Optional pre-existing keypair to use for aggregator initialization.
    */
   keypair?: Keypair;
@@ -558,6 +558,10 @@ export interface AggregatorInitParams {
    *  the aggregator keypair.
    */
   authority?: PublicKey;
+  /**
+   *  The queue to which this aggregator will be linked
+   */
+  queueAccount: OracleQueueAccount;
 }
 
 /**
@@ -1114,11 +1118,13 @@ export class AggregatorAccount {
         minOracleResults: params.minRequiredOracleResults,
         minJobResults: params.minRequiredJobResults,
         minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+        startAfter: params.startAfter,
         varianceThreshold: SwitchboardDecimal.fromBig(
           new Big(params.varianceThreshold ?? 0)
         ),
         forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
         expiration: params.expiration ?? new anchor.BN(0),
+        disableCrank: params.disableCrank,
         stateBump,
       })
       .accounts({
@@ -2022,6 +2028,11 @@ export class PermissionAccount {
  */
 export interface OracleQueueInitParams {
   /**
+   *  The account to delegate authority to for creating permissions targeted
+   *  at the queue.
+   */
+  authority: PublicKey;
+  /**
    *  A name to assign to this OracleQueue
    */
   name?: Buffer;
@@ -2043,18 +2054,9 @@ export interface OracleQueueInitParams {
    */
   feedProbationPeriod?: number;
   /**
-   *  The account to delegate authority to for creating permissions targeted
-   *  at the queue.
+   *  Time period (in seconds) we should remove an oracle after if no response.
    */
-  authority: PublicKey;
-  /**
-   *  Time period we should remove an oracle after if no response.
-   */
-  oracleTimeout?: anchor.BN;
-  /**
-   *  Whether slashing is enabled on this queue.
-   */
-  slashingEnabled?: boolean;
+  oracleTimeout?: number;
   /**
    *  The tolerated variance amount oracle results can have from the
    *  accepted round result before being slashed.
@@ -2071,7 +2073,6 @@ export interface OracleQueueInitParams {
    *  Consecutive failure limit for an oracle before oracle permission is revoked.
    */
   consecutiveOracleFailureLimit?: anchor.BN;
-
   /**
    * the minimum update delay time for Aggregators
    */
@@ -2080,6 +2081,10 @@ export interface OracleQueueInitParams {
    * Optionally set the size of the queue.
    */
   queueSize?: number;
+  /**
+   *  Whether slashing is enabled on this queue.
+   */
+  slashingEnabled?: boolean;
   /**
    * Enabling this setting means data feeds do not need explicit permission
    * to join the queue.
