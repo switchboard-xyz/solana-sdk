@@ -4173,7 +4173,7 @@ export async function sendAll(
  * @param recentBlockhash Optional blockhash
  * @returns Transaction[]
  */
-function packInstructions(
+export function packInstructions(
   instructions: (
     | anchor.web3.TransactionInstruction
     | anchor.web3.TransactionInstruction[]
