@@ -16,8 +16,7 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   Transaction,
-  TransactionInstruction,
-  TransactionSignature
+  TransactionSignature,
 } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -4174,86 +4173,78 @@ export async function sendAll(
  * @param recentBlockhash Optional blockhash
  * @returns Transaction[]
  */
-export function packInstructions(
-  instructions: (TransactionInstruction | TransactionInstruction[])[],
-  feePayer: PublicKey = PublicKey.default,
-  recentBlockhash: string = PublicKey.default.toBase58()
-): Transaction[] {
-  const packed: Transaction[] = [];
-  let currentTransaction = new Transaction();
-  currentTransaction.recentBlockhash = recentBlockhash;
-  currentTransaction.feePayer = feePayer;
+function packInstructions(
+  instructions: (
+    | anchor.web3.TransactionInstruction
+    | anchor.web3.TransactionInstruction[]
+  )[],
+  feePayer = anchor.web3.PublicKey.default,
+  recentBlockhash = anchor.web3.PublicKey.default.toBase58()
+): anchor.web3.Transaction[] {
+  // Constructs a new Transaction.
+  const buildNewTransaction = (ixns: anchor.web3.TransactionInstruction[]) => {
+    const txn = new anchor.web3.Transaction();
+    txn.recentBlockhash = recentBlockhash;
+    txn.feePayer = feePayer;
+    return ixns.length ? txn.add(...ixns) : txn;
+  };
 
-  const encodeLength = (bytes: Array<number>, len: number) => {
-    let remLen = len;
-    for (;;) {
-      let elem = remLen & 0x7f;
-      remLen >>= 7;
-      if (remLen == 0) {
-        bytes.push(elem);
-        break;
-      } else {
-        elem |= 0x80;
-        bytes.push(elem);
+  const getTxnSize = (transaction: anchor.web3.Transaction) => {
+    const encodeLength = (len: number) => {
+      const bytes = new Array<number>();
+      let remLen = len;
+      for (;;) {
+        let elem = remLen & 0x7f;
+        remLen >>= 7;
+        if (remLen === 0) {
+          bytes.push(elem);
+          break;
+        } else {
+          elem |= 0x80;
+          bytes.push(elem);
+        }
       }
+      return bytes;
+    };
+
+    try {
+      return (
+        transaction.serializeMessage().length +
+        transaction.signatures.length * 64 +
+        encodeLength(transaction.signatures.length).length
+      );
+    } catch (err) {
+      return Number.MAX_SAFE_INTEGER;
     }
   };
 
-  for (const ixGroup of instructions) {
-    const ixs = Array.isArray(ixGroup) ? ixGroup : [ixGroup];
-
-    for (const ix of ixs) {
-      // add the new transaction
-      currentTransaction.add(ix);
-    }
-
-    const sigCount: number[] = [];
-    encodeLength(sigCount, currentTransaction.signatures.length);
-
-    let currentTransactionSize = Number.MAX_SAFE_INTEGER;
-    try {
-      currentTransactionSize =
-        currentTransaction.serializeMessage().length +
-        currentTransaction.signatures.length * 64 +
-        sigCount.length;
-    } catch (err) {} /* Ignore */
-
-    if (anchor.web3.PACKET_DATA_SIZE <= currentTransactionSize) {
-      // If the aggregator transaction fits, it will serialize without error. We can then push it ahead no problem
-      const trimmedInstructions = ixs
-        .map(() => currentTransaction.instructions.pop())
-        .reverse();
-
-      // Every serialize adds the instruction signatures as dependencies
-      currentTransaction.signatures = [];
-
-      const overflowInstructions = trimmedInstructions;
-
-      // add the capped transaction to our transaction - only push it if it works
-      packed.push(currentTransaction);
-
-      currentTransaction = new Transaction();
-      currentTransaction.recentBlockhash = recentBlockhash;
-      currentTransaction.feePayer = feePayer;
-      currentTransaction.instructions = overflowInstructions;
-
-      const newsc: number[] = [];
-      encodeLength(newsc, currentTransaction.signatures.length);
+  const packed: anchor.web3.Transaction[] = [];
+  let currentTransaction = buildNewTransaction([]);
+  instructions
+    .map((ixGroup) => (Array.isArray(ixGroup) ? ixGroup : [ixGroup]))
+    .forEach((ixs) => {
+      const newTransaction = buildNewTransaction(ixs);
       if (
-        anchor.web3.PACKET_DATA_SIZE <=
-        currentTransaction.serializeMessage().length +
-          currentTransaction.signatures.length * 64 +
-          newsc.length
+        anchor.web3.PACKET_DATA_SIZE >=
+        getTxnSize(currentTransaction) + getTxnSize(newTransaction)
       ) {
+        // If `newTransaction` can be added to current transaction, do so.
+        currentTransaction.add(...newTransaction.instructions);
+      } else if (anchor.web3.PACKET_DATA_SIZE <= getTxnSize(newTransaction)) {
+        // If `newTransaction` is too large to fit in a transaction, throw an error.
         throw new Error(
           "Instruction packing error: a grouping of instructions must be able to fit into a single transaction"
         );
+      } else {
+        // If `newTransaction` cannot be added to `currentTransaction`, push `currentTransaction` and move forward.
+        packed.push(currentTransaction);
+        currentTransaction = newTransaction;
       }
-    }
+    });
+  // If the final transaction has at least 1 instruction, add it to the pack.
+  if (currentTransaction.instructions.length > 0) {
+    packed.push(currentTransaction);
   }
-
-  packed.push(currentTransaction);
-
   return packed;
 }
 
