@@ -16,7 +16,7 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   Transaction,
-  TransactionSignature
+  TransactionSignature,
 } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -1160,16 +1160,16 @@ export class AggregatorAccount {
       params.authority ?? this.keypair ?? programWallet(this.program);
     return program.methods
       .aggregatorSetConfig({
-        name: findKeyInObject(params, "name"),
-        metadata: findKeyInObject(params, "metadata"),
-        batchSize: findKeyInObject(params, "batchSize"),
-        minOracleResults: findKeyInObject(params, "minOracleResults"),
-        minUpdateDelaySeconds: findKeyInObject(params, "minUpdateDelaySeconds"),
-        minJobResults: findKeyInObject(params, "minJobResults"),
-        forceReportPeriod: findKeyInObject(params, "forceReportPeriod"),
-        varianceThreshold: findKeyInObject(params, "varianceThreshold", (o) =>
-          SwitchboardDecimal.fromBig(new Big(o))
-        ),
+        name: params.name ?? null,
+        metadata: params.metadata ?? null,
+        batchSize: params.batchSize ?? null,
+        minOracleResults: params.minOracleResults ?? null,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds ?? null,
+        minJobResults: params.minJobResults ?? null,
+        forceReportPeriod: params.forceReportPeriod ?? null,
+        varianceThreshold: lodash.isFinite(params.varianceThreshold)
+          ? SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
+          : null,
       })
       .accounts({
         aggregator: this.publicKey,
@@ -2298,35 +2298,25 @@ export class OracleQueueAccount {
       params.authority ?? this.keypair ?? programWallet(this.program);
     return program.methods
       .oracleQueueSetConfig({
-        name: findKeyInObject(params, "name"),
-        metadata: findKeyInObject(params, "metadata"),
-        unpermissionedFeedsEnabled: findKeyInObject(
-          params,
-          "unpermissionedFeedsEnabled"
-        ),
-        unpermissionedVrfEnabled: findKeyInObject(
-          params,
-          "unpermissionedVrfEnabled"
-        ),
-        enableBufferRelayers: findKeyInObject(params, "enableBufferRelayers"),
-        slashingEnabled: findKeyInObject(params, "slashingEnabled"),
-
-        reward: findKeyInObject(params, "reward"),
-        minStake: findKeyInObject(params, "minStake"),
-        oracleTimeout: findKeyInObject(params, "oracleTimeout"),
-        consecutiveFeedFailureLimit: findKeyInObject(
-          params,
-          "consecutiveFeedFailureLimit"
-        ),
-        consecutiveOracleFailureLimit: findKeyInObject(
-          params,
-          "consecutiveOracleFailureLimit"
-        ),
-        varianceToleranceMultiplier: findKeyInObject(
-          params,
-          "varianceToleranceMultiplier",
-          (o) => SwitchboardDecimal.fromBig(new Big(o))
-        ),
+        name: params.name ?? null,
+        metadata: params.metadata ?? null,
+        unpermissionedFeedsEnabled: params.unpermissionedFeedsEnabled ?? null,
+        unpermissionedVrfEnabled: params.unpermissionedVrfEnabled ?? null,
+        enableBufferRelayers: params.enableBufferRelayers ?? null,
+        slashingEnabled: params.slashingEnabled ?? null,
+        reward: params.reward ?? null,
+        minStake: params.minStake ?? null,
+        oracleTimeout: params.oracleTimeout ?? null,
+        consecutiveFeedFailureLimit: params.consecutiveFeedFailureLimit ?? null,
+        consecutiveOracleFailureLimit:
+          params.consecutiveOracleFailureLimit ?? null,
+        varianceToleranceMultiplier: lodash.isFinite(
+          params.varianceToleranceMultiplier
+        )
+          ? SwitchboardDecimal.fromBig(
+              new Big(params.varianceToleranceMultiplier)
+            )
+          : null,
       })
       .accounts({ queue: this.publicKey, authority: authority.publicKey })
       .signers([authority])
@@ -4363,26 +4353,6 @@ function safeDiv(number_: Big, denominator: Big, decimals = 20): Big {
   const result = number_.div(denominator);
   Big.DP = oldDp;
   return result;
-}
-
-/**
- * Given an {@linkcode object} and a {@linkcode key}, try to produce a value.
- *
- * @param object    _REQUIRED_: The object search for value output.
- * @param key       _REQUIRED_: A key of {@linkcode object} to check for value output.
- * @param transform _OPTIONAL_: A hook that can be used to transform the result value if it is found.
- *
- * @returns The (optionally transformed) keyed object found in {@linkcode object}.
- */
-function findKeyInObject<T extends Record<string, unknown>>(
-  object: T,
-  key: keyof T,
-  transform?: (obj: any) => any
-) {
-  const obj = lodash.get<T, keyof T, null>(object, key, null);
-  return lodash.isNull(obj) || lodash.isUndefined(transform)
-    ? obj
-    : transform(obj);
 }
 
 export class AnchorWallet implements anchor.Wallet {
