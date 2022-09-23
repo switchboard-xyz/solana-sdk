@@ -522,13 +522,9 @@ export interface AggregatorInitParams {
    */
   minUpdateDelaySeconds: number;
   /**
-   *  The queue to which this aggregator will be linked
-   */
-  queueAccount: OracleQueueAccount;
-  /**
    *  unix_timestamp for which no feed update will occur before.
    */
-  startAfter?: number;
+  startAfter?: anchor.BN;
   /**
    *  Change percentage required between a previous round and the current round.
    *  If variance percentage is not met, reject new oracle responses.
@@ -545,6 +541,10 @@ export interface AggregatorInitParams {
    */
   expiration?: anchor.BN;
   /**
+   *  If true, this aggregator is disallowed from being updated by a crank on the queue.
+   */
+  disableCrank?: boolean;
+  /**
    *  Optional pre-existing keypair to use for aggregator initialization.
    */
   keypair?: Keypair;
@@ -558,6 +558,10 @@ export interface AggregatorInitParams {
    *  the aggregator keypair.
    */
   authority?: PublicKey;
+  /**
+   *  The queue to which this aggregator will be linked
+   */
+  queueAccount: OracleQueueAccount;
 }
 
 /**
@@ -778,10 +782,16 @@ export class AggregatorAccount {
    * @param aggregator A preloaded aggregator object.
    * @return The name of the aggregator.
    */
-  static getName(aggregator: any): string {
-    // eslint-disable-next-line no-control-regex
-    return String.fromCharCode(...aggregator.name).replace(/\u0000/g, "");
-  }
+  static getName = (aggregator: any) =>
+    String.fromCharCode(...aggregator.name).replace(/\u0000/g, "");
+
+  /**
+   * Returns the aggregator's metadata buffer in a stringified format.
+   * @param aggregator A preloaded aggregator object.
+   * @return The stringified metadata of the aggregator.
+   */
+  static getMetadata = (aggregator: any) =>
+    String.fromCharCode(...aggregator.metadata).replace(/\u0000/g, "");
 
   /**
    * Load and parse AggregatorAccount state based on the program IDL.
@@ -1108,11 +1118,13 @@ export class AggregatorAccount {
         minOracleResults: params.minRequiredOracleResults,
         minJobResults: params.minRequiredJobResults,
         minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+        startAfter: params.startAfter,
         varianceThreshold: SwitchboardDecimal.fromBig(
           new Big(params.varianceThreshold ?? 0)
         ),
         forceReportPeriod: params.forceReportPeriod ?? new anchor.BN(0),
         expiration: params.expiration ?? new anchor.BN(0),
+        disableCrank: params.disableCrank,
         stateBump,
       })
       .accounts({
@@ -1148,16 +1160,16 @@ export class AggregatorAccount {
       params.authority ?? this.keypair ?? programWallet(this.program);
     return program.methods
       .aggregatorSetConfig({
-        name: findKeyInObject(params, "name"),
-        metadata: findKeyInObject(params, "metadata"),
-        batchSize: findKeyInObject(params, "batchSize"),
-        minOracleResults: findKeyInObject(params, "minOracleResults"),
-        minUpdateDelaySeconds: findKeyInObject(params, "minUpdateDelaySeconds"),
-        minJobResults: findKeyInObject(params, "minJobResults"),
-        forceReportPeriod: findKeyInObject(params, "forceReportPeriod"),
-        varianceThreshold: findKeyInObject(params, "varianceThreshold", (o) =>
-          SwitchboardDecimal.fromBig(new Big(o))
-        ),
+        name: params.name ?? null,
+        metadata: params.metadata ?? null,
+        batchSize: params.batchSize ?? null,
+        minOracleResults: params.minOracleResults ?? null,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds ?? null,
+        minJobResults: params.minJobResults ?? null,
+        forceReportPeriod: params.forceReportPeriod ?? null,
+        varianceThreshold: lodash.isFinite(params.varianceThreshold)
+          ? SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
+          : null,
       })
       .accounts({
         aggregator: this.publicKey,
@@ -1170,14 +1182,10 @@ export class AggregatorAccount {
   async setConfig(
     params: AggregatorSetConfigParams
   ): Promise<TransactionSignature> {
-    return (
-      await this.program.provider.sendAll([
-        {
-          tx: await this.setConfigTxn(params),
-          signers: [this.keypair ?? programWallet(this.program)],
-        },
-      ])
-    )[0];
+    const provider = this.program.provider as anchor.AnchorProvider;
+    return provider.sendAndConfirm(await this.setConfigTxn(params), [
+      this.keypair ?? programWallet(this.program),
+    ]);
   }
 
   async setHistoryBuffer(
@@ -2020,6 +2028,11 @@ export class PermissionAccount {
  */
 export interface OracleQueueInitParams {
   /**
+   *  The account to delegate authority to for creating permissions targeted
+   *  at the queue.
+   */
+  authority: PublicKey;
+  /**
    *  A name to assign to this OracleQueue
    */
   name?: Buffer;
@@ -2041,18 +2054,9 @@ export interface OracleQueueInitParams {
    */
   feedProbationPeriod?: number;
   /**
-   *  The account to delegate authority to for creating permissions targeted
-   *  at the queue.
+   *  Time period (in seconds) we should remove an oracle after if no response.
    */
-  authority: PublicKey;
-  /**
-   *  Time period we should remove an oracle after if no response.
-   */
-  oracleTimeout?: anchor.BN;
-  /**
-   *  Whether slashing is enabled on this queue.
-   */
-  slashingEnabled?: boolean;
+  oracleTimeout?: number;
   /**
    *  The tolerated variance amount oracle results can have from the
    *  accepted round result before being slashed.
@@ -2069,7 +2073,6 @@ export interface OracleQueueInitParams {
    *  Consecutive failure limit for an oracle before oracle permission is revoked.
    */
   consecutiveOracleFailureLimit?: anchor.BN;
-
   /**
    * the minimum update delay time for Aggregators
    */
@@ -2078,6 +2081,10 @@ export interface OracleQueueInitParams {
    * Optionally set the size of the queue.
    */
   queueSize?: number;
+  /**
+   *  Whether slashing is enabled on this queue.
+   */
+  slashingEnabled?: boolean;
   /**
    * Enabling this setting means data feeds do not need explicit permission
    * to join the queue.
@@ -2095,15 +2102,20 @@ export interface OracleQueueInitParams {
   mint: PublicKey;
 }
 
-export interface OracleQueueSetRewardsParams {
-  rewards: anchor.BN;
-  authority?: Keypair;
-}
-
-export interface OracleQueueSetVrfSettingsParams {
-  unpermissionedVrf: boolean;
-  authority?: Keypair;
-}
+export type OracleQueueSetConfigParams = Partial<{
+  name: Buffer;
+  metadata: Buffer;
+  unpermissionedFeedsEnabled: boolean;
+  unpermissionedVrfEnabled: boolean;
+  enableBufferRelayers: boolean;
+  slashingEnabled: boolean;
+  varianceToleranceMultiplier: number;
+  oracleTimeout: number;
+  reward: anchor.BN;
+  minStake: anchor.BN;
+  consecutiveFeedFailureLimit: anchor.BN;
+  consecutiveOracleFailureLimit: anchor.BN;
+}>;
 
 /**
  * A Switchboard account representing a queue for distributing oracles to
@@ -2139,6 +2151,22 @@ export class OracleQueueAccount {
     this.keypair = params.keypair;
     this.publicKey = params.publicKey ?? this.keypair.publicKey;
   }
+
+  /**
+   * Returns the queue's name buffer in a stringified format.
+   * @param queue A preloaded queue object.
+   * @return The name of the queue.
+   */
+  static getName = (queue: any) =>
+    String.fromCharCode(...queue.name).replace(/\u0000/g, "");
+
+  /**
+   * Returns the queue's metadata buffer in a stringified format.
+   * @param queue A preloaded queue object.
+   * @return The stringified metadata of the queue.
+   */
+  static getMetadata = (queue: any) =>
+    String.fromCharCode(...queue.metadata).replace(/\u0000/g, "");
 
   async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();
@@ -2262,36 +2290,48 @@ export class OracleQueueAccount {
     return new OracleQueueAccount({ program, keypair: oracleQueueAccount });
   }
 
-  async setRewards(
-    params: OracleQueueSetRewardsParams
-  ): Promise<TransactionSignature> {
+  async setConfigTxn(
+    params: OracleQueueSetConfigParams & { authority?: Keypair }
+  ): Promise<anchor.web3.Transaction> {
+    const program = this.program;
     const authority =
       params.authority ?? this.keypair ?? programWallet(this.program);
-    return this.program.methods
-      .oracleQueueSetRewards({
-        rewards: params.rewards,
+    return program.methods
+      .oracleQueueSetConfig({
+        name: params.name ?? null,
+        metadata: params.metadata ?? null,
+        unpermissionedFeedsEnabled: params.unpermissionedFeedsEnabled ?? null,
+        unpermissionedVrfEnabled: params.unpermissionedVrfEnabled ?? null,
+        enableBufferRelayers: params.enableBufferRelayers ?? null,
+        slashingEnabled: params.slashingEnabled ?? null,
+        reward: params.reward ?? null,
+        minStake: params.minStake ?? null,
+        oracleTimeout: params.oracleTimeout ?? null,
+        consecutiveFeedFailureLimit: params.consecutiveFeedFailureLimit ?? null,
+        consecutiveOracleFailureLimit:
+          params.consecutiveOracleFailureLimit ?? null,
+        varianceToleranceMultiplier: lodash.isFinite(
+          params.varianceToleranceMultiplier
+        )
+          ? SwitchboardDecimal.fromBig(
+              new Big(params.varianceToleranceMultiplier)
+            )
+          : null,
       })
       .accounts({ queue: this.publicKey, authority: authority.publicKey })
       .signers([authority])
-      .rpc();
+      .transaction();
   }
 
-  async setVrfSettings(
-    params: OracleQueueSetVrfSettingsParams
+  async setConfig(
+    params: OracleQueueSetConfigParams & { authority?: Keypair }
   ): Promise<TransactionSignature> {
+    const provider = this.program.provider as anchor.AnchorProvider;
     const authority =
       params.authority ?? this.keypair ?? programWallet(this.program);
-
-    return this.program.methods
-      .oracleQueueVrfConfig({
-        unpermissionedVrfEnabled: params.unpermissionedVrf,
-      })
-      .accounts({
-        queue: this.publicKey,
-        authority: authority.publicKey,
-      })
-      .signers([authority])
-      .rpc();
+    return provider.sendAndConfirm(await this.setConfigTxn(params), [
+      authority,
+    ]);
   }
 }
 
@@ -4313,26 +4353,6 @@ function safeDiv(number_: Big, denominator: Big, decimals = 20): Big {
   const result = number_.div(denominator);
   Big.DP = oldDp;
   return result;
-}
-
-/**
- * Given an {@linkcode object} and a {@linkcode key}, try to produce a value.
- *
- * @param object    _REQUIRED_: The object search for value output.
- * @param key       _REQUIRED_: A key of {@linkcode object} to check for value output.
- * @param transform _OPTIONAL_: A hook that can be used to transform the result value if it is found.
- *
- * @returns The (optionally transformed) keyed object found in {@linkcode object}.
- */
-function findKeyInObject<T extends Record<string, unknown>>(
-  object: T,
-  key: keyof T,
-  transform?: (obj: any) => any
-) {
-  const obj = lodash.get<T, keyof T, null>(object, key, null);
-  return lodash.isNull(obj) || lodash.isUndefined(transform)
-    ? obj
-    : transform(obj);
 }
 
 export class AnchorWallet implements anchor.Wallet {
