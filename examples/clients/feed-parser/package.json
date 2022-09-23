@@ -20,7 +20,7 @@
   "dependencies": {
     "@project-serum/anchor": "^0.24.2",
     "@solana/web3.js": "^1.33.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.134",
+    "@switchboard-xyz/switchboard-v2": "^0.0.135",
     "big.js": "^6.1.1"
   },
   "devDependencies": {
