@@ -1,5 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
+import type { PublicKey } from "@solana/web3.js";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import { IOracleJob, OracleJob } from "@switchboard-xyz/common";
 import {
@@ -17,23 +18,54 @@ import {
 } from "@switchboard-xyz/switchboard-v2";
 import chalk from "chalk";
 import dotenv from "dotenv";
+import fs from "fs";
 import os from "os";
 import path from "path";
 import readlineSync from "readline-sync";
-import { getKeypair, sleep, toAccountString } from "./utils";
 
 dotenv.config();
 
+export const toAccountString = (
+  label: string,
+  publicKey: PublicKey | string | undefined
+): string => {
+  if (typeof publicKey === "string") {
+    return `${chalk.blue(label.padEnd(24, " "))} ${chalk.yellow(publicKey)}`;
+  }
+  if (!publicKey) {
+    return "";
+  }
+  return `${chalk.blue(label.padEnd(24, " "))} ${chalk.yellow(
+    publicKey.toString()
+  )}`;
+};
+
+export const sleep = (ms: number): Promise<any> =>
+  new Promise((s) => setTimeout(s, ms));
+
+export const getKeypair = (keypairPath: string): Keypair => {
+  if (!fs.existsSync(keypairPath)) {
+    throw new Error(
+      `failed to load authority keypair from ${keypairPath}, try providing a path to your keypair with the script 'ts-node src/main KEYPAIR_PATH'`
+    );
+  }
+  const keypairString = fs.readFileSync(keypairPath, "utf8");
+  const keypairBuffer = new Uint8Array(JSON.parse(keypairString));
+  const walletKeypair = Keypair.fromSecretKey(keypairBuffer);
+  return walletKeypair;
+};
+
 async function main() {
   // get payer keypair
-  let authority: Keypair;
-  if (process.env.PAYER_KEYPAIR) {
-    authority = getKeypair(process.env.PAYER_KEYPAIR);
+  let payerKeypairPath: string;
+  if (process.argv.length > 2 && process.argv[2]) {
+    payerKeypairPath = process.argv[2];
+  } else if (process.env.PAYER_KEYPAIR) {
+    payerKeypairPath = process.env.PAYER_KEYPAIR;
   } else {
-    // attempt to load default keypair
-    const homeDir = os.homedir();
-    authority = getKeypair(path.join(homeDir, ".config/solana/id.json"));
+    payerKeypairPath = path.join(os.homedir(), ".config/solana/id.json");
   }
+  const authority = getKeypair(payerKeypairPath);
 
   // get cluster
   let cluster: "mainnet-beta" | "devnet" | "localnet";
@@ -195,7 +227,7 @@ async function main() {
   console.log(chalk.yellow("######## Start the Oracle ########"));
   console.log(chalk.blue("Run the following command in a new shell\r\n"));
   console.log(
-    `      ORACLE_KEY=${oracleAccount.publicKey} PAYER_KEYPAIR=${authority} RPC_URL=${rpcUrl} docker-compose up\r\n`
+    `      ORACLE_KEY=${oracleAccount.publicKey} PAYER_KEYPAIR=${payerKeypairPath} RPC_URL=${rpcUrl} docker-compose up\r\n`
   );
   if (
     !readlineSync.keyInYN(
@@ -217,7 +249,7 @@ async function main() {
         const crank = await crankAccount.loadData();
         const queue = await queueAccount.loadData();
 
-        const crankTurnSignature = await crankAccount.popTxn({
+        const crankTurnSignature = await crankAccount.pop({
           payoutWallet: tokenAccount,
           queuePubkey: queueAccount.publicKey,
           queueAuthority: queue.authority,
@@ -248,7 +280,15 @@ async function main() {
   console.log(chalk.yellow("######## Aggregator Result ########"));
   await sleep(5000);
   try {
-    const result = await aggregatorAccount.getLatestValue();
+    let result = await aggregatorAccount.getLatestValue();
+    if (result === null) {
+      // wait a bit longer
+      await sleep(2500);
+      result = await aggregatorAccount.getLatestValue();
+      if (result === null) {
+        throw new Error(`Aggregator currently holds no value.`);
+      }
+    }
     console.log(`${chalk.blue("Result:")} ${chalk.green(result)}\r\n`);
     console.log(chalk.green("\u2714 Aggregator succesfully updated!"));
   } catch (error: any) {
