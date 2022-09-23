@@ -16,7 +16,7 @@
     "@solana/web3.js": "^1.42.0",
     "@switchboard-xyz/sbv2-utils": "^0.1.43",
     "@switchboard-xyz/switchboard-v2": "^0.0.135",
-    "node-fetch": "^2.6"
+    "node-fetch": "^3.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
