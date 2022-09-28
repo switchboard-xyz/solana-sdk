@@ -1,7 +1,0 @@
-[workspace]
-members = [
-    "examples/programs/*",
-]
-exclude = [
-    "libraries/rs"
-]
