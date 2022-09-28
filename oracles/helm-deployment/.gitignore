@@ -1,5 +1,0 @@
-secrets/**
-.keypairs/**
-/**.json
-**.env
-kubernetes-**/**
