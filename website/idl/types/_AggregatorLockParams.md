@@ -1,2 +1,0 @@
-| Field | Type | Description |
-| ----- | ---- | ----------- |
