@@ -1,4 +1,3 @@
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 
 #[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize)]

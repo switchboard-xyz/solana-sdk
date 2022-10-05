@@ -28,3 +28,4 @@ rust_decimal = { version = "1.18.0" }
 solana-program = "~1.10.29"
 bytemuck = "1.7.2"
 superslice = "1"
+spl-token = "3.3.1"

@@ -27,4 +27,8 @@ pub enum SwitchboardError {
     ConfidenceIntervalExceeded,
     #[msg("Invalid authority provided to Switchboard account")]
     InvalidAuthority,
+    #[msg("Switchboard value variance exceeded threshold")]
+    AllowedVarianceExceeded,
+    #[msg("Invalid function input")]
+    InvalidFunctionInput,
 }

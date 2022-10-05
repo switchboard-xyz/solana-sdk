@@ -1,4 +1,3 @@
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 
 #[account(zero_copy)]

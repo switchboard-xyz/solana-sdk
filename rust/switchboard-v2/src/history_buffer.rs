@@ -1,4 +1,3 @@
-#[allow(unaligned_references)]
 use super::decimal::SwitchboardDecimal;
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;

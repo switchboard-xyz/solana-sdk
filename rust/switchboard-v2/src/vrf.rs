@@ -1,5 +1,4 @@
 #![allow(non_snake_case)]
-#[allow(unaligned_references)]
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;

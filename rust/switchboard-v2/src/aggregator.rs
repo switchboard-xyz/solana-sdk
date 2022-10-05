@@ -1,8 +1,8 @@
-#[allow(unaligned_references)]
 use super::decimal::SwitchboardDecimal;
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
 use std::cell::Ref;
+use rust_decimal::Decimal;
 
 #[zero_copy]
 #[repr(packed)]
@@ -183,6 +183,24 @@ impl AggregatorAccountData {
     ) -> anchor_lang::Result<()> {
         if self.latest_confirmed_round.std_deviation > max_confidence_interval {
             return Err(SwitchboardError::ConfidenceIntervalExceeded.into());
+        }
+        Ok(())
+    }
+
+    /// Check the variance (as a percentage difference from the max delivered
+    /// oracle value) from all oracles.
+    pub fn check_variace(&self, max_variance: Decimal) -> anchor_lang::Result<()> {
+        if max_variance > Decimal::ONE {
+            return Err(SwitchboardError::InvalidFunctionInput.into());
+        }
+        let min: Decimal = self.latest_confirmed_round.min_response.try_into().unwrap();
+        let max: Decimal = self.latest_confirmed_round.max_response.try_into().unwrap();
+
+        if min < Decimal::ZERO || max < Decimal::ZERO || min > max {
+            return Err(SwitchboardError::AllowedVarianceExceeded.into());
+        }
+        if min / max > max_variance {
+            return Err(SwitchboardError::AllowedVarianceExceeded.into());
         }
         Ok(())
     }

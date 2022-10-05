@@ -1,5 +1,5 @@
-#[allow(unaligned_references)]
 use super::decimal::SwitchboardDecimal;
+use bytemuck::try_cast_slice_mut;
 use anchor_lang::prelude::*;
 
 #[account(zero_copy)]

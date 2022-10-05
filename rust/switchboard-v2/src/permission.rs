@@ -1,5 +1,4 @@
 use super::error::SwitchboardError;
-#[allow(unaligned_references)]
 use anchor_lang::prelude::*;
 // use bytemuck::{Pod, Zeroable};
 use solana_program::entrypoint::ProgramResult;
