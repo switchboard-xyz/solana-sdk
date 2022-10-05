@@ -1,6 +1,6 @@
 use super::decimal::SwitchboardDecimal;
-use bytemuck::try_cast_slice_mut;
 use anchor_lang::prelude::*;
+use bytemuck::try_cast_slice_mut;
 
 #[account(zero_copy)]
 #[repr(packed)]
@@ -57,7 +57,6 @@ pub struct OracleQueueAccountData {
     pub data_buffer: Pubkey,
 }
 
-
 impl OracleQueueAccountData {
     pub fn size() -> usize {
         std::mem::size_of::<OracleQueueAccountData>() + 8
@@ -93,4 +92,3 @@ impl Default for OracleQueueAccountData {
         unsafe { std::mem::zeroed() }
     }
 }
-

@@ -1,8 +1,8 @@
 use super::decimal::SwitchboardDecimal;
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
-use std::cell::Ref;
 use rust_decimal::Decimal;
+use std::cell::Ref;
 
 #[zero_copy]
 #[repr(packed)]
