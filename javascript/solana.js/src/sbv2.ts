@@ -2774,6 +2774,7 @@ export interface CrankPopParams {
   queue: any;
   tokenMint: PublicKey;
   failOpenOnMismatch?: boolean;
+  popIdx?: number;
 }
 
 /**
@@ -3065,6 +3066,7 @@ export class CrankAccount {
         permissionBumps: Buffer.from(permissionBumps),
         nonce: params.nonce ?? null,
         failOpenOnAccountMismatch,
+        popIdx: params.popIdx ?? 0,
       })
       .accounts({
         crank: this.publicKey,
