@@ -196,7 +196,7 @@
 
 "@switchboard-xyz/common@^2.0.0":
   version "2.0.0"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/common/-/common-2.0.0.tgz#8c3551b3611c4a2348c46879c0ab2ea188a1f753"
+  resolved "https://registry.yarnpkg.com/@switchboard-xyz/common/-/common-2.0.0.tgz#8c3551b3611c4a2348c46879c0ab2ea188a1f753"
   integrity sha512-hC7J7NShGQHjWaCU7+w6tEtZ3KljxMIKJe5IaxPxD+cgdxhx58UMjngyevaCcle33aPyFZ/tbpm0tU2ZqzqZtQ==
   dependencies:
     big.js "^6.2.1"
