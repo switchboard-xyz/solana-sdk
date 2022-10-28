@@ -782,8 +782,7 @@ export class AggregatorAccount {
    * @param aggregator A preloaded aggregator object.
    * @return The name of the aggregator.
    */
-  static getName = (aggregator: any) =>
-    String.fromCharCode(...aggregator.name).replace(/\u0000/g, "");
+  static getName = (aggregator: any) => Buffer.from(aggregator.name).toString();
 
   /**
    * Returns the aggregator's metadata buffer in a stringified format.
@@ -791,7 +790,7 @@ export class AggregatorAccount {
    * @return The stringified metadata of the aggregator.
    */
   static getMetadata = (aggregator: any) =>
-    String.fromCharCode(...aggregator.metadata).replace(/\u0000/g, "");
+    Buffer.from(aggregator.metadata).toString();
 
   /**
    * Load and parse AggregatorAccount state based on the program IDL.
@@ -2156,16 +2155,14 @@ export class OracleQueueAccount {
    * @param queue A preloaded queue object.
    * @return The name of the queue.
    */
-  static getName = (queue: any) =>
-    String.fromCharCode(...queue.name).replace(/\u0000/g, "");
+  static getName = (queue: any) => Buffer.from(queue.name).toString();
 
   /**
    * Returns the queue's metadata buffer in a stringified format.
    * @param queue A preloaded queue object.
    * @return The stringified metadata of the queue.
    */
-  static getMetadata = (queue: any) =>
-    String.fromCharCode(...queue.metadata).replace(/\u0000/g, "");
+  static getMetadata = (queue: any) => Buffer.from(queue.metadata).toString();
 
   async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();
