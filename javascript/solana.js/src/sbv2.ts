@@ -26,7 +26,7 @@ import lodash from "lodash";
 
 export type SwitchboardProgram = anchor.Program;
 
-export type { SwitchboardDecimal } from "@switchboard-xyz/common";
+export { SwitchboardDecimal } from "@switchboard-xyz/common";
 
 /**
  * Switchboard Devnet Program ID
