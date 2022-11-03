@@ -18,7 +18,7 @@ import {
   Transaction,
   TransactionSignature,
 } from "@solana/web3.js";
-import { OracleJob, SwitchboardDecimal } from "@switchboard-xyz/common";
+import { OracleJob, SwitchboardDecimal, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 import Big from "big.js";
 import * as crypto from "crypto";
@@ -681,15 +681,14 @@ export class AggregatorAccount {
    * @param aggregator A preloaded aggregator object.
    * @return The name of the aggregator.
    */
-  static getName = (aggregator: any) => Buffer.from(aggregator.name).toString();
+  static getName = (aggregator: any) => toUtf8(aggregator.name);
 
   /**
    * Returns the aggregator's metadata buffer in a stringified format.
    * @param aggregator A preloaded aggregator object.
    * @return The stringified metadata of the aggregator.
    */
-  static getMetadata = (aggregator: any) =>
-    Buffer.from(aggregator.metadata).toString();
+  static getMetadata = (aggregator: any) => toUtf8(aggregator.metadata);
 
   /**
    * Load and parse AggregatorAccount state based on the program IDL.
@@ -2054,14 +2053,14 @@ export class OracleQueueAccount {
    * @param queue A preloaded queue object.
    * @return The name of the queue.
    */
-  static getName = (queue: any) => Buffer.from(queue.name).toString();
+  static getName = (queue: any) => toUtf8(queue.name);
 
   /**
    * Returns the queue's metadata buffer in a stringified format.
    * @param queue A preloaded queue object.
    * @return The stringified metadata of the queue.
    */
-  static getMetadata = (queue: any) => Buffer.from(queue.metadata).toString();
+  static getMetadata = (queue: any) => toUtf8(queue.metadata);
 
   async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();

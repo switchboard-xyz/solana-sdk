@@ -194,14 +194,14 @@
     rpc-websockets "^7.5.0"
     superstruct "^0.14.2"
 
-"@switchboard-xyz/common@^2.0.0":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@switchboard-xyz/common/-/common-2.0.3.tgz#85bdd46eb39e00e90a997c7540c5b5f23f258b6d"
-  integrity sha512-g/4CWopqedk81GGoftGshEkrDFGzrMGT0/bOcI0S6nQLdd3l2rc+svSVwkREMJHVVsZNQbfRaJzqauY15+y55A==
+"@switchboard-xyz/common@^2.1.3":
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/@switchboard-xyz/common/-/common-2.1.3.tgz#ce50fd579841543c56d37550f5613d985d804514"
+  integrity sha512-u6jQAZbsB1buFPhvW4Ybw9gpDmn59ETPlPAL7BxUtLZ88A/PzFyA7a5CTQZHn8cvsP2jBlLmPm1uHwLM/3lPiA==
   dependencies:
     big.js "^6.2.1"
     bn.js "^5.2.1"
-    protobufjs "^6.11.3"
+    protobufjs "^7.1.2"
 
 "@types/big.js@^6.1.6":
   version "6.1.6"
@@ -1268,6 +1268,11 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+long@^5.0.0:
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.1.tgz#e27595d0083d103d2fa2c20c7699f8e0c92b897f"
+  integrity sha512-GKSNGeNAtw8IryjjkhZxuKB3JzlcLTwjtiQCHKvqQet81I93kXslhDQruGI/QsddO83mcDToBVy7GqGS/zYf/A==
+
 lower-case@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/lower-case/-/lower-case-2.0.2.tgz#6fa237c63dbdc4a82ca0fd882e4722dc5e634e28"
@@ -1522,10 +1527,10 @@ picomatch@^2.0.4, picomatch@^2.2.1:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
 
-protobufjs@^6.11.3:
-  version "6.11.3"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
-  integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
+protobufjs@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.1.2.tgz#a0cf6aeaf82f5625bffcf5a38b7cd2a7de05890c"
+  integrity sha512-4ZPTPkXCdel3+L81yw3dG6+Kq3umdWKh7Dc7GW/CpNk4SX3hK58iPCWeCyhVTDrbkNeKrYNZ7EojM5WDaEWTLQ==
   dependencies:
     "@protobufjs/aspromise" "^1.1.2"
     "@protobufjs/base64" "^1.1.2"
@@ -1537,9 +1542,8 @@ protobufjs@^6.11.3:
     "@protobufjs/path" "^1.1.2"
     "@protobufjs/pool" "^1.1.0"
     "@protobufjs/utf8" "^1.1.0"
-    "@types/long" "^4.0.1"
     "@types/node" ">=13.7.0"
-    long "^4.0.0"
+    long "^5.0.0"
 
 ps-tree@1.2.0:
   version "1.2.0"
