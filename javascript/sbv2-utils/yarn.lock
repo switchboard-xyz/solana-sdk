@@ -372,27 +372,27 @@
     rpc-websockets "^7.5.0"
     superstruct "^0.14.2"
 
-"@switchboard-xyz/common@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/common/-/common-2.0.0.tgz#8c3551b3611c4a2348c46879c0ab2ea188a1f753"
-  integrity sha512-hC7J7NShGQHjWaCU7+w6tEtZ3KljxMIKJe5IaxPxD+cgdxhx58UMjngyevaCcle33aPyFZ/tbpm0tU2ZqzqZtQ==
+"@switchboard-xyz/common@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/common/-/common-2.1.0.tgz#4dd5483ee0c3f37e583ba51e61b17a70bdb39d3d"
+  integrity sha512-m7N3GyqHYI4/jI5BsnIgam+JmQnCB8TeaVHoKVW5BD1m67P9zcVikgl1YlROSBQbS5xNB+0xI8ZWV4dOajyx5A==
   dependencies:
     big.js "^6.2.1"
     bn.js "^5.2.1"
-    protobufjs "^6.11.3"
+    protobufjs "^7.1.2"
 
-"@switchboard-xyz/switchboard-v2@^0.0.136":
-  version "0.0.136"
-  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.136.tgz#092f43e9c0e35f31033c124aa12ce46019af4eb5"
-  integrity sha512-vgaGqkDais2VJHfQawBSqrlKjvqtvOScHv7Q9bAlQtSieu7a3zMgH3rF4zAZAh/iphJLsm6bdMftUdcCMpVbKQ==
+"@switchboard-xyz/switchboard-v2@^0.0.142":
+  version "0.0.142"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.142.tgz#f5c64f13343d12923f4e80f2591d08466cc8d763"
+  integrity sha512-+M7GrpT3zotdvP1qQikYJutb+EOaa807UmZNx1CKinfih/puvFacdTzu1sZjSdADVF4YUHblBBLSUL+fwE8eFg==
   dependencies:
     "@project-serum/anchor" "^0.24.2"
     "@solana/spl-governance" "^0.0.34"
     "@solana/spl-token-v2" "npm:@solana/spl-token@^0.2.0"
     "@solana/web3.js" "^1.44.3"
-    "@switchboard-xyz/common" "^2.0.0"
+    "@switchboard-xyz/common" "^2.1.0"
     assert "^2.0.0"
-    big.js "^6.2.0"
+    big.js "^6.2.1"
     bs58 "^5.0.0"
     chan "^0.6.1"
     crypto-js "^4.0.0"
@@ -432,11 +432,6 @@
   version "0.0.29"
   resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
-
-"@types/long@^4.0.1":
-  version "4.0.2"
-  resolved "https://registry.npmjs.org/@types/long/-/long-4.0.2.tgz#b74129719fc8d11c01868010082d483b7545591a"
-  integrity sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==
 
 "@types/mocha@^9.0.0":
   version "9.1.1"
@@ -639,7 +634,7 @@ base64-js@^1.3.1, base64-js@^1.5.1:
   resolved "https://registry.npmjs.org/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
 
-big.js@^6.2.0, big.js@^6.2.1:
+big.js@^6.2.1:
   version "6.2.1"
   resolved "https://registry.npmjs.org/big.js/-/big.js-6.2.1.tgz#7205ce763efb17c2e41f26f121c420c6a7c2744f"
   integrity sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==
@@ -2186,6 +2181,11 @@ long@^4.0.0:
   resolved "https://registry.npmjs.org/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+long@^5.0.0:
+  version "5.2.1"
+  resolved "https://registry.npmjs.org/long/-/long-5.2.1.tgz#e27595d0083d103d2fa2c20c7699f8e0c92b897f"
+  integrity sha512-GKSNGeNAtw8IryjjkhZxuKB3JzlcLTwjtiQCHKvqQet81I93kXslhDQruGI/QsddO83mcDToBVy7GqGS/zYf/A==
+
 lower-case@^2.0.2:
   version "2.0.2"
   resolved "https://registry.npmjs.org/lower-case/-/lower-case-2.0.2.tgz#6fa237c63dbdc4a82ca0fd882e4722dc5e634e28"
@@ -2603,10 +2603,10 @@ prompts@^2.4.1:
     kleur "^3.0.3"
     sisteransi "^1.0.5"
 
-protobufjs@^6.11.3:
-  version "6.11.3"
-  resolved "https://registry.npmjs.org/protobufjs/-/protobufjs-6.11.3.tgz#637a527205a35caa4f3e2a9a4a13ddffe0e7af74"
-  integrity sha512-xL96WDdCZYdU7Slin569tFX712BxsxslWwAfAhCYjQKGTq7dAU91Lomy6nLLhh/dyGhk/YH4TwTSRxTzhuHyZg==
+protobufjs@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.npmjs.org/protobufjs/-/protobufjs-7.1.2.tgz#a0cf6aeaf82f5625bffcf5a38b7cd2a7de05890c"
+  integrity sha512-4ZPTPkXCdel3+L81yw3dG6+Kq3umdWKh7Dc7GW/CpNk4SX3hK58iPCWeCyhVTDrbkNeKrYNZ7EojM5WDaEWTLQ==
   dependencies:
     "@protobufjs/aspromise" "^1.1.2"
     "@protobufjs/base64" "^1.1.2"
@@ -2618,9 +2618,8 @@ protobufjs@^6.11.3:
     "@protobufjs/path" "^1.1.2"
     "@protobufjs/pool" "^1.1.0"
     "@protobufjs/utf8" "^1.1.0"
-    "@types/long" "^4.0.1"
     "@types/node" ">=13.7.0"
-    long "^4.0.0"
+    long "^5.0.0"
 
 ps-tree@1.2.0:
   version "1.2.0"
