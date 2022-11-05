@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.15"
+version = "0.1.16"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
