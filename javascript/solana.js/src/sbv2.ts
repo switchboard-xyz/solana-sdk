@@ -2960,7 +2960,7 @@ export class CrankAccount {
         leaseBumps: Buffer.from(leaseBumps),
         permissionBumps: Buffer.from(permissionBumps),
         nonce: params.nonce ?? null,
-        failOpenOnAccountMismatch,
+        failOpenOnAccountMismatch: failOpenOnAccountMismatch ?? true,
         popIdx: params.popIdx ?? 0,
       })
       .accounts({
