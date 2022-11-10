@@ -2955,7 +2955,7 @@ export class CrankAccount {
     }
     // const promises: Array<Promise<TransactionSignature>> = [];
     return this.program.methods
-      .crankPop({
+      .crankPopV2({
         stateBump,
         leaseBumps: Buffer.from(leaseBumps),
         permissionBumps: Buffer.from(permissionBumps),
