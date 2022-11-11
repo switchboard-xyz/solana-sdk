@@ -24,3 +24,48 @@ url="https://api.devnet.solana.com"
 
 [[testnet.validator.clone]]
 address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed
+
+[test]
+startup_wait = 10000
+
+[[test.validator.clone]] # programID
+address = "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
+
+[[test.validator.clone]] # idlAddress
+address = "CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp"
+
+[[test.validator.clone]] # programState
+address = "BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt"
+
+[[test.validator.clone]] # switchboardVault
+address = "FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy"
+
+[[test.validator.clone]] # tokenWallet
+address = "98noixB6NnabjgFKw9wgXtqVd9Xg6rmj5kEVMeCHUB5e"
+
+[[test.validator.clone]] # queue
+address = "FTPhaHC1dEj4UNXGcp2r9T87B5jxnFU6emxEUpRqAx6A"
+
+[[test.validator.clone]] # queueAuthority
+address = "AXrbiv8bmcJfscyYWjR8BMFvTUjmx7FSENCjtEx4NxFh"
+
+[[test.validator.clone]] # queueBuffer
+address = "FgZfUbf4qEUcK6WMWnH2U9VvQnYfBiFgTgV83qbLmfaa"
+
+[[test.validator.clone]] # crank
+address = "28x9auDSau1MmJr57wdDUBk1qXQoktz7mkW1ueT5hpe8"
+
+[[test.validator.clone]] # crankBuffer
+address = "EmbyiARb7cJSJAdB8dWRVpsrHfGed3Pq9LZR8L3LfdQq"
+
+[[test.validator.clone]] # oracle
+address = "GmrXk527KuzNDsn9LnnRKeiTjgaut58gBfZ7qpmiU5yP"
+
+[[test.validator.clone]] # oracleAuthority
+address = "AXrbiv8bmcJfscyYWjR8BMFvTUjmx7FSENCjtEx4NxFh"
+
+[[test.validator.clone]] # oracleEscrow
+address = "4ZxDxkACGAmDKqJFnQPf95uCJwuH1p6FAQnRgKiUr1oo"
+
+[[test.validator.clone]] # oraclePermissions
+address = "AYjx3BfH4emjWPMUxTFUNntLC5dhQKzuWfX4HbgDUSwr"

@@ -7,6 +7,7 @@ import {
 } from "@solana/web3.js";
 import {
   promiseWithTimeout,
+  sleep,
   SwitchboardTestContext,
 } from "@switchboard-xyz/sbv2-utils";
 import {
@@ -88,11 +89,46 @@ describe("anchor-vrf-parser test", () => {
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);
+      console.error(error);
     }
     // If fails, throw error
     throw new Error(
       `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
     );
+  });
+
+  beforeEach(async () => {
+    const maxTime = 60000;
+    const retryCount = 10;
+    const retryInterval = maxTime / retryCount;
+    let isReady = false;
+    const timer = setInterval(async () => {
+      const queue = await switchboard.queue.loadData();
+      const oracles = queue.queueData as anchor.web3.PublicKey[];
+      if (oracles.length) {
+        console.log(`oracle ready, ${oracles.length}`);
+        isReady = true;
+        clearTimeout(timer);
+      } else {
+        console.log(`oracle not ready, ${oracles.length}`);
+      }
+    }, retryInterval);
+
+    let n = maxTime / 1000;
+    while (!isReady && n > 0) {
+      if (isReady) {
+        console.log(`finally ready`);
+        break;
+      }
+      console.log(`still not ready ${n} ...`);
+      await sleep(1 * 1000);
+      --n;
+    }
+    if (!isReady) {
+      throw new Error(`Docker oracle failed to initialize in 60seconds`);
+    }
+
+    clearTimeout(timer);
   });
 
   it("Creates a vrfClient account", async () => {
@@ -199,7 +235,7 @@ describe("anchor-vrf-parser test", () => {
     const result = await awaitCallback(
       vrfClientProgram.provider.connection,
       vrfClientKey,
-      55_000
+      155_000
     );
 
     console.log(`VrfClient Result: ${result}`);

@@ -272,8 +272,9 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
     try {
       mint = await queue.loadMint();
     } catch (error: any) {
+      console.error(error);
       throw new Error(
-        `Failed to load the SBV2 mint for the given cluster, ${error.message}`
+        `Failed to load the SBV2 mint for the given cluster, ${error}`
       );
     }
 
