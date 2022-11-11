@@ -4179,7 +4179,9 @@ export function packInstructions(
         );
       } else {
         // If `newTransaction` cannot be added to `currentTransaction`, push `currentTransaction` and move forward.
-        packed.push(currentTransaction);
+        if (currentTransaction.instructions.length > 0) {
+          packed.push(currentTransaction);
+        }
         currentTransaction = newTransaction;
       }
     });
