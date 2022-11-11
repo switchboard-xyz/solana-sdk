@@ -291,7 +291,7 @@ wallet = "${this.payerKeypairPath}"
 startup_wait = 10000
 
 [test.validator]
-url = "https://devnet.genesysgo.net/"
+url = "https://api.devnet.solana.com"
 
 [[test.validator.clone]] # programID
 address = "${this.programId}"

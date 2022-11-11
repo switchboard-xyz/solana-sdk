@@ -1526,7 +1526,7 @@ export class JobAccount {
           payer: payerKeypair.publicKey,
           systemProgram: SystemProgram.programId,
         })
-        // .signers()
+        .signers([payerKeypair, jobKeypair])
         .rpc();
     } else {
       const chunks: Buffer[] = [];
@@ -1557,6 +1557,7 @@ export class JobAccount {
             payer: payerKeypair.publicKey,
             systemProgram: SystemProgram.programId,
           })
+          .signers([payerKeypair, jobKeypair])
           .rpc()
       );
 
