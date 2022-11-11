@@ -5,6 +5,8 @@
     },
     "dependencies": {
         "@project-serum/anchor": "^0.25.0",
+        "@switchboard-xyz/common": "^2.0.3",
+        "@switchboard-xyz/sbv2-utils": "^0.1.49",
         "@switchboard-xyz/switchboard-v2": "^0.0.137"
     },
     "devDependencies": {
