@@ -5,18 +5,19 @@ import * as spl from "@solana/spl-token-v2";
 import {
   AccountInfo,
   AccountMeta,
-  clusterApiUrl,
+  ComputeBudgetProgram,
   ConfirmOptions,
   Connection,
   Keypair,
   PublicKey,
-  sendAndConfirmTransaction,
-  Signer,
-  SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+  Signer,
+  SystemProgram,
   Transaction,
   TransactionSignature,
+  clusterApiUrl,
+  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import { OracleJob, SwitchboardDecimal, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -1373,6 +1374,12 @@ export class AggregatorAccount {
       historyBuffer = this.publicKey;
     }
 
+    remainingAccounts.push(
+      anchor.utils.publicKey.findProgramAddressSync(
+        [Buffer.from("SlidingResultAccountData"), this.publicKey.toBytes()],
+        this.program.programId
+      )[0]
+    );
     return this.program.methods
       .aggregatorSaveResult({
         oracleIdx: params.oracleIdx,
