@@ -1121,6 +1121,27 @@ export class AggregatorAccount {
       .rpc();
   }
 
+  async setResolutionMode(params: {
+    authority: Keypair;
+    mode: number;
+  }): Promise<TransactionSignature> {
+    const slidingWindow = anchor.utils.publicKey.findProgramAddressSync(
+      [Buffer.from("SlidingResultAccountData"), this.publicKey.toBytes()],
+      this.program.programId
+    )[0];
+    return this.program.methods
+      .aggregatorSetResolutionMode({ mode: params.mode })
+      .accounts({
+        aggregator: this.publicKey,
+        authority: params.authority.publicKey,
+        slidingWindow,
+        payer: programWallet(this.program).publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([params.authority])
+      .rpc();
+  }
+
   async setQueue(
     params: AggregatorSetQueueParams
   ): Promise<TransactionSignature> {
