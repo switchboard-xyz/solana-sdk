@@ -4185,13 +4185,18 @@ export function packInstructions(
 
   const packed: anchor.web3.Transaction[] = [];
   let currentTransaction = buildNewTransaction([]);
+  const emptyTxSize = getTxnSize(currentTransaction);
   instructions
     .map((ixGroup) => (Array.isArray(ixGroup) ? ixGroup : [ixGroup]))
-    .forEach((ixs) => {
-      const newTransaction = buildNewTransaction(ixs);
+    .forEach((ixGroup) => {
+      // Build a new transaction with this ixGroup for comparison.
+      const newTransaction = buildNewTransaction(ixGroup);
+      // Size of the new TXN - size of an empty TXN should ~= size of the ixGroup data.
+      const newIxGroupSize = getTxnSize(newTransaction) - emptyTxSize;
+
       if (
         anchor.web3.PACKET_DATA_SIZE >=
-        getTxnSize(currentTransaction) + getTxnSize(newTransaction)
+        getTxnSize(currentTransaction) + newIxGroupSize
       ) {
         // If `newTransaction` can be added to current transaction, do so.
         currentTransaction.add(...newTransaction.instructions);
@@ -4202,7 +4207,9 @@ export function packInstructions(
         );
       } else {
         // If `newTransaction` cannot be added to `currentTransaction`, push `currentTransaction` and move forward.
-        packed.push(currentTransaction);
+        if (currentTransaction.instructions.length > 0) {
+          packed.push(currentTransaction);
+        }
         currentTransaction = newTransaction;
       }
     });
