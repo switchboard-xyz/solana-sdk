@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.158",
+  "version": "0.0.159",
   "license": "MIT",
   "author": "mitch@switchboard.xyz",
   "description": "API wrapper for intergating with the Switchboardv2 program",
@@ -45,7 +45,7 @@
     "@solana/web3.js": "^1.44.3"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.24.2",
+    "@project-serum/anchor": "^0.25.0",
     "@solana/spl-governance": "^0.0.34",
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.66.2",
