@@ -41,8 +41,7 @@
     "prepublishOnly": "shx rm -rf lib && yarn build"
   },
   "peerDependencies": {
-    "@solana/spl-governance": "^0.0.34",
-    "@solana/web3.js": "^1.44.3"
+    "@solana/spl-governance": "^0.0.34"
   },
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
