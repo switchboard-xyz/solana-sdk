@@ -11,7 +11,7 @@ solana airdrop 1 secrets/payer-keypair.json
 solana airdrop 1 secrets/payer-keypair.json
 solana airdrop 1 secrets/payer-keypair.json
 anchor build
-solana-keygen pubkey target/deploy/anchor_vrf_example-keypair.json
+solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json
 ```
 
 Note the program ID.
