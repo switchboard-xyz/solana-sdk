@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/switchboard-v2",
-  "version": "0.0.163",
+  "version": "0.0.165",
   "license": "MIT",
   "author": "mitch@switchboard.xyz",
   "description": "API wrapper for intergating with the Switchboardv2 program",
@@ -58,7 +58,7 @@
     "lodash": "^4.17.21",
     "long": "^4.0.0",
     "mocha": "^9.1.1",
-    "node-fetch": "^3.2.6"
+    "node-fetch": "^3.3.0"
   },
   "devDependencies": {
     "@types/big.js": "^6.1.6",
