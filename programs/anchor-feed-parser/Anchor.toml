@@ -3,14 +3,12 @@ members = [
     "."
 ]
 
-[provider]
-# cluster = "devnet"
-cluster = "localnet"
-wallet = "../../../payer-keypair.json"
-# wallet = "~/.config/solana/id.json"
-
 [programs.localnet]
-anchor_buffer_parser = "FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh"
+anchor_feed_parser = "5cjAZXFoY4KN1Sq35ZYE72fGdVy8sy5YGpNix1N4rtHY"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -18,9 +16,11 @@ url = "https://anchor.projectserum.com"
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 ./tests/*.test.ts"
 
+# [test.validator]
+# url="https://api.devnet.solana.com"
 
-[test.validator]
-url="https://api.devnet.solana.com"
+# [test]
+# startup_wait = 10000
 
-[[testnet.validator.clone]]
-address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed
+# [[testnet.validator.clone]]
+# address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed

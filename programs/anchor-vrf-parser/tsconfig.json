@@ -13,7 +13,7 @@
     "strict": false,
     "strictNullChecks": false,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../javascript/solana.js"],
+      "@switchboard-xyz/switchboard-v2": ["../../javascript/switchboard-v2"],
       "@switchboard-xyz/sbv2-utils": ["../../javascript/sbv2-utils"],
       "@solana/spl-token": ["./node_modules/@solana/spl-token"]
     }
@@ -21,7 +21,7 @@
   "include": ["tests/**/*", "./cli.ts", "./client/**/*"],
   "exclude": ["target", "lib"],
   "references": [
-    { "path": "../../javascript/solana.js" },
+    { "path": "../../javascript/switchboard-v2" },
     { "path": "../../javascript/sbv2-utils" }
   ]
 }

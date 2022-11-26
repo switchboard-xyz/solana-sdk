@@ -22,12 +22,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../solana.js"],
+      "@switchboard-xyz/switchboard-v2": ["../switchboard-v2"],
       "@solana/spl-token": ["./node_modules/@solana/spl-token"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["esbuild.js", "dist"],
-  "references": [{ "path": "../solana.js" }],
+  "references": [{ "path": "../switchboard-v2" }],
   "files": ["src/main.ts"]
 }

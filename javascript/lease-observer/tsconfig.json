@@ -25,13 +25,13 @@
     "rootDir": "src",
     "strict": false,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../solana.js"],
+      "@switchboard-xyz/switchboard-v2": ["../switchboard-v2"],
       "@switchboard-xyz/sbv2-utils": ["../sbv2-utils"],
       "@solana/spl-token": ["./node_modules/@solana/spl-token"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../solana.js" }, { "path": "../sbv2-utils" }],
+  "references": [{ "path": "../switchboard-v2" }, { "path": "../sbv2-utils" }],
   "files": ["src/main.ts"]
 }

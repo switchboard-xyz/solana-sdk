@@ -5,19 +5,18 @@ import * as spl from "@solana/spl-token-v2";
 import {
   AccountInfo,
   AccountMeta,
-  ComputeBudgetProgram,
+  clusterApiUrl,
   ConfirmOptions,
   Connection,
   Keypair,
   PublicKey,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
-  SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+  sendAndConfirmTransaction,
   Signer,
   SystemProgram,
+  SYSVAR_INSTRUCTIONS_PUBKEY,
+  SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   Transaction,
   TransactionSignature,
-  clusterApiUrl,
-  sendAndConfirmTransaction,
 } from "@solana/web3.js";
 import { OracleJob, SwitchboardDecimal, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
@@ -825,10 +824,7 @@ export class AggregatorAccount {
    * @param aggregator The loaded aggegator schema
    * @returns boolean
    */
-  static async shouldReportValue(
-    value: Big,
-    aggregator: any
-  ): Promise<boolean> {
+  static shouldReportValue(value: Big, aggregator: any): boolean {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
       return true;
     }

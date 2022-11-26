@@ -17,7 +17,7 @@ default = []
 
 [dependencies]
 # switchboard-v2 = { path = "../../rust/switchboard-v2", features = ["devnet"] }
-switchboard-v2 = { version = "^0.1.14", features = ["devnet"] }
+switchboard-v2 = { version = "^0.1.16", features = ["devnet"] }
 anchor-lang = "^0.25.0"
 anchor-spl = "^0.25.0"
 solana-program = "~1.10.29"

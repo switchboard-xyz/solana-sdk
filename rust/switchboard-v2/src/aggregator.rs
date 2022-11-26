@@ -47,6 +47,29 @@ pub struct AggregatorRound {
     pub errors_fulfilled: [bool; 16],
 }
 
+#[derive(Copy, Clone, Debug, AnchorSerialize, AnchorDeserialize, Eq, PartialEq)]
+#[repr(u8)]
+pub enum AggregatorResolutionMode {
+    ModeRoundResolution = 0,
+    ModeSlidingResolution = 1,
+}
+#[account(zero_copy)]
+#[repr(packed)]
+pub struct SlidingResultAccountData {
+    pub data: [SlidingWindowElement; 16],
+    pub bump: u8,
+    pub _ebuf: [u8; 512],
+}
+#[zero_copy]
+#[derive(Default)]
+#[repr(packed)]
+pub struct SlidingWindowElement {
+    pub oracle_key: Pubkey,
+    pub value: SwitchboardDecimal,
+    pub slot: u64,
+    pub timestamp: i64,
+}
+
 // #[zero_copy]
 #[account(zero_copy)]
 #[repr(packed)]
@@ -113,8 +136,11 @@ pub struct AggregatorAccountData {
     pub job_weights: [u8; 16],
     /// Unix timestamp when the feed was created.
     pub creation_timestamp: i64,
+    /// Use sliding windoe or round based resolution
+    /// NOTE: This changes result propogation in latest_round_result
+    pub resolution_mode: AggregatorResolutionMode,
     /// Reserved for future info.
-    pub _ebuf: [u8; 139],
+    pub _ebuf: [u8; 138],
 }
 
 impl AggregatorAccountData {
@@ -161,7 +187,12 @@ impl AggregatorAccountData {
     /// let decimal: f64 = feed_result.try_into()?;
     /// ```
     pub fn get_result(&self) -> anchor_lang::Result<SwitchboardDecimal> {
-        if self.min_oracle_results > self.latest_confirmed_round.num_success {
+        if self.resolution_mode == AggregatorResolutionMode::ModeSlidingResolution {
+            return Ok(self.latest_confirmed_round.result);
+        }
+        let min_oracle_results = self.min_oracle_results;
+        let latest_confirmed_round_num_success = self.latest_confirmed_round.num_success;
+        if min_oracle_results > latest_confirmed_round_num_success {
             return Err(SwitchboardError::InvalidAggregatorRound.into());
         }
         Ok(self.latest_confirmed_round.result)

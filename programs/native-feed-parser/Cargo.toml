@@ -12,6 +12,6 @@ no-entrypoint = []
 
 [dependencies]
 # switchboard-v2 = { path = "../../rust/switchboard-v2", features = ["devnet"] }
-switchboard-v2 = { version = "^0.1.13", features = ["devnet"] }
+switchboard-v2 = { version = "^0.1.16", features = ["devnet"] }
 solana-program = "~1.10.29"
 anchor-lang = "^0.25.0"

@@ -1,19 +1,14 @@
 import * as anchor from "@project-serum/anchor";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type {
   AggregatorAccount,
   AnchorWallet,
 } from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
-import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 import { PROGRAM_ID } from "../client/programId";
+import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 const expect = chai.expect;
-
-// Anchor.toml will copy this to localnet when we start our tests
-const DEFAULT_SOL_USD_FEED = new PublicKey(
-  "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
-);
 
 describe("anchor-feed-parser test", () => {
   const tomlProvider = anchor.AnchorProvider.env();

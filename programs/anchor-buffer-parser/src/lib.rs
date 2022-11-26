@@ -28,10 +28,8 @@ pub mod anchor_buffer_parser {
         ctx: Context<ReadResult>,
         params: ReadResultParams,
     ) -> anchor_lang::Result<()> {
-        let buffer_account = &ctx.accounts.buffer;
-
         // load and deserialize buffer
-        let buffer = BufferRelayerAccountData::new(buffer_account)?;
+        let buffer = BufferRelayerAccountData::new(&ctx.accounts.buffer)?;
 
         msg!("Buffer account loaded!");
 

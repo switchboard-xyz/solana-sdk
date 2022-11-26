@@ -3,8 +3,8 @@ import { PublicKey } from "@solana/web3.js";
 import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
 import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
-import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 import { PROGRAM_ID } from "../client/programId";
+import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 const expect = chai.expect;
 
 // Anchor.toml will copy this to localnet when we start our tests
@@ -31,6 +31,8 @@ describe("anchor-feed-parser test", () => {
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
 
+  console.log(`rpc: ${feedParserProgram.provider.connection.rpcEndpoint}`);
+
   before(async () => {
     try {
       switchboard = await SwitchboardTestContext.loadDevnetQueue(
@@ -49,7 +51,7 @@ describe("anchor-feed-parser test", () => {
 
   it("Read SOL/USD Feed", async () => {
     const signature = await feedParserProgram.methods
-      .readResult({ maxConfidenceInterval: 0.25 })
+      .readResult({ maxConfidenceInterval: null })
       .accounts({ aggregator: aggregatorKey })
       .rpc();
 
