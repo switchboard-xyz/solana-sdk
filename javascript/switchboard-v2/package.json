@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/switchboard-v2",
-    "directory": "javascript/solana.js"
+    "directory": "javascript/switchboard-v2"
   },
   "homepage": "https://docs.switchboard.xyz",
   "files": [

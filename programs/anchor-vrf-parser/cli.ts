@@ -4,7 +4,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
 import * as spl from "@solana/spl-token-v2";
-import type {
+import {
+  clusterApiUrl,
   Connection,
   ParsedTransactionWithMeta,
   PublicKey,
@@ -19,12 +20,12 @@ const { hideBin } = require("yargs/helpers");
 // import { hideBin } from "yargs/helpers";
 import fs from "fs";
 import path from "path";
-import { AnchorVrfParser, IDL } from "../../../target/types/anchor_vrf_parser";
+import { AnchorVrfParser, IDL } from "./target/types/anchor_vrf_parser";
 import { VrfClient } from "./client/accounts";
 import { PROGRAM_ID } from "./client/programId";
 
-const DEFAULT_MAINNET_RPC = "https://ssc-dao.genesysgo.net";
-const DEFAULT_DEVNET_RPC = "https://devnet.genesysgo.net";
+// const DEFAULT_MAINNET_RPC = "https://ssc-dao.genesysgo.net";
+// const DEFAULT_DEVNET_RPC = "https://devnet.genesysgo.net";
 const DEFAULT_LOCALNET_RPC = "http://localhost:8899";
 
 const DEFAULT_COMMITMENT = "confirmed";
@@ -178,10 +179,11 @@ yargs(hideBin(process.argv))
       }
 
       const { vrfClientProgram, switchboardProgram, payer, provider } =
-        await loadCli(rpcUrl as string, cluster as string);
+        await loadCli((rpcUrl as string) ?? "", (cluster as string) ?? "");
 
       const vrfClient = await VrfClient.fetch(
         provider.connection,
+        vrfClientProgram.programId,
         new anchor.web3.PublicKey(vrfClientKey)
       );
       if (!vrfClient) {
@@ -353,6 +355,7 @@ yargs(hideBin(process.argv))
 
       const vrfClient = await VrfClient.fetch(
         provider.connection,
+        vrfClientProgram.programId,
         vrfClientPubkey
       );
       if (!vrfClient) {
@@ -440,8 +443,7 @@ yargs(hideBin(process.argv))
       let successes = 0;
       let failures = 0;
       try {
-        for await (const i of [...Array(numLoops).keys()]) {
-          writeStatus(i, numLoops, successes, failures);
+        for await (const i of Array.from(Array(numLoops).keys())) {
           let success = false;
           try {
             while (true) {
@@ -460,10 +462,13 @@ yargs(hideBin(process.argv))
               }
             }
 
-            await awaitCallback(provider.connection, vrfClientPubkey, 45_000)
+            await awaitCallback(provider.connection, vrfClientPubkey, 90_000)
               .then(() => {
                 success = true;
                 successes++;
+
+                clearStatus();
+                writeStatus(i, numLoops, successes, failures);
               })
               .catch(async (error) => {
                 failures++;
@@ -506,11 +511,11 @@ yargs(hideBin(process.argv))
                     15
                   ),
           };
+
           results.push(result);
-
           saveResults(startTime, vrfClientKey, results);
-
           clearStatus();
+          writeStatus(i, numLoops, successes, failures);
         }
       } catch (error) {
         console.error(`GLOBAL: ${error}`);
@@ -543,9 +548,9 @@ yargs(hideBin(process.argv))
 function getRpcUrl(cluster: string): string {
   switch (cluster) {
     case "mainnet-beta":
-      return DEFAULT_MAINNET_RPC;
+      return clusterApiUrl("mainnet-beta");
     case "devnet":
-      return DEFAULT_DEVNET_RPC;
+      return clusterApiUrl("devnet");
     case "localnet":
       return DEFAULT_LOCALNET_RPC;
     default:

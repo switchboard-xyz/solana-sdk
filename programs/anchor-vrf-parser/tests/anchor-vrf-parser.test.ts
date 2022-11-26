@@ -42,6 +42,7 @@ describe("anchor-vrf-parser test", () => {
   let switchboard: SwitchboardTestContext;
 
   const vrfSecret = anchor.web3.Keypair.generate();
+  console.log(`VRF Account: ${vrfSecret.publicKey}`);
 
   const [vrfClientKey, vrfClientBump] =
     anchor.utils.publicKey.findProgramAddressSync(
@@ -101,26 +102,28 @@ describe("anchor-vrf-parser test", () => {
     const maxTime = 60000;
     const retryCount = 10;
     const retryInterval = maxTime / retryCount;
+
     let isReady = false;
+
     const timer = setInterval(async () => {
       const queue = await switchboard.queue.loadData();
-      const oracles = queue.queueData as anchor.web3.PublicKey[];
-      if (oracles.length) {
-        console.log(`oracle ready, ${oracles.length}`);
+      const oracles = queue.queue as anchor.web3.PublicKey[];
+      if (oracles.length > 0) {
+        // console.log(`oracle ready, ${oracles.length}`);
         isReady = true;
         clearTimeout(timer);
       } else {
-        console.log(`oracle not ready, ${oracles.length}`);
+        // console.log(`oracle not ready, ${oracles.length}`);
       }
     }, retryInterval);
 
     let n = maxTime / 1000;
     while (!isReady && n > 0) {
       if (isReady) {
-        console.log(`finally ready`);
+        // console.log(`finally ready`);
         break;
       }
-      console.log(`still not ready ${n} ...`);
+      // console.log(`still not ready ${n} ...`);
       await sleep(1 * 1000);
       --n;
     }
@@ -206,6 +209,9 @@ describe("anchor-vrf-parser test", () => {
 
     const { escrow } = await vrfAccount.loadData();
 
+    // give account time to propagate to oracle RPCs
+    await sleep(2000);
+
     // Request randomness
     await vrfClientProgram.methods.requestResult!({
       switchboardStateBump: programStateBump,
@@ -235,7 +241,7 @@ describe("anchor-vrf-parser test", () => {
     const result = await awaitCallback(
       vrfClientProgram.provider.connection,
       vrfClientKey,
-      155_000
+      45_000
     );
 
     console.log(`VrfClient Result: ${result}`);

@@ -12,8 +12,8 @@ import {
   PermissionAccount,
 } from "@switchboard-xyz/switchboard-v2";
 import fetch from "node-fetch";
-import { AnchorBufferParser, IDL } from "../target/types/anchor_buffer_parser";
 import { PROGRAM_ID } from "../client/programId";
+import { AnchorBufferParser, IDL } from "../target/types/anchor_buffer_parser";
 
 describe("anchor-buffer-parser test", () => {
   const provider = anchor.AnchorProvider.env();
@@ -41,6 +41,7 @@ describe("anchor-buffer-parser test", () => {
       return;
     } catch (error: any) {
       console.log(`Error: SBV2 Localnet - ${error.message}`);
+      console.error(error);
     }
     // If fails, throw error
     throw new Error(

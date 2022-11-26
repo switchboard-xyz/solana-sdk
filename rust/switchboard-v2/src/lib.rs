@@ -37,6 +37,8 @@ pub const LEASE_SEED: &[u8] = b"LeaseAccountData";
 pub const ORACLE_SEED: &[u8] = b"OracleAccountData";
 /// Discriminator used for Switchboard buffer accounts.
 pub const BUFFER_DISCRIMINATOR: &[u8] = b"BUFFERxx";
+/// Seed used to derive the SlidingWindow PDA.
+const SLIDING_RESULT_SEED: &[u8] = b"SlidingResultAccountData";
 
 /// Mainnet program id for Switchboard v2
 pub const SWITCHBOARD_V2_MAINNET: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");

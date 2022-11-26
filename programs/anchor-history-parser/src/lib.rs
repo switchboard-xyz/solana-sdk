@@ -1,8 +1,8 @@
 use anchor_lang::prelude::*;
+use std::convert::TryInto;
 pub use switchboard_v2::{
     AggregatorAccountData, AggregatorHistoryBuffer, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID,
 };
-use std::convert::TryInto;
 
 declare_id!("C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS");
 
@@ -10,16 +10,10 @@ declare_id!("C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS");
 #[instruction(params: ReadHistoryParams)]
 pub struct ReadHistory<'info> {
     #[account(
-        has_one = history_buffer @ ErrorCode::InvalidHistoryBuffer,
-        constraint = 
-            *aggregator.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ ErrorCode::InvalidSwitchboardAccount
+        has_one = history_buffer @ ErrorCode::InvalidHistoryBuffer
     )]
     pub aggregator: AccountLoader<'info, AggregatorAccountData>,
-    /// CHECK: Verified by aggregator.history_buffer
-    #[account(
-        constraint = 
-            *aggregator.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ ErrorCode::InvalidSwitchboardAccount
-    )]
+    /// CHECK: verified in the aggregator has_one check
     pub history_buffer: AccountInfo<'info>,
 }
 
@@ -36,17 +30,6 @@ pub mod anchor_history_parser {
         ctx: Context<ReadHistory>,
         params: ReadHistoryParams,
     ) -> anchor_lang::Result<()> {
-        let aggregator = &ctx.accounts.aggregator.load()?;
-
-        // we validate this in the context but adding here for demonstration purposes
-        if aggregator.history_buffer != ctx.accounts.history_buffer.key() {
-            return Err(error!(ErrorCode::InvalidHistoryBuffer));
-        }
-
-        // demonstration purposes
-        if *ctx.accounts.history_buffer.owner != SWITCHBOARD_PROGRAM_ID {
-            return Err(error!(ErrorCode::InvalidHistoryBuffer));
-        }
         let history_buffer = AggregatorHistoryBuffer::new(&ctx.accounts.history_buffer)?;
 
         let timestamp: i64;
@@ -57,8 +40,13 @@ pub mod anchor_history_parser {
             timestamp = Clock::get()?.unix_timestamp - 3600;
         }
 
-        let value_at_timestamp: f64  = history_buffer.lower_bound(timestamp).unwrap().value.try_into()?;
+        let value_at_timestamp: f64 = history_buffer
+            .lower_bound(timestamp)
+            .unwrap()
+            .value
+            .try_into()?;
         msg!("Result {:?}!", value_at_timestamp);
+
         Ok(())
     }
 }

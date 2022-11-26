@@ -1,19 +1,13 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
-// use anchor_lang::{Discriminator, Owner, ZeroCopy};
-// use bytemuck::{Pod, Zeroable};
 use std::convert::TryInto;
 pub use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID};
 
-declare_id!("FnsPs665aBSwJRu2A8wGv6ZT76ipR41kHm4hoA3B1QGh");
+declare_id!("5cjAZXFoY4KN1Sq35ZYE72fGdVy8sy5YGpNix1N4rtHY");
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]
 pub struct ReadResult<'info> {
-    #[account(
-        constraint = 
-            *aggregator.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ FeedErrorCode::InvalidSwitchboardAccount
-    )]
     pub aggregator: AccountLoader<'info, AggregatorAccountData>,
 }
 

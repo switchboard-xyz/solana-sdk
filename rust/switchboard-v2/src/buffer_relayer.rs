@@ -29,7 +29,8 @@ pub struct BufferRelayerAccountData {
     pub result: Vec<u8>,
 }
 
-#[derive(Default, Debug, Clone, AnchorSerialize, AnchorDeserialize)]
+#[zero_copy]
+#[derive(Default, Debug, AnchorSerialize, AnchorDeserialize)]
 pub struct BufferRelayerRound {
     /// Number of successful responses.
     pub num_success: u32,
