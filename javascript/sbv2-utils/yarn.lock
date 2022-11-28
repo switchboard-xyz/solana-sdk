@@ -382,10 +382,20 @@
     bn.js "^5.2.1"
     protobufjs "^7.1.2"
 
-"@switchboard-xyz/switchboard-v2@^0.0.159":
-  version "0.0.159"
-  resolved "https://registry.yarnpkg.com/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.159.tgz#14b7562f5661c2af49bffa8d999709534793b400"
-  integrity sha512-RL7nsXCi7F3Dc5MRuItQvnKg+0SmSU3plU3aoGRVAY6phCQ8LOs5IILwg7dfA2glHOE4DZUsn75II2KpJ2e2vA==
+"@switchboard-xyz/common@^2.1.7":
+  version "2.1.7"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/common/-/common-2.1.7.tgz#44941febbbdbce7546c8a835764cb6c609650e88"
+  integrity sha512-ME2HnxMn/S2jCuUkanPZKtc3gaT5lq+Crr47DUx46ILldwBxsA9UL6LVv/Pknlp6JwkVxekhMCc+m6YSRER3pw==
+  dependencies:
+    big.js "^6.2.1"
+    bn.js "^5.2.1"
+    decimal.js "^10.4.2"
+    protobufjs "^7.1.2"
+
+"@switchboard-xyz/switchboard-v2@^0.0.165":
+  version "0.0.165"
+  resolved "https://registry.npmjs.org/@switchboard-xyz/switchboard-v2/-/switchboard-v2-0.0.165.tgz#f7daae7a90b6077d4b45f60dfb3374eca9f00061"
+  integrity sha512-r5jzIH/oG3H9+tHI3CEJBZOOGRusTygnHUhU+MtKNMezP099UaXBdGkocjXc3pFWFBvtMnmT5C+zPuRSdEIgLQ==
   dependencies:
     "@project-serum/anchor" "^0.25.0"
     "@solana/spl-governance" "^0.0.34"
@@ -401,7 +411,7 @@
     lodash "^4.17.21"
     long "^4.0.0"
     mocha "^9.1.1"
-    node-fetch "^3.2.6"
+    node-fetch "^3.3.0"
 
 "@types/big.js@^6.1.5", "@types/big.js@^6.1.6":
   version "6.1.6"
@@ -1017,7 +1027,7 @@ decimal.js-light@^2.5.1:
   resolved "https://registry.yarnpkg.com/decimal.js-light/-/decimal.js-light-2.5.1.tgz#134fd32508f19e208f4fb2f8dac0d2626a867934"
   integrity sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==
 
-decimal.js@^10.2.1, decimal.js@^10.3.0, decimal.js@^10.3.1:
+decimal.js@^10.2.1, decimal.js@^10.3.0, decimal.js@^10.3.1, decimal.js@^10.4.2:
   version "10.4.2"
   resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.4.2.tgz#0341651d1d997d86065a2ce3a441fbd0d8e8b98e"
   integrity sha512-ic1yEvwT6GuvaYwBLLY6/aFFgjZdySKTE8en/fkU3QICTmRtgtSlFn0u0BXN06InZwtfCelR7j8LRiDI/02iGA==
@@ -2390,9 +2400,9 @@ node-fetch@2, node-fetch@2.6.7, node-fetch@^2.2.0:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-fetch@^3.2.6:
+node-fetch@^3.3.0:
   version "3.3.0"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.3.0.tgz#37e71db4ecc257057af828d523a7243d651d91e4"
+  resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.0.tgz#37e71db4ecc257057af828d523a7243d651d91e4"
   integrity sha512-BKwRP/O0UvoMKp7GNdwPlObhYGB5DQqwhEDQlNKuoqwVYSxkSZCSbHjnFFmUEtwSKRPU4kNK8PbDYYitwaE3QA==
   dependencies:
     data-uri-to-buffer "^4.0.0"
