@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Installs Anchor
-        uses: ./github/actions/install-common-build-deps/action.yml
+        uses: ./.github/actions/install-common-build-deps/action.yml
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           # rust-version: ${{ env.RUST_TOOLCHAIN }}
