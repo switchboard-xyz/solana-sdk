@@ -1,0 +1,73 @@
+name: solana-js-test
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/**"
+      - "javascript/solana.js/src/**"
+      - "javascript/solana.js/tests/**"
+      - "javascript/solana.js/package.json"
+      - "javascript/solana.js/yarn.lock"
+
+env:
+  ANCHOR_VERSION: 0.24.2
+  CARGO_TERM_COLOR: always
+  SOLANA_VERSION: 1.10.40
+  RUST_TOOLCHAIN: stable
+
+jobs:
+  solana_js_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        SOLANA_VERSION: [v1.10.32, v1.13.5]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Installs Anchor
+        uses: ./github/actions/install-common-build-deps/action.yml
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          # rust-version: ${{ env.RUST_TOOLCHAIN }}
+      # - run:
+      #     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s --
+      #     -y
+      # - run: echo "/home/runner/.cargo/bin" >> $GITHUB_PATH
+      # - run: curl -sSfL https://release.solana.com/$SOLANA_VERSION/install | sh
+      # - run:
+      #     echo "/home/runner/.local/share/solana/install/active_release/bin" >>
+      #     $GITHUB_PATH
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Install sbv2, anchor, and typescript
+        run:
+          npm i -g @project-serum/anchor-cli@$ANCHOR_VERSION ts-mocha typescript
+          @switchboard-xyz/cli@latest
+      - name: Install dependencies
+        working-directory: javascript/solana.js
+        run:
+          yarn install --frozen-lockfile --network-timeout=1000000 && yarn build
+      - name: Start Local Validator & Run Tests
+        working-directory: javascript/solana.js
+        run: |
+          solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json --silent
+          mkdir -p .anchor/test-ledger
+          solana-test-validator -r --ledger
+          .anchor/test-ledger --mint $(solana-keygen pubkey
+          ~/.config/solana/id.json) --bind-address 0.0.0.0 --url
+          https://api.devnet.solana.com --rpc-port 8899  --clone
+          2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone
+          J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone
+          CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp & sleep 15
+          npm run test:localnet
