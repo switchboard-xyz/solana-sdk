@@ -5,6 +5,7 @@ import * as errors from '../errors';
 import Big from 'big.js';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountInfo,
   AccountMeta,
   Keypair,
   PublicKey,
@@ -22,172 +23,6 @@ import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
-
-/**
- * Parameters to initialize an aggregator account.
- */
-export interface AggregatorInitParams {
-  /**
-   *  Name of the aggregator to store on-chain.
-   */
-  name?: string;
-  /**
-   *  Metadata of the aggregator to store on-chain.
-   */
-  metadata?: string;
-  /**
-   *  Number of oracles to request on aggregator update.
-   */
-  batchSize: number;
-  /**
-   *  Minimum number of oracle responses required before a round is validated.
-   */
-  minRequiredOracleResults: number;
-  /**
-   *  Minimum number of feed jobs suggested to be successful before an oracle
-   *  sends a response.
-   */
-  minRequiredJobResults: number;
-  /**
-   *  Minimum number of seconds required between aggregator rounds.
-   */
-  minUpdateDelaySeconds: number;
-  /**
-   *  unix_timestamp for which no feed update will occur before.
-   */
-  startAfter?: number;
-  /**
-   *  Change percentage required between a previous round and the current round.
-   *  If variance percentage is not met, reject new oracle responses.
-   */
-  varianceThreshold?: number;
-  /**
-   *  Number of seconds for which, even if the variance threshold is not passed,
-   *  accept new responses from oracles.
-   */
-  forceReportPeriod?: number;
-  /**
-   *  unix_timestamp after which funds may be withdrawn from the aggregator.
-   *  null/undefined/0 means the feed has no expiration.
-   */
-  expiration?: number;
-  /**
-   *  If true, this aggregator is disallowed from being updated by a crank on the queue.
-   */
-  disableCrank?: boolean;
-  /**
-   *  Optional pre-existing keypair to use for aggregator initialization.
-   */
-  keypair?: Keypair;
-  /**
-   *  An optional wallet for receiving kickbacks from job usage in feeds.
-   *  Defaults to token vault.
-   */
-  authorWallet?: PublicKey;
-  /**
-   *  If included, this keypair will be the aggregator authority rather than
-   *  the aggregator keypair.
-   */
-  authority?: PublicKey;
-  /**
-   *  The queue to which this aggregator will be linked
-   */
-  queueAccount: QueueAccount;
-  /**
-   * The authority of the queue.
-   */
-  queueAuthority: PublicKey;
-}
-
-export type AggregatorSetConfigParams = Partial<{
-  name: Buffer;
-  metadata: Buffer;
-  batchSize: number;
-  minOracleResults: number;
-  minJobResults: number;
-  minUpdateDelaySeconds: number;
-  forceReportPeriod: number;
-  varianceThreshold: number;
-}>;
-
-export interface AggregatorSetQueueParams {
-  queueAccount: QueueAccount;
-  authority?: Keypair;
-}
-
-/**
- * Parameters required to open an aggregator round
- */
-export interface AggregatorOpenRoundParams {
-  /**
-   *  The oracle queue from which oracles are assigned this update.
-   */
-  oracleQueueAccount: QueueAccount;
-  /**
-   *  The token wallet which will receive rewards for calling update on this feed.
-   */
-  payoutWallet: PublicKey;
-}
-
-/**
- * Parameters for creating and setting a history buffer for an aggregator
- */
-export interface AggregatorSetHistoryBufferParams {
-  /*
-   * Authority keypair for the aggregator.
-   */
-  authority?: Keypair;
-  /*
-   * Number of elements for the history buffer to fit.
-   */
-  size: number;
-}
-
-/**
- * Parameters for which oracles must submit for responding to update requests.
- */
-export interface AggregatorSaveResultParams {
-  /**
-   *  Index in the list of oracles in the aggregator assigned to this round update.
-   */
-  oracleIdx: number;
-  /**
-   *  Reports that an error occured and the oracle could not send a value.
-   */
-  error: boolean;
-  /**
-   *  Value the oracle is responding with for this update.
-   */
-  value: Big;
-  /**
-   *  The minimum value this oracle has seen this round for the jobs listed in the
-   *  aggregator.
-   */
-  minResponse: Big;
-  /**
-   *  The maximum value this oracle has seen this round for the jobs listed in the
-   *  aggregator.
-   */
-  maxResponse: Big;
-  /**
-   *  List of OracleJobs that were performed to produce this result.
-   */
-  jobs: Array<OracleJob>;
-  /**
-   *  Authority of the queue the aggregator is attached to.
-   */
-  queueAuthority: PublicKey;
-  /**
-   *  Program token mint.
-   */
-  tokenMint: PublicKey;
-  /**
-   *  List of parsed oracles.
-   *
-   *  TODO: Add better typing to this field type
-   */
-  oracles: Array<any>;
-}
 
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
@@ -208,67 +43,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * Get the size of an {@linkcode AggregatorAccount} on-chain.
    */
   public size = this.program.account.aggregatorAccountData.size;
-
-  /**
-   * Retrieve and decode the {@linkcode types.AggregatorAccountData} stored in this account.
-   */
-  public async loadData(): Promise<types.AggregatorAccountData> {
-    const data = await types.AggregatorAccountData.fetch(
-      this.program,
-      this.publicKey
-    );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
-    return data;
-  }
-
-  public getAccounts(params: {
-    queueAccount: QueueAccount;
-    queueAuthority: PublicKey;
-  }): {
-    queueAccount: QueueAccount;
-    permissionAccount: PermissionAccount;
-    permissionBump: number;
-    leaseAccount: LeaseAccount;
-    leaseBump: number;
-    leaseEscrow: PublicKey;
-  } {
-    const queueAccount = params.queueAccount;
-
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      params.queueAuthority,
-      queueAccount.publicKey,
-      this.publicKey
-    );
-
-    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
-      this.program,
-      queueAccount.publicKey,
-      this.publicKey
-    );
-
-    const leaseEscrow = this.program.mint.getAssociatedAddress(
-      leaseAccount.publicKey
-    );
-
-    return {
-      queueAccount,
-      permissionAccount,
-      permissionBump,
-      leaseAccount,
-      leaseBump,
-      leaseEscrow,
-    };
-  }
-
-  public static async load(
-    program: SwitchboardProgram,
-    publicKey: PublicKey
-  ): Promise<AggregatorAccount> {
-    const account = new AggregatorAccount(program, publicKey);
-    await account.loadData();
-    return account;
-  }
 
   public decode(data: Buffer): types.AggregatorAccountData {
     try {
@@ -293,7 +67,32 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
+   * Retrieve and decode the {@linkcode types.AggregatorAccountData} stored in this account.
+   */
+  public async loadData(): Promise<types.AggregatorAccountData> {
+    const data = await types.AggregatorAccountData.fetch(
+      this.program,
+      this.publicKey
+    );
+    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    return data;
+  }
+
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey
+  ): Promise<[AggregatorAccount, types.AggregatorAccountData]> {
+    const account = new AggregatorAccount(program, publicKey);
+    const aggregator = await account.loadData();
+    return [account, aggregator];
+  }
+
+  /**
    * Creates a transaction object with aggregatorInit instructions.
+   * @param program The SwitchboardProgram.
+   * @param payer The account that will pay for the new accounts.
+   * @param params aggregator configuration parameters.
+   * @return {@linkcode TransactionObject} that will create the aggregatorAccount.
    *
    * Basic usage example:
    *
@@ -309,10 +108,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * });
    * const txnSignature = await program.signAndSend(aggregatorInit);
    * ```
-   * @param program The SwitchboardProgram.
-   * @param payer The account that will pay for the new accounts.
-   * @param params aggregator configuration parameters.
-   * @return {@linkcode TransactionObject} that will create the aggregatorAccount.
    */
   public static async createInstruction(
     program: SwitchboardProgram,
@@ -375,13 +170,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Creates a transaction object with aggregatorInit instructions.
+   * Creates an aggregator on-chain and return the transaction signature and created account resource.
+   * @param program The SwitchboardProgram.
+   * @param params aggregator configuration parameters.
+   * @return Transaction signature and the newly created aggregatorAccount.
    *
    * Basic usage example:
    *
    * ```ts
    * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
-   * const [aggregatorInit, aggregatorAccount] = await AggregatorAccount.createInstruction(program, payer, {
+   * const [txnSignature, aggregatorAccount] = await AggregatorAccount(program, {
    *    queueAccount,
    *    queueAuthority,
    *    batchSize: 5,
@@ -389,11 +187,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *    minRequiredJobResults: 1,
    *    minUpdateDelaySeconds: 30,
    * });
-   * const txnSignature = await program.signAndSend(aggregatorInit);
+   * const aggregator = await aggregatorAccount.loadData();
    * ```
-   * @param program The SwitchboardProgram.
-   * @param params aggregator configuration parameters.
-   * @return Transaction signature and the newly created aggregatorAccount.
    */
   public static async create(
     program: SwitchboardProgram,
@@ -408,9 +203,15 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [txnSignature, account];
   }
 
+  /**
+   * Decode an aggregators history buffer and return an array of historical samples
+   * @params historyBuffer the historyBuffer AccountInfo stored on-chain
+   * @return the array of {@linkcode types.AggregatorHistoryRow} samples
+   */
   public static decodeHistory(
-    historyBuffer: Buffer
+    bufferAccountInfo: AccountInfo<Buffer>
   ): Array<types.AggregatorHistoryRow> {
+    const historyBuffer = bufferAccountInfo.data ?? Buffer.from('');
     const ROW_SIZE = 28;
 
     if (historyBuffer.length < 12) {
@@ -439,16 +240,64 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return front.concat(tail);
   }
 
+  /**
+   * Fetch an aggregators history buffer and return an array of historical samples
+   * @params aggregator the pre-loaded aggregator state
+   * @return the array of {@linkcode types.AggregatorHistoryRow} samples
+   */
   public async loadHistory(
     aggregator: types.AggregatorAccountData
   ): Promise<Array<types.AggregatorHistoryRow>> {
     if (PublicKey.default.equals(aggregator.historyBuffer)) {
       return [];
     }
-    const historyBuffer =
-      (await this.program.connection.getAccountInfo(aggregator.historyBuffer))
-        ?.data ?? Buffer.from('');
-    return AggregatorAccount.decodeHistory(historyBuffer);
+    const bufferAccountInfo = await this.program.connection.getAccountInfo(
+      aggregator.historyBuffer
+    );
+    if (bufferAccountInfo === null) {
+      throw new errors.AccountNotFoundError(aggregator.historyBuffer);
+    }
+    return AggregatorAccount.decodeHistory(bufferAccountInfo);
+  }
+
+  public getAccounts(params: {
+    queueAccount: QueueAccount;
+    queueAuthority: PublicKey;
+  }): {
+    queueAccount: QueueAccount;
+    permissionAccount: PermissionAccount;
+    permissionBump: number;
+    leaseAccount: LeaseAccount;
+    leaseBump: number;
+    leaseEscrow: PublicKey;
+  } {
+    const queueAccount = params.queueAccount;
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      params.queueAuthority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+      this.program,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    const leaseEscrow = this.program.mint.getAssociatedAddress(
+      leaseAccount.publicKey
+    );
+
+    return {
+      queueAccount,
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseBump,
+      leaseEscrow,
+    };
   }
 
   /**
@@ -490,17 +339,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
     return aggregator.latestConfirmedRound.roundOpenTimestamp;
   }
-
-  // decodeOracleIndex(aggregator: types.AggregatorAccountData): number {
-  //   throw new Error('Not implemented yet');
-  // }
-
-  // shouldReportValue(
-  //   value: Big,
-  //   aggregator: types.AggregatorAccountData
-  // ): boolean {
-  //   throw new Error('Not implemented yet');
-  // }
 
   public static decodeConfirmedRoundResults(
     aggregator: types.AggregatorAccountData
@@ -1235,4 +1073,165 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const txnSignature = await this.program.signAndSend(saveResultTxn);
     return txnSignature;
   }
+}
+
+/**
+ * Parameters to initialize an aggregator account.
+ */
+export interface AggregatorInitParams {
+  /**
+   *  Name of the aggregator to store on-chain.
+   */
+  name?: string;
+  /**
+   *  Metadata of the aggregator to store on-chain.
+   */
+  metadata?: string;
+  /**
+   *  Number of oracles to request on aggregator update.
+   */
+  batchSize: number;
+  /**
+   *  Minimum number of oracle responses required before a round is validated.
+   */
+  minRequiredOracleResults: number;
+  /**
+   *  Minimum number of feed jobs suggested to be successful before an oracle
+   *  sends a response.
+   */
+  minRequiredJobResults: number;
+  /**
+   *  Minimum number of seconds required between aggregator rounds.
+   */
+  minUpdateDelaySeconds: number;
+  /**
+   *  unix_timestamp for which no feed update will occur before.
+   */
+  startAfter?: number;
+  /**
+   *  Change percentage required between a previous round and the current round.
+   *  If variance percentage is not met, reject new oracle responses.
+   */
+  varianceThreshold?: number;
+  /**
+   *  Number of seconds for which, even if the variance threshold is not passed,
+   *  accept new responses from oracles.
+   */
+  forceReportPeriod?: number;
+  /**
+   *  unix_timestamp after which funds may be withdrawn from the aggregator.
+   *  null/undefined/0 means the feed has no expiration.
+   */
+  expiration?: number;
+  /**
+   *  If true, this aggregator is disallowed from being updated by a crank on the queue.
+   */
+  disableCrank?: boolean;
+  /**
+   *  Optional pre-existing keypair to use for aggregator initialization.
+   */
+  keypair?: Keypair;
+  /**
+   *  If included, this keypair will be the aggregator authority rather than
+   *  the aggregator keypair.
+   */
+  authority?: PublicKey;
+  /**
+   *  The queue to which this aggregator will be linked
+   */
+  queueAccount: QueueAccount;
+  /**
+   * The authority of the queue.
+   */
+  queueAuthority: PublicKey;
+}
+
+export type AggregatorSetConfigParams = Partial<{
+  name: Buffer;
+  metadata: Buffer;
+  batchSize: number;
+  minOracleResults: number;
+  minJobResults: number;
+  minUpdateDelaySeconds: number;
+  forceReportPeriod: number;
+  varianceThreshold: number;
+}>;
+
+export interface AggregatorSetQueueParams {
+  queueAccount: QueueAccount;
+  authority?: Keypair;
+}
+
+/**
+ * Parameters required to open an aggregator round
+ */
+export interface AggregatorOpenRoundParams {
+  /**
+   *  The oracle queue from which oracles are assigned this update.
+   */
+  oracleQueueAccount: QueueAccount;
+  /**
+   *  The token wallet which will receive rewards for calling update on this feed.
+   */
+  payoutWallet: PublicKey;
+}
+
+/**
+ * Parameters for creating and setting a history buffer for an aggregator
+ */
+export interface AggregatorSetHistoryBufferParams {
+  /*
+   * Authority keypair for the aggregator.
+   */
+  authority?: Keypair;
+  /*
+   * Number of elements for the history buffer to fit.
+   */
+  size: number;
+}
+
+/**
+ * Parameters for which oracles must submit for responding to update requests.
+ */
+export interface AggregatorSaveResultParams {
+  /**
+   *  Index in the list of oracles in the aggregator assigned to this round update.
+   */
+  oracleIdx: number;
+  /**
+   *  Reports that an error occured and the oracle could not send a value.
+   */
+  error: boolean;
+  /**
+   *  Value the oracle is responding with for this update.
+   */
+  value: Big;
+  /**
+   *  The minimum value this oracle has seen this round for the jobs listed in the
+   *  aggregator.
+   */
+  minResponse: Big;
+  /**
+   *  The maximum value this oracle has seen this round for the jobs listed in the
+   *  aggregator.
+   */
+  maxResponse: Big;
+  /**
+   *  List of OracleJobs that were performed to produce this result.
+   */
+  jobs: Array<OracleJob>;
+  /**
+   *  Authority of the queue the aggregator is attached to.
+   */
+  queueAuthority: PublicKey;
+  /**
+   *  Program token mint.
+   */
+  tokenMint: PublicKey;
+  /**
+   *  List of parsed oracles.
+   *
+   *  TODO: Add better typing to this field type
+   */
+  oracles: Array<types.OracleAccountData>;
 }

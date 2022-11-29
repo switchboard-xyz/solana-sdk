@@ -23,11 +23,11 @@ describe('Queue Tests', () => {
     const [createQueueSignature, oracleQueue] = await sbv2.QueueAccount.create(
       ctx.program,
       {
-        name: Buffer.from('q1'),
-        metadata: Buffer.from(''),
+        name: 'q1',
+        metadata: '',
         queueSize: 2,
-        reward: new anchor.BN(0),
-        minStake: new anchor.BN(0),
+        reward: 0,
+        minStake: 0,
         oracleTimeout: 60,
         mint: spl.NATIVE_MINT,
         slashingEnabled: false,

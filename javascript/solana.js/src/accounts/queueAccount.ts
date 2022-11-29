@@ -1,6 +1,8 @@
 import * as anchor from '@project-serum/anchor';
 import * as spl from '@solana/spl-token';
 import {
+  AccountInfo,
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -16,118 +18,68 @@ import {
 } from '../generated/types/SwitchboardPermission';
 import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
-import { Account } from './account';
-import { AggregatorAccount } from './aggregatorAccount';
-import { CrankAccount } from './crankAccount';
-import { JobAccount } from './jobAccount';
+import { Account, OnAccountChangeCallback } from './account';
+import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
+import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
+import { CrankAccount, CrankInitParams } from './crankAccount';
+import { JobAccount, JobInitParams } from './jobAccount';
 import { LeaseAccount } from './leaseAccount';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
-
-/**
- *  Parameters for initializing an {@linkcode QueueAccount}
- */
-export interface QueueInitParams {
-  /**
-   *  A name to assign to this {@linkcode QueueAccount}
-   */
-  name?: Buffer;
-  /**
-   *  Buffer for queue metadata
-   */
-  metadata?: Buffer;
-  /**
-   *  Rewards to provide oracles and round openers on this queue.
-   */
-  reward: anchor.BN;
-  /**
-   *  The minimum amount of stake oracles must present to remain on the queue.
-   */
-  minStake: anchor.BN;
-  /**
-   *  After a feed lease is funded or re-funded, it must consecutively succeed
-   *  N amount of times or its authorization to use the queue is auto-revoked.
-   */
-  feedProbationPeriod?: number;
-  /**
-   *  Time period (in seconds) we should remove an oracle after if no response.
-   */
-  oracleTimeout?: number;
-  /**
-   *  Whether slashing is enabled on this queue.
-   */
-  slashingEnabled?: boolean;
-  /**
-   *  The tolerated variance amount oracle results can have from the accepted round result
-   *  before being slashed.
-   *  slashBound = varianceToleranceMultiplier * stdDeviation
-   *  Default: 2
-   */
-  varianceToleranceMultiplier?: number;
-  /**
-   *  Consecutive failure limit for a feed before feed permission is revoked.
-   */
-  consecutiveFeedFailureLimit?: number;
-  /**
-   *  Consecutive failure limit for an oracle before oracle permission is revoked.
-   */
-  consecutiveOracleFailureLimit?: number;
-  /**
-   *  Optionally set the size of the queue.
-   */
-  queueSize?: number;
-  /**
-   *  Enabling this setting means data feeds do not need explicit permission to join the queue.
-   */
-  unpermissionedFeeds?: boolean;
-  /**
-   *  Enabling this setting means data feeds do not need explicit permission
-   *  to request VRF proofs and verifications from this queue.
-   */
-  unpermissionedVrf?: boolean;
-  /**
-   *  Enabling this setting will allow buffer relayer accounts to call openRound.
-   */
-  enableBufferRelayers?: boolean;
-  /**
-   *  The account to delegate authority to for creating permissions targeted at the queue.
-   *
-   *  Defaults to the payer.
-   */
-  authority?: PublicKey;
-  mint: PublicKey;
-}
-
-export type QueueSetConfigParams = Partial<{
-  authority?: anchor.web3.Keypair;
-  name: string;
-  metadata: string;
-  unpermissionedFeedsEnabled: boolean;
-  unpermissionedVrfEnabled: boolean;
-  enableBufferRelayers: boolean;
-  slashingEnabled: boolean;
-  varianceToleranceMultiplier: number;
-  oracleTimeout: number;
-  reward: anchor.BN;
-  minStake: anchor.BN;
-  consecutiveFeedFailureLimit: anchor.BN;
-  consecutiveOracleFailureLimit: anchor.BN;
-}>;
+import { VrfAccount, VrfInitParams } from './vrfAccount';
 
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
-  oracles: Array<PublicKey> | undefined = undefined;
-
   static accountName = 'OracleQueueAccountData';
+
+  /** The public key of the queue's data buffer storing a list of oracle's that are actively heartbeating */
+  dataBuffer?: PublicKey;
+
+  /**
+   * Get the size of an {@linkcode QueueAccount} on-chain.
+   */
+  public readonly size = this.program.account.oracleQueueAccountData.size;
+
   /**
    * Returns the queue's name buffer in a stringified format.
    */
   public static getName = (queue: types.OracleQueueAccountData) =>
     Buffer.from(queue.name).toString('utf8').replace(/u0000/g, '');
+
   /**
    * Returns the queue's metadata buffer in a stringified format.
    */
   public static getMetadata = (queue: types.OracleQueueAccountData) =>
     Buffer.from(queue.metadata).toString('utf8').replace(/u0000/g, '');
+
+  onChange(
+    callback: OnAccountChangeCallback<types.OracleQueueAccountData>,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    return this.program.connection.onAccountChange(
+      this.publicKey,
+      accountInfo =>
+        callback(types.OracleQueueAccountData.decode(accountInfo.data)),
+      commitment
+    );
+  }
+
+  onBufferChange(
+    callback: OnAccountChangeCallback<Array<PublicKey>>,
+    _dataBuffer?: PublicKey,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    const buffer = this.dataBuffer ?? _dataBuffer;
+    if (!buffer) {
+      throw new Error(
+        `No queue dataBuffer provided. Call queueAccount.loadData() or pass it to this function in order to watch the account for changes`
+      );
+    }
+    return this.program.connection.onAccountChange(
+      buffer,
+      accountInfo => callback(QueueAccount.decodeBuffer(accountInfo)),
+      commitment
+    );
+  }
 
   /**
    * Retrieve and decode the {@linkcode types.OracleQueueAccountData} stored in this account.
@@ -138,7 +90,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       this.publicKey
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    this.dataBuffer = data.dataBuffer;
     return data;
+  }
+
+  /**
+   * Get the spl Mint associated with this {@linkcode QueueAccount}.
+   */
+  public async loadMint(): Promise<spl.Mint> {
+    return this.program.mint.mint;
   }
 
   public static async create(
@@ -166,6 +126,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const queueSize = params.queueSize ?? 500;
     const queueDataSize = queueSize * 32 + 8;
 
+    const reward = program.mint.toTokenAmountBN(params.reward);
+    const minStake = program.mint.toTokenAmountBN(params.minStake);
+
     return [
       new TransactionObject(
         payer,
@@ -192,8 +155,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                     Buffer.from(params.metadata ?? '').slice(0, 64)
                   ),
                 ],
-                reward: new anchor.BN(params.reward ?? 0),
-                minStake: new anchor.BN(params.minStake ?? 0),
+                reward: reward,
+                minStake: minStake,
                 feedProbationPeriod: params.feedProbationPeriod ?? 0,
                 oracleTimeout: params.oracleTimeout ?? 180,
                 slashingEnabled: params.slashingEnabled ?? false,
@@ -297,22 +260,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   public async createFeed(
-    params: {
-      // aggregator params
-      batchSize: number;
-      minRequiredOracleResults: number;
-      minRequiredJobResults: number;
-      minUpdateDelaySeconds: number;
-      name?: string;
-      metadata?: string;
-      startAfter?: number;
-      varianceThreshold?: number;
-      forceReportPeriod?: number;
-      expiration?: number;
-      disableCrank?: boolean;
-      authorWallet?: PublicKey;
-      feedKeypair?: Keypair;
+    params: Omit<
+      Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
+      'authority'
+    > & {
       authority?: Keypair;
+      crankPubkey?: PublicKey;
     } & {
       // lease params
       loadAmount?: number;
@@ -320,23 +273,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       funder?: PublicKey;
     } & {
       // permission params
-      permission?: types.SwitchboardPermissionKind;
       enable?: boolean;
       queueAuthority?: Keypair;
     } & {
       // job params
-      jobs?: Array<
-        | { pubkey: PublicKey; weight?: number }
-        | {
-            data: Uint8Array;
-            weight?: number;
-            name?: string;
-            authority?: PublicKey;
-            expiration?: number;
-            variables?: Array<string>;
-            jobKeypair?: Keypair;
-          }
-      >;
+      jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
     }
   ): Promise<[Array<TransactionSignature>, AggregatorAccount]> {
     const signers: Keypair[] = [];
@@ -362,23 +303,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
   public async createFeedInstructions(
     payer: PublicKey,
-    params: {
-      // aggregator params
-      batchSize: number;
-      minRequiredOracleResults: number;
-      minRequiredJobResults: number;
-      minUpdateDelaySeconds: number;
-      name?: string;
-      metadata?: string;
-      startAfter?: number;
-      varianceThreshold?: number;
-      forceReportPeriod?: number;
-      expiration?: number;
-      disableCrank?: boolean;
-      authorWallet?: PublicKey;
-      feedKeypair?: Keypair;
+    params: Omit<
+      Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
+      'authority'
+    > & {
       authority?: Keypair;
-    } & {
       crankPubkey?: PublicKey;
     } & {
       // lease params
@@ -387,23 +316,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       funder?: PublicKey;
     } & {
       // permission params
-      permission?: types.SwitchboardPermissionKind;
       enable?: boolean;
       queueAuthority?: Keypair;
     } & {
       // job params
-      jobs?: Array<
-        | { pubkey: PublicKey; weight?: number }
-        | {
-            data: Uint8Array;
-            weight?: number;
-            name?: string;
-            authority?: PublicKey;
-            expiration?: number;
-            variables?: Array<string>;
-            jobKeypair?: Keypair;
-          }
-      >;
+      jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
     }
   ): Promise<[TransactionObject[], AggregatorAccount]> {
     const queue = await this.loadData();
@@ -437,7 +354,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               authority: job.authority ?? payer,
               expiration: job.expiration,
               variables: job.variables,
-              jobKeypair: job.jobKeypair,
+              keypair: job.keypair,
             }
           );
           pre.push(...jobInit);
@@ -457,14 +374,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         ...params,
         queueAccount: this,
         queueAuthority: queue.authority,
-        keypair: params.feedKeypair,
+        keypair: params.keypair,
         authority: params.authority ? params.authority.publicKey : undefined,
       });
 
     txns.push(aggregatorInit);
 
-    // create lease account
-    const [leaseInit, leaseAccount] = await LeaseAccount.createInstructions(
+    const [leaseInit] = await LeaseAccount.createInstructions(
       this.program,
       payer,
       {
@@ -527,95 +443,255 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [packed, aggregatorAccount];
   }
 
-  public async isReady(): Promise<boolean> {
-    const queue = await this.loadData();
-    const oracles = await this.loadOracleAccounts(queue);
-
-    const timeout = queue.oracleTimeout;
-    // TODO: Use SolanaClock
-    const unixTimestamp = Math.floor(Date.now() / 1000);
-    const activeOracles = oracles.filter(o => {
-      if (
-        o.data &&
-        o.data.lastHeartbeat.toNumber() >= unixTimestamp - timeout
-      ) {
-        return true;
-      }
-      return false;
+  public async createCrankInstructions(
+    payer: PublicKey,
+    params: Omit<CrankInitParams, 'queueAccount'>
+  ): Promise<[TransactionObject, CrankAccount]> {
+    return await CrankAccount.createInstructions(this.program, payer, {
+      ...params,
+      queueAccount: this,
     });
-
-    return activeOracles.length > 0 ? true : false;
   }
 
-  /**
-   * Get the spl Mint associated with this {@linkcode QueueAccount}.
-   */
-  public async loadMint(): Promise<spl.Mint> {
-    const queue = await this.loadData();
-    const mintKey = queue.mint.equals(PublicKey.default)
-      ? spl.NATIVE_MINT
-      : queue.mint;
-    return spl.getMint(this.program.connection, mintKey);
-  }
-
-  /**
-   * Get the size of an {@linkcode QueueAccount} on-chain.
-   */
-  public readonly size = this.program.account.oracleQueueAccountData.size;
-
-  public async loadOracles(
-    queue?: types.OracleQueueAccountData
-  ): Promise<Array<PublicKey>> {
-    const queueData = queue ?? (await this.loadData());
-    const accountInfo = await this.program.connection.getAccountInfo(
-      queueData.dataBuffer
+  public async createCrank(
+    params: Omit<CrankInitParams, 'queueAccount'>
+  ): Promise<[TransactionSignature, CrankAccount]> {
+    const [txn, crankAccount] = await this.createCrankInstructions(
+      this.program.walletPubkey,
+      params
     );
-    if (!accountInfo || accountInfo.data === null) {
-      throw new Error('Failed to fetch oracle queue buffer');
+    const txnSignature = await this.program.signAndSend(txn);
+    return [txnSignature, crankAccount];
+  }
+
+  public async createBufferRelayerInstructions(
+    payer: PublicKey,
+    params: Omit<BufferRelayerInit, 'queueAccount'> & {
+      // permission params
+      enable?: boolean;
+      queueAuthority?: Keypair;
     }
-    const buffer = accountInfo.data.slice(8) ?? Buffer.from('');
+  ): Promise<[TransactionObject, BufferRelayerAccount]> {
+    const queue = await this.loadData();
+
+    const [bufferInit, bufferAccount] =
+      await BufferRelayerAccount.createInstructions(this.program, payer, {
+        name: params.name,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+        queueAccount: this,
+        authority: params.authority,
+        jobAccount: params.jobAccount,
+        keypair: params.keypair,
+      });
+
+    // eslint-disable-next-line prefer-const
+    let [permissionInit, permissionAccount] =
+      PermissionAccount.createInstruction(this.program, payer, {
+        granter: this.publicKey,
+        grantee: bufferAccount.publicKey,
+        authority: queue.authority,
+      });
+
+    if (params.enable) {
+      if (params.queueAuthority || queue.authority.equals(payer)) {
+        const permissionSet = permissionAccount.setInstruction(payer, {
+          permission: new PermitOracleQueueUsage(),
+          enable: true,
+          authority: params.queueAuthority,
+        });
+        permissionInit = permissionInit.combine(permissionSet);
+      }
+    }
+
+    return [bufferInit.combine(permissionInit), bufferAccount];
+  }
+
+  public async createBufferRelayer(
+    params: Omit<BufferRelayerInit, 'queueAccount'> & {
+      // permission params
+      enable?: boolean;
+      queueAuthority?: Keypair;
+    }
+  ): Promise<[TransactionSignature, BufferRelayerAccount]> {
+    const [txn, bufferRelayerAccount] =
+      await this.createBufferRelayerInstructions(
+        this.program.walletPubkey,
+        params
+      );
+    const txnSignature = await this.program.signAndSend(txn);
+    return [txnSignature, bufferRelayerAccount];
+  }
+
+  public async createVrfInstructions(
+    payer: PublicKey,
+    params: Omit<VrfInitParams, 'queueAccount'> & {
+      // permission params
+      enable?: boolean;
+      queueAuthority?: Keypair;
+    }
+  ): Promise<[TransactionObject, VrfAccount]> {
+    const queue = await this.loadData();
+
+    const [vrfInit, vrfAccount] = await VrfAccount.createInstructions(
+      this.program,
+      payer,
+      {
+        vrfKeypair: params.vrfKeypair,
+        queueAccount: this,
+        callback: params.callback,
+        authority: params.authority,
+      }
+    );
+
+    // eslint-disable-next-line prefer-const
+    let [permissionInit, permissionAccount] =
+      PermissionAccount.createInstruction(this.program, payer, {
+        granter: this.publicKey,
+        grantee: vrfAccount.publicKey,
+        authority: queue.authority,
+      });
+
+    if (params.enable) {
+      if (params.queueAuthority || queue.authority.equals(payer)) {
+        const permissionSet = permissionAccount.setInstruction(payer, {
+          permission: new PermitOracleQueueUsage(),
+          enable: true,
+          authority: params.queueAuthority,
+        });
+        permissionInit = permissionInit.combine(permissionSet);
+      }
+    }
+
+    return [vrfInit.combine(permissionInit), vrfAccount];
+  }
+
+  public async createVrf(
+    params: Omit<VrfInitParams, 'queueAccount'> & {
+      // permission params
+      enable?: boolean;
+      queueAuthority?: Keypair;
+    }
+  ): Promise<[TransactionSignature, VrfAccount]> {
+    const [txn, vrfAccount] = await this.createVrfInstructions(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(txn);
+    return [txnSignature, vrfAccount];
+  }
+
+  public static decodeBuffer(
+    bufferAccountInfo: AccountInfo<Buffer>
+  ): Array<PublicKey> {
+    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from('');
 
     const oracles: PublicKey[] = [];
 
     for (let i = 0; i < buffer.byteLength * 32; i += 32) {
-      if (buffer.length - i < 32) {
+      if (buffer.byteLength - i < 32) {
         break;
       }
+
       const pubkeyBuf = buffer.slice(i, i + 32);
       const pubkey = new PublicKey(pubkeyBuf);
-      if (!PublicKey.default.equals(pubkey)) {
-        oracles.push(pubkey);
+      if (PublicKey.default.equals(pubkey)) {
+        break;
       }
+      oracles.push(pubkey);
     }
 
-    this.oracles = oracles;
     return oracles;
   }
 
+  /** Load the list of oracles that are currently stored in the buffer */
+  public async loadOracles(
+    queue?: types.OracleQueueAccountData,
+    commitment: Commitment = 'confirmed'
+  ): Promise<Array<PublicKey>> {
+    const dataBuffer =
+      this.dataBuffer ??
+      queue?.dataBuffer ??
+      (await this.loadData()).dataBuffer;
+    const accountInfo = await this.program.connection.getAccountInfo(
+      dataBuffer,
+      { commitment }
+    );
+    if (!accountInfo || accountInfo.data === null) {
+      throw new errors.AccountNotFoundError(dataBuffer);
+    }
+
+    return QueueAccount.decodeBuffer(accountInfo);
+  }
+
+  /** Loads the oracle states for the oracles currently on the queue's dataBuffer */
   public async loadOracleAccounts(
     queue?: types.OracleQueueAccountData
   ): Promise<
     Array<{
       publicKey: PublicKey;
-      data?: types.OracleAccountData;
+      data: types.OracleAccountData;
     }>
   > {
-    const oracles = await this.loadOracles(queue);
-    const accountInfos = await this.program.connection.getMultipleAccountsInfo(
-      oracles
+    const coder = this.program.coder;
+
+    const oraclePubkeys = await this.loadOracles(queue);
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      this.program.connection,
+      oraclePubkeys
     );
 
-    const coder = this.program.coder;
-    return await Promise.all(
-      accountInfos.map(async (o, i) => {
-        const publicKey: PublicKey = oracles[i];
-        const data: types.OracleAccountData | undefined =
-          o === null
-            ? undefined
-            : coder.decode(OracleAccount.accountName, o?.data);
-        return { publicKey, data };
+    function accountExists<
+      T = {
+        publicKey: PublicKey;
+        data: types.OracleAccountData;
+      }
+    >(value: T | null | undefined): value is T {
+      return value !== null && value !== undefined;
+    }
+
+    const oracles = await Promise.all(
+      accountInfos.map(async o => {
+        if (!o || !o.account) {
+          return undefined;
+        }
+        const data: types.OracleAccountData = coder.decode(
+          OracleAccount.accountName,
+          o.account.data
+        );
+        return { publicKey: o.publicKey, data };
       })
     );
+
+    return oracles.filter(accountExists);
+  }
+
+  public async loadActiveOracleAccounts(
+    _queue?: types.OracleQueueAccountData
+  ): Promise<
+    Array<{
+      publicKey: PublicKey;
+      data: types.OracleAccountData;
+    }>
+  > {
+    const queue = _queue ?? (await this.loadData());
+    const oracles = await this.loadOracleAccounts(queue);
+
+    const timeout = queue.oracleTimeout;
+    // TODO: Use SolanaClock
+    const unixTimestamp = Math.floor(Date.now() / 1000);
+    const activeOracles = oracles.filter(
+      o => o.data && o.data.lastHeartbeat.toNumber() >= unixTimestamp - timeout
+    );
+    return activeOracles;
+  }
+
+  /** Returns a flag dictating whether enough oracles are actively heartbeating on an oracle queue and ready for on-chain update requests */
+  public async isReady(
+    _queue?: types.OracleQueueAccountData,
+    oraclesNeeded = 1
+  ): Promise<boolean> {
+    const activeOracles = await this.loadActiveOracleAccounts(_queue);
+    return activeOracles.length >= oraclesNeeded ? true : false;
   }
 
   public async setConfig(
@@ -640,6 +716,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
             new Big(params.varianceToleranceMultiplier)
           )
         : null;
+
+    const reward = params.reward
+      ? this.program.mint.toTokenAmountBN(params.reward)
+      : null;
+    const minStake = params.minStake
+      ? this.program.mint.toTokenAmountBN(params.minStake)
+      : null;
 
     return new TransactionObject(
       payer,
@@ -667,13 +750,16 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               unpermissionedVrfEnabled: params.unpermissionedVrfEnabled ?? null,
               enableBufferRelayers: params.enableBufferRelayers ?? null,
               slashingEnabled: params.slashingEnabled ?? null,
-              reward: params.reward ?? null,
-              minStake: params.minStake ?? null,
+              reward: reward,
+              minStake: minStake,
               oracleTimeout: params.oracleTimeout ?? null,
-              consecutiveFeedFailureLimit:
-                params.consecutiveFeedFailureLimit ?? null,
+              consecutiveFeedFailureLimit: params.consecutiveFeedFailureLimit
+                ? new anchor.BN(params.consecutiveFeedFailureLimit)
+                : null,
               consecutiveOracleFailureLimit:
-                params.consecutiveOracleFailureLimit ?? null,
+                params.consecutiveOracleFailureLimit
+                  ? new anchor.BN(params.consecutiveOracleFailureLimit)
+                  : null,
               varianceToleranceMultiplier: multiplier,
             },
           },
@@ -687,3 +773,93 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     );
   }
 }
+
+/**
+ *  Parameters for initializing an {@linkcode QueueAccount}
+ */
+export interface QueueInitParams {
+  /**
+   *  A name to assign to this {@linkcode QueueAccount}
+   */
+  name?: string;
+  /**
+   *  Buffer for queue metadata
+   */
+  metadata?: string;
+  /**
+   *  Rewards to provide oracles and round openers on this queue.
+   */
+  reward: number;
+  /**
+   *  The minimum amount of stake oracles must present to remain on the queue.
+   */
+  minStake: number;
+  /**
+   *  After a feed lease is funded or re-funded, it must consecutively succeed
+   *  N amount of times or its authorization to use the queue is auto-revoked.
+   */
+  feedProbationPeriod?: number;
+  /**
+   *  Time period (in seconds) we should remove an oracle after if no response.
+   */
+  oracleTimeout?: number;
+  /**
+   *  Whether slashing is enabled on this queue.
+   */
+  slashingEnabled?: boolean;
+  /**
+   *  The tolerated variance amount oracle results can have from the accepted round result
+   *  before being slashed.
+   *  slashBound = varianceToleranceMultiplier * stdDeviation
+   *  Default: 2
+   */
+  varianceToleranceMultiplier?: number;
+  /**
+   *  Consecutive failure limit for a feed before feed permission is revoked.
+   */
+  consecutiveFeedFailureLimit?: number;
+  /**
+   *  Consecutive failure limit for an oracle before oracle permission is revoked.
+   */
+  consecutiveOracleFailureLimit?: number;
+  /**
+   *  Optionally set the size of the queue.
+   */
+  queueSize?: number;
+  /**
+   *  Enabling this setting means data feeds do not need explicit permission to join the queue.
+   */
+  unpermissionedFeeds?: boolean;
+  /**
+   *  Enabling this setting means data feeds do not need explicit permission
+   *  to request VRF proofs and verifications from this queue.
+   */
+  unpermissionedVrf?: boolean;
+  /**
+   *  Enabling this setting will allow buffer relayer accounts to call openRound.
+   */
+  enableBufferRelayers?: boolean;
+  /**
+   *  The account to delegate authority to for creating permissions targeted at the queue.
+   *
+   *  Defaults to the payer.
+   */
+  authority?: PublicKey;
+  mint: PublicKey;
+}
+
+export type QueueSetConfigParams = Partial<{
+  authority?: anchor.web3.Keypair;
+  name: string;
+  metadata: string;
+  unpermissionedFeedsEnabled: boolean;
+  unpermissionedVrfEnabled: boolean;
+  enableBufferRelayers: boolean;
+  slashingEnabled: boolean;
+  varianceToleranceMultiplier: number;
+  oracleTimeout: number;
+  reward: number;
+  minStake: number;
+  consecutiveFeedFailureLimit: number;
+  consecutiveOracleFailureLimit: number;
+}>;

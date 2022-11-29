@@ -147,7 +147,7 @@ export class SwitchboardProgram {
   /**
    * The anchor Provider used by this program to connect with Solana cluster.
    */
-  private get provider(): anchor.AnchorProvider {
+  public get provider(): anchor.AnchorProvider {
     return this._program.provider as anchor.AnchorProvider;
   }
   /**

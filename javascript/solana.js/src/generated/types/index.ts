@@ -1,6 +1,7 @@
 import * as Lanes from './Lanes';
 import * as Shuffle from './Shuffle';
 import * as Error from './Error';
+import * as AggregatorResolutionMode from './AggregatorResolutionMode';
 import * as SwitchboardPermission from './SwitchboardPermission';
 import * as OracleResponseType from './OracleResponseType';
 import * as VrfStatus from './VrfStatus';
@@ -35,6 +36,11 @@ export type {
   AggregatorSaveResultParamsFields,
   AggregatorSaveResultParamsJSON,
 } from './AggregatorSaveResultParams';
+export { AggregatorSaveResultParamsV2 } from './AggregatorSaveResultParamsV2';
+export type {
+  AggregatorSaveResultParamsV2Fields,
+  AggregatorSaveResultParamsV2JSON,
+} from './AggregatorSaveResultParamsV2';
 export { AggregatorSetAuthorityParams } from './AggregatorSetAuthorityParams';
 export type {
   AggregatorSetAuthorityParamsFields,
@@ -75,6 +81,11 @@ export type {
   AggregatorSetQueueParamsFields,
   AggregatorSetQueueParamsJSON,
 } from './AggregatorSetQueueParams';
+export { AggregatorSetResolutionModeParams } from './AggregatorSetResolutionModeParams';
+export type {
+  AggregatorSetResolutionModeParamsFields,
+  AggregatorSetResolutionModeParamsJSON,
+} from './AggregatorSetResolutionModeParams';
 export { AggregatorSetUpdateIntervalParams } from './AggregatorSetUpdateIntervalParams';
 export type {
   AggregatorSetUpdateIntervalParamsFields,
@@ -257,6 +268,11 @@ export type {
 } from './EcvrfIntermediate';
 export { Hash } from './Hash';
 export type { HashFields, HashJSON } from './Hash';
+export { SlidingWindowElement } from './SlidingWindowElement';
+export type {
+  SlidingWindowElementFields,
+  SlidingWindowElementJSON,
+} from './SlidingWindowElement';
 export { AggregatorRound } from './AggregatorRound';
 export type {
   AggregatorRoundFields,
@@ -299,9 +315,6 @@ export type { BorshDecimalFields, BorshDecimalJSON } from './BorshDecimal';
 export { Lanes };
 export { Shuffle };
 export { Error };
-export { SwitchboardPermission };
-export { OracleResponseType };
-export { VrfStatus };
 
 export type LanesKind = Lanes.C | Lanes.D | Lanes.AB | Lanes.AC | Lanes.AD;
 export type LanesJSON =
@@ -345,6 +358,17 @@ export type ErrorJSON =
   | Error.DeserializationErrorJSON
   | Error.InvalidDataErrorJSON;
 
+export { AggregatorResolutionMode };
+
+export type AggregatorResolutionModeKind =
+  | AggregatorResolutionMode.ModeRoundResolution
+  | AggregatorResolutionMode.ModeSlidingResolution;
+export type AggregatorResolutionModeJSON =
+  | AggregatorResolutionMode.ModeRoundResolutionJSON
+  | AggregatorResolutionMode.ModeSlidingResolutionJSON;
+
+export { SwitchboardPermission };
+
 export type SwitchboardPermissionKind =
   | SwitchboardPermission.PermitOracleHeartbeat
   | SwitchboardPermission.PermitOracleQueueUsage
@@ -353,6 +377,8 @@ export type SwitchboardPermissionJSON =
   | SwitchboardPermission.PermitOracleHeartbeatJSON
   | SwitchboardPermission.PermitOracleQueueUsageJSON
   | SwitchboardPermission.PermitVrfRequestsJSON;
+
+export { OracleResponseType };
 
 export type OracleResponseTypeKind =
   | OracleResponseType.TypeSuccess
@@ -364,6 +390,8 @@ export type OracleResponseTypeJSON =
   | OracleResponseType.TypeErrorJSON
   | OracleResponseType.TypeDisagreementJSON
   | OracleResponseType.TypeNoResponseJSON;
+
+export { VrfStatus };
 
 export type VrfStatusKind =
   | VrfStatus.StatusNone

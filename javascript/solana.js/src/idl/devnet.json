@@ -261,6 +261,84 @@
       ]
     },
     {
+      "name": "aggregatorSaveResultV2",
+      "accounts": [
+        {
+          "name": "aggregator",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracleAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "oracleQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feedPermission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oraclePermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lease",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "historyBuffer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AggregatorSaveResultParamsV2"
+          }
+        }
+      ]
+    },
+    {
       "name": "aggregatorSetAuthority",
       "accounts": [
         {
@@ -1903,11 +1981,27 @@
             }
           },
           {
+            "name": "basePriorityFee",
+            "type": "u32"
+          },
+          {
+            "name": "priorityFeeBump",
+            "type": "u32"
+          },
+          {
+            "name": "priorityFeeBumpPeriod",
+            "type": "u32"
+          },
+          {
+            "name": "maxPriorityFeeMultiplier",
+            "type": "u32"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                138
+                122
               ]
             }
           }
@@ -2678,6 +2772,75 @@
       }
     },
     {
+      "name": "AggregatorSaveResultParamsV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracleIdx",
+            "type": "u32"
+          },
+          {
+            "name": "error",
+            "type": "bool"
+          },
+          {
+            "name": "value",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "jobsChecksum",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "minResponse",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "maxResponse",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "feedPermissionBump",
+            "type": "u8"
+          },
+          {
+            "name": "oraclePermissionBump",
+            "type": "u8"
+          },
+          {
+            "name": "leaseBump",
+            "type": "u8"
+          },
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "jobValues",
+            "type": {
+              "vec": {
+                "option": {
+                  "defined": "BorshDecimal"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AggregatorSetAuthorityParams",
       "type": {
         "kind": "struct",
@@ -2759,6 +2922,30 @@
               "option": {
                 "defined": "BorshDecimal"
               }
+            }
+          },
+          {
+            "name": "basePriorityFee",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "priorityFeeBump",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "priorityFeeBumpPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "maxPriorityFeeMultiplier",
+            "type": {
+              "option": "u32"
             }
           }
         ]
@@ -4839,6 +5026,49 @@
       ]
     },
     {
+      "name": "AggregatorSaveResultEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "value",
+          "type": {
+            "defined": "BorshDecimal"
+          },
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "oraclePubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "jobValues",
+          "type": {
+            "vec": {
+              "option": {
+                "defined": "BorshDecimal"
+              }
+            }
+          },
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "AggregatorValueUpdateEvent",
       "fields": [
         {
@@ -5196,6 +5426,31 @@
         {
           "name": "queue",
           "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PriorityFeeReimburseEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "fee",
+          "type": "u64",
           "index": false
         }
       ]

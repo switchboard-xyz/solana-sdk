@@ -45,21 +45,13 @@ export class JobAccount extends Account<types.JobAccountData> {
   public static createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: {
-      data: Uint8Array;
-    } & Partial<{
-      name?: string;
-      authority?: PublicKey;
-      expiration?: number;
-      variables?: Array<string>;
-      jobKeypair?: Keypair;
-    }>
+    params: JobInitParams
   ): [Array<TransactionObject>, JobAccount] {
     if (params.data.byteLength > 6400) {
       throw new Error('Switchboard jobs need to be less than 6400 bytes');
     }
 
-    const jobKeypair = params.jobKeypair ?? Keypair.generate();
+    const jobKeypair = params.keypair ?? Keypair.generate();
     const authority = params.authority ?? payer;
 
     const CHUNK_SIZE = 800;
@@ -144,15 +136,7 @@ export class JobAccount extends Account<types.JobAccountData> {
 
   public static async create(
     program: SwitchboardProgram,
-    params: {
-      data: Uint8Array;
-    } & Partial<{
-      name?: string;
-      expiration?: number;
-      variables?: Array<string>;
-      jobKeypair: Keypair;
-      authority?: PublicKey;
-    }>
+    params: JobInitParams
   ): Promise<[Array<TransactionSignature>, JobAccount]> {
     const [transactions, account] = JobAccount.createInstructions(
       program,
@@ -192,4 +176,14 @@ export class JobAccount extends Account<types.JobAccountData> {
       JobAccount.decode(program, accountInfo).data!
     );
   }
+}
+
+export interface JobInitParams {
+  data: Uint8Array;
+  weight?: number;
+  name?: string;
+  authority?: PublicKey;
+  expiration?: number;
+  variables?: Array<string>;
+  keypair?: Keypair;
 }

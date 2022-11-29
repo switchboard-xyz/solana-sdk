@@ -69,7 +69,7 @@ describe("anchor-vrf-parser test", () => {
     // First, attempt to load the switchboard devnet PID
     try {
       switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        provider,
+        provider as anchor.AnchorProvider,
         "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy",
         5_000_000 // .005 wSOL
       );

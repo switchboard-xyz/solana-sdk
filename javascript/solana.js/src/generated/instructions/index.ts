@@ -28,6 +28,11 @@ export type {
   AggregatorSaveResultArgs,
   AggregatorSaveResultAccounts,
 } from './aggregatorSaveResult';
+export { aggregatorSaveResultV2 } from './aggregatorSaveResultV2';
+export type {
+  AggregatorSaveResultV2Args,
+  AggregatorSaveResultV2Accounts,
+} from './aggregatorSaveResultV2';
 export { aggregatorSetAuthority } from './aggregatorSetAuthority';
 export type {
   AggregatorSetAuthorityArgs,
@@ -38,6 +43,11 @@ export type {
   AggregatorSetConfigArgs,
   AggregatorSetConfigAccounts,
 } from './aggregatorSetConfig';
+export { aggregatorSetResolutionMode } from './aggregatorSetResolutionMode';
+export type {
+  AggregatorSetResolutionModeArgs,
+  AggregatorSetResolutionModeAccounts,
+} from './aggregatorSetResolutionMode';
 export { aggregatorSetHistoryBuffer } from './aggregatorSetHistoryBuffer';
 export type {
   AggregatorSetHistoryBufferArgs,

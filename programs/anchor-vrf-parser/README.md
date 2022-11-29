@@ -20,7 +20,6 @@ In the following files, replace the program ID from above:
 
 - `programs/anchor-vrf-example/src/lib.rs`
 - `Anchor.toml`
-- `solita.ts`
 
 Rebuild the program `anchor build`.
 

@@ -102,7 +102,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const signers: Keypair[] = [];
 
     const loadAmount = params.loadAmount ?? 0;
-    const loadAmountLamports = program.mint.toTokenAmount(loadAmount);
+    const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
     const funderAuthority = params.funderAuthority
       ? params.funderAuthority.publicKey
@@ -152,7 +152,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         program,
         {
           params: {
-            loadAmount: new BN(loadAmountLamports.toString()),
+            loadAmount: loadTokenAmountBN,
             withdrawAuthority: params.withdrawAuthority ?? payer,
             leaseBump: leaseBump,
             stateBump: program.programState.bump,

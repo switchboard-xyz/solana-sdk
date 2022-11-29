@@ -34,6 +34,11 @@ export interface AggregatorAccountDataFields {
   disableCrank: boolean;
   jobWeights: Array<number>;
   creationTimestamp: BN;
+  resolutionMode: types.AggregatorResolutionModeKind;
+  basePriorityFee: number;
+  priorityFeeBump: number;
+  priorityFeeBumpPeriod: number;
+  maxPriorityFeeMultiplier: number;
   ebuf: Array<number>;
 }
 
@@ -67,6 +72,11 @@ export interface AggregatorAccountDataJSON {
   disableCrank: boolean;
   jobWeights: Array<number>;
   creationTimestamp: string;
+  resolutionMode: types.AggregatorResolutionModeJSON;
+  basePriorityFee: number;
+  priorityFeeBump: number;
+  priorityFeeBumpPeriod: number;
+  maxPriorityFeeMultiplier: number;
   ebuf: Array<number>;
 }
 
@@ -100,6 +110,11 @@ export class AggregatorAccountData {
   readonly disableCrank: boolean;
   readonly jobWeights: Array<number>;
   readonly creationTimestamp: BN;
+  readonly resolutionMode: types.AggregatorResolutionModeKind;
+  readonly basePriorityFee: number;
+  readonly priorityFeeBump: number;
+  readonly priorityFeeBumpPeriod: number;
+  readonly maxPriorityFeeMultiplier: number;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -136,7 +151,12 @@ export class AggregatorAccountData {
     borsh.bool('disableCrank'),
     borsh.array(borsh.u8(), 16, 'jobWeights'),
     borsh.i64('creationTimestamp'),
-    borsh.array(borsh.u8(), 139, 'ebuf'),
+    types.AggregatorResolutionMode.layout('resolutionMode'),
+    borsh.u32('basePriorityFee'),
+    borsh.u32('priorityFeeBump'),
+    borsh.u32('priorityFeeBumpPeriod'),
+    borsh.u32('maxPriorityFeeMultiplier'),
+    borsh.array(borsh.u8(), 122, 'ebuf'),
   ]);
 
   constructor(fields: AggregatorAccountDataFields) {
@@ -175,6 +195,11 @@ export class AggregatorAccountData {
     this.disableCrank = fields.disableCrank;
     this.jobWeights = fields.jobWeights;
     this.creationTimestamp = fields.creationTimestamp;
+    this.resolutionMode = fields.resolutionMode;
+    this.basePriorityFee = fields.basePriorityFee;
+    this.priorityFeeBump = fields.priorityFeeBump;
+    this.priorityFeeBumpPeriod = fields.priorityFeeBumpPeriod;
+    this.maxPriorityFeeMultiplier = fields.maxPriorityFeeMultiplier;
     this.ebuf = fields.ebuf;
   }
 
@@ -259,6 +284,13 @@ export class AggregatorAccountData {
       disableCrank: dec.disableCrank,
       jobWeights: dec.jobWeights,
       creationTimestamp: dec.creationTimestamp,
+      resolutionMode: types.AggregatorResolutionMode.fromDecoded(
+        dec.resolutionMode
+      ),
+      basePriorityFee: dec.basePriorityFee,
+      priorityFeeBump: dec.priorityFeeBump,
+      priorityFeeBumpPeriod: dec.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: dec.maxPriorityFeeMultiplier,
       ebuf: dec.ebuf,
     });
   }
@@ -294,6 +326,11 @@ export class AggregatorAccountData {
       disableCrank: this.disableCrank,
       jobWeights: this.jobWeights,
       creationTimestamp: this.creationTimestamp.toString(),
+      resolutionMode: this.resolutionMode.toJSON(),
+      basePriorityFee: this.basePriorityFee,
+      priorityFeeBump: this.priorityFeeBump,
+      priorityFeeBumpPeriod: this.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: this.maxPriorityFeeMultiplier,
       ebuf: this.ebuf,
     };
   }
@@ -335,6 +372,13 @@ export class AggregatorAccountData {
       disableCrank: obj.disableCrank,
       jobWeights: obj.jobWeights,
       creationTimestamp: new BN(obj.creationTimestamp),
+      resolutionMode: types.AggregatorResolutionMode.fromJSON(
+        obj.resolutionMode
+      ),
+      basePriorityFee: obj.basePriorityFee,
+      priorityFeeBump: obj.priorityFeeBump,
+      priorityFeeBumpPeriod: obj.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: obj.maxPriorityFeeMultiplier,
       ebuf: obj.ebuf,
     });
   }

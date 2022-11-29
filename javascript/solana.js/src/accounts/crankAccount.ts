@@ -1,8 +1,9 @@
 import * as anchor from '@project-serum/anchor';
-import * as spl from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
+  AccountInfo,
   AccountMeta,
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -12,82 +13,9 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
-import { Account } from './account';
+import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount } from './aggregatorAccount';
-import { LeaseAccount } from './leaseAccount';
-import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
-
-/**
- * Parameters for initializing a CrankAccount
- */
-export interface CrankInitParams {
-  /**
-   *  OracleQueueAccount for which this crank is associated
-   */
-  queueAccount: QueueAccount;
-  /**
-   *  String specifying crank name
-   */
-  name?: string;
-  /**
-   *  String specifying crank metadata
-   */
-  metadata?: String;
-  /**
-   * Optional max number of rows
-   */
-  maxRows?: number;
-  /**
-   * Optional
-   */
-  keypair?: Keypair;
-}
-
-/**
- * Parameters for pushing an element into a CrankAccount.
- */
-export interface CrankPushParams {
-  /**
-   * Specifies the aggregator to push onto the crank.
-   */
-  aggregatorAccount: AggregatorAccount;
-  aggregator?: types.AggregatorAccountData;
-  queueAccount?: QueueAccount;
-  queue?: types.OracleQueueAccountData;
-}
-
-/**
- * Parameters for popping an element from a CrankAccount.
- */
-export interface CrankPopParams {
-  /**
-   * Specifies the wallet to reward for turning the crank.
-   */
-  payoutWallet: PublicKey;
-  /**
-   * The pubkey of the linked oracle queue.
-   */
-  queuePubkey: PublicKey;
-  /**
-   * The pubkey of the linked oracle queue authority.
-   */
-  queueAuthority: PublicKey;
-  /**
-   * Array of pubkeys to attempt to pop. If discluded, this will be loaded
-   * from the crank upon calling.
-   */
-  readyPubkeys?: PublicKey[];
-  /**
-   * Nonce to allow consecutive crank pops with the same blockhash.
-   */
-  nonce?: number;
-  crank: types.CrankAccountData;
-  queue: types.OracleQueueAccountData;
-  tokenMint: PublicKey;
-  failOpenOnMismatch?: boolean;
-  popIdx?: number;
-}
 
 /**
  * A Switchboard account representing a crank of aggregators ordered by next update time.
@@ -95,10 +23,42 @@ export interface CrankPopParams {
 export class CrankAccount extends Account<types.CrankAccountData> {
   static accountName = 'CrankAccountData';
 
+  /** The public key of the crank's data buffer storing a priority queue of {@linkcode AggregatorAccount}'s and their next available update timestamp */
+  dataBuffer?: PublicKey;
+
   /**
    * Get the size of an {@linkcode CrankAccount} on-chain.
    */
   public size = this.program.account.crankAccountData.size;
+
+  onChange(
+    callback: OnAccountChangeCallback<types.CrankAccountData>,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    return this.program.connection.onAccountChange(
+      this.publicKey,
+      accountInfo => callback(types.CrankAccountData.decode(accountInfo.data)),
+      commitment
+    );
+  }
+
+  onBufferChange(
+    callback: OnAccountChangeCallback<Array<types.CrankRow>>,
+    _dataBuffer?: PublicKey,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    const buffer = this.dataBuffer ?? _dataBuffer;
+    if (!buffer) {
+      throw new Error(
+        `No crank dataBuffer provided. Call crankAccount.loadData() or pass it to this function in order to watch the account for changes`
+      );
+    }
+    return this.program.connection.onAccountChange(
+      buffer,
+      accountInfo => callback(CrankAccount.decodeBuffer(accountInfo)),
+      commitment
+    );
+  }
 
   /**
    * Retrieve and decode the {@linkcode types.CrankAccountData} stored in this account.
@@ -109,7 +69,57 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       this.publicKey
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    this.dataBuffer = data.dataBuffer;
     return data;
+  }
+
+  public static decodeBuffer(
+    bufferAccountInfo: AccountInfo<Buffer>
+  ): Array<types.CrankRow> {
+    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from('');
+    const maxRows = Math.floor(buffer.byteLength / 40);
+
+    const pqData: Array<types.CrankRow> = [];
+
+    for (let i = 0; i < maxRows * 40; i += 40) {
+      if (buffer.byteLength - i < 40) {
+        break;
+      }
+
+      const rowBuf = buffer.slice(i, i + 40);
+      const pubkey = new PublicKey(rowBuf.slice(0, 32));
+      if (pubkey.equals(PublicKey.default)) {
+        break;
+      }
+
+      const nextTimestamp = new anchor.BN(rowBuf.slice(32, 40), 'le');
+      pqData.push(new types.CrankRow({ pubkey, nextTimestamp }));
+    }
+
+    return pqData;
+  }
+
+  public async loadCrank(
+    sorted = false,
+    commitment: Commitment = 'confirmed'
+  ): Promise<Array<types.CrankRow>> {
+    // Can we do this in a single RPC call? Do we need pqSize?
+    const dataBuffer = this.dataBuffer ?? (await this.loadData()).dataBuffer;
+    const bufferAccountInfo = await this.program.connection.getAccountInfo(
+      dataBuffer,
+      { commitment }
+    );
+    if (bufferAccountInfo === null) {
+      throw new errors.AccountNotFoundError(dataBuffer);
+    }
+
+    const pqData = CrankAccount.decodeBuffer(bufferAccountInfo);
+
+    if (sorted) {
+      return pqData.sort((a, b) => a.nextTimestamp.cmp(b.nextTimestamp));
+    }
+
+    return pqData;
   }
 
   public static async createInstructions(
@@ -315,29 +325,15 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const txnSignature = await this.program.signAndSend(pushTxn);
     return txnSignature;
   }
+
   /**
    * Get an array of the next aggregator pubkeys to be popped from the crank, limited by n
    * @param num The limit of pubkeys to return.
    * @return List of {@linkcode types.CrankRow}, ordered by timestamp.
    */
   async peakNextWithTime(num?: number): Promise<types.CrankRow[]> {
-    const crankData = await this.loadData();
-    const buffer = await this.program.connection
-      .getAccountInfo(crankData.dataBuffer)
-      .then(accountInfo => accountInfo?.data.subarray(8) ?? Buffer.from(''));
-    const rowSize = 40;
-    const crankRows: types.CrankRow[] = [];
-    for (let i = 0; i < crankData.pqSize * rowSize; i += rowSize) {
-      if (buffer.length - i < rowSize) break;
-      const rowBuf = buffer.subarray(i, i + rowSize);
-      const pubkey = new PublicKey(rowBuf.slice(0, 32));
-      const nextTimestamp = new anchor.BN(rowBuf.slice(32, rowSize), 'le');
-      crankRows.push(new types.CrankRow({ pubkey, nextTimestamp }));
-    }
-    return crankRows
-      .slice(0, crankData.pqSize)
-      .sort((a, b) => a.nextTimestamp.cmp(b.nextTimestamp))
-      .slice(0, num);
+    const crankRows = await this.loadCrank(true);
+    return crankRows.slice(0, num ?? crankRows.length);
   }
 
   /**
@@ -348,11 +344,10 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   async peakNextReady(num?: number): Promise<PublicKey[]> {
     const now = Math.floor(Date.now() / 1000);
-    return this.peakNextWithTime(num).then(crankRows => {
-      return crankRows
-        .filter(row => now >= row.nextTimestamp.toNumber())
-        .map(row => row.pubkey);
-    });
+    const crankRows = await this.peakNextWithTime(num);
+    return crankRows
+      .filter(row => now >= row.nextTimestamp.toNumber())
+      .map(row => row.pubkey);
   }
 
   /**
@@ -361,8 +356,93 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    * @return Pubkey list of Aggregators next up to be popped.
    */
   async peakNext(num?: number): Promise<PublicKey[]> {
-    return this.peakNextWithTime(num).then(crankRows => {
-      return crankRows.map(row => row.pubkey);
-    });
+    const crankRows = await this.peakNextWithTime(num);
+    return crankRows.map(row => row.pubkey);
   }
+
+  /** Whether an aggregator pubkey is active on a Crank */
+  async isOnCrank(
+    pubkey: PublicKey,
+    crankRows?: Array<types.CrankRow>
+  ): Promise<boolean> {
+    const rows = crankRows ?? (await this.loadCrank());
+
+    const idx = rows.findIndex(r => r.pubkey.equals(pubkey));
+    if (idx === -1) {
+      return false;
+    }
+
+    return true;
+  }
+}
+
+/**
+ * Parameters for initializing a CrankAccount
+ */
+export interface CrankInitParams {
+  /**
+   *  OracleQueueAccount for which this crank is associated
+   */
+  queueAccount: QueueAccount;
+  /**
+   *  String specifying crank name
+   */
+  name?: string;
+  /**
+   *  String specifying crank metadata
+   */
+  metadata?: String;
+  /**
+   * Optional max number of rows
+   */
+  maxRows?: number;
+  /**
+   * Optional
+   */
+  keypair?: Keypair;
+}
+
+/**
+ * Parameters for pushing an element into a CrankAccount.
+ */
+export interface CrankPushParams {
+  /**
+   * Specifies the aggregator to push onto the crank.
+   */
+  aggregatorAccount: AggregatorAccount;
+  aggregator?: types.AggregatorAccountData;
+  queueAccount?: QueueAccount;
+  queue?: types.OracleQueueAccountData;
+}
+
+/**
+ * Parameters for popping an element from a CrankAccount.
+ */
+export interface CrankPopParams {
+  /**
+   * Specifies the wallet to reward for turning the crank.
+   */
+  payoutWallet: PublicKey;
+  /**
+   * The pubkey of the linked oracle queue.
+   */
+  queuePubkey: PublicKey;
+  /**
+   * The pubkey of the linked oracle queue authority.
+   */
+  queueAuthority: PublicKey;
+  /**
+   * Array of pubkeys to attempt to pop. If discluded, this will be loaded
+   * from the crank upon calling.
+   */
+  readyPubkeys?: PublicKey[];
+  /**
+   * Nonce to allow consecutive crank pops with the same blockhash.
+   */
+  nonce?: number;
+  crank: types.CrankAccountData;
+  queue: types.OracleQueueAccountData;
+  tokenMint: PublicKey;
+  failOpenOnMismatch?: boolean;
+  popIdx?: number;
 }
