@@ -1,7 +1,6 @@
 import * as anchor from '@project-serum/anchor';
 import * as errors from './errors';
 import * as sbv2 from './accounts';
-import * as types from './generated';
 import {
   Cluster,
   Connection,
@@ -12,124 +11,8 @@ import {
 } from '@solana/web3.js';
 import { Mint } from './mint';
 import { TransactionObject } from './transaction';
+import { SwitchboardEvents } from './switchboardEvents';
 
-export type SwitchboardEvents = {
-  AggregatorInitEvent: {
-    feedPubkey: PublicKey;
-  };
-  VrfRequestRandomnessEvent: {
-    vrfPubkey: PublicKey;
-    oraclePubkeys: PublicKey[];
-    loadAmount: anchor.BN;
-    existingAmount: anchor.BN;
-  };
-  VrfRequestEvent: {
-    vrfPubkey: PublicKey;
-    oraclePubkeys: PublicKey[];
-  };
-  VrfProveEvent: {
-    vrfPubkey: PublicKey;
-    oraclePubkey: PublicKey;
-    authorityPubkey: PublicKey;
-  };
-  VrfVerifyEvent: {
-    vrfPubkey: PublicKey;
-    oraclePubkey: PublicKey;
-    authorityPubkey: PublicKey;
-    amount: anchor.BN;
-  };
-  VrfCallbackPerformedEvent: {
-    vrfPubkey: PublicKey;
-    oraclePubkey: PublicKey;
-    amount: anchor.BN;
-  };
-  AggregatorOpenRoundEvent: {
-    feedPubkey: PublicKey;
-    oraclePubkeys: PublicKey[];
-    jobPubkeys: PublicKey[];
-    remainingFunds: anchor.BN;
-    queueAuthority: PublicKey;
-  };
-  AggregatorValueUpdateEvent: {
-    feedPubkey: PublicKey;
-    value: types.SwitchboardDecimal;
-    slot: anchor.BN;
-    timestamp: anchor.BN;
-    oraclePubkeys: PublicKey[];
-    oracleValues: types.SwitchboardDecimal[];
-  };
-  OracleRewardEvent: {
-    feedPubkey: PublicKey;
-    leasePubkey: PublicKey;
-    oraclePubkey: PublicKey;
-    walletPubkey: PublicKey;
-    amount: anchor.BN;
-    roundSlot: anchor.BN;
-    timestamp: anchor.BN;
-  };
-  OracleWithdrawEvent: {
-    oraclePubkey: PublicKey;
-    walletPubkey: PublicKey;
-    destinationWallet: PublicKey;
-    previousAmount: anchor.BN;
-    newAmount: anchor.BN;
-    timestamp: anchor.BN;
-  };
-  LeaseWithdrawEvent: {
-    leasePubkey: PublicKey;
-    walletPubkey: PublicKey;
-    previousAmount: anchor.BN;
-    newAmount: anchor.BN;
-    timestamp: anchor.BN;
-  };
-  OracleSlashEvent: {
-    feedPubkey: PublicKey;
-    leasePubkey: PublicKey;
-    oraclePubkey: PublicKey;
-    walletPubkey: PublicKey;
-    amount: anchor.BN;
-    roundSlot: anchor.BN;
-    timestamp: anchor.BN;
-  };
-  LeaseFundEvent: {
-    leasePubkey: PublicKey;
-    funder: PublicKey;
-    amount: anchor.BN;
-    timestamp: anchor.BN;
-  };
-  ProbationBrokenEvent: {
-    feedPubkey: PublicKey;
-    queuePubkey: PublicKey;
-    timestamp: anchor.BN;
-  };
-  FeedPermissionRevokedEvent: {
-    feedPubkey: PublicKey;
-    timestamp: anchor.BN;
-  };
-  GarbageCollectFailureEvent: {
-    queuePubkey: PublicKey;
-  };
-  OracleBootedEvent: {
-    queuePubkey: PublicKey;
-    oraclePubkey: PublicKey;
-  };
-  AggregatorCrankEvictionEvent: {};
-  CrankLeaseInsufficientFundsEvent: {
-    feedPubkey: PublicKey;
-    leasePubkey: PublicKey;
-  };
-  CrankPopExpectedFailureEvent: {
-    feedPubkey: PublicKey;
-    leasePubkey: PublicKey;
-  };
-  BufferRelayerOpenRoundEvent: {
-    relayerPubkey: PublicKey;
-    jobPubkey: PublicKey;
-    oraclePubkeys: PublicKey[];
-    remainingFunds: anchor.BN;
-    queue: PublicKey;
-  };
-};
 /**
  * Switchboard Devnet Program ID
  */
@@ -142,6 +25,10 @@ export const SBV2_DEVNET_PID = new PublicKey(
 export const SBV2_MAINNET_PID = new PublicKey(
   'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 );
+/**
+ *  A generated keypair that is assigned as the _payerKeypair_ when in read-only mode.
+ */
+export const READ_ONLY_KEYPAIR = Keypair.generate();
 /**
  * Returns the Switchboard Program ID for the specified Cluster.
  */
@@ -166,12 +53,6 @@ export const getSwitchboardProgramId = (
 const isBrowser =
   process.env.ANCHOR_BROWSER ||
   (typeof window !== 'undefined' && !window.process?.hasOwnProperty('type')); // eslint-disable-line no-prototype-builtins
-
-// export const READ_ONLY_KEYPAIR = Keypair.fromSecretKey(
-//   new Uint8Array([...(Array(32).fill(255) as number[])])
-// );
-export const READ_ONLY_KEYPAIR = Keypair.generate();
-export const READ_ONLY_PUBKEY = READ_ONLY_KEYPAIR.publicKey;
 
 /**
  * Wrapper class for the Switchboard anchor Program.

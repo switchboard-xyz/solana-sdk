@@ -183,6 +183,8 @@ export interface AggregatorSaveResultParams {
   tokenMint: PublicKey;
   /**
    *  List of parsed oracles.
+   *
+   *  TODO: Add better typing to this field type
    */
   oracles: Array<any>;
 }
