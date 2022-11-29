@@ -10,6 +10,11 @@ export type {
   AggregatorAccountDataFields,
   AggregatorAccountDataJSON,
 } from './AggregatorAccountData';
+export { SlidingResultAccountData } from './SlidingResultAccountData';
+export type {
+  SlidingResultAccountDataFields,
+  SlidingResultAccountDataJSON,
+} from './SlidingResultAccountData';
 export { PermissionAccountData } from './PermissionAccountData';
 export type {
   PermissionAccountDataFields,

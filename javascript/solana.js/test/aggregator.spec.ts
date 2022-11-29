@@ -33,12 +33,12 @@ describe('Aggregator Tests', () => {
     const [createQueueSignature, oracleQueue] = await sbv2.QueueAccount.create(
       ctx.program,
       {
-        name: Buffer.from('aggregator-queue'),
-        metadata: Buffer.from(''),
+        name: 'aggregator-queue',
+        metadata: '',
         authority: queueAuthority.publicKey,
         queueSize: 1,
-        reward: new anchor.BN(0),
-        minStake: new anchor.BN(0),
+        reward: 0,
+        minStake: 0,
         oracleTimeout: 86400,
         mint: spl.NATIVE_MINT,
         slashingEnabled: false,
@@ -148,7 +148,6 @@ describe('Aggregator Tests', () => {
         minUpdateDelaySeconds: 60,
         loadAmount: 2.5,
         enable: true,
-        permission: new PermitOracleQueueUsage(),
         jobs: [
           { pubkey: jobAccount.publicKey },
           {

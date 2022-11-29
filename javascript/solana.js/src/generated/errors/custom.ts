@@ -1,5 +1,4 @@
 import { SwitchboardProgram } from '../../program';
-
 export type CustomError =
   | ArrayOperationError
   | QueueOperationError
@@ -90,7 +89,8 @@ export type CustomError =
   | JobChunksExceeded
   | JobDataLocked
   | JobNotInitialized
-  | BufferRelayerIllegalRoundOpenCall;
+  | BufferRelayerIllegalRoundOpenCall
+  | InvalidSliderAccount;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1116,6 +1116,17 @@ export class BufferRelayerIllegalRoundOpenCall extends Error {
   }
 }
 
+export class InvalidSliderAccount extends Error {
+  static readonly code = 6090;
+  readonly code = 6090;
+  readonly name = 'InvalidSliderAccount';
+  readonly msg = 'Invalid slider account.';
+
+  constructor(readonly logs?: string[]) {
+    super('6090: Invalid slider account.');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1298,6 +1309,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new JobNotInitialized(logs);
     case 6089:
       return new BufferRelayerIllegalRoundOpenCall(logs);
+    case 6090:
+      return new InvalidSliderAccount(logs);
   }
 
   return null;

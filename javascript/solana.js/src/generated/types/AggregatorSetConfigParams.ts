@@ -12,6 +12,10 @@ export interface AggregatorSetConfigParamsFields {
   minOracleResults: number | null;
   forceReportPeriod: number | null;
   varianceThreshold: types.BorshDecimalFields | null;
+  basePriorityFee: number | null;
+  priorityFeeBump: number | null;
+  priorityFeeBumpPeriod: number | null;
+  maxPriorityFeeMultiplier: number | null;
 }
 
 export interface AggregatorSetConfigParamsJSON {
@@ -23,6 +27,10 @@ export interface AggregatorSetConfigParamsJSON {
   minOracleResults: number | null;
   forceReportPeriod: number | null;
   varianceThreshold: types.BorshDecimalJSON | null;
+  basePriorityFee: number | null;
+  priorityFeeBump: number | null;
+  priorityFeeBumpPeriod: number | null;
+  maxPriorityFeeMultiplier: number | null;
 }
 
 export class AggregatorSetConfigParams {
@@ -34,6 +42,10 @@ export class AggregatorSetConfigParams {
   readonly minOracleResults: number | null;
   readonly forceReportPeriod: number | null;
   readonly varianceThreshold: types.BorshDecimal | null;
+  readonly basePriorityFee: number | null;
+  readonly priorityFeeBump: number | null;
+  readonly priorityFeeBumpPeriod: number | null;
+  readonly maxPriorityFeeMultiplier: number | null;
 
   constructor(fields: AggregatorSetConfigParamsFields) {
     this.name = fields.name;
@@ -47,6 +59,10 @@ export class AggregatorSetConfigParams {
       (fields.varianceThreshold &&
         new types.BorshDecimal({ ...fields.varianceThreshold })) ||
       null;
+    this.basePriorityFee = fields.basePriorityFee;
+    this.priorityFeeBump = fields.priorityFeeBump;
+    this.priorityFeeBumpPeriod = fields.priorityFeeBumpPeriod;
+    this.maxPriorityFeeMultiplier = fields.maxPriorityFeeMultiplier;
   }
 
   static layout(property?: string) {
@@ -60,6 +76,10 @@ export class AggregatorSetConfigParams {
         borsh.option(borsh.u32(), 'minOracleResults'),
         borsh.option(borsh.u32(), 'forceReportPeriod'),
         borsh.option(types.BorshDecimal.layout(), 'varianceThreshold'),
+        borsh.option(borsh.u32(), 'basePriorityFee'),
+        borsh.option(borsh.u32(), 'priorityFeeBump'),
+        borsh.option(borsh.u32(), 'priorityFeeBumpPeriod'),
+        borsh.option(borsh.u32(), 'maxPriorityFeeMultiplier'),
       ],
       property
     );
@@ -79,6 +99,10 @@ export class AggregatorSetConfigParams {
         (obj.varianceThreshold &&
           types.BorshDecimal.fromDecoded(obj.varianceThreshold)) ||
         null,
+      basePriorityFee: obj.basePriorityFee,
+      priorityFeeBump: obj.priorityFeeBump,
+      priorityFeeBumpPeriod: obj.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: obj.maxPriorityFeeMultiplier,
     });
   }
 
@@ -95,6 +119,10 @@ export class AggregatorSetConfigParams {
         (fields.varianceThreshold &&
           types.BorshDecimal.toEncodable(fields.varianceThreshold)) ||
         null,
+      basePriorityFee: fields.basePriorityFee,
+      priorityFeeBump: fields.priorityFeeBump,
+      priorityFeeBumpPeriod: fields.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: fields.maxPriorityFeeMultiplier,
     };
   }
 
@@ -109,6 +137,10 @@ export class AggregatorSetConfigParams {
       forceReportPeriod: this.forceReportPeriod,
       varianceThreshold:
         (this.varianceThreshold && this.varianceThreshold.toJSON()) || null,
+      basePriorityFee: this.basePriorityFee,
+      priorityFeeBump: this.priorityFeeBump,
+      priorityFeeBumpPeriod: this.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: this.maxPriorityFeeMultiplier,
     };
   }
 
@@ -127,6 +159,10 @@ export class AggregatorSetConfigParams {
         (obj.varianceThreshold &&
           types.BorshDecimal.fromJSON(obj.varianceThreshold)) ||
         null,
+      basePriorityFee: obj.basePriorityFee,
+      priorityFeeBump: obj.priorityFeeBump,
+      priorityFeeBumpPeriod: obj.priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier: obj.maxPriorityFeeMultiplier,
     });
   }
 

@@ -42,6 +42,12 @@ export class Mint {
     return BigInt(tokenAmount.toString());
   }
 
+  toTokenAmountBN(amount: number): BN {
+    const big = new Big(amount);
+    const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
+    return new BN(tokenAmount.toString());
+  }
+
   fromTokenAmount(amount: bigint): number {
     const swbDecimal = new SwitchboardDecimal({
       mantissa: new BN(amount.toString()),

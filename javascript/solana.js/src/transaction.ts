@@ -8,7 +8,11 @@ import {
 } from '@solana/web3.js';
 
 export interface ITransactionObject {
+  /** The public key of the account that will pay the transaction fees */
+  payer: PublicKey;
+  /** An array of TransactionInstructions that will be added to the transaction */
   ixns: Array<TransactionInstruction>;
+  /** An array of signers used to sign the transaction before sending. This may not include the payer keypair for web wallet support */
   signers: Array<Keypair>;
 }
 
@@ -29,7 +33,41 @@ export class TransactionObject implements ITransactionObject {
     TransactionObject.verify(payer, ixns, signers);
   }
 
-  add(
+  /**
+   * Append instructions to the beginning of a TransactionObject
+   */
+  public unshift(
+    ixn: TransactionInstruction | Array<TransactionInstruction>,
+    signers?: Array<Keypair>
+  ): TransactionObject {
+    const newIxns = [...this.ixns];
+    if (Array.isArray(ixn)) {
+      newIxns.unshift(...ixn);
+    } else {
+      newIxns.unshift(ixn);
+    }
+    const newSigners = [...this.signers];
+    if (signers) {
+      signers.forEach(s => {
+        if (
+          newSigners.findIndex(signer =>
+            signer.publicKey.equals(s.publicKey)
+          ) === -1
+        ) {
+          newSigners.push(s);
+        }
+      });
+    }
+    TransactionObject.verify(this.payer, newIxns, newSigners);
+    this.ixns = newIxns;
+    this.signers = newSigners;
+    return this;
+  }
+
+  /**
+   * Append instructions to the end of a TransactionObject
+   */
+  public add(
     ixn: TransactionInstruction | Array<TransactionInstruction>,
     signers?: Array<Keypair>
   ): TransactionObject {
@@ -57,7 +95,11 @@ export class TransactionObject implements ITransactionObject {
     return this;
   }
 
-  static verify(
+  /**
+   * Verify a transaction object has less than 10 instructions, less than 1232 bytes, and contains all required signers minus the payer
+   * @throws if more than 10 instructions, serialized size is greater than 1232 bytes, or if object is missing a required signer minus the payer
+   */
+  public static verify(
     payer: PublicKey,
     ixns: Array<TransactionInstruction>,
     signers: Array<Keypair>
@@ -77,7 +119,10 @@ export class TransactionObject implements ITransactionObject {
     TransactionObject.verifySigners(payer, ixns, signers);
   }
 
-  static size(ixns: Array<TransactionInstruction>) {
+  /**
+   * Return the serialized size of an array of TransactionInstructions
+   */
+  public static size(ixns: Array<TransactionInstruction>) {
     const encodeLength = (len: number) => {
       const bytes = new Array<number>();
       let remLen = len;
@@ -119,11 +164,15 @@ export class TransactionObject implements ITransactionObject {
     return txnSize;
   }
 
-  size(): number {
+  get size(): number {
     return TransactionObject.size(this.ixns);
   }
 
-  combine(otherObject: TransactionObject): TransactionObject {
+  /**
+   * Try to combine two {@linkcode TransactionObject}'s
+   * @throws if verification fails. See TransactionObject.verify
+   */
+  public combine(otherObject: TransactionObject): TransactionObject {
     if (!this.payer.equals(otherObject.payer)) {
       throw new Error(`Cannot combine transactions with different payers`);
     }
@@ -160,6 +209,9 @@ export class TransactionObject implements ITransactionObject {
     }
   }
 
+  /**
+   * Convert the TransactionObject into a Solana Transaction
+   */
   public toTxn(blockhash: {
     blockhash: string;
     lastValidBlockHeight: number;
@@ -172,6 +224,9 @@ export class TransactionObject implements ITransactionObject {
     return txn;
   }
 
+  /**
+   * Return a Transaction signed by the provided signers
+   */
   public sign(
     blockhash: { blockhash: string; lastValidBlockHeight: number },
     signers?: Array<Keypair>
@@ -185,6 +240,9 @@ export class TransactionObject implements ITransactionObject {
     return txn;
   }
 
+  /**
+   * Pack an array of TransactionObject's into as few transactions as possible.
+   */
   public static pack(
     _txns: Array<TransactionObject>
   ): Array<TransactionObject> {
@@ -207,5 +265,30 @@ export class TransactionObject implements ITransactionObject {
     }
     packed.push(txn);
     return packed;
+  }
+
+  /**
+   * Pack an array of TransactionInstructions into as few transactions as possible. Assumes only a single signer
+   */
+  public static packIxns(
+    payer: PublicKey,
+    _ixns: Array<TransactionInstruction>
+  ): Array<TransactionObject> {
+    const ixns = [..._ixns];
+    const txns: TransactionObject[] = [];
+
+    let txn = new TransactionObject(payer, [], []);
+    while (ixns.length) {
+      const ixn = ixns.shift()!;
+      try {
+        txn.add(ixn);
+      } catch {
+        txns.push(txn);
+        txn = new TransactionObject(payer, [ixn], []);
+      }
+    }
+
+    txns.push(txn);
+    return txns;
   }
 }
