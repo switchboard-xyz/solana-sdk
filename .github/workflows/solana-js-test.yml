@@ -63,11 +63,5 @@ jobs:
         run: |
           solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json --silent
           mkdir -p .anchor/test-ledger
-          solana-test-validator -q -r --ledger
-          .anchor/test-ledger --mint $(solana-keygen pubkey
-          ~/.config/solana/id.json) --bind-address 0.0.0.0 --url
-          https://api.devnet.solana.com --rpc-port 8899  --clone
-          2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone
-          J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone
-          CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp & sleep 15
+          solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp & sleep 15
           npm run test:localnet
