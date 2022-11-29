@@ -11,9 +11,9 @@ on:
       - "javascript/solana.js/yarn.lock"
 
 env:
-  ANCHOR_VERSION: 0.24.2
+  ANCHOR_VERSION: 0.25.0
   CARGO_TERM_COLOR: always
-  SOLANA_VERSION: 1.10.40
+  # SOLANA_VERSION: 1.13.5
   RUST_TOOLCHAIN: stable
 
 jobs:
@@ -22,11 +22,11 @@ jobs:
     defaults:
       run:
         shell: bash
-    strategy:
-      fail-fast: false
-      max-parallel: 5
-      matrix:
-        SOLANA_VERSION: [v1.10.32, v1.13.5]
+    # strategy:
+    #   fail-fast: false
+    #   max-parallel: 5
+    #   matrix:
+    #     SOLANA_VERSION: [v1.13.5]
     steps:
       - uses: actions/checkout@v2
       - name: Installs Anchor
@@ -63,7 +63,7 @@ jobs:
         run: |
           solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json --silent
           mkdir -p .anchor/test-ledger
-          solana-test-validator -r --ledger
+          solana-test-validator -q -r --ledger
           .anchor/test-ledger --mint $(solana-keygen pubkey
           ~/.config/solana/id.json) --bind-address 0.0.0.0 --url
           https://api.devnet.solana.com --rpc-port 8899  --clone
