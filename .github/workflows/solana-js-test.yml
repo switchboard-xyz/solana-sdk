@@ -13,7 +13,7 @@ on:
 env:
   ANCHOR_VERSION: 0.25.0
   CARGO_TERM_COLOR: always
-  # SOLANA_VERSION: 1.13.5
+  SOLANA_VERSION: 1.13.5
   RUST_TOOLCHAIN: stable
 
 jobs:
@@ -22,18 +22,18 @@ jobs:
     defaults:
       run:
         shell: bash
-    strategy:
-      fail-fast: false
-      max-parallel: 5
-      matrix:
-        SOLANA_VERSION: [1.13.5]
+    # strategy:
+    #   fail-fast: false
+    #   max-parallel: 5
+    #   matrix:
+    #     SOLANA_VERSION: [1.10.32, 1.13.5]
     steps:
       - uses: actions/checkout@v2
       - name: Installs Anchor
         uses: ./.github/actions/install-common-build-deps
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          solana_version: ${{ env.SOLANA_VERSION }}
+          solana_version: ${{ env.SOLANA_VERSION}}
           # rust-version: ${{ env.RUST_TOOLCHAIN }}
       # - run:
       #     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s --
