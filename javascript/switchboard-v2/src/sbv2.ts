@@ -505,6 +505,10 @@ export interface AggregatorSaveResultParams {
    *  List of parsed oracles.
    */
   oracles: Array<any>;
+  /**
+   *  List of oracle results relative to the job idx. null if failed
+   */
+  jobValues: Array<SwitchboardDecimal | null>;
 }
 
 /**
@@ -615,14 +619,18 @@ export class AggregatorHistoryRow {
 }
 
 export type AggregatorSetConfigParams = Partial<{
-  name: Buffer;
-  metadata: Buffer;
-  batchSize: number;
-  minOracleResults: number;
-  minJobResults: number;
-  minUpdateDelaySeconds: number;
-  forceReportPeriod: number;
-  varianceThreshold: number;
+  name?: Buffer;
+  metadata?: Buffer;
+  batchSize?: number;
+  minOracleResults?: number;
+  minJobResults?: number;
+  minUpdateDelaySeconds?: number;
+  forceReportPeriod?: number;
+  varianceThreshold?: number;
+  basePriorityFee?: number;
+  priorityFeeBump?: number;
+  priorityFeeBumpPeriod?: number;
+  maxPriorityFeeMultiplier?: number;
 }>;
 
 export interface AggregatorSetQueueParams {
@@ -1064,6 +1072,10 @@ export class AggregatorAccount {
         varianceThreshold: lodash.isFinite(params.varianceThreshold)
           ? SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
           : null,
+        basePriorityFee: params.basePriorityFee ?? null,
+        priorityFeeBump: params.priorityFeeBump ?? null,
+        priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? null,
+        maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? null,
       })
       .accounts({
         aggregator: this.publicKey,
@@ -1398,7 +1410,7 @@ export class AggregatorAccount {
       )[0]
     );
     return this.program.methods
-      .aggregatorSaveResult({
+      .aggregatorSaveResultV2({
         oracleIdx: params.oracleIdx,
         error: params.error,
         value: SwitchboardDecimal.fromBig(params.value),
@@ -1409,6 +1421,7 @@ export class AggregatorAccount {
         oraclePermissionBump,
         leaseBump,
         stateBump,
+        jobValues: params.jobValues,
       })
       .accounts({
         aggregator: this.publicKey,
