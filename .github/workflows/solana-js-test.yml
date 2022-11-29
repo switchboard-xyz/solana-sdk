@@ -26,13 +26,14 @@ jobs:
       fail-fast: false
       max-parallel: 5
       matrix:
-        SOLANA_VERSION: [v1.13.5]
+        SOLANA_VERSION: [1.13.5]
     steps:
       - uses: actions/checkout@v2
       - name: Installs Anchor
         uses: ./.github/actions/install-common-build-deps
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
+          solana_version: ${{ env.SOLANA_VERSION }}
           # rust-version: ${{ env.RUST_TOOLCHAIN }}
       # - run:
       #     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s --
