@@ -312,10 +312,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     if (!queueAccountInfo) {
       throw new errors.AccountNotFoundError(lease.queue);
     }
-    const queue: types.OracleQueueAccountData = coder.decode(
-      QueueAccount.accountName,
-      queueAccountInfo.data
-    );
 
     const jobWallets: Array<PublicKey> = [];
     const walletBumps: Array<number> = [];
@@ -436,8 +432,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     }
 
     const lease = await this.loadData();
-    const coder = this.program.coder;
-
     const accountInfos = await this.program.connection.getMultipleAccountsInfo([
       lease.aggregator,
       lease.queue,
@@ -452,20 +446,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     if (!aggregatorAccountInfo) {
       throw new errors.AccountNotFoundError(lease.aggregator);
     }
-    const aggregator: types.AggregatorAccountData = coder.decode(
-      AggregatorAccount.accountName,
-      aggregatorAccountInfo.data
-    );
 
     // decode queue
     const queueAccountInfo = accountInfos.shift();
     if (!queueAccountInfo) {
       throw new errors.AccountNotFoundError(lease.queue);
     }
-    const queue: types.OracleQueueAccountData = coder.decode(
-      QueueAccount.accountName,
-      queueAccountInfo.data
-    );
 
     const [_, leaseBump] = LeaseAccount.fromSeed(
       this.program,
