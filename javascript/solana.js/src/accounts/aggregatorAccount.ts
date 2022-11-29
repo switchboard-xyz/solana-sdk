@@ -99,6 +99,94 @@ export interface AggregatorInitParams {
   queueAuthority: PublicKey;
 }
 
+export type AggregatorSetConfigParams = Partial<{
+  name: Buffer;
+  metadata: Buffer;
+  batchSize: number;
+  minOracleResults: number;
+  minJobResults: number;
+  minUpdateDelaySeconds: number;
+  forceReportPeriod: number;
+  varianceThreshold: number;
+}>;
+
+export interface AggregatorSetQueueParams {
+  queueAccount: QueueAccount;
+  authority?: Keypair;
+}
+
+/**
+ * Parameters required to open an aggregator round
+ */
+export interface AggregatorOpenRoundParams {
+  /**
+   *  The oracle queue from which oracles are assigned this update.
+   */
+  oracleQueueAccount: QueueAccount;
+  /**
+   *  The token wallet which will receive rewards for calling update on this feed.
+   */
+  payoutWallet: PublicKey;
+}
+
+/**
+ * Parameters for creating and setting a history buffer for an aggregator
+ */
+export interface AggregatorSetHistoryBufferParams {
+  /*
+   * Authority keypair for the aggregator.
+   */
+  authority?: Keypair;
+  /*
+   * Number of elements for the history buffer to fit.
+   */
+  size: number;
+}
+
+/**
+ * Parameters for which oracles must submit for responding to update requests.
+ */
+export interface AggregatorSaveResultParams {
+  /**
+   *  Index in the list of oracles in the aggregator assigned to this round update.
+   */
+  oracleIdx: number;
+  /**
+   *  Reports that an error occured and the oracle could not send a value.
+   */
+  error: boolean;
+  /**
+   *  Value the oracle is responding with for this update.
+   */
+  value: Big;
+  /**
+   *  The minimum value this oracle has seen this round for the jobs listed in the
+   *  aggregator.
+   */
+  minResponse: Big;
+  /**
+   *  The maximum value this oracle has seen this round for the jobs listed in the
+   *  aggregator.
+   */
+  maxResponse: Big;
+  /**
+   *  List of OracleJobs that were performed to produce this result.
+   */
+  jobs: Array<OracleJob>;
+  /**
+   *  Authority of the queue the aggregator is attached to.
+   */
+  queueAuthority: PublicKey;
+  /**
+   *  Program token mint.
+   */
+  tokenMint: PublicKey;
+  /**
+   *  List of parsed oracles.
+   */
+  oracles: Array<any>;
+}
+
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
 
@@ -129,6 +217,46 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
     return data;
+  }
+
+  public getAccounts(params: {
+    queueAccount: QueueAccount;
+    queueAuthority: PublicKey;
+  }): {
+    queueAccount: QueueAccount;
+    permissionAccount: PermissionAccount;
+    permissionBump: number;
+    leaseAccount: LeaseAccount;
+    leaseBump: number;
+    leaseEscrow: PublicKey;
+  } {
+    const queueAccount = params.queueAccount;
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      params.queueAuthority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+      this.program,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    const leaseEscrow = this.program.mint.getAssociatedAddress(
+      leaseAccount.publicKey
+    );
+
+    return {
+      queueAccount,
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseBump,
+      leaseEscrow,
+    };
   }
 
   public static async load(
@@ -181,7 +309,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * ```
    * @param program The SwitchboardProgram.
    * @param payer The account that will pay for the new accounts.
-   * @param params {@linkcode AggregatorInitParams}.
+   * @param params aggregator configuration parameters.
    * @return {@linkcode TransactionObject} that will create the aggregatorAccount.
    */
   public static async createInstruction(
@@ -244,6 +372,27 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     ];
   }
 
+  /**
+   * Creates a transaction object with aggregatorInit instructions.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
+   * const [aggregatorInit, aggregatorAccount] = await AggregatorAccount.createInstruction(program, payer, {
+   *    queueAccount,
+   *    queueAuthority,
+   *    batchSize: 5,
+   *    minRequiredOracleResults: 3,
+   *    minRequiredJobResults: 1,
+   *    minUpdateDelaySeconds: 30,
+   * });
+   * const txnSignature = await program.signAndSend(aggregatorInit);
+   * ```
+   * @param program The SwitchboardProgram.
+   * @param params aggregator configuration parameters.
+   * @return Transaction signature and the newly created aggregatorAccount.
+   */
   public static async create(
     program: SwitchboardProgram,
     params: AggregatorInitParams
@@ -318,7 +467,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   /**
    * Get the latest confirmed value stored in the aggregator account.
-   * @return latest feed value
+   * @return latest feed value or null if not populated
    */
   public async fetchLatestValue(): Promise<Big | null> {
     const aggregator = await this.loadData();
@@ -794,66 +943,21 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       permission?: [PermissionAccount, number];
     }>
   ): Promise<TransactionObject> {
-    const aggregator = params.aggregator ?? (await this.loadData());
     const queueAccount =
       params.queueAccount ??
-      new QueueAccount(this.program, aggregator.queuePubkey);
+      new QueueAccount(this.program, (await this.loadData()).queuePubkey);
+    const queue = await queueAccount.loadData();
 
-    let queueAuthority = params.queueAuthority;
-    let queueDataBuffer = params.queueDataBuffer;
-
-    let queue = params.queue;
-    if (params.queue) {
-      queueAuthority = params.queue.authority;
-      queueDataBuffer = params.queue.dataBuffer;
-    }
-    if (!queueAuthority || !queueDataBuffer) {
-      queue = await queueAccount.loadData();
-      queueAuthority = queue.authority;
-      queueDataBuffer = queue.dataBuffer;
-    }
-
-    const [leaseAccount, leaseBump] =
-      params.lease ??
-      LeaseAccount.fromSeed(
-        this.program,
-        queueAccount.publicKey,
-        this.publicKey
-      );
-    let lease: types.LeaseAccountData;
-    try {
-      lease = await leaseAccount.loadData();
-    } catch (_) {
-      throw new Error(
-        'A requested lease pda account has not been initialized.'
-      );
-    }
-
-    const leaseEscrow =
-      params.leaseEscrow ??
-      lease.escrow ??
-      spl.getAssociatedTokenAddressSync(
-        this.program.mint.address,
-        leaseAccount.publicKey,
-        true
-      );
-
-    const [permissionAccount, permissionBump] =
-      params.permission ??
-      PermissionAccount.fromSeed(
-        this.program,
-        queueAuthority,
-        queueAccount.publicKey,
-        this.publicKey
-      );
-    let permission: types.PermissionAccountData;
-    try {
-      permission = await permissionAccount.loadData();
-    } catch (_) {
-      throw new Error(
-        'A requested aggregator permission pda account has not been initialized.'
-      );
-    }
+    const {
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseBump,
+      leaseEscrow,
+    } = this.getAccounts({
+      queueAccount: queueAccount,
+      queueAuthority: queue.authority,
+    });
 
     const ixns: Array<TransactionInstruction> = [];
 
@@ -882,13 +986,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           aggregator: this.publicKey,
           lease: leaseAccount.publicKey,
           oracleQueue: queueAccount.publicKey,
-          queueAuthority: queueAuthority,
+          queueAuthority: queue.authority,
           permission: permissionAccount.publicKey,
           escrow: leaseEscrow,
           programState: this.program.programState.publicKey,
           payoutWallet: payoutWallet,
           tokenProgram: TOKEN_PROGRAM_ID,
-          dataBuffer: queueDataBuffer,
+          dataBuffer: queue.dataBuffer,
           mint: this.program.mint.address,
         }
       )
@@ -1018,7 +1122,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     for (let i = 0; i < aggregator.oracleRequestBatchSize; ++i) {
       remainingAccounts.push(aggregator.currentRound.oraclePubkeysData[i]);
     }
-    for (const oracle of params?.oracles ?? []) {
+    for (const oracle of params?.oracles ??
+      (await this.loadCurrentRoundOracles(aggregator)).map(a => a.state)) {
       remainingAccounts.push(oracle.tokenAccount);
     }
     remainingAccounts.push(
@@ -1062,41 +1167,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       mint = mint ?? queue.mint ?? spl.NATIVE_MINT;
     }
 
-    const [leaseAccount, leaseBump] =
-      params.lease ??
-      LeaseAccount.fromSeed(
-        this.program,
-        queueAccount.publicKey,
-        this.publicKey
-      );
-    try {
-      await leaseAccount.loadData();
-    } catch (_) {
-      throw new Error(
-        'A requested lease pda account has not been initialized.'
-      );
-    }
-    const leaseEscrow = spl.getAssociatedTokenAddressSync(
-      mint,
-      leaseAccount.publicKey,
-      true
-    );
-
-    const [feedPermissionAccount, feedPermissionBump] =
-      params.feedPermission ??
-      PermissionAccount.fromSeed(
-        this.program,
-        queueAuthority,
-        queueAccount.publicKey,
-        this.publicKey
-      );
-    try {
-      await feedPermissionAccount.loadData();
-    } catch (_) {
-      throw new Error(
-        'A requested aggregator permission pda account has not been initialized.'
-      );
-    }
+    const {
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseBump,
+      leaseEscrow,
+    } = this.getAccounts({
+      queueAccount: queueAccount,
+      queueAuthority: queueAuthority,
+    });
 
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission ??
@@ -1119,7 +1199,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const saveResultIxn = this.saveResultInstruction({
       queueAccount,
       queueAuthority,
-      feedPermission: [feedPermissionAccount, feedPermissionBump],
+      feedPermission: [permissionAccount, permissionBump],
       jobs: params.jobs,
       historyBuffer: historyBuffer.equals(PublicKey.default)
         ? undefined
@@ -1136,13 +1216,15 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       lease: [leaseAccount, leaseBump],
       leaseEscrow: leaseEscrow,
     });
+
+    // add remaining accounts
     saveResultIxn.keys.push(
       ...remainingAccounts.map((pubkey): AccountMeta => {
         return { isSigner: false, isWritable: true, pubkey };
       })
     );
-    ixns.push(saveResultIxn);
 
+    ixns.push(saveResultIxn);
     const saveResultTxn = new TransactionObject(
       this.program.walletPubkey,
       ixns,

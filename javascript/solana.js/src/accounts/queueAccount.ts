@@ -18,6 +18,7 @@ import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
 import { Account } from './account';
 import { AggregatorAccount } from './aggregatorAccount';
+import { CrankAccount } from './crankAccount';
 import { JobAccount } from './jobAccount';
 import { LeaseAccount } from './leaseAccount';
 import { OracleAccount } from './oracleAccount';
@@ -378,6 +379,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       feedKeypair?: Keypair;
       authority?: Keypair;
     } & {
+      crankPubkey?: PublicKey;
+    } & {
       // lease params
       loadAmount?: number;
       funderAuthority?: Keypair;
@@ -502,6 +505,17 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         authority: params.authority,
       });
       post.push(addJobTxn);
+    }
+
+    if (params.crankPubkey) {
+      const crankAccount = new CrankAccount(this.program, params.crankPubkey);
+      post.push(
+        await crankAccount.pushInstruction(this.program.walletPubkey, {
+          aggregatorAccount: aggregatorAccount,
+          queueAccount: this,
+          queue,
+        })
+      );
     }
 
     const packed = TransactionObject.pack([
