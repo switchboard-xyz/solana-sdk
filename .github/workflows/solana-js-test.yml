@@ -30,11 +30,14 @@ jobs:
     steps:
       # Setup Deps
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/install-linux-build-deps
-      - uses: ./.github/actions/install-solana
+      - name: Setup Linux Build Deps
+        uses: ./.github/actions/install-linux-build-deps
+      - name: Install Solana
+        uses: ./.github/actions/install-solana
         with:
           solana_version: ${{ env.SOLANA_VERSION }}
-      - uses: ./.github/actions/install-rust
+      - name: Install Rust
+        uses: ./.github/actions/install-rust
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - name: Use Node.js
@@ -43,11 +46,11 @@ jobs:
           node-version: 16
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
-      - name: Install sbv2, anchor, and typescript
-        run:
-          npm i -g @project-serum/anchor-cli@$ANCHOR_VERSION ts-mocha typescript
-          @switchboard-xyz/cli@latest
-      - name: Install dependencies
+      # - name: Install sbv2, anchor, and typescript
+      #   run:
+      #     npm i -g @project-serum/anchor-cli@$ANCHOR_VERSION ts-mocha typescript
+      #     @switchboard-xyz/cli@latest
+      - name: Build solana.js
         working-directory: javascript/solana.js
         run:
           yarn install --frozen-lockfile --network-timeout=1000000 && yarn build
