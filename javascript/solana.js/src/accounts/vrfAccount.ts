@@ -4,6 +4,7 @@ import { PublicKey, SystemProgram } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
+import { TransactionObject } from '../transaction';
 import { Account, OnAccountChangeCallback } from './account';
 import { QueueAccount } from './queueAccount';
 
@@ -48,15 +49,13 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     program: SwitchboardProgram,
     params: VrfInitParams
   ): Promise<[string, VrfAccount]> {
-    return this.createInstructions(program, {
-      ...params,
-      payerKeypair: program.wallet.payer,
-    }).then(async ([instructions, account]) => {
-      const txSignature = await program.signAndSendTransaction(instructions, [
-        params.vrfKeypair,
-      ]);
-      return [txSignature, account];
-    });
+    const [createTxn, vrfAccount] = await VrfAccount.createInstructions(
+      program,
+      program.walletPubkey,
+      params
+    );
+    const txnSignature = await program.signAndSend(createTxn);
+    return [txnSignature, vrfAccount];
   }
 
   /**
@@ -67,9 +66,9 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public static async createInstructions(
     program: SwitchboardProgram,
-    params: VrfInitParams & { payerKeypair: anchor.web3.Keypair },
-    payer: PublicKey = program.walletPubkey
-  ): Promise<[anchor.web3.TransactionInstruction[], VrfAccount]> {
+    payer: PublicKey,
+    params: VrfInitParams
+  ): Promise<[TransactionObject, VrfAccount]> {
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
     const size = program.account.vrfAccountData.size;
     const switchTokenMint = await params.queue.loadMint();
@@ -78,50 +77,50 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       params.vrfKeypair.publicKey,
       true
     );
-    return [
-      [
-        spl.createAssociatedTokenAccountInstruction(
-          program.wallet.payer.publicKey,
-          escrow,
-          params.vrfKeypair.publicKey,
-          switchTokenMint.address
+    const ixns = [
+      spl.createAssociatedTokenAccountInstruction(
+        program.wallet.payer.publicKey,
+        escrow,
+        params.vrfKeypair.publicKey,
+        switchTokenMint.address
+      ),
+      spl.createSetAuthorityInstruction(
+        escrow,
+        params.vrfKeypair.publicKey,
+        spl.AuthorityType.AccountOwner,
+        program.programState.publicKey,
+        [program.wallet.payer, params.vrfKeypair]
+      ),
+      SystemProgram.createAccount({
+        fromPubkey: program.wallet.payer.publicKey,
+        newAccountPubkey: params.vrfKeypair.publicKey,
+        space: size,
+        lamports: await program.connection.getMinimumBalanceForRentExemption(
+          size
         ),
-        spl.createSetAuthorityInstruction(
-          escrow,
-          params.vrfKeypair.publicKey,
-          spl.AuthorityType.AccountOwner,
-          program.programState.publicKey,
-          [program.wallet.payer, params.vrfKeypair]
-        ),
-        SystemProgram.createAccount({
-          fromPubkey: program.wallet.payer.publicKey,
-          newAccountPubkey: params.vrfKeypair.publicKey,
-          space: size,
-          lamports: await program.connection.getMinimumBalanceForRentExemption(
-            size
-          ),
-          programId: program.programId,
-        }),
-        types.vrfInit(
-          program,
-          {
-            params: {
-              stateBump: program.programState.bump,
-              callback: params.callback,
-            },
+        programId: program.programId,
+      }),
+      types.vrfInit(
+        program,
+        {
+          params: {
+            stateBump: program.programState.bump,
+            callback: params.callback,
           },
-          {
-            vrf: params.vrfKeypair.publicKey,
-            authority: params.authority ?? params.vrfKeypair.publicKey,
-            escrow,
-            oracleQueue: params.queue.publicKey,
-            programState: program.programState.publicKey,
-            tokenProgram: spl.TOKEN_PROGRAM_ID,
-          }
-        ),
-      ],
-      vrfAccount,
+        },
+        {
+          vrf: params.vrfKeypair.publicKey,
+          authority: params.authority ?? params.vrfKeypair.publicKey,
+          escrow,
+          oracleQueue: params.queue.publicKey,
+          programState: program.programState.publicKey,
+          tokenProgram: spl.TOKEN_PROGRAM_ID,
+        }
+      ),
     ];
+
+    const txn = new TransactionObject(payer, ixns, [params.vrfKeypair]);
+    return [txn, vrfAccount];
   }
 
   /**

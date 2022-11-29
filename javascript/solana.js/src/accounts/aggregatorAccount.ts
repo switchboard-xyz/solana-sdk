@@ -5,6 +5,7 @@ import * as errors from '../errors';
 import Big from 'big.js';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountMeta,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -20,6 +21,7 @@ import { LeaseAccount } from './leaseAccount';
 import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
@@ -716,62 +718,20 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
-  public openRoundInstruction(
+  public async openRoundInstruction(
     payer: PublicKey,
-    params: {
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      queueDataBuffer: PublicKey;
-      mint: PublicKey;
-      payoutWallet: PublicKey;
-      lease: [LeaseAccount, number];
-      leaseEscrow: PublicKey;
-      permission: [PermissionAccount, number];
-    }
-  ): TransactionInstruction {
-    const [leaseAccount, leaseBump] = params.lease;
-    const [permissionAccount, permissionBump] = params.permission;
-
-    return types.aggregatorOpenRound(
-      this.program,
-      {
-        params: {
-          stateBump: this.program.programState.bump,
-          leaseBump: leaseBump,
-          permissionBump: permissionBump,
-          jitter: 0, // what is this for?
-        },
-      },
-      {
-        aggregator: this.publicKey,
-        lease: leaseAccount.publicKey,
-        oracleQueue: params.queueAccount.publicKey,
-        queueAuthority: params.queueAuthority,
-        permission: permissionAccount.publicKey,
-        escrow: params.leaseEscrow,
-        programState: this.program.programState.publicKey,
-        payoutWallet: params.payoutWallet,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
-        dataBuffer: params.queueDataBuffer,
-        mint: params.mint,
-      }
-    );
-  }
-
-  public async openRound(
     params: Partial<{
-      aggregator: types.AggregatorAccountData;
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      queueDataBuffer: PublicKey;
-      mint: PublicKey;
-      payoutWallet: PublicKey;
-      lease: [LeaseAccount, number];
-      leaseEscrow: PublicKey;
-      permission: [PermissionAccount, number];
+      aggregator?: types.AggregatorAccountData;
+      queueAccount?: QueueAccount;
+      queue?: types.OracleQueueAccountData;
+      queueAuthority?: PublicKey;
+      queueDataBuffer?: PublicKey;
+      payoutWallet?: PublicKey;
+      lease?: [LeaseAccount, number];
+      leaseEscrow?: PublicKey;
+      permission?: [PermissionAccount, number];
     }>
-  ): Promise<TransactionSignature> {
-    const payer = this.program.walletPubkey;
+  ): Promise<TransactionObject> {
     const aggregator = params.aggregator ?? (await this.loadData());
     const queueAccount =
       params.queueAccount ??
@@ -779,12 +739,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     let queueAuthority = params.queueAuthority;
     let queueDataBuffer = params.queueDataBuffer;
-    let mint = params.mint;
-    if (!queueAuthority || !queueDataBuffer || !mint) {
-      const queue = await queueAccount.loadData();
+
+    let queue = params.queue;
+    if (params.queue) {
+      queueAuthority = params.queue.authority;
+      queueDataBuffer = params.queue.dataBuffer;
+    }
+    if (!queueAuthority || !queueDataBuffer) {
+      queue = await queueAccount.loadData();
       queueAuthority = queue.authority;
       queueDataBuffer = queue.dataBuffer;
-      mint = mint ?? queue.mint ?? spl.NATIVE_MINT;
     }
 
     const [leaseAccount, leaseBump] =
@@ -794,18 +758,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         queueAccount.publicKey,
         this.publicKey
       );
+    let lease: types.LeaseAccountData;
     try {
-      await leaseAccount.loadData();
+      lease = await leaseAccount.loadData();
     } catch (_) {
       throw new Error(
         'A requested lease pda account has not been initialized.'
       );
     }
-    const leaseEscrow = spl.getAssociatedTokenAddressSync(
-      mint,
-      leaseAccount.publicKey,
-      true
-    );
+
+    const leaseEscrow =
+      params.leaseEscrow ??
+      lease.escrow ??
+      spl.getAssociatedTokenAddressSync(
+        this.program.mint.address,
+        leaseAccount.publicKey,
+        true
+      );
 
     const [permissionAccount, permissionBump] =
       params.permission ??
@@ -815,44 +784,76 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         queueAccount.publicKey,
         this.publicKey
       );
+    let permission: types.PermissionAccountData;
     try {
-      await permissionAccount.loadData();
+      permission = await permissionAccount.loadData();
     } catch (_) {
       throw new Error(
         'A requested aggregator permission pda account has not been initialized.'
       );
     }
 
-    const preInstructions: Array<TransactionInstruction> = [];
+    const ixns: Array<TransactionInstruction> = [];
 
-    const payoutWallet = spl.getAssociatedTokenAddressSync(mint, payer, true);
-    try {
-      await spl.getAccount(this.program.connection, payoutWallet);
-    } catch (error) {
-      // TODO: Catch error and make sure it matches account doesnt exist
-      preInstructions.push(
-        spl.createAssociatedTokenAccountInstruction(
-          payer,
-          payoutWallet,
-          payer,
-          mint
-        )
-      );
+    const payoutWallet =
+      params.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
+    const payoutWalletAccountInfo =
+      await this.program.connection.getAccountInfo(payoutWallet);
+    if (payoutWalletAccountInfo === null) {
+      const [createTokenAccountTxn] =
+        this.program.mint.createAssocatedUserInstruction(payer);
+      ixns.push(...createTokenAccountTxn.ixns);
     }
 
-    return await this.program.signAndSendTransaction([
-      ...preInstructions,
-      this.openRoundInstruction(this.program.walletPubkey, {
-        queueAccount,
-        queueAuthority,
-        queueDataBuffer,
-        mint,
-        lease: [leaseAccount, leaseBump],
-        permission: [permissionAccount, permissionBump],
-        payoutWallet: payoutWallet,
-        leaseEscrow: leaseEscrow,
-      }),
-    ]);
+    ixns.push(
+      types.aggregatorOpenRound(
+        this.program,
+        {
+          params: {
+            stateBump: this.program.programState.bump,
+            leaseBump,
+            permissionBump,
+            jitter: 0,
+          },
+        },
+        {
+          aggregator: this.publicKey,
+          lease: leaseAccount.publicKey,
+          oracleQueue: queueAccount.publicKey,
+          queueAuthority: queueAuthority,
+          permission: permissionAccount.publicKey,
+          escrow: leaseEscrow,
+          programState: this.program.programState.publicKey,
+          payoutWallet: payoutWallet,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          dataBuffer: queueDataBuffer,
+          mint: this.program.mint.address,
+        }
+      )
+    );
+
+    return new TransactionObject(payer, ixns, []);
+  }
+
+  public async openRound(
+    params: Partial<{
+      aggregator?: types.AggregatorAccountData;
+      queueAccount?: QueueAccount;
+      queue?: types.OracleQueueAccountData;
+      queueAuthority?: PublicKey;
+      queueDataBuffer?: PublicKey;
+      payoutWallet?: PublicKey;
+      lease?: [LeaseAccount, number];
+      leaseEscrow?: PublicKey;
+      permission?: [PermissionAccount, number];
+    }>
+  ): Promise<TransactionSignature> {
+    const openRoundTxn = await this.openRoundInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(openRoundTxn);
+    return txnSignature;
   }
 
   public saveResultInstruction(
@@ -877,6 +878,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     } & Partial<{
       error?: boolean;
       historyBuffer?: PublicKey;
+      oracles: Array<types.OracleAccountData>;
     }>
   ): TransactionInstruction {
     const [leaseAccount, leaseBump] = params.lease;
@@ -944,10 +946,25 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       payoutWallet: PublicKey;
       lease: [LeaseAccount, number];
       leaseEscrow: PublicKey;
+      oracles: Array<types.OracleAccountData>;
     }>
   ): Promise<TransactionSignature> {
     const payer = this.program.walletPubkey;
     const aggregator = params.aggregator ?? (await this.loadData());
+
+    const remainingAccounts: Array<PublicKey> = [];
+    for (let i = 0; i < aggregator.oracleRequestBatchSize; ++i) {
+      remainingAccounts.push(aggregator.currentRound.oraclePubkeysData[i]);
+    }
+    for (const oracle of params?.oracles ?? []) {
+      remainingAccounts.push(oracle.tokenAccount);
+    }
+    remainingAccounts.push(
+      anchor.utils.publicKey.findProgramAddressSync(
+        [Buffer.from('SlidingResultAccountData'), this.publicKey.toBytes()],
+        this.program.programId
+      )[0]
+    );
 
     const oracleIdx =
       params.oracleIdx ??
@@ -957,6 +974,18 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     if (oracleIdx < 0) {
       throw new Error('Failed to find oracle in current round');
+    }
+
+    const ixns: Array<TransactionInstruction> = [];
+
+    const payoutWallet =
+      params.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
+    const payoutWalletAccountInfo =
+      await this.program.connection.getAccountInfo(payoutWallet);
+    if (payoutWalletAccountInfo === null) {
+      const [createTokenAccountTxn] =
+        this.program.mint.createAssocatedUserInstruction(payer);
+      ixns.push(...createTokenAccountTxn.ixns);
     }
 
     const queueAccount =
@@ -1023,49 +1052,41 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       );
     }
 
-    const preInstructions: Array<TransactionInstruction> = [];
-
-    const payoutWallet = spl.getAssociatedTokenAddressSync(mint, payer, true);
-    try {
-      await spl.getAccount(this.program.connection, payoutWallet);
-    } catch (error) {
-      // TODO: Catch error and make sure it matches account doesnt exist
-      preInstructions.push(
-        spl.createAssociatedTokenAccountInstruction(
-          payer,
-          payoutWallet,
-          payer,
-          mint
-        )
-      );
-    }
-
     const historyBuffer = params.historyBuffer ?? aggregator.historyBuffer;
 
-    // TODO: Add SlidingWindow account to remainingAccounts
+    const saveResultIxn = this.saveResultInstruction({
+      queueAccount,
+      queueAuthority,
+      feedPermission: [feedPermissionAccount, feedPermissionBump],
+      jobs: params.jobs,
+      historyBuffer: historyBuffer.equals(PublicKey.default)
+        ? undefined
+        : historyBuffer,
+      oracleAccount: params.oracleAccount,
+      oracleIdx,
+      oraclePermission: [oraclePermissionAccount, oraclePermissionBump],
+      value: params.value,
+      minResponse: params.minResponse,
+      maxResponse: params.maxResponse,
+      error: params.error ?? false,
+      mint,
+      payoutWallet: payoutWallet,
+      lease: [leaseAccount, leaseBump],
+      leaseEscrow: leaseEscrow,
+    });
+    saveResultIxn.keys.push(
+      ...remainingAccounts.map((pubkey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      })
+    );
+    ixns.push(saveResultIxn);
 
-    return await this.program.signAndSendTransaction([
-      ...preInstructions,
-      this.saveResultInstruction({
-        queueAccount,
-        queueAuthority,
-        feedPermission: [feedPermissionAccount, feedPermissionBump],
-        jobs: params.jobs,
-        historyBuffer: historyBuffer.equals(PublicKey.default)
-          ? undefined
-          : historyBuffer,
-        oracleAccount: params.oracleAccount,
-        oracleIdx,
-        oraclePermission: [oraclePermissionAccount, oraclePermissionBump],
-        value: params.value,
-        minResponse: params.minResponse,
-        maxResponse: params.maxResponse,
-        error: params.error ?? false,
-        mint,
-        payoutWallet: payoutWallet,
-        lease: [leaseAccount, leaseBump],
-        leaseEscrow: leaseEscrow,
-      }),
-    ]);
+    const saveResultTxn = new TransactionObject(
+      this.program.walletPubkey,
+      ixns,
+      []
+    );
+    const txnSignature = await this.program.signAndSend(saveResultTxn);
+    return txnSignature;
   }
 }

@@ -27,10 +27,8 @@ describe('Mint Tests', () => {
       await ctx.program.mint.createAssocatedUser(ctx.payer.publicKey, user);
     userTokenAddress = tokenAddress;
 
-    const userTokenAccount = await ctx.program.mint.getAccount(user.publicKey);
-    const userTokenBalance = ctx.program.mint.fromTokenAmount(
-      userTokenAccount.amount
-    );
+    const userTokenBalance =
+      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
 
     if (userTokenBalance !== 0) {
       throw new Error(
@@ -50,10 +48,8 @@ describe('Mint Tests', () => {
       user
     );
 
-    const userTokenAccount = await ctx.program.mint.getAccount(user.publicKey);
-    const userTokenBalance = ctx.program.mint.fromTokenAmount(
-      userTokenAccount.amount
-    );
+    const userTokenBalance =
+      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
     if (userTokenBalance !== 0.25) {
       throw new Error(
         `Incorrect user token balance, expected 0.25, received ${userTokenBalance}`
@@ -66,12 +62,8 @@ describe('Mint Tests', () => {
       throw new Error(`User token address does not exist`);
     }
 
-    const initialUserTokenAccount = await ctx.program.mint.getAccount(
-      user.publicKey
-    );
-    const initialUserTokenBalance = ctx.program.mint.fromTokenAmount(
-      initialUserTokenAccount.amount
-    );
+    const initialUserTokenBalance =
+      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
     const expectedFinalBalance = initialUserTokenBalance - 0.1;
     if (expectedFinalBalance < 0) {
       throw new Error(`Final user token address would be negative`);

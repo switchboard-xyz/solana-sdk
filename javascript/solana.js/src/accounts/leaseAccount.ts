@@ -90,7 +90,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     payer: PublicKey,
     params: {
       loadAmount?: number;
-      mint: PublicKey;
       funder?: PublicKey;
       funderAuthority?: Keypair;
       queuePubkey: PublicKey;
@@ -111,11 +110,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const funder = params.funder
       ? params.funder
       : program.mint.getAssociatedAddress(funderAuthority);
-    const funderBalance = await program.mint.getBalance(funderAuthority);
+    const funderBalance = (await program.mint.getBalance(funderAuthority)) ?? 0;
     if (loadAmount && funderBalance < loadAmount) {
-      const wrapIxns = await program.mint.unwrapInstruction(
+      const wrapIxns = await program.mint.wrapInstruction(
         payer,
-        params.loadAmount,
+        { amount: loadAmount },
         params.funderAuthority
       );
       ixns.push(...wrapIxns.ixns);
@@ -132,14 +131,14 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       [
         leaseAccount.publicKey.toBuffer(),
         spl.TOKEN_PROGRAM_ID.toBuffer(),
-        params.mint.toBuffer(),
+        program.mint.address.toBuffer(),
       ],
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
     const { walletBumps } = LeaseAccount.getWallets(
       params.jobAuthorities,
-      params.mint
+      program.mint.address
     );
 
     ixns.push(
@@ -147,7 +146,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         payer,
         escrow,
         leaseAccount.publicKey,
-        params.mint
+        program.mint.address
       ),
       types.leaseInit(
         program,
@@ -171,7 +170,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           owner: funderAuthority,
           escrow: escrow,
           programState: program.programState.publicKey,
-          mint: params.mint,
+          mint: program.mint.address,
         }
       )
     );
@@ -348,7 +347,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const funder = params.funder
       ? params.funder
       : this.program.mint.getAssociatedAddress(funderAuthority);
-    const funderBalance = await this.program.mint.getBalance(funderAuthority);
+    const funderBalance =
+      (await this.program.mint.getBalance(funderAuthority)) ?? 0;
     if (funderBalance < params.loadAmount) {
       const wrapIxns = await this.program.mint.unwrapInstruction(
         payer,

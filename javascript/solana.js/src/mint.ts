@@ -55,14 +55,23 @@ export class Mint {
     return swbDecimal.toBig().toNumber();
   }
 
-  public async getAccount(user: PublicKey): Promise<spl.Account> {
+  public async getAccount(user: PublicKey): Promise<spl.Account | null> {
     const userTokenAddress = Mint.getAssociatedAddress(user);
-    const account = await spl.getAccount(this.connection, userTokenAddress);
+    const userTokenAccountInfo = await this.provider.connection.getAccountInfo(
+      userTokenAddress
+    );
+    if (userTokenAccountInfo === null) {
+      return null;
+    }
+    const account = spl.unpackAccount(userTokenAddress, userTokenAccountInfo);
     return account;
   }
 
-  public async getBalance(user: PublicKey): Promise<number> {
+  public async getBalance(user: PublicKey): Promise<number | null> {
     const userAccount = await this.getAccount(user);
+    if (userAccount === null) {
+      return null;
+    }
     return this.fromTokenAmount(userAccount.amount);
   }
 
@@ -147,7 +156,7 @@ export class Mint {
       Mint.native,
       owner
     );
-    return [account, new TransactionObject(payer, [ixn], user ? [user] : [])];
+    return [account, new TransactionObject(payer, [ixn], [])];
   }
 
   public createUserInstruction(
@@ -179,6 +188,8 @@ export class Mint {
       throw new NativeMintOnlyError();
     }
 
+    const ixns: TransactionInstruction[] = [];
+
     const owner = user ? user.publicKey : payer;
 
     const ownerBalance = new Big(await this.connection.getBalance(owner));
@@ -189,6 +200,16 @@ export class Mint {
       userAccountInfo === null
         ? null
         : spl.unpackAccount(userAddress, userAccountInfo);
+    // if (userAccount === null) {
+    //   ixns.push(
+    //     spl.createAssociatedTokenAccountInstruction(
+    //       payer,
+    //       userAddress,
+    //       owner,
+    //       Mint.native
+    //     )
+    //   );
+    // }
 
     const balance = userAccount
       ? new Big(this.fromTokenAmount(userAccount.amount))
@@ -219,7 +240,7 @@ export class Mint {
 
     const wrapAmountLamports = this.toTokenAmount(wrapAmount.toNumber());
 
-    const ixns = [
+    ixns.push(
       spl.createAssociatedTokenAccountInstruction(
         payer,
         ephemeralWallet,
@@ -242,8 +263,8 @@ export class Mint {
         ephemeralWallet,
         owner,
         ephemeralAccount.publicKey
-      ),
-    ];
+      )
+    );
 
     return new TransactionObject(
       payer,
@@ -286,7 +307,7 @@ export class Mint {
     const signers: Keypair[] = user ? [user] : [];
 
     const userAddress = this.getAssociatedAddress(owner);
-    const userBalance = await this.getBalance(owner);
+    const userBalance = (await this.getBalance(owner)) ?? 0;
 
     if (amount) {
       if (amount >= userBalance) {

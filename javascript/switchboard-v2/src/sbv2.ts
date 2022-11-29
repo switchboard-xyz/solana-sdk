@@ -1426,7 +1426,7 @@ export class AggregatorAccount {
         mint: params.tokenMint,
       })
       .remainingAccounts(
-        remainingAccounts.map((pubkey: PublicKey) => {
+        remainingAccounts.map((pubkey: PublicKey): AccountMeta => {
           return { isSigner: false, isWritable: true, pubkey };
         })
       )

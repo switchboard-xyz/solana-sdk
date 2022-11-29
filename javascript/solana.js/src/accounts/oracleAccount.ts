@@ -253,7 +253,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       );
     }
 
-    return await this.program.signAndSendTransaction(
+    const heartbeatTxn = new TransactionObject(
+      this.program.walletPubkey,
       [
         this.heartbeatInstruction(this.program.walletPubkey, {
           tokenWallet: tokenWallet,
@@ -266,6 +267,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       ],
       params.authority ? [params.authority] : []
     );
+
+    const txnSignature = await this.program.signAndSend(heartbeatTxn);
+    return txnSignature;
   }
 
   withdrawInstruction(
@@ -343,7 +347,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       permissionBump = permission[1];
     }
 
-    return await this.program.signAndSendTransaction(
+    const withdrawTxn = new TransactionObject(
+      this.program.walletPubkey,
       [
         this.withdrawInstruction(this.program.walletPubkey, {
           amount: params.amount,
@@ -355,5 +360,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       ],
       params.authority ? [params.authority] : []
     );
+
+    const txnSignature = await this.program.signAndSend(withdrawTxn);
+    return txnSignature;
   }
 }

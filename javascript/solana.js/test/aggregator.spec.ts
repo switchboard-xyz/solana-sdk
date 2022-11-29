@@ -50,6 +50,8 @@ describe('Aggregator Tests', () => {
 
     queueAccount = oracleQueue;
 
+    await ctx.program.mint.getOrCreateAssociatedUser(ctx.program.walletPubkey);
+
     // add a single oracle for open round calls
     await queueAccount.createOracle({
       name: 'oracle-1',
@@ -222,9 +224,8 @@ describe('Aggregator Tests', () => {
       );
     }
 
-    const finalUserTokenBalance = await ctx.program.mint.getBalance(
-      ctx.payer.publicKey
-    );
+    const finalUserTokenBalance =
+      (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
     if (initialUserTokenBalance !== finalUserTokenBalance) {
       throw new Error(
         `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`

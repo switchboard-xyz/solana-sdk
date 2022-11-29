@@ -1,5 +1,5 @@
 import * as anchor from '@project-serum/anchor';
-import { SwitchboardProgram } from '../';
+import { SwitchboardProgram } from '../program';
 import * as types from '../generated';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
@@ -10,6 +10,7 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
+import { TransactionObject } from '../transaction';
 
 /**
  * Account type representing Switchboard global program state.
@@ -68,21 +69,28 @@ export class ProgramStateAccount extends Account<types.SbState> {
             ];
           }
         })();
-        const instruction = types.programInit(
-          program,
-          { params: { stateBump: bump } },
-          {
-            state: account.publicKey,
-            authority: program.wallet.publicKey,
-            payer: program.wallet.publicKey,
-            tokenMint: mint,
-            vault: vault,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: spl.TOKEN_PROGRAM_ID,
-            daoMint: params.daoMint ?? mint,
-          }
+
+        const programInit = new TransactionObject(
+          program.walletPubkey,
+          [
+            types.programInit(
+              program,
+              { params: { stateBump: bump } },
+              {
+                state: account.publicKey,
+                authority: program.wallet.publicKey,
+                payer: program.wallet.publicKey,
+                tokenMint: mint,
+                vault: vault,
+                systemProgram: SystemProgram.programId,
+                tokenProgram: spl.TOKEN_PROGRAM_ID,
+                daoMint: params.daoMint ?? mint,
+              }
+            ),
+          ],
+          []
         );
-        await program.signAndSendTransaction([instruction]);
+        await program.signAndSend(programInit);
       } catch {} // eslint-disable-line no-empty
     }
     return [account, bump];
@@ -143,18 +151,26 @@ export class ProgramStateAccount extends Account<types.SbState> {
   ): Promise<TransactionSignature> {
     const [account, bump] = ProgramStateAccount.fromSeed(program);
     const vault = (await account.loadData()).tokenVault;
-    const instruction = types.vaultTransfer(
-      program,
-      { params: { stateBump: bump, amount: params.amount } },
-      {
-        state: account.publicKey,
-        to,
-        vault,
-        authority: authority.publicKey,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
-      }
+
+    const vaultTransfer = new TransactionObject(
+      program.walletPubkey,
+      [
+        types.vaultTransfer(
+          program,
+          { params: { stateBump: bump, amount: params.amount } },
+          {
+            state: account.publicKey,
+            to,
+            vault,
+            authority: authority.publicKey,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+          }
+        ),
+      ],
+      []
     );
-    return program.signAndSendTransaction([instruction]);
+    const txnSignature = await program.signAndSend(vaultTransfer);
+    return txnSignature;
   }
   /**
    * @return account size of the global {@linkcode ProgramStateAccount}.

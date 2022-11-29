@@ -74,6 +74,8 @@ export async function setupTest(): Promise<TestContext> {
     console.error(e);
   }
 
+  await program.mint.getOrCreateAssociatedUser(program.walletPubkey);
+
   return {
     cluster,
     program,

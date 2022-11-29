@@ -376,27 +376,6 @@ export class SwitchboardProgram {
 
     return txnSignature;
   }
-
-  public async signAndSendTransaction(
-    instructions: TransactionInstruction[],
-    signers?: Signer[]
-  ): Promise<TransactionSignature> {
-    if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
-    if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
-
-    const txnSignature = await this.provider.sendAndConfirm(
-      await this.provider.wallet.signTransaction(
-        new Transaction({
-          feePayer: this.provider.wallet.publicKey,
-          ...(await this.connection.getLatestBlockhash()),
-        }).add(...instructions)
-      ),
-      signers,
-      { skipPreflight: false, maxRetries: 10 }
-    );
-
-    return txnSignature;
-  }
 }
 
 export class AnchorWallet implements anchor.Wallet {

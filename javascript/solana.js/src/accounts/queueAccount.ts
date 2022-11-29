@@ -405,7 +405,20 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   ): Promise<[TransactionObject[], AggregatorAccount]> {
     const queue = await this.loadData();
 
+    const pre: TransactionObject[] = [];
     const txns: TransactionObject[] = [];
+    const post: TransactionObject[] = [];
+
+    // getOrCreate token account for
+    const userTokenAddress = this.program.mint.getAssociatedAddress(payer);
+    const userTokenAccountInfo = await this.program.connection.getAccountInfo(
+      userTokenAddress
+    );
+    if (userTokenAccountInfo === null) {
+      const [createTokenAccount] =
+        this.program.mint.createAssocatedUserInstruction(payer);
+      pre.push(createTokenAccount);
+    }
 
     // create / load jobs
     const jobs: { job: JobAccount; weight: number }[] = [];
@@ -424,7 +437,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               jobKeypair: job.jobKeypair,
             }
           );
-          txns.push(...jobInit);
+          pre.push(...jobInit);
           jobs.push({ job: jobAccount, weight: job.weight ?? 1 });
         } else if ('pubkey' in job) {
           const jobAccount = new JobAccount(this.program, job.pubkey);
@@ -434,16 +447,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           throw new Error(`Failed to create job account ${job}`);
         }
       }
-    }
-    // getOrCreate token account for
-    const userTokenAddress = this.program.mint.getAssociatedAddress(payer);
-    const userTokenAccountInfo = await this.program.connection.getAccountInfo(
-      userTokenAddress
-    );
-    if (userTokenAccountInfo === null) {
-      const [createTokenAccount] =
-        this.program.mint.createAssocatedUserInstruction(payer);
-      txns.push(createTokenAccount);
     }
 
     const [aggregatorInit, aggregatorAccount] =
@@ -465,14 +468,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         loadAmount: params.loadAmount,
         funder: params.funder,
         funderAuthority: params.funderAuthority,
-        mint: this.program.mint.address,
         aggregatorPubkey: aggregatorAccount.publicKey,
         queuePubkey: this.publicKey,
         jobAuthorities: [],
       }
     );
     txns.push(leaseInit);
-    // // create permission account
+
+    // create permission account
     const [permissionInit, permissionAccount] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
@@ -498,10 +501,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         weight: weight,
         authority: params.authority,
       });
-      txns.push(addJobTxn);
+      post.push(addJobTxn);
     }
 
-    const packed = TransactionObject.pack(txns);
+    const packed = TransactionObject.pack([
+      ...TransactionObject.pack(pre),
+      ...TransactionObject.pack(txns),
+      ...TransactionObject.pack(post),
+    ]);
 
     return [packed, aggregatorAccount];
   }
