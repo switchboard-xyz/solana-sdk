@@ -28,29 +28,21 @@ jobs:
     #   matrix:
     #     SOLANA_VERSION: [1.10.32, 1.13.5]
     steps:
-      - uses: actions/checkout@v2
-      - name: Installs Anchor
-        uses: ./.github/actions/install-common-build-deps
+      # Setup Deps
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/install-linux-build-deps
+      - uses: ./.github/actions/install-solana
+        with:
+          solana_version: ${{ env.SOLANA_VERSION }}
+      - uses: ./.github/actions/install-rust
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
-          solana_version: ${{ env.SOLANA_VERSION}}
-          # rust-version: ${{ env.RUST_TOOLCHAIN }}
-      # - run:
-      #     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s --
-      #     -y
-      # - run: echo "/home/runner/.cargo/bin" >> $GITHUB_PATH
-      # - run: curl -sSfL https://release.solana.com/$SOLANA_VERSION/install | sh
-      # - run:
-      #     echo "/home/runner/.local/share/solana/install/active_release/bin" >>
-      #     $GITHUB_PATH
-
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
-
       - name: Install sbv2, anchor, and typescript
         run:
           npm i -g @project-serum/anchor-cli@$ANCHOR_VERSION ts-mocha typescript
