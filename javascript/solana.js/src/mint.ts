@@ -56,6 +56,14 @@ export class Mint {
     return swbDecimal.toBig().toNumber();
   }
 
+  fromTokenAmountBN(amount: BN): number {
+    const swbDecimal = new SwitchboardDecimal({
+      mantissa: amount,
+      scale: this.mint.decimals,
+    });
+    return swbDecimal.toBig().toNumber();
+  }
+
   public async getAccount(user: PublicKey): Promise<spl.Account | null> {
     const userTokenAddress = Mint.getAssociatedAddress(user);
     const userTokenAccountInfo = await this.provider.connection.getAccountInfo(
