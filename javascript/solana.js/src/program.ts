@@ -7,15 +7,13 @@ import {
   Connection,
   Keypair,
   PublicKey,
-  Signer,
   Transaction,
-  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { Mint } from './mint';
 import { TransactionObject } from './transaction';
 
-type SwitchboardEvents = {
+export type SwitchboardEvents = {
   AggregatorInitEvent: {
     feedPubkey: PublicKey;
   };
@@ -145,7 +143,7 @@ export const SBV2_MAINNET_PID = new PublicKey(
   'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 );
 /**
- * Returns the Switchboard Program ID for the specified {@linkcode cluster}.
+ * Returns the Switchboard Program ID for the specified Cluster.
  */
 export const getSwitchboardProgramId = (
   cluster: Cluster | 'localnet'
@@ -176,7 +174,7 @@ export const READ_ONLY_KEYPAIR = Keypair.generate();
 export const READ_ONLY_PUBKEY = READ_ONLY_KEYPAIR.publicKey;
 
 /**
- * Wrapper class for the Switchboard {@linkcode anchor.Program}.
+ * Wrapper class for the Switchboard anchor Program.
  */
 export class SwitchboardProgram {
   private static readonly _readOnlyKeypair = READ_ONLY_KEYPAIR;
@@ -266,19 +264,19 @@ export class SwitchboardProgram {
     return new anchor.BorshAccountsCoder(this._program.idl);
   }
   /**
-   * The {@linkcode anchor.AnchorProvider} used by this program to connect with Solana cluster.
+   * The anchor Provider used by this program to connect with Solana cluster.
    */
   private get provider(): anchor.AnchorProvider {
     return this._program.provider as anchor.AnchorProvider;
   }
   /**
-   * The {@linkcode Connection} used by this program to connect with Solana cluster.
+   * The Connection used by this program to connect with Solana cluster.
    */
   public get connection(): Connection {
     return this._program.provider.connection;
   }
   /**
-   * The {@linkcode Connection} used by this program to connect with Solana cluster.
+   * The Connection used by this program to connect with Solana cluster.
    */
   public get wallet(): AnchorWallet {
     return this.provider.wallet as AnchorWallet;
@@ -288,7 +286,7 @@ export class SwitchboardProgram {
     return this.wallet.payer.publicKey;
   }
   /**
-   * Some actions exposed by this SDK require that a payer {@linkcode Keypair} has been
+   * Some actions exposed by this SDK require that a payer Keypair has been
    * provided to {@linkcode SwitchboardProgram} in order to send transactions.
    */
   public get isReadOnly(): boolean {

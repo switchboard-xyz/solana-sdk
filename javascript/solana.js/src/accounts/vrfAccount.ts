@@ -43,7 +43,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   /**
    *  Produces a Switchboard {@linkcode VrfAccount}.
    *
-   *  _NOTE_: {@linkcode program.wallet} is used to sign the transaction.
+   *  _NOTE_: program wallet is used to sign the transaction.
    */
   public static async create(
     program: SwitchboardProgram,
@@ -62,7 +62,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    *  Creates a list of instructions that will produce a {@linkcode VrfAccount}.
    *
    *  _NOTE_: The transaction that includes these instructions should be signed by both
-   *  {@linkcode params.payerKeypair} and {@linkcode params.vrfKeypair}.
+   *  payer and vrfKeypair.
    */
   public static async createInstructions(
     program: SwitchboardProgram,

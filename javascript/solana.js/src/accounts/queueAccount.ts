@@ -24,7 +24,7 @@ import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
 
 /**
- *  Parameters for initializing an {@linkcode OracleQueueAccount}
+ *  Parameters for initializing an {@linkcode QueueAccount}
  */
 export interface QueueInitParams {
   /**
@@ -534,7 +534,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Get the {@linkcode spl.Mint} associated with this {@linkcode OracleQueueAccount}.
+   * Get the spl Mint associated with this {@linkcode QueueAccount}.
    */
   public async loadMint(): Promise<spl.Mint> {
     const queue = await this.loadData();
@@ -545,7 +545,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Get the size of an {@linkcode OracleQueueAccount} on-chain.
+   * Get the size of an {@linkcode QueueAccount} on-chain.
    */
   public readonly size = this.program.account.oracleQueueAccountData.size;
 

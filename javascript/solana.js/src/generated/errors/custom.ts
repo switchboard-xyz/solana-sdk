@@ -1,4 +1,5 @@
 import { SwitchboardProgram } from '../../program';
+
 export type CustomError =
   | ArrayOperationError
   | QueueOperationError

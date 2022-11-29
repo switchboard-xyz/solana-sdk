@@ -4,6 +4,7 @@ dist
 lib
 build
 tsconfig.tsbuildinfo
+javascript/*/docs
 
 *.env
 .switchboard

@@ -13,11 +13,6 @@ import Big from 'big.js';
 import BN from 'bn.js';
 import { TransactionObject } from './transaction';
 
-/**
- * load - load the given mint and metadata
- *
- */
-
 export class Mint {
   public static native = new PublicKey(
     'So11111111111111111111111111111111111111112'

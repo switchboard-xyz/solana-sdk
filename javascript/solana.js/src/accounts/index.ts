@@ -1,3 +1,4 @@
+export * from './account';
 export * from './aggregatorAccount';
 export * from './bufferRelayAccount';
 export * from './crankAccount';

@@ -23,6 +23,82 @@ import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
+/**
+ * Parameters to initialize an aggregator account.
+ */
+export interface AggregatorInitParams {
+  /**
+   *  Name of the aggregator to store on-chain.
+   */
+  name?: string;
+  /**
+   *  Metadata of the aggregator to store on-chain.
+   */
+  metadata?: string;
+  /**
+   *  Number of oracles to request on aggregator update.
+   */
+  batchSize: number;
+  /**
+   *  Minimum number of oracle responses required before a round is validated.
+   */
+  minRequiredOracleResults: number;
+  /**
+   *  Minimum number of feed jobs suggested to be successful before an oracle
+   *  sends a response.
+   */
+  minRequiredJobResults: number;
+  /**
+   *  Minimum number of seconds required between aggregator rounds.
+   */
+  minUpdateDelaySeconds: number;
+  /**
+   *  unix_timestamp for which no feed update will occur before.
+   */
+  startAfter?: number;
+  /**
+   *  Change percentage required between a previous round and the current round.
+   *  If variance percentage is not met, reject new oracle responses.
+   */
+  varianceThreshold?: number;
+  /**
+   *  Number of seconds for which, even if the variance threshold is not passed,
+   *  accept new responses from oracles.
+   */
+  forceReportPeriod?: number;
+  /**
+   *  unix_timestamp after which funds may be withdrawn from the aggregator.
+   *  null/undefined/0 means the feed has no expiration.
+   */
+  expiration?: number;
+  /**
+   *  If true, this aggregator is disallowed from being updated by a crank on the queue.
+   */
+  disableCrank?: boolean;
+  /**
+   *  Optional pre-existing keypair to use for aggregator initialization.
+   */
+  keypair?: Keypair;
+  /**
+   *  An optional wallet for receiving kickbacks from job usage in feeds.
+   *  Defaults to token vault.
+   */
+  authorWallet?: PublicKey;
+  /**
+   *  If included, this keypair will be the aggregator authority rather than
+   *  the aggregator keypair.
+   */
+  authority?: PublicKey;
+  /**
+   *  The queue to which this aggregator will be linked
+   */
+  queueAccount: QueueAccount;
+  /**
+   * The authority of the queue.
+   */
+  queueAuthority: PublicKey;
+}
+
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
 
@@ -86,28 +162,32 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
   }
 
+  /**
+   * Creates a transaction object with aggregatorInit instructions.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
+   * const [aggregatorInit, aggregatorAccount] = await AggregatorAccount.createInstruction(program, payer, {
+   *    queueAccount,
+   *    queueAuthority,
+   *    batchSize: 5,
+   *    minRequiredOracleResults: 3,
+   *    minRequiredJobResults: 1,
+   *    minUpdateDelaySeconds: 30,
+   * });
+   * const txnSignature = await program.signAndSend(aggregatorInit);
+   * ```
+   * @param program The SwitchboardProgram.
+   * @param payer The account that will pay for the new accounts.
+   * @param params {@linkcode AggregatorInitParams}.
+   * @return {@linkcode TransactionObject} that will create the aggregatorAccount.
+   */
   public static async createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: {
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      batchSize: number;
-      minRequiredOracleResults: number;
-      minRequiredJobResults: number;
-      minUpdateDelaySeconds: number;
-    } & Partial<{
-      name: string;
-      metadata: string;
-      startAfter: number;
-      varianceThreshold: number;
-      forceReportPeriod: number;
-      expiration: number;
-      disableCrank: boolean;
-      authorWallet: PublicKey;
-      authority?: PublicKey;
-      keypair?: Keypair;
-    }>
+    params: AggregatorInitParams
   ): Promise<[TransactionObject, AggregatorAccount]> {
     const keypair = params.keypair ?? Keypair.generate();
 
@@ -166,25 +246,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   public static async create(
     program: SwitchboardProgram,
-    params: {
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      batchSize: number;
-      minRequiredOracleResults: number;
-      minRequiredJobResults: number;
-      minUpdateDelaySeconds: number;
-    } & Partial<{
-      name: string;
-      metadata: string;
-      startAfter: number;
-      varianceThreshold: number;
-      forceReportPeriod: number;
-      expiration: number;
-      disableCrank: boolean;
-      authorWallet: PublicKey;
-      authority?: PublicKey;
-      keypair: Keypair;
-    }>
+    params: AggregatorInitParams
   ): Promise<[TransactionSignature, AggregatorAccount]> {
     const [transaction, account] = await AggregatorAccount.createInstruction(
       program,
