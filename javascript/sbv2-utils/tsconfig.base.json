@@ -27,8 +27,8 @@
     "noImplicitReturns": true,
     "strictPropertyInitialization": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../solana.js"]
+      "@switchboard-xyz/switchboard-v2": ["../switchboard-v2"]
     }
   },
-  "references": [{ "path": "../solana.js" }]
+  "references": [{ "path": "../switchboard-v2" }]
 }

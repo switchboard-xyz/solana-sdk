@@ -23,8 +23,8 @@
     "noImplicitReturns": true,
     "strictPropertyInitialization": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../ts"]
+      "@switchboard-xyz/switchboard-v2": ["../switchboard-v2"]
     }
   },
-  "references": [{ "path": "../ts" }]
+  "references": [{ "path": "../switchboard-v2" }]
 }

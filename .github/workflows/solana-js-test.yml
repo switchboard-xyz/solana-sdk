@@ -8,7 +8,7 @@ on:
       - "javascript/solana.js/src/**"
       - "javascript/solana.js/tests/**"
       - "javascript/solana.js/package.json"
-      - "javascript/solana.js/yarn.lock"
+      - "javascript/solana.js/package-lock.json"
 
 env:
   ANCHOR_VERSION: 0.25.0
@@ -38,8 +38,7 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
       - name: Build solana.js
         working-directory: javascript/solana.js
-        run:
-          yarn install --frozen-lockfile --network-timeout=1000000 && yarn build
+        run: npm install && npm run build
       - name: Start Local Validator & Run Tests
         working-directory: javascript/solana.js
         run: |
