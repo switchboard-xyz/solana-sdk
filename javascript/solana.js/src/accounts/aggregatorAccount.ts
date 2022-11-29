@@ -472,6 +472,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       forceReportPeriod: number;
       varianceThreshold: number;
       authority?: Keypair;
+      basePriorityFee?: number;
+      priorityFeeBump?: number;
+      priorityFeeBumpPeriod?: number;
+      maxPriorityFeeMultiplier?: number;
     }>
   ): TransactionObject {
     const setConfigIxn = types.aggregatorSetConfig(
@@ -501,6 +505,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
                   )
                 )
               : null,
+          basePriorityFee: params.basePriorityFee ?? 0,
+          priorityFeeBump: params.priorityFeeBump ?? 0,
+          priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? 0,
+          maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? 0,
         },
       },
       {
@@ -527,6 +535,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       forceReportPeriod: number;
       varianceThreshold: number;
       authority?: Keypair;
+      basePriorityFee?: number;
+      priorityFeeBump?: number;
+      priorityFeeBumpPeriod?: number;
+      maxPriorityFeeMultiplier?: number;
     }>
   ): Promise<TransactionSignature> {
     const setConfigTxn = this.setConfigInstruction(
