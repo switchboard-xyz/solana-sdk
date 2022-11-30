@@ -146,7 +146,7 @@ describe('Aggregator Tests', () => {
         minRequiredOracleResults: 1,
         minRequiredJobResults: 1,
         minUpdateDelaySeconds: 60,
-        loadAmount: 2.5,
+        fundAmount: 2.5,
         enable: true,
         jobs: [
           { pubkey: jobAccount.publicKey },

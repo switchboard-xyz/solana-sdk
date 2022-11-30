@@ -163,10 +163,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       )
     );
 
-    return [
-      new TransactionObject(payer, ixns, signers),
-      new AggregatorAccount(program, keypair.publicKey),
-    ];
+    const aggregatorInit = new TransactionObject(payer, ixns, signers);
+    const aggregatorAccount = new AggregatorAccount(program, keypair.publicKey);
+
+    return [aggregatorInit, aggregatorAccount];
   }
 
   /**
@@ -1084,6 +1084,109 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     const txnSignature = await this.program.signAndSend(saveResultTxn);
     return txnSignature;
+  }
+
+  public async loadAllAccounts(
+    _aggregator?: types.AggregatorAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<
+    types.AggregatorAccountDataJSON & {
+      publicKey: PublicKey;
+      queue: types.OracleQueueAccountData;
+      permission: types.PermissionAccountData;
+      lease: types.LeaseAccountData;
+      leaseEscrow: spl.Account;
+      jobs: Array<
+        types.JobAccountDataJSON & {
+          publicKey: PublicKey;
+          tasks: Array<OracleJob.ITask>;
+        }
+      >;
+    }
+  > {
+    const aggregator = _aggregator ?? (await this.loadData());
+    const queueAccount =
+      _queueAccount ?? new QueueAccount(this.program, aggregator.queuePubkey);
+    const queue = _queue ?? (await queueAccount.loadData());
+
+    const accountMap: Map<string, any> = new Map();
+
+    const { permissionAccount, leaseAccount, leaseEscrow } = this.getAccounts({
+      queueAccount,
+      queueAuthority: queue.authority,
+    });
+
+    const jobPubkeys = aggregator.jobPubkeysData.slice(
+      0,
+      aggregator.jobPubkeysSize
+    );
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      this.program.connection,
+      [
+        permissionAccount.publicKey,
+        leaseAccount.publicKey,
+        leaseEscrow,
+        ...jobPubkeys,
+      ]
+    );
+
+    const permissionAccountInfo = accountInfos.shift();
+    if (!permissionAccountInfo || !permissionAccountInfo.account) {
+      throw new Error(
+        `PermissionAccount has not been created yet for this aggregator`
+      );
+    }
+    const permission = types.PermissionAccountData.decode(
+      permissionAccountInfo.account.data
+    );
+
+    const leaseAccountInfo = accountInfos.shift();
+    if (!leaseAccountInfo || !leaseAccountInfo.account) {
+      throw new Error(
+        `LeaseAccount has not been created yet for this aggregator`
+      );
+    }
+    const lease = types.LeaseAccountData.decode(leaseAccountInfo.account.data);
+
+    const leaseEscrowAccountInfo = accountInfos.shift();
+    if (!leaseEscrowAccountInfo || !leaseEscrowAccountInfo.account) {
+      throw new Error(
+        `LeaseAccount escrow has not been created yet for this aggregator`
+      );
+    }
+    const leaseEscrowAccount = spl.unpackAccount(
+      leaseEscrow,
+      leaseEscrowAccountInfo.account
+    );
+
+    const jobs: (types.JobAccountDataJSON & {
+      publicKey: PublicKey;
+      tasks: Array<OracleJob.ITask>;
+    })[] = [];
+    accountInfos.map(accountInfo => {
+      if (!accountInfo || !accountInfo.account) {
+        throw new Error(`Failed to fetch JobAccount`);
+      }
+      const job = types.JobAccountData.decode(accountInfo.account.data);
+      const oracleJob = OracleJob.decodeDelimited(job.data);
+      jobs.push({
+        publicKey: accountInfo.publicKey,
+        ...job.toJSON(),
+        tasks: oracleJob.tasks,
+      });
+    });
+
+    return {
+      publicKey: this.publicKey,
+      ...aggregator.toJSON(),
+      queue: queue,
+      permission: permission,
+      lease: lease,
+      leaseEscrow: leaseEscrowAccount,
+      jobs: jobs,
+    };
   }
 }
 

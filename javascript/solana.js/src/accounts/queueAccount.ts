@@ -266,11 +266,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     > & {
       authority?: Keypair;
       crankPubkey?: PublicKey;
+      historyLimit?: number;
     } & {
       // lease params
-      loadAmount?: number;
+      fundAmount?: number;
       funderAuthority?: Keypair;
-      funder?: PublicKey;
+      funderTokenAccount?: PublicKey;
     } & {
       // permission params
       enable?: boolean;
@@ -309,11 +310,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     > & {
       authority?: Keypair;
       crankPubkey?: PublicKey;
+      historyLimit?: number;
     } & {
       // lease params
-      loadAmount?: number;
+      fundAmount?: number;
       funderAuthority?: Keypair;
-      funder?: PublicKey;
+      funderTokenAccount?: PublicKey;
     } & {
       // permission params
       enable?: boolean;
@@ -384,8 +386,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       this.program,
       payer,
       {
-        loadAmount: params.loadAmount,
-        funder: params.funder,
+        loadAmount: params.fundAmount,
+        funder: params.funderTokenAccount,
         funderAuthority: params.funderAuthority,
         aggregatorPubkey: aggregatorAccount.publicKey,
         queuePubkey: this.publicKey,
@@ -431,6 +433,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           queueAccount: this,
           queue,
         })
+      );
+    }
+
+    if (params.historyLimit && params.historyLimit > 0) {
+      post.push(
+        await aggregatorAccount.setHistoryBufferInstruction(
+          this.program.walletPubkey,
+          { size: params.historyLimit, authority: params.authority }
+        )
       );
     }
 
