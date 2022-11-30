@@ -304,7 +304,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
             lease: leaseAccount.publicKey,
             escrow: leaseEscrow,
             programState: this.program.programState.publicKey,
-            dataBuffer: queue.dataBuffer,
+            dataBuffer: this.dataBuffer ?? (await this.loadData()).dataBuffer,
           }
         ),
       ],
