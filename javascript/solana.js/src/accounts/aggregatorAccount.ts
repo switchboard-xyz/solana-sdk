@@ -1093,10 +1093,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   ): Promise<
     types.AggregatorAccountDataJSON & {
       publicKey: PublicKey;
-      queue: types.OracleQueueAccountData;
-      permission: types.PermissionAccountData;
-      lease: types.LeaseAccountData;
-      leaseEscrow: spl.Account;
+      queue: types.OracleQueueAccountDataJSON;
+      permission: types.PermissionAccountDataJSON;
+      lease: types.LeaseAccountDataJSON & { balance: number };
       jobs: Array<
         types.JobAccountDataJSON & {
           publicKey: PublicKey;
@@ -1109,8 +1108,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, aggregator.queuePubkey);
     const queue = _queue ?? (await queueAccount.loadData());
-
-    const accountMap: Map<string, any> = new Map();
 
     const { permissionAccount, leaseAccount, leaseEscrow } = this.getAccounts({
       queueAccount,
@@ -1181,10 +1178,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return {
       publicKey: this.publicKey,
       ...aggregator.toJSON(),
-      queue: queue,
-      permission: permission,
-      lease: lease,
-      leaseEscrow: leaseEscrowAccount,
+      queue: queue.toJSON(),
+      permission: permission.toJSON(),
+      lease: {
+        ...lease.toJSON(),
+        balance: this.program.mint.fromTokenAmount(leaseEscrowAccount.amount),
+      },
       jobs: jobs,
     };
   }
@@ -1345,8 +1344,6 @@ export interface AggregatorSaveResultParams {
   tokenMint: PublicKey;
   /**
    *  List of parsed oracles.
-   *
-   *  TODO: Add better typing to this field type
    */
   oracles: Array<types.OracleAccountData>;
 }

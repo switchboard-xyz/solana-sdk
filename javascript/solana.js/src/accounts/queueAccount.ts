@@ -119,8 +119,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     payer: PublicKey,
     params: QueueInitParams
   ): Promise<[TransactionObject, QueueAccount]> {
-    const queueKeypair = Keypair.generate();
-    const dataBuffer = Keypair.generate();
+    const queueKeypair = params.keypair ?? Keypair.generate();
+    const dataBuffer = params.dataBufferKeypair ?? Keypair.generate();
 
     const account = new QueueAccount(program, queueKeypair.publicKey);
     const queueSize = params.queueSize ?? 500;
@@ -181,7 +181,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               buffer: dataBuffer.publicKey,
               systemProgram: SystemProgram.programId,
               payer,
-              mint: params.mint,
+              mint: program.mint.address,
             }
           ),
         ],
@@ -477,13 +477,46 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
   public async createBufferRelayerInstructions(
     payer: PublicKey,
-    params: Omit<BufferRelayerInit, 'queueAccount'> & {
+    params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> & {
       // permission params
       enable?: boolean;
       queueAuthority?: Keypair;
+    } & {
+      // job params
+      job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
     }
   ): Promise<[TransactionObject, BufferRelayerAccount]> {
     const queue = await this.loadData();
+
+    const txns: TransactionObject[] = [];
+
+    let job: JobAccount;
+    if ('data' in params.job) {
+      const [jobInit, jobAccount] = JobAccount.createInstructions(
+        this.program,
+        payer,
+        {
+          data: params.job.data,
+          name: params.job.name ?? '',
+          authority: params.job.authority ?? payer,
+          expiration: params.job.expiration,
+          variables: params.job.variables,
+          keypair: params.job.keypair,
+        }
+      );
+      txns.push(...jobInit);
+      job = jobAccount;
+    } else if (params.job instanceof PublicKey) {
+      const jobAccount = new JobAccount(this.program, params.job);
+      // should we verify its a valid job account?
+      job = jobAccount;
+    } else if (params.job instanceof JobAccount) {
+      job = params.job;
+    } else {
+      throw new Error(
+        `Failed to create BufferRelayer job account. 'data' or 'pubkey' was not defined in jobDefinition`
+      );
+    }
 
     const [bufferInit, bufferAccount] =
       await BufferRelayerAccount.createInstructions(this.program, payer, {
@@ -491,9 +524,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         minUpdateDelaySeconds: params.minUpdateDelaySeconds,
         queueAccount: this,
         authority: params.authority,
-        jobAccount: params.jobAccount,
+        jobAccount: job,
         keypair: params.keypair,
       });
+
+    txns.push(bufferInit);
 
     // eslint-disable-next-line prefer-const
     let [permissionInit, permissionAccount] =
@@ -514,14 +549,26 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       }
     }
 
-    return [bufferInit.combine(permissionInit), bufferAccount];
+    txns.push(permissionInit);
+
+    const packed = TransactionObject.pack(txns);
+    if (packed.length > 1) {
+      throw new Error(
+        `Failed to pack buffer relayer instructions into a single transaction`
+      );
+    }
+
+    return [packed[0], bufferAccount];
   }
 
   public async createBufferRelayer(
-    params: Omit<BufferRelayerInit, 'queueAccount'> & {
+    params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> & {
       // permission params
       enable?: boolean;
       queueAuthority?: Keypair;
+    } & {
+      // job params
+      job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
     }
   ): Promise<[TransactionSignature, BufferRelayerAccount]> {
     const [txn, bufferRelayerAccount] =
@@ -856,7 +903,9 @@ export interface QueueInitParams {
    *  Defaults to the payer.
    */
   authority?: PublicKey;
-  mint: PublicKey;
+
+  keypair?: Keypair;
+  dataBufferKeypair?: Keypair;
 }
 
 export type QueueSetConfigParams = Partial<{
