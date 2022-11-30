@@ -29,7 +29,6 @@ describe('Queue Tests', () => {
         reward: 0,
         minStake: 0,
         oracleTimeout: 60,
-        mint: spl.NATIVE_MINT,
         slashingEnabled: false,
         unpermissionedFeeds: true,
         unpermissionedVrf: true,

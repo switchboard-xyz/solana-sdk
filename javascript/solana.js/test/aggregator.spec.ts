@@ -40,7 +40,6 @@ describe('Aggregator Tests', () => {
         reward: 0,
         minStake: 0,
         oracleTimeout: 86400,
-        mint: spl.NATIVE_MINT,
         slashingEnabled: false,
         unpermissionedFeeds: true,
         unpermissionedVrf: true,
