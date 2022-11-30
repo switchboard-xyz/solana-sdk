@@ -24,7 +24,7 @@ devnet = []
 [dependencies]
 anchor-lang = "0.25.0"
 anchor-spl = "0.25.0"
-rust_decimal = ">=1.20"
+rust_decimal = ">=1.26.0"
 solana-program = "~1.10.29"
 bytemuck = "1.7.2"
 superslice = "1"
