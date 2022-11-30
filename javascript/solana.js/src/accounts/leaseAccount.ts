@@ -90,7 +90,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     payer: PublicKey,
     params: {
       loadAmount?: number;
-      funder?: PublicKey;
+      funderTokenAccount?: PublicKey;
       funderAuthority?: Keypair;
       queuePubkey: PublicKey;
       aggregatorPubkey: PublicKey;
@@ -107,11 +107,14 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const funderAuthority = params.funderAuthority
       ? params.funderAuthority.publicKey
       : payer;
-    const funder = params.funder
-      ? params.funder
+    const funderTokenAccount = params.funderTokenAccount
+      ? params.funderTokenAccount
       : program.mint.getAssociatedAddress(funderAuthority);
-    const funderBalance = (await program.mint.getBalance(funderAuthority)) ?? 0;
-    if (loadAmount && funderBalance < loadAmount) {
+
+    const funderTokenBalance =
+      (await program.mint.getBalance(funderAuthority)) ?? 0;
+
+    if (loadAmount && funderTokenBalance < loadAmount) {
       const wrapIxns = await program.mint.wrapInstruction(
         payer,
         { amount: loadAmount },
@@ -166,7 +169,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           payer: payer,
           systemProgram: SystemProgram.programId,
           tokenProgram: spl.TOKEN_PROGRAM_ID,
-          funder: funder,
+          funder: funderTokenAccount,
           owner: funderAuthority,
           escrow: escrow,
           programState: program.programState.publicKey,

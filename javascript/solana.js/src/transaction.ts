@@ -104,6 +104,11 @@ export class TransactionObject implements ITransactionObject {
     ixns: Array<TransactionInstruction>,
     signers: Array<Keypair>
   ) {
+    // verify payer is not default pubkey
+    if (payer.equals(PublicKey.default)) {
+      throw new errors.SwitchboardProgramReadOnlyError();
+    }
+
     // verify num ixns
     if (ixns.length > 10) {
       throw new errors.TransactionInstructionOverflowError(ixns.length);

@@ -220,18 +220,18 @@ export class Mint {
     //   );
     // }
 
-    const balance = userAccount
+    const tokenBalance = userAccount
       ? new Big(this.fromTokenAmount(userAccount.amount))
       : new Big(0);
 
     let wrapAmount: Big;
     if ('fundUpTo' in params) {
-      if (balance.gte(params.fundUpTo)) {
+      if (tokenBalance.gte(params.fundUpTo)) {
         return new TransactionObject(payer, [], []);
       }
-      wrapAmount = params.fundUpTo.sub(balance);
+      wrapAmount = params.fundUpTo.sub(tokenBalance);
     } else if ('amount' in params) {
-      wrapAmount = balance.add(params.amount);
+      wrapAmount = tokenBalance.add(params.amount);
     } else {
       throw new Error(
         `Must specify fundUpTo or amount to perform this actions`

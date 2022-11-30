@@ -177,6 +177,12 @@ export class SwitchboardProgram {
     );
   }
 
+  public verifyPayer(): void {
+    if (this.isReadOnly) {
+      throw new errors.SwitchboardProgramReadOnlyError();
+    }
+  }
+
   public get account(): anchor.AccountNamespace {
     return this._program.account;
   }

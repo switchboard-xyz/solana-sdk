@@ -336,6 +336,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const userTokenAccountInfo = await this.program.connection.getAccountInfo(
       userTokenAddress
     );
+
     if (userTokenAccountInfo === null) {
       const [createTokenAccount] =
         this.program.mint.createAssocatedUserInstruction(payer);
@@ -387,7 +388,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       payer,
       {
         loadAmount: params.fundAmount,
-        funder: params.funderTokenAccount,
+        funderTokenAccount: params.funderTokenAccount,
         funderAuthority: params.funderAuthority,
         aggregatorPubkey: aggregatorAccount.publicKey,
         queuePubkey: this.publicKey,
