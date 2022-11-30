@@ -6,7 +6,7 @@ on:
     paths:
       - ".github/workflows/**"
       - "javascript/solana.js/src/**"
-      - "javascript/solana.js/tests/**"
+      - "javascript/solana.js/test/**"
       - "javascript/solana.js/package.json"
       - "javascript/solana.js/package-lock.json"
 
