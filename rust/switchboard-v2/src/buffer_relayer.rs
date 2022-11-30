@@ -101,6 +101,7 @@ impl BufferRelayerAccountData {
     }
 }
 impl Discriminator for BufferRelayerAccountData {
+    const DISCRIMINATOR: [u8; 8] = [50, 35, 51, 115, 169, 219, 158, 52];
     fn discriminator() -> [u8; 8] {
         [50, 35, 51, 115, 169, 219, 158, 52]
     }
