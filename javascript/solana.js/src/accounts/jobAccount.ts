@@ -57,6 +57,8 @@ export class JobAccount extends Account<types.JobAccountData> {
     }
 
     const jobKeypair = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(jobKeypair);
+
     const authority = params.authority ?? payer;
 
     const CHUNK_SIZE = 800;

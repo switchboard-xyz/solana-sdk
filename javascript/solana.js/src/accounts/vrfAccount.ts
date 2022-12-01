@@ -2,6 +2,7 @@ import * as anchor from '@project-serum/anchor';
 import * as spl from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
+  AccountInfo,
   Commitment,
   Keypair,
   PublicKey,
@@ -11,6 +12,7 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+import { promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
@@ -21,8 +23,10 @@ import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 
 /**
- * @class VrfAccount
  * Account holding a Verifiable Random Function result with a callback instruction for consuming on-chain pseudo-randomness.
+ *
+ * Data: {@linkcode types.VrfAccountData}
+ * Result: [u8;32]
  */
 export class VrfAccount extends Account<types.VrfAccountData> {
   static accountName = 'VrfAccountData';
@@ -69,6 +73,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     payer: PublicKey,
     params: VrfInitParams
   ): Promise<[TransactionObject, VrfAccount]> {
+    program.verifyNewKeypair(params.vrfKeypair);
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
     const size = program.account.vrfAccountData.size;
 
@@ -353,6 +358,50 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     const txnSignature = await this.program.signAndSend(setCallbackTxn);
     return txnSignature;
   }
+
+  /** Await the next vrf round */
+  public async nextRound(
+    roundId: anchor.BN,
+    /** Number of milliseconds to await the next VRF round. */
+    timeout: number
+  ): Promise<VrfResult> {
+    let ws: number | undefined = undefined;
+    return await promiseWithTimeout(
+      timeout,
+      new Promise((resolve: (result: VrfResult) => void) => {
+        ws = this.program.connection.onAccountChange(
+          this.publicKey,
+          (accountInfo: AccountInfo<Buffer>) => {
+            const vrf = types.VrfAccountData.decode(accountInfo.data);
+            if (!vrf.counter.eq(roundId)) {
+              return;
+            }
+            if (
+              vrf.status.kind === 'StatusCallbackSuccess' ||
+              vrf.status.kind === 'StatusVerifyFailure'
+            ) {
+              resolve({
+                success: vrf.status.kind === 'StatusCallbackSuccess',
+                result: new Uint8Array(vrf.currentRound.result),
+                status: vrf.status,
+              });
+            }
+          }
+        );
+      })
+    ).finally(async () => {
+      if (ws) {
+        await this.program.connection.removeAccountChangeListener(ws);
+      }
+      ws = undefined;
+    });
+  }
+}
+
+export interface VrfResult {
+  success: boolean;
+  result: Uint8Array;
+  status: types.VrfStatusKind;
 }
 
 /**

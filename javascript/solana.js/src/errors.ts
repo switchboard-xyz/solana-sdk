@@ -12,6 +12,12 @@ export class SwitchboardProgramReadOnlyError extends Error {
     Object.setPrototypeOf(this, SwitchboardProgramReadOnlyError.prototype);
   }
 }
+export class ExistingKeypair extends Error {
+  constructor() {
+    super('Provided keypair corresponds to an existing account.');
+    Object.setPrototypeOf(this, ExistingKeypair.prototype);
+  }
+}
 export class AccountNotFoundError extends Error {
   constructor(publicKey: anchor.web3.PublicKey) {
     super(`No account was found at the address: ${publicKey.toBase58()}`);

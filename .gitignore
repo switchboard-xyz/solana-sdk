@@ -25,6 +25,7 @@ target
 .crates
 
 # Misc
+.DS_STORE
 .keypairs
 secrets
 *-keypair*.json

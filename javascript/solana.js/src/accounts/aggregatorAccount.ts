@@ -5,7 +5,6 @@ import * as errors from '../errors';
 import Big from 'big.js';
 import { SwitchboardProgram } from '../program';
 import {
-  AccountInfo,
   AccountMeta,
   Commitment,
   Keypair,
@@ -30,6 +29,9 @@ import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
  * Account type holding a data feed's update configuration, job accounts, and its current result.
  *
  * Data: {@linkcode types.AggregatorAccountData}
+ *
+ * Result: {@linkcode types.SwitchboardDecimal}
+ *
  * HistoryBuffer?: Array<{@linkcode types.AggregatorHistoryRow}>
  *
  * An aggregator account belongs to a single {@linkcode QueueAccount} but can later be transferred by the aggregator's authority. In order for an {@linkcode OracleAccount} to respond to an aggregator's update request, the aggregator must initialize a {@linkcode PermissionAccount} and {@linkcode LeaseAccount}. These will need to be recreated when transferring queues.
@@ -140,6 +142,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params: AggregatorInitParams
   ): Promise<[TransactionObject, AggregatorAccount]> {
     const keypair = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(keypair);
 
     const ixns: TransactionInstruction[] = [];
     const signers: Keypair[] = [keypair];

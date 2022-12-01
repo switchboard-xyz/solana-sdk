@@ -19,6 +19,7 @@ import { TransactionObject } from '../transaction';
  */
 export class ProgramStateAccount extends Account<types.SbState> {
   static accountName = 'SbState';
+
   /**
    * Retrieves the {@linkcode ProgramStateAccount}, creates it if it doesn't exist;
    */

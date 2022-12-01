@@ -10,4 +10,5 @@ export * from './oracleAccount';
 export * from './permissionAccount';
 export * from './programStateAccount';
 export * from './queueAccount';
+export * from './queueDataBuffer';
 export * from './vrfAccount';

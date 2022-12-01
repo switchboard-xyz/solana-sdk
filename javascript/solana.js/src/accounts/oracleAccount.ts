@@ -213,7 +213,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.tokenWallet ?? (await this.loadData()).tokenAccount;
 
     const queue = params.queue ?? (await params.queueAccount.loadData());
-    const oracles = await params.queueAccount.loadOracles(queue);
+    const oracles = await params.queueAccount.loadOracles();
 
     let lastPubkey = this.publicKey;
     if (queue.size !== 0) {

@@ -15,19 +15,14 @@ export interface PermissionAccountInitParams {
   authority: PublicKey;
 }
 
-export type PermissionSetParams =
-  | {
-      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
-      permission: boolean;
-      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
-      queueAuthority?: Keypair;
-    }
-  | {
-      /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
-      enable?: boolean;
-      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
-      queueAuthority?: Keypair;
-    };
+export interface PermissionSetParams {
+  /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
+  permission: types.SwitchboardPermissionKind;
+  /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
+  enable: boolean;
+  /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
+  queueAuthority?: Keypair;
+}
 
 /**
  * Account type dictating the level of permissions between a granter and a grantee.
@@ -132,11 +127,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   /**
    * Sets the permission in the PermissionAccount
    */
-  public async set(params: {
-    permission: types.SwitchboardPermissionKind;
-    enable: boolean;
-    authority?: Keypair;
-  }): Promise<string> {
+  public async set(params: PermissionSetParams): Promise<string> {
     const setTxn = this.setInstruction(this.program.walletPubkey, params);
     const txnSignature = await this.program.signAndSend(setTxn);
     return txnSignature;
@@ -147,25 +138,28 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
    */
   public setInstruction(
     payer: PublicKey,
-    params: {
-      permission: types.SwitchboardPermissionKind;
-      enable: boolean;
-      authority?: Keypair;
-    }
+    params: PermissionSetParams
   ): TransactionObject {
     return new TransactionObject(
       payer,
       [
         types.permissionSet(
           this.program,
-          { params },
+          {
+            params: {
+              permission: params.permission,
+              enable: params.enable,
+            },
+          },
           {
             permission: this.publicKey,
-            authority: params.authority ? params.authority.publicKey : payer,
+            authority: params.queueAuthority
+              ? params.queueAuthority.publicKey
+              : payer,
           }
         ),
       ],
-      params.authority ? [params.authority] : []
+      params.queueAuthority ? [params.queueAuthority] : []
     );
   }
 }

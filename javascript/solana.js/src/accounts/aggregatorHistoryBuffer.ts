@@ -164,6 +164,7 @@ export class AggregatorHistoryBuffer extends Account<
     params: AggregatorHistoryInit
   ): Promise<[TransactionObject, AggregatorHistoryBuffer]> {
     const buffer = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(buffer);
 
     const ixns: TransactionInstruction[] = [];
     const signers: Keypair[] = params.aggregatorAuthority

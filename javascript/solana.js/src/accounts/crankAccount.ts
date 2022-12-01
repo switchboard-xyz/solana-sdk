@@ -22,7 +22,8 @@ import { QueueAccount } from './queueAccount';
  * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.
  *
  * Data: {@linkcode types.CrankAccountData}
- * Buffer: Array<{@linkcode types.CrankRow}>
+ *
+ * Buffer: {@linkcode CrankDataBuffer}
  */
 export class CrankAccount extends Account<types.CrankAccountData> {
   static accountName = 'CrankAccountData';
@@ -61,7 +62,10 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       this.publicKey
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
-    this.dataBuffer = CrankDataBuffer.fromCrank(this.program, data);
+    if (!this.dataBuffer) {
+      this.dataBuffer = CrankDataBuffer.fromCrank(this.program, data);
+    }
+
     return data;
   }
 
@@ -71,7 +75,11 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     params: CrankInitParams
   ): Promise<[TransactionObject, CrankAccount]> {
     const crankAccount = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(crankAccount);
+
     const buffer = anchor.web3.Keypair.generate();
+    program.verifyNewKeypair(buffer);
+
     const maxRows = params.maxRows ?? 500;
     const crankSize = maxRows * 40 + 8;
 
@@ -312,19 +320,29 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     return crankRows.map(row => row.pubkey);
   }
 
+  /**
+   * Load a cranks {@linkcode CrankDataBuffer}.
+   * @return the list of aggregtors and their next available update time.
+   */
+  async loadCrank(): Promise<Array<types.CrankRow>> {
+    if (!this.dataBuffer) {
+      this.dataBuffer = new CrankDataBuffer(
+        this.program,
+        (await this.loadData()).dataBuffer
+      );
+    }
+
+    const crankRows = await this.dataBuffer.loadData();
+
+    return crankRows;
+  }
+
   /** Whether an aggregator pubkey is active on a Crank */
   async isOnCrank(
     pubkey: PublicKey,
     crankRows?: Array<types.CrankRow>
   ): Promise<boolean> {
-    let crank: CrankDataBuffer;
-    if (this.dataBuffer) {
-      crank = this.dataBuffer;
-    } else {
-      const crankData = await this.loadData();
-      crank = new CrankDataBuffer(this.program, crankData.dataBuffer);
-    }
-    const rows = await crank.loadData();
+    const rows = crankRows ?? (await this.loadCrank());
 
     const idx = rows.findIndex(r => r.pubkey.equals(pubkey));
     if (idx === -1) {

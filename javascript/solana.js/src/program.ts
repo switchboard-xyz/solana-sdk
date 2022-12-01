@@ -183,6 +183,13 @@ export class SwitchboardProgram {
     }
   }
 
+  public async verifyNewKeypair(keypair: Keypair): Promise<void> {
+    const accountInfo = await this.connection.getAccountInfo(keypair.publicKey);
+    if (accountInfo) {
+      throw new errors.ExistingKeypair();
+    }
+  }
+
   public get account(): anchor.AccountNamespace {
     return this._program.account;
   }
