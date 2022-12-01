@@ -139,13 +139,18 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     payer: PublicKey,
     params: QueueInitParams
   ): Promise<[QueueAccount, TransactionObject]> {
-    const queueKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(queueKeypair);
+    const keypair = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(keypair);
 
     const dataBuffer = params.dataBufferKeypair ?? Keypair.generate();
     program.verifyNewKeypair(dataBuffer);
 
-    const account = new QueueAccount(program, queueKeypair.publicKey);
+    const queueAccount = new QueueAccount(program, keypair.publicKey);
+    queueAccount.dataBuffer = new QueueDataBuffer(
+      program,
+      dataBuffer.publicKey
+    );
+
     const queueSize = params.queueSize ?? 500;
     const queueDataSize = queueSize * 32 + 8;
 
@@ -197,7 +202,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
             },
           },
           {
-            oracleQueue: account.publicKey,
+            oracleQueue: queueAccount.publicKey,
             authority: params.authority ?? payer,
             buffer: dataBuffer.publicKey,
             systemProgram: SystemProgram.programId,
@@ -206,10 +211,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           }
         ),
       ],
-      [dataBuffer, queueKeypair]
+      [dataBuffer, keypair]
     );
 
-    return [account, txn];
+    return [queueAccount, txn];
   }
 
   /**
@@ -280,9 +285,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     payer: PublicKey,
     params: OracleInitParams &
       OracleStakeParams &
-      Partial<Omit<PermissionSetParams, 'permission'>>
+      Partial<Omit<PermissionSetParams, 'permission'>> & {
+        queueAuthorityPubkey?: PublicKey;
+      }
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
-    const queue = await this.loadData();
+    const queueAuthorityPubkey = params.queueAuthority
+      ? params.queueAuthority.publicKey
+      : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
     const [oracleAccount, createOracleTxnObject] =
       await OracleAccount.createInstructions(this.program, payer, {
@@ -294,7 +303,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: oracleAccount.publicKey,
-        authority: queue.authority,
+        authority: queueAuthorityPubkey,
       });
 
     if (params.enable && params.queueAuthority) {
@@ -421,9 +430,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     } & Partial<Omit<PermissionSetParams, 'permission'>> & {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
+      } & {
+        queueAuthorityPubkey?: PublicKey;
       }
   ): Promise<[AggregatorAccount, TransactionObject[]]> {
-    const queue = await this.loadData();
+    const queueAuthorityPubkey = params.queueAuthority
+      ? params.queueAuthority.publicKey
+      : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
     const pre: TransactionObject[] = [];
     const txns: TransactionObject[] = [];
@@ -474,7 +487,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       await AggregatorAccount.createInstruction(this.program, payer, {
         ...params,
         queueAccount: this,
-        queueAuthority: queue.authority,
+        queueAuthority: queueAuthorityPubkey,
         keypair: params.keypair,
         authority: params.authority ? params.authority.publicKey : undefined,
       });
@@ -497,7 +510,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const [permissionAccount, permissionInit] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
-        authority: queue.authority,
+        authority: queueAuthorityPubkey,
         grantee: aggregatorAccount.publicKey,
       });
 

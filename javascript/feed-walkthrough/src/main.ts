@@ -2,11 +2,11 @@ import type { PublicKey } from "@solana/web3.js";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import {
-  CrankAccount,
   SwitchboardProgram,
-  OracleAccount,
   QueueAccount,
+  TransactionObject,
   PermissionAccount,
+  LeaseAccount,
   types,
 } from "@switchboard-xyz/solana.js";
 import chalk from "chalk";
@@ -88,6 +88,8 @@ async function main() {
     authority
   );
 
+  console.log(program.cluster);
+
   console.log(chalk.yellow("######## Switchboard Setup ########"));
 
   // create our token wallet for the wrapped SOL mint
@@ -96,63 +98,120 @@ async function main() {
   );
 
   // Oracle Queue
-  const [queueAccount] = await QueueAccount.create(program, {
-    name: "Queue-1",
-    slashingEnabled: false,
-    reward: 0,
-    minStake: 0,
-  });
+  const [queueAccount, queueInit] = await QueueAccount.createInstructions(
+    program,
+    program.walletPubkey,
+    {
+      name: "Queue-1",
+      slashingEnabled: false,
+      reward: 0,
+      minStake: 0,
+    }
+  );
   console.log(toAccountString("Oracle Queue", queueAccount.publicKey));
 
   // Crank
-  const [crankAccount] = await queueAccount.createCrank({
-    name: "Crank",
-    maxRows: 10,
-  });
+  const [crankAccount, crankInit] = await queueAccount.createCrankInstructions(
+    program.walletPubkey,
+    {
+      name: "Crank",
+      maxRows: 10,
+    }
+  );
   console.log(toAccountString("Crank", crankAccount.publicKey));
 
   // Oracle
-  const [oracleAccount] = await queueAccount.createOracle({
-    name: "Oracle",
-    enable: true,
-  });
+  const [oracleAccount, oracleInit] =
+    await queueAccount.createOracleInstructions(program.walletPubkey, {
+      name: "Oracle",
+      enable: true,
+      queueAuthority: authority,
+    });
   console.log(toAccountString("Oracle", oracleAccount.publicKey));
-  await oracleAccount.heartbeat();
 
   // Aggregator
-
-  const [aggregatorAccount] = await queueAccount.createFeed({
-    name: "SOL_USD",
-    queueAuthority: authority,
-    batchSize: 1,
-    minRequiredOracleResults: 1,
-    minRequiredJobResults: 1,
-    minUpdateDelaySeconds: 10,
-    fundAmount: 0.5,
-    enable: true,
-    crankPubkey: crankAccount.publicKey,
-    jobs: [
-      {
-        weight: 2,
-        data: OracleJob.encodeDelimited(
-          OracleJob.fromObject({
-            tasks: [
-              {
-                httpTask: {
-                  url: `https://ftx.us/api/markets/SOL_USD`,
+  const [aggregatorAccount, aggregatorInit] =
+    await queueAccount.createFeedInstructions(program.walletPubkey, {
+      name: "SOL_USD",
+      queueAuthority: authority,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 10,
+      fundAmount: 0.5,
+      enable: true,
+      jobs: [
+        {
+          weight: 2,
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  httpTask: {
+                    url: `https://ftx.us/api/markets/SOL_USD`,
+                  },
                 },
-              },
-              {
-                jsonParseTask: { path: "$.result.price" },
-              },
-            ],
-          })
-        ).finish(),
-      },
-    ],
-  });
+                {
+                  jsonParseTask: { path: "$.result.price" },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
   console.log(toAccountString("Aggregator", aggregatorAccount.publicKey));
+
+  const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+    program,
+    authority.publicKey,
+    queueAccount.publicKey,
+    aggregatorAccount.publicKey
+  );
+  const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+    program,
+    queueAccount.publicKey,
+    aggregatorAccount.publicKey
+  );
+  const leaseEscrow = program.mint.getAssociatedAddress(leaseAccount.publicKey);
+
+  const crankPushIxn = types.crankPush(
+    program,
+    {
+      params: {
+        stateBump: program.programState.bump,
+        permissionBump: permissionBump,
+        notifiRef: null,
+      },
+    },
+    {
+      crank: crankAccount.publicKey,
+      aggregator: aggregatorAccount.publicKey,
+      oracleQueue: queueAccount.publicKey,
+      queueAuthority: authority.publicKey,
+      permission: permissionAccount.publicKey,
+      lease: leaseAccount.publicKey,
+      escrow: leaseEscrow,
+      programState: program.programState.publicKey,
+      dataBuffer: crankAccount.dataBuffer!.publicKey,
+    }
+  );
+
+  const packedTxns = TransactionObject.pack([
+    queueInit,
+    crankInit,
+    ...oracleInit,
+    ...aggregatorInit,
+    new TransactionObject(authority.publicKey, [crankPushIxn], []),
+  ]);
+  const txnSignatures = await program.signAndSendAll(packedTxns, {
+    skipPreflight: true,
+  });
+  console.log(JSON.stringify(txnSignatures, undefined, 2));
+
   const aggregator = await aggregatorAccount.loadData();
+
+  await oracleAccount.heartbeat();
 
   console.log(chalk.green("\u2714 Switchboard setup complete"));
 

@@ -73,8 +73,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     payer: PublicKey,
     params: CrankInitParams
   ): Promise<[CrankAccount, TransactionObject]> {
-    const crankAccount = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(crankAccount);
+    const keypair = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(keypair);
 
     const buffer = anchor.web3.Keypair.generate();
     program.verifyNewKeypair(buffer);
@@ -104,7 +104,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
             },
           },
           {
-            crank: crankAccount.publicKey,
+            crank: keypair.publicKey,
             queue: params.queueAccount.publicKey,
             buffer: buffer.publicKey,
             systemProgram: SystemProgram.programId,
@@ -112,10 +112,13 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           }
         ),
       ],
-      [crankAccount, buffer]
+      [keypair, buffer]
     );
 
-    return [new CrankAccount(program, crankAccount.publicKey), crankInit];
+    const crankAccount = new CrankAccount(program, keypair.publicKey);
+    crankAccount.dataBuffer = new CrankDataBuffer(program, buffer.publicKey);
+
+    return [crankAccount, crankInit];
   }
 
   public static async create(
