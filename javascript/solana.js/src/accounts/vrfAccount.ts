@@ -72,7 +72,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: VrfInitParams
-  ): Promise<[TransactionObject, VrfAccount]> {
+  ): Promise<[VrfAccount, TransactionObject]> {
     program.verifyNewKeypair(params.vrfKeypair);
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
     const size = program.account.vrfAccountData.size;
@@ -121,8 +121,10 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       ),
     ];
 
-    const txn = new TransactionObject(payer, ixns, [params.vrfKeypair]);
-    return [txn, vrfAccount];
+    return [
+      vrfAccount,
+      new TransactionObject(payer, ixns, [params.vrfKeypair]),
+    ];
   }
 
   /**
@@ -133,14 +135,14 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   public static async create(
     program: SwitchboardProgram,
     params: VrfInitParams
-  ): Promise<[string, VrfAccount]> {
-    const [createTxn, vrfAccount] = await VrfAccount.createInstructions(
+  ): Promise<[VrfAccount, string]> {
+    const [vrfAccount, vrfInitTxn] = await VrfAccount.createInstructions(
       program,
       program.walletPubkey,
       params
     );
-    const txnSignature = await program.signAndSend(createTxn);
-    return [txnSignature, vrfAccount];
+    const txnSignature = await program.signAndSend(vrfInitTxn);
+    return [vrfAccount, txnSignature];
   }
 
   public async requestRandomnessInstruction(

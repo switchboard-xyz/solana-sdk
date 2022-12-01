@@ -147,10 +147,10 @@ export class AggregatorHistoryBuffer extends Account<
    * Basic usage example:
    *
    * ```ts
-   * import {AggregatorAccount,AggregatorHistoryBuffer} from '@switchboard-xyz/solana.js';
+   * import { AggregatorAccount,AggregatorHistoryBuffer } from '@switchboard-xyz/solana.js';
    * const aggregatorAccount = new AggregatorAccount(program, aggregatorKey);
    * const aggregator = await aggregatorAccount.loadData();
-   * const [addHistoryTxn, historyBuffer] = await AggregatorHistoryBuffer.createInstructions(program, payer, {
+   * const [historyBuffer, addHistoryTxn] = await AggregatorHistoryBuffer.createInstructions(program, payer, {
    *    aggregatorAccount,
    *    maxSamples: 10000,
    * });
@@ -162,7 +162,7 @@ export class AggregatorHistoryBuffer extends Account<
     program: SwitchboardProgram,
     payer: PublicKey,
     params: AggregatorHistoryInit
-  ): Promise<[TransactionObject, AggregatorHistoryBuffer]> {
+  ): Promise<[AggregatorHistoryBuffer, TransactionObject]> {
     const buffer = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(buffer);
 
@@ -199,8 +199,8 @@ export class AggregatorHistoryBuffer extends Account<
     );
 
     return [
-      new TransactionObject(payer, ixns, signers),
       new AggregatorHistoryBuffer(program, buffer.publicKey),
+      new TransactionObject(payer, ixns, signers),
     ];
   }
 
@@ -214,10 +214,10 @@ export class AggregatorHistoryBuffer extends Account<
    * Basic usage example:
    *
    * ```ts
-   * import {AggregatorAccount,AggregatorHistoryBuffer} from '@switchboard-xyz/solana.js';
+   * import { AggregatorAccount,AggregatorHistoryBuffer } from '@switchboard-xyz/solana.js';
    * const aggregatorAccount = new AggregatorAccount(program, aggregatorKey);
    * const aggregator = await aggregatorAccount.loadData();
-   * const [addHistorySignature, historyBuffer] = await AggregatorHistoryBuffer.create(program, {
+   * const [historyBuffer, addHistorySignature] = await AggregatorHistoryBuffer.create(program, {
    *    aggregatorAccount,
    *    maxSamples: 10000,
    * });
@@ -227,14 +227,14 @@ export class AggregatorHistoryBuffer extends Account<
   public static async create(
     program: SwitchboardProgram,
     params: AggregatorHistoryInit
-  ): Promise<[TransactionSignature, AggregatorHistoryBuffer]> {
-    const [transaction, account] =
+  ): Promise<[AggregatorHistoryBuffer, TransactionSignature]> {
+    const [account, transaction] =
       await AggregatorHistoryBuffer.createInstructions(
         program,
         program.walletPubkey,
         params
       );
     const txnSignature = await program.signAndSend(transaction);
-    return [txnSignature, account];
+    return [account, txnSignature];
   }
 }

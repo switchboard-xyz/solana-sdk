@@ -51,7 +51,7 @@ export class JobAccount extends Account<types.JobAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: JobInitParams
-  ): [Array<TransactionObject>, JobAccount] {
+  ): [JobAccount, Array<TransactionObject>] {
     if (params.data.byteLength > 6400) {
       throw new Error('Switchboard jobs need to be less than 6400 bytes');
     }
@@ -138,20 +138,20 @@ export class JobAccount extends Account<types.JobAccountData> {
       }
     }
 
-    return [txns, new JobAccount(program, jobKeypair.publicKey)];
+    return [new JobAccount(program, jobKeypair.publicKey), txns];
   }
 
   public static async create(
     program: SwitchboardProgram,
     params: JobInitParams
-  ): Promise<[Array<TransactionSignature>, JobAccount]> {
-    const [transactions, account] = JobAccount.createInstructions(
+  ): Promise<[JobAccount, Array<TransactionSignature>]> {
+    const [account, transactions] = JobAccount.createInstructions(
       program,
       program.walletPubkey,
       params
     );
     const txSignature = await program.signAndSendAll(transactions);
-    return [txSignature, account];
+    return [account, txSignature];
   }
 
   decode(data: Buffer): types.JobAccountData {

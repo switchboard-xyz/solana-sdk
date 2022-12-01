@@ -92,7 +92,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       jobAccount: JobAccount;
       keypair?: Keypair;
     }
-  ): Promise<[TransactionObject, BufferRelayerAccount]> {
+  ): Promise<[BufferRelayerAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
 
@@ -143,8 +143,8 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     );
 
     return [
-      new TransactionObject(payer, ixns, [keypair]),
       new BufferRelayerAccount(program, keypair.publicKey),
+      new TransactionObject(payer, ixns, [keypair]),
     ];
   }
 
@@ -158,15 +158,15 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       jobAccount: JobAccount;
       keypair?: Keypair;
     }
-  ): Promise<[TransactionSignature, BufferRelayerAccount]> {
-    const [bufferInit, bufferAccount] =
+  ): Promise<[BufferRelayerAccount, TransactionSignature]> {
+    const [bufferAccount, bufferInit] =
       await BufferRelayerAccount.createInstructions(
         program,
         program.walletPubkey,
         params
       );
     const txnSignature = await program.signAndSend(bufferInit);
-    return [txnSignature, bufferAccount];
+    return [bufferAccount, txnSignature];
   }
 
   public async openRoundInstructions(

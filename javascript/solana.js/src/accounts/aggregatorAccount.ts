@@ -125,7 +125,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * ```ts
    * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
-   * const [aggregatorInit, aggregatorAccount] = await AggregatorAccount.createInstruction(program, payer, {
+   * const [aggregatorAccount, aggregatorInit ] = await AggregatorAccount.createInstruction(program, payer, {
    *    queueAccount,
    *    queueAuthority,
    *    batchSize: 5,
@@ -140,7 +140,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: AggregatorInitParams
-  ): Promise<[TransactionObject, AggregatorAccount]> {
+  ): Promise<[AggregatorAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
 
@@ -194,7 +194,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const aggregatorInit = new TransactionObject(payer, ixns, signers);
     const aggregatorAccount = new AggregatorAccount(program, keypair.publicKey);
 
-    return [aggregatorInit, aggregatorAccount];
+    return [aggregatorAccount, aggregatorInit];
   }
 
   /**
@@ -207,7 +207,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * ```ts
    * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
-   * const [txnSignature, aggregatorAccount] = await AggregatorAccount.create(program, {
+   * const [aggregatorAccount, txnSignature] = await AggregatorAccount.create(program, {
    *    queueAccount,
    *    queueAuthority,
    *    batchSize: 5,
@@ -221,14 +221,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   public static async create(
     program: SwitchboardProgram,
     params: AggregatorInitParams
-  ): Promise<[TransactionSignature, AggregatorAccount]> {
-    const [transaction, account] = await AggregatorAccount.createInstruction(
+  ): Promise<[AggregatorAccount, TransactionSignature]> {
+    const [account, transaction] = await AggregatorAccount.createInstruction(
       program,
       program.walletPubkey,
       params
     );
     const txnSignature = await program.signAndSend(transaction);
-    return [txnSignature, account];
+    return [account, txnSignature];
   }
 
   public getAccounts(params: {

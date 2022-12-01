@@ -80,16 +80,18 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
   }
 
   /**
-   * Return an aggregator's assigned history buffer or undefined if it doesn't exist.
+   * Return a queues dataBuffer
+   *
+   * @throws {string} if dataBuffer is equal to default publicKey
    */
-  static fromCrank(
+  static fromQueue(
     program: SwitchboardProgram,
-    crank: types.CrankAccountData
+    queue: types.OracleQueueAccountData
   ): QueueDataBuffer {
-    if (crank.dataBuffer.equals(PublicKey.default)) {
-      throw new Error(`Failed to find crank data buffer`);
+    if (queue.dataBuffer.equals(PublicKey.default)) {
+      throw new Error(`Failed to find queue data buffer`);
     }
 
-    return new QueueDataBuffer(program, crank.dataBuffer);
+    return new QueueDataBuffer(program, queue.dataBuffer);
   }
 }

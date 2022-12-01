@@ -72,7 +72,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: CrankInitParams
-  ): Promise<[TransactionObject, CrankAccount]> {
+  ): Promise<[CrankAccount, TransactionObject]> {
     const crankAccount = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(crankAccount);
 
@@ -115,20 +115,20 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       [crankAccount, buffer]
     );
 
-    return [crankInit, new CrankAccount(program, crankAccount.publicKey)];
+    return [new CrankAccount(program, crankAccount.publicKey), crankInit];
   }
 
   public static async create(
     program: SwitchboardProgram,
     params: CrankInitParams
-  ): Promise<[TransactionSignature, CrankAccount]> {
-    const [crankInit, crankAccount] = await CrankAccount.createInstructions(
+  ): Promise<[CrankAccount, TransactionSignature]> {
+    const [crankAccount, crankInit] = await CrankAccount.createInstructions(
       program,
       program.walletPubkey,
       params
     );
     const txnSignature = await program.signAndSend(crankInit);
-    return [txnSignature, crankAccount];
+    return [crankAccount, txnSignature];
   }
 
   public async popInstruction(

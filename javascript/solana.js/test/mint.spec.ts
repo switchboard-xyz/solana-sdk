@@ -23,8 +23,10 @@ describe('Mint Tests', () => {
     );
     await ctx.program.connection.confirmTransaction(airdropTxn);
 
-    const [tokenAddress, createTokenAccountSig] =
-      await ctx.program.mint.createAssocatedUser(ctx.payer.publicKey, user);
+    const [tokenAddress] = await ctx.program.mint.createAssocatedUser(
+      ctx.payer.publicKey,
+      user
+    );
     userTokenAddress = tokenAddress;
 
     const userTokenBalance =
@@ -42,11 +44,7 @@ describe('Mint Tests', () => {
       throw new Error(`User token address does not exist`);
     }
 
-    const wrapSignature = await ctx.program.mint.wrap(
-      ctx.payer.publicKey,
-      { amount: 0.25 },
-      user
-    );
+    await ctx.program.mint.wrap(ctx.payer.publicKey, { amount: 0.25 }, user);
 
     const userTokenBalance =
       (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
@@ -69,11 +67,7 @@ describe('Mint Tests', () => {
       throw new Error(`Final user token address would be negative`);
     }
 
-    const unwrapSignature = await ctx.program.mint.unwrap(
-      ctx.payer.publicKey,
-      0.1,
-      user
-    );
+    await ctx.program.mint.unwrap(ctx.payer.publicKey, 0.1, user);
 
     const userTokenBalance = await ctx.program.mint.getBalance(user.publicKey);
     if (userTokenBalance !== expectedFinalBalance) {
@@ -88,15 +82,9 @@ describe('Mint Tests', () => {
       throw new Error(`User token address does not exist`);
     }
 
-    const initialUserTokenBalance = await ctx.program.mint.getBalance(
-      user.publicKey
-    );
+    await ctx.program.mint.getBalance(user.publicKey);
 
-    const unwrapSignature = await ctx.program.mint.unwrap(
-      ctx.payer.publicKey,
-      undefined,
-      user
-    );
+    await ctx.program.mint.unwrap(ctx.payer.publicKey, undefined, user);
 
     const userTokenAccount = await ctx.program.connection.getAccountInfo(
       userTokenAddress

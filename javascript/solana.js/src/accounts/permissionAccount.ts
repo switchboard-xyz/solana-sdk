@@ -1,5 +1,10 @@
 import * as anchor from '@project-serum/anchor';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  TransactionSignature,
+} from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
@@ -60,24 +65,11 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     return [new PermissionAccount(program, publicKey), bump];
   }
 
-  public static async create(
-    program: SwitchboardProgram,
-    params: PermissionAccountInitParams
-  ): Promise<[string, PermissionAccount]> {
-    const [txnObject, account] = this.createInstruction(
-      program,
-      program.walletPubkey,
-      params
-    );
-    const txSignature = await program.signAndSend(txnObject);
-    return [txSignature, account];
-  }
-
   public static createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
     params: PermissionAccountInitParams
-  ): [TransactionObject, PermissionAccount] {
+  ): [PermissionAccount, TransactionObject] {
     const [account] = PermissionAccount.fromSeed(
       program,
       params.authority,
@@ -96,7 +88,20 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
         payer,
       }
     );
-    return [new TransactionObject(payer, [instruction], []), account];
+    return [account, new TransactionObject(payer, [instruction], [])];
+  }
+
+  public static async create(
+    program: SwitchboardProgram,
+    params: PermissionAccountInitParams
+  ): Promise<[PermissionAccount, TransactionSignature]> {
+    const [account, txnObject] = this.createInstruction(
+      program,
+      program.walletPubkey,
+      params
+    );
+    const txSignature = await program.signAndSend(txnObject);
+    return [account, txSignature];
   }
 
   /**

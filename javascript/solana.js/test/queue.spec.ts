@@ -2,8 +2,6 @@ import 'mocha';
 import chai, { expect } from 'chai';
 import assert from 'assert';
 
-import * as anchor from '@project-serum/anchor';
-import * as spl from '@solana/spl-token';
 import * as sbv2 from '../src';
 import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
@@ -16,28 +14,24 @@ describe('Queue Tests', () => {
     ctx = await setupTest();
   });
 
-  let queueAccount: sbv2.QueueAccount;
   const queueAuthority = Keypair.generate();
+  let queueAccount: sbv2.QueueAccount;
 
   it('Creates a Queue', async () => {
-    const [createQueueSignature, oracleQueue] = await sbv2.QueueAccount.create(
-      ctx.program,
-      {
-        name: 'q1',
-        metadata: '',
-        queueSize: 2,
-        reward: 0,
-        minStake: 0,
-        oracleTimeout: 60,
-        slashingEnabled: false,
-        unpermissionedFeeds: true,
-        unpermissionedVrf: true,
-        enableBufferRelayers: false,
-        authority: queueAuthority.publicKey,
-      }
-    );
-    queueAccount = oracleQueue;
-    const queue = await queueAccount.loadData();
+    [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
+      name: 'q1',
+      metadata: '',
+      queueSize: 2,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 60,
+      slashingEnabled: false,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: false,
+      authority: queueAuthority.publicKey,
+    });
+    await queueAccount.loadData();
   });
 
   it('Adds an oracle to a queue', async () => {
@@ -46,24 +40,24 @@ describe('Queue Tests', () => {
     }
     const oracleAuthority = Keypair.generate();
     // Create a new oracle
-    const [createOracleSignatures, oracleAccount] =
-      await queueAccount.createOracle({
-        name: 'oracle2',
-        metadata: '',
-        queueAuthority,
-        enable: true,
-        authority: oracleAuthority,
-      });
+    const [oracleAccount] = await queueAccount.createOracle({
+      name: 'oracle2',
+      metadata: '',
+      queueAuthority,
+      enable: true,
+      authority: oracleAuthority,
+    });
 
     const oracle = await oracleAccount.loadData();
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+    const [permissionAccount] = PermissionAccount.fromSeed(
       ctx.program,
       queueAuthority.publicKey,
       queueAccount.publicKey,
       oracleAccount.publicKey
     );
+    await permissionAccount.loadData();
 
-    const heartbeatSignature = await oracleAccount.heartbeat({
+    await oracleAccount.heartbeat({
       queueAccount,
       tokenWallet: oracle.tokenAccount,
       authority: oracleAuthority,
@@ -83,18 +77,17 @@ describe('Queue Tests', () => {
     const oracleAuthority = Keypair.generate();
 
     // Create a new oracle
-    const [createOracleSignatures, oracleAccount] =
-      await queueAccount.createOracle({
-        name: 'oracle2',
-        metadata: '',
-        queueAuthority,
-        enable: true,
-        authority: oracleAuthority,
-      });
+    const [oracleAccount] = await queueAccount.createOracle({
+      name: 'oracle2',
+      metadata: '',
+      queueAuthority,
+      enable: true,
+      authority: oracleAuthority,
+    });
 
     const oracle = await oracleAccount.loadData();
 
-    const heartbeatSignature = await oracleAccount.heartbeat({
+    await oracleAccount.heartbeat({
       queueAccount,
       tokenWallet: oracle.tokenAccount,
       authority: oracleAuthority,
@@ -116,16 +109,15 @@ describe('Queue Tests', () => {
     const tokenWallet = Keypair.generate();
 
     // Create a new oracle
-    const [createOracleSignatures, oracleAccount] =
-      await queueAccount.createOracle({
-        name: 'oracle3',
-        metadata: '',
-        queueAuthority,
-        enable: true,
-        authority: oracleAuthority,
-      });
+    const [oracleAccount] = await queueAccount.createOracle({
+      name: 'oracle3',
+      metadata: '',
+      queueAuthority,
+      enable: true,
+      authority: oracleAuthority,
+    });
 
-    const oracle = await oracleAccount.loadData();
+    await oracleAccount.loadData();
 
     assert.rejects(
       async () => {

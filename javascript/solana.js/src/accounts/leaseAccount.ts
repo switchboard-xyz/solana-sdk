@@ -102,7 +102,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       withdrawAuthority?: PublicKey;
       jobAuthorities: Array<PublicKey>;
     }
-  ): Promise<[TransactionObject, LeaseAccount]> {
+  ): Promise<[LeaseAccount, TransactionObject]> {
     const ixns: TransactionInstruction[] = [];
     const signers: Keypair[] = [];
 
@@ -183,7 +183,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       )
     );
 
-    return [new TransactionObject(payer, ixns, signers), leaseAccount];
+    return [leaseAccount, new TransactionObject(payer, ixns, signers)];
   }
 
   public static async create(
@@ -198,8 +198,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       withdrawAuthority?: PublicKey;
       jobAuthorities: Array<PublicKey>;
     }
-  ): Promise<[TransactionSignature, LeaseAccount]> {
-    const [transaction, leaseAccount] = await LeaseAccount.createInstructions(
+  ): Promise<[LeaseAccount, TransactionSignature]> {
+    const [leaseAccount, transaction] = await LeaseAccount.createInstructions(
       program,
       program.walletPubkey,
       {
@@ -211,7 +211,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
     const signature = await program.signAndSend(transaction);
 
-    return [signature, leaseAccount];
+    return [leaseAccount, signature];
   }
 
   public async getBalance(): Promise<number> {

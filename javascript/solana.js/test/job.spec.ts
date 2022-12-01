@@ -22,7 +22,7 @@ describe('Job Tests', () => {
     });
     const data = OracleJob.encodeDelimited(oracleJob).finish();
 
-    const [jobInit, jobAccount] = JobAccount.createInstructions(
+    const [jobAccount, jobInit] = JobAccount.createInstructions(
       ctx.program,
       ctx.program.walletPubkey,
       {

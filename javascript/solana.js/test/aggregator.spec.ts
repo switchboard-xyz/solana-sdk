@@ -3,8 +3,6 @@ import 'mocha';
 import chai, { expect } from 'chai';
 import assert from 'assert';
 
-import * as anchor from '@project-serum/anchor';
-import * as spl from '@solana/spl-token';
 import * as sbv2 from '../src';
 import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
@@ -15,7 +13,6 @@ import {
   QueueAccount,
 } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
-import { PermitOracleQueueUsage } from '../src/generated/types/SwitchboardPermission';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;
@@ -30,22 +27,19 @@ describe('Aggregator Tests', () => {
   before(async () => {
     ctx = await setupTest();
 
-    const [createQueueSignature, oracleQueue] = await sbv2.QueueAccount.create(
-      ctx.program,
-      {
-        name: 'aggregator-queue',
-        metadata: '',
-        authority: queueAuthority.publicKey,
-        queueSize: 1,
-        reward: 0,
-        minStake: 0,
-        oracleTimeout: 86400,
-        slashingEnabled: false,
-        unpermissionedFeeds: true,
-        unpermissionedVrf: true,
-        enableBufferRelayers: false,
-      }
-    );
+    const [oracleQueue] = await sbv2.QueueAccount.create(ctx.program, {
+      name: 'aggregator-queue',
+      metadata: '',
+      authority: queueAuthority.publicKey,
+      queueSize: 1,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 86400,
+      slashingEnabled: false,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: false,
+    });
 
     queueAccount = oracleQueue;
 
@@ -56,7 +50,7 @@ describe('Aggregator Tests', () => {
       name: 'oracle-1',
     });
 
-    const [createJobSigs, jobAccount1] = await JobAccount.create(ctx.program, {
+    const [jobAccount1] = await JobAccount.create(ctx.program, {
       data: OracleJob.encodeDelimited(
         OracleJob.fromObject({
           tasks: [
@@ -77,18 +71,17 @@ describe('Aggregator Tests', () => {
     const aggregatorKeypair = Keypair.generate();
     const aggregatorAuthority = Keypair.generate();
 
-    const [createAggregatorSig, aggregatorAccount] =
-      await AggregatorAccount.create(ctx.program, {
-        queueAccount,
-        queueAuthority: queueAuthority.publicKey,
-        authority: aggregatorAuthority.publicKey,
-        batchSize: 1,
-        minRequiredOracleResults: 1,
-        minRequiredJobResults: 1,
-        minUpdateDelaySeconds: 60,
-        keypair: aggregatorKeypair,
-      });
-    const aggregator = await aggregatorAccount.loadData();
+    const [aggregatorAccount] = await AggregatorAccount.create(ctx.program, {
+      queueAccount,
+      queueAuthority: queueAuthority.publicKey,
+      authority: aggregatorAuthority.publicKey,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 60,
+      keypair: aggregatorKeypair,
+    });
+    await aggregatorAccount.loadData();
 
     const oracleJob = OracleJob.fromObject({
       tasks: [
@@ -100,7 +93,7 @@ describe('Aggregator Tests', () => {
       ],
     });
 
-    const [createJobSigs, jobAccount] = await JobAccount.create(
+    const [jobAccount] = await JobAccount.create(
       ctx.program,
 
       {
@@ -109,7 +102,7 @@ describe('Aggregator Tests', () => {
       }
     );
 
-    const addSig = await aggregatorAccount.addJob({
+    await aggregatorAccount.addJob({
       job: jobAccount,
       weight: 1,
       authority: aggregatorAuthority,
@@ -123,7 +116,7 @@ describe('Aggregator Tests', () => {
       throw new Error(`Failed to add job to aggregator`);
     }
 
-    const removeSig = await aggregatorAccount.removeJob({
+    await aggregatorAccount.removeJob({
       job: jobAccount,
       jobIdx: jobIdx,
       authority: aggregatorAuthority,
@@ -138,33 +131,32 @@ describe('Aggregator Tests', () => {
   });
 
   it('Creates and funds aggregator', async () => {
-    const [createAggregatorSig, aggregatorAccount] =
-      await queueAccount.createFeed({
-        queueAuthority: queueAuthority,
-        batchSize: 1,
-        minRequiredOracleResults: 1,
-        minRequiredJobResults: 1,
-        minUpdateDelaySeconds: 60,
-        fundAmount: 2.5,
-        enable: true,
-        jobs: [
-          { pubkey: jobAccount.publicKey },
-          {
-            weight: 2,
-            data: OracleJob.encodeDelimited(
-              OracleJob.fromObject({
-                tasks: [
-                  {
-                    valueTask: {
-                      value: 1,
-                    },
+    const [aggregatorAccount] = await queueAccount.createFeed({
+      queueAuthority: queueAuthority,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 60,
+      fundAmount: 2.5,
+      enable: true,
+      jobs: [
+        { pubkey: jobAccount.publicKey },
+        {
+          weight: 2,
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: 1,
                   },
-                ],
-              })
-            ).finish(),
-          },
-        ],
-      });
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
 
     const aggregator = await aggregatorAccount.loadData();
 

@@ -8,6 +8,7 @@ import { Mint } from '../mint';
 import {
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { TransactionObject } from '../transaction';
@@ -103,7 +104,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
     program: SwitchboardProgram,
     mint = Mint.native,
     daoMint = Mint.native
-  ): [ProgramStateAccount, anchor.web3.TransactionInstruction] {
+  ): [ProgramStateAccount, TransactionInstruction] {
     const [programStateAccount, stateBump] =
       ProgramStateAccount.fromSeed(program);
 

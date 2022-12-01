@@ -84,7 +84,9 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
   }
 
   /**
-   * Return an aggregator's assigned history buffer or undefined if it doesn't exist.
+   * Return a crank's dataBuffer
+   *
+   * @throws {string} if dataBuffer is equal to default publicKey
    */
   static fromCrank(
     program: SwitchboardProgram,

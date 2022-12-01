@@ -113,8 +113,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
-   * const [queueInitTxn, queueAccount] = await QueueAccount.createInstructions(program, payer, {
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
+   * const [queueAccount, queueInitTxn] = await QueueAccount.createInstructions(program, payer, {
         name: 'My Queue',
         metadata: 'Top Secret',
         queueSize: 100,
@@ -134,7 +134,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: QueueInitParams
-  ): Promise<[TransactionObject, QueueAccount]> {
+  ): Promise<[QueueAccount, TransactionObject]> {
     const queueKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(queueKeypair);
 
@@ -148,66 +148,64 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const reward = program.mint.toTokenAmountBN(params.reward);
     const minStake = program.mint.toTokenAmountBN(params.minStake);
 
-    return [
-      new TransactionObject(
-        payer,
-        [
-          SystemProgram.createAccount({
-            fromPubkey: program.wallet.publicKey,
-            newAccountPubkey: dataBuffer.publicKey,
-            space: queueDataSize,
-            lamports:
-              await program.connection.getMinimumBalanceForRentExemption(
-                queueDataSize
-              ),
-            programId: program.programId,
-          }),
-          types.oracleQueueInit(
-            program,
-            {
-              params: {
-                name: Array.from(
-                  new Uint8Array(Buffer.from(params.name ?? '').slice(0, 32))
-                ),
-                metadata: [
-                  ...new Uint8Array(
-                    Buffer.from(params.metadata ?? '').slice(0, 64)
-                  ),
-                ],
-                reward: reward,
-                minStake: minStake,
-                feedProbationPeriod: params.feedProbationPeriod ?? 0,
-                oracleTimeout: params.oracleTimeout ?? 180,
-                slashingEnabled: params.slashingEnabled ?? false,
-                varianceToleranceMultiplier: SwitchboardDecimal.fromBig(
-                  new Big(params.varianceToleranceMultiplier ?? 2)
-                ),
-                consecutiveFeedFailureLimit: new anchor.BN(
-                  params.consecutiveFeedFailureLimit ?? 1000
-                ),
-                consecutiveOracleFailureLimit: new anchor.BN(
-                  params.consecutiveOracleFailureLimit ?? 1000
-                ),
-                queueSize: queueSize,
-                unpermissionedFeeds: params.unpermissionedFeeds ?? false,
-                unpermissionedVrf: params.unpermissionedVrf ?? false,
-                enableBufferRelayers: params.enableBufferRelayers ?? false,
-              },
-            },
-            {
-              oracleQueue: account.publicKey,
-              authority: params.authority ?? payer,
-              buffer: dataBuffer.publicKey,
-              systemProgram: SystemProgram.programId,
-              payer,
-              mint: program.mint.address,
-            }
+    const txn = new TransactionObject(
+      payer,
+      [
+        SystemProgram.createAccount({
+          fromPubkey: program.wallet.publicKey,
+          newAccountPubkey: dataBuffer.publicKey,
+          space: queueDataSize,
+          lamports: await program.connection.getMinimumBalanceForRentExemption(
+            queueDataSize
           ),
-        ],
-        [dataBuffer, queueKeypair]
-      ),
-      account,
-    ];
+          programId: program.programId,
+        }),
+        types.oracleQueueInit(
+          program,
+          {
+            params: {
+              name: Array.from(
+                new Uint8Array(Buffer.from(params.name ?? '').slice(0, 32))
+              ),
+              metadata: [
+                ...new Uint8Array(
+                  Buffer.from(params.metadata ?? '').slice(0, 64)
+                ),
+              ],
+              reward: reward,
+              minStake: minStake,
+              feedProbationPeriod: params.feedProbationPeriod ?? 0,
+              oracleTimeout: params.oracleTimeout ?? 180,
+              slashingEnabled: params.slashingEnabled ?? false,
+              varianceToleranceMultiplier: SwitchboardDecimal.fromBig(
+                new Big(params.varianceToleranceMultiplier ?? 2)
+              ),
+              consecutiveFeedFailureLimit: new anchor.BN(
+                params.consecutiveFeedFailureLimit ?? 1000
+              ),
+              consecutiveOracleFailureLimit: new anchor.BN(
+                params.consecutiveOracleFailureLimit ?? 1000
+              ),
+              queueSize: queueSize,
+              unpermissionedFeeds: params.unpermissionedFeeds ?? false,
+              unpermissionedVrf: params.unpermissionedVrf ?? false,
+              enableBufferRelayers: params.enableBufferRelayers ?? false,
+            },
+          },
+          {
+            oracleQueue: account.publicKey,
+            authority: params.authority ?? payer,
+            buffer: dataBuffer.publicKey,
+            systemProgram: SystemProgram.programId,
+            payer,
+            mint: program.mint.address,
+          }
+        ),
+      ],
+      [dataBuffer, queueKeypair]
+    );
+
+    return [account, txn];
   }
 
   /**
@@ -222,8 +220,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
-   * const [txnSignature, queueAccount] = await QueueAccount.create(program, {
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
+   * const [queueAccount, txnSignature] = await QueueAccount.create(program, {
         name: 'My Queue',
         metadata: 'Top Secret',
         queueSize: 100,
@@ -241,14 +239,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public static async create(
     program: SwitchboardProgram,
     params: QueueInitParams
-  ): Promise<[string, QueueAccount]> {
-    const [txnObject, account] = await this.createInstructions(
+  ): Promise<[QueueAccount, string]> {
+    const [account, txnObject] = await this.createInstructions(
       program,
       program.walletPubkey,
       params
     );
     const txnSignature = await program.signAndSend(txnObject);
-    return [txnSignature, account];
+    return [account, txnSignature];
   }
 
   /**
@@ -263,9 +261,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [oracleInitTxn, oracleAccount] = await queueAccount.createOracleInstructions(payer, {
+   * const [oracleAccount, oracleInitTxn] = await queueAccount.createOracleInstructions(payer, {
    *  name: "My Oracle",
    *  metadata: "Oracle #1"
    * });
@@ -277,16 +275,16 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
     params: OracleInitParams & Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[TransactionObject, OracleAccount]> {
+  ): Promise<[OracleAccount, TransactionObject]> {
     const queue = await this.loadData();
 
-    const [createOracleTxnObject, oracleAccount] =
+    const [oracleAccount, createOracleTxnObject] =
       await OracleAccount.createInstructions(this.program, payer, {
         ...params,
         queueAccount: this,
       });
 
-    const [createPermissionTxnObject, permissionAccount] =
+    const [permissionAccount, createPermissionTxnObject] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: oracleAccount.publicKey,
@@ -303,8 +301,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     return [
-      createOracleTxnObject.combine(createPermissionTxnObject),
       oracleAccount,
+      createOracleTxnObject.combine(createPermissionTxnObject),
     ];
   }
 
@@ -318,9 +316,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [oracleInitSignature, oracleAccount] = await queueAccount.createOracle({
+   * const [oracleAccount, oracleInitSignature] = await queueAccount.createOracle({
    *  name: "My Oracle",
    *  metadata: "Oracle #1"
    * });
@@ -329,7 +327,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createOracle(
     params: OracleInitParams & Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[TransactionSignature, OracleAccount]> {
+  ): Promise<[OracleAccount, TransactionSignature]> {
     const signers: Keypair[] = [];
 
     const queue = await this.loadData();
@@ -341,14 +339,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       signers.push(params.queueAuthority);
     }
 
-    const [txn, oracleAccount] = await this.createOracleInstructions(
+    const [oracleAccount, txn] = await this.createOracleInstructions(
       this.program.walletPubkey,
       params
     );
 
     const signature = await this.program.signAndSend(txn);
 
-    return [signature, oracleAccount];
+    return [oracleAccount, signature];
   }
 
   /**
@@ -363,9 +361,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Optionally, enable the permissions by setting a queueAuthority keypair along with the enable boolean set to true.
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [aggregatorInitTxnObject, aggregatorAccount] =
+   * const [aggregatorAccount, aggregatorInitTxnObject] =
       await queueAccount.createFeedInstructions({
         enable: true, // not needed if queue has unpermissionedFeedsEnabled
         queueAuthority: queueAuthority, // not needed if queue has unpermissionedFeedsEnabled
@@ -413,7 +411,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
       }
-  ): Promise<[TransactionObject[], AggregatorAccount]> {
+  ): Promise<[AggregatorAccount, TransactionObject[]]> {
     const queue = await this.loadData();
 
     const pre: TransactionObject[] = [];
@@ -437,7 +435,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     if (params.jobs && Array.isArray(params.jobs)) {
       for await (const job of params.jobs) {
         if ('data' in job) {
-          const [jobInit, jobAccount] = JobAccount.createInstructions(
+          const [jobAccount, jobInit] = JobAccount.createInstructions(
             this.program,
             payer,
             {
@@ -461,7 +459,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       }
     }
 
-    const [aggregatorInit, aggregatorAccount] =
+    const [aggregatorAccount, aggregatorInit] =
       await AggregatorAccount.createInstruction(this.program, payer, {
         ...params,
         queueAccount: this,
@@ -472,7 +470,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(aggregatorInit);
 
-    const [leaseInit] = await LeaseAccount.createInstructions(
+    const [leaseAccount, leaseInit] = await LeaseAccount.createInstructions(
       this.program,
       payer,
       {
@@ -487,7 +485,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     txns.push(leaseInit);
 
     // create permission account
-    const [permissionInit, permissionAccount] =
+    const [permissionAccount, permissionInit] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         authority: queue.authority,
@@ -525,7 +523,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.historyLimit && params.historyLimit > 0) {
-      const [historyBufferInit] =
+      const [historyBuffer, historyBufferInit] =
         await AggregatorHistoryBuffer.createInstructions(this.program, payer, {
           aggregatorAccount,
           maxSamples: params.historyLimit,
@@ -539,7 +537,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       ...TransactionObject.pack(post),
     ]);
 
-    return [packed, aggregatorAccount];
+    return [aggregatorAccount, packed];
   }
 
   /**
@@ -550,9 +548,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Optionally, enable the permissions by setting a queueAuthority keypair along with the enable boolean set to true.
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [aggregatorInitSignatures, aggregatorAccount] =
+   * const [aggregatorAccount, aggregatorInitSignatures] =
       await queueAccount.createFeed({
         enable: true, // not needed if queue has unpermissionedFeedsEnabled
         queueAuthority: queueAuthority, // not needed if queue has unpermissionedFeedsEnabled
@@ -598,7 +596,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
       }
-  ): Promise<[Array<TransactionSignature>, AggregatorAccount]> {
+  ): Promise<[AggregatorAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
     const queue = await this.loadData();
@@ -610,14 +608,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       signers.push(params.queueAuthority);
     }
 
-    const [txns, aggregatorAccount] = await this.createFeedInstructions(
+    const [aggregatorAccount, txns] = await this.createFeedInstructions(
       this.program.walletPubkey,
       params
     );
 
     const signatures = await this.program.signAndSendAll(txns);
 
-    return [signatures, aggregatorAccount];
+    return [aggregatorAccount, signatures];
   }
 
   /**
@@ -632,9 +630,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [crankInitTxn, crankAccount] = await queueAccount.createCrankInstructions(payer, {
+   * const [crankAccount, crankInitTxn] = await queueAccount.createCrankInstructions(payer, {
    *  name: "My Crank",
    *  metadata: "Crank #1",
    *  maxRows: 1000,
@@ -646,7 +644,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createCrankInstructions(
     payer: PublicKey,
     params: Omit<CrankInitParams, 'queueAccount'>
-  ): Promise<[TransactionObject, CrankAccount]> {
+  ): Promise<[CrankAccount, TransactionObject]> {
     return await CrankAccount.createInstructions(this.program, payer, {
       ...params,
       queueAccount: this,
@@ -663,9 +661,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [crankInitSignature, crankAccount] = await queueAccount.createCrank({
+   * const [crankAccount, crankInitSignature] = await queueAccount.createCrank({
    *  name: "My Crank",
    *  metadata: "Crank #1",
    *  maxRows: 1000,
@@ -675,13 +673,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createCrank(
     params: Omit<CrankInitParams, 'queueAccount'>
-  ): Promise<[TransactionSignature, CrankAccount]> {
-    const [txn, crankAccount] = await this.createCrankInstructions(
+  ): Promise<[CrankAccount, TransactionSignature]> {
+    const [crankAccount, txn] = await this.createCrankInstructions(
       this.program.walletPubkey,
       params
     );
     const txnSignature = await this.program.signAndSend(txn);
-    return [txnSignature, crankAccount];
+    return [crankAccount, txnSignature];
   }
 
   /**
@@ -696,10 +694,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
    * const vrfKeypair = Keypair.generate();
-   * const [vrfInitTxn, vrfAccount] = await queueAccount.createVrfInstructions(payer, {
+   * const [vrfAccount, vrfInitTxn] = await queueAccount.createVrfInstructions(payer, {
    *  vrfKeypair: vrfKeypair,
    *  callback: {
    *    programId: "",
@@ -715,10 +713,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     payer: PublicKey,
     params: Omit<VrfInitParams, 'queueAccount'> &
       Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[TransactionObject, VrfAccount]> {
+  ): Promise<[VrfAccount, TransactionObject]> {
     const queue = await this.loadData();
 
-    const [vrfInit, vrfAccount] = await VrfAccount.createInstructions(
+    const [vrfAccount, vrfInit] = await VrfAccount.createInstructions(
       this.program,
       payer,
       {
@@ -730,7 +728,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     );
 
     // eslint-disable-next-line prefer-const
-    let [permissionInit, permissionAccount] =
+    let [permissionAccount, permissionInit] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: vrfAccount.publicKey,
@@ -748,7 +746,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       }
     }
 
-    return [vrfInit.combine(permissionInit), vrfAccount];
+    return [vrfAccount, vrfInit.combine(permissionInit)];
   }
 
   /**
@@ -761,10 +759,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
    * const vrfKeypair = Keypair.generate();
-   * const [vrfInitSignature, vrfAccount] = await queueAccount.createVrf({
+   * const [vrfAccount, vrfInitSignature] = await queueAccount.createVrf({
    *  vrfKeypair: vrfKeypair,
    *  callback: {
    *    programId: "",
@@ -778,13 +776,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createVrf(
     params: Omit<VrfInitParams, 'queueAccount'> &
       Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[TransactionSignature, VrfAccount]> {
-    const [txn, vrfAccount] = await this.createVrfInstructions(
+  ): Promise<[VrfAccount, TransactionSignature]> {
+    const [vrfAccount, txn] = await this.createVrfInstructions(
       this.program.walletPubkey,
       params
     );
     const txnSignature = await this.program.signAndSend(txn);
-    return [txnSignature, vrfAccount];
+    return [vrfAccount, txnSignature];
   }
 
   /**
@@ -799,9 +797,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [bufferRelayerInitTxn, bufferRelayerAccount] = await queueAccount.createBufferRelayerInstructions(payer, {
+   * const [bufferRelayerAccount, bufferRelayerInitTxn] = await queueAccount.createBufferRelayerInstructions(payer, {
    *  name: "My Buffer",
    *  minUpdateDelaySeconds: 30,
    *  job: existingJobPubkey,
@@ -817,14 +815,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
       }
-  ): Promise<[TransactionObject, BufferRelayerAccount]> {
+  ): Promise<[BufferRelayerAccount, TransactionObject]> {
     const queue = await this.loadData();
 
     const txns: TransactionObject[] = [];
 
     let job: JobAccount;
     if ('data' in params.job) {
-      const [jobInit, jobAccount] = JobAccount.createInstructions(
+      const [jobAccount, jobInit] = JobAccount.createInstructions(
         this.program,
         payer,
         {
@@ -850,7 +848,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       );
     }
 
-    const [bufferInit, bufferAccount] =
+    const [bufferAccount, bufferInit] =
       await BufferRelayerAccount.createInstructions(this.program, payer, {
         name: params.name,
         minUpdateDelaySeconds: params.minUpdateDelaySeconds,
@@ -863,7 +861,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     txns.push(bufferInit);
 
     // eslint-disable-next-line prefer-const
-    let [permissionInit, permissionAccount] =
+    let [permissionAccount, permissionInit] =
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: bufferAccount.publicKey,
@@ -890,7 +888,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       );
     }
 
-    return [packed[0], bufferAccount];
+    return [bufferAccount, packed[0]];
   }
 
   /**
@@ -903,9 +901,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * import { QueueAccount } from '@switchboard-xyz/solana.js';
    * const queueAccount = new QueueAccount(program, queuePubkey);
-   * const [bufferRelayerInitSignature, bufferRelayerAccount] = await queueAccount.createBufferRelayer({
+   * const [bufferRelayerAccount, bufferRelayerInitSignature] = await queueAccount.createBufferRelayer({
    *  name: "My Buffer",
    *  minUpdateDelaySeconds: 30,
    *  job: existingJobPubkey,
@@ -919,14 +917,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
       }
-  ): Promise<[TransactionSignature, BufferRelayerAccount]> {
-    const [txn, bufferRelayerAccount] =
+  ): Promise<[BufferRelayerAccount, TransactionSignature]> {
+    const [bufferRelayerAccount, txn] =
       await this.createBufferRelayerInstructions(
         this.program.walletPubkey,
         params
       );
     const txnSignature = await this.program.signAndSend(txn);
-    return [txnSignature, bufferRelayerAccount];
+    return [bufferRelayerAccount, txnSignature];
   }
 
   /** Load the list of oracles that are currently stored in the buffer */

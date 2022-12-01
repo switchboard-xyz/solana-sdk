@@ -48,7 +48,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams
-  ): Promise<[TransactionObject, OracleAccount]> {
+  ): Promise<[OracleAccount, TransactionObject]> {
     const tokenWallet = Keypair.generate();
     // console.log(`tokenWallet`, tokenWallet.publicKey.toBase58());
 
@@ -108,12 +108,12 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     ];
 
     return [
+      new OracleAccount(program, oracleAccount.publicKey),
       new TransactionObject(
         payer,
         ixns,
         params.authority ? [tokenWallet, params.authority] : [tokenWallet]
       ),
-      new OracleAccount(program, oracleAccount.publicKey),
     ];
   }
 
@@ -122,8 +122,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams
-  ): Promise<[TransactionSignature, OracleAccount]> {
-    const [txnObject, oracleAccount] = await OracleAccount.createInstructions(
+  ): Promise<[OracleAccount, TransactionSignature]> {
+    const [oracleAccount, txnObject] = await OracleAccount.createInstructions(
       program,
       program.walletPubkey,
       params
@@ -131,7 +131,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     const txnSignature = await program.signAndSend(txnObject);
 
-    return [txnSignature, oracleAccount];
+    return [oracleAccount, txnSignature];
   }
 
   /**
