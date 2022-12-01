@@ -4,7 +4,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/switchboard-xyz/switchboard-v2",
+    "url": "https://github.com/switchboard-xyz/sbv2-solana",
     "directory": "programs/native-feed-parser"
   },
   "scripts": {

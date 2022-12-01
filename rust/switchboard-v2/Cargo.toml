@@ -6,7 +6,7 @@ description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
 keywords = ["switchboard", "oracle", "solana"]
 homepage = "https://docs.switchboard.xyz"
-repository = "https://github.com/switchboard-xyz/switchboard-v2/tree/main/libraries/rs"
+repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/libraries/rs"
 license = "MIT"
 documentation = "https://docs.rs/switchboard-v2/"
 
@@ -19,6 +19,7 @@ doctest = false
 default = ["cpi"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
+## The devnet feature enables using the Switchboard Devnet Program ID instead of the Mainnet Program ID.
 devnet = []
 
 [dependencies]

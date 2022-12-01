@@ -2,7 +2,7 @@
 name = "switchboardpy"
 version = "0.0.7"
 description = "Switchboard V2 API"
-repository = "https://github.com/switchboard-xyz/switchboard-v2/tree/main/libraries/py"
+repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/libraries/py"
 homepage = "https://docs.switchboard.xyz"
 authors = ["Albert Hermida <albert@switchboard.xyz>"]
 license = "MIT"

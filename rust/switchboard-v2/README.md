@@ -7,11 +7,14 @@ A Rust library to interact with Switchboard V2 accounts.
 
 This package can be used to interact and deserialize Switchboard V2 accounts.
 
-See the [documentation](https://docs.switchboard.xyz/introduction) for more info on Switchboard.
+See the [documentation](https://docs.switchboard.xyz/introduction) for more info
+on Switchboard.
 
 ## Features
 
-By default the crate will default to mainnet. You must explicitly enable the `devnet` feature to use on devnet.
+| Feature | Description                                                                                           |
+| ------- | ----------------------------------------------------------------------------------------------------- |
+| devnet  | The devnet feature enables using the Switchboard Devnet Program ID instead of the Mainnet Program ID. |
 
 ## Usage
 
@@ -45,7 +48,9 @@ feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
 feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
-**Example(s)**: [anchor-feed-parser](https://github.com/switchboard-xyz/switchboard-v2/blob/main/examples/programs/anchor-feed-parser/src/lib.rs), [native-feed-parser](https://github.com/switchboard-xyz/switchboard-v2/blob/main/examples/programs/native-feed-parser/src/lib.rs)
+**Example(s)**:
+[anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-feed-parser/src/lib.rs),
+[native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/native-feed-parser/src/lib.rs)
 
 #### Read Aggregator History
 
@@ -78,7 +83,8 @@ let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
 let result = value[0] % 256000 as u128;
 ```
 
-**Example**: [anchor-vrf-parser](https://github.com/switchboard-xyz/switchboard-v2/blob/main/examples/programs/anchor-vrf-parser/src/actions/update_result.rs)
+**Example**:
+[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-vrf-parser/src/actions/update_result.rs)
 
 #### RequestRandomness CPI
 
@@ -121,7 +127,8 @@ vrf_request_randomness.invoke_signed(
 
 ```
 
-**Example**: [anchor-vrf-parser](https://github.com/switchboard-xyz/switchboard-v2/blob/main/examples/programs/anchor-vrf-parser/src/actions/request_result.rs)
+**Example**:
+[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-vrf-parser/src/actions/request_result.rs)
 
 ### Buffer Relayer Account
 
@@ -153,4 +160,5 @@ let result_string = String::from_utf8(buffer.result)
 msg!("Buffer string {:?}!", result_string);
 ```
 
-**Example**: [anchor-buffer-parser](https://github.com/switchboard-xyz/switchboard-v2/blob/main/examples/programs/anchor-buffer-parser/src/lib.rs)
+**Example**:
+[anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-buffer-parser/src/lib.rs)
