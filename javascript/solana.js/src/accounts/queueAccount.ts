@@ -29,10 +29,12 @@ import { PermissionAccount } from './permissionAccount';
 import { VrfAccount, VrfInitParams } from './vrfAccount';
 
 /**
- * @class QueueAccount
  * Account type representing an oracle queue's configuration along with a buffer account holding a list of oracles that are actively heartbeating.
  *
  * A QueueAccount is responsible for allocating update requests to it's round robin queue of {@linkcode OracleAccount}'s.
+ *
+ * Data: {@linkcode types.OracleQueueAccountData}
+ * Buffer: Array<PublicKey>
  */
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
   static accountName = 'OracleQueueAccountData';

@@ -17,8 +17,9 @@ import { TransactionObject } from '../transaction';
 import { BN } from 'bn.js';
 
 /**
- * @class LeaseAccount
  * Account type representing an {@linkcode AggregatorAccount}'s pre-funded escrow used to reward {@linkcode OracleAccount}'s for responding to open round requests.
+ *
+ * Data: {@linkcode types.LeaseAccountData}
  */
 export class LeaseAccount extends Account<types.LeaseAccountData> {
   static accountName = 'LeaseAccountData';

@@ -324,26 +324,13 @@ export { Error };
  * having to know details about the data layout of the
  * `FieldElement2625x4`.
  */
-export type LanesKind =
-  | Lanes.C
-  | Lanes.D
-  | Lanes.AB
-  | Lanes.AC
-  | Lanes.CD
-  | Lanes.AD
-  | Lanes.BC
-  | Lanes.ABCD;
+export type LanesKind = Lanes.C | Lanes.D | Lanes.AB | Lanes.AC | Lanes.AD;
 export type LanesJSON =
   | Lanes.CJSON
   | Lanes.DJSON
   | Lanes.ABJSON
   | Lanes.ACJSON
-  | Lanes.CDJSON
-  | Lanes.ADJSON
-  | Lanes.BCJSON
-  | Lanes.ABCDJSON;
-
-export { Shuffle };
+  | Lanes.ADJSON;
 
 /**
  * The `Shuffle` enum represents a shuffle of a `FieldElement2625x4`.

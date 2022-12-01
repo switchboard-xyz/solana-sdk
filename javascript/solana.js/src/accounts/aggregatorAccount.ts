@@ -26,8 +26,10 @@ import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 /**
- * @class AggregatorAccount
  * Account type holding a data feed's update configuration, job accounts, and its current result.
+ *
+ * Data: {@linkcode types.AggregatorAccountData}
+ * HistoryBuffer?: Array<{@linkcode types.AggregatorHistoryRow}>
  *
  * An aggregator account belongs to a single {@linkcode QueueAccount} but can later be transferred by the aggregator's authority. In order for an {@linkcode OracleAccount} to respond to an aggregator's update request, the aggregator must initialize a {@linkcode PermissionAccount} and {@linkcode LeaseAccount}. These will need to be recreated when transferring queues.
  *

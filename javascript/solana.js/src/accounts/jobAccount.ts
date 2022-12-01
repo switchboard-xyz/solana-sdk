@@ -14,8 +14,9 @@ import { Account } from './account';
 import { TransactionObject } from '../transaction';
 
 /**
- * @class JobAccount
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.ITask} dictating how to source data off-chain.
+ *
+ * Data: {@linkcode types.JobAccountData}
  */
 export class JobAccount extends Account<types.JobAccountData> {
   static accountName = 'JobAccountData';

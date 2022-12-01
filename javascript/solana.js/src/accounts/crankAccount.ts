@@ -18,8 +18,10 @@ import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
 
 /**
- * @class CrankAccount
  * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.
+ *
+ * Data: {@linkcode types.CrankAccountData}
+ * Buffer: Array<{@linkcode types.CrankRow}>
  */
 export class CrankAccount extends Account<types.CrankAccountData> {
   static accountName = 'CrankAccountData';

@@ -162,9 +162,6 @@ export function fromDecoded(obj: any): types.LanesKind {
   if ('AD' in obj) {
     return new AD();
   }
-  if ('BCD' in obj) {
-    return new BCD();
-  }
 
   throw new Error('Invalid enum object');
 }
@@ -185,9 +182,6 @@ export function fromJSON(obj: types.LanesJSON): types.LanesKind {
     }
     case 'AD': {
       return new AD();
-    }
-    case 'BCD': {
-      return new BCD();
     }
   }
 }
