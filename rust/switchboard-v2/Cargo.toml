@@ -22,8 +22,8 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = { git = "https://github.com/coral-xyz/anchor.git" }
-anchor-spl = { git = "https://github.com/coral-xyz/anchor.git" }
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
+anchor-spl = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
 rust_decimal = "1.26.0"
 solana-program = "1.10"
 bytemuck = "1.7.2"
