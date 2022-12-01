@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.16"
+version = "0.1.17"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
@@ -28,4 +28,4 @@ rust_decimal = "1.26.0"
 solana-program = "1.10"
 bytemuck = "1.7.2"
 superslice = "1"
-spl-token = "3.3"
+spl-token = "3.5"
