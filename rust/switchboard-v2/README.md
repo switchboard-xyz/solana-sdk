@@ -16,6 +16,33 @@ on Switchboard.
 | ------- | ----------------------------------------------------------------------------------------------------- |
 | devnet  | The devnet feature enables using the Switchboard Devnet Program ID instead of the Mainnet Program ID. |
 
+Enable it in your Cargo.toml
+
+```toml
+[dependencies]
+switchboard-v2 = { version = "0.1.17", features = ["devnet"] }
+```
+
+### Define Your Own Devnet Feature
+
+You can also define your own devnet feature to dynamically swap the program IDs.
+
+```toml
+[features]
+default = []
+devnet = ["switchboard-v2/devnet"]
+```
+
+This allows you to build your program with a feature flag to automate devnet and
+mainnet builds.
+
+```bash
+# Build with Mainnet Switchboard Program ID
+cargo build-bpf
+# Build with Devnet Switchboard Program ID
+cargo build-bpf --features devnet
+```
+
 ## Usage
 
 ### Aggregator
