@@ -22,6 +22,7 @@ import { QueueAccount } from './queueAccount';
 
 /**
  * @class VrfAccount
+ * Account holding a Verifiable Random Function result with a callback instruction for consuming on-chain pseudo-randomness.
  */
 export class VrfAccount extends Account<types.VrfAccountData> {
   static accountName = 'VrfAccountData';
@@ -31,6 +32,12 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public readonly size = this.program.account.vrfAccountData.size;
 
+  /**
+   * Invoke a callback each time a VrfAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the vrf state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
   onChange(
     callback: OnAccountChangeCallback<types.VrfAccountData>,
     commitment: Commitment = 'confirmed'

@@ -5,6 +5,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -23,6 +24,10 @@ import { JobAccount } from './jobAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 
+/**
+ * @class BufferRelayerAccount
+ * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.
+ */
 export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData> {
   static accountName = 'BufferRelayerAccountData';
 
@@ -44,14 +49,22 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     }
   }
 
+  /**
+   * Invoke a callback each time a BufferRelayerAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the buffer relayer state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
   public onChange(
-    callback: OnAccountChangeCallback<types.BufferRelayerAccountData>
+    callback: OnAccountChangeCallback<types.BufferRelayerAccountData>,
+    commitment: Commitment = 'confirmed'
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
       accountInfo => {
         callback(this.decode(accountInfo.data));
-      }
+      },
+      commitment
     );
   }
 

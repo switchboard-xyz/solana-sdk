@@ -13,6 +13,7 @@ import {
 import { TransactionObject } from '../transaction';
 
 /**
+ * @class ProgramStateAccount
  * Account type representing Switchboard global program state.
  */
 export class ProgramStateAccount extends Account<types.SbState> {

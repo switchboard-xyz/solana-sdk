@@ -7,6 +7,7 @@ import { SwitchboardProgram } from '../program';
 import {
   AccountInfo,
   AccountMeta,
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -24,6 +25,16 @@ import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
+/**
+ * @class AggregatorAccount
+ * Account type holding a data feed's update configuration, job accounts, and its current result.
+ *
+ * An aggregator account belongs to a single {@linkcode QueueAccount} but can later be transferred by the aggregator's authority. In order for an {@linkcode OracleAccount} to respond to an aggregator's update request, the aggregator must initialize a {@linkcode PermissionAccount} and {@linkcode LeaseAccount}. These will need to be recreated when transferring queues.
+ *
+ * Optionally, An aggregator can be pushed onto a {@linkcode CrankAccount} in order to be updated
+ *
+ * Optionally, an aggregator can add a history buffer to store the last N historical samples along with their update timestamp.
+ */
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
 
@@ -55,14 +66,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
   }
 
+  /**
+   * Invoke a callback each time an AggregatorAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the aggregator state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
   public onChange(
-    callback: OnAccountChangeCallback<types.AggregatorAccountData>
+    callback: OnAccountChangeCallback<types.AggregatorAccountData>,
+    commitment: Commitment = 'confirmed'
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
       accountInfo => {
         callback(this.decode(accountInfo.data));
-      }
+      },
+      commitment
     );
   }
 

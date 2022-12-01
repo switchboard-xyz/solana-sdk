@@ -15,6 +15,12 @@ import { QueueAccount } from './queueAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 
+/**
+ * @class OracleAccount
+ * Account type holding an oracle's configuration including the authority and the reward/slashing wallet along with a set of metrics tracking its reliability.
+ *
+ * An oracle is a server that sits between the internet and a blockchain and facilitates the flow of information and is rewarded for responding with the honest majority.
+ */
 export class OracleAccount extends Account<types.OracleAccountData> {
   static accountName = 'OracleAccountData';
 

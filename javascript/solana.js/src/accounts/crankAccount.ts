@@ -18,7 +18,8 @@ import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
 
 /**
- * A Switchboard account representing a crank of aggregators ordered by next update time.
+ * @class CrankAccount
+ * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.
  */
 export class CrankAccount extends Account<types.CrankAccountData> {
   static accountName = 'CrankAccountData';
@@ -31,6 +32,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   public size = this.program.account.crankAccountData.size;
 
+  /**
+   * Invoke a callback each time a CrankAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the cranks state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
   onChange(
     callback: OnAccountChangeCallback<types.CrankAccountData>,
     commitment: Commitment = 'confirmed'
@@ -42,6 +49,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     );
   }
 
+  /**
+   * Invoke a callback each time a crank's buffer has changed on-chain. The buffer stores a list of {@linkcode AggregatorAccount} public keys along with their next available update time.
+   * @param callback - the callback invoked when the crank's buffer changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
   onBufferChange(
     callback: OnAccountChangeCallback<Array<types.CrankRow>>,
     _dataBuffer?: PublicKey,
