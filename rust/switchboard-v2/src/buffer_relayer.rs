@@ -101,9 +101,7 @@ impl BufferRelayerAccountData {
     }
 }
 impl Discriminator for BufferRelayerAccountData {
-    fn discriminator() -> [u8; 8] {
-        [50, 35, 51, 115, 169, 219, 158, 52]
-    }
+    const DISCRIMINATOR: [u8; 8] = [50, 35, 51, 115, 169, 219, 158, 52];
 }
 impl Owner for BufferRelayerAccountData {
     fn owner() -> solana_program::pubkey::Pubkey {

@@ -22,10 +22,10 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = "0.25.0"
-anchor-spl = "0.25.0"
-rust_decimal = { version = "1.18.0" }
-solana-program = "~1.10.29"
+anchor-lang = { git = "https://github.com/coral-xyz/anchor.git" }
+anchor-spl = { git = "https://github.com/coral-xyz/anchor.git" }
+rust_decimal = "1.26.0"
+solana-program = "1.10"
 bytemuck = "1.7.2"
 superslice = "1"
-spl-token = "3.3.1"
+spl-token = "3.3"
