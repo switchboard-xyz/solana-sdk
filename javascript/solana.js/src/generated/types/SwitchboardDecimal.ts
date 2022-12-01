@@ -5,17 +5,32 @@ import * as borsh from '@project-serum/borsh';
 import Big from 'big.js';
 
 export interface SwitchboardDecimalFields {
+  /**
+   * The part of a floating-point number that represents the significant digits of that number,
+   * and that is multiplied by the base, 10, raised to the power of scale to give the actual value of the number.
+   */
   mantissa: BN;
+  /** The number of decimal places to move to the left to yield the actual value. */
   scale: number;
 }
 
 export interface SwitchboardDecimalJSON {
+  /**
+   * The part of a floating-point number that represents the significant digits of that number,
+   * and that is multiplied by the base, 10, raised to the power of scale to give the actual value of the number.
+   */
   mantissa: string;
+  /** The number of decimal places to move to the left to yield the actual value. */
   scale: number;
 }
 
 export class SwitchboardDecimal {
+  /**
+   * The part of a floating-point number that represents the significant digits of that number,
+   * and that is multiplied by the base, 10, raised to the power of scale to give the actual value of the number.
+   */
   readonly mantissa: BN;
+  /** The number of decimal places to move to the left to yield the actual value. */
   readonly scale: number;
 
   constructor(fields: SwitchboardDecimalFields) {

@@ -5,40 +5,68 @@ import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescrip
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface LeaseAccountDataFields {
+  /** Public key of the token account holding the lease contract funds until rewarded to oracles for successfully processing updates */
   escrow: PublicKey;
+  /** Public key of the oracle queue that the lease contract is applicable for. */
   queue: PublicKey;
+  /** Public key of the aggregator that the lease contract is applicable for */
   aggregator: PublicKey;
+  /** Public key of the Solana token program ID. */
   tokenProgram: PublicKey;
+  /** Whether the lease contract is still active. */
   isActive: boolean;
+  /** Index of an aggregators position on a crank. */
   crankRowCount: number;
+  /** Timestamp when the lease contract was created. */
   createdAt: BN;
+  /** Counter keeping track of the number of updates for the given aggregator. */
   updateCount: BN;
+  /** Public key of keypair that may withdraw funds from the lease at any time */
   withdrawAuthority: PublicKey;
   ebuf: Array<number>;
 }
 
 export interface LeaseAccountDataJSON {
+  /** Public key of the token account holding the lease contract funds until rewarded to oracles for successfully processing updates */
   escrow: string;
+  /** Public key of the oracle queue that the lease contract is applicable for. */
   queue: string;
+  /** Public key of the aggregator that the lease contract is applicable for */
   aggregator: string;
+  /** Public key of the Solana token program ID. */
   tokenProgram: string;
+  /** Whether the lease contract is still active. */
   isActive: boolean;
+  /** Index of an aggregators position on a crank. */
   crankRowCount: number;
+  /** Timestamp when the lease contract was created. */
   createdAt: string;
+  /** Counter keeping track of the number of updates for the given aggregator. */
   updateCount: string;
+  /** Public key of keypair that may withdraw funds from the lease at any time */
   withdrawAuthority: string;
   ebuf: Array<number>;
 }
 
+/** This should be any ccount that links a permission to an escrow */
 export class LeaseAccountData {
+  /** Public key of the token account holding the lease contract funds until rewarded to oracles for successfully processing updates */
   readonly escrow: PublicKey;
+  /** Public key of the oracle queue that the lease contract is applicable for. */
   readonly queue: PublicKey;
+  /** Public key of the aggregator that the lease contract is applicable for */
   readonly aggregator: PublicKey;
+  /** Public key of the Solana token program ID. */
   readonly tokenProgram: PublicKey;
+  /** Whether the lease contract is still active. */
   readonly isActive: boolean;
+  /** Index of an aggregators position on a crank. */
   readonly crankRowCount: number;
+  /** Timestamp when the lease contract was created. */
   readonly createdAt: BN;
+  /** Counter keeping track of the number of updates for the given aggregator. */
   readonly updateCount: BN;
+  /** Public key of keypair that may withdraw funds from the lease at any time */
   readonly withdrawAuthority: PublicKey;
   readonly ebuf: Array<number>;
 

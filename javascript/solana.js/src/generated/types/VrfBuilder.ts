@@ -4,8 +4,11 @@ import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-
 import * as borsh from '@project-serum/borsh';
 
 export interface VrfBuilderFields {
+  /** The OracleAccountData that is producing the randomness. */
   producer: PublicKey;
+  /** The current status of the VRF verification. */
   status: types.VrfStatusKind;
+  /** The VRF proof sourced from the producer. */
   reprProof: Array<number>;
   proof: types.EcvrfProofZCFields;
   yPoint: PublicKey;
@@ -39,14 +42,20 @@ export interface VrfBuilderFields {
   cPrimeHashbuf: Array<number>;
   m1: types.FieldElementZCFields;
   m2: types.FieldElementZCFields;
+  /** The number of transactions remaining to verify the VRF proof. */
   txRemaining: number;
+  /** Whether the VRF proof has been verified on-chain. */
   verified: boolean;
+  /** The VRF proof verification result. Will be zeroized if still awaiting fulfillment. */
   result: Array<number>;
 }
 
 export interface VrfBuilderJSON {
+  /** The OracleAccountData that is producing the randomness. */
   producer: string;
+  /** The current status of the VRF verification. */
   status: types.VrfStatusJSON;
+  /** The VRF proof sourced from the producer. */
   reprProof: Array<number>;
   proof: types.EcvrfProofZCJSON;
   yPoint: string;
@@ -80,14 +89,20 @@ export interface VrfBuilderJSON {
   cPrimeHashbuf: Array<number>;
   m1: types.FieldElementZCJSON;
   m2: types.FieldElementZCJSON;
+  /** The number of transactions remaining to verify the VRF proof. */
   txRemaining: number;
+  /** Whether the VRF proof has been verified on-chain. */
   verified: boolean;
+  /** The VRF proof verification result. Will be zeroized if still awaiting fulfillment. */
   result: Array<number>;
 }
 
 export class VrfBuilder {
+  /** The OracleAccountData that is producing the randomness. */
   readonly producer: PublicKey;
+  /** The current status of the VRF verification. */
   readonly status: types.VrfStatusKind;
+  /** The VRF proof sourced from the producer. */
   readonly reprProof: Array<number>;
   readonly proof: types.EcvrfProofZC;
   readonly yPoint: PublicKey;
@@ -121,8 +136,11 @@ export class VrfBuilder {
   readonly cPrimeHashbuf: Array<number>;
   readonly m1: types.FieldElementZC;
   readonly m2: types.FieldElementZC;
+  /** The number of transactions remaining to verify the VRF proof. */
   readonly txRemaining: number;
+  /** Whether the VRF proof has been verified on-chain. */
   readonly verified: boolean;
+  /** The VRF proof verification result. Will be zeroized if still awaiting fulfillment. */
   readonly result: Array<number>;
 
   constructor(fields: VrfBuilderFields) {

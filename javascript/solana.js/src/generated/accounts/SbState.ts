@@ -5,26 +5,41 @@ import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescrip
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SbStateFields {
+  /** The account authority permitted to make account changes. */
   authority: PublicKey;
+  /** The token mint used for oracle rewards, aggregator leases, and other reward incentives. */
   tokenMint: PublicKey;
+  /** Token vault used by the program to receive kickbacks. */
   tokenVault: PublicKey;
+  /** The token mint used by the DAO. */
   daoMint: PublicKey;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
 export interface SbStateJSON {
+  /** The account authority permitted to make account changes. */
   authority: string;
+  /** The token mint used for oracle rewards, aggregator leases, and other reward incentives. */
   tokenMint: string;
+  /** Token vault used by the program to receive kickbacks. */
   tokenVault: string;
+  /** The token mint used by the DAO. */
   daoMint: string;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
 export class SbState {
+  /** The account authority permitted to make account changes. */
   readonly authority: PublicKey;
+  /** The token mint used for oracle rewards, aggregator leases, and other reward incentives. */
   readonly tokenMint: PublicKey;
+  /** Token vault used by the program to receive kickbacks. */
   readonly tokenVault: PublicKey;
+  /** The token mint used by the DAO. */
   readonly daoMint: PublicKey;
+  /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([

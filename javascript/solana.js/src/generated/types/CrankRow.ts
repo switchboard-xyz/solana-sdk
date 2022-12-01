@@ -4,17 +4,23 @@ import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-
 import * as borsh from '@project-serum/borsh';
 
 export interface CrankRowFields {
+  /** The PublicKey of the AggregatorAccountData. */
   pubkey: PublicKey;
+  /** The aggregator's next available update time. */
   nextTimestamp: BN;
 }
 
 export interface CrankRowJSON {
+  /** The PublicKey of the AggregatorAccountData. */
   pubkey: string;
+  /** The aggregator's next available update time. */
   nextTimestamp: string;
 }
 
 export class CrankRow {
+  /** The PublicKey of the AggregatorAccountData. */
   readonly pubkey: PublicKey;
+  /** The aggregator's next available update time. */
   readonly nextTimestamp: BN;
 
   constructor(fields: CrankRowFields) {

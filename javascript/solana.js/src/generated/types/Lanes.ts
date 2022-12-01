@@ -193,6 +193,7 @@ export function layout(property?: string) {
     borsh.struct([], 'AB'),
     borsh.struct([], 'AC'),
     borsh.struct([], 'AD'),
+    borsh.struct([], 'BCD'),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

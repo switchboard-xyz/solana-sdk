@@ -316,6 +316,14 @@ export { Lanes };
 export { Shuffle };
 export { Error };
 
+/**
+ * The `Lanes` enum represents a subset of the lanes `A,B,C,D` of a
+ * `FieldElement2625x4`.
+ *
+ * It's used to specify blend operations without
+ * having to know details about the data layout of the
+ * `FieldElement2625x4`.
+ */
 export type LanesKind = Lanes.C | Lanes.D | Lanes.AB | Lanes.AC | Lanes.AD;
 export type LanesJSON =
   | Lanes.CJSON
@@ -324,6 +332,13 @@ export type LanesJSON =
   | Lanes.ACJSON
   | Lanes.ADJSON;
 
+/**
+ * The `Shuffle` enum represents a shuffle of a `FieldElement2625x4`.
+ *
+ * The enum variants are named by what they do to a vector \\(
+ * (A,B,C,D) \\); for instance, `Shuffle::BADC` turns \\( (A, B, C,
+ * D) \\) into \\( (B, A, D, C) \\).
+ */
 export type ShuffleKind =
   | Shuffle.AAAA
   | Shuffle.BBBB

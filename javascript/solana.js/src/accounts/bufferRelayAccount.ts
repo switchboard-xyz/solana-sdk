@@ -25,8 +25,9 @@ import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 
 /**
- * @class BufferRelayerAccount
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.
+ *
+ * Data: {@linkcode types.BufferRelayerAccountData}
  */
 export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData> {
   static accountName = 'BufferRelayerAccountData';

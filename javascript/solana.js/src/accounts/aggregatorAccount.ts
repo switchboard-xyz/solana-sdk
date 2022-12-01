@@ -24,10 +24,13 @@ import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 
 /**
- * @class AggregatorAccount
  * Account type holding a data feed's update configuration, job accounts, and its current result.
+ *
+ * Data: {@linkcode types.AggregatorAccountData}
+ * HistoryBuffer?: Array<{@linkcode types.AggregatorHistoryRow}>
  *
  * An aggregator account belongs to a single {@linkcode QueueAccount} but can later be transferred by the aggregator's authority. In order for an {@linkcode OracleAccount} to respond to an aggregator's update request, the aggregator must initialize a {@linkcode PermissionAccount} and {@linkcode LeaseAccount}. These will need to be recreated when transferring queues.
  *
@@ -37,6 +40,8 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
  */
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static accountName = 'AggregatorAccountData';
+
+  public history?: AggregatorHistoryBuffer;
 
   /**
    * Returns the aggregator's name buffer in a stringified format.
@@ -94,6 +99,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       this.publicKey
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    this.history = AggregatorHistoryBuffer.fromAggregator(this.program, data);
     return data;
   }
 
@@ -220,63 +226,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     const txnSignature = await program.signAndSend(transaction);
     return [txnSignature, account];
-  }
-
-  /**
-   * Decode an aggregators history buffer and return an array of historical samples
-   * @params historyBuffer the historyBuffer AccountInfo stored on-chain
-   * @return the array of {@linkcode types.AggregatorHistoryRow} samples
-   */
-  public static decodeHistory(
-    bufferAccountInfo: AccountInfo<Buffer>
-  ): Array<types.AggregatorHistoryRow> {
-    const historyBuffer = bufferAccountInfo.data ?? Buffer.from('');
-    const ROW_SIZE = 28;
-
-    if (historyBuffer.length < 12) {
-      return [];
-    }
-
-    const insertIdx = historyBuffer.readUInt32LE(8) * ROW_SIZE;
-    const front: Array<types.AggregatorHistoryRow> = [];
-    const tail: Array<types.AggregatorHistoryRow> = [];
-    for (let i = 12; i < historyBuffer.length; i += ROW_SIZE) {
-      if (i + ROW_SIZE > historyBuffer.length) {
-        break;
-      }
-      const row = types.AggregatorHistoryRow.fromDecoded(
-        types.AggregatorHistoryRow.layout().decode(historyBuffer, i)
-      );
-      if (row.timestamp.eq(new anchor.BN(0))) {
-        break;
-      }
-      if (i <= insertIdx) {
-        tail.push(row);
-      } else {
-        front.push(row);
-      }
-    }
-    return front.concat(tail);
-  }
-
-  /**
-   * Fetch an aggregators history buffer and return an array of historical samples
-   * @params aggregator the pre-loaded aggregator state
-   * @return the array of {@linkcode types.AggregatorHistoryRow} samples
-   */
-  public async loadHistory(
-    aggregator: types.AggregatorAccountData
-  ): Promise<Array<types.AggregatorHistoryRow>> {
-    if (PublicKey.default.equals(aggregator.historyBuffer)) {
-      return [];
-    }
-    const bufferAccountInfo = await this.program.connection.getAccountInfo(
-      aggregator.historyBuffer
-    );
-    if (bufferAccountInfo === null) {
-      throw new errors.AccountNotFoundError(aggregator.historyBuffer);
-    }
-    return AggregatorAccount.decodeHistory(bufferAccountInfo);
   }
 
   public getAccounts(params: {
@@ -565,62 +514,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       params
     );
     const txnSignature = await this.program.signAndSend(setConfigTxn);
-    return txnSignature;
-  }
-
-  static getHistoryBufferSize(samples: number): number {
-    return 8 + 4 + samples * 28;
-  }
-
-  public async setHistoryBufferInstruction(
-    payer: PublicKey,
-    params: {
-      size: number;
-      authority?: Keypair;
-      buffer?: Keypair;
-    }
-  ): Promise<TransactionObject> {
-    const buffer = params.buffer ?? Keypair.generate();
-    const ixns: TransactionInstruction[] = [];
-    const signers: Keypair[] = params.authority
-      ? [params.authority, buffer]
-      : [buffer];
-
-    const size = AggregatorAccount.getHistoryBufferSize(params.size);
-
-    ixns.push(
-      SystemProgram.createAccount({
-        fromPubkey: payer,
-        newAccountPubkey: buffer.publicKey,
-        space: size,
-        lamports:
-          await this.program.connection.getMinimumBalanceForRentExemption(size),
-        programId: this.program.programId,
-      }),
-      types.aggregatorSetHistoryBuffer(
-        this.program,
-        { params: {} },
-        {
-          aggregator: this.publicKey,
-          authority: params.authority ? params.authority.publicKey : payer,
-          buffer: buffer.publicKey,
-        }
-      )
-    );
-
-    return new TransactionObject(payer, ixns, signers);
-  }
-
-  public async setHistoryBuffer(params: {
-    size: number;
-    authority?: Keypair;
-    buffer?: Keypair;
-  }): Promise<TransactionSignature> {
-    const setHistoryTxn = await this.setHistoryBufferInstruction(
-      this.program.walletPubkey,
-      params
-    );
-    const txnSignature = await this.program.signAndSend(setHistoryTxn);
     return txnSignature;
   }
 
@@ -1262,13 +1155,40 @@ export interface AggregatorInitParams {
 }
 
 export type AggregatorSetConfigParams = Partial<{
-  name: Buffer;
-  metadata: Buffer;
+  /**
+   *  Name of the aggregator to store on-chain.
+   */
+  name: string;
+  /**
+   *  Metadata of the aggregator to store on-chain.
+   */
+  metadata: string;
+  /**
+   *  Number of oracles to request on aggregator update.
+   */
   batchSize: number;
+  /**
+   *  Minimum number of oracle responses required before a round is validated.
+   */
   minOracleResults: number;
+  /**
+   *  Minimum number of feed jobs suggested to be successful before an oracle
+   *  sends a response.
+   */
   minJobResults: number;
+  /**
+   *  Minimum number of seconds required between aggregator rounds.
+   */
   minUpdateDelaySeconds: number;
+  /**
+   *  Number of seconds for which, even if the variance threshold is not passed,
+   *  accept new responses from oracles.
+   */
   forceReportPeriod: number;
+  /**
+   *  Change percentage required between a previous round and the current round.
+   *  If variance percentage is not met, reject new oracle responses.
+   */
   varianceThreshold: number;
 }>;
 
@@ -1295,11 +1215,11 @@ export interface AggregatorOpenRoundParams {
  * Parameters for creating and setting a history buffer for an aggregator
  */
 export interface AggregatorSetHistoryBufferParams {
-  /*
+  /**
    * Authority keypair for the aggregator.
    */
   authority?: Keypair;
-  /*
+  /**
    * Number of elements for the history buffer to fit.
    */
   size: number;

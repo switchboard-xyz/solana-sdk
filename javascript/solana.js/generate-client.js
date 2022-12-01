@@ -60,7 +60,7 @@ async function main() {
   );
 
   execSync(
-    'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ./src/idl/mainnet.json ./src/generated'
+    'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated'
   );
   fs.writeFileSync(
     './src/generated/index.ts',

@@ -20,19 +20,22 @@ import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
+import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
 import { CrankAccount, CrankInitParams } from './crankAccount';
 import { JobAccount, JobInitParams } from './jobAccount';
 import { LeaseAccount } from './leaseAccount';
-import { OracleAccount } from './oracleAccount';
+import { OracleAccount, OracleInitParams } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
 import { VrfAccount, VrfInitParams } from './vrfAccount';
 
 /**
- * @class QueueAccount
  * Account type representing an oracle queue's configuration along with a buffer account holding a list of oracles that are actively heartbeating.
  *
  * A QueueAccount is responsible for allocating update requests to it's round robin queue of {@linkcode OracleAccount}'s.
+ *
+ * Data: {@linkcode types.OracleQueueAccountData}
+ * Buffer: Array<PublicKey>
  */
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
   static accountName = 'OracleQueueAccountData';
@@ -120,22 +123,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a new QueueAccount.
-   */
-  public static async create(
-    program: SwitchboardProgram,
-    params: QueueInitParams
-  ): Promise<[string, QueueAccount]> {
-    const [txnObject, account] = await this.createInstructions(
-      program,
-      program.walletPubkey,
-      params
-    );
-    const txnSignature = await program.signAndSend(txnObject);
-    return [txnSignature, account];
-  }
-
-  /**
    * Create a {@linkcode TransactionObject} that contains the Solana TransactionInstructions and signers required to create a new QueueAccount on-chain.
    */
   public static async createInstructions(
@@ -216,47 +203,32 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a new {@linkcode OracleAccount} for the queue.
+   * Create a new QueueAccount.
    */
-  public async createOracle(params: {
-    name?: string;
-    metadata?: string;
-    enable?: boolean;
-    queueAuthority?: Keypair;
-    authority?: Keypair; // defaults to payer
-  }): Promise<[TransactionSignature, OracleAccount]> {
-    const signers: Keypair[] = [];
-
-    const queue = await this.loadData();
-
-    if (
-      params.queueAuthority &&
-      params.queueAuthority.publicKey.equals(queue.authority)
-    ) {
-      signers.push(params.queueAuthority);
-    }
-
-    const [txn, oracleAccount] = await this.createOracleInstructions(
-      this.program.walletPubkey,
+  public static async create(
+    program: SwitchboardProgram,
+    params: QueueInitParams
+  ): Promise<[string, QueueAccount]> {
+    const [txnObject, account] = await this.createInstructions(
+      program,
+      program.walletPubkey,
       params
     );
-
-    const signature = await this.program.signAndSend(txn);
-
-    return [signature, oracleAccount];
+    const txnSignature = await program.signAndSend(txnObject);
+    return [txnSignature, account];
   }
 
   /**
    * Create a {@linkcode TransactionObject} that can then be used to create a new {@linkcode OracleAccount} for the queue.
    */
   public async createOracleInstructions(
+    /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: {
-      name?: string;
-      metadata?: string;
+    params: OracleInitParams & {
+      /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
       enable?: boolean;
+      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
       queueAuthority?: Keypair;
-      authority?: Keypair; // defaults to payer
     }
   ): Promise<[TransactionObject, OracleAccount]> {
     const queue = await this.loadData();
@@ -264,7 +236,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const [createOracleTxnObject, oracleAccount] =
       await OracleAccount.createInstructions(this.program, payer, {
         ...params,
-        queuePubkey: this.publicKey,
+        queueAccount: this,
       });
 
     const [createPermissionTxnObject, permissionAccount] =
@@ -287,6 +259,38 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       createOracleTxnObject.combine(createPermissionTxnObject),
       oracleAccount,
     ];
+  }
+
+  /**
+   * Create a new {@linkcode OracleAccount} for the queue.
+   */
+  public async createOracle(
+    params: OracleInitParams & {
+      /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
+      enable?: boolean;
+      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
+      queueAuthority?: Keypair;
+    }
+  ): Promise<[TransactionSignature, OracleAccount]> {
+    const signers: Keypair[] = [];
+
+    const queue = await this.loadData();
+
+    if (
+      params.queueAuthority &&
+      params.queueAuthority.publicKey.equals(queue.authority)
+    ) {
+      signers.push(params.queueAuthority);
+    }
+
+    const [txn, oracleAccount] = await this.createOracleInstructions(
+      this.program.walletPubkey,
+      params
+    );
+
+    const signature = await this.program.signAndSend(txn);
+
+    return [signature, oracleAccount];
   }
 
   /**
@@ -547,12 +551,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.historyLimit && params.historyLimit > 0) {
-      post.push(
-        await aggregatorAccount.setHistoryBufferInstruction(
-          this.program.walletPubkey,
-          { size: params.historyLimit, authority: params.authority }
-        )
-      );
+      const [historyBufferInit, historyBuffer] =
+        await AggregatorHistoryBuffer.createInstructions(this.program, payer, {
+          aggregatorAccount,
+          maxSamples: params.historyLimit,
+        });
+      post.push(historyBufferInit);
     }
 
     const packed = TransactionObject.pack([

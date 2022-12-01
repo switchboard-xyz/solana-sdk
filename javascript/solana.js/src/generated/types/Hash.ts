@@ -4,14 +4,17 @@ import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-
 import * as borsh from '@project-serum/borsh';
 
 export interface HashFields {
+  /** The bytes used to derive the hash. */
   data: Array<number>;
 }
 
 export interface HashJSON {
+  /** The bytes used to derive the hash. */
   data: Array<number>;
 }
 
 export class Hash {
+  /** The bytes used to derive the hash. */
   readonly data: Array<number>;
 
   constructor(fields: HashFields) {
