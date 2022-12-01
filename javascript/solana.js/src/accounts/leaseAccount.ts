@@ -337,11 +337,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       walletBumps.push(bump);
     }
 
-    const [_, leaseBump] = LeaseAccount.fromSeed(
+    const leaseBump = LeaseAccount.fromSeed(
       this.program,
       lease.queue,
       lease.aggregator
-    );
+    )[1];
 
     // const funder = params.funder ?? payer;
     const funderAuthority = params.funderAuthority
@@ -460,11 +460,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       throw new errors.AccountNotFoundError(lease.queue);
     }
 
-    const [_, leaseBump] = LeaseAccount.fromSeed(
+    const leaseBump = LeaseAccount.fromSeed(
       this.program,
       lease.queue,
       lease.aggregator
-    );
+    )[1];
 
     txns.push(
       new TransactionObject(

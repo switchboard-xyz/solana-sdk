@@ -802,21 +802,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   public async openRoundInstruction(
     payer: PublicKey,
-    params: Partial<{
-      aggregator?: types.AggregatorAccountData;
-      queueAccount?: QueueAccount;
-      queue?: types.OracleQueueAccountData;
-      queueAuthority?: PublicKey;
-      queueDataBuffer?: PublicKey;
-      payoutWallet?: PublicKey;
-      lease?: [LeaseAccount, number];
-      leaseEscrow?: PublicKey;
-      permission?: [PermissionAccount, number];
-    }>
+    params: Partial<{ payoutWallet: PublicKey }>
   ): Promise<TransactionObject> {
-    const queueAccount =
-      params.queueAccount ??
-      new QueueAccount(this.program, (await this.loadData()).queuePubkey);
+    const aggregatorData = await this.loadData();
+    const queueAccount = new QueueAccount(
+      this.program,
+      aggregatorData.queuePubkey
+    );
     const queue = await queueAccount.loadData();
 
     const {
@@ -833,7 +825,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const ixns: Array<TransactionInstruction> = [];
 
     const payoutWallet =
-      params.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
+      params?.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
     const payoutWalletAccountInfo =
       await this.program.connection.getAccountInfo(payoutWallet);
     if (payoutWalletAccountInfo === null) {
@@ -873,17 +865,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   public async openRound(
-    params: Partial<{
-      aggregator?: types.AggregatorAccountData;
-      queueAccount?: QueueAccount;
-      queue?: types.OracleQueueAccountData;
-      queueAuthority?: PublicKey;
-      queueDataBuffer?: PublicKey;
-      payoutWallet?: PublicKey;
-      lease?: [LeaseAccount, number];
-      leaseEscrow?: PublicKey;
-      permission?: [PermissionAccount, number];
-    }>
+    params: Partial<{ payoutWallet: PublicKey }>
   ): Promise<TransactionSignature> {
     const openRoundTxn = await this.openRoundInstruction(
       this.program.walletPubkey,
