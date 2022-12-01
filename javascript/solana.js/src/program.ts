@@ -109,6 +109,25 @@ export class SwitchboardProgram {
 
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
+   *
+   * @param cluster - the solana cluster to load the Switchboard program for.
+   *
+   * @param connection - the Solana connection object used to connect to an RPC node.
+   *
+   * @param payerKeypair - optional, payer keypair used to pay for on-chain transactions.
+   *
+   * @param programId - optional, override the cluster's default programId.
+   *
+   * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {Connection} from "@solana/web3.js";
+   * import {SwitchboardProgram} from '@switchboard-xyz/solana.js';
+   * const program = await SwitchboardProgram.load("mainnet-beta", new Connection("https://api.mainnet-beta.solana.com"), payerKeypair);
+   * console.log(program.programId);
+   * ```
    */
   static load = async (
     cluster: Cluster | 'localnet',
@@ -177,12 +196,17 @@ export class SwitchboardProgram {
     );
   }
 
+  /** Verify a payer keypair was supplied. */
   public verifyPayer(): void {
     if (this.isReadOnly) {
       throw new errors.SwitchboardProgramReadOnlyError();
     }
   }
 
+  /**
+   * Verify a fresh keypair was provided.
+   *
+   * **NOTE:** Creating new accounts without this check will prevent the ability to remove any existing funds. */
   public async verifyNewKeypair(keypair: Keypair): Promise<void> {
     const accountInfo = await this.connection.getAccountInfo(keypair.publicKey);
     if (accountInfo) {

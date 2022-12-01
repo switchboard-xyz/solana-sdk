@@ -207,7 +207,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * ```ts
    * import {AggregatorAccount} from '@switchboard-xyz/solana.js';
-   * const [txnSignature, aggregatorAccount] = await AggregatorAccount(program, {
+   * const [txnSignature, aggregatorAccount] = await AggregatorAccount.create(program, {
    *    queueAccount,
    *    queueAuthority,
    *    batchSize: 5,

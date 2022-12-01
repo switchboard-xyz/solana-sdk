@@ -100,7 +100,35 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a {@linkcode TransactionObject} that contains the Solana TransactionInstructions and signers required to create a new QueueAccount on-chain.
+   * Creates a transaction object with oracleQueueInit instructions.
+   *
+   * @param program The SwitchboardProgram.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params oracle queue configuration parameters.
+   *
+   * @return Transaction signature and the newly created QueueAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const [queueInitTxn, queueAccount] = await QueueAccount.createInstructions(program, payer, {
+        name: 'My Queue',
+        metadata: 'Top Secret',
+        queueSize: 100,
+        reward: 0.00001337,
+        minStake: 10,
+        oracleTimeout: 60,
+        slashingEnabled: false,
+        unpermissionedFeeds: true,
+        unpermissionedVrf: true,
+        enableBufferRelayers: false,
+   * });
+   * const queueInitSignature = await program.signAndSend(queueInitTxn);
+   * const queue = await queueAccount.loadData();
+   * ```
    */
   public static async createInstructions(
     program: SwitchboardProgram,
@@ -183,7 +211,32 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a new QueueAccount.
+   * Creates an oracle queue on-chain and return the transaction signature and created account resource.
+   *
+   * @param program The SwitchboardProgram.
+   *
+   * @param params oracle queue configuration parameters.
+   *
+   * @return Transaction signature and the newly created QueueAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const [txnSignature, queueAccount] = await QueueAccount.create(program, {
+        name: 'My Queue',
+        metadata: 'Top Secret',
+        queueSize: 100,
+        reward: 0.00001337,
+        minStake: 10,
+        oracleTimeout: 60,
+        slashingEnabled: false,
+        unpermissionedFeeds: true,
+        unpermissionedVrf: true,
+        enableBufferRelayers: false,
+   * });
+   * const queue = await queueAccount.loadData();
+   * ```
    */
   public static async create(
     program: SwitchboardProgram,
@@ -199,7 +252,26 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a {@linkcode TransactionObject} that can then be used to create a new {@linkcode OracleAccount} for the queue.
+   * Creates a transaction object with oracleInit instructions for the given QueueAccount.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params - the oracle configuration parameters.
+   *
+   * @return Transaction signature and the newly created OracleAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [oracleInitTxn, oracleAccount] = await queueAccount.createOracleInstructions(payer, {
+   *  name: "My Oracle",
+   *  metadata: "Oracle #1"
+   * });
+   * const oracleInitSignature = await program.signAndSend(oracleInitTxn);
+   * const oracle = await oracleAccount.loadData();
+   * ```
    */
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
@@ -237,7 +309,23 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a new {@linkcode OracleAccount} for the queue.
+   * Creates a new {@linkcode OracleAccount}.
+   *
+   * @param params - the oracle configuration parameters.
+   *
+   * @return Transaction signature and the newly created OracleAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [oracleInitSignature, oracleAccount] = await queueAccount.createOracle({
+   *  name: "My Oracle",
+   *  metadata: "Oracle #1"
+   * });
+   * const oracle = await oracleAccount.loadData();
+   * ```
    */
   public async createOracle(
     params: OracleInitParams & Partial<Omit<PermissionSetParams, 'permission'>>
@@ -264,7 +352,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /**
-   * Create a new {@linkcode TransactionObject} containing the instructions and signers needed to create a new {@linkcode AggregatorAccount} for the queue along with its {@linkcode PermissionAccount} and {@linkcode LeaseAccount}.
+   * Create a new {@linkcode TransactionObject} constaining the instructions and signers needed to create a new {@linkcode AggregatorAccount} for the queue along with its {@linkcode PermissionAccount} and {@linkcode LeaseAccount}.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params - the aggregatorInit, jobInit, permissionInit, permissionSet, leaseInit, and crankPush configuration parameters.
    *
    * Optionally, specify a crankPubkey in order to push it onto an existing {@linkcode CrankAccount}.
    *
@@ -530,6 +622,29 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [signatures, aggregatorAccount];
   }
 
+  /**
+   * Creates a transaction object with crankInit instructions for the given QueueAccount.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params - the crank configuration parameters.
+   *
+   * @return Transaction signature and the newly created CrankAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [crankInitTxn, crankAccount] = await queueAccount.createCrankInstructions(payer, {
+   *  name: "My Crank",
+   *  metadata: "Crank #1",
+   *  maxRows: 1000,
+   * });
+   * const crankInitSignature = await program.signAndSend(crankInitTxn);
+   * const crank = await crankAccount.loadData();
+   * ```
+   */
   public async createCrankInstructions(
     payer: PublicKey,
     params: Omit<CrankInitParams, 'queueAccount'>
@@ -540,6 +655,26 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     });
   }
 
+  /**
+   * Creates a new {@linkcode CrankAccount}.
+   *
+   * @param params - the crank configuration parameters.
+   *
+   * @return Transaction signature and the newly created CrankAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [crankInitSignature, crankAccount] = await queueAccount.createCrank({
+   *  name: "My Crank",
+   *  metadata: "Crank #1",
+   *  maxRows: 1000,
+   * });
+   * const crank = await crankAccount.loadData();
+   * ```
+   */
   public async createCrank(
     params: Omit<CrankInitParams, 'queueAccount'>
   ): Promise<[TransactionSignature, CrankAccount]> {
@@ -551,6 +686,33 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [txnSignature, crankAccount];
   }
 
+  /**
+   * Creates a transaction object with vrfInit instructions for the given QueueAccount.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params - the vrf configuration parameters.
+   *
+   * @return Transaction signature and the newly created VrfAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const vrfKeypair = Keypair.generate();
+   * const [vrfInitTxn, vrfAccount] = await queueAccount.createVrfInstructions(payer, {
+   *  vrfKeypair: vrfKeypair,
+   *  callback: {
+   *    programId: "",
+   *    accounts: [],
+   *    ixData: Buffer.from("")
+   *  },
+   * });
+   * const vrfInitSignature = await program.signAndSend(vrfInitTxn);
+   * const vrf = await vrfAccount.loadData();
+   * ```
+   */
   public async createVrfInstructions(
     payer: PublicKey,
     params: Omit<VrfInitParams, 'queueAccount'> &
@@ -591,6 +753,30 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [vrfInit.combine(permissionInit), vrfAccount];
   }
 
+  /**
+   * Creates a new {@linkcode VrfAccount} for a given QueueAccount.
+   *
+   * @param params - the vrf configuration parameters.
+   *
+   * @return Transaction signature and the newly created VrfAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const vrfKeypair = Keypair.generate();
+   * const [vrfInitSignature, vrfAccount] = await queueAccount.createVrf({
+   *  vrfKeypair: vrfKeypair,
+   *  callback: {
+   *    programId: "",
+   *    accounts: [],
+   *    ixData: Buffer.from("")
+   *  },
+   * });
+   * const vrf = await vrfAccount.loadData();
+   * ```
+   */
   public async createVrf(
     params: Omit<VrfInitParams, 'queueAccount'> &
       Partial<Omit<PermissionSetParams, 'permission'>>
@@ -603,6 +789,29 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [txnSignature, vrfAccount];
   }
 
+  /**
+   * Creates a transaction object with bufferRelayerInit instructions for the given QueueAccount.
+   *
+   * @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   * @param params - the buffer relayer configuration parameters.
+   *
+   * @return Transaction signature and the newly created BufferRelayerAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [bufferRelayerInitTxn, bufferRelayerAccount] = await queueAccount.createBufferRelayerInstructions(payer, {
+   *  name: "My Buffer",
+   *  minUpdateDelaySeconds: 30,
+   *  job: existingJobPubkey,
+   * });
+   * const bufferRelayerInitSignature = await program.signAndSend(bufferRelayerInitTxn);
+   * const bufferRelayer = await bufferRelayerAccount.loadData();
+   * ```
+   */
   public async createBufferRelayerInstructions(
     payer: PublicKey,
     params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
@@ -686,6 +895,26 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [packed[0], bufferAccount];
   }
 
+  /**
+   * Creates a new {@linkcode BufferRelayerAccount} for a given QueueAccount.
+   *
+   * @param params - the buffer relayer configuration parameters.
+   *
+   * @return Transaction signature and the newly created BufferRelayerAccount.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import {QueueAccount} from '@switchboard-xyz/solana.js';
+   * const queueAccount = new QueueAccount(program, queuePubkey);
+   * const [bufferRelayerInitSignature, bufferRelayerAccount] = await queueAccount.createBufferRelayer({
+   *  name: "My Buffer",
+   *  minUpdateDelaySeconds: 30,
+   *  job: existingJobPubkey,
+   * });
+   * const bufferRelayer = await bufferRelayerAccount.loadData();
+   * ```
+   */
   public async createBufferRelayer(
     params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
       Partial<Omit<PermissionSetParams, 'permission'>> & {
