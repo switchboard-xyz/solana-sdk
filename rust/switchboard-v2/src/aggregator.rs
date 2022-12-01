@@ -175,6 +175,34 @@ impl AggregatorAccountData {
             bytemuck::from_bytes(&data[8..std::mem::size_of::<AggregatorAccountData>() + 8])
         }))
     }
+
+    /// Returns the deserialized Switchboard Aggregator account
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - A Solana AccountInfo's data buffer
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::AggregatorAccountData;
+    ///
+    /// let data_feed = AggregatorAccountData::new(feed_account_info.try_borrow_data()?)?;
+    /// ```
+    pub fn new_from_bytes(data: &[u8]) -> anchor_lang::Result<&AggregatorAccountData> {
+        if data.len() < AggregatorAccountData::discriminator().len() {
+            return Err(ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+
+        let mut disc_bytes = [0u8; 8];
+        disc_bytes.copy_from_slice(&data[..8]);
+        if disc_bytes != AggregatorAccountData::discriminator() {
+            return Err(ErrorCode::AccountDiscriminatorMismatch.into());
+        }
+
+        Ok(bytemuck::from_bytes(&data[8..std::mem::size_of::<AggregatorAccountData>() + 8]))
+    }
+
     /// If sufficient oracle responses, returns the latest on-chain result in SwitchboardDecimal format
     ///
     /// # Examples
