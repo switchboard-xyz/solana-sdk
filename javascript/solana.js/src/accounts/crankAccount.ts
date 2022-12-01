@@ -6,6 +6,7 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import * as errors from '../errors';
@@ -142,6 +143,11 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const leaseBumpsMap: Map<string, number> = new Map();
     const permissionBumpsMap: Map<string, number> = new Map();
     const queueAccount = new QueueAccount(this.program, params.queuePubkey);
+    const queueData = params.queue ?? (await queueAccount.loadData());
+    const crankData = params.crank ?? (await this.loadData());
+
+    const toBumps = (bumpMap: Map<string, number>) =>
+      new Uint8Array(Array.from(bumpMap.values()));
 
     for (const row of next) {
       const aggregatorAccount = new AggregatorAccount(this.program, row);
@@ -154,7 +160,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
         leaseEscrow,
       } = aggregatorAccount.getAccounts({
         queueAccount: queueAccount,
-        queueAuthority: params.queueAuthority,
+        queueAuthority: queueData.authority,
       });
 
       remainingAccounts.push(aggregatorAccount.publicKey);
@@ -169,11 +175,18 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       a.toBuffer().compare(b.toBuffer())
     );
 
-    const toBumps = (bumpMap: Map<string, number>): Uint8Array => {
-      return new Uint8Array(Array.from(bumpMap.values()));
-    };
+    const ixns: Array<TransactionInstruction> = [];
+    const payoutWallet =
+      params?.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
+    const payoutWalletAccountInfo =
+      await this.program.connection.getAccountInfo(payoutWallet);
+    if (payoutWalletAccountInfo === null) {
+      const [createTokenAccountTxn] =
+        this.program.mint.createAssocatedUserInstruction(payer);
+      ixns.push(...createTokenAccountTxn.ixns);
+    }
 
-    const ixn = types.crankPop(
+    const crankPopIxn = types.crankPop(
       this.program,
       {
         params: {
@@ -186,23 +199,24 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       },
       {
         crank: this.publicKey,
-        oracleQueue: params.queuePubkey,
-        queueAuthority: params.queueAuthority,
+        oracleQueue: queueAccount.publicKey,
+        queueAuthority: queueData.authority,
         programState: this.program.programState.publicKey,
-        payoutWallet: params.payoutWallet,
+        payoutWallet: payoutWallet,
         tokenProgram: TOKEN_PROGRAM_ID,
-        crankDataBuffer: params.crank.dataBuffer,
-        queueDataBuffer: params.queue.dataBuffer,
+        crankDataBuffer: crankData.dataBuffer,
+        queueDataBuffer: queueData.dataBuffer,
         mint: this.program.mint.address,
       }
     );
-    ixn.keys.push(
+    crankPopIxn.keys.push(
       ...remainingAccounts.map((pubkey): AccountMeta => {
         return { isSigner: false, isWritable: true, pubkey };
       })
     );
+    ixns.push(crankPopIxn);
 
-    const crankPop = new TransactionObject(payer, [ixn], []);
+    const crankPop = new TransactionObject(payer, ixns, []);
 
     return crankPop;
   }
@@ -397,16 +411,15 @@ export interface CrankPushParams {
 export interface CrankPopParams {
   /**
    * Specifies the wallet to reward for turning the crank.
+   *
+   * Defaults to the payer.
    */
-  payoutWallet: PublicKey;
+  payoutWallet?: PublicKey;
   /**
    * The pubkey of the linked oracle queue.
    */
   queuePubkey: PublicKey;
-  /**
-   * The pubkey of the linked oracle queue authority.
-   */
-  queueAuthority: PublicKey;
+  queue?: types.OracleQueueAccountData;
   /**
    * Array of pubkeys to attempt to pop. If discluded, this will be loaded
    * from the crank upon calling.
@@ -416,9 +429,7 @@ export interface CrankPopParams {
    * Nonce to allow consecutive crank pops with the same blockhash.
    */
   nonce?: number;
-  crank: types.CrankAccountData;
-  queue: types.OracleQueueAccountData;
-  tokenMint: PublicKey;
+  crank?: types.CrankAccountData;
   failOpenOnMismatch?: boolean;
   popIdx?: number;
 }
