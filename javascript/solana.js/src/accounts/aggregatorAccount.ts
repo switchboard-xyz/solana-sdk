@@ -1134,6 +1134,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     return result;
   }
+
+  /**
+   * Load an aggregators {@linkcode AggregatorHistoryBuffer}.
+   * @return the list of historical samples attached to the aggregator.
+   */
+  async loadHistory(): Promise<Array<types.AggregatorHistoryRow>> {
+    if (!this.history) {
+      this.history = new AggregatorHistoryBuffer(
+        this.program,
+        (await this.loadData()).historyBuffer
+      );
+    }
+
+    const history = await this.history.loadData();
+
+    return history;
+  }
 }
 
 /**

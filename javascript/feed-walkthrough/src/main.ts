@@ -1,21 +1,14 @@
-import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token-v2";
 import type { PublicKey } from "@solana/web3.js";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
-import { IOracleJob, OracleJob } from "@switchboard-xyz/common";
+import { OracleJob } from "@switchboard-xyz/common";
 import {
-  AggregatorAccount,
   CrankAccount,
-  JobAccount,
-  LeaseAccount,
-  loadSwitchboardProgram,
+  SwitchboardProgram,
   OracleAccount,
-  OracleQueueAccount,
+  QueueAccount,
   PermissionAccount,
-  ProgramStateAccount,
-  programWallet,
-  SwitchboardPermission,
-} from "@switchboard-xyz/switchboard-v2";
+  types,
+} from "@switchboard-xyz/solana.js";
 import chalk from "chalk";
 import dotenv from "dotenv";
 import fs from "fs";
@@ -89,137 +82,77 @@ async function main() {
       cluster === "localnet" ? "http://localhost:8899" : clusterApiUrl(cluster);
   }
 
-  const program = await loadSwitchboardProgram(
+  const program = await SwitchboardProgram.load(
     cluster === "localnet" ? "devnet" : cluster,
     new Connection(rpcUrl),
-    authority,
-    {
-      commitment: "finalized",
-    }
+    authority
   );
 
   console.log(chalk.yellow("######## Switchboard Setup ########"));
 
-  // Program State Account and token mint for payout rewards
-  const [programStateAccount] = ProgramStateAccount.fromSeed(program);
-  console.log(toAccountString("Program State", programStateAccount.publicKey));
-  const mint = await programStateAccount.getTokenMint();
-  const tokenAccount = await spl.createAccount(
-    program.provider.connection,
-    programWallet(program),
-    mint.address,
-    authority.publicKey,
-    Keypair.generate()
+  // create our token wallet for the wrapped SOL mint
+  const tokenAccount = await program.mint.getOrCreateAssociatedUser(
+    program.walletPubkey
   );
 
   // Oracle Queue
-  const queueAccount = await OracleQueueAccount.create(program, {
-    name: Buffer.from("Queue-1"),
-    mint: spl.NATIVE_MINT,
+  const [queueAccount] = await QueueAccount.create(program, {
+    name: "Queue-1",
     slashingEnabled: false,
-    reward: new anchor.BN(0), // no token account needed
-    minStake: new anchor.BN(0),
-    authority: authority.publicKey,
+    reward: 0,
+    minStake: 0,
   });
   console.log(toAccountString("Oracle Queue", queueAccount.publicKey));
 
   // Crank
-  const crankAccount = await CrankAccount.create(program, {
-    name: Buffer.from("Crank"),
+  const [crankAccount] = await queueAccount.createCrank({
+    name: "Crank",
     maxRows: 10,
-    queueAccount,
   });
   console.log(toAccountString("Crank", crankAccount.publicKey));
 
   // Oracle
-  const oracleAccount = await OracleAccount.create(program, {
-    name: Buffer.from("Oracle"),
-    queueAccount,
-  });
-  console.log(toAccountString("Oracle", oracleAccount.publicKey));
-
-  // Oracle permissions
-  const oraclePermission = await PermissionAccount.create(program, {
-    authority: authority.publicKey,
-    granter: queueAccount.publicKey,
-    grantee: oracleAccount.publicKey,
-  });
-  await oraclePermission.set({
-    authority,
-    permission: SwitchboardPermission.PERMIT_ORACLE_HEARTBEAT,
+  const [oracleAccount] = await queueAccount.createOracle({
+    name: "Oracle",
     enable: true,
   });
-  console.log(toAccountString(`  Permission`, oraclePermission.publicKey));
-  await oracleAccount.heartbeat(authority);
+  console.log(toAccountString("Oracle", oracleAccount.publicKey));
+  await oracleAccount.heartbeat();
 
   // Aggregator
-  const aggregatorAccount = await AggregatorAccount.create(program, {
-    name: Buffer.from("SOL_USD"),
+
+  const [aggregatorAccount] = await queueAccount.createFeed({
+    name: "SOL_USD",
+    queueAuthority: authority,
     batchSize: 1,
     minRequiredOracleResults: 1,
     minRequiredJobResults: 1,
     minUpdateDelaySeconds: 10,
-    queueAccount,
-    authority: authority.publicKey,
-  });
-  console.log(
-    toAccountString(`Aggregator (SOL/USD)`, aggregatorAccount.publicKey)
-  );
-  if (!aggregatorAccount.publicKey) {
-    throw new Error(`failed to read Aggregator publicKey`);
-  }
-
-  // Aggregator permissions
-  const aggregatorPermission = await PermissionAccount.create(program, {
-    authority: authority.publicKey,
-    granter: queueAccount.publicKey,
-    grantee: aggregatorAccount.publicKey,
-  });
-  await aggregatorPermission.set({
-    authority,
-    permission: SwitchboardPermission.PERMIT_ORACLE_QUEUE_USAGE,
+    fundAmount: 0.5,
     enable: true,
-  });
-  console.log(toAccountString(`  Permission`, aggregatorPermission.publicKey));
-
-  // Lease
-  const leaseContract = await LeaseAccount.create(program, {
-    loadAmount: new anchor.BN(0),
-    funder: tokenAccount,
-    funderAuthority: authority,
-    oracleQueueAccount: queueAccount,
-    aggregatorAccount,
-  });
-  console.log(toAccountString(`  Lease`, leaseContract.publicKey));
-
-  // Job
-  const jobDefinition: IOracleJob = {
-    tasks: [
+    crankPubkey: crankAccount.publicKey,
+    jobs: [
       {
-        httpTask: {
-          url: `https://ftx.us/api/markets/SOL_USD`,
-        },
-      },
-      {
-        jsonParseTask: { path: "$.result.price" },
+        weight: 2,
+        data: OracleJob.encodeDelimited(
+          OracleJob.fromObject({
+            tasks: [
+              {
+                httpTask: {
+                  url: `https://ftx.us/api/markets/SOL_USD`,
+                },
+              },
+              {
+                jsonParseTask: { path: "$.result.price" },
+              },
+            ],
+          })
+        ).finish(),
       },
     ],
-  };
-
-  // using OracleJob.fromObject will convert string enums to the correct format
-  // using OracleJob.create will not
-  const oracleJob = OracleJob.fromObject(jobDefinition);
-
-  const jobKeypair = anchor.web3.Keypair.generate();
-  const jobAccount = await JobAccount.create(program, {
-    data: Buffer.from(OracleJob.encodeDelimited(oracleJob).finish()),
-    keypair: jobKeypair,
-    authority: authority.publicKey,
   });
-  console.log(toAccountString(`  Job (FTX)`, jobAccount.publicKey));
-
-  await aggregatorAccount.addJob(jobAccount, authority); // Add Job to Aggregator
-  await crankAccount.push({ aggregatorAccount }); // Add Aggregator to Crank
+  console.log(toAccountString("Aggregator", aggregatorAccount.publicKey));
+  const aggregator = await aggregatorAccount.loadData();
 
   console.log(chalk.green("\u2714 Switchboard setup complete"));
 
@@ -241,23 +174,17 @@ async function main() {
   }
   console.log("");
 
+  const confirmedRoundPromise = aggregatorAccount.nextRound();
+
   // Turn the Crank
   async function turnCrank(retryCount: number): Promise<number> {
     try {
       const readyPubkeys = await crankAccount.peakNextReady(5);
       if (readyPubkeys) {
-        const crank = await crankAccount.loadData();
-        const queue = await queueAccount.loadData();
-
-        const crankTurnSignature = await crankAccount.pop({
+        await crankAccount.pop({
           payoutWallet: tokenAccount,
-          queuePubkey: queueAccount.publicKey,
-          queueAuthority: queue.authority,
           readyPubkeys,
           nonce: 0,
-          crank,
-          queue,
-          tokenMint: mint.address,
         });
         console.log(chalk.green("\u2714 Crank turned"));
         return 0;
@@ -278,28 +205,11 @@ async function main() {
 
   // Read Aggregators latest result
   console.log(chalk.yellow("######## Aggregator Result ########"));
-  await sleep(5000);
-  try {
-    let result = await aggregatorAccount.getLatestValue();
-    if (result === null) {
-      // wait a bit longer
-      await sleep(2500);
-      result = await aggregatorAccount.getLatestValue();
-      if (result === null) {
-        throw new Error(`Aggregator currently holds no value.`);
-      }
-    }
-    console.log(`${chalk.blue("Result:")} ${chalk.green(result)}\r\n`);
-    console.log(chalk.green("\u2714 Aggregator succesfully updated!"));
-  } catch (error: any) {
-    if (error.message === "Aggregator currently holds no value.") {
-      console.log(
-        chalk.red("\u2716 Aggregator holds no value, was the oracle running?")
-      );
-      return;
-    }
-    console.error(error);
-  }
+  const confirmedRound = await confirmedRoundPromise;
+  console.log(
+    `${chalk.blue("Result:")} ${chalk.green(confirmedRound.result.toBig())}\r\n`
+  );
+  console.log(chalk.green("\u2714 Aggregator succesfully updated!"));
 }
 
 main().then(

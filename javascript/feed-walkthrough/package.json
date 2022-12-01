@@ -19,9 +19,9 @@
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
-    "@solana/web3.js": "^1.50.1",
+    "@solana/web3.js": "^1.67.2",
     "@switchboard-xyz/common": "^2.1.7",
-    "@switchboard-xyz/switchboard-v2": "^0.0.165",
+    "@switchboard-xyz/solana.js": "file:../solana.js",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",
     "readline-sync": "^1.4.10"

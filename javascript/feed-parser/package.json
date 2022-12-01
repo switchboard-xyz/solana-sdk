@@ -19,8 +19,8 @@
   "license": "ISC",
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
-    "@solana/web3.js": "^1.33.0",
-    "@switchboard-xyz/switchboard-v2": "^0.0.165",
+    "@solana/web3.js": "^1.67.2",
+    "@switchboard-xyz/solana.js": "file:../solana.js",
     "big.js": "^6.1.1"
   },
   "devDependencies": {

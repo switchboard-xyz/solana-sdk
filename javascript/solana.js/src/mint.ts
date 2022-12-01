@@ -392,41 +392,36 @@ export class NativeMint extends Mint {
     const signers: Keypair[] = user ? [user] : [];
 
     const userAddress = this.getAssociatedAddress(owner);
-    const userBalance = (await this.getBalance(owner)) ?? 0;
 
-    if (amount) {
-      if (amount >= userBalance) {
-        ixns.push(spl.createCloseAccountInstruction(userAddress, owner, owner));
-      } else {
-        const ephemeralAccount = Keypair.generate();
-        const ephemeralWallet = this.getAssociatedAddress(
+    if (amount !== undefined && amount > 0) {
+      const ephemeralAccount = Keypair.generate();
+      const ephemeralWallet = this.getAssociatedAddress(
+        ephemeralAccount.publicKey
+      );
+
+      const unwrapAmountLamports = this.toTokenAmount(amount);
+
+      signers.push(ephemeralAccount);
+
+      ixns.push(
+        spl.createAssociatedTokenAccountInstruction(
+          payer,
+          ephemeralWallet,
+          ephemeralAccount.publicKey,
+          Mint.native
+        ),
+        spl.createTransferInstruction(
+          userAddress,
+          ephemeralWallet,
+          owner,
+          unwrapAmountLamports
+        ),
+        spl.createCloseAccountInstruction(
+          ephemeralWallet,
+          owner,
           ephemeralAccount.publicKey
-        );
-
-        const unwrapAmountLamports = this.toTokenAmount(amount);
-
-        signers.push(ephemeralAccount);
-
-        ixns.push(
-          spl.createAssociatedTokenAccountInstruction(
-            payer,
-            ephemeralWallet,
-            ephemeralAccount.publicKey,
-            Mint.native
-          ),
-          spl.createTransferInstruction(
-            userAddress,
-            ephemeralWallet,
-            owner,
-            unwrapAmountLamports
-          ),
-          spl.createCloseAccountInstruction(
-            ephemeralWallet,
-            owner,
-            ephemeralAccount.publicKey
-          )
-        );
-      }
+        )
+      );
     } else {
       ixns.push(spl.createCloseAccountInstruction(userAddress, owner, owner));
     }
