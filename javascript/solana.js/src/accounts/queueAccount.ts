@@ -95,7 +95,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   /**
    * Get the spl Mint associated with this {@linkcode QueueAccount}.
    */
-  public async loadMint(): Promise<spl.Mint> {
+  public get mint(): spl.Mint {
     return this.program.mint.mint;
   }
 
