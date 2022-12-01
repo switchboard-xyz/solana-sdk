@@ -176,10 +176,6 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
     const payoutWallet =
       params?.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
-    const txnObject =
-      (await this.program.connection.getAccountInfo(payoutWallet)) === null
-        ? (() => this.program.mint.createAssocatedUserInstruction(payer)[0])()
-        : new TransactionObject(payer, [], []);
 
     const crankPopIxn = types.crankPop(
       this.program,
@@ -209,7 +205,15 @@ export class CrankAccount extends Account<types.CrankAccountData> {
         return { isSigner: false, isWritable: true, pubkey };
       })
     );
-    return txnObject.add(crankPopIxn);
+
+    const txnObject: TransactionObject =
+      (await this.program.connection.getAccountInfo(payoutWallet)) === null
+        ? (() =>
+            this.program.mint
+              .createAssocatedUserInstruction(payer)[0]
+              .add(crankPopIxn))()
+        : new TransactionObject(payer, [crankPopIxn], []);
+    return txnObject;
   }
 
   public async pop(params: CrankPopParams): Promise<TransactionSignature> {
