@@ -20,6 +20,7 @@ import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
+import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
 import { CrankAccount, CrankInitParams } from './crankAccount';
 import { JobAccount, JobInitParams } from './jobAccount';
@@ -550,12 +551,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.historyLimit && params.historyLimit > 0) {
-      post.push(
-        await aggregatorAccount.setHistoryBufferInstruction(
-          this.program.walletPubkey,
-          { size: params.historyLimit, authority: params.authority }
-        )
-      );
+      const [historyBufferInit, historyBuffer] =
+        await AggregatorHistoryBuffer.createInstructions(this.program, payer, {
+          aggregatorAccount,
+          maxSamples: params.historyLimit,
+        });
+      post.push(historyBufferInit);
     }
 
     const packed = TransactionObject.pack([

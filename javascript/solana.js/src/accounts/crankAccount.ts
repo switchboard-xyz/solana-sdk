@@ -15,6 +15,7 @@ import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount } from './aggregatorAccount';
+import { CrankDataBuffer } from './crankDataBuffer';
 import { QueueAccount } from './queueAccount';
 
 /**
@@ -27,7 +28,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   static accountName = 'CrankAccountData';
 
   /** The public key of the crank's data buffer storing a priority queue of {@linkcode AggregatorAccount}'s and their next available update timestamp */
-  dataBuffer?: PublicKey;
+  dataBuffer?: CrankDataBuffer;
 
   /**
    * Get the size of an {@linkcode CrankAccount} on-chain.
@@ -52,30 +53,6 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   }
 
   /**
-   * Invoke a callback each time a crank's buffer has changed on-chain. The buffer stores a list of {@linkcode AggregatorAccount} public keys along with their next available update time.
-   * @param callback - the callback invoked when the crank's buffer changes
-   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
-   * @returns the websocket subscription id
-   */
-  onBufferChange(
-    callback: OnAccountChangeCallback<Array<types.CrankRow>>,
-    _dataBuffer?: PublicKey,
-    commitment: Commitment = 'confirmed'
-  ): number {
-    const buffer = this.dataBuffer ?? _dataBuffer;
-    if (!buffer) {
-      throw new Error(
-        `No crank dataBuffer provided. Call crankAccount.loadData() or pass it to this function in order to watch the account for changes`
-      );
-    }
-    return this.program.connection.onAccountChange(
-      buffer,
-      accountInfo => callback(CrankAccount.decodeBuffer(accountInfo)),
-      commitment
-    );
-  }
-
-  /**
    * Retrieve and decode the {@linkcode types.CrankAccountData} stored in this account.
    */
   public async loadData(): Promise<types.CrankAccountData> {
@@ -84,57 +61,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       this.publicKey
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
-    this.dataBuffer = data.dataBuffer;
+    this.dataBuffer = CrankDataBuffer.fromCrank(this.program, data);
     return data;
-  }
-
-  public static decodeBuffer(
-    bufferAccountInfo: AccountInfo<Buffer>
-  ): Array<types.CrankRow> {
-    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from('');
-    const maxRows = Math.floor(buffer.byteLength / 40);
-
-    const pqData: Array<types.CrankRow> = [];
-
-    for (let i = 0; i < maxRows * 40; i += 40) {
-      if (buffer.byteLength - i < 40) {
-        break;
-      }
-
-      const rowBuf = buffer.slice(i, i + 40);
-      const pubkey = new PublicKey(rowBuf.slice(0, 32));
-      if (pubkey.equals(PublicKey.default)) {
-        break;
-      }
-
-      const nextTimestamp = new anchor.BN(rowBuf.slice(32, 40), 'le');
-      pqData.push(new types.CrankRow({ pubkey, nextTimestamp }));
-    }
-
-    return pqData;
-  }
-
-  public async loadCrank(
-    sorted = false,
-    commitment: Commitment = 'confirmed'
-  ): Promise<Array<types.CrankRow>> {
-    // Can we do this in a single RPC call? Do we need pqSize?
-    const dataBuffer = this.dataBuffer ?? (await this.loadData()).dataBuffer;
-    const bufferAccountInfo = await this.program.connection.getAccountInfo(
-      dataBuffer,
-      { commitment }
-    );
-    if (bufferAccountInfo === null) {
-      throw new errors.AccountNotFoundError(dataBuffer);
-    }
-
-    const pqData = CrankAccount.decodeBuffer(bufferAccountInfo);
-
-    if (sorted) {
-      return pqData.sort((a, b) => a.nextTimestamp.cmp(b.nextTimestamp));
-    }
-
-    return pqData;
   }
 
   public static async createInstructions(
@@ -319,7 +247,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
             lease: leaseAccount.publicKey,
             escrow: leaseEscrow,
             programState: this.program.programState.publicKey,
-            dataBuffer: this.dataBuffer ?? (await this.loadData()).dataBuffer,
+            dataBuffer:
+              this.dataBuffer?.publicKey ?? (await this.loadData()).dataBuffer,
           }
         ),
       ],
@@ -347,7 +276,15 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    * @return List of {@linkcode types.CrankRow}, ordered by timestamp.
    */
   async peakNextWithTime(num?: number): Promise<types.CrankRow[]> {
-    const crankRows = await this.loadCrank(true);
+    let crank: CrankDataBuffer;
+    if (this.dataBuffer) {
+      crank = this.dataBuffer;
+    } else {
+      const crankData = await this.loadData();
+      crank = new CrankDataBuffer(this.program, crankData.dataBuffer);
+    }
+    const crankRows = await crank.loadData();
+
     return crankRows.slice(0, num ?? crankRows.length);
   }
 
@@ -380,7 +317,14 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     pubkey: PublicKey,
     crankRows?: Array<types.CrankRow>
   ): Promise<boolean> {
-    const rows = crankRows ?? (await this.loadCrank());
+    let crank: CrankDataBuffer;
+    if (this.dataBuffer) {
+      crank = this.dataBuffer;
+    } else {
+      const crankData = await this.loadData();
+      crank = new CrankDataBuffer(this.program, crankData.dataBuffer);
+    }
+    const rows = await crank.loadData();
 
     const idx = rows.findIndex(r => r.pubkey.equals(pubkey));
     if (idx === -1) {

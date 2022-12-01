@@ -80,7 +80,7 @@ export class AggregatorHistoryBuffer extends Account<
     program: SwitchboardProgram,
     aggregator: types.AggregatorAccountData
   ): AggregatorHistoryBuffer | undefined {
-    if (aggregator.historyBuffer.equals(aggregator.historyBuffer)) {
+    if (aggregator.historyBuffer.equals(PublicKey.default)) {
       return undefined;
     }
 
