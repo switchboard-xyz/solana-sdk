@@ -527,7 +527,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.historyLimit && params.historyLimit > 0) {
-      const [historyBufferInit, historyBuffer] =
+      const [historyBufferInit] =
         await AggregatorHistoryBuffer.createInstructions(this.program, payer, {
           aggregatorAccount,
           maxSamples: params.historyLimit,
