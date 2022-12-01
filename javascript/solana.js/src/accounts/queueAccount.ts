@@ -470,18 +470,16 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(aggregatorInit);
 
-    const [leaseAccount, leaseInit] = await LeaseAccount.createInstructions(
-      this.program,
-      payer,
-      {
+    const leaseInit = (
+      await LeaseAccount.createInstructions(this.program, payer, {
         loadAmount: params.fundAmount,
         funderTokenAccount: params.funderTokenAccount,
         funderAuthority: params.funderAuthority,
         aggregatorPubkey: aggregatorAccount.publicKey,
         queuePubkey: this.publicKey,
         jobAuthorities: [],
-      }
-    );
+      })
+    )[1];
     txns.push(leaseInit);
 
     // create permission account
@@ -523,11 +521,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.historyLimit && params.historyLimit > 0) {
-      const [historyBuffer, historyBufferInit] =
+      const historyBufferInit = (
         await AggregatorHistoryBuffer.createInstructions(this.program, payer, {
           aggregatorAccount,
           maxSamples: params.historyLimit,
-        });
+        })
+      )[1];
       post.push(historyBufferInit);
     }
 
