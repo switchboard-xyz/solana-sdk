@@ -56,15 +56,36 @@ const isBrowser =
 
 /**
  * Wrapper class for the Switchboard anchor Program.
+ *
+ * Basic usage example:
+ *
+ * ```ts
+ * import { Connection } from "@solana/web3.js";
+ * import { SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
+ *
+ * const program = await SwitchboardProgram.load(
+ *    "mainnet-beta",
+ *    new Connection("https://api.mainnet-beta.solana.com"),
+ *    payerKeypair
+ * );
+ *
+ * const txn = new TransactionObject(program.walletPubkey, [], []);
+ * const txnSignature = await program.signAndSend(txn);
+ * ```
  */
 export class SwitchboardProgram {
   private static readonly _readOnlyKeypair = READ_ONLY_KEYPAIR;
+
   private readonly _program: anchor.Program;
+
+  /** The solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | 'localnet';
+
   readonly programState: {
     publicKey: PublicKey;
     bump: number;
   };
+
   readonly mint: Mint;
 
   /**
@@ -123,10 +144,17 @@ export class SwitchboardProgram {
    * Basic usage example:
    *
    * ```ts
-   * import {Connection} from "@solana/web3.js";
-   * import {SwitchboardProgram} from '@switchboard-xyz/solana.js';
-   * const program = await SwitchboardProgram.load("mainnet-beta", new Connection("https://api.mainnet-beta.solana.com"), payerKeypair);
-   * console.log(program.programId);
+   * import { Connection } from "@solana/web3.js";
+   * import { SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
+   *
+   * const program = await SwitchboardProgram.load(
+   *    "mainnet-beta",
+   *    new Connection("https://api.mainnet-beta.solana.com"),
+   *    payerKeypair
+   * );
+   *
+   * const txn = new TransactionObject(program.walletPubkey, [], []);
+   * const txnSignature = await program.signAndSend(txn);
    * ```
    */
   static load = async (
