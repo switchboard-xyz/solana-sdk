@@ -52,8 +52,10 @@ export class AggregatorHistoryBuffer extends Account<
     }
 
     const insertIdx = historyBuffer.readUInt32LE(8) * ROW_SIZE;
+
     const front: Array<types.AggregatorHistoryRow> = [];
     const tail: Array<types.AggregatorHistoryRow> = [];
+
     for (let i = 12; i < historyBuffer.length; i += ROW_SIZE) {
       if (i + ROW_SIZE > historyBuffer.length) {
         break;
