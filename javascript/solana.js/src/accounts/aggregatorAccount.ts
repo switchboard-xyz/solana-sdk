@@ -14,7 +14,7 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { OracleAccount } from './oracleAccount';
-import { OracleJob } from '@switchboard-xyz/common';
+import { OracleJob, promiseWithTimeout } from '@switchboard-xyz/common';
 import crypto from 'crypto';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
@@ -779,6 +779,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       jobs: Array<OracleJob>;
       // oracle
       oracleAccount: OracleAccount;
+      oracleAuthority: PublicKey;
       oracleIdx: number;
       oraclePermission: [PermissionAccount, number];
       // response
@@ -826,7 +827,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       {
         aggregator: this.publicKey,
         oracle: params.oracleAccount.publicKey,
-        oracleAuthority: params.queueAuthority,
+        oracleAuthority: params.oracleAuthority,
         oracleQueue: params.queueAccount.publicKey,
         queueAuthority: params.queueAuthority,
         feedPermission: feedPermissionAccount.publicKey,
@@ -855,6 +856,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       feedPermission: [PermissionAccount, number];
       historyBuffer: PublicKey;
       oracleIdx: number;
+      oracleAuthority: PublicKey;
       oraclePermission: [PermissionAccount, number];
       error: boolean;
       mint: PublicKey;
@@ -954,6 +956,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         ? undefined
         : historyBuffer,
       oracleAccount: params.oracleAccount,
+      oracleAuthority: (await params.oracleAccount.loadData()).oracleAuthority,
       oracleIdx,
       oraclePermission: [oraclePermissionAccount, oraclePermissionBump],
       value: params.value,
@@ -1083,6 +1086,53 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       },
       jobs: jobs,
     };
+  }
+
+  /**
+   * Await for the next round to close and return the aggregator round result
+   *
+   * @param roundOpenSlot - optional, the slot when the current round was opened. if not provided then it will be loaded.
+   * @param timeout - the number of milliseconds to wait for the round to close
+   *
+   * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
+   */
+  async nextRound(
+    roundOpenSlot?: anchor.BN,
+    timeout = 30000
+  ): Promise<types.AggregatorRound> {
+    const slot =
+      roundOpenSlot ?? (await this.loadData()).currentRound.roundOpenSlot;
+    let ws: number | undefined;
+
+    let result: types.AggregatorRound;
+    try {
+      result = await promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: types.AggregatorRound) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(aggregator => {
+              if (aggregator.latestConfirmedRound.roundOpenSlot.gt(slot)) {
+                reject(
+                  `Latest confirmed round slot is higher than requested round`
+                );
+              }
+              if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
+                resolve(aggregator.latestConfirmedRound);
+              }
+            });
+          }
+        )
+      );
+    } finally {
+      if (ws) {
+        await this.program.connection.removeAccountChangeListener(ws);
+      }
+    }
+
+    return result;
   }
 }
 
