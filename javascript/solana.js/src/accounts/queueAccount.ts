@@ -520,8 +520,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       post.push(
         await crankAccount.pushInstruction(this.program.walletPubkey, {
           aggregatorAccount: aggregatorAccount,
-          queueAccount: this,
-          queue,
         })
       );
     }

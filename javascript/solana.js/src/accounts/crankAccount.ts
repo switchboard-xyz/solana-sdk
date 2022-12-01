@@ -6,7 +6,6 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import * as errors from '../errors';
@@ -142,9 +141,9 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const remainingAccounts: PublicKey[] = [];
     const leaseBumpsMap: Map<string, number> = new Map();
     const permissionBumpsMap: Map<string, number> = new Map();
-    const queueAccount = new QueueAccount(this.program, params.queuePubkey);
-    const queueData = params.queue ?? (await queueAccount.loadData());
-    const crankData = params.crank ?? (await this.loadData());
+    const crankData = await this.loadData();
+    const queueAccount = new QueueAccount(this.program, crankData.queuePubkey);
+    const queueData = await queueAccount.loadData();
 
     const toBumps = (bumpMap: Map<string, number>) =>
       new Uint8Array(Array.from(bumpMap.values()));
@@ -175,16 +174,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       a.toBuffer().compare(b.toBuffer())
     );
 
-    const ixns: Array<TransactionInstruction> = [];
     const payoutWallet =
       params?.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
-    const payoutWalletAccountInfo =
-      await this.program.connection.getAccountInfo(payoutWallet);
-    if (payoutWalletAccountInfo === null) {
-      const [createTokenAccountTxn] =
-        this.program.mint.createAssocatedUserInstruction(payer);
-      ixns.push(...createTokenAccountTxn.ixns);
-    }
+    const txnObject =
+      (await this.program.connection.getAccountInfo(payoutWallet)) === null
+        ? (() => this.program.mint.createAssocatedUserInstruction(payer)[0])()
+        : new TransactionObject(payer, [], []);
 
     const crankPopIxn = types.crankPop(
       this.program,
@@ -214,11 +209,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
         return { isSigner: false, isWritable: true, pubkey };
       })
     );
-    ixns.push(crankPopIxn);
-
-    const crankPop = new TransactionObject(payer, ixns, []);
-
-    return crankPop;
+    return txnObject.add(crankPopIxn);
   }
 
   public async pop(params: CrankPopParams): Promise<TransactionSignature> {
@@ -236,10 +227,9 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     payer: PublicKey,
     params: CrankPushParams
   ): Promise<TransactionObject> {
-    const queueAccount =
-      params.queueAccount ??
-      new QueueAccount(this.program, (await this.loadData()).queuePubkey);
-    const queue = params.queue ?? (await queueAccount.loadData());
+    const crankData = await this.loadData();
+    const queueAccount = new QueueAccount(this.program, crankData.queuePubkey);
+    const queue = await queueAccount.loadData();
 
     const { permissionAccount, permissionBump, leaseAccount, leaseEscrow } =
       params.aggregatorAccount.getAccounts({
@@ -400,9 +390,6 @@ export interface CrankPushParams {
    * Specifies the aggregator to push onto the crank.
    */
   aggregatorAccount: AggregatorAccount;
-  aggregator?: types.AggregatorAccountData;
-  queueAccount?: QueueAccount;
-  queue?: types.OracleQueueAccountData;
 }
 
 /**
@@ -416,11 +403,6 @@ export interface CrankPopParams {
    */
   payoutWallet?: PublicKey;
   /**
-   * The pubkey of the linked oracle queue.
-   */
-  queuePubkey: PublicKey;
-  queue?: types.OracleQueueAccountData;
-  /**
    * Array of pubkeys to attempt to pop. If discluded, this will be loaded
    * from the crank upon calling.
    */
@@ -429,7 +411,6 @@ export interface CrankPopParams {
    * Nonce to allow consecutive crank pops with the same blockhash.
    */
   nonce?: number;
-  crank?: types.CrankAccountData;
   failOpenOnMismatch?: boolean;
   popIdx?: number;
 }
