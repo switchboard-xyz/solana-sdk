@@ -5,29 +5,59 @@ import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescrip
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface PermissionAccountDataFields {
+  /** The authority that is allowed to set permissions for this account. */
   authority: PublicKey;
+  /** The SwitchboardPermission enumeration assigned by the granter to the grantee. */
   permissions: number;
+  /** Public key of account that is granting permissions to use its resources. */
   granter: PublicKey;
+  /** Public key of account that is being assigned permissions to use a granters resources. */
   grantee: PublicKey;
+  /**
+   * unused currently. may want permission PDA per permission for
+   * unique expiration periods, BUT currently only one permission
+   * per account makes sense for the infra. Dont over engineer.
+   */
   expiration: BN;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
 export interface PermissionAccountDataJSON {
+  /** The authority that is allowed to set permissions for this account. */
   authority: string;
+  /** The SwitchboardPermission enumeration assigned by the granter to the grantee. */
   permissions: number;
+  /** Public key of account that is granting permissions to use its resources. */
   granter: string;
+  /** Public key of account that is being assigned permissions to use a granters resources. */
   grantee: string;
+  /**
+   * unused currently. may want permission PDA per permission for
+   * unique expiration periods, BUT currently only one permission
+   * per account makes sense for the infra. Dont over engineer.
+   */
   expiration: string;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
 export class PermissionAccountData {
+  /** The authority that is allowed to set permissions for this account. */
   readonly authority: PublicKey;
+  /** The SwitchboardPermission enumeration assigned by the granter to the grantee. */
   readonly permissions: number;
+  /** Public key of account that is granting permissions to use its resources. */
   readonly granter: PublicKey;
+  /** Public key of account that is being assigned permissions to use a granters resources. */
   readonly grantee: PublicKey;
+  /**
+   * unused currently. may want permission PDA per permission for
+   * unique expiration periods, BUT currently only one permission
+   * per account makes sense for the infra. Dont over engineer.
+   */
   readonly expiration: BN;
+  /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([

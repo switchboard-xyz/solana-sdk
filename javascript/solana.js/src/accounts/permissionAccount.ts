@@ -15,6 +15,20 @@ export interface PermissionAccountInitParams {
   authority: PublicKey;
 }
 
+export type PermissionSetParams =
+  | {
+      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
+      permission: boolean;
+      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
+      queueAuthority?: Keypair;
+    }
+  | {
+      /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
+      enable?: boolean;
+      /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
+      queueAuthority?: Keypair;
+    };
+
 /**
  * @class PermissionAccount
  * Account type dictating the level of permissions between a granter and a grantee.

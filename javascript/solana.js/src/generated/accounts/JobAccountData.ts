@@ -5,40 +5,67 @@ import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescrip
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface JobAccountDataFields {
+  /** Name of the job to store on-chain. */
   name: Array<number>;
+  /** Metadata of the job to store on-chain. */
   metadata: Array<number>;
+  /** The account delegated as the authority for making account changes. */
   authority: PublicKey;
+  /** Unix timestamp when the job is considered invalid */
   expiration: BN;
+  /** Hash of the serialized data to prevent tampering. */
   hash: Array<number>;
+  /** Serialized protobuf containing the collection of task to retrieve data off-chain. */
   data: Uint8Array;
+  /** The number of data feeds referencing the job account.. */
   referenceCount: number;
+  /** The token amount funded into a feed that contains this job account. */
   totalSpent: BN;
+  /** Unix timestamp when the job was created on-chain. */
   createdAt: BN;
   isInitializing: number;
 }
 
 export interface JobAccountDataJSON {
+  /** Name of the job to store on-chain. */
   name: Array<number>;
+  /** Metadata of the job to store on-chain. */
   metadata: Array<number>;
+  /** The account delegated as the authority for making account changes. */
   authority: string;
+  /** Unix timestamp when the job is considered invalid */
   expiration: string;
+  /** Hash of the serialized data to prevent tampering. */
   hash: Array<number>;
+  /** Serialized protobuf containing the collection of task to retrieve data off-chain. */
   data: Array<number>;
+  /** The number of data feeds referencing the job account.. */
   referenceCount: number;
+  /** The token amount funded into a feed that contains this job account. */
   totalSpent: string;
+  /** Unix timestamp when the job was created on-chain. */
   createdAt: string;
   isInitializing: number;
 }
 
 export class JobAccountData {
+  /** Name of the job to store on-chain. */
   readonly name: Array<number>;
+  /** Metadata of the job to store on-chain. */
   readonly metadata: Array<number>;
+  /** The account delegated as the authority for making account changes. */
   readonly authority: PublicKey;
+  /** Unix timestamp when the job is considered invalid */
   readonly expiration: BN;
+  /** Hash of the serialized data to prevent tampering. */
   readonly hash: Array<number>;
+  /** Serialized protobuf containing the collection of task to retrieve data off-chain. */
   readonly data: Uint8Array;
+  /** The number of data feeds referencing the job account.. */
   readonly referenceCount: number;
+  /** The token amount funded into a feed that contains this job account. */
   readonly totalSpent: BN;
+  /** Unix timestamp when the job was created on-chain. */
   readonly createdAt: BN;
   readonly isInitializing: number;
 

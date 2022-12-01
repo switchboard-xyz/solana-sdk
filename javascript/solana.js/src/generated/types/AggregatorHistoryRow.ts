@@ -4,17 +4,23 @@ import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-
 import * as borsh from '@project-serum/borsh';
 
 export interface AggregatorHistoryRowFields {
+  /** The timestamp of the sample. */
   timestamp: BN;
+  /** The value of the sample. */
   value: types.SwitchboardDecimalFields;
 }
 
 export interface AggregatorHistoryRowJSON {
+  /** The timestamp of the sample. */
   timestamp: string;
+  /** The value of the sample. */
   value: types.SwitchboardDecimalJSON;
 }
 
 export class AggregatorHistoryRow {
+  /** The timestamp of the sample. */
   readonly timestamp: BN;
+  /** The value of the sample. */
   readonly value: types.SwitchboardDecimal;
 
   constructor(fields: AggregatorHistoryRowFields) {

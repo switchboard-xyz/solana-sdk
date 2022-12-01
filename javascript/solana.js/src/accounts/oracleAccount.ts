@@ -45,13 +45,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: {
-      queuePubkey: PublicKey;
-    } & Partial<{
-      mint: PublicKey;
-      name: string;
-      metadata: string;
-      authority: Keypair; // defaults to payer
-    }>
+      queueAccount: QueueAccount;
+    } & OracleInitParams
   ): Promise<[TransactionObject, OracleAccount]> {
     const tokenWallet = Keypair.generate();
     // console.log(`tokenWallet`, tokenWallet.publicKey.toBase58());
@@ -60,7 +55,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       program,
-      params.queuePubkey,
+      params.queueAccount.publicKey,
       tokenWallet.publicKey
     );
 
@@ -104,7 +99,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           oracleAuthority: authority,
           wallet: tokenWallet.publicKey,
           programState: program.programState.publicKey,
-          queue: params.queuePubkey,
+          queue: params.queueAccount.publicKey,
           payer,
           systemProgram: SystemProgram.programId,
         }
@@ -125,31 +120,12 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     program: SwitchboardProgram,
     params: {
       queueAccount: QueueAccount;
-    } & Partial<{
-      name: string;
-      metadata: string;
-      mint: PublicKey;
-      authority: Keypair; // defaults to payer
-    }>
+    } & OracleInitParams
   ): Promise<[TransactionSignature, OracleAccount]> {
-    let mint = params.mint;
-    if (!mint) {
-      const queue = await params.queueAccount.loadData();
-      mint = queue.mint.equals(PublicKey.default)
-        ? spl.NATIVE_MINT
-        : queue.mint;
-    }
-
     const [txnObject, oracleAccount] = await OracleAccount.createInstructions(
       program,
       program.walletPubkey,
-      {
-        queuePubkey: params.queueAccount.publicKey,
-        mint: mint,
-        name: params.name,
-        metadata: params.metadata,
-        authority: params.authority,
-      }
+      params
     );
 
     const txnSignature = await program.signAndSend(txnObject);
@@ -370,4 +346,13 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     const txnSignature = await this.program.signAndSend(withdrawTxn);
     return txnSignature;
   }
+}
+
+export interface OracleInitParams {
+  /** Name of the oracle for easier identification. */
+  name?: string;
+  /** Metadata of the oracle for easier identification. */
+  metadata?: string;
+  /** Alternative keypair that will be the authority for the oracle. If not set the payer will be used. */
+  authority?: Keypair;
 }

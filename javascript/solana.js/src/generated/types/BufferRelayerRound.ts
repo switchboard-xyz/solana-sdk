@@ -4,26 +4,41 @@ import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-
 import * as borsh from '@project-serum/borsh';
 
 export interface BufferRelayerRoundFields {
+  /** Number of successful responses. */
   numSuccess: number;
+  /** Number of error responses. */
   numError: number;
+  /** Slot when the buffer relayer round was opened. */
   roundOpenSlot: BN;
+  /** Timestamp when the buffer relayer round was opened. */
   roundOpenTimestamp: BN;
+  /** The public key of the oracle fulfilling the buffer relayer update request. */
   oraclePubkey: PublicKey;
 }
 
 export interface BufferRelayerRoundJSON {
+  /** Number of successful responses. */
   numSuccess: number;
+  /** Number of error responses. */
   numError: number;
+  /** Slot when the buffer relayer round was opened. */
   roundOpenSlot: string;
+  /** Timestamp when the buffer relayer round was opened. */
   roundOpenTimestamp: string;
+  /** The public key of the oracle fulfilling the buffer relayer update request. */
   oraclePubkey: string;
 }
 
 export class BufferRelayerRound {
+  /** Number of successful responses. */
   readonly numSuccess: number;
+  /** Number of error responses. */
   readonly numError: number;
+  /** Slot when the buffer relayer round was opened. */
   readonly roundOpenSlot: BN;
+  /** Timestamp when the buffer relayer round was opened. */
   readonly roundOpenTimestamp: BN;
+  /** The public key of the oracle fulfilling the buffer relayer update request. */
   readonly oraclePubkey: PublicKey;
 
   constructor(fields: BufferRelayerRoundFields) {
