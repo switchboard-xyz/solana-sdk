@@ -192,7 +192,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     );
     const tokenAmountBN = new BN(tokenAccount.amount.toString());
     if (tokenAmountBN.lt(queue.reward)) {
-      const wrapTxn = await this.program.mint.wrapInstruction(payer, {
+      const wrapTxn = await this.program.mint.wrapInstructions(payer, {
         fundUpTo: new Big(this.program.mint.fromTokenAmountBN(queue.reward)),
       });
       ixns.push(...wrapTxn.ixns);

@@ -58,8 +58,8 @@ export async function setupTest(): Promise<TestContext> {
       payer.publicKey,
       1 * LAMPORTS_PER_SOL
     );
-    await program.connection.confirmTransaction(airdropTxn);
     console.log(`Airdrop requested: ${airdropTxn}`);
+    await program.connection.confirmTransaction(airdropTxn);
   }
 
   // Check if programStateAccount exists

@@ -1,4 +1,5 @@
 import * as anchor from '@project-serum/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 export class SwitchboardProgramIsBrowserError extends Error {
   constructor() {
@@ -67,5 +68,13 @@ export class TransactionMissingSignerError extends Error {
   constructor(signers: string[]) {
     super(`missing signers [${signers.join(', ')}]`);
     Object.setPrototypeOf(this, TransactionMissingSignerError.prototype);
+  }
+}
+export class IncorrectAuthority extends Error {
+  constructor(expectedAuthority: PublicKey, receivedAuthority: PublicKey) {
+    super(
+      `incorrect authority, expected ${expectedAuthority}, received ${receivedAuthority}`
+    );
+    Object.setPrototypeOf(this, IncorrectAuthority.prototype);
   }
 }

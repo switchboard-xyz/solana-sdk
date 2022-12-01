@@ -120,7 +120,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       (await program.mint.getBalance(funderAuthority)) ?? 0;
 
     if (loadAmount && funderTokenBalance < loadAmount) {
-      const wrapIxns = await program.mint.wrapInstruction(
+      const wrapIxns = await program.mint.wrapInstructions(
         payer,
         { amount: loadAmount },
         params.funderAuthority
@@ -354,7 +354,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const funderBalance =
       (await this.program.mint.getBalance(funderAuthority)) ?? 0;
     if (funderBalance < params.loadAmount) {
-      const wrapIxns = await this.program.mint.unwrapInstruction(
+      const wrapIxns = await this.program.mint.unwrapInstructions(
         payer,
         params.loadAmount,
         params.funderAuthority
@@ -393,20 +393,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
 
     return new TransactionObject(payer, ixns, signers);
-  }
-
-  public async withdraw(params: {
-    amount: number;
-    unwrap?: boolean;
-    withdrawWallet?: PublicKey;
-    withdrawAuthority?: Keypair;
-  }): Promise<TransactionSignature> {
-    const withdrawTxn = await this.withdrawInstruction(
-      this.program.walletPubkey,
-      params
-    );
-    const txnSignature = await this.program.signAndSend(withdrawTxn);
-    return txnSignature;
   }
 
   public async withdrawInstruction(
@@ -499,7 +485,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
     if (params.unwrap) {
       txns.push(
-        await this.program.mint.unwrapInstruction(
+        await this.program.mint.unwrapInstructions(
           payer,
           params.amount,
           params.withdrawAuthority
@@ -513,6 +499,20 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     }
 
     return packed[0];
+  }
+
+  public async withdraw(params: {
+    amount: number;
+    unwrap?: boolean;
+    withdrawWallet?: PublicKey;
+    withdrawAuthority?: Keypair;
+  }): Promise<TransactionSignature> {
+    const withdrawTxn = await this.withdrawInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(withdrawTxn);
+    return txnSignature;
   }
 
   public async setAuthority(params: {

@@ -1,5 +1,4 @@
 import 'mocha';
-import chai, { expect } from 'chai';
 import assert from 'assert';
 
 import { setupTest, TestContext } from './utilts';

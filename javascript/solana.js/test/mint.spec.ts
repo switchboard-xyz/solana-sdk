@@ -1,6 +1,4 @@
 import 'mocha';
-import chai, { expect } from 'chai';
-import assert from 'assert';
 
 import * as anchor from '@project-serum/anchor';
 import { setupTest, TestContext } from './utilts';

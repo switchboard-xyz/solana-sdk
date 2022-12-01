@@ -1,5 +1,4 @@
 import 'mocha';
-import chai, { expect } from 'chai';
 import assert from 'assert';
 
 import * as sbv2 from '../src';
@@ -46,6 +45,7 @@ describe('Queue Tests', () => {
       queueAuthority,
       enable: true,
       authority: oracleAuthority,
+      stakeAmount: 2,
     });
 
     const oracle = await oracleAccount.loadData();

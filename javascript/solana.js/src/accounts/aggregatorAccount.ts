@@ -698,7 +698,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   public async openRoundInstruction(
     payer: PublicKey,
-    params: Partial<{ payoutWallet: PublicKey }>
+    params?: { payoutWallet?: PublicKey }
   ): Promise<TransactionObject> {
     const aggregatorData = await this.loadData();
     const queueAccount = new QueueAccount(
@@ -760,9 +760,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return new TransactionObject(payer, ixns, []);
   }
 
-  public async openRound(
-    params: Partial<{ payoutWallet: PublicKey }>
-  ): Promise<TransactionSignature> {
+  public async openRound(params?: {
+    payoutWallet?: PublicKey;
+  }): Promise<TransactionSignature> {
     const openRoundTxn = await this.openRoundInstruction(
       this.program.walletPubkey,
       params

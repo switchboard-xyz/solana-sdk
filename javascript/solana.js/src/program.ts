@@ -9,9 +9,12 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { Mint } from './mint';
+import { types } from './';
+import { Mint, NativeMint } from './mint';
 import { TransactionObject } from './transaction';
 import { SwitchboardEvents } from './switchboardEvents';
+import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
+import { fromCode as fromAnchorCode } from './generated/errors/anchor';
 
 /**
  * Switchboard Devnet Program ID
@@ -86,7 +89,7 @@ export class SwitchboardProgram {
     bump: number;
   };
 
-  readonly mint: Mint;
+  readonly mint: NativeMint;
 
   /**
    * Constructor.
@@ -94,7 +97,7 @@ export class SwitchboardProgram {
   constructor(
     program: anchor.Program,
     cluster: Cluster | 'localnet',
-    mint: Mint
+    mint: NativeMint
   ) {
     this._program = program;
     this.cluster = cluster;
@@ -169,7 +172,9 @@ export class SwitchboardProgram {
       payerKeypair,
       programId
     );
-    const mint = await Mint.load(program.provider as anchor.AnchorProvider);
+    const mint = await NativeMint.load(
+      program.provider as anchor.AnchorProvider
+    );
     return new SwitchboardProgram(program, cluster, mint);
   };
 
@@ -308,17 +313,37 @@ export class SwitchboardProgram {
         s.publicKey.equals(txn.payer) || reqSigners.has(s.publicKey.toBase58())
     );
 
-    const txnSignature = await this.provider.sendAndConfirm(
-      txn.toTxn(blockhash ?? (await this.connection.getLatestBlockhash())),
-      filteredSigners,
-      {
-        skipPreflight: false,
-        maxRetries: 10,
-        ...opts,
-      }
+    const transaction = txn.toTxn(
+      blockhash ?? (await this.connection.getLatestBlockhash())
     );
 
-    return txnSignature;
+    try {
+      const txnSignature = await this.provider.sendAndConfirm(
+        transaction,
+        filteredSigners,
+        {
+          skipPreflight: false,
+          maxRetries: 10,
+          ...opts,
+        }
+      );
+
+      return txnSignature;
+    } catch (error) {
+      if ('code' in (error as any) && typeof (error as any).code === 'number') {
+        const switchboardError = fromSwitchboardCode((error as any).code);
+        if (switchboardError) {
+          throw switchboardError;
+        }
+
+        const anchorError = fromAnchorCode((error as any).code);
+        if (anchorError) {
+          throw anchorError;
+        }
+      }
+
+      throw error;
+    }
   }
 }
 

@@ -4,6 +4,7 @@ import { Account, OnAccountChangeCallback } from './account';
 import * as anchor from '@project-serum/anchor';
 import { SwitchboardProgram } from '../program';
 import {
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -30,6 +31,35 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   public size = this.program.account.oracleAccountData.size;
 
+  decode(data: Buffer): types.OracleAccountData {
+    try {
+      return types.OracleAccountData.decode(data);
+    } catch {
+      return this.program.coder.decode<types.OracleAccountData>(
+        OracleAccount.accountName,
+        data
+      );
+    }
+  }
+
+  /**
+   * Invoke a callback each time an OracleAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the oracle state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
+  onChange(
+    callback: OnAccountChangeCallback<types.OracleAccountData>,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    return this.program.connection.onAccountChange(
+      this.publicKey,
+      accountInfo => {
+        callback(this.decode(accountInfo.data));
+      }
+    );
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.OracleAccountData} stored in this account.
    */
@@ -40,98 +70,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
     if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
     return data;
-  }
-
-  public static async createInstructions(
-    program: SwitchboardProgram,
-    payer: PublicKey,
-    params: {
-      queueAccount: QueueAccount;
-    } & OracleInitParams
-  ): Promise<[OracleAccount, TransactionObject]> {
-    const tokenWallet = Keypair.generate();
-    // console.log(`tokenWallet`, tokenWallet.publicKey.toBase58());
-
-    const authority = params.authority?.publicKey ?? payer;
-
-    const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
-      program,
-      params.queueAccount.publicKey,
-      tokenWallet.publicKey
-    );
-
-    const ixns = [
-      SystemProgram.createAccount({
-        fromPubkey: payer,
-        newAccountPubkey: tokenWallet.publicKey,
-        space: spl.ACCOUNT_SIZE,
-        lamports: await program.connection.getMinimumBalanceForRentExemption(
-          spl.ACCOUNT_SIZE
-        ),
-        programId: spl.TOKEN_PROGRAM_ID,
-      }),
-      spl.createInitializeAccountInstruction(
-        tokenWallet.publicKey,
-        program.mint.address,
-        authority
-      ),
-      spl.createSetAuthorityInstruction(
-        tokenWallet.publicKey,
-        authority,
-        spl.AuthorityType.AccountOwner,
-        program.programState.publicKey
-      ),
-      types.oracleInit(
-        program,
-        {
-          params: {
-            name: new Uint8Array(
-              Buffer.from(params.name ?? '', 'utf8').slice(0, 32)
-            ),
-            metadata: new Uint8Array(
-              Buffer.from(params.metadata ?? '', 'utf8').slice(0, 128)
-            ),
-            oracleBump,
-            stateBump: program.programState.bump,
-          },
-        },
-        {
-          oracle: oracleAccount.publicKey,
-          oracleAuthority: authority,
-          wallet: tokenWallet.publicKey,
-          programState: program.programState.publicKey,
-          queue: params.queueAccount.publicKey,
-          payer,
-          systemProgram: SystemProgram.programId,
-        }
-      ),
-    ];
-
-    return [
-      new OracleAccount(program, oracleAccount.publicKey),
-      new TransactionObject(
-        payer,
-        ixns,
-        params.authority ? [tokenWallet, params.authority] : [tokenWallet]
-      ),
-    ];
-  }
-
-  public static async create(
-    program: SwitchboardProgram,
-    params: {
-      queueAccount: QueueAccount;
-    } & OracleInitParams
-  ): Promise<[OracleAccount, TransactionSignature]> {
-    const [oracleAccount, txnObject] = await OracleAccount.createInstructions(
-      program,
-      program.walletPubkey,
-      params
-    );
-
-    const txnSignature = await program.signAndSend(txnObject);
-
-    return [oracleAccount, txnSignature];
   }
 
   /**
@@ -153,24 +91,172 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return [new OracleAccount(program, publicKey), bump];
   }
 
-  decode(data: Buffer): types.OracleAccountData {
-    try {
-      return types.OracleAccountData.decode(data);
-    } catch {
-      return this.program.coder.decode<types.OracleAccountData>(
-        OracleAccount.accountName,
-        data
-      );
+  public static async createInstructions(
+    program: SwitchboardProgram,
+    payer: PublicKey,
+    params: {
+      queueAccount: QueueAccount;
+    } & OracleInitParams &
+      OracleStakeParams
+  ): Promise<[OracleAccount, TransactionObject]> {
+    const tokenWallet = Keypair.generate();
+
+    const authority = params.authority?.publicKey ?? payer;
+
+    const txns: TransactionObject[] = [];
+
+    const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
+      program,
+      params.queueAccount.publicKey,
+      tokenWallet.publicKey
+    );
+
+    const oracleInit = new TransactionObject(
+      payer,
+      [
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: tokenWallet.publicKey,
+          space: spl.ACCOUNT_SIZE,
+          lamports: await program.connection.getMinimumBalanceForRentExemption(
+            spl.ACCOUNT_SIZE
+          ),
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
+        spl.createInitializeAccountInstruction(
+          tokenWallet.publicKey,
+          program.mint.address,
+          authority
+        ),
+        spl.createSetAuthorityInstruction(
+          tokenWallet.publicKey,
+          authority,
+          spl.AuthorityType.AccountOwner,
+          program.programState.publicKey
+        ),
+        types.oracleInit(
+          program,
+          {
+            params: {
+              name: new Uint8Array(
+                Buffer.from(params.name ?? '', 'utf8').slice(0, 32)
+              ),
+              metadata: new Uint8Array(
+                Buffer.from(params.metadata ?? '', 'utf8').slice(0, 128)
+              ),
+              oracleBump,
+              stateBump: program.programState.bump,
+            },
+          },
+          {
+            oracle: oracleAccount.publicKey,
+            oracleAuthority: authority,
+            wallet: tokenWallet.publicKey,
+            programState: program.programState.publicKey,
+            queue: params.queueAccount.publicKey,
+            payer,
+            systemProgram: SystemProgram.programId,
+          }
+        ),
+      ],
+      params.authority ? [params.authority, tokenWallet] : [tokenWallet]
+    );
+
+    txns.push(oracleInit);
+
+    if (params.stakeAmount && params.stakeAmount > 0) {
+      const depositTxn = await oracleAccount.stakeInstructions(payer, {
+        stakeAmount: params.stakeAmount,
+        funderAuthority: params.funderAuthority,
+        funderTokenAccount: params.funderTokenAccount,
+        tokenAccount: tokenWallet.publicKey,
+      });
+      txns.push(depositTxn);
     }
+
+    const packed = TransactionObject.pack(txns);
+    if (packed.length > 1) {
+      throw new Error(`Expected a single TransactionObject`);
+    }
+
+    return [oracleAccount, packed[0]];
   }
 
-  onChange(callback: OnAccountChangeCallback<types.OracleAccountData>): number {
-    return this.program.connection.onAccountChange(
-      this.publicKey,
-      accountInfo => {
-        callback(this.decode(accountInfo.data));
-      }
+  public static async create(
+    program: SwitchboardProgram,
+    params: {
+      queueAccount: QueueAccount;
+    } & OracleInitParams &
+      OracleStakeParams
+  ): Promise<[OracleAccount, TransactionSignature]> {
+    const [oracleAccount, txnObject] = await OracleAccount.createInstructions(
+      program,
+      program.walletPubkey,
+      params
     );
+
+    const txnSignature = await program.signAndSend(txnObject);
+
+    return [oracleAccount, txnSignature];
+  }
+
+  async stakeInstructions(
+    payer: PublicKey,
+    params: OracleStakeParams & { tokenAccount?: PublicKey }
+  ): Promise<TransactionObject> {
+    if (!params.stakeAmount || params.stakeAmount <= 0) {
+      throw new Error(`stake amount should be greater than 0`);
+    }
+
+    const tokenWallet =
+      params.tokenAccount ?? (await this.loadData()).tokenAccount;
+
+    const funderAuthority = params.funderAuthority?.publicKey ?? payer;
+    const funderTokenAccount =
+      this.program.mint.getAssociatedAddress(funderAuthority);
+    const funderTokenAccountInfo = await this.program.connection.getAccountInfo(
+      funderTokenAccount
+    );
+
+    let wrapFundsTxn: TransactionObject;
+
+    if (!funderTokenAccountInfo) {
+      let userTokenAccount: PublicKey;
+      [userTokenAccount, wrapFundsTxn] =
+        await this.program.mint.createWrappedUserInstructions(
+          payer,
+          params.stakeAmount,
+          params.funderAuthority
+        );
+    } else {
+      wrapFundsTxn = await this.program.mint.wrapInstructions(
+        payer,
+        { amount: params.stakeAmount },
+        params.funderAuthority
+      );
+    }
+
+    wrapFundsTxn.add(
+      spl.createTransferInstruction(
+        funderTokenAccount,
+        tokenWallet,
+        funderAuthority,
+        this.program.mint.toTokenAmount(params.stakeAmount)
+      )
+    );
+
+    return wrapFundsTxn;
+  }
+
+  async stake(
+    params: OracleStakeParams & { tokenAccount?: PublicKey }
+  ): Promise<TransactionSignature> {
+    const stakeTxn = await this.stakeInstructions(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(stakeTxn);
+    return txnSignature;
   }
 
   heartbeatInstruction(
@@ -201,7 +287,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
   }
 
-  async heartbeat(params: {
+  async heartbeat(params?: {
     queueAccount: QueueAccount;
     tokenWallet?: PublicKey;
     queueAuthority?: PublicKey;
@@ -209,23 +295,27 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     permission?: [PermissionAccount, number];
     authority?: Keypair;
   }): Promise<TransactionSignature> {
-    const tokenWallet =
-      params.tokenWallet ?? (await this.loadData()).tokenAccount;
+    const oracle = await this.loadData();
+    const tokenWallet = params?.tokenWallet ?? oracle.tokenAccount;
 
-    const queue = params.queue ?? (await params.queueAccount.loadData());
-    const oracles = await params.queueAccount.loadOracles();
+    const queueAccount =
+      params?.queueAccount ??
+      new QueueAccount(this.program, oracle.queuePubkey);
+
+    const queue = params?.queue ?? (await queueAccount.loadData());
+    const oracles = await queueAccount.loadOracles();
 
     let lastPubkey = this.publicKey;
-    if (queue.size !== 0) {
+    if (oracles.length !== 0) {
       lastPubkey = oracles[queue.gcIdx];
     }
 
     const [permissionAccount, permissionBump] =
-      params.permission ??
+      params?.permission ??
       PermissionAccount.fromSeed(
         this.program,
-        params.queueAuthority ?? queue.authority,
-        params.queueAccount.publicKey,
+        queue.authority,
+        queueAccount.publicKey,
         this.publicKey
       );
     try {
@@ -236,19 +326,29 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       );
     }
 
+    if (
+      params?.authority &&
+      !oracle.oracleAuthority.equals(params.authority.publicKey)
+    ) {
+      throw new errors.IncorrectAuthority(
+        oracle.oracleAuthority,
+        params.authority.publicKey
+      );
+    }
+
     const heartbeatTxn = new TransactionObject(
       this.program.walletPubkey,
       [
         this.heartbeatInstruction(this.program.walletPubkey, {
           tokenWallet: tokenWallet,
           gcOracle: lastPubkey,
-          oracleQueue: params.queueAccount.publicKey,
+          oracleQueue: queueAccount.publicKey,
           dataBuffer: queue.dataBuffer,
           permission: [permissionAccount, permissionBump],
-          authority: params.authority ? params.authority.publicKey : undefined,
+          authority: oracle.oracleAuthority,
         }),
       ],
-      params.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : []
     );
 
     const txnSignature = await this.program.signAndSend(heartbeatTxn);
@@ -356,4 +456,13 @@ export interface OracleInitParams {
   metadata?: string;
   /** Alternative keypair that will be the authority for the oracle. If not set the payer will be used. */
   authority?: Keypair;
+}
+
+export interface OracleStakeParams {
+  /** The amount of funds to deposit into the oracle's staking wallet. The oracle must have the {@linkcode QueueAccount} minStake before being permitted to heartbeat and join the queue. */
+  stakeAmount?: number;
+  /** The tokenAccount for the account funding the staking wallet. Will default to the payer's associatedTokenAccount if not provided. */
+  funderTokenAccount?: PublicKey;
+  /** The funderTokenAccount authority for approving the transfer of funds from the funderTokenAccount into the oracle staking wallet. Will default to the payer if not provided. */
+  funderAuthority?: Keypair;
 }

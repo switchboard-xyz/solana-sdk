@@ -7,6 +7,11 @@ import {
 } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
+import {
+  PermitOracleHeartbeat,
+  PermitOracleQueueUsage,
+  PermitVrfRequests,
+} from '../generated/types/SwitchboardPermission';
 import { SwitchboardProgram } from '../program';
 import { TransactionObject } from '../transaction';
 import { Account } from './account';
@@ -18,6 +23,29 @@ export interface PermissionAccountInitParams {
   granter: PublicKey;
   grantee: PublicKey;
   authority: PublicKey;
+}
+
+export interface PermitNoneJSON {
+  kind: 'PermitNone';
+}
+
+export class PermitNone {
+  static readonly discriminator = 0;
+  static readonly kind = 'NONE';
+  readonly discriminator = 0;
+  readonly kind = 'PermitNone';
+
+  toJSON(): PermitNoneJSON {
+    return {
+      kind: 'PermitNone',
+    };
+  }
+
+  toEncodable() {
+    return {
+      PermitOracleHeartbeat: {},
+    };
+  }
 }
 
 export interface PermissionSetParams {
@@ -38,6 +66,25 @@ export interface PermissionSetParams {
  */
 export class PermissionAccount extends Account<types.PermissionAccountData> {
   static accountName = 'PermissionAccountData';
+
+  static getPermissions(
+    permission: types.PermissionAccountData
+  ): types.SwitchboardPermissionKind | PermitNone {
+    switch (permission.permissions) {
+      case 0:
+        return new PermitNone();
+      case 1:
+        return new PermitOracleHeartbeat();
+      case 2:
+        return new PermitOracleQueueUsage();
+      case 3:
+        return new PermitVrfRequests();
+    }
+
+    throw new Error(
+      `Failed to find the assigned permissions, expected a value from 0 - 3, received ${permission.permissions}`
+    );
+  }
 
   /**
    * Loads a PermissionAccount from the expected PDA seed format.

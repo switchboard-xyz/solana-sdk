@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
 import 'mocha';
-import chai, { expect } from 'chai';
-import assert from 'assert';
 
 import * as sbv2 from '../src';
 import { setupTest, TestContext } from './utilts';
@@ -189,9 +187,8 @@ describe('Aggregator Tests', () => {
     }
     const aggregatorAccount = fundedAggregator;
 
-    const initialUserTokenBalance = await ctx.program.mint.getBalance(
-      ctx.payer.publicKey
-    );
+    const initialUserTokenBalance =
+      (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
 
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,
@@ -212,6 +209,13 @@ describe('Aggregator Tests', () => {
       throw new Error(
         `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
       );
+    }
+
+    const finalUserBalance = await ctx.program.mint.getBalance(
+      ctx.payer.publicKey
+    );
+    if (!finalUserBalance) {
+      throw new Error(`Users wrapped account was closed`);
     }
 
     const finalUserTokenBalance =

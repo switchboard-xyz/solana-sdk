@@ -31,8 +31,11 @@ export class Mint {
     return this.provider.connection;
   }
 
-  public static async load(provider: anchor.AnchorProvider): Promise<Mint> {
-    const splMint = await spl.getMint(provider.connection, Mint.native);
+  public static async load(
+    provider: anchor.AnchorProvider,
+    mint = Mint.native
+  ): Promise<Mint> {
+    const splMint = await spl.getMint(provider.connection, mint);
     return new Mint(provider, splMint);
   }
 
@@ -84,15 +87,11 @@ export class Mint {
     return this.fromTokenAmount(userAccount.amount);
   }
 
-  public getAssociatedAddress(
-    user: anchor.web3.PublicKey
-  ): anchor.web3.PublicKey {
+  public getAssociatedAddress(user: PublicKey): PublicKey {
     return Mint.getAssociatedAddress(user);
   }
 
-  public static getAssociatedAddress(
-    user: anchor.web3.PublicKey
-  ): anchor.web3.PublicKey {
+  public static getAssociatedAddress(user: PublicKey): PublicKey {
     const [associatedToken] = anchor.utils.publicKey.findProgramAddressSync(
       [
         user.toBuffer(),
@@ -107,7 +106,7 @@ export class Mint {
   public async getOrCreateAssociatedUser(
     payer: PublicKey,
     user?: Keypair
-  ): Promise<anchor.web3.PublicKey> {
+  ): Promise<PublicKey> {
     const owner = user ? user.publicKey : payer;
     const associatedToken = Mint.getAssociatedAddress(owner);
     const accountInfo = await this.connection.getAccountInfo(associatedToken);
@@ -120,9 +119,9 @@ export class Mint {
   }
 
   public async createAssocatedUser(
-    payer: anchor.web3.PublicKey,
+    payer: PublicKey,
     user?: Keypair
-  ): Promise<[anchor.web3.PublicKey, string]> {
+  ): Promise<[PublicKey, string]> {
     const [txn, associatedToken] = this.createAssocatedUserInstruction(
       payer,
       user
@@ -133,7 +132,7 @@ export class Mint {
   }
 
   public static createAssocatedUserInstruction(
-    payer: anchor.web3.PublicKey,
+    payer: PublicKey,
     user?: Keypair
   ): [TransactionObject, PublicKey] {
     const owner = user ? user.publicKey : payer;
@@ -184,8 +183,107 @@ export class Mint {
     return [account, sig];
   }
 
-  public async wrapInstruction(
-    payer: anchor.web3.PublicKey,
+  public async signAndSend(
+    txn: TransactionObject,
+    opts: anchor.web3.ConfirmOptions = {
+      skipPreflight: false,
+      maxRetries: 10,
+    }
+  ): Promise<TransactionSignature> {
+    const blockhash = await this.connection.getLatestBlockhash();
+    const txnSignature = await this.provider.sendAndConfirm(
+      await this.provider.wallet.signTransaction(txn.toTxn(blockhash)),
+      txn.signers,
+      opts
+    );
+    return txnSignature;
+  }
+}
+
+export class NativeMint extends Mint {
+  public static async load(
+    provider: anchor.AnchorProvider
+  ): Promise<NativeMint> {
+    const splMint = await spl.getMint(provider.connection, Mint.native);
+    return new NativeMint(provider, splMint);
+  }
+
+  public async createWrappedUserInstructions(
+    payer: PublicKey,
+    amount: number,
+    user?: Keypair
+  ): Promise<[PublicKey, TransactionObject]> {
+    const owner = user ? user.publicKey : payer;
+    const associatedAddress = this.getAssociatedAddress(owner);
+    const associatedAccountInfo =
+      this.connection.getAccountInfo(associatedAddress);
+    if (!associatedAccountInfo) {
+      throw new Error(
+        `Associated token address already exists for this user ${owner}`
+      );
+    }
+
+    const ephemeralAccount = Keypair.generate();
+    const ephemeralWallet = this.getAssociatedAddress(
+      ephemeralAccount.publicKey
+    );
+
+    const wrapAmountLamports = this.toTokenAmount(amount);
+
+    return [
+      associatedAddress,
+      new TransactionObject(
+        payer,
+        [
+          spl.createAssociatedTokenAccountInstruction(
+            payer,
+            associatedAddress,
+            owner,
+            Mint.native
+          ),
+          spl.createAssociatedTokenAccountInstruction(
+            payer,
+            ephemeralWallet,
+            ephemeralAccount.publicKey,
+            spl.NATIVE_MINT
+          ),
+          SystemProgram.transfer({
+            fromPubkey: owner,
+            toPubkey: ephemeralWallet,
+            lamports: wrapAmountLamports,
+          }),
+          spl.createSyncNativeInstruction(ephemeralWallet),
+          spl.createTransferInstruction(
+            ephemeralWallet,
+            associatedAddress,
+            ephemeralAccount.publicKey,
+            wrapAmountLamports
+          ),
+          spl.createCloseAccountInstruction(
+            ephemeralWallet,
+            owner,
+            ephemeralAccount.publicKey
+          ),
+        ],
+        user ? [user, ephemeralAccount] : [ephemeralAccount]
+      ),
+    ];
+  }
+
+  public async createWrappedUser(
+    payer: PublicKey,
+    amount: number,
+    user?: Keypair
+  ): Promise<[PublicKey, TransactionSignature]> {
+    const [tokenAccount, createWrappedUserTxn] =
+      await this.createWrappedUserInstructions(payer, amount, user);
+    const txSignature = await this.signAndSend(createWrappedUserTxn);
+
+    return [tokenAccount, txSignature];
+  }
+
+  public async wrapInstructions(
+    payer: PublicKey,
     params:
       | {
           amount: number;
@@ -193,10 +291,6 @@ export class Mint {
       | { fundUpTo: Big },
     user?: Keypair
   ): Promise<TransactionObject> {
-    if (!this.address.equals(Mint.native)) {
-      throw new NativeMintOnlyError();
-    }
-
     const ixns: TransactionInstruction[] = [];
 
     const owner = user ? user.publicKey : payer;
@@ -209,16 +303,6 @@ export class Mint {
       userAccountInfo === null
         ? null
         : spl.unpackAccount(userAddress, userAccountInfo);
-    // if (userAccount === null) {
-    //   ixns.push(
-    //     spl.createAssociatedTokenAccountInstruction(
-    //       payer,
-    //       userAddress,
-    //       owner,
-    //       Mint.native
-    //     )
-    //   );
-    // }
 
     const tokenBalance = userAccount
       ? new Big(this.fromTokenAmount(userAccount.amount))
@@ -283,7 +367,7 @@ export class Mint {
   }
 
   public async wrap(
-    payer: anchor.web3.PublicKey,
+    payer: PublicKey,
     params:
       | {
           amount: number;
@@ -291,25 +375,17 @@ export class Mint {
       | { fundUpTo: Big },
     user?: Keypair
   ) {
-    if (!this.address.equals(Mint.native)) {
-      throw new NativeMintOnlyError();
-    }
-
-    const wrapIxns = await this.wrapInstruction(payer, params, user);
+    const wrapIxns = await this.wrapInstructions(payer, params, user);
     const txSignature = await this.signAndSend(wrapIxns);
 
     return txSignature;
   }
 
-  public async unwrapInstruction(
-    payer: anchor.web3.PublicKey,
+  public async unwrapInstructions(
+    payer: PublicKey,
     amount?: number,
     user?: Keypair
   ): Promise<TransactionObject> {
-    if (!this.address.equals(Mint.native)) {
-      throw new NativeMintOnlyError();
-    }
-
     const owner = user ? user.publicKey : payer;
 
     const ixns: TransactionInstruction[] = [];
@@ -359,7 +435,7 @@ export class Mint {
   }
 
   public async unwrap(
-    payer: anchor.web3.PublicKey,
+    payer: PublicKey,
     amount?: number,
     user?: Keypair
   ): Promise<TransactionSignature> {
@@ -367,24 +443,8 @@ export class Mint {
       throw new NativeMintOnlyError();
     }
 
-    const unwrapTxn = await this.unwrapInstruction(payer, amount, user);
+    const unwrapTxn = await this.unwrapInstructions(payer, amount, user);
     const txSignature = await this.signAndSend(unwrapTxn);
     return txSignature;
-  }
-
-  private async signAndSend(
-    txn: TransactionObject,
-    opts: anchor.web3.ConfirmOptions = {
-      skipPreflight: false,
-      maxRetries: 10,
-    }
-  ): Promise<TransactionSignature> {
-    const blockhash = await this.connection.getLatestBlockhash();
-    const txnSignature = await this.provider.sendAndConfirm(
-      await this.provider.wallet.signTransaction(txn.toTxn(blockhash)),
-      txn.signers,
-      opts
-    );
-    return txnSignature;
   }
 }

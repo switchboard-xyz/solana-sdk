@@ -24,7 +24,11 @@ import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
 import { CrankAccount, CrankInitParams } from './crankAccount';
 import { JobAccount, JobInitParams } from './jobAccount';
 import { LeaseAccount } from './leaseAccount';
-import { OracleAccount, OracleInitParams } from './oracleAccount';
+import {
+  OracleAccount,
+  OracleInitParams,
+  OracleStakeParams,
+} from './oracleAccount';
 import { PermissionAccount, PermissionSetParams } from './permissionAccount';
 import { QueueDataBuffer } from './queueDataBuffer';
 import { VrfAccount, VrfInitParams } from './vrfAccount';
@@ -274,8 +278,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: OracleInitParams & Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[OracleAccount, TransactionObject]> {
+    params: OracleInitParams &
+      OracleStakeParams &
+      Partial<Omit<PermissionSetParams, 'permission'>>
+  ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const queue = await this.loadData();
 
     const [oracleAccount, createOracleTxnObject] =
@@ -302,7 +308,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     return [
       oracleAccount,
-      createOracleTxnObject.combine(createPermissionTxnObject),
+      TransactionObject.pack([
+        createOracleTxnObject,
+        createPermissionTxnObject,
+      ]),
     ];
   }
 
@@ -326,8 +335,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: OracleInitParams & Partial<Omit<PermissionSetParams, 'permission'>>
-  ): Promise<[OracleAccount, TransactionSignature]> {
+    params: OracleInitParams &
+      OracleStakeParams &
+      Partial<Omit<PermissionSetParams, 'permission'>>
+  ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
     const queue = await this.loadData();
@@ -344,9 +355,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       params
     );
 
-    const signature = await this.program.signAndSend(txn);
+    const signatures = await this.program.signAndSendAll(txn);
 
-    return [oracleAccount, signature];
+    return [oracleAccount, signatures];
   }
 
   /**
