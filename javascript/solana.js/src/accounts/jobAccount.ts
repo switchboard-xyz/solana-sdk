@@ -38,6 +38,19 @@ export class JobAccount extends Account<types.JobAccountData> {
    */
   public size = this.program.account.jobAccountData.size;
 
+  /** Load an existing JobAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[JobAccount, types.JobAccountData]> {
+    const account = new JobAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.JobAccountData} stored in this account.
    */

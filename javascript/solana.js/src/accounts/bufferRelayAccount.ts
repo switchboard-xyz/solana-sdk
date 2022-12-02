@@ -69,6 +69,19 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     );
   }
 
+  /** Load an existing BufferRelayer with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[BufferRelayerAccount, types.BufferRelayerAccountData]> {
+    const account = new BufferRelayerAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Load and parse {@linkcode BufferRelayerAccount} data based on the program IDL.
    */

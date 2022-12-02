@@ -65,6 +65,19 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public static getMetadata = (queue: types.OracleQueueAccountData) =>
     Buffer.from(queue.metadata).toString('utf8').replace(/u0000/g, '');
 
+  /** Load an existing QueueAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[QueueAccount, types.OracleQueueAccountData]> {
+    const account = new QueueAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Invoke a callback each time a QueueAccount's data has changed on-chain.
    * @param callback - the callback invoked when the queues state changes

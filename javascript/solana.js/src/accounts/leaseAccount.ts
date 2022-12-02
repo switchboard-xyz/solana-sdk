@@ -29,6 +29,19 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
    */
   public size = this.program.account.leaseAccountData.size;
 
+  /** Load an existing LeaseAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[LeaseAccount, types.LeaseAccountData]> {
+    const account = new LeaseAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Loads a LeaseAccount from the expected PDA seed format.
    * @param program The Switchboard program for the current connection.

@@ -31,6 +31,19 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   public size = this.program.account.oracleAccountData.size;
 
+  /** Load an existing OracleAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[OracleAccount, types.OracleAccountData]> {
+    const account = new OracleAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   decode(data: Buffer): types.OracleAccountData {
     try {
       return types.OracleAccountData.decode(data);

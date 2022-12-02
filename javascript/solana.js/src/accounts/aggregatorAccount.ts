@@ -105,13 +105,17 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return data;
   }
 
+  /** Load an existing AggregatorAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
-    publicKey: PublicKey
+    publicKey: PublicKey | string
   ): Promise<[AggregatorAccount, types.AggregatorAccountData]> {
-    const account = new AggregatorAccount(program, publicKey);
-    const aggregator = await account.loadData();
-    return [account, aggregator];
+    const account = new AggregatorAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
   }
 
   /**

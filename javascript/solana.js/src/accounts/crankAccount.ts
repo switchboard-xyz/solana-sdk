@@ -52,6 +52,19 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     );
   }
 
+  /** Load an existing CrankAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[CrankAccount, types.CrankAccountData]> {
+    const account = new CrankAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.CrankAccountData} stored in this account.
    */
