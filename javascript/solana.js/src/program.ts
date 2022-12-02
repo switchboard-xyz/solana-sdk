@@ -328,17 +328,15 @@ export class SwitchboardProgram {
       );
 
       return txnSignature;
-    } catch (error) {
-      if ('code' in (error as any) && typeof (error as any).code === 'number') {
-        const switchboardError = fromSwitchboardCode((error as any).code);
-        if (switchboardError) {
-          throw switchboardError;
-        }
-
-        const anchorError = fromAnchorCode((error as any).code);
-        if (anchorError) {
-          throw anchorError;
-        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if ('code' in error && typeof error.code === 'number') {
+        // Check for other switchboard error.
+        const switchboardError = fromSwitchboardCode(error.code);
+        if (switchboardError) throw switchboardError;
+        // Check for other anchor error.
+        const anchorError = fromAnchorCode(error.code);
+        if (anchorError) throw anchorError;
       }
 
       throw error;

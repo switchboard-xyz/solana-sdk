@@ -2,7 +2,6 @@ import * as anchor from '@project-serum/anchor';
 import * as spl from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
-  AccountInfo,
   Commitment,
   Keypair,
   ParsedTransactionWithMeta,

@@ -499,8 +499,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         loadAmount: params.fundAmount,
         funderTokenAccount: params.funderTokenAccount,
         funderAuthority: params.funderAuthority,
-        aggregatorPubkey: aggregatorAccount.publicKey,
-        queuePubkey: this.publicKey,
+        aggregatorAccount: aggregatorAccount,
+        queueAccount: this,
         jobAuthorities: [],
       })
     )[1];

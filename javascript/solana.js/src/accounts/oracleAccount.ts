@@ -54,9 +54,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => {
-        callback(this.decode(accountInfo.data));
-      }
+      accountInfo => callback(this.decode(accountInfo.data)),
+      commitment
     );
   }
 

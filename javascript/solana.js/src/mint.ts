@@ -228,8 +228,9 @@ export class NativeMint extends Mint {
           ? params.amount
           : 0;
 
-      const [userWrapedTokenAccount, userInit] =
-        await this.createWrappedUserInstructions(payer, amount, user);
+      const userInit = (
+        await this.createWrappedUserInstructions(payer, amount, user)
+      )[1];
 
       return [associatedToken, userInit];
     } else {
