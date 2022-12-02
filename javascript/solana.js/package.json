@@ -41,7 +41,7 @@
     "pretest": "npm run build",
     "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
     "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
-    "localnet:up": "npm run local:validator & sleep 10 && npm run test:localnet; kill -9 $(pgrep command solana-test-validator)",
+    "localnet:up": "npm run local:validator & sleep 15 && npm run test:localnet; kill -9 $(pgrep command solana-test-validator)",
     "posttest": "npm run lint",
     "prepublishOnly": "shx rm -rf lib && npm run build",
     "docs": "typedoc src/index.ts --githubPages --cleanOutputDir",
