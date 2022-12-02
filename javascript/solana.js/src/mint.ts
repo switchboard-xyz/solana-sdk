@@ -67,34 +67,57 @@ export class Mint {
     return swbDecimal.toBig().toNumber();
   }
 
-  public async getAccount(user: PublicKey): Promise<spl.Account | null> {
-    const userTokenAddress = Mint.getAssociatedAddress(user);
-    const userTokenAccountInfo = await this.provider.connection.getAccountInfo(
-      userTokenAddress
+  public async getAssociatedAccount(
+    owner: PublicKey
+  ): Promise<spl.Account | null> {
+    const ownerTokenAddress = Mint.getAssociatedAddress(owner);
+    const ownerTokenAccountInfo = await this.provider.connection.getAccountInfo(
+      ownerTokenAddress
     );
-    if (userTokenAccountInfo === null) {
+    if (ownerTokenAccountInfo === null) {
       return null;
     }
-    const account = spl.unpackAccount(userTokenAddress, userTokenAccountInfo);
+    const account = spl.unpackAccount(ownerTokenAddress, ownerTokenAccountInfo);
     return account;
   }
 
-  public async getBalance(user: PublicKey): Promise<number | null> {
-    const userAccount = await this.getAccount(user);
-    if (userAccount === null) {
+  public async getAssociatedBalance(owner: PublicKey): Promise<number | null> {
+    const ownerAccount = await this.getAssociatedAccount(owner);
+    if (ownerAccount === null) {
       return null;
     }
-    return this.fromTokenAmount(userAccount.amount);
+    return this.fromTokenAmount(ownerAccount.amount);
+  }
+
+  public async getAccount(
+    tokenAddress: PublicKey
+  ): Promise<spl.Account | null> {
+    const tokenAccountInfo = await this.provider.connection.getAccountInfo(
+      tokenAddress
+    );
+    if (tokenAccountInfo === null) {
+      return null;
+    }
+    const account = spl.unpackAccount(tokenAddress, tokenAccountInfo);
+    return account;
+  }
+
+  public async getBalance(tokenAddress: PublicKey): Promise<number | null> {
+    const tokenAccount = await this.getAccount(tokenAddress);
+    if (tokenAccount === null) {
+      return null;
+    }
+    return this.fromTokenAmount(tokenAccount.amount);
   }
 
   public getAssociatedAddress(user: PublicKey): PublicKey {
     return Mint.getAssociatedAddress(user);
   }
 
-  public static getAssociatedAddress(user: PublicKey): PublicKey {
+  public static getAssociatedAddress(owner: PublicKey): PublicKey {
     const [associatedToken] = anchor.utils.publicKey.findProgramAddressSync(
       [
-        user.toBuffer(),
+        owner.toBuffer(),
         spl.TOKEN_PROGRAM_ID.toBuffer(),
         Mint.native.toBuffer(),
       ],
@@ -238,7 +261,7 @@ export class NativeMint extends Mint {
         if (!params.fundUpTo || params.fundUpTo < 0) {
           throw new Error(`fundUpTo must be a positive number`);
         }
-        const tokenBalance = (await this.getBalance(owner)) ?? 0;
+        const tokenBalance = (await this.getAssociatedBalance(owner)) ?? 0;
         if (tokenBalance > (params.fundUpTo ?? 0)) {
           return [associatedToken, new TransactionObject(payer, [], [])];
         }

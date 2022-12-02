@@ -977,7 +977,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   }
 
   /** Loads the oracle states for the oracles currently on the queue's dataBuffer */
-  public async loadOracleAccounts(): Promise<
+  public async loadOracleAccounts(_oracles?: Array<PublicKey>): Promise<
     Array<{
       publicKey: PublicKey;
       data: types.OracleAccountData;
@@ -985,7 +985,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   > {
     const coder = this.program.coder;
 
-    const oraclePubkeys = await this.loadOracles();
+    const oraclePubkeys = _oracles ?? (await this.loadOracles());
     const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
       this.program.connection,
       oraclePubkeys
@@ -1123,6 +1123,39 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       ],
       params.authority ? [params.authority] : []
     );
+  }
+
+  public async toAccountsJSON(
+    _queue?: types.OracleQueueAccountData,
+    _oracles?: Array<PublicKey>
+  ): Promise<
+    Omit<types.OracleQueueAccountDataJSON, 'dataBuffer'> & {
+      publicKey: PublicKey;
+      dataBuffer: { publicKey: PublicKey; data: Array<PublicKey> };
+      oracles: Array<{
+        publicKey: PublicKey;
+        data: types.OracleAccountDataJSON;
+      }>;
+    }
+  > {
+    const queue = _queue ?? (await this.loadData());
+    const oracles = _oracles ?? (await this.loadOracles());
+    const oracleAccounts = await this.loadOracleAccounts(oracles);
+
+    return {
+      publicKey: this.publicKey,
+      ...queue.toJSON(),
+      dataBuffer: {
+        publicKey: queue.dataBuffer,
+        data: oracles,
+      },
+      oracles: oracleAccounts.map(o => {
+        return {
+          publicKey: o.publicKey,
+          data: o.data.toJSON(),
+        };
+      }),
+    };
   }
 }
 

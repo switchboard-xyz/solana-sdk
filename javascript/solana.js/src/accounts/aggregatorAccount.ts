@@ -990,16 +990,18 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
-  public async loadAllAccounts(
+  public async toAccountsJSON(
     _aggregator?: types.AggregatorAccountData,
     _queueAccount?: QueueAccount,
     _queue?: types.OracleQueueAccountData
   ): Promise<
     types.AggregatorAccountDataJSON & {
       publicKey: PublicKey;
-      queue: types.OracleQueueAccountDataJSON;
-      permission: types.PermissionAccountDataJSON;
-      lease: types.LeaseAccountDataJSON & { balance: number };
+      queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
+      permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
+      lease: types.LeaseAccountDataJSON & { publicKey: PublicKey } & {
+        balance: number;
+      };
       jobs: Array<
         types.JobAccountDataJSON & {
           publicKey: PublicKey;
@@ -1082,9 +1084,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return {
       publicKey: this.publicKey,
       ...aggregator.toJSON(),
-      queue: queue.toJSON(),
-      permission: permission.toJSON(),
+      queue: {
+        publicKey: queueAccount.publicKey,
+        ...queue.toJSON(),
+      },
+      permission: {
+        publicKey: permissionAccount.publicKey,
+        ...permission.toJSON(),
+      },
       lease: {
+        publicKey: leaseAccount.publicKey,
         ...lease.toJSON(),
         balance: this.program.mint.fromTokenAmount(leaseEscrowAccount.amount),
       },

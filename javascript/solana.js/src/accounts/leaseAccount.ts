@@ -361,7 +361,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       ? params.funder
       : this.program.mint.getAssociatedAddress(funderAuthority);
     const funderBalance =
-      (await this.program.mint.getBalance(funderAuthority)) ?? 0;
+      (await this.program.mint.getAssociatedBalance(funderAuthority)) ?? 0;
     if (funderBalance < params.loadAmount) {
       const wrapIxns = await this.program.mint.unwrapInstructions(
         payer,

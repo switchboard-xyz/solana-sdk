@@ -374,6 +374,28 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
     return true;
   }
+
+  public async toAccountsJSON(
+    _crank?: types.CrankAccountData,
+    _crankRows?: Array<types.CrankRow>
+  ): Promise<
+    Omit<types.CrankAccountDataJSON, 'dataBuffer'> & {
+      publicKey: PublicKey;
+      dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };
+    }
+  > {
+    const crank = _crank ?? (await this.loadData());
+    const crankRows = _crankRows ?? (await this.loadCrank());
+
+    return {
+      publicKey: this.publicKey,
+      ...crank.toJSON(),
+      dataBuffer: {
+        publicKey: crank.dataBuffer,
+        data: crankRows,
+      },
+    };
+  }
 }
 
 /**
