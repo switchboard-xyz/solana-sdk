@@ -89,14 +89,18 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   /** Load an existing PermissionAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
-    publicKey: PublicKey | string
-  ): Promise<[PermissionAccount, types.PermissionAccountData]> {
-    const account = new PermissionAccount(
+    authority: PublicKey | string,
+    granter: PublicKey | string,
+    grantee: PublicKey | string
+  ): Promise<[PermissionAccount, types.PermissionAccountData, number]> {
+    const [account, bump] = PermissionAccount.fromSeed(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof authority === 'string' ? new PublicKey(authority) : authority,
+      typeof granter === 'string' ? new PublicKey(granter) : granter,
+      typeof grantee === 'string' ? new PublicKey(grantee) : grantee
     );
     const state = await account.loadData();
-    return [account, state];
+    return [account, state, bump];
   }
 
   /**

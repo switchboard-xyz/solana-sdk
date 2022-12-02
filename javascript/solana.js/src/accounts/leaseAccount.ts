@@ -32,14 +32,16 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   /** Load an existing LeaseAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
-    publicKey: PublicKey | string
-  ): Promise<[LeaseAccount, types.LeaseAccountData]> {
-    const account = new LeaseAccount(
+    queue: PublicKey | string,
+    aggregator: PublicKey | string
+  ): Promise<[LeaseAccount, types.LeaseAccountData, number]> {
+    const [account, bump] = LeaseAccount.fromSeed(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof queue === 'string' ? new PublicKey(queue) : queue,
+      typeof aggregator === 'string' ? new PublicKey(aggregator) : aggregator
     );
     const state = await account.loadData();
-    return [account, state];
+    return [account, state, bump];
   }
 
   /**

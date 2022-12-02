@@ -78,3 +78,9 @@ export class IncorrectAuthority extends Error {
     Object.setPrototypeOf(this, IncorrectAuthority.prototype);
   }
 }
+export class AggregatorConfigError extends Error {
+  constructor(property: string, message: string) {
+    super(`failed to validate property '${property}' - ${message}`);
+    Object.setPrototypeOf(this, AggregatorConfigError.prototype);
+  }
+}

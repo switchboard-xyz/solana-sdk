@@ -435,7 +435,61 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return jobs.map(j => Buffer.from(new Uint8Array(j.state.hash)));
   }
 
-  public setConfigInstruction(
+  /**
+   * Validate an aggregators config
+   *
+   * @throws {AggregatorConfigError} if minUpdateDelaySeconds < 5, if batchSize > queueSize, if minOracleResults > batchSize, if minJobResults > aggregator.jobPubkeysSize
+   */
+  public verifyConfig(
+    aggregator: types.AggregatorAccountData,
+    queue: types.OracleQueueAccountData,
+    target: {
+      batchSize?: number;
+      minOracleResults?: number;
+      minJobResults?: number;
+      minUpdateDelaySeconds?: number;
+    }
+  ): void {
+    const numberOfOracles = queue.size;
+
+    const endState = {
+      batchSize: target.batchSize ?? aggregator.oracleRequestBatchSize,
+      minOracleResults: target.minOracleResults ?? aggregator.minOracleResults,
+      minJobResults: target.minJobResults ?? aggregator.minJobResults,
+      minUpdateDelaySeconds:
+        target.minUpdateDelaySeconds ?? aggregator.minUpdateDelaySeconds,
+    };
+
+    if (endState.minUpdateDelaySeconds < 5) {
+      throw new errors.AggregatorConfigError(
+        'minUpdateDelaySeconds',
+        'must be greater than 5 seconds'
+      );
+    }
+
+    if (endState.minJobResults < aggregator.jobPubkeysSize) {
+      throw new errors.AggregatorConfigError(
+        'minJobResults',
+        `must be less than the number of jobs (${aggregator.jobPubkeysSize})`
+      );
+    }
+
+    if (endState.batchSize > numberOfOracles) {
+      throw new errors.AggregatorConfigError(
+        'oracleRequestBatchSize',
+        `must be less than the number of oracles actively heartbeating on the queue (${numberOfOracles})`
+      );
+    }
+
+    if (endState.minOracleResults > endState.batchSize) {
+      throw new errors.AggregatorConfigError(
+        'minOracleResults',
+        `must be less than the oracleRequestBatchSize (${endState.batchSize})`
+      );
+    }
+  }
+
+  public async setConfigInstruction(
     payer: PublicKey,
     params: Partial<{
       name: string;
@@ -451,8 +505,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBump?: number;
       priorityFeeBumpPeriod?: number;
       maxPriorityFeeMultiplier?: number;
-    }>
-  ): TransactionObject {
+    }> & { force?: boolean }
+  ): Promise<TransactionObject> {
+    if (!(params.force ?? false)) {
+      const aggregator = await this.loadData();
+      const queueAccount = new QueueAccount(
+        this.program,
+        aggregator.queuePubkey
+      );
+      const queue = await queueAccount.loadData();
+      this.verifyConfig(aggregator, queue, {
+        batchSize: params.batchSize,
+        minOracleResults: params.minOracleResults,
+        minJobResults: params.minJobResults,
+        minUpdateDelaySeconds: params.minUpdateDelaySeconds,
+      });
+    }
+
     const setConfigIxn = types.aggregatorSetConfig(
       this.program,
       {
@@ -516,7 +585,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       maxPriorityFeeMultiplier?: number;
     }>
   ): Promise<TransactionSignature> {
-    const setConfigTxn = this.setConfigInstruction(
+    const setConfigTxn = await this.setConfigInstruction(
       this.program.walletPubkey,
       params
     );
