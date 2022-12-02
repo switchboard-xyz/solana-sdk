@@ -94,11 +94,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: {
+      aggregatorAccount: AggregatorAccount;
+      queueAccount: QueueAccount;
       loadAmount?: number;
       funderTokenAccount?: PublicKey;
       funderAuthority?: Keypair;
-      queuePubkey: PublicKey;
-      aggregatorPubkey: PublicKey;
       withdrawAuthority?: PublicKey;
       jobAuthorities: Array<PublicKey>;
     }
@@ -131,8 +131,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
       program,
-      params.queuePubkey,
-      params.aggregatorPubkey
+      params.queueAccount.publicKey,
+      params.aggregatorAccount.publicKey
     );
 
     const [escrow] = anchor.utils.publicKey.findProgramAddressSync(
@@ -169,8 +169,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         },
         {
           lease: leaseAccount.publicKey,
-          queue: params.queuePubkey,
-          aggregator: params.aggregatorPubkey,
+          queue: params.queueAccount.publicKey,
+          aggregator: params.aggregatorAccount.publicKey,
           payer: payer,
           systemProgram: SystemProgram.programId,
           tokenProgram: spl.TOKEN_PROGRAM_ID,
@@ -189,12 +189,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   public static async create(
     program: SwitchboardProgram,
     params: {
-      loadAmount?: number;
-      mint: PublicKey;
-      funder?: PublicKey;
-      funderAuthority?: Keypair;
-      queueAccount: QueueAccount;
       aggregatorAccount: AggregatorAccount;
+      queueAccount: QueueAccount;
+      loadAmount?: number;
+      funderTokenAccount?: PublicKey;
+      funderAuthority?: Keypair;
       withdrawAuthority?: PublicKey;
       jobAuthorities: Array<PublicKey>;
     }
@@ -202,15 +201,10 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const [leaseAccount, transaction] = await LeaseAccount.createInstructions(
       program,
       program.walletPubkey,
-      {
-        ...params,
-        aggregatorPubkey: params.aggregatorAccount.publicKey,
-        queuePubkey: params.queueAccount.publicKey,
-      }
+      params
     );
 
     const signature = await program.signAndSend(transaction);
-
     return [leaseAccount, signature];
   }
 
