@@ -187,8 +187,25 @@ describe('Aggregator Tests', () => {
     }
     const aggregatorAccount = fundedAggregator;
 
-    const initialUserTokenBalance =
-      (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
+    let initialUserTokenBalance = await ctx.program.mint.getBalance(
+      ctx.payer.publicKey
+    );
+    if (initialUserTokenBalance === null || initialUserTokenBalance <= 0) {
+      const [user, userInit] =
+        await ctx.program.mint.getOrCreateWrappedUserInstructions(
+          ctx.payer.publicKey,
+          {
+            fundUpTo: 0.1,
+          }
+        );
+
+      if (userInit.ixns.length > 0) {
+        await ctx.program.signAndSend(userInit);
+      }
+
+      initialUserTokenBalance =
+        (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
+    }
 
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,

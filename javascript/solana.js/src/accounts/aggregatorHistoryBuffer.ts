@@ -52,24 +52,30 @@ export class AggregatorHistoryBuffer extends Account<
     }
 
     const insertIdx = historyBuffer.readUInt32LE(8) * ROW_SIZE;
+
     const front: Array<types.AggregatorHistoryRow> = [];
     const tail: Array<types.AggregatorHistoryRow> = [];
+
     for (let i = 12; i < historyBuffer.length; i += ROW_SIZE) {
       if (i + ROW_SIZE > historyBuffer.length) {
         break;
       }
+
       const row = types.AggregatorHistoryRow.fromDecoded(
         types.AggregatorHistoryRow.layout().decode(historyBuffer, i)
       );
+
       if (row.timestamp.eq(new anchor.BN(0))) {
         break;
       }
+
       if (i <= insertIdx) {
         tail.push(row);
       } else {
         front.push(row);
       }
     }
+
     return front.concat(tail);
   }
 

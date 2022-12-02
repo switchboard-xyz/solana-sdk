@@ -431,6 +431,35 @@ impl VrfAccountData {
         }))
     }
 
+    /// Returns the deserialized Switchboard VRF account
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - A Solana AccountInfo's data buffer
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_v2::VrfAccountData;
+    ///
+    /// let vrf = VrfAccountData::new(vrf_account_info.try_borrow_data()?)?;
+    /// ```
+    pub fn new_from_bytes(data: &[u8]) -> anchor_lang::Result<&VrfAccountData> {
+        if data.len() < VrfAccountData::discriminator().len() {
+            return Err(ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+
+        let mut disc_bytes = [0u8; 8];
+        disc_bytes.copy_from_slice(&data[..8]);
+        if disc_bytes != VrfAccountData::discriminator() {
+            return Err(ErrorCode::AccountDiscriminatorMismatch.into());
+        }
+
+        Ok(bytemuck::from_bytes(
+            &data[8..std::mem::size_of::<VrfAccountData>() + 8],
+        ))
+    }
+
     /// Returns the current VRF round ID
     pub fn get_current_randomness_round_id(&self) -> u128 {
         self.counter

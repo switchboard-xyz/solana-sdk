@@ -5,6 +5,7 @@ import {
   AccountInfo,
   Commitment,
   Keypair,
+  ParsedTransactionWithMeta,
   PublicKey,
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -361,42 +362,108 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     return txnSignature;
   }
 
-  /** Await the next vrf round */
-  public async nextRound(
-    roundId: anchor.BN,
-    /** Number of milliseconds to await the next VRF round. */
-    timeout: number
+  /** Return parsed transactions for a VRF request */
+  public async getCallbackTransactions(
+    requestSlot?: anchor.BN,
+    txnLimit = 50
+  ): Promise<Array<ParsedTransactionWithMeta>> {
+    const slot =
+      requestSlot ?? (await this.loadData()).currentRound.requestSlot;
+    // TODO: Add options and allow getting signatures by slot
+    const transactions = await this.program.connection.getSignaturesForAddress(
+      this.publicKey,
+      { limit: txnLimit, minContextSlot: slot.toNumber() }
+    );
+    const signatures = transactions.map(txn => txn.signature);
+    const parsedTransactions =
+      await this.program.connection.getParsedTransactions(signatures);
+
+    const callbackTransactions: ParsedTransactionWithMeta[] = [];
+
+    for (const txn of parsedTransactions) {
+      if (txn === null) {
+        continue;
+      }
+
+      const logs = txn.meta?.logMessages?.join('\n') ?? '';
+      if (logs.includes('Invoking callback')) {
+        callbackTransactions.push(txn);
+      }
+    }
+
+    return callbackTransactions;
+  }
+
+  /**
+   * Await for the next vrf result
+   *
+   * @param roundId - optional, the id associated with the VRF round to watch. If not provided the current round Id will be used.
+   * @param timeout - the number of milliseconds to wait for the round to close
+   *
+   * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
+   */
+  public async nextResult(
+    roundId?: anchor.BN,
+    timeout = 30000
   ): Promise<VrfResult> {
-    let ws: number | undefined = undefined;
-    return await promiseWithTimeout(
-      timeout,
-      new Promise((resolve: (result: VrfResult) => void) => {
-        ws = this.program.connection.onAccountChange(
-          this.publicKey,
-          (accountInfo: AccountInfo<Buffer>) => {
-            const vrf = types.VrfAccountData.decode(accountInfo.data);
-            if (!vrf.counter.eq(roundId)) {
-              return;
-            }
-            if (
-              vrf.status.kind === 'StatusCallbackSuccess' ||
-              vrf.status.kind === 'StatusVerifyFailure'
-            ) {
-              resolve({
-                success: vrf.status.kind === 'StatusCallbackSuccess',
-                result: new Uint8Array(vrf.currentRound.result),
-                status: vrf.status,
-              });
-            }
+    let id: anchor.BN;
+    if (roundId) {
+      id = roundId;
+    } else {
+      const vrf = await this.loadData();
+      if (vrf.status.kind === 'StatusVerifying') {
+        id = vrf.counter;
+      } else {
+        // wait for the next round
+        id = vrf.counter.add(new anchor.BN(1));
+      }
+    }
+    let ws: number | undefined;
+
+    let result: VrfResult;
+    try {
+      result = await promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: VrfResult) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(vrf => {
+              if (vrf.counter.gt(id)) {
+                reject(`Current counter is higher than requested roundId`);
+              }
+              if (vrf.counter.eq(id)) {
+                switch (vrf.status.kind) {
+                  case 'StatusCallbackSuccess': {
+                    resolve({
+                      success: true,
+                      result: new Uint8Array(vrf.currentRound.result),
+                      status: vrf.status,
+                    });
+                    break;
+                  }
+                  case 'StatusVerifyFailure': {
+                    resolve({
+                      success: false,
+                      result: new Uint8Array(),
+                      status: vrf.status,
+                    });
+                    break;
+                  }
+                }
+              }
+            });
           }
-        );
-      })
-    ).finally(async () => {
+        )
+      );
+    } finally {
       if (ws) {
         await this.program.connection.removeAccountChangeListener(ws);
       }
-      ws = undefined;
-    });
+    }
+
+    return result;
   }
 }
 

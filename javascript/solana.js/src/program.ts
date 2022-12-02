@@ -9,8 +9,7 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { types } from './';
-import { Mint, NativeMint } from './mint';
+import { NativeMint } from './mint';
 import { TransactionObject } from './transaction';
 import { SwitchboardEvents } from './switchboardEvents';
 import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
