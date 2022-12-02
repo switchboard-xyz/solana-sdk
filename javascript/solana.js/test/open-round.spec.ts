@@ -175,7 +175,8 @@ describe('Open Round Tests', () => {
     const result = new Big(1337);
 
     const confirmedRoundPromise = aggregatorAccount.nextRound(
-      aggregator.currentRound.roundOpenSlot
+      aggregator.currentRound.roundOpenSlot,
+      10000
     );
 
     await Promise.all(

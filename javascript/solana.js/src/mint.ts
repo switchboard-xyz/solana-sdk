@@ -208,6 +208,60 @@ export class NativeMint extends Mint {
     return new NativeMint(provider, splMint);
   }
 
+  public async getOrCreateWrappedUserInstructions(
+    payer: PublicKey,
+    params:
+      | {
+          amount: number;
+        }
+      | { fundUpTo: number },
+    user?: Keypair
+  ): Promise<[PublicKey, TransactionObject]> {
+    const owner = user ? user.publicKey : payer;
+    const associatedToken = Mint.getAssociatedAddress(owner);
+    const accountInfo = await this.connection.getAccountInfo(associatedToken);
+    if (accountInfo === null) {
+      const amount =
+        'fundUpTo' in params
+          ? params.fundUpTo
+          : 'amount' in params
+          ? params.amount
+          : 0;
+
+      const [userWrapedTokenAccount, userInit] =
+        await this.createWrappedUserInstructions(payer, amount, user);
+
+      return [associatedToken, userInit];
+    } else {
+      if ('fundUpTo' in params) {
+        if (!params.fundUpTo || params.fundUpTo < 0) {
+          throw new Error(`fundUpTo must be a positive number`);
+        }
+        const tokenBalance = (await this.getBalance(owner)) ?? 0;
+        if (tokenBalance > (params.fundUpTo ?? 0)) {
+          return [associatedToken, new TransactionObject(payer, [], [])];
+        }
+        const userWrap = await this.wrapInstructions(
+          payer,
+          { fundUpTo: new Big(params.fundUpTo ?? 0) },
+          user
+        );
+        return [associatedToken, userWrap];
+      }
+
+      if ('amount' in params) {
+        const userWrap = await this.wrapInstructions(
+          payer,
+          { amount: params.amount },
+          user
+        );
+        return [associatedToken, userWrap];
+      }
+    }
+
+    throw new Error(`Failed to getOrCreate the users wrapped SOL account`);
+  }
+
   public async createWrappedUserInstructions(
     payer: PublicKey,
     amount: number,

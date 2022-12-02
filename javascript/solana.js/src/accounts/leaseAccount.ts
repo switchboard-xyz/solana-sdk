@@ -103,31 +103,24 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       jobAuthorities: Array<PublicKey>;
     }
   ): Promise<[LeaseAccount, TransactionObject]> {
-    const ixns: TransactionInstruction[] = [];
-    const signers: Keypair[] = [];
-
     const loadAmount = params.loadAmount ?? 0;
     const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
     const funderAuthority = params.funderAuthority
       ? params.funderAuthority.publicKey
       : payer;
-    const funderTokenAccount = params.funderTokenAccount
-      ? params.funderTokenAccount
-      : program.mint.getAssociatedAddress(funderAuthority);
 
-    const funderTokenBalance =
-      (await program.mint.getBalance(funderAuthority)) ?? 0;
-
-    if (loadAmount && funderTokenBalance < loadAmount) {
-      const wrapIxns = await program.mint.wrapInstructions(
-        payer,
-        { amount: loadAmount },
-        params.funderAuthority
-      );
-      ixns.push(...wrapIxns.ixns);
-      signers.push(...wrapIxns.signers);
-    }
+    const [funderTokenAccount, wrapTxn] =
+      params.loadAmount && params.loadAmount > 0
+        ? await program.mint.getOrCreateWrappedUserInstructions(
+            payer,
+            { fundUpTo: params.loadAmount ?? 0 },
+            params.funderAuthority
+          )
+        : [
+            program.mint.getAssociatedAddress(funderAuthority),
+            new TransactionObject(payer, [], []),
+          ];
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
       program,
@@ -149,41 +142,50 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       program.mint.address
     );
 
-    ixns.push(
-      spl.createAssociatedTokenAccountInstruction(
-        payer,
-        escrow,
-        leaseAccount.publicKey,
-        program.mint.address
-      ),
-      types.leaseInit(
-        program,
-        {
-          params: {
-            loadAmount: loadTokenAmountBN,
-            withdrawAuthority: params.withdrawAuthority ?? payer,
-            leaseBump: leaseBump,
-            stateBump: program.programState.bump,
-            walletBumps: walletBumps,
+    const leaseInitTxn = new TransactionObject(
+      payer,
+      [
+        spl.createAssociatedTokenAccountInstruction(
+          payer,
+          escrow,
+          leaseAccount.publicKey,
+          program.mint.address
+        ),
+        types.leaseInit(
+          program,
+          {
+            params: {
+              loadAmount: loadTokenAmountBN,
+              withdrawAuthority: params.withdrawAuthority ?? payer,
+              leaseBump: leaseBump,
+              stateBump: program.programState.bump,
+              walletBumps: walletBumps,
+            },
           },
-        },
-        {
-          lease: leaseAccount.publicKey,
-          queue: params.queuePubkey,
-          aggregator: params.aggregatorPubkey,
-          payer: payer,
-          systemProgram: SystemProgram.programId,
-          tokenProgram: spl.TOKEN_PROGRAM_ID,
-          funder: funderTokenAccount,
-          owner: funderAuthority,
-          escrow: escrow,
-          programState: program.programState.publicKey,
-          mint: program.mint.address,
-        }
-      )
+          {
+            lease: leaseAccount.publicKey,
+            queue: params.queuePubkey,
+            aggregator: params.aggregatorPubkey,
+            payer: payer,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            funder: funderTokenAccount,
+            owner: funderAuthority,
+            escrow: escrow,
+            programState: program.programState.publicKey,
+            mint: program.mint.address,
+          }
+        ),
+      ],
+      params.funderAuthority ? [params.funderAuthority] : []
     );
 
-    return [leaseAccount, new TransactionObject(payer, ixns, signers)];
+    const packed = TransactionObject.pack([wrapTxn, leaseInitTxn]);
+    if (packed.length > 1) {
+      throw new Error(`Failed to pack transactions into a single transactions`);
+    }
+
+    return [leaseAccount, packed[0]];
   }
 
   public static async create(
