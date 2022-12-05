@@ -35,6 +35,19 @@ export class JobAccount extends Account<types.JobAccountData> {
    */
   public size = this.program.account.jobAccountData.size;
 
+  /** Load an existing JobAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[JobAccount, types.JobAccountData]> {
+    const account = new JobAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.JobAccountData} stored in this account.
    */
@@ -179,6 +192,22 @@ export class JobAccount extends Account<types.JobAccountData> {
     return OracleJob.decodeDelimited(
       JobAccount.decode(program, accountInfo).data!
     );
+  }
+
+  public async toAccountsJSON(_job?: types.JobAccountData): Promise<
+    types.JobAccountDataJSON & {
+      publicKey: PublicKey;
+      tasks: Array<OracleJob.ITask>;
+    }
+  > {
+    const job = _job ?? (await this.loadData());
+    const oracleJob = OracleJob.decodeDelimited(job.data);
+
+    return {
+      publicKey: this.publicKey,
+      ...job.toJSON(),
+      tasks: oracleJob.tasks,
+    };
   }
 }
 

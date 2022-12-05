@@ -29,6 +29,21 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
    */
   public size = this.program.account.leaseAccountData.size;
 
+  /** Load an existing LeaseAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    queue: PublicKey | string,
+    aggregator: PublicKey | string
+  ): Promise<[LeaseAccount, types.LeaseAccountData, number]> {
+    const [account, bump] = LeaseAccount.fromSeed(
+      program,
+      typeof queue === 'string' ? new PublicKey(queue) : queue,
+      typeof aggregator === 'string' ? new PublicKey(aggregator) : aggregator
+    );
+    const state = await account.loadData();
+    return [account, state, bump];
+  }
+
   /**
    * Loads a LeaseAccount from the expected PDA seed format.
    * @param program The Switchboard program for the current connection.
@@ -348,7 +363,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       ? params.funder
       : this.program.mint.getAssociatedAddress(funderAuthority);
     const funderBalance =
-      (await this.program.mint.getBalance(funderAuthority)) ?? 0;
+      (await this.program.mint.getAssociatedBalance(funderAuthority)) ?? 0;
     if (funderBalance < params.loadAmount) {
       const wrapIxns = await this.program.mint.unwrapInstructions(
         payer,

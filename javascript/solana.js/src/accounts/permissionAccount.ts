@@ -86,6 +86,23 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     );
   }
 
+  /** Load an existing PermissionAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    authority: PublicKey | string,
+    granter: PublicKey | string,
+    grantee: PublicKey | string
+  ): Promise<[PermissionAccount, types.PermissionAccountData, number]> {
+    const [account, bump] = PermissionAccount.fromSeed(
+      program,
+      typeof authority === 'string' ? new PublicKey(authority) : authority,
+      typeof granter === 'string' ? new PublicKey(granter) : granter,
+      typeof grantee === 'string' ? new PublicKey(grantee) : grantee
+    );
+    const state = await account.loadData();
+    return [account, state, bump];
+  }
+
   /**
    * Loads a PermissionAccount from the expected PDA seed format.
    * @param program The Switchboard program for the current connection.

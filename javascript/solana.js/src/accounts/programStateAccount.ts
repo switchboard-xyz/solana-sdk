@@ -21,6 +21,19 @@ import { TransactionObject } from '../transaction';
 export class ProgramStateAccount extends Account<types.SbState> {
   static accountName = 'SbState';
 
+  /** Load the ProgramStateAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[ProgramStateAccount, types.SbState]> {
+    const account = new ProgramStateAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Retrieves the {@linkcode ProgramStateAccount}, creates it if it doesn't exist;
    */

@@ -31,6 +31,19 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   public size = this.program.account.oracleAccountData.size;
 
+  /** Load an existing OracleAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[OracleAccount, types.OracleAccountData]> {
+    const account = new OracleAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   decode(data: Buffer): types.OracleAccountData {
     try {
       return types.OracleAccountData.decode(data);
@@ -450,6 +463,46 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     const txnSignature = await this.program.signAndSend(withdrawTxn);
     return txnSignature;
+  }
+
+  public async toAccountsJSON(
+    _oracle?: types.OracleAccountData & { balance: number },
+    _permissionAccount?: PermissionAccount,
+    _permission?: types.PermissionAccountData
+  ): Promise<
+    types.OracleAccountDataJSON & {
+      publicKey: PublicKey;
+      balance: number;
+      permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
+    }
+  > {
+    const oracle = _oracle ?? (await this.loadData());
+    let permissionAccount = _permissionAccount;
+    let permission = _permission;
+    if (!permissionAccount || !permission) {
+      const queueAccount = new QueueAccount(this.program, oracle.queuePubkey);
+      const queue = await queueAccount.loadData();
+      [permissionAccount] = PermissionAccount.fromSeed(
+        this.program,
+        queue.authority,
+        queueAccount.publicKey,
+        this.publicKey
+      );
+      permission = await permissionAccount.loadData();
+    }
+
+    const oracleBalance =
+      (await this.program.mint.getBalance(oracle.tokenAccount)) ?? 0;
+
+    return {
+      publicKey: this.publicKey,
+      balance: oracleBalance,
+      ...oracle.toJSON(),
+      permission: {
+        publicKey: permissionAccount.publicKey,
+        ...permission.toJSON(),
+      },
+    };
   }
 }
 

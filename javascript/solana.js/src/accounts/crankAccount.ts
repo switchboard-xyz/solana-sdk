@@ -52,6 +52,19 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     );
   }
 
+  /** Load an existing CrankAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[CrankAccount, types.CrankAccountData]> {
+    const account = new CrankAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.CrankAccountData} stored in this account.
    */
@@ -360,6 +373,28 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     }
 
     return true;
+  }
+
+  public async toAccountsJSON(
+    _crank?: types.CrankAccountData,
+    _crankRows?: Array<types.CrankRow>
+  ): Promise<
+    Omit<types.CrankAccountDataJSON, 'dataBuffer'> & {
+      publicKey: PublicKey;
+      dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };
+    }
+  > {
+    const crank = _crank ?? (await this.loadData());
+    const crankRows = _crankRows ?? (await this.loadCrank());
+
+    return {
+      publicKey: this.publicKey,
+      ...crank.toJSON(),
+      dataBuffer: {
+        publicKey: crank.dataBuffer,
+        data: crankRows,
+      },
+    };
   }
 }
 

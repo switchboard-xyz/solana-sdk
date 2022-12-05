@@ -36,6 +36,19 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public readonly size = this.program.account.vrfAccountData.size;
 
+  /** Load an existing VrfAccount with its current on-chain state */
+  public static async load(
+    program: SwitchboardProgram,
+    publicKey: PublicKey | string
+  ): Promise<[VrfAccount, types.VrfAccountData]> {
+    const account = new VrfAccount(
+      program,
+      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+    );
+    const state = await account.loadData();
+    return [account, state];
+  }
+
   /**
    * Invoke a callback each time a VrfAccount's data has changed on-chain.
    * @param callback - the callback invoked when the vrf state changes
