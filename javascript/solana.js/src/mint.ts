@@ -42,7 +42,8 @@ export class Mint {
   toTokenAmount(amount: number): bigint {
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
-    return BigInt(tokenAmount.toString());
+    // We need to fix tokenAmount to 0 decimal places because the amount in base units must be an integer.
+    return BigInt(tokenAmount.toFixed(0));
   }
 
   toTokenAmountBN(amount: number): BN {
