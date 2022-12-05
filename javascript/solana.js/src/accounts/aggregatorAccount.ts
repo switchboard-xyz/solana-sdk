@@ -323,11 +323,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       payerTokenAccount
     );
     if (payerTokenAccountInfo === null) {
-      const [payerTokenAddress, payerTokenInitTxn] =
+      const createPayerTokenWallet =
         await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
           amount: 0,
         });
-      txns.unshift(payerTokenInitTxn);
+      txns.unshift(createPayerTokenWallet[1]);
     }
 
     // withdraw from lease
@@ -348,7 +348,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     // create lease for the new queue and transfer existing balance
-    const [leaseAccount, leaseInitTxn] = await LeaseAccount.createInstructions(
+    const leaseInit = await LeaseAccount.createInstructions(
       this.program,
       payer,
       {
@@ -363,7 +363,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         ),
       }
     );
-    txns.push(leaseInitTxn);
+    txns.push(leaseInit[1]);
 
     // push onto crank
     if (params.crankPubkey) {
