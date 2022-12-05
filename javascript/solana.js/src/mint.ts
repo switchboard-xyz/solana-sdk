@@ -75,18 +75,14 @@ export class Mint {
     const ownerTokenAccountInfo = await this.provider.connection.getAccountInfo(
       ownerTokenAddress
     );
-    if (ownerTokenAccountInfo === null) {
-      return null;
-    }
+    if (ownerTokenAccountInfo === null) return null;
     const account = spl.unpackAccount(ownerTokenAddress, ownerTokenAccountInfo);
     return account;
   }
 
   public async getAssociatedBalance(owner: PublicKey): Promise<number | null> {
     const ownerAccount = await this.getAssociatedAccount(owner);
-    if (ownerAccount === null) {
-      return null;
-    }
+    if (ownerAccount === null) return null;
     return this.fromTokenAmount(ownerAccount.amount);
   }
 
@@ -96,18 +92,14 @@ export class Mint {
     const tokenAccountInfo = await this.provider.connection.getAccountInfo(
       tokenAddress
     );
-    if (tokenAccountInfo === null) {
-      return null;
-    }
+    if (!tokenAccountInfo) return null;
     const account = spl.unpackAccount(tokenAddress, tokenAccountInfo);
     return account;
   }
 
   public async getBalance(tokenAddress: PublicKey): Promise<number | null> {
     const tokenAccount = await this.getAccount(tokenAddress);
-    if (tokenAccount === null) {
-      return null;
-    }
+    if (tokenAccount === null) return null;
     return this.fromTokenAmount(tokenAccount.amount);
   }
 
@@ -129,9 +121,9 @@ export class Mint {
 
   public async getOrCreateAssociatedUser(
     payer: PublicKey,
-    user?: Keypair
+    user?: PublicKey
   ): Promise<PublicKey> {
-    const owner = user ? user.publicKey : payer;
+    const owner = user ?? payer;
     const associatedToken = Mint.getAssociatedAddress(owner);
     const accountInfo = await this.connection.getAccountInfo(associatedToken);
     if (accountInfo === null) {
@@ -144,7 +136,7 @@ export class Mint {
 
   public async createAssocatedUser(
     payer: PublicKey,
-    user?: Keypair
+    user?: PublicKey
   ): Promise<[PublicKey, string]> {
     const [txn, associatedToken] = this.createAssocatedUserInstruction(
       payer,
@@ -157,9 +149,9 @@ export class Mint {
 
   public static createAssocatedUserInstruction(
     payer: PublicKey,
-    user?: Keypair
+    user?: PublicKey
   ): [TransactionObject, PublicKey] {
-    const owner = user ? user.publicKey : payer;
+    const owner = user ?? payer;
     const associatedToken = Mint.getAssociatedAddress(owner);
     const ixn = spl.createAssociatedTokenAccountInstruction(
       payer,
@@ -172,7 +164,7 @@ export class Mint {
 
   public createAssocatedUserInstruction(
     payer: PublicKey,
-    user?: Keypair
+    user?: PublicKey
   ): [TransactionObject, PublicKey] {
     return Mint.createAssocatedUserInstruction(payer, user);
   }

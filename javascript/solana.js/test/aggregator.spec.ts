@@ -202,9 +202,7 @@ describe('Aggregator Tests', () => {
       const [user, userInit] =
         await ctx.program.mint.getOrCreateWrappedUserInstructions(
           ctx.payer.publicKey,
-          {
-            fundUpTo: 0.1,
-          }
+          { fundUpTo: 0.1 }
         );
 
       if (userInit.ixns.length > 0) {

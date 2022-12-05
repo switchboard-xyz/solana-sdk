@@ -454,7 +454,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     if (withdrawWalletAccountInfo === null) {
       const [createUserTxn] = this.program.mint.createAssocatedUserInstruction(
         payer,
-        params.withdrawAuthority
+        withdrawAuthority
       );
       txns.push(createUserTxn);
     }

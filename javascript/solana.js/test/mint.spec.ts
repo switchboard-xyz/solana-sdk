@@ -23,7 +23,7 @@ describe('Mint Tests', () => {
 
     const [tokenAddress] = await ctx.program.mint.createAssocatedUser(
       ctx.payer.publicKey,
-      user
+      user.publicKey
     );
     userTokenAddress = tokenAddress;
 
