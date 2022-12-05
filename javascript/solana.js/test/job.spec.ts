@@ -45,7 +45,7 @@ describe('Job Tests', () => {
     });
     const data = OracleJob.encodeDelimited(oracleJob).finish(); // 6402 bytes
 
-    assert.rejects(async () => {
+    await assert.rejects(async () => {
       await JobAccount.create(ctx.program, {
         data: data,
       });

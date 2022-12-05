@@ -225,10 +225,14 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return [leaseAccount, signature];
   }
 
-  public async getBalance(): Promise<number> {
-    const lease = await this.loadData();
-    const escrow = await spl.getAccount(this.program.connection, lease.escrow);
-    return this.program.mint.fromTokenAmount(escrow.amount);
+  public async getBalance(escrow?: PublicKey): Promise<number> {
+    const escrowPubkey =
+      escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
+    const escrowBalance = await this.program.mint.getBalance(escrowPubkey);
+    if (escrowBalance === null) {
+      throw new errors.AccountNotFoundError(escrowPubkey);
+    }
+    return escrowBalance;
   }
 
   /**

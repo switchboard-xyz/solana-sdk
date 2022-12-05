@@ -4,7 +4,7 @@ import assert from 'assert';
 import * as sbv2 from '../src';
 import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
-import { PermissionAccount } from '../src';
+import { PermissionAccount, TransactionMissingSignerError } from '../src';
 
 describe('Queue Tests', () => {
   let ctx: TestContext;
@@ -15,6 +15,9 @@ describe('Queue Tests', () => {
 
   const queueAuthority = Keypair.generate();
   let queueAccount: sbv2.QueueAccount;
+
+  const oracleAuthority = Keypair.generate();
+  let oracleAccount: sbv2.OracleAccount;
 
   it('Creates a Queue', async () => {
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
@@ -37,9 +40,9 @@ describe('Queue Tests', () => {
     if (!queueAccount) {
       throw new Error('OracleQueue does not exist');
     }
-    const oracleAuthority = Keypair.generate();
+
     // Create a new oracle
-    const [oracleAccount] = await queueAccount.createOracle({
+    [oracleAccount] = await queueAccount.createOracle({
       name: 'oracle2',
       metadata: '',
       queueAuthority,
@@ -106,7 +109,6 @@ describe('Queue Tests', () => {
       throw new Error('OracleQueue does not exist');
     }
     const oracleAuthority = Keypair.generate();
-    const tokenWallet = Keypair.generate();
 
     // Create a new oracle
     const [oracleAccount] = await queueAccount.createOracle({
@@ -117,28 +119,99 @@ describe('Queue Tests', () => {
       authority: oracleAuthority,
     });
 
-    await oracleAccount.loadData();
+    const oracle = await oracleAccount.loadData();
 
-    assert.rejects(
+    await assert.rejects(
       async () => {
         await oracleAccount.heartbeat({
           queueAccount,
-          tokenWallet: tokenWallet.publicKey,
+          tokenWallet: oracle.tokenAccount,
           authority: oracleAuthority,
         });
       },
-      { code: 6001 }
+      new RegExp(/custom program error: 0x1771/g)
+      // { code: 6001 } // QueueOperationError
     );
   });
 
-  // it('Deposits into an oracle account', async () => {
-  //   if (!queueAccount) {
-  //     throw new Error('OracleQueue does not exist');
-  //   }
-  //   if (!oracle1Account) {
-  //     throw new Error('oracleAccount does not exist');
-  //   }
+  it('Deposits into an oracle staking wallet', async () => {
+    if (!queueAccount) {
+      throw new Error('OracleQueue does not exist');
+    }
+    if (!oracleAccount) {
+      throw new Error('oracleAccount does not exist');
+    }
 
-  //   // TODO: Handle wrapped funds
-  // });
+    const STAKE_AMOUNT = 1.25;
+
+    const oracle = await oracleAccount.loadData();
+
+    const initialStakeBalance = await oracleAccount.getBalance(
+      oracle.tokenAccount
+    );
+
+    await oracleAccount.stake({
+      stakeAmount: STAKE_AMOUNT,
+      tokenAccount: oracle.tokenAccount,
+    });
+
+    const finalStakeBalance = await oracleAccount.getBalance(
+      oracle.tokenAccount
+    );
+
+    assert(
+      finalStakeBalance === initialStakeBalance + STAKE_AMOUNT,
+      `Oracle token balance mismatch, expected ${
+        initialStakeBalance + STAKE_AMOUNT
+      }, received ${finalStakeBalance}`
+    );
+  });
+
+  it('Fails to withdraw if authority is missing', async () => {
+    if (!queueAccount) {
+      throw new Error('OracleQueue does not exist');
+    }
+    if (!oracleAccount) {
+      throw new Error('oracleAccount does not exist');
+    }
+
+    await assert.rejects(async () => {
+      await oracleAccount.withdraw({
+        amount: 1,
+      });
+    }, TransactionMissingSignerError);
+  });
+
+  it('Withdraws from an oracle staking wallet', async () => {
+    if (!queueAccount) {
+      throw new Error('OracleQueue does not exist');
+    }
+    if (!oracleAccount) {
+      throw new Error('oracleAccount does not exist');
+    }
+
+    const WITHDRAW_AMOUNT = 0.55;
+
+    const oracle = await oracleAccount.loadData();
+
+    const initialStakeBalance = await oracleAccount.getBalance(
+      oracle.tokenAccount
+    );
+
+    await oracleAccount.withdraw({
+      amount: WITHDRAW_AMOUNT,
+      authority: oracleAuthority,
+    });
+
+    const finalStakeBalance = await oracleAccount.getBalance(
+      oracle.tokenAccount
+    );
+
+    assert(
+      finalStakeBalance === initialStakeBalance - WITHDRAW_AMOUNT,
+      `Oracle token balance mismatch, expected ${
+        initialStakeBalance - WITHDRAW_AMOUNT
+      }, received ${finalStakeBalance}`
+    );
+  });
 });

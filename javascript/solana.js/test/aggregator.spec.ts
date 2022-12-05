@@ -187,9 +187,14 @@ describe('Aggregator Tests', () => {
     }
     const aggregatorAccount = fundedAggregator;
 
-    let initialUserTokenBalance = await ctx.program.mint.getBalance(
+    const userTokenAddress = ctx.program.mint.getAssociatedAddress(
       ctx.payer.publicKey
     );
+
+    let initialUserTokenBalance = await ctx.program.mint.getBalance(
+      userTokenAddress
+    );
+
     if (initialUserTokenBalance === null || initialUserTokenBalance <= 0) {
       const [user, userInit] =
         await ctx.program.mint.getOrCreateWrappedUserInstructions(
@@ -204,7 +209,7 @@ describe('Aggregator Tests', () => {
       }
 
       initialUserTokenBalance =
-        (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
+        (await ctx.program.mint.getBalance(userTokenAddress)) ?? 0;
     }
 
     const [leaseAccount] = LeaseAccount.fromSeed(
@@ -229,14 +234,14 @@ describe('Aggregator Tests', () => {
     }
 
     const finalUserBalance = await ctx.program.mint.getBalance(
-      ctx.payer.publicKey
+      userTokenAddress
     );
     if (!finalUserBalance) {
       throw new Error(`Users wrapped account was closed`);
     }
 
     const finalUserTokenBalance =
-      (await ctx.program.mint.getBalance(ctx.payer.publicKey)) ?? 0;
+      (await ctx.program.mint.getBalance(userTokenAddress)) ?? 0;
     if (initialUserTokenBalance !== finalUserTokenBalance) {
       throw new Error(
         `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`

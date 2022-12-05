@@ -8,7 +8,6 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { PermissionAccount } from './permissionAccount';
@@ -72,6 +71,15 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
   }
 
+  async getBalance(stakingWallet?: PublicKey): Promise<number> {
+    const tokenAccount = stakingWallet ?? (await this.loadData()).tokenAccount;
+    const amount = await this.program.mint.getBalance(tokenAccount);
+    if (amount === null) {
+      throw new Error(`Failed to fetch oracle staking wallet balance`);
+    }
+    return amount;
+  }
+
   /**
    * Retrieve and decode the {@linkcode types.OracleAccountData} stored in this account.
    */
@@ -101,6 +109,25 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       program.programId
     );
     return [new OracleAccount(program, publicKey), bump];
+  }
+
+  public async getPermissions(
+    _oracle?: types.OracleAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<[PermissionAccount, number, types.PermissionAccountData]> {
+    const oracle = _oracle ?? (await this.loadData());
+    const queueAccount =
+      _queueAccount ?? new QueueAccount(this.program, oracle.queuePubkey);
+    const queue = _queue ?? (await queueAccount.loadData());
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      queue.authority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+    const permission = await permissionAccount.loadData();
+    return [permissionAccount, permissionBump, permission];
   }
 
   public static async createInstructions(
@@ -372,33 +399,40 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return txnSignature;
   }
 
-  withdrawInstruction(
+  async withdrawInstruction(
     payer: PublicKey,
-    params: {
-      amount: anchor.BN;
-      oracle: types.OracleAccountData;
-      withdrawAccount: PublicKey;
-      permission: [PermissionAccount, number];
-      authority?: Keypair;
-    }
-  ): TransactionInstruction {
-    const [permissionAccount, permissionBump] = params.permission;
+    params: OracleWithdrawParams
+  ): Promise<TransactionObject> {
+    const tokenAmount = this.program.mint.toTokenAmountBN(params.amount);
 
-    return types.oracleWithdraw(
+    const oracle = await this.loadData();
+    const queueAccount = new QueueAccount(this.program, oracle.queuePubkey);
+    const queue = await queueAccount.loadData();
+
+    const [permissionAccount, permissionBump] = await this.getPermissions(
+      oracle,
+      queueAccount,
+      queue
+    );
+
+    const withdrawAccount =
+      params.withdrawAccount ?? this.program.mint.getAssociatedAddress(payer);
+
+    const withdrawIxn = types.oracleWithdraw(
       this.program,
       {
         params: {
           stateBump: this.program.programState.bump,
           permissionBump,
-          amount: params.amount,
+          amount: tokenAmount,
         },
       },
       {
         oracle: this.publicKey,
-        oracleAuthority: params.oracle.oracleAuthority,
-        tokenAccount: params.oracle.tokenAccount,
-        withdrawAccount: params.withdrawAccount,
-        oracleQueue: params.oracle.queuePubkey,
+        oracleAuthority: oracle.oracleAuthority,
+        tokenAccount: oracle.tokenAccount,
+        withdrawAccount: withdrawAccount,
+        oracleQueue: queueAccount.publicKey,
         permission: permissionAccount.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         programState: this.program.programState.publicKey,
@@ -406,61 +440,19 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         systemProgram: SystemProgram.programId,
       }
     );
-  }
 
-  async withdraw(
-    params: {
-      amount: anchor.BN;
-      withdrawAccount: PublicKey;
-    } & Partial<{
-      oracle: types.OracleAccountData;
-      permission: [PermissionAccount, number];
-      queue: types.OracleQueueAccountData;
-      authority?: Keypair;
-    }>
-  ): Promise<TransactionSignature> {
-    const oracle = params.oracle ?? (await this.loadData());
-
-    let permissionAccount: PermissionAccount;
-    let permissionBump: number;
-
-    if (params.permission) {
-      [permissionAccount, permissionBump] = params.permission;
-    } else {
-      const queue =
-        params.queue ??
-        (await new QueueAccount(this.program, oracle.queuePubkey).loadData());
-      const permission = PermissionAccount.fromSeed(
-        this.program,
-        queue.authority,
-        oracle.queuePubkey,
-        this.publicKey
-      );
-      try {
-        await permission[0].loadData();
-      } catch (_) {
-        throw new Error(
-          'A requested oracle permission pda account has not been initialized.'
-        );
-      }
-      permissionAccount = permission[0];
-      permissionBump = permission[1];
-    }
-
-    const withdrawTxn = new TransactionObject(
-      this.program.walletPubkey,
-      [
-        this.withdrawInstruction(this.program.walletPubkey, {
-          amount: params.amount,
-          withdrawAccount: params.withdrawAccount,
-          oracle,
-          permission: [permissionAccount, permissionBump],
-          authority: params.authority,
-        }),
-      ],
+    return new TransactionObject(
+      payer,
+      [withdrawIxn],
       params.authority ? [params.authority] : []
     );
+  }
 
+  async withdraw(params: OracleWithdrawParams): Promise<TransactionSignature> {
+    const withdrawTxn = await this.withdrawInstruction(
+      this.program.walletPubkey,
+      params
+    );
     const txnSignature = await this.program.signAndSend(withdrawTxn);
     return txnSignature;
   }
@@ -522,4 +514,13 @@ export interface OracleStakeParams {
   funderTokenAccount?: PublicKey;
   /** The funderTokenAccount authority for approving the transfer of funds from the funderTokenAccount into the oracle staking wallet. Will default to the payer if not provided. */
   funderAuthority?: Keypair;
+}
+
+export interface OracleWithdrawParams {
+  /** The amount of tokens to withdraw from the oracle staking wallet. Ex: 1.25 would withdraw 1250000000 wSOL tokens from the staking wallet */
+  amount: number;
+  /** SPL token account where the tokens will be sent. Defaults to the payers associated token account. */
+  withdrawAccount?: PublicKey;
+  /** Alternative keypair that is the oracle authority and required to withdraw from the staking wallet. */
+  authority?: Keypair;
 }

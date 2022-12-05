@@ -28,7 +28,7 @@ describe('Mint Tests', () => {
     userTokenAddress = tokenAddress;
 
     const userTokenBalance =
-      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
+      (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
 
     if (userTokenBalance !== 0) {
       throw new Error(
@@ -45,7 +45,7 @@ describe('Mint Tests', () => {
     await ctx.program.mint.wrap(ctx.payer.publicKey, { amount: 0.25 }, user);
 
     const userTokenBalance =
-      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
+      (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
     if (userTokenBalance !== 0.25) {
       throw new Error(
         `Incorrect user token balance, expected 0.25, received ${userTokenBalance}`
@@ -59,7 +59,7 @@ describe('Mint Tests', () => {
     }
 
     const initialUserTokenBalance =
-      (await ctx.program.mint.getBalance(user.publicKey)) ?? 0;
+      (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
     const expectedFinalBalance = initialUserTokenBalance - 0.1;
     if (expectedFinalBalance < 0) {
       throw new Error(`Final user token address would be negative`);
@@ -67,7 +67,9 @@ describe('Mint Tests', () => {
 
     await ctx.program.mint.unwrap(ctx.payer.publicKey, 0.1, user);
 
-    const userTokenBalance = await ctx.program.mint.getBalance(user.publicKey);
+    const userTokenBalance = await ctx.program.mint.getAssociatedBalance(
+      user.publicKey
+    );
     if (userTokenBalance !== expectedFinalBalance) {
       throw new Error(
         `Incorrect user token balance, expected ${expectedFinalBalance}, received ${userTokenBalance}`
@@ -80,7 +82,7 @@ describe('Mint Tests', () => {
       throw new Error(`User token address does not exist`);
     }
 
-    await ctx.program.mint.getBalance(user.publicKey);
+    await ctx.program.mint.getAssociatedBalance(user.publicKey);
 
     await ctx.program.mint.unwrap(ctx.payer.publicKey, undefined, user);
 

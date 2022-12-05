@@ -6,3 +6,4 @@ export * from './program';
 export * from './switchboardError';
 export * from './switchboardEvents';
 export * from './transaction';
+export * from './errors';

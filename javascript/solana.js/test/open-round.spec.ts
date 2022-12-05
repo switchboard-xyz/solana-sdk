@@ -114,7 +114,7 @@ describe('Open Round Tests', () => {
   });
 
   it('fails to call open round when aggregator lacks permissions', async () => {
-    assert.rejects(
+    await assert.rejects(
       async () => {
         await aggregatorAccount.openRound();
       },
@@ -140,7 +140,7 @@ describe('Open Round Tests', () => {
   });
 
   it('fails to call open round when not enough oracles are heartbeating', async () => {
-    assert.rejects(
+    await assert.rejects(
       async () => {
         await aggregatorAccount.openRound();
       },
@@ -150,7 +150,7 @@ describe('Open Round Tests', () => {
 
     // still fails when queueSize < batchSize
     await oracleAccount1.heartbeat();
-    assert.rejects(
+    await assert.rejects(
       async () => {
         await aggregatorAccount.openRound();
       },
