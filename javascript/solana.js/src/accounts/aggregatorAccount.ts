@@ -14,7 +14,7 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { OracleAccount } from './oracleAccount';
-import { OracleJob, promiseWithTimeout } from '@switchboard-xyz/common';
+import { OracleJob, promiseWithTimeout, toUtf8 } from '@switchboard-xyz/common';
 import crypto from 'crypto';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
@@ -49,14 +49,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * Returns the aggregator's name buffer in a stringified format.
    */
   public static getName = (aggregator: types.AggregatorAccountData) =>
-    Buffer.from(aggregator.name).toString('utf8').replace(/u0000/g, '');
-
+    toUtf8(aggregator.name);
   /**
    * Returns the aggregator's metadata buffer in a stringified format.
    */
   public static getMetadata = (aggregator: types.AggregatorAccountData) =>
-    Buffer.from(aggregator.metadata).toString('utf8').replace(/u0000/g, '');
-
+    toUtf8(aggregator.metadata);
   /**
    * Get the size of an {@linkcode AggregatorAccount} on-chain.
    */

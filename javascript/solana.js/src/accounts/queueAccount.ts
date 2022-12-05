@@ -7,7 +7,7 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
-import { SwitchboardDecimal } from '@switchboard-xyz/common';
+import { SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 import Big from 'big.js';
 import * as errors from '../errors';
 import * as types from '../generated';
@@ -57,14 +57,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * Returns the queue's name buffer in a stringified format.
    */
   public static getName = (queue: types.OracleQueueAccountData) =>
-    Buffer.from(queue.name).toString('utf8').replace(/u0000/g, '');
-
+    toUtf8(queue.name);
   /**
    * Returns the queue's metadata buffer in a stringified format.
    */
   public static getMetadata = (queue: types.OracleQueueAccountData) =>
-    Buffer.from(queue.metadata).toString('utf8').replace(/u0000/g, '');
-
+    toUtf8(queue.metadata);
   /**
    * Invoke a callback each time a QueueAccount's data has changed on-chain.
    * @param callback - the callback invoked when the queues state changes

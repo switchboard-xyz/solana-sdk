@@ -6,7 +6,7 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import * as anchor from '@project-serum/anchor';
-import { OracleJob } from '@switchboard-xyz/common';
+import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
@@ -24,15 +24,12 @@ export class JobAccount extends Account<types.JobAccountData> {
   /**
    * Returns the job's name buffer in a stringified format.
    */
-  public static getName = (job: types.JobAccountData) =>
-    Buffer.from(job.name).toString('utf8').replace(/u0000/g, '');
-
+  public static getName = (job: types.JobAccountData) => toUtf8(job.name);
   /**
    * Returns the job's metadata buffer in a stringified format.
    */
   public static getMetadata = (job: types.JobAccountData) =>
-    Buffer.from(job.metadata).toString('utf8').replace(/u0000/g, '');
-
+    toUtf8(job.metadata);
   /**
    * Get the size of an {@linkcode JobAccount} on-chain.
    */

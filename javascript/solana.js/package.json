@@ -55,7 +55,7 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.5",
     "@solana/web3.js": "^1.66.1",
-    "@switchboard-xyz/common": "^2.1.7",
+    "@switchboard-xyz/common": "^2.1.8",
     "big.js": "^6.2.1",
     "bn.js": "^5.2.1"
   },
