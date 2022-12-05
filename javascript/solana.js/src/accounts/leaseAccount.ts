@@ -5,6 +5,7 @@ import { SwitchboardProgram } from '../program';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
 import {
+  AccountMeta,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -78,31 +79,25 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   static getWallets(
     jobAuthorities: Array<PublicKey>,
     mint: PublicKey
-  ): {
-    wallets: Array<{ publicKey: PublicKey; bump: number }>;
-    walletBumps: Uint8Array;
-  } {
+  ): Array<{ publicKey: PublicKey; bump: number }> {
     const wallets: Array<{ publicKey: PublicKey; bump: number }> = [];
-    const walletBumps: Array<number> = [];
 
-    for (const jobAuthority in jobAuthorities) {
-      const authority = new PublicKey(jobAuthority);
-      if (!jobAuthority || PublicKey.default.equals(authority)) {
+    for (const jobAuthority of jobAuthorities) {
+      if (!jobAuthority || PublicKey.default.equals(jobAuthority)) {
         continue;
       }
       const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
         [
-          authority.toBuffer(),
+          jobAuthority.toBuffer(),
           spl.TOKEN_PROGRAM_ID.toBuffer(),
           mint.toBuffer(),
         ],
         spl.ASSOCIATED_TOKEN_PROGRAM_ID
       );
       wallets.push({ publicKey: jobWallet, bump });
-      walletBumps.push(bump);
     }
 
-    return { wallets, walletBumps: new Uint8Array(walletBumps) };
+    return wallets;
   }
 
   static async createInstructions(
@@ -111,11 +106,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     params: {
       aggregatorAccount: AggregatorAccount;
       queueAccount: QueueAccount;
+      jobAuthorities?: Array<PublicKey>;
+      jobPubkeys?: Array<PublicKey>;
       loadAmount?: number;
       funderTokenAccount?: PublicKey;
       funderAuthority?: Keypair;
       withdrawAuthority?: PublicKey;
-      jobAuthorities: Array<PublicKey>;
     }
   ): Promise<[LeaseAccount, TransactionObject]> {
     const loadAmount = params.loadAmount ?? 0;
@@ -152,46 +148,68 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );
 
-    const { walletBumps } = LeaseAccount.getWallets(
-      params.jobAuthorities,
+    // load jobPubkeys and authorities ONLY if undefined
+    // we need to allow empty arrays for initial job creation or else loading aggregator will fail
+    let jobPubkeys = params.jobPubkeys;
+    let jobAuthorities = params.jobAuthorities;
+    if (jobPubkeys === undefined || jobAuthorities === undefined) {
+      const aggregator = await params.aggregatorAccount.loadData();
+      jobPubkeys = aggregator.jobPubkeysData.slice(
+        0,
+        aggregator.jobPubkeysSize
+      );
+      const jobs = await params.aggregatorAccount.loadJobs(aggregator);
+      jobAuthorities = jobs.map(j => j.state.authority);
+    }
+
+    const wallets = LeaseAccount.getWallets(
+      jobAuthorities ?? [],
       program.mint.address
     );
+    const walletBumps = new Uint8Array(wallets.map(w => w.bump));
+
+    const remainingAccounts: Array<AccountMeta> = (jobPubkeys ?? [])
+      .concat(wallets.map(w => w.publicKey))
+      .map(pubkey => {
+        return { isSigner: false, isWritable: true, pubkey };
+      });
+
+    const createTokenAccountIxn = spl.createAssociatedTokenAccountInstruction(
+      payer,
+      escrow,
+      leaseAccount.publicKey,
+      program.mint.address
+    );
+    const leaseInitIxn = types.leaseInit(
+      program,
+      {
+        params: {
+          loadAmount: loadTokenAmountBN,
+          withdrawAuthority: params.withdrawAuthority ?? payer,
+          leaseBump: leaseBump,
+          stateBump: program.programState.bump,
+          walletBumps: walletBumps,
+        },
+      },
+      {
+        lease: leaseAccount.publicKey,
+        queue: params.queueAccount.publicKey,
+        aggregator: params.aggregatorAccount.publicKey,
+        payer: payer,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        funder: funderTokenAccount,
+        owner: funderAuthority,
+        escrow: escrow,
+        programState: program.programState.publicKey,
+        mint: program.mint.address,
+      }
+    );
+    leaseInitIxn.keys.push(...remainingAccounts);
 
     const leaseInitTxn = new TransactionObject(
       payer,
-      [
-        spl.createAssociatedTokenAccountInstruction(
-          payer,
-          escrow,
-          leaseAccount.publicKey,
-          program.mint.address
-        ),
-        types.leaseInit(
-          program,
-          {
-            params: {
-              loadAmount: loadTokenAmountBN,
-              withdrawAuthority: params.withdrawAuthority ?? payer,
-              leaseBump: leaseBump,
-              stateBump: program.programState.bump,
-              walletBumps: walletBumps,
-            },
-          },
-          {
-            lease: leaseAccount.publicKey,
-            queue: params.queueAccount.publicKey,
-            aggregator: params.aggregatorAccount.publicKey,
-            payer: payer,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: spl.TOKEN_PROGRAM_ID,
-            funder: funderTokenAccount,
-            owner: funderAuthority,
-            escrow: escrow,
-            programState: program.programState.publicKey,
-            mint: program.mint.address,
-          }
-        ),
-      ],
+      [createTokenAccountIxn, leaseInitIxn],
       params.funderAuthority ? [params.funderAuthority] : []
     );
 
@@ -208,11 +226,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     params: {
       aggregatorAccount: AggregatorAccount;
       queueAccount: QueueAccount;
+      jobAuthorities?: Array<PublicKey>;
+      jobPubkeys?: Array<PublicKey>;
       loadAmount?: number;
       funderTokenAccount?: PublicKey;
       funderAuthority?: Keypair;
       withdrawAuthority?: PublicKey;
-      jobAuthorities: Array<PublicKey>;
     }
   ): Promise<[LeaseAccount, TransactionSignature]> {
     const [leaseAccount, transaction] = await LeaseAccount.createInstructions(

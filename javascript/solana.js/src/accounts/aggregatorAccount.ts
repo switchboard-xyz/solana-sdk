@@ -19,11 +19,13 @@ import crypto from 'crypto';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
 import { LeaseAccount } from './leaseAccount';
-import { PermissionAccount } from './permissionAccount';
+import { PermissionAccount, PermissionSetParams } from './permissionAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
+import { PermitOracleQueueUsage } from '../generated/types/SwitchboardPermission';
+import { CrankAccount } from './crankAccount';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -233,6 +235,172 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [account, txnSignature];
   }
 
+  async transferInstruction(
+    payer: PublicKey,
+    params: {
+      newQueue: QueueAccount;
+      authority?: Keypair;
+      crankPubkey?: PublicKey;
+    } & Partial<PermissionSetParams>
+  ): Promise<Array<TransactionObject>> {
+    const txns: Array<TransactionObject> = [];
+
+    const aggregator = await this.loadData();
+    const newQueue = await params.newQueue.loadData();
+
+    const authorityPubkey = params.authority
+      ? params.authority.publicKey
+      : payer;
+
+    if (!aggregator.authority.equals(authorityPubkey)) {
+      throw new errors.IncorrectAuthority(
+        aggregator.authority,
+        authorityPubkey
+      );
+    }
+
+    const jobs = await this.loadJobs(aggregator);
+    const jobAuthorities = jobs.map(j => j.state.authority);
+    // const jobAuthorities = Array.from(
+    //   jobs.reduce((set, job) => {
+    //     set.add(job.state.authority);
+    //     return set;
+    //   }, new Set<PublicKey>())
+    // );
+
+    const [oldLeaseAccount] = LeaseAccount.fromSeed(
+      this.program,
+      aggregator.queuePubkey,
+      this.publicKey
+    );
+
+    const setQueueTxn = new TransactionObject(
+      payer,
+      [
+        types.aggregatorSetQueue(
+          this.program,
+          { params: {} },
+          {
+            aggregator: this.publicKey,
+            authority: authorityPubkey,
+            queue: params.newQueue.publicKey,
+          }
+        ),
+      ],
+      params.authority ? [params.authority] : []
+    );
+    txns.push(setQueueTxn);
+
+    // create and set permissions
+    const [newPermissionAccount, permissionInitTxn] =
+      PermissionAccount.createInstruction(this.program, payer, {
+        authority: newQueue.authority,
+        granter: params.newQueue.publicKey,
+        grantee: this.publicKey,
+      });
+    if (params.enable) {
+      if (
+        params.queueAuthority &&
+        !params.queueAuthority.publicKey.equals(newQueue.authority)
+      ) {
+        throw new errors.IncorrectAuthority(
+          newQueue.authority,
+          params.queueAuthority.publicKey
+        );
+      }
+      const permissionSetTxn = newPermissionAccount.setInstruction(payer, {
+        enable: true,
+        queueAuthority: params.queueAuthority ?? undefined,
+        permission: new PermitOracleQueueUsage(),
+      });
+      permissionInitTxn.combine(permissionSetTxn);
+    }
+    txns.push(permissionInitTxn);
+
+    // create payer token account if we need to
+    const payerTokenAccount = this.program.mint.getAssociatedAddress(payer);
+    const payerTokenAccountInfo = await this.program.connection.getAccountInfo(
+      payerTokenAccount
+    );
+    if (payerTokenAccountInfo === null) {
+      const [payerTokenAddress, payerTokenInitTxn] =
+        await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+          amount: 0,
+        });
+      txns.unshift(payerTokenInitTxn);
+    }
+
+    // withdraw from lease
+    let oldLeaseWithdrawAuthority = payer;
+    let oldLeaseBalance = 0;
+    try {
+      const oldLease = await oldLeaseAccount.loadData();
+      oldLeaseBalance = await oldLeaseAccount.getBalance(oldLease.escrow);
+      oldLeaseWithdrawAuthority = oldLease.withdrawAuthority;
+      const withdrawTxn = await oldLeaseAccount.withdrawInstruction(payer, {
+        amount: oldLeaseBalance,
+        withdrawWallet: payerTokenAccount,
+        unwrap: false,
+      });
+      txns.push(withdrawTxn);
+    } catch {
+      // failed to get old lease balance, skipping
+    }
+
+    // create lease for the new queue and transfer existing balance
+    const [leaseAccount, leaseInitTxn] = await LeaseAccount.createInstructions(
+      this.program,
+      payer,
+      {
+        aggregatorAccount: this,
+        queueAccount: params.newQueue,
+        jobAuthorities,
+        loadAmount: oldLeaseBalance ?? 0,
+        withdrawAuthority: oldLeaseWithdrawAuthority,
+        jobPubkeys: aggregator.jobPubkeysData.slice(
+          0,
+          aggregator.jobPubkeysSize
+        ),
+      }
+    );
+    txns.push(leaseInitTxn);
+
+    // push onto crank
+    if (params.crankPubkey) {
+      const crankAccount = new CrankAccount(this.program, params.crankPubkey);
+      const crank = await crankAccount.loadData();
+      if (!params.newQueue.publicKey.equals(crank.queuePubkey)) {
+        throw new Error(
+          `Desired crank does not belong to new queue, expected ${params.newQueue.publicKey}, received ${crank.queuePubkey}`
+        );
+      }
+      const crankPush = await crankAccount.pushInstruction(payer, {
+        aggregatorAccount: this,
+      });
+
+      txns.push(crankPush);
+    }
+
+    return TransactionObject.pack(txns);
+  }
+
+  async transfer(
+    params: {
+      newQueue: QueueAccount;
+      authority?: Keypair;
+      crankPubkey?: PublicKey;
+    } & Partial<PermissionSetParams>
+  ): Promise<Array<TransactionSignature>> {
+    const transactions = await this.transferInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignatures = await this.program.signAndSendAll(transactions, {
+      skipPreflight: true,
+    });
+    return txnSignatures;
+  }
+
   public getAccounts(params: {
     queueAccount: QueueAccount;
     queueAuthority: PublicKey;
@@ -439,7 +607,15 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * @throws {AggregatorConfigError} if minUpdateDelaySeconds < 5, if batchSize > queueSize, if minOracleResults > batchSize, if minJobResults > aggregator.jobPubkeysSize
    */
   public verifyConfig(
-    aggregator: types.AggregatorAccountData,
+    aggregator:
+      | types.AggregatorAccountData
+      | {
+          oracleRequestBatchSize: number;
+          minOracleResults: number;
+          minJobResults: number;
+          minUpdateDelaySeconds: number;
+          jobPubkeysSize: number;
+        },
     queue: types.OracleQueueAccountData,
     target: {
       batchSize?: number;

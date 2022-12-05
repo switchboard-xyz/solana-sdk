@@ -109,6 +109,11 @@ export class TransactionObject implements ITransactionObject {
       throw new errors.SwitchboardProgramReadOnlyError();
     }
 
+    // if empty object, return
+    if (ixns.length === 0) {
+      return;
+    }
+
     // verify num ixns
     if (ixns.length > 10) {
       throw new errors.TransactionInstructionOverflowError(ixns.length);

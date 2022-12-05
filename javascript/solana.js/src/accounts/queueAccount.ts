@@ -296,7 +296,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     payer: PublicKey,
     params: OracleInitParams &
       OracleStakeParams &
-      Partial<Omit<PermissionSetParams, 'permission'>> & {
+      Partial<PermissionSetParams> & {
         queueAuthorityPubkey?: PublicKey;
       }
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
@@ -355,9 +355,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: OracleInitParams &
-      OracleStakeParams &
-      Partial<Omit<PermissionSetParams, 'permission'>>
+    params: OracleInitParams & OracleStakeParams & Partial<PermissionSetParams>
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -438,7 +436,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       fundAmount?: number;
       funderAuthority?: Keypair;
       funderTokenAccount?: PublicKey;
-    } & Partial<Omit<PermissionSetParams, 'permission'>> & {
+    } & Partial<PermissionSetParams> & {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
       } & {
@@ -512,7 +510,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         funderAuthority: params.funderAuthority,
         aggregatorAccount: aggregatorAccount,
         queueAccount: this,
-        jobAuthorities: [],
+        jobAuthorities: [], // create lease before adding jobs to skip this step
+        jobPubkeys: [],
       })
     )[1];
     txns.push(leaseInit);
@@ -626,7 +625,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       fundAmount?: number;
       funderAuthority?: Keypair;
       funderTokenAccount?: PublicKey;
-    } & Partial<Omit<PermissionSetParams, 'permission'>> & {
+    } & Partial<PermissionSetParams> & {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
       }
@@ -745,8 +744,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createVrfInstructions(
     payer: PublicKey,
-    params: Omit<VrfInitParams, 'queueAccount'> &
-      Partial<Omit<PermissionSetParams, 'permission'>>
+    params: Omit<VrfInitParams, 'queueAccount'> & Partial<PermissionSetParams>
   ): Promise<[VrfAccount, TransactionObject]> {
     const queue = await this.loadData();
 
@@ -808,8 +806,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createVrf(
-    params: Omit<VrfInitParams, 'queueAccount'> &
-      Partial<Omit<PermissionSetParams, 'permission'>>
+    params: Omit<VrfInitParams, 'queueAccount'> & Partial<PermissionSetParams>
   ): Promise<[VrfAccount, TransactionSignature]> {
     const [vrfAccount, txn] = await this.createVrfInstructions(
       this.program.walletPubkey,
@@ -845,7 +842,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createBufferRelayerInstructions(
     payer: PublicKey,
     params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
-      Partial<Omit<PermissionSetParams, 'permission'>> & {
+      Partial<PermissionSetParams> & {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
       }
@@ -947,7 +944,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createBufferRelayer(
     params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
-      Partial<Omit<PermissionSetParams, 'permission'>> & {
+      Partial<PermissionSetParams> & {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
       }
@@ -1166,7 +1163,7 @@ export interface QueueInitParams {
    */
   name?: string;
   /**
-   *  Buffer for queue metadata
+   *  Metadata for the queue for easier identification.
    */
   metadata?: string;
   /**
@@ -1233,18 +1230,58 @@ export interface QueueInitParams {
   dataBufferKeypair?: Keypair;
 }
 
-export type QueueSetConfigParams = Partial<{
+export interface QueueSetConfigParams {
+  /** Alternative keypair that is the queue authority and is permitted to make account changes. Defaults to the payer if not provided. */
   authority?: anchor.web3.Keypair;
-  name: string;
-  metadata: string;
-  unpermissionedFeedsEnabled: boolean;
-  unpermissionedVrfEnabled: boolean;
-  enableBufferRelayers: boolean;
-  slashingEnabled: boolean;
-  varianceToleranceMultiplier: number;
-  oracleTimeout: number;
-  reward: number;
-  minStake: number;
-  consecutiveFeedFailureLimit: number;
-  consecutiveOracleFailureLimit: number;
-}>;
+  /**
+   *  A name to assign to this {@linkcode QueueAccount}
+   */
+  name?: string;
+  /**
+   *  Metadata for the queue for easier identification.
+   */
+  metadata?: string;
+  /**
+   *  Enabling this setting means data feeds do not need explicit permission to join the queue.
+   */
+  unpermissionedFeedsEnabled?: boolean;
+  /**
+   *  Enabling this setting means data feeds do not need explicit permission
+   *  to request VRF proofs and verifications from this queue.
+   */
+  unpermissionedVrfEnabled?: boolean;
+  /**
+   *  Enabling this setting will allow buffer relayer accounts to call openRound.
+   */
+  enableBufferRelayers?: boolean;
+  /**
+   *  Whether slashing is enabled on this queue.
+   */
+  slashingEnabled?: boolean;
+  /**
+   *  The tolerated variance amount oracle results can have from the accepted round result
+   *  before being slashed.
+   *  slashBound = varianceToleranceMultiplier * stdDeviation
+   */
+  varianceToleranceMultiplier?: number;
+  /**
+   *  Time period (in seconds) we should remove an oracle after if no response.
+   */
+  oracleTimeout?: number;
+  /**
+   *  Rewards to provide oracles and round openers on this queue.
+   */
+  reward?: number;
+  /**
+   *  The minimum amount of stake oracles must present to remain on the queue.
+   */
+  minStake?: number;
+  /**
+   *  Consecutive failure limit for a feed before feed permission is revoked.
+   */
+  consecutiveFeedFailureLimit?: number;
+  /**
+   *  Consecutive failure limit for an oracle before oracle permission is revoked.
+   */
+  consecutiveOracleFailureLimit?: number;
+}

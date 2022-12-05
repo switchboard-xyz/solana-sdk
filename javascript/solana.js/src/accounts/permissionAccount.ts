@@ -1,5 +1,7 @@
 import * as anchor from '@project-serum/anchor';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
 import {
+  AccountInfo,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -49,8 +51,6 @@ export class PermitNone {
 }
 
 export interface PermissionSetParams {
-  /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
-  permission: types.SwitchboardPermissionKind;
   /** Whether to enable PERMIT_ORACLE_HEARTBEAT permissions. **Note:** Requires a provided queueAuthority keypair or payer to be the assigned queue authority. */
   enable: boolean;
   /** Keypair used to enable heartbeat permissions if payer is not the queue authority. */
@@ -196,7 +196,12 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   /**
    * Sets the permission in the PermissionAccount
    */
-  public async set(params: PermissionSetParams): Promise<string> {
+  public async set(
+    params: PermissionSetParams & {
+      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
+      permission: types.SwitchboardPermissionKind;
+    }
+  ): Promise<string> {
     const setTxn = this.setInstruction(this.program.walletPubkey, params);
     const txnSignature = await this.program.signAndSend(setTxn);
     return txnSignature;
@@ -207,7 +212,10 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
    */
   public setInstruction(
     payer: PublicKey,
-    params: PermissionSetParams
+    params: PermissionSetParams & {
+      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
+      permission: types.SwitchboardPermissionKind;
+    }
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -229,6 +237,39 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
         ),
       ],
       params.queueAuthority ? [params.queueAuthority] : []
+    );
+  }
+
+  static getGranteePermissions(
+    grantee: AccountInfo<Buffer>
+  ): types.SwitchboardPermissionKind {
+    if (grantee.data.byteLength < ACCOUNT_DISCRIMINATOR_SIZE) {
+      throw new Error(`Cannot assign permissions to grantee`);
+    }
+    const discriminator = grantee.data.slice(0, ACCOUNT_DISCRIMINATOR_SIZE);
+
+    // check oracle
+    if (types.OracleAccountData.discriminator.compare(discriminator) === 0) {
+      return new PermitOracleHeartbeat();
+    }
+
+    // check aggregator and buffer relayer
+    if (
+      types.AggregatorAccountData.discriminator.compare(discriminator) === 0 ||
+      types.BufferRelayerAccountData.discriminator.compare(discriminator)
+    ) {
+      return new PermitOracleQueueUsage();
+    }
+
+    // check vrf
+    if (types.VrfAccountData.discriminator.compare(discriminator) === 0) {
+      return new PermitVrfRequests();
+    }
+
+    throw new Error(
+      `Cannot find permissions to assign for account with discriminator of [${discriminator.join(
+        ', '
+      )}]`
     );
   }
 }
