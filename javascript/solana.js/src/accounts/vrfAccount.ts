@@ -94,7 +94,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
     const ixns = [
       spl.createAssociatedTokenAccountInstruction(
-        program.wallet.payer.publicKey,
+        payer,
         escrow,
         params.vrfKeypair.publicKey,
         program.mint.address
@@ -103,11 +103,10 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         escrow,
         params.vrfKeypair.publicKey,
         spl.AuthorityType.AccountOwner,
-        program.programState.publicKey,
-        [program.wallet.payer, params.vrfKeypair]
+        program.programState.publicKey
       ),
       SystemProgram.createAccount({
-        fromPubkey: program.wallet.payer.publicKey,
+        fromPubkey: payer,
         newAccountPubkey: params.vrfKeypair.publicKey,
         space: size,
         lamports: await program.connection.getMinimumBalanceForRentExemption(

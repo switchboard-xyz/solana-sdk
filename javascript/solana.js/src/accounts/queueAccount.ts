@@ -172,7 +172,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       payer,
       [
         SystemProgram.createAccount({
-          fromPubkey: program.wallet.publicKey,
+          fromPubkey: payer,
           newAccountPubkey: dataBuffer.publicKey,
           space: queueDataSize,
           lamports: await program.connection.getMinimumBalanceForRentExemption(
@@ -506,8 +506,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const leaseInit = (
       await LeaseAccount.createInstructions(this.program, payer, {
         loadAmount: params.fundAmount,
-        funderTokenAccount: params.funderTokenAccount,
-        funderAuthority: params.funderAuthority,
+        funderTokenAccount: params.funderTokenAccount ?? userTokenAddress,
+        funderAuthority: params.funderAuthority ?? undefined,
         aggregatorAccount: aggregatorAccount,
         queueAccount: this,
         jobAuthorities: [], // create lease before adding jobs to skip this step
@@ -646,7 +646,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       params
     );
 
-    const signatures = await this.program.signAndSendAll(txns);
+    const signatures = await this.program.signAndSendAll(txns, {
+      skipPreflight: true,
+    });
 
     return [aggregatorAccount, signatures];
   }

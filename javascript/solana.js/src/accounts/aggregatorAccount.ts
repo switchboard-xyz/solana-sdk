@@ -105,6 +105,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return data;
   }
 
+  public get slidingWindowKey(): PublicKey {
+    return anchor.utils.publicKey.findProgramAddressSync(
+      [Buffer.from('SlidingResultAccountData'), this.publicKey.toBytes()],
+      this.program.programId
+    )[0];
+  }
+
   /** Load an existing AggregatorAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
@@ -260,13 +267,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     const jobs = await this.loadJobs(aggregator);
-    const jobAuthorities = jobs.map(j => j.state.authority);
-    // const jobAuthorities = Array.from(
-    //   jobs.reduce((set, job) => {
-    //     set.add(job.state.authority);
-    //     return set;
-    //   }, new Set<PublicKey>())
-    // );
+    const jobAuthorities = jobs.map(job => job.state.authority);
 
     const [oldLeaseAccount] = LeaseAccount.fromSeed(
       this.program,
@@ -1124,12 +1125,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       (await this.loadCurrentRoundOracles(aggregator)).map(a => a.state)) {
       remainingAccounts.push(oracle.tokenAccount);
     }
-    remainingAccounts.push(
-      anchor.utils.publicKey.findProgramAddressSync(
-        [Buffer.from('SlidingResultAccountData'), this.publicKey.toBytes()],
-        this.program.programId
-      )[0]
-    );
+    remainingAccounts.push(this.slidingWindowKey);
 
     const oracleIdx =
       params.oracleIdx ??
@@ -1342,6 +1338,46 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       },
       jobs: jobs,
     };
+  }
+
+  setSlidingWindowInstruction(
+    payer: PublicKey,
+    params: {
+      authority?: Keypair;
+      mode: types.AggregatorResolutionModeKind;
+    }
+  ): TransactionObject {
+    return new TransactionObject(
+      payer,
+      [
+        types.aggregatorSetResolutionMode(
+          this.program,
+          {
+            params: { mode: params.mode.discriminator },
+          },
+          {
+            aggregator: this.publicKey,
+            authority: params.authority ? params.authority.publicKey : payer,
+            slidingWindow: this.slidingWindowKey,
+            payer: payer,
+            systemProgram: SystemProgram.programId,
+          }
+        ),
+      ],
+      params.authority ? [params.authority] : []
+    );
+  }
+
+  async setSlidingWindow(params: {
+    authority?: Keypair;
+    mode: types.AggregatorResolutionModeKind;
+  }): Promise<TransactionSignature> {
+    const setSlidingWindowTxn = this.setSlidingWindowInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(setSlidingWindowTxn);
+    return txnSignature;
   }
 
   /**

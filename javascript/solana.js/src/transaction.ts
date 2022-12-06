@@ -243,10 +243,15 @@ export class TransactionObject implements ITransactionObject {
   ): Transaction {
     const txn = this.toTxn(blockhash);
     const allSigners = [...this.signers];
+
     if (signers) {
       allSigners.push(...signers);
     }
-    txn.sign(...allSigners);
+
+    if (allSigners.length) {
+      txn.sign(...allSigners);
+    }
+
     return txn;
   }
 
