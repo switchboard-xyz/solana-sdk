@@ -68,7 +68,7 @@ describe('Aggregator Tests', () => {
     jobAccount = jobAccount1;
   });
 
-  it('Adds and removes a job from an aggregator', async () => {
+  it("Adds job, updates it's weight, then removes it from aggregator", async () => {
     const aggregatorKeypair = Keypair.generate();
     const aggregatorAuthority = Keypair.generate();
 
@@ -94,14 +94,10 @@ describe('Aggregator Tests', () => {
       ],
     });
 
-    const [jobAccount] = await JobAccount.create(
-      ctx.program,
-
-      {
-        data: OracleJob.encodeDelimited(oracleJob).finish(),
-        name: 'Job1',
-      }
-    );
+    const [jobAccount] = await JobAccount.create(ctx.program, {
+      data: OracleJob.encodeDelimited(oracleJob).finish(),
+      name: 'Job1',
+    });
 
     await aggregatorAccount.addJob({
       job: jobAccount,
@@ -115,6 +111,17 @@ describe('Aggregator Tests', () => {
     );
     if (jobIdx === -1) {
       throw new Error(`Failed to add job to aggregator`);
+    }
+
+    await aggregatorAccount.updateJobWeight({
+      job: jobAccount,
+      jobIdx: jobIdx,
+      weight: 2,
+      authority: aggregatorAuthority,
+    });
+    const postUpdateWeightAggregatorState = await aggregatorAccount.loadData();
+    if (postUpdateWeightAggregatorState.jobWeights[0] !== 2) {
+      throw new Error(`Failed to update job weight in aggregator`);
     }
 
     await aggregatorAccount.removeJob({

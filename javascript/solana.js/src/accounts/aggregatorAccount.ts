@@ -906,6 +906,42 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
+  public updateJobWeightInstruction(
+    payer: PublicKey,
+    params: {
+      job: JobAccount;
+      jobIdx: number;
+      weight: number;
+      authority?: Keypair;
+    }
+  ): TransactionObject {
+    const removeJob = this.removeJobInstruction(payer, {
+      job: params.job,
+      jobIdx: params.jobIdx,
+      authority: params.authority,
+    });
+    const addJob = this.addJobInstruction(payer, {
+      job: params.job,
+      weight: params.weight,
+      authority: params.authority,
+    });
+    return removeJob.combine(addJob);
+  }
+
+  public async updateJobWeight(params: {
+    job: JobAccount;
+    jobIdx: number;
+    weight: number;
+    authority?: Keypair;
+  }): Promise<TransactionSignature> {
+    const transaction = this.updateJobWeightInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const signature = await this.program.signAndSend(transaction);
+    return signature;
+  }
+
   public removeJobInstruction(
     payer: PublicKey,
     params: {
