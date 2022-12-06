@@ -261,6 +261,84 @@
       ]
     },
     {
+      "name": "aggregatorSaveResultV2",
+      "accounts": [
+        {
+          "name": "aggregator",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracleAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "oracleQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "feedPermission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oraclePermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "lease",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "historyBuffer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AggregatorSaveResultParamsV2"
+          }
+        }
+      ]
+    },
+    {
       "name": "aggregatorSetAuthority",
       "accounts": [
         {
@@ -307,6 +385,44 @@
           "name": "params",
           "type": {
             "defined": "AggregatorSetConfigParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "aggregatorSetResolutionMode",
+      "accounts": [
+        {
+          "name": "aggregator",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "slidingWindow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AggregatorSetResolutionModeParams"
           }
         }
       ]
@@ -1859,11 +1975,65 @@
             "type": "i64"
           },
           {
+            "name": "resolutionMode",
+            "type": {
+              "defined": "AggregatorResolutionMode"
+            }
+          },
+          {
+            "name": "basePriorityFee",
+            "type": "u32"
+          },
+          {
+            "name": "priorityFeeBump",
+            "type": "u32"
+          },
+          {
+            "name": "priorityFeeBumpPeriod",
+            "type": "u32"
+          },
+          {
+            "name": "maxPriorityFeeMultiplier",
+            "type": "u32"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                139
+                122
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SlidingResultAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": {
+              "array": [
+                {
+                  "defined": "SlidingWindowElement"
+                },
+                16
+              ]
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "type": {
+              "array": [
+                "u8",
+                512
               ]
             }
           }
@@ -2602,6 +2772,75 @@
       }
     },
     {
+      "name": "AggregatorSaveResultParamsV2",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracleIdx",
+            "type": "u32"
+          },
+          {
+            "name": "error",
+            "type": "bool"
+          },
+          {
+            "name": "value",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "jobsChecksum",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "minResponse",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "maxResponse",
+            "type": {
+              "defined": "BorshDecimal"
+            }
+          },
+          {
+            "name": "feedPermissionBump",
+            "type": "u8"
+          },
+          {
+            "name": "oraclePermissionBump",
+            "type": "u8"
+          },
+          {
+            "name": "leaseBump",
+            "type": "u8"
+          },
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "jobValues",
+            "type": {
+              "vec": {
+                "option": {
+                  "defined": "BorshDecimal"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "AggregatorSetAuthorityParams",
       "type": {
         "kind": "struct",
@@ -2684,6 +2923,30 @@
                 "defined": "BorshDecimal"
               }
             }
+          },
+          {
+            "name": "basePriorityFee",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "priorityFeeBump",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "priorityFeeBumpPeriod",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "maxPriorityFeeMultiplier",
+            "type": {
+              "option": "u32"
+            }
           }
         ]
       }
@@ -2736,6 +2999,18 @@
       "type": {
         "kind": "struct",
         "fields": []
+      }
+    },
+    {
+      "name": "AggregatorSetResolutionModeParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mode",
+            "type": "u8"
+          }
+        ]
       }
     },
     {
@@ -3713,6 +3988,32 @@
       }
     },
     {
+      "name": "SlidingWindowElement",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "oracleKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "value",
+            "type": {
+              "defined": "SwitchboardDecimal"
+            }
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
       "name": "AggregatorRound",
       "type": {
         "kind": "struct",
@@ -4483,6 +4784,20 @@
       }
     },
     {
+      "name": "AggregatorResolutionMode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ModeRoundResolution"
+          },
+          {
+            "name": "ModeSlidingResolution"
+          }
+        ]
+      }
+    },
+    {
       "name": "SwitchboardPermission",
       "type": {
         "kind": "enum",
@@ -4706,6 +5021,49 @@
         {
           "name": "queueAuthority",
           "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorSaveResultEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "value",
+          "type": {
+            "defined": "BorshDecimal"
+          },
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "oraclePubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "jobValues",
+          "type": {
+            "vec": {
+              "option": {
+                "defined": "BorshDecimal"
+              }
+            }
+          },
           "index": false
         }
       ]
@@ -5068,6 +5426,31 @@
         {
           "name": "queue",
           "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PriorityFeeReimburseEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        },
+        {
+          "name": "fee",
+          "type": "u64",
           "index": false
         }
       ]
@@ -5523,6 +5906,11 @@
       "code": 6089,
       "name": "BufferRelayerIllegalRoundOpenCall",
       "msg": "BufferRelayer round open called too early."
+    },
+    {
+      "code": 6090,
+      "name": "InvalidSliderAccount",
+      "msg": "Invalid slider account."
     }
   ]
 }
