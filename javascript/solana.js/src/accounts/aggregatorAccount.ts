@@ -906,60 +906,40 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
-  public async updateJobWeightsInstruction(
+  public updateJobWeightInstruction(
     payer: PublicKey,
     params: {
-      weights: { jobPubkey: PublicKey; weight: number }[];
+      job: JobAccount;
+      jobIdx: number;
+      weight: number;
       authority?: Keypair;
     }
-  ): Promise<Array<TransactionObject>> {
-    // Find the job idx (if any) of each provided pukey and sort descending, so that the job index
-    // doesn't change as we remove jobs.
-    const data = await this.loadData();
-    const mapped = params.weights
-      .reduce((array, job) => {
-        const jobIdx = data.jobPubkeysData.findIndex(pubkey =>
-          pubkey.equals(job.jobPubkey)
-        );
-        if (jobIdx < 0) return array;
-        // If the job is found in the current aggregator data push it to the array.
-        return array.concat({ ...job, jobIdx });
-      }, [] as { jobIdx: number; jobPubkey: PublicKey; weight: number }[])
-      .sort((a, b) => -1 * (a.jobIdx - b.jobIdx));
-
-    // For each updated job weight - we must remove the job from its current index, and add it back
-    // with its updated weight.
-    const transactions = mapped.reduce<TransactionObject[]>(
-      (transactions, updated) => {
-        const jobAccount = new JobAccount(this.program, updated.jobPubkey);
-        const removeJob = this.removeJobInstruction(payer, {
-          job: jobAccount,
-          jobIdx: updated.jobIdx,
-          authority: params.authority,
-        });
-        const addJob = this.addJobInstruction(payer, {
-          job: jobAccount,
-          weight: updated.weight,
-          authority: params.authority,
-        });
-        return transactions.concat(removeJob, addJob);
-      },
-      []
-    );
-
-    return TransactionObject.pack(transactions);
+  ): TransactionObject {
+    const removeJob = this.removeJobInstruction(payer, {
+      job: params.job,
+      jobIdx: params.jobIdx,
+      authority: params.authority,
+    });
+    const addJob = this.addJobInstruction(payer, {
+      job: params.job,
+      weight: params.weight,
+      authority: params.authority,
+    });
+    return removeJob.combine(addJob);
   }
 
-  public async updateJobWeights(params: {
-    weights: { jobPubkey: PublicKey; weight: number }[];
+  public async updateJobWeight(params: {
+    job: JobAccount;
+    jobIdx: number;
+    weight: number;
     authority?: Keypair;
-  }): Promise<Array<TransactionSignature>> {
-    const transactions = await this.updateJobWeightsInstruction(
+  }): Promise<TransactionSignature> {
+    const transaction = this.updateJobWeightInstruction(
       this.program.walletPubkey,
       params
     );
-    const signatures = await this.program.signAndSendAll(transactions);
-    return signatures;
+    const signature = await this.program.signAndSend(transaction);
+    return signature;
   }
 
   public removeJobInstruction(
