@@ -267,13 +267,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     const jobs = await this.loadJobs(aggregator);
-    const jobAuthorities = jobs.map(j => j.state.authority);
-    // const jobAuthorities = Array.from(
-    //   jobs.reduce((set, job) => {
-    //     set.add(job.state.authority);
-    //     return set;
-    //   }, new Set<PublicKey>())
-    // );
+    const jobAuthorities = jobs.map(job => job.state.authority);
 
     const [oldLeaseAccount] = LeaseAccount.fromSeed(
       this.program,

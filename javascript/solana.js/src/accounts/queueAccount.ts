@@ -172,7 +172,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       payer,
       [
         SystemProgram.createAccount({
-          fromPubkey: program.wallet.publicKey,
+          fromPubkey: payer,
           newAccountPubkey: dataBuffer.publicKey,
           space: queueDataSize,
           lamports: await program.connection.getMinimumBalanceForRentExemption(
