@@ -1516,44 +1516,6 @@ export interface AggregatorInitParams {
   queueAuthority: PublicKey;
 }
 
-export type AggregatorSetConfigParams = Partial<{
-  /**
-   *  Name of the aggregator to store on-chain.
-   */
-  name: string;
-  /**
-   *  Metadata of the aggregator to store on-chain.
-   */
-  metadata: string;
-  /**
-   *  Number of oracles to request on aggregator update.
-   */
-  batchSize: number;
-  /**
-   *  Minimum number of oracle responses required before a round is validated.
-   */
-  minOracleResults: number;
-  /**
-   *  Minimum number of feed jobs suggested to be successful before an oracle
-   *  sends a response.
-   */
-  minJobResults: number;
-  /**
-   *  Minimum number of seconds required between aggregator rounds.
-   */
-  minUpdateDelaySeconds: number;
-  /**
-   *  Number of seconds for which, even if the variance threshold is not passed,
-   *  accept new responses from oracles.
-   */
-  forceReportPeriod: number;
-  /**
-   *  Change percentage required between a previous round and the current round.
-   *  If variance percentage is not met, reject new oracle responses.
-   */
-  varianceThreshold: number;
-}>;
-
 export interface AggregatorSetQueueParams {
   queueAccount: QueueAccount;
   authority?: Keypair;
