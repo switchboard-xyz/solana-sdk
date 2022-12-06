@@ -16,6 +16,7 @@ import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
 import { TransactionObject } from '../transaction';
 import { BN } from 'bn.js';
+import Big from 'big.js';
 
 /**
  * Account type representing an {@linkcode AggregatorAccount}'s pre-funded escrow used to reward {@linkcode OracleAccount}'s for responding to open round requests.
@@ -114,24 +115,30 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       withdrawAuthority?: PublicKey;
     }
   ): Promise<[LeaseAccount, TransactionObject]> {
+    const txns: Array<TransactionObject> = [];
     const loadAmount = params.loadAmount ?? 0;
     const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
-    const funderAuthority = params.funderAuthority
-      ? params.funderAuthority.publicKey
-      : payer;
-
-    const [funderTokenAccount, wrapTxn] =
-      params.loadAmount && params.loadAmount > 0
-        ? await program.mint.getOrCreateWrappedUserInstructions(
-            payer,
-            { fundUpTo: params.loadAmount ?? 0 },
-            params.funderAuthority
-          )
-        : [
-            program.mint.getAssociatedAddress(funderAuthority),
-            new TransactionObject(payer, [], []),
-          ];
+    let tokenTxn: TransactionObject;
+    let funderTokenAddress: PublicKey;
+    if (params.funderTokenAccount) {
+      funderTokenAddress = params.funderTokenAccount;
+      tokenTxn = await program.mint.wrapInstructions(
+        payer,
+        {
+          fundUpTo: new Big(params.loadAmount ?? 0),
+        },
+        params.funderAuthority
+      );
+    } else {
+      [funderTokenAddress, tokenTxn] =
+        await program.mint.getOrCreateWrappedUserInstructions(
+          payer,
+          { fundUpTo: params.loadAmount ?? 0 },
+          params.funderAuthority
+        );
+    }
+    txns.push(tokenTxn);
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
       program,
@@ -198,8 +205,10 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         payer: payer,
         systemProgram: SystemProgram.programId,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
-        funder: funderTokenAccount,
-        owner: funderAuthority,
+        funder: funderTokenAddress,
+        owner: params.funderAuthority
+          ? params.funderAuthority.publicKey
+          : payer,
         escrow: escrow,
         programState: program.programState.publicKey,
         mint: program.mint.address,
@@ -207,13 +216,15 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
     leaseInitIxn.keys.push(...remainingAccounts);
 
-    const leaseInitTxn = new TransactionObject(
-      payer,
-      [createTokenAccountIxn, leaseInitIxn],
-      params.funderAuthority ? [params.funderAuthority] : []
+    txns.push(
+      new TransactionObject(
+        payer,
+        [createTokenAccountIxn, leaseInitIxn],
+        params.funderAuthority ? [params.funderAuthority] : []
+      )
     );
 
-    const packed = TransactionObject.pack([wrapTxn, leaseInitTxn]);
+    const packed = TransactionObject.pack(txns);
     if (packed.length > 1) {
       throw new Error(`Failed to pack transactions into a single transactions`);
     }
