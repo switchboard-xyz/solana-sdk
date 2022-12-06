@@ -40,11 +40,11 @@ export type SwitchboardEvents = {
   };
   AggregatorValueUpdateEvent: {
     feedPubkey: anchor.web3.PublicKey;
-    value: types.SwitchboardDecimal;
+    value: types.SwitchboardDecimalFields;
     slot: anchor.BN;
     timestamp: anchor.BN;
     oraclePubkeys: anchor.web3.PublicKey[];
-    oracleValues: types.SwitchboardDecimal[];
+    oracleValues: types.SwitchboardDecimalFields[];
   };
   OracleRewardEvent: {
     feedPubkey: anchor.web3.PublicKey;
