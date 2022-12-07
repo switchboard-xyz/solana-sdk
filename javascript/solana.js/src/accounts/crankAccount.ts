@@ -73,7 +73,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Crank', this.publicKey);
     if (!this.dataBuffer) {
       this.dataBuffer = CrankDataBuffer.fromCrank(this.program, data);
     }

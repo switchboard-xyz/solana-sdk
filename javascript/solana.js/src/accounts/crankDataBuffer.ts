@@ -48,7 +48,10 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
       this.publicKey
     );
     if (accountInfo === null)
-      throw new errors.AccountNotFoundError(this.publicKey);
+      throw new errors.AccountNotFoundError(
+        'Crank Data Buffer',
+        this.publicKey
+      );
     const data = CrankDataBuffer.decode(accountInfo);
     return data;
   }

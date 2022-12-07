@@ -90,7 +90,8 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Buffer Relayer', this.publicKey);
     return data;
   }
 

@@ -53,7 +53,8 @@ export class JobAccount extends Account<types.JobAccountData> {
    */
   public async loadData(): Promise<types.JobAccountData> {
     const data = await types.JobAccountData.fetch(this.program, this.publicKey);
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Job', this.publicKey);
     return data;
   }
 

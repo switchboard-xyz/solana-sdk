@@ -1,4 +1,5 @@
 import * as types from '../generated';
+import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as anchor from '@project-serum/anchor';
 import { Account, OnAccountChangeCallback } from './account';
 import * as errors from '../errors';
@@ -119,7 +120,10 @@ export class AggregatorHistoryBuffer extends Account<
       this.publicKey
     );
     if (bufferAccountInfo === null) {
-      throw new errors.AccountNotFoundError(this.publicKey);
+      throw new errors.AccountNotFoundError(
+        'Aggregator History',
+        this.publicKey
+      );
     }
     return AggregatorHistoryBuffer.decode(bufferAccountInfo.data);
   }

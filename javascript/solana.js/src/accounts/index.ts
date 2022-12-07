@@ -12,3 +12,29 @@ export * from './programStateAccount';
 export * from './queueAccount';
 export * from './queueDataBuffer';
 export * from './vrfAccount';
+
+export const BUFFER_DISCRIMINATOR = Buffer.from([
+  42,
+  55,
+  46,
+  46,
+  45,
+  52,
+  78,
+  78, // BUFFERxx
+]);
+
+export type SwitchboardAccountTypes =
+  | 'Aggregator'
+  | 'AggregatorHistory'
+  | 'BufferRelayer'
+  | 'Crank'
+  | 'CrankBuffer'
+  | 'Job'
+  | 'Lease'
+  | 'Oracle'
+  | 'Permission'
+  | 'ProgramState'
+  | 'Queue'
+  | 'QueueBuffer'
+  | 'Vrf';

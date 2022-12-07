@@ -71,7 +71,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   async loadData(): Promise<types.VrfAccountData> {
     const data = await types.VrfAccountData.fetch(this.program, this.publicKey);
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Vrf', this.publicKey);
     return data;
   }
 
@@ -425,40 +426,72 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     };
   }
 
-  public async toAccountsJSON(
+  public async fetchAccounts(
     _vrf?: types.VrfAccountData,
     _queueAccount?: QueueAccount,
     _queue?: types.OracleQueueAccountData
-  ): Promise<VrfAccountsJSON> {
+  ): Promise<VrfAccounts> {
     const vrf = _vrf ?? (await this.loadData());
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, vrf.oracleQueue);
     const queue = _queue ?? (await queueAccount.loadData());
 
-    const { permissionAccount } = this.getAccounts({
+    const { permissionAccount, permissionBump } = this.getAccounts({
       queueAccount,
       queueAuthority: queue.authority,
     });
 
     const permission = await permissionAccount.loadData();
 
-    const vrfEscrowBalance: number =
-      (await this.program.mint.getBalance(vrf.escrow)) ?? 0;
+    const vrfEscrow = await this.program.mint.getAccount(vrf.escrow);
+    if (!vrfEscrow) {
+      throw new errors.AccountNotFoundError('Vrf Escrow', vrf.escrow);
+    }
+
+    const vrfEscrowBalance: number = this.program.mint.fromTokenAmount(
+      vrfEscrow.amount
+    );
 
     return {
-      publicKey: this.publicKey,
-      ...vrf.toJSON(),
+      vrf: { publicKey: this.publicKey, data: vrf },
       queue: {
         publicKey: queueAccount.publicKey,
-        ...queue.toJSON(),
+        data: queue,
       },
       permission: {
         publicKey: permissionAccount.publicKey,
-        ...permission.toJSON(),
+        bump: permissionBump,
+        data: permission,
       },
       escrow: {
         publicKey: vrf.escrow,
+        data: vrfEscrow,
         balance: vrfEscrowBalance,
+      },
+    };
+  }
+
+  public async toAccountsJSON(
+    _vrf?: types.VrfAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<VrfAccountsJSON> {
+    const accounts = await this.fetchAccounts(_vrf, _queueAccount, _queue);
+
+    return {
+      publicKey: this.publicKey,
+      ...accounts.vrf.data.toJSON(),
+      queue: {
+        publicKey: accounts.queue.publicKey,
+        ...accounts.queue.data.toJSON(),
+      },
+      permission: {
+        publicKey: accounts.permission.publicKey,
+        ...accounts.permission.data.toJSON(),
+      },
+      escrow: {
+        publicKey: accounts.escrow.publicKey,
+        balance: accounts.escrow.balance,
       },
     };
   }
@@ -602,4 +635,25 @@ export type VrfAccountsJSON = Omit<types.VrfAccountDataJSON, 'escrow'> & {
   queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
   permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
   escrow: { publicKey: PublicKey; balance: number };
+};
+
+export type VrfAccounts = {
+  vrf: {
+    publicKey: PublicKey;
+    data: types.VrfAccountData;
+  };
+  queue: {
+    publicKey: PublicKey;
+    data: types.OracleQueueAccountData;
+  };
+  permission: {
+    publicKey: PublicKey;
+    bump: number;
+    data: types.PermissionAccountData;
+  };
+  escrow: {
+    publicKey: PublicKey;
+    data: spl.Account;
+    balance: number;
+  };
 };

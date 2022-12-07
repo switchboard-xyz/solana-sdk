@@ -88,7 +88,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Oracle', this.publicKey);
     return data;
   }
 

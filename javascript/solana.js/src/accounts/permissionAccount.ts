@@ -181,7 +181,8 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Permissions', this.publicKey);
     return data;
   }
 

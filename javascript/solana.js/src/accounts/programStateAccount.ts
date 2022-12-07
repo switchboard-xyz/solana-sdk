@@ -198,7 +198,8 @@ export class ProgramStateAccount extends Account<types.SbState> {
    */
   public async loadData(): Promise<types.SbState> {
     const data = await types.SbState.fetch(this.program, this.publicKey);
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Program State', this.publicKey);
     return data;
   }
   /**

@@ -102,7 +102,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Queue', this.publicKey);
     this.dataBuffer = new QueueDataBuffer(this.program, data.dataBuffer);
     return data;
   }

@@ -20,8 +20,8 @@ export class ExistingKeypair extends Error {
   }
 }
 export class AccountNotFoundError extends Error {
-  constructor(publicKey: anchor.web3.PublicKey) {
-    super(`No account was found at the address: ${publicKey.toBase58()}`);
+  constructor(label: string, publicKey: anchor.web3.PublicKey) {
+    super(`Failed to find ${label} at address ${publicKey.toBase58()}`);
     Object.setPrototypeOf(this, AccountNotFoundError.prototype);
   }
 }
