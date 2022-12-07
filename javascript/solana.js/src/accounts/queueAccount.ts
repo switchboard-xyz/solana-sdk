@@ -102,7 +102,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Queue', this.publicKey);
     this.dataBuffer = new QueueDataBuffer(this.program, data.dataBuffer);
     return data;
   }
@@ -1125,16 +1126,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async toAccountsJSON(
     _queue?: types.OracleQueueAccountData,
     _oracles?: Array<PublicKey>
-  ): Promise<
-    Omit<types.OracleQueueAccountDataJSON, 'dataBuffer'> & {
-      publicKey: PublicKey;
-      dataBuffer: { publicKey: PublicKey; data: Array<PublicKey> };
-      oracles: Array<{
-        publicKey: PublicKey;
-        data: types.OracleAccountDataJSON;
-      }>;
-    }
-  > {
+  ): Promise<QueueAccountsJSON> {
     const queue = _queue ?? (await this.loadData());
     const oracles = _oracles ?? (await this.loadOracles());
     const oracleAccounts = await this.loadOracleAccounts(oracles);
@@ -1287,3 +1279,15 @@ export interface QueueSetConfigParams {
    */
   consecutiveOracleFailureLimit?: number;
 }
+
+export type QueueAccountsJSON = Omit<
+  types.OracleQueueAccountDataJSON,
+  'dataBuffer'
+> & {
+  publicKey: PublicKey;
+  dataBuffer: { publicKey: PublicKey; data: Array<PublicKey> };
+  oracles: Array<{
+    publicKey: PublicKey;
+    data: types.OracleAccountDataJSON;
+  }>;
+};

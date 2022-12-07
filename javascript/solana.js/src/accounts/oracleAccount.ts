@@ -88,7 +88,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Oracle', this.publicKey);
     return data;
   }
 
@@ -461,13 +462,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     _oracle?: types.OracleAccountData & { balance: number },
     _permissionAccount?: PermissionAccount,
     _permission?: types.PermissionAccountData
-  ): Promise<
-    types.OracleAccountDataJSON & {
-      publicKey: PublicKey;
-      balance: number;
-      permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
-    }
-  > {
+  ): Promise<OracleAccountsJSON> {
     const oracle = _oracle ?? (await this.loadData());
     let permissionAccount = _permissionAccount;
     let permission = _permission;
@@ -524,3 +519,9 @@ export interface OracleWithdrawParams {
   /** Alternative keypair that is the oracle authority and required to withdraw from the staking wallet. */
   authority?: Keypair;
 }
+
+export type OracleAccountsJSON = types.OracleAccountDataJSON & {
+  publicKey: PublicKey;
+  balance: number;
+  permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
+};

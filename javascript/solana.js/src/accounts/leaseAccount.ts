@@ -73,7 +73,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Lease', this.publicKey);
     return data;
   }
 
@@ -260,7 +261,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
     const escrowBalance = await this.program.mint.getBalance(escrowPubkey);
     if (escrowBalance === null) {
-      throw new errors.AccountNotFoundError(escrowPubkey);
+      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
     }
     return escrowBalance;
   }
@@ -283,7 +284,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     // decode aggregator
     const aggregatorAccountInfo = accountInfos.shift();
     if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.aggregator);
+      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
     }
     const aggregator: types.AggregatorAccountData = coder.decode(
       AggregatorAccount.accountName,
@@ -293,7 +294,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     // decode queue
     const queueAccountInfo = accountInfos.shift();
     if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.queue);
+      throw new errors.AccountNotFoundError('Queue', lease.queue);
     }
     const queue: types.OracleQueueAccountData = coder.decode(
       QueueAccount.accountName,
@@ -351,7 +352,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
     const aggregatorAccountInfo = accountInfos.shift();
     if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.aggregator);
+      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
     }
     const aggregator: types.AggregatorAccountData = coder.decode(
       AggregatorAccount.accountName,
@@ -363,7 +364,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     // decode queue
     const queueAccountInfo = accountInfos.shift();
     if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.queue);
+      throw new errors.AccountNotFoundError('Queue', lease.queue);
     }
 
     const jobWallets: Array<PublicKey> = [];
@@ -483,13 +484,13 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
     const aggregatorAccountInfo = accountInfos.shift();
     if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.aggregator);
+      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
     }
 
     // decode queue
     const queueAccountInfo = accountInfos.shift();
     if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError(lease.queue);
+      throw new errors.AccountNotFoundError('Queue', lease.queue);
     }
 
     const leaseBump = LeaseAccount.fromSeed(

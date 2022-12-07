@@ -100,7 +100,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       this.program,
       this.publicKey
     );
-    if (data === null) throw new errors.AccountNotFoundError(this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Aggregator', this.publicKey);
     this.history = AggregatorHistoryBuffer.fromAggregator(this.program, data);
     return data;
   }
@@ -1267,32 +1268,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
-  public async toAccountsJSON(
+  public async fetchAccounts(
     _aggregator?: types.AggregatorAccountData,
     _queueAccount?: QueueAccount,
     _queue?: types.OracleQueueAccountData
-  ): Promise<
-    types.AggregatorAccountDataJSON & {
-      publicKey: PublicKey;
-      queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
-      permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
-      lease: types.LeaseAccountDataJSON & { publicKey: PublicKey } & {
-        balance: number;
-      };
-      jobs: Array<
-        types.JobAccountDataJSON & {
-          publicKey: PublicKey;
-          tasks: Array<OracleJob.ITask>;
-        }
-      >;
-    }
-  > {
+  ): Promise<AggregatorAccounts> {
     const aggregator = _aggregator ?? (await this.loadData());
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, aggregator.queuePubkey);
     const queue = _queue ?? (await queueAccount.loadData());
 
-    const { permissionAccount, leaseAccount, leaseEscrow } = this.getAccounts({
+    const {
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseEscrow,
+      leaseBump,
+    } = this.getAccounts({
       queueAccount,
       queueAuthority: queue.authority,
     });
@@ -1341,10 +1333,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       leaseEscrowAccountInfo.account
     );
 
-    const jobs: (types.JobAccountDataJSON & {
+    const jobs: Array<{
       publicKey: PublicKey;
+      data: types.JobAccountData;
       tasks: Array<OracleJob.ITask>;
-    })[] = [];
+    }> = [];
     accountInfos.map(accountInfo => {
       if (!accountInfo || !accountInfo.account) {
         throw new Error(`Failed to fetch JobAccount`);
@@ -1353,28 +1346,71 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       const oracleJob = OracleJob.decodeDelimited(job.data);
       jobs.push({
         publicKey: accountInfo.publicKey,
-        ...job.toJSON(),
+        data: job,
         tasks: oracleJob.tasks,
       });
     });
 
     return {
-      publicKey: this.publicKey,
-      ...aggregator.toJSON(),
+      aggregator: {
+        publicKey: this.publicKey,
+        data: aggregator,
+      },
       queue: {
         publicKey: queueAccount.publicKey,
-        ...queue.toJSON(),
+        data: queue,
       },
       permission: {
         publicKey: permissionAccount.publicKey,
-        ...permission.toJSON(),
+        bump: permissionBump,
+        data: permission,
       },
       lease: {
         publicKey: leaseAccount.publicKey,
-        ...lease.toJSON(),
+        bump: leaseBump,
+        data: lease,
         balance: this.program.mint.fromTokenAmount(leaseEscrowAccount.amount),
       },
       jobs: jobs,
+    };
+  }
+
+  public async toAccountsJSON(
+    _aggregator?: types.AggregatorAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<AggregatorAccountsJSON> {
+    const accounts = await this.fetchAccounts(
+      _aggregator,
+      _queueAccount,
+      _queue
+    );
+
+    return {
+      publicKey: this.publicKey,
+      ...accounts.aggregator.data.toJSON(),
+      queue: {
+        publicKey: accounts.queue.publicKey,
+        ...accounts.queue.data.toJSON(),
+      },
+      permission: {
+        publicKey: accounts.permission.publicKey,
+        bump: accounts.permission.bump,
+        ...accounts.permission.data.toJSON(),
+      },
+      lease: {
+        publicKey: accounts.lease.publicKey,
+        bump: accounts.lease.bump,
+        balance: accounts.lease.balance,
+        ...accounts.lease.data.toJSON(),
+      },
+      jobs: accounts.jobs.map(j => {
+        return {
+          publicKey: j.publicKey,
+          ...j.data.toJSON(),
+          tasks: j.tasks,
+        };
+      }),
     };
   }
 
@@ -1630,3 +1666,47 @@ export interface AggregatorSaveResultParams {
    */
   oracles: Array<types.OracleAccountData>;
 }
+
+export type AggregatorAccountsJSON = types.AggregatorAccountDataJSON & {
+  publicKey: PublicKey;
+  queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
+  permission: types.PermissionAccountDataJSON & {
+    bump: number;
+    publicKey: PublicKey;
+  };
+  lease: types.LeaseAccountDataJSON & { bump: number; publicKey: PublicKey } & {
+    balance: number;
+  };
+  jobs: Array<
+    types.JobAccountDataJSON & {
+      publicKey: PublicKey;
+      tasks: Array<OracleJob.ITask>;
+    }
+  >;
+};
+export type AggregatorAccounts = {
+  aggregator: {
+    publicKey: PublicKey;
+    data: types.AggregatorAccountData;
+  };
+  queue: {
+    publicKey: PublicKey;
+    data: types.OracleQueueAccountData;
+  };
+  permission: {
+    publicKey: PublicKey;
+    bump: number;
+    data: types.PermissionAccountData;
+  };
+  lease: {
+    publicKey: PublicKey;
+    bump: number;
+    balance: number;
+    data: types.LeaseAccountData;
+  };
+  jobs: Array<{
+    publicKey: PublicKey;
+    data: types.JobAccountData;
+    tasks: Array<OracleJob.ITask>;
+  }>;
+};

@@ -47,7 +47,10 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
       this.publicKey
     );
     if (accountInfo === null)
-      throw new errors.AccountNotFoundError(this.publicKey);
+      throw new errors.AccountNotFoundError(
+        'Oracle Queue Buffer',
+        this.publicKey
+      );
     const data = QueueDataBuffer.decode(accountInfo);
     return data;
   }

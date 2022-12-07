@@ -2,6 +2,7 @@ import * as anchor from '@project-serum/anchor';
 import * as errors from './errors';
 import * as sbv2 from './accounts';
 import {
+  AccountInfo,
   Cluster,
   Connection,
   Keypair,
@@ -14,6 +15,21 @@ import { TransactionObject } from './transaction';
 import { SwitchboardEvents } from './switchboardEvents';
 import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
 import { fromCode as fromAnchorCode } from './generated/errors/anchor';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
+import {
+  AggregatorAccountData,
+  BufferRelayerAccountData,
+  CrankAccountData,
+  JobAccountData,
+  LeaseAccountData,
+  OracleAccountData,
+  OracleQueueAccountData,
+  PermissionAccountData,
+  SbState,
+  SlidingResultAccountData,
+  VrfAccountData,
+} from './generated';
+import { AggregatorAccount, DISCRIMINATOR_MAP } from './accounts';
 
 const DEVNET_GENESIS_HASH = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
 
@@ -408,6 +424,175 @@ export class SwitchboardProgram {
       throw error;
     }
   }
+
+  async getProgramAccounts(): Promise<{
+    aggregators: Map<string, AggregatorAccountData>;
+    buffers: Map<string, Buffer>;
+    bufferRelayers: Map<string, BufferRelayerAccountData>;
+    cranks: Map<string, CrankAccountData>;
+    jobs: Map<string, JobAccountData>;
+    leases: Map<string, LeaseAccountData>;
+    oracles: Map<string, OracleAccountData>;
+    permissions: Map<string, PermissionAccountData>;
+    programState: Map<string, SbState>;
+    queues: Map<string, OracleQueueAccountData>;
+    slidingResult: Map<string, SlidingResultAccountData>;
+    vrfs: Map<string, VrfAccountData>;
+  }> {
+    const accountInfos: Array<AccountInfoResponse> =
+      await this.connection.getProgramAccounts(this.programId);
+
+    // buffer - [42, 55, 46, 46, 45, 52, 78, 78]
+    // bufferRelayer - [50, 35, 51, 115, 169, 219, 158, 52]
+    // lease - [55, 254, 208, 251, 164, 44, 150, 50]
+    // permissions - [77, 37, 177, 164, 38, 39, 34, 109]
+    // slidingResult - [91, 4, 83, 187, 102, 216, 153, 254]
+    // vrf - [101, 35, 62, 239, 103, 151, 6, 18]
+    // crank - [111, 81, 146, 73, 172, 180, 134, 209]
+    // job - [124, 69, 101, 195, 229, 218, 144, 63]
+    // oracles - [128, 30, 16, 241, 170, 73, 55, 54]
+    // sbState - [159, 42, 192, 191, 139, 62, 168, 28]
+    // queue - [164, 207, 200, 51, 199, 113, 35, 109]
+    // aggregator - [217, 230, 65, 101, 201, 162, 27, 125]
+
+    const discriminatorMap: Map<
+      string,
+      Array<AccountInfoResponse>
+    > = accountInfos.reduce((map, account) => {
+      const discriminator = account.account.data
+        .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
+        .toString('utf-8');
+
+      const accounts = map.get(discriminator) ?? [];
+      accounts.push(account);
+      map.set(discriminator, accounts);
+
+      return map;
+    }, new Map<string, Array<AccountInfoResponse>>());
+
+    function decodeAccounts<T extends sbv2.SwitchboardAccount>(
+      accounts: Array<AccountInfoResponse>,
+      decode: (data: Buffer) => T
+    ): Map<string, T> {
+      return accounts.reduce((map, account) => {
+        try {
+          const decoded = decode(account.account.data);
+          map.set(account.pubkey.toBase58(), decoded);
+          // eslint-disable-next-line no-empty
+        } catch {}
+
+        return map;
+      }, new Map<string, T>());
+    }
+
+    const aggregators: Map<string, AggregatorAccountData> = decodeAccounts(
+      discriminatorMap.get(
+        AggregatorAccountData.discriminator.toString('utf-8')
+      ) ?? [],
+      AggregatorAccountData.decode
+    );
+
+    // TODO: Use aggregator.historyBuffer, crank.dataBuffer, queue.dataBuffer to filter these down and decode
+    const buffers: Map<string, Buffer> = (
+      discriminatorMap.get(sbv2.BUFFER_DISCRIMINATOR.toString('utf-8')) ?? []
+    ).reduce((map, buffer) => {
+      map.set(buffer.pubkey.toBase58(), buffer.account.data);
+      return map;
+    }, new Map<string, Buffer>());
+
+    const bufferRelayers: Map<string, BufferRelayerAccountData> =
+      decodeAccounts(
+        discriminatorMap.get(
+          BufferRelayerAccountData.discriminator.toString('utf-8')
+        ) ?? [],
+        BufferRelayerAccountData.decode
+      );
+
+    const cranks: Map<string, CrankAccountData> = decodeAccounts(
+      discriminatorMap.get(CrankAccountData.discriminator.toString('utf-8')) ??
+        [],
+      CrankAccountData.decode
+    );
+
+    const jobs: Map<string, JobAccountData> = decodeAccounts(
+      discriminatorMap.get(JobAccountData.discriminator.toString('utf-8')) ??
+        [],
+      JobAccountData.decode
+    );
+
+    const leases: Map<string, LeaseAccountData> = decodeAccounts(
+      discriminatorMap.get(LeaseAccountData.discriminator.toString('utf-8')) ??
+        [],
+      LeaseAccountData.decode
+    );
+
+    const oracles: Map<string, OracleAccountData> = decodeAccounts(
+      discriminatorMap.get(OracleAccountData.discriminator.toString('utf-8')) ??
+        [],
+      OracleAccountData.decode
+    );
+
+    const permissions: Map<string, PermissionAccountData> = decodeAccounts(
+      discriminatorMap.get(
+        PermissionAccountData.discriminator.toString('utf-8')
+      ) ?? [],
+      PermissionAccountData.decode
+    );
+
+    const programState: Map<string, SbState> = decodeAccounts(
+      discriminatorMap.get(SbState.discriminator.toString('utf-8')) ?? [],
+      SbState.decode
+    );
+
+    const queues: Map<string, OracleQueueAccountData> = decodeAccounts(
+      discriminatorMap.get(
+        OracleQueueAccountData.discriminator.toString('utf-8')
+      ) ?? [],
+      OracleQueueAccountData.decode
+    );
+
+    const slidingResult: Map<string, SlidingResultAccountData> = decodeAccounts(
+      discriminatorMap.get(
+        SlidingResultAccountData.discriminator.toString('utf-8')
+      ) ?? [],
+      SlidingResultAccountData.decode
+    );
+
+    const vrfs: Map<string, VrfAccountData> = decodeAccounts(
+      discriminatorMap.get(VrfAccountData.discriminator.toString('utf-8')) ??
+        [],
+      VrfAccountData.decode
+    );
+
+    return {
+      aggregators,
+      buffers,
+      bufferRelayers,
+      cranks,
+      jobs,
+      leases,
+      oracles,
+      permissions,
+      programState,
+      slidingResult,
+      queues,
+      vrfs,
+    };
+  }
+
+  static getAccountType(
+    accountInfo: AccountInfo<Buffer>
+  ): sbv2.SwitchboardAccountType | null {
+    const discriminator = accountInfo.data
+      .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
+      .toString('utf-8');
+    const accountType = DISCRIMINATOR_MAP.get(discriminator);
+    if (accountType) {
+      return accountType;
+    }
+
+    return null;
+  }
 }
 
 export class AnchorWallet implements anchor.Wallet {
@@ -427,4 +612,13 @@ export class AnchorWallet implements anchor.Wallet {
   async signAllTransactions(txns: Transaction[]) {
     return txns.map(this.sign);
   }
+}
+
+interface AccountInfoResponse {
+  pubkey: anchor.web3.PublicKey;
+  account: anchor.web3.AccountInfo<Buffer>;
+}
+
+interface DecodableAccount {
+  decode: (data: Buffer) => DecodableAccount;
 }
