@@ -1,5 +1,6 @@
 import {
   AccountInfo,
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -206,6 +207,45 @@ export class JobAccount extends Account<types.JobAccountData> {
       ...job.toJSON(),
       tasks: oracleJob.tasks,
     };
+  }
+
+  static async fetchMultiple(
+    program: SwitchboardProgram,
+    publicKeys: Array<PublicKey>,
+    commitment: Commitment = 'confirmed'
+  ): Promise<
+    Array<{
+      account: JobAccount;
+      data: types.JobAccountData;
+      job: OracleJob;
+    }>
+  > {
+    const jobs: Array<{
+      account: JobAccount;
+      data: types.JobAccountData;
+      job: OracleJob;
+    }> = [];
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      program.connection,
+      publicKeys,
+      commitment
+    );
+
+    for (const accountInfo of accountInfos) {
+      if (!accountInfo?.publicKey) {
+        continue;
+      }
+      try {
+        const account = new JobAccount(program, accountInfo.publicKey);
+        const data = types.JobAccountData.decode(accountInfo.account.data);
+        const job = OracleJob.decodeDelimited(data.data);
+        jobs.push({ account, data, job });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return jobs;
   }
 }
 

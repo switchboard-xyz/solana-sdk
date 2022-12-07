@@ -491,6 +491,42 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       },
     };
   }
+
+  static async fetchMultiple(
+    program: SwitchboardProgram,
+    publicKeys: Array<PublicKey>,
+    commitment: Commitment = 'confirmed'
+  ): Promise<
+    Array<{
+      account: OracleAccount;
+      data: types.OracleAccountData;
+    }>
+  > {
+    const oracles: Array<{
+      account: OracleAccount;
+      data: types.OracleAccountData;
+    }> = [];
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      program.connection,
+      publicKeys,
+      commitment
+    );
+
+    for (const accountInfo of accountInfos) {
+      if (!accountInfo?.publicKey) {
+        continue;
+      }
+      try {
+        const account = new OracleAccount(program, accountInfo.publicKey);
+        const data = types.OracleAccountData.decode(accountInfo.account.data);
+        oracles.push({ account, data });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return oracles;
+  }
 }
 
 export interface OracleInitParams {

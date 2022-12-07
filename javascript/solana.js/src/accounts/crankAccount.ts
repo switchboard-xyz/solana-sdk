@@ -376,6 +376,46 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     return true;
   }
 
+  public async fetchAccounts(
+    _crank?: types.CrankAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<CrankAccounts> {
+    const crank = _crank ?? (await this.loadData());
+    const queueAccount =
+      _queueAccount ?? new QueueAccount(this.program, crank.queuePubkey);
+    const queue = _queue ?? (await queueAccount.loadData());
+
+    const crankRows = await this.loadCrank();
+
+    const aggregatorPubkeys = crankRows.map(r => r.pubkey);
+    const aggregators = await AggregatorAccount.fetchMultiple(
+      this.program,
+      aggregatorPubkeys
+    );
+
+    return {
+      crank: {
+        publicKey: this.publicKey,
+        data: crank,
+      },
+      queue: {
+        publicKey: queueAccount.publicKey,
+        data: queue,
+      },
+      dataBuffer: {
+        publicKey: crank.dataBuffer,
+        data: crankRows,
+      },
+      aggregators: aggregators.map(a => {
+        return {
+          publicKey: a.account.publicKey,
+          data: a.data,
+        };
+      }),
+    };
+  }
+
   public async toAccountsJSON(
     _crank?: types.CrankAccountData,
     _crankRows?: Array<types.CrankRow>
@@ -459,4 +499,23 @@ export type CrankAccountsJSON = Omit<
 > & {
   publicKey: PublicKey;
   dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };
+};
+
+export type CrankAccounts = {
+  crank: {
+    publicKey: PublicKey;
+    data: types.CrankAccountData;
+  };
+  queue: {
+    publicKey: PublicKey;
+    data: types.OracleQueueAccountData;
+  };
+  dataBuffer: {
+    publicKey: PublicKey;
+    data: Array<types.CrankRow>;
+  };
+  aggregators: Array<{
+    publicKey: PublicKey;
+    data: types.AggregatorAccountData;
+  }>;
 };

@@ -4,6 +4,7 @@ import {
   getAccount,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
+import * as spl from '@solana/spl-token';
 import {
   Commitment,
   Keypair,
@@ -260,6 +261,76 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     const txnSignature = await this.program.signAndSend(openRound);
     return txnSignature;
   }
+
+  public getAccounts(params: {
+    queueAccount: QueueAccount;
+    queueAuthority: PublicKey;
+  }) {
+    const queueAccount = params.queueAccount;
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      params.queueAuthority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    return {
+      queueAccount,
+      permissionAccount,
+      permissionBump,
+    };
+  }
+
+  public async fetchAccounts(
+    _bufferRelayer?: types.BufferRelayerAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<BufferRelayerAccounts> {
+    const bufferRelayer = _bufferRelayer ?? (await this.loadData());
+
+    const queueAccount =
+      _queueAccount ??
+      new QueueAccount(this.program, bufferRelayer.queuePubkey);
+    const queue = _queue ?? (await queueAccount.loadData());
+
+    const { permissionAccount, permissionBump } = this.getAccounts({
+      queueAccount,
+      queueAuthority: queue.authority,
+    });
+    const permission = await permissionAccount.loadData();
+
+    const bufferEscrow = await this.program.mint.getAccount(
+      bufferRelayer.escrow
+    );
+    if (!bufferEscrow) {
+      throw new errors.AccountNotFoundError(
+        'Buffer Relayer Escrow',
+        bufferRelayer.escrow
+      );
+    }
+    const vrfEscrowBalance: number = this.program.mint.fromTokenAmount(
+      bufferEscrow.amount
+    );
+
+    return {
+      bufferRelayer: { publicKey: this.publicKey, data: bufferRelayer },
+      queue: {
+        publicKey: queueAccount.publicKey,
+        data: queue,
+      },
+      permission: {
+        publicKey: permissionAccount.publicKey,
+        bump: permissionBump,
+        data: permission,
+      },
+      escrow: {
+        publicKey: bufferRelayer.escrow,
+        data: bufferEscrow,
+        balance: vrfEscrowBalance,
+      },
+    };
+  }
 }
 
 export interface BufferRelayerInit {
@@ -270,3 +341,24 @@ export interface BufferRelayerInit {
   jobAccount: JobAccount;
   keypair?: Keypair;
 }
+
+export type BufferRelayerAccounts = {
+  bufferRelayer: {
+    publicKey: PublicKey;
+    data: types.BufferRelayerAccountData;
+  };
+  queue: {
+    publicKey: PublicKey;
+    data: types.OracleQueueAccountData;
+  };
+  permission: {
+    publicKey: PublicKey;
+    bump: number;
+    data: types.PermissionAccountData;
+  };
+  escrow: {
+    publicKey: PublicKey;
+    data: spl.Account;
+    balance: number;
+  };
+};

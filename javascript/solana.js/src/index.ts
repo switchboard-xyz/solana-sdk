@@ -1,5 +1,5 @@
 export * from './accounts';
-export * from './clock';
+export * from './SolanaClock';
 export * as types from './generated';
 export * from './mint';
 export * from './program';

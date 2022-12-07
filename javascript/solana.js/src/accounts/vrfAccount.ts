@@ -432,6 +432,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     _queue?: types.OracleQueueAccountData
   ): Promise<VrfAccounts> {
     const vrf = _vrf ?? (await this.loadData());
+
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, vrf.oracleQueue);
     const queue = _queue ?? (await queueAccount.loadData());
@@ -440,14 +441,12 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       queueAccount,
       queueAuthority: queue.authority,
     });
-
     const permission = await permissionAccount.loadData();
 
     const vrfEscrow = await this.program.mint.getAccount(vrf.escrow);
     if (!vrfEscrow) {
       throw new errors.AccountNotFoundError('Vrf Escrow', vrf.escrow);
     }
-
     const vrfEscrowBalance: number = this.program.mint.fromTokenAmount(
       vrfEscrow.amount
     );

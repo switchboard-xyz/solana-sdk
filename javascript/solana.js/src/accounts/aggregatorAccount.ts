@@ -1517,6 +1517,44 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     return history;
   }
+
+  static async fetchMultiple(
+    program: SwitchboardProgram,
+    publicKeys: Array<PublicKey>,
+    commitment: Commitment = 'confirmed'
+  ): Promise<
+    Array<{
+      account: AggregatorAccount;
+      data: types.AggregatorAccountData;
+    }>
+  > {
+    const aggregators: Array<{
+      account: AggregatorAccount;
+      data: types.AggregatorAccountData;
+    }> = [];
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      program.connection,
+      publicKeys,
+      commitment
+    );
+
+    for (const accountInfo of accountInfos) {
+      if (!accountInfo?.publicKey) {
+        continue;
+      }
+      try {
+        const account = new AggregatorAccount(program, accountInfo.publicKey);
+        const data = types.AggregatorAccountData.decode(
+          accountInfo.account.data
+        );
+        aggregators.push({ account, data });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return aggregators;
+  }
 }
 
 /**

@@ -9,6 +9,7 @@ import {
 } from '@solana/web3.js';
 import { SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 import Big from 'big.js';
+import { BN } from 'bn.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import {
@@ -16,6 +17,7 @@ import {
   PermitOracleQueueUsage,
 } from '../generated/types/SwitchboardPermission';
 import { SwitchboardProgram } from '../program';
+import { SolanaClock } from '../SolanaClock';
 import { TransactionObject } from '../transaction';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
@@ -977,48 +979,20 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   /** Loads the oracle states for the oracles currently on the queue's dataBuffer */
   public async loadOracleAccounts(_oracles?: Array<PublicKey>): Promise<
     Array<{
-      publicKey: PublicKey;
+      account: OracleAccount;
       data: types.OracleAccountData;
     }>
   > {
-    const coder = this.program.coder;
-
     const oraclePubkeys = _oracles ?? (await this.loadOracles());
-    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
-      this.program.connection,
-      oraclePubkeys
-    );
 
-    function accountExists<
-      T = {
-        publicKey: PublicKey;
-        data: types.OracleAccountData;
-      }
-    >(value: T | null | undefined): value is T {
-      return value !== null && value !== undefined;
-    }
-
-    const oracles = await Promise.all(
-      accountInfos.map(async o => {
-        if (!o || !o.account) {
-          return undefined;
-        }
-        const data: types.OracleAccountData = coder.decode(
-          OracleAccount.accountName,
-          o.account.data
-        );
-        return { publicKey: o.publicKey, data };
-      })
-    );
-
-    return oracles.filter(accountExists);
+    return await OracleAccount.fetchMultiple(this.program, oraclePubkeys);
   }
 
   public async loadActiveOracleAccounts(
     _queue?: types.OracleQueueAccountData
   ): Promise<
     Array<{
-      publicKey: PublicKey;
+      account: OracleAccount;
       data: types.OracleAccountData;
     }>
   > {
@@ -1026,11 +1000,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     const oracles = await this.loadOracleAccounts();
 
-    const timeout = queue.oracleTimeout;
-    // TODO: Use SolanaClock
-    const unixTimestamp = Math.floor(Date.now() / 1000);
+    const unixTimestamp = (await SolanaClock.fetch(this.program.connection))
+      .unixTimestamp;
+    const timeout = unixTimestamp.sub(new BN(queue.oracleTimeout));
     const activeOracles = oracles.filter(
-      o => o.data && o.data.lastHeartbeat.toNumber() >= unixTimestamp - timeout
+      o => o.data && o.data.lastHeartbeat.gte(timeout)
     );
     return activeOracles;
   }
@@ -1140,8 +1114,35 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       },
       oracles: oracleAccounts.map(o => {
         return {
-          publicKey: o.publicKey,
+          publicKey: o.account.publicKey,
           data: o.data.toJSON(),
+        };
+      }),
+    };
+  }
+
+  public async fetchAccounts(
+    _queue?: types.OracleQueueAccountData,
+    _oracles?: Array<PublicKey>
+  ): Promise<QueueAccounts> {
+    const queue = _queue ?? (await this.loadData());
+    const oracles = _oracles ?? (await this.loadOracles());
+
+    const oracleAccounts = await this.loadOracleAccounts(oracles);
+
+    return {
+      queue: {
+        publicKey: this.publicKey,
+        data: queue,
+      },
+      dataBuffer: {
+        publicKey: queue.dataBuffer,
+        data: oracles,
+      },
+      oracles: oracleAccounts.map(o => {
+        return {
+          publicKey: o.account.publicKey,
+          data: o.data,
         };
       }),
     };
@@ -1289,5 +1290,20 @@ export type QueueAccountsJSON = Omit<
   oracles: Array<{
     publicKey: PublicKey;
     data: types.OracleAccountDataJSON;
+  }>;
+};
+
+export type QueueAccounts = {
+  queue: {
+    publicKey: PublicKey;
+    data: types.OracleQueueAccountData;
+  };
+  dataBuffer: {
+    publicKey: PublicKey;
+    data: Array<PublicKey>;
+  };
+  oracles: Array<{
+    publicKey: PublicKey;
+    data: types.OracleAccountData;
   }>;
 };
