@@ -474,7 +474,12 @@ export class SwitchboardProgram {
       decode: (data: Buffer) => T
     ): Map<string, T> {
       return accounts.reduce((map, account) => {
-        map.set(account.pubkey.toBase58(), decode(account.account.data));
+        try {
+          const decoded = decode(account.account.data);
+          map.set(account.pubkey.toBase58(), decoded);
+          // eslint-disable-next-line no-empty
+        } catch {}
+
         return map;
       }, new Map<string, T>());
     }
