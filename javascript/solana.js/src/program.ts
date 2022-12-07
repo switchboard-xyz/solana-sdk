@@ -2,6 +2,7 @@ import * as anchor from '@project-serum/anchor';
 import * as errors from './errors';
 import * as sbv2 from './accounts';
 import {
+  AccountInfo,
   Cluster,
   Connection,
   Keypair,
@@ -28,7 +29,7 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from './generated';
-import { AggregatorAccount } from './accounts';
+import { AggregatorAccount, DISCRIMINATOR_MAP } from './accounts';
 
 const DEVNET_GENESIS_HASH = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
 
@@ -577,6 +578,20 @@ export class SwitchboardProgram {
       queues,
       vrfs,
     };
+  }
+
+  static getAccountType(
+    accountInfo: AccountInfo<Buffer>
+  ): sbv2.SwitchboardAccountType | null {
+    const discriminator = accountInfo.data
+      .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
+      .toString('utf-8');
+    const accountType = DISCRIMINATOR_MAP.get(discriminator);
+    if (accountType) {
+      return accountType;
+    }
+
+    return null;
   }
 }
 
