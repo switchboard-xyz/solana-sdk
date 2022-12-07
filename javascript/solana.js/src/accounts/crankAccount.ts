@@ -378,12 +378,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   public async toAccountsJSON(
     _crank?: types.CrankAccountData,
     _crankRows?: Array<types.CrankRow>
-  ): Promise<
-    Omit<types.CrankAccountDataJSON, 'dataBuffer'> & {
-      publicKey: PublicKey;
-      dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };
-    }
-  > {
+  ): Promise<CrankAccountsJSON> {
     const crank = _crank ?? (await this.loadData());
     const crankRows = _crankRows ?? (await this.loadCrank());
 
@@ -456,3 +451,11 @@ export interface CrankPopParams {
   failOpenOnMismatch?: boolean;
   popIdx?: number;
 }
+
+export type CrankAccountsJSON = Omit<
+  types.CrankAccountDataJSON,
+  'dataBuffer'
+> & {
+  publicKey: PublicKey;
+  dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };
+};

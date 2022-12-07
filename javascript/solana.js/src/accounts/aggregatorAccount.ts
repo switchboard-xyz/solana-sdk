@@ -1269,22 +1269,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     _aggregator?: types.AggregatorAccountData,
     _queueAccount?: QueueAccount,
     _queue?: types.OracleQueueAccountData
-  ): Promise<
-    types.AggregatorAccountDataJSON & {
-      publicKey: PublicKey;
-      queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
-      permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
-      lease: types.LeaseAccountDataJSON & { publicKey: PublicKey } & {
-        balance: number;
-      };
-      jobs: Array<
-        types.JobAccountDataJSON & {
-          publicKey: PublicKey;
-          tasks: Array<OracleJob.ITask>;
-        }
-      >;
-    }
-  > {
+  ): Promise<AggregatorAccountsJSON> {
     const aggregator = _aggregator ?? (await this.loadData());
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, aggregator.queuePubkey);
@@ -1628,3 +1613,18 @@ export interface AggregatorSaveResultParams {
    */
   oracles: Array<types.OracleAccountData>;
 }
+
+export type AggregatorAccountsJSON = types.AggregatorAccountDataJSON & {
+  publicKey: PublicKey;
+  queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
+  permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
+  lease: types.LeaseAccountDataJSON & { publicKey: PublicKey } & {
+    balance: number;
+  };
+  jobs: Array<
+    types.JobAccountDataJSON & {
+      publicKey: PublicKey;
+      tasks: Array<OracleJob.ITask>;
+    }
+  >;
+};

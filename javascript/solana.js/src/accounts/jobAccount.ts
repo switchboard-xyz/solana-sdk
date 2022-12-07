@@ -194,12 +194,9 @@ export class JobAccount extends Account<types.JobAccountData> {
     );
   }
 
-  public async toAccountsJSON(_job?: types.JobAccountData): Promise<
-    types.JobAccountDataJSON & {
-      publicKey: PublicKey;
-      tasks: Array<OracleJob.ITask>;
-    }
-  > {
+  public async toAccountsJSON(
+    _job?: types.JobAccountData
+  ): Promise<JobAccountsJSON> {
     const job = _job ?? (await this.loadData());
     const oracleJob = OracleJob.decodeDelimited(job.data);
 
@@ -220,3 +217,8 @@ export interface JobInitParams {
   variables?: Array<string>;
   keypair?: Keypair;
 }
+
+export type JobAccountsJSON = types.JobAccountDataJSON & {
+  publicKey: PublicKey;
+  tasks: Array<OracleJob.ITask>;
+};

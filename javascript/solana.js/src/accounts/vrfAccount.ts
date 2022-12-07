@@ -405,6 +405,64 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     return callbackTransactions;
   }
 
+  public getAccounts(params: {
+    queueAccount: QueueAccount;
+    queueAuthority: PublicKey;
+  }) {
+    const queueAccount = params.queueAccount;
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      this.program,
+      params.queueAuthority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+
+    return {
+      queueAccount,
+      permissionAccount,
+      permissionBump,
+    };
+  }
+
+  public async toAccountsJSON(
+    _vrf?: types.VrfAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<VrfAccountsJSON> {
+    const vrf = _vrf ?? (await this.loadData());
+    const queueAccount =
+      _queueAccount ?? new QueueAccount(this.program, vrf.oracleQueue);
+    const queue = _queue ?? (await queueAccount.loadData());
+
+    const { permissionAccount } = this.getAccounts({
+      queueAccount,
+      queueAuthority: queue.authority,
+    });
+
+    const permission = await permissionAccount.loadData();
+
+    const vrfEscrowBalance: number =
+      (await this.program.mint.getBalance(vrf.escrow)) ?? 0;
+
+    return {
+      publicKey: this.publicKey,
+      ...vrf.toJSON(),
+      queue: {
+        publicKey: queueAccount.publicKey,
+        ...queue.toJSON(),
+      },
+      permission: {
+        publicKey: permissionAccount.publicKey,
+        ...permission.toJSON(),
+      },
+      escrow: {
+        publicKey: vrf.escrow,
+        balance: vrfEscrowBalance,
+      },
+    };
+  }
+
   /**
    * Await for the next vrf result
    *
@@ -538,3 +596,10 @@ export interface VrfRequestRandomnessParams {
   queueAccount?: QueueAccount;
   vrf?: types.VrfAccountData;
 }
+
+export type VrfAccountsJSON = Omit<types.VrfAccountDataJSON, 'escrow'> & {
+  publicKey: PublicKey;
+  queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
+  permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
+  escrow: { publicKey: PublicKey; balance: number };
+};
