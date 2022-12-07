@@ -642,7 +642,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       );
     }
 
-    if (endState.minJobResults < aggregator.jobPubkeysSize) {
+    if (endState.minJobResults > aggregator.jobPubkeysSize) {
       throw new errors.AggregatorConfigError(
         'minJobResults',
         `must be less than the number of jobs (${aggregator.jobPubkeysSize})`
