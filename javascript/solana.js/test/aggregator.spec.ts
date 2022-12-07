@@ -338,4 +338,64 @@ describe('Aggregator Tests', () => {
       }, received ${newPermission.permissions}`
     );
   });
+
+  it("Adds job, updates it's config, then removes it from aggregator", async () => {
+    const aggregatorKeypair = Keypair.generate();
+    const aggregatorAuthority = Keypair.generate();
+
+    const [aggregatorAccount] = await AggregatorAccount.create(ctx.program, {
+      queueAccount,
+      queueAuthority: queueAuthority.publicKey,
+      authority: aggregatorAuthority.publicKey,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 60,
+      keypair: aggregatorKeypair,
+    });
+    await aggregatorAccount.loadData();
+
+    const oracleJob = OracleJob.fromObject({
+      tasks: [{ valueTask: { value: 1 } }],
+    });
+
+    const [jobAccount] = await JobAccount.create(ctx.program, {
+      data: OracleJob.encodeDelimited(oracleJob).finish(),
+      name: 'Job1',
+    });
+
+    await aggregatorAccount.addJob({
+      job: jobAccount,
+      weight: 1,
+      authority: aggregatorAuthority,
+    });
+
+    const postAddJobAggregatorState = await aggregatorAccount.loadData();
+    const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(pubkey =>
+      pubkey.equals(jobAccount.publicKey)
+    );
+    if (jobIdx === -1) {
+      throw new Error(`Failed to add job to aggregator`);
+    }
+
+    const badSetConfigSignature = await aggregatorAccount
+      .setConfigInstruction(aggregatorAuthority.publicKey, { minJobResults: 2 })
+      .catch(() => undefined);
+    // If badSetConfigSignature isn't undefined, a (bad) transaction was built and sent.
+    if (badSetConfigSignature) {
+      throw new Error(
+        'Aggregator should not let minJobResults increase above numJobs'
+      );
+    }
+
+    await aggregatorAccount.setConfig({
+      authority: aggregatorAuthority,
+      minUpdateDelaySeconds: 300,
+      force: true, // Bypass validation rules.
+    });
+    const postUpdateAggregatorState = await aggregatorAccount.loadData();
+    if (postUpdateAggregatorState.minUpdateDelaySeconds !== 300) {
+      throw new Error(`Failed to setConfig on aggregator`);
+    }
+  });
 });

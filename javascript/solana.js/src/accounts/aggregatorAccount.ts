@@ -675,12 +675,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       minUpdateDelaySeconds: number;
       forceReportPeriod: number;
       varianceThreshold: number;
-      authority?: Keypair;
-      basePriorityFee?: number;
-      priorityFeeBump?: number;
-      priorityFeeBumpPeriod?: number;
-      maxPriorityFeeMultiplier?: number;
-    }> & { force?: boolean }
+      authority: Keypair;
+      basePriorityFee: number;
+      priorityFeeBump: number;
+      priorityFeeBumpPeriod: number;
+      maxPriorityFeeMultiplier: number;
+      force: boolean;
+    }>
   ): Promise<TransactionObject> {
     if (!(params.force ?? false)) {
       const aggregator = await this.loadData();
@@ -758,6 +759,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBump?: number;
       priorityFeeBumpPeriod?: number;
       maxPriorityFeeMultiplier?: number;
+      force: boolean;
     }>
   ): Promise<TransactionSignature> {
     const setConfigTxn = await this.setConfigInstruction(
