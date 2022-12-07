@@ -1,3 +1,17 @@
+import {
+  AggregatorAccountData,
+  BufferRelayerAccountData,
+  CrankAccountData,
+  JobAccountData,
+  LeaseAccountData,
+  OracleAccountData,
+  OracleQueueAccountData,
+  PermissionAccountData,
+  SbState,
+  SlidingResultAccountData,
+  VrfAccountData,
+} from '../generated';
+
 export * from './account';
 export * from './aggregatorAccount';
 export * from './aggregatorHistoryBuffer';
@@ -38,3 +52,16 @@ export type SwitchboardAccountTypes =
   | 'Queue'
   | 'QueueBuffer'
   | 'Vrf';
+
+export type SwitchboardAccount =
+  | AggregatorAccountData
+  | BufferRelayerAccountData
+  | CrankAccountData
+  | JobAccountData
+  | LeaseAccountData
+  | OracleAccountData
+  | PermissionAccountData
+  | SbState
+  | OracleQueueAccountData
+  | SlidingResultAccountData
+  | VrfAccountData;

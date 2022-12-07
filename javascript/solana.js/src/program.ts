@@ -455,23 +455,21 @@ export class SwitchboardProgram {
     // aggregator - [217, 230, 65, 101, 201, 162, 27, 125]
 
     const discriminatorMap: Map<
-      Buffer,
+      string,
       Array<AccountInfoResponse>
     > = accountInfos.reduce((map, account) => {
-      const discriminator = account.account.data.slice(
-        0,
-        ACCOUNT_DISCRIMINATOR_SIZE
-      );
-      if (map.has(discriminator)) {
-        const accounts = map.get(discriminator)!;
-        map.set(discriminator, [...accounts, account]);
-      } else {
-        map.set(discriminator, [account]);
-      }
-      return map;
-    }, new Map<Buffer, Array<AccountInfoResponse>>());
+      const discriminator = account.account.data
+        .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
+        .toString('utf-8');
 
-    function decodeAccounts<T>(
+      const accounts = map.get(discriminator) ?? [];
+      accounts.push(account);
+      map.set(discriminator, accounts);
+
+      return map;
+    }, new Map<string, Array<AccountInfoResponse>>());
+
+    function decodeAccounts<T extends sbv2.SwitchboardAccount>(
       accounts: Array<AccountInfoResponse>,
       decode: (data: Buffer) => T
     ): Map<string, T> {
@@ -482,13 +480,15 @@ export class SwitchboardProgram {
     }
 
     const aggregators: Map<string, AggregatorAccountData> = decodeAccounts(
-      discriminatorMap.get(AggregatorAccountData.discriminator) ?? [],
+      discriminatorMap.get(
+        AggregatorAccountData.discriminator.toString('utf-8')
+      ) ?? [],
       AggregatorAccountData.decode
     );
 
     // TODO: Use aggregator.historyBuffer, crank.dataBuffer, queue.dataBuffer to filter these down and decode
     const buffers: Map<string, Buffer> = (
-      discriminatorMap.get(sbv2.BUFFER_DISCRIMINATOR) ?? []
+      discriminatorMap.get(sbv2.BUFFER_DISCRIMINATOR.toString('utf-8')) ?? []
     ).reduce((map, buffer) => {
       map.set(buffer.pubkey.toBase58(), buffer.account.data);
       return map;
@@ -496,52 +496,65 @@ export class SwitchboardProgram {
 
     const bufferRelayers: Map<string, BufferRelayerAccountData> =
       decodeAccounts(
-        discriminatorMap.get(BufferRelayerAccountData.discriminator) ?? [],
+        discriminatorMap.get(
+          BufferRelayerAccountData.discriminator.toString('utf-8')
+        ) ?? [],
         BufferRelayerAccountData.decode
       );
 
     const cranks: Map<string, CrankAccountData> = decodeAccounts(
-      discriminatorMap.get(CrankAccountData.discriminator) ?? [],
+      discriminatorMap.get(CrankAccountData.discriminator.toString('utf-8')) ??
+        [],
       CrankAccountData.decode
     );
 
     const jobs: Map<string, JobAccountData> = decodeAccounts(
-      discriminatorMap.get(JobAccountData.discriminator) ?? [],
+      discriminatorMap.get(JobAccountData.discriminator.toString('utf-8')) ??
+        [],
       JobAccountData.decode
     );
 
     const leases: Map<string, LeaseAccountData> = decodeAccounts(
-      discriminatorMap.get(LeaseAccountData.discriminator) ?? [],
+      discriminatorMap.get(LeaseAccountData.discriminator.toString('utf-8')) ??
+        [],
       LeaseAccountData.decode
     );
 
     const oracles: Map<string, OracleAccountData> = decodeAccounts(
-      discriminatorMap.get(OracleAccountData.discriminator) ?? [],
+      discriminatorMap.get(OracleAccountData.discriminator.toString('utf-8')) ??
+        [],
       OracleAccountData.decode
     );
 
     const permissions: Map<string, PermissionAccountData> = decodeAccounts(
-      discriminatorMap.get(PermissionAccountData.discriminator) ?? [],
+      discriminatorMap.get(
+        PermissionAccountData.discriminator.toString('utf-8')
+      ) ?? [],
       PermissionAccountData.decode
     );
 
     const programState: Map<string, SbState> = decodeAccounts(
-      discriminatorMap.get(SbState.discriminator) ?? [],
+      discriminatorMap.get(SbState.discriminator.toString('utf-8')) ?? [],
       SbState.decode
     );
 
     const queues: Map<string, OracleQueueAccountData> = decodeAccounts(
-      discriminatorMap.get(OracleQueueAccountData.discriminator) ?? [],
+      discriminatorMap.get(
+        OracleQueueAccountData.discriminator.toString('utf-8')
+      ) ?? [],
       OracleQueueAccountData.decode
     );
 
     const slidingResult: Map<string, SlidingResultAccountData> = decodeAccounts(
-      discriminatorMap.get(SlidingResultAccountData.discriminator) ?? [],
+      discriminatorMap.get(
+        SlidingResultAccountData.discriminator.toString('utf-8')
+      ) ?? [],
       SlidingResultAccountData.decode
     );
 
     const vrfs: Map<string, VrfAccountData> = decodeAccounts(
-      discriminatorMap.get(VrfAccountData.discriminator) ?? [],
+      discriminatorMap.get(VrfAccountData.discriminator.toString('utf-8')) ??
+        [],
       VrfAccountData.decode
     );
 
