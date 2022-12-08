@@ -205,6 +205,8 @@ export class SwitchboardTestContext {
       minRequiredOracleResults: 1,
       minRequiredJobResults: 1,
       minUpdateDelaySeconds: 10,
+      enable: true,
+      queueAuthorityPubkey: this.program.walletPubkey,
       jobs: [
         {
           data: OracleJob.encodeDelimited(
@@ -353,6 +355,10 @@ export class SwitchboardTestContext {
       minStake: 0,
       queueSize: 10,
       dataBufferKeypair: dataBufferKeypair,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: true,
+      slashingEnabled: false,
       cranks: [
         {
           name: 'Test Crank',
