@@ -224,6 +224,25 @@ export class NativeMint extends Mint {
     return new NativeMint(provider, splMint);
   }
 
+  public async getOrCreateWrappedUser(
+    payer: PublicKey,
+    params:
+      | {
+          amount: number;
+        }
+      | { fundUpTo: number },
+    user?: Keypair
+  ): Promise<[PublicKey, TransactionSignature | undefined]> {
+    const [userAddress, userInit] =
+      await this.getOrCreateWrappedUserInstructions(payer, params, user);
+    if (userInit.ixns.length > 0) {
+      const signature = await this.signAndSend(userInit);
+      return [userAddress, signature];
+    }
+
+    return [userAddress, undefined];
+  }
+
   public async getOrCreateWrappedUserInstructions(
     payer: PublicKey,
     params:

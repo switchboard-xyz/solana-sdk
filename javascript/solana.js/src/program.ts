@@ -52,7 +52,7 @@ import {
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
 } from './const';
-import { types } from '.';
+
 /**
  * Switchboard Devnet Program ID
  */
@@ -360,9 +360,9 @@ export class SwitchboardProgram {
    */
   async loadPermissionless(): Promise<{
     queueAccount: QueueAccount;
-    queue: types.OracleQueueAccountData;
+    queue: OracleQueueAccountData;
     crankAccount: CrankAccount;
-    crank: types.CrankAccountData;
+    crank: CrankAccountData;
   }> {
     const queueKey =
       this.cluster === 'mainnet-beta'
@@ -403,9 +403,9 @@ export class SwitchboardProgram {
    */
   async loadPermissioned(): Promise<{
     queueAccount: QueueAccount;
-    queue: types.OracleQueueAccountData;
+    queue: OracleQueueAccountData;
     crankAccount: CrankAccount;
-    crank: types.CrankAccountData;
+    crank: CrankAccountData;
   }> {
     const queueKey =
       this.cluster === 'mainnet-beta'

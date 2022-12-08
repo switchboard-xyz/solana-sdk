@@ -92,12 +92,10 @@ export class SwitchboardTestContext {
       alternateProgramId
     );
 
-    const [userTokenWallet, userTokenInit] =
-      await program.mint.getOrCreateWrappedUserInstructions(
-        program.walletPubkey,
-        { fundUpTo: 1 }
-      );
-    await program.signAndSend(userTokenInit);
+    const [userTokenWallet] = await program.mint.getOrCreateWrappedUser(
+      program.walletPubkey,
+      { fundUpTo: 1 }
+    );
 
     const programDataAddress = getProgramDataAddress(program.programId);
     const idlAddress = await getIdlAddress(program.programId);
