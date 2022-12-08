@@ -13,10 +13,7 @@
   },
   "dependencies": {
     "@project-serum/anchor": "^0.25.0",
-    "@solana/web3.js": "^1.66.2",
-    "@switchboard-xyz/sbv2-utils": "^0.1.53",
-    "@switchboard-xyz/switchboard-v2": "^0.0.165",
-    "fs": "^0.0.1-security"
+    "@solana/web3.js": "^1.66.2"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",

@@ -348,6 +348,7 @@ export class SwitchboardTestContext {
       metadata: `created ${BNtoDateTimeString(
         new anchor.BN(Math.floor(Date.now() / 1000))
       )}`,
+      authority: program.walletPubkey,
       reward: 0,
       minStake: 0,
       queueSize: 10,
@@ -364,6 +365,7 @@ export class SwitchboardTestContext {
           name: 'Test Oracle',
           enable: true,
           stakingWalletKeypair: oracleStakingWalletKeypair,
+          queueAuthorityPubkey: program.walletPubkey,
         },
       ],
     });

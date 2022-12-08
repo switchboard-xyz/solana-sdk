@@ -753,7 +753,9 @@ export class SwitchboardProgram {
         const [oracleAccount, oracleInit] =
           await queueAccount.createOracleInstructions(payer, {
             ...oracleInitParams,
-            queueAuthorityPubkey: payer,
+            queueAuthorityPubkey:
+              oracleInitParams.queueAuthorityPubkey ?? payer,
+            enable: true,
           });
 
         const [oraclePermissionAccount, oraclePermissionBump] =

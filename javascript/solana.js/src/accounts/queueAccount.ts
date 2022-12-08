@@ -326,7 +326,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         authority: queueAuthorityPubkey,
       });
 
-    if (params.enable && params.queueAuthority) {
+    if (
+      params.enable &&
+      (params.queueAuthority || queueAuthorityPubkey.equals(payer))
+    ) {
       const permissionSetTxn = permissionAccount.setInstruction(payer, {
         permission: new PermitOracleHeartbeat(),
         enable: true,
@@ -364,7 +367,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: OracleInitParams & OracleStakeParams & Partial<PermissionSetParams>
+    params: OracleInitParams &
+      OracleStakeParams &
+      Partial<PermissionSetParams> & {
+        queueAuthorityPubkey?: PublicKey;
+      }
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -534,7 +541,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       });
 
     // // set permissions if needed
-    if (params.enable && params.queueAuthority) {
+    if (
+      params.enable &&
+      (params.queueAuthority || queueAuthorityPubkey.equals(payer))
+    ) {
       const permissionSetTxn = permissionAccount.setInstruction(payer, {
         permission: new PermitOracleQueueUsage(),
         enable: true,
@@ -637,6 +647,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     } & Partial<PermissionSetParams> & {
         // job params
         jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
+      } & {
+        queueAuthorityPubkey?: PublicKey;
       }
   ): Promise<[AggregatorAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
@@ -755,9 +767,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createVrfInstructions(
     payer: PublicKey,
-    params: Omit<VrfInitParams, 'queueAccount'> & Partial<PermissionSetParams>
+    params: Omit<VrfInitParams, 'queueAccount'> &
+      Partial<PermissionSetParams> & {
+        queueAuthorityPubkey?: PublicKey;
+      }
   ): Promise<[VrfAccount, TransactionObject]> {
-    const queue = await this.loadData();
+    const queueAuthorityPubkey = params.queueAuthority
+      ? params.queueAuthority.publicKey
+      : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
     const [vrfAccount, vrfInit] = await VrfAccount.createInstructions(
       this.program,
@@ -775,18 +792,19 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: vrfAccount.publicKey,
-        authority: queue.authority,
+        authority: queueAuthorityPubkey,
       });
 
-    if (params.enable) {
-      if (params.queueAuthority || queue.authority.equals(payer)) {
-        const permissionSet = permissionAccount.setInstruction(payer, {
-          permission: new PermitOracleQueueUsage(),
-          enable: true,
-          queueAuthority: params.queueAuthority,
-        });
-        permissionInit = permissionInit.combine(permissionSet);
-      }
+    if (
+      params.enable &&
+      (params.queueAuthority || queueAuthorityPubkey.equals(payer))
+    ) {
+      const permissionSet = permissionAccount.setInstruction(payer, {
+        permission: new PermitOracleQueueUsage(),
+        enable: true,
+        queueAuthority: params.queueAuthority,
+      });
+      permissionInit = permissionInit.combine(permissionSet);
     }
 
     return [vrfAccount, vrfInit.combine(permissionInit)];
@@ -817,7 +835,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createVrf(
-    params: Omit<VrfInitParams, 'queueAccount'> & Partial<PermissionSetParams>
+    params: Omit<VrfInitParams, 'queueAccount'> &
+      Partial<PermissionSetParams> & {
+        queueAuthorityPubkey?: PublicKey;
+      }
   ): Promise<[VrfAccount, TransactionSignature]> {
     const [vrfAccount, txn] = await this.createVrfInstructions(
       this.program.walletPubkey,
@@ -856,9 +877,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       Partial<PermissionSetParams> & {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
+      } & {
+        queueAuthorityPubkey?: PublicKey;
       }
   ): Promise<[BufferRelayerAccount, TransactionObject]> {
-    const queue = await this.loadData();
+    const queueAuthorityPubkey = params.queueAuthority
+      ? params.queueAuthority.publicKey
+      : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
     const txns: TransactionObject[] = [];
 
@@ -907,18 +932,19 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       PermissionAccount.createInstruction(this.program, payer, {
         granter: this.publicKey,
         grantee: bufferAccount.publicKey,
-        authority: queue.authority,
+        authority: queueAuthorityPubkey,
       });
 
-    if (params.enable) {
-      if (params.queueAuthority || queue.authority.equals(payer)) {
-        const permissionSet = permissionAccount.setInstruction(payer, {
-          permission: new PermitOracleQueueUsage(),
-          enable: true,
-          queueAuthority: params.queueAuthority,
-        });
-        permissionInit = permissionInit.combine(permissionSet);
-      }
+    if (
+      params.enable &&
+      (params.queueAuthority || queueAuthorityPubkey.equals(payer))
+    ) {
+      const permissionSet = permissionAccount.setInstruction(payer, {
+        permission: new PermitOracleQueueUsage(),
+        enable: true,
+        queueAuthority: params.queueAuthority,
+      });
+      permissionInit = permissionInit.combine(permissionSet);
     }
 
     txns.push(permissionInit);
@@ -958,6 +984,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       Partial<PermissionSetParams> & {
         // job params
         job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
+      } & {
+        queueAuthorityPubkey?: PublicKey;
       }
   ): Promise<[BufferRelayerAccount, TransactionSignature]> {
     const [bufferRelayerAccount, txn] =
