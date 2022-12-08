@@ -29,11 +29,18 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from './generated';
-import { AggregatorAccount, DISCRIMINATOR_MAP } from './accounts';
-
-const DEVNET_GENESIS_HASH = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
-
-const MAINNET_GENESIS_HASH = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
+import { CrankAccount, DISCRIMINATOR_MAP, QueueAccount } from './accounts';
+import {
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
+} from './const';
+import { types } from '.';
 
 /**
  * Switchboard Devnet Program ID
@@ -332,6 +339,97 @@ export class SwitchboardProgram {
     return this._program.account;
   }
 
+  /**
+   * Load the Switchboard Labs permissionless Queue for either devnet or mainnet. The permissionless queue has the following permissions:
+   *  - unpermissionedFeedsEnabled: True
+   *  - unpermissionedVrfEnabled: True
+   *  - enableBufferRelayers: False
+   *
+   * **Note:** {@linkcode AggregatorAccount}s and {@linkcode VrfAccount}s do not require permissions to join this queue. {@linkcode BufferRelayerAccount}s are disabled.
+   */
+  async loadPermissionless(): Promise<{
+    queueAccount: QueueAccount;
+    queue: types.OracleQueueAccountData;
+    crankAccount: CrankAccount;
+    crank: types.CrankAccountData;
+  }> {
+    const queueKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
+        : null;
+    if (!queueKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [queueAccount, queue] = await QueueAccount.load(this, queueKey);
+
+    const crankKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK
+        : null;
+    if (!crankKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
+
+    return { queueAccount, queue, crankAccount, crank };
+  }
+
+  /**
+   * Load the Switchboard Labs permissionled Queue for either devnet or mainnet. The permissioned queue has the following permissions:
+   *  - unpermissionedFeedsEnabled: False
+   *  - unpermissionedVrfEnabled: False
+   *  - enableBufferRelayers: False
+   *
+   * **Note:** The queue authority must grant {@linkcode AggregatorAccount}s PERMIT_ORACLE_QUEUE_USAGE and {@linkcode VrfAccount}s PERMIT_VRF_REQUESTS permissions before joining the queue and requesting oracle updates. {@linkcode BufferRelayerAccount}s are disabled.
+   */
+  async loadPermissioned(): Promise<{
+    queueAccount: QueueAccount;
+    queue: types.OracleQueueAccountData;
+    crankAccount: CrankAccount;
+    crank: types.CrankAccountData;
+  }> {
+    const queueKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
+        : null;
+    if (!queueKey) {
+      throw new Error(
+        `Failed to load the permissioned queue for cluster ${this.cluster}`
+      );
+    }
+    const [queueAccount, queue] = await QueueAccount.load(
+      this,
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
+        : SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
+    );
+
+    const crankKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK
+        : null;
+    if (!crankKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
+
+    return { queueAccount, queue, crankAccount, crank };
+  }
+
   public addEventListener<EventName extends keyof SwitchboardEvents>(
     eventName: EventName,
     callback: (
@@ -617,8 +715,4 @@ export class AnchorWallet implements anchor.Wallet {
 interface AccountInfoResponse {
   pubkey: anchor.web3.PublicKey;
   account: anchor.web3.AccountInfo<Buffer>;
-}
-
-interface DecodableAccount {
-  decode: (data: Buffer) => DecodableAccount;
 }
