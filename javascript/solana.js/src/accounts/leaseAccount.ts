@@ -126,7 +126,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const loadAmount = params.loadAmount ?? 0;
     const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
-    let tokenTxn: TransactionObject;
+    let tokenTxn: TransactionObject | undefined;
     let funderTokenAddress: PublicKey;
     if (params.funderTokenAccount) {
       funderTokenAddress = params.funderTokenAccount;
@@ -145,7 +145,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           params.funderAuthority
         );
     }
-    txns.push(tokenTxn);
+    if (tokenTxn) {
+      txns.push(tokenTxn);
+    }
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
       program,

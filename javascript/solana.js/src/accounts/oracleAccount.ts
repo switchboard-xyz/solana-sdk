@@ -249,11 +249,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.tokenAccount ?? (await this.loadData()).tokenAccount;
 
     const funderAuthority = params.funderAuthority?.publicKey ?? payer;
-    // const funderTokenAccount =
-    //   this.program.mint.getAssociatedAddress(funderAuthority);
-    // const funderTokenAccountInfo = await this.program.connection.getAccountInfo(
-    //   funderTokenAccount
-    // );
 
     const [funderTokenAccount, wrapFundsTxn] =
       await this.program.mint.getOrCreateWrappedUserInstructions(
@@ -262,32 +257,22 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         params.funderAuthority
       );
 
-    // if (!funderTokenAccountInfo) {
-    //   let userTokenAccount: PublicKey;
-    //   [userTokenAccount, wrapFundsTxn] =
-    //     await this.program.mint.createWrappedUserInstructions(
-    //       payer,
-    //       params.stakeAmount,
-    //       params.funderAuthority
-    //     );
-    // } else {
-    //   wrapFundsTxn = await this.program.mint.wrapInstructions(
-    //     payer,
-    //     { amount: params.stakeAmount },
-    //     params.funderAuthority
-    //   );
-    // }
-
-    wrapFundsTxn.add(
-      spl.createTransferInstruction(
-        funderTokenAccount,
-        tokenWallet,
-        funderAuthority,
-        this.program.mint.toTokenAmount(params.stakeAmount)
-      )
+    const transferIxn = spl.createTransferInstruction(
+      funderTokenAccount,
+      tokenWallet,
+      funderAuthority,
+      this.program.mint.toTokenAmount(params.stakeAmount)
     );
 
-    return wrapFundsTxn;
+    if (wrapFundsTxn) {
+      return wrapFundsTxn.add(transferIxn);
+    }
+
+    return new TransactionObject(
+      payer,
+      [transferIxn],
+      params.funderAuthority ? [params.funderAuthority] : []
+    );
   }
 
   async stake(

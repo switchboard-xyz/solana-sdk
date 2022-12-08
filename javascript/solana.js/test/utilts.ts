@@ -9,7 +9,10 @@ dotenv.config();
 export const sleep = (ms: number): Promise<any> =>
   new Promise(s => setTimeout(s, ms));
 
-const DEFAULT_KEYPAIR_PATH = path.join(os.homedir(), '.config/solana/id.json');
+export const DEFAULT_KEYPAIR_PATH = path.join(
+  os.homedir(),
+  '.config/solana/id.json'
+);
 
 export interface TestContext {
   cluster: 'localnet' | 'devnet';

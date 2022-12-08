@@ -95,7 +95,7 @@ export class SwitchboardTestContext {
 
     const [userTokenWallet] = await program.mint.getOrCreateWrappedUser(
       program.walletPubkey,
-      { fundUpTo: 0 }
+      { amount: 0 }
     );
 
     const programDataAddress = getProgramDataAddress(program.programId);

@@ -212,7 +212,7 @@ describe('Aggregator Tests', () => {
           { fundUpTo: 0.1 }
         );
 
-      if (userInit.ixns.length > 0) {
+      if (userInit && userInit.ixns.length > 0) {
         await ctx.program.signAndSend(userInit);
       }
 

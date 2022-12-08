@@ -1,7 +1,7 @@
 import 'mocha';
 import assert from 'assert';
 
-import { setupTest, TestContext } from './utilts';
+import { DEFAULT_KEYPAIR_PATH } from './utilts';
 import { SwitchboardTestContext } from '../src/test';
 import fs from 'fs';
 import path from 'path';
@@ -12,22 +12,21 @@ import {
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 
-const PAYER_KEYPAIR_PATH = path.join(__dirname, 'data', 'payer-keypair.json');
-
 describe('SwitchboardTestContext Tests', () => {
-  //   let ctx: TestContext;
+  let payerKeypair: Keypair;
+  let payerKeypairPath: string;
 
   before(async () => {
-    // ctx = await setupTest();
+    payerKeypairPath = fs.existsSync(DEFAULT_KEYPAIR_PATH)
+      ? DEFAULT_KEYPAIR_PATH
+      : path.join(__dirname, 'data', 'payer-keypair.json');
 
-    let payerKeypair: Keypair;
-
-    if (!fs.existsSync(PAYER_KEYPAIR_PATH)) {
+    if (!fs.existsSync(payerKeypairPath)) {
       payerKeypair = Keypair.generate();
-      fs.writeFileSync(PAYER_KEYPAIR_PATH, `[${payerKeypair.secretKey}]`);
+      fs.writeFileSync(payerKeypairPath, `[${payerKeypair.secretKey}]`);
     } else {
       payerKeypair = Keypair.fromSecretKey(
-        new Uint8Array(JSON.parse(fs.readFileSync(PAYER_KEYPAIR_PATH, 'utf-8')))
+        new Uint8Array(JSON.parse(fs.readFileSync(payerKeypairPath, 'utf-8')))
       );
     }
 
@@ -45,7 +44,7 @@ describe('SwitchboardTestContext Tests', () => {
 
   it('Creates a test context', async () => {
     const testEnvironment = await SwitchboardTestContext.createEnvironment(
-      PAYER_KEYPAIR_PATH
+      payerKeypairPath
     );
   });
 });

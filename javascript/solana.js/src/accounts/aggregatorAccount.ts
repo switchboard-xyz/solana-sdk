@@ -334,8 +334,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       const createPayerTokenWallet =
         await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
           amount: 0,
-        });
-      txns.unshift(createPayerTokenWallet[1]);
+        })[1];
+      if (createPayerTokenWallet) {
+        txns.unshift(createPayerTokenWallet);
+      }
     }
 
     // withdraw from lease
