@@ -2,7 +2,10 @@ import 'mocha';
 import assert from 'assert';
 
 import { DEFAULT_KEYPAIR_PATH } from './utilts';
-import { SwitchboardTestContext } from '../src/test';
+import {
+  camelToUpperCaseWithUnderscores,
+  SwitchboardTestContext,
+} from '../src/test';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -47,11 +50,23 @@ describe('SwitchboardTestContext Tests', () => {
     }
   });
 
+  it('Converts camelCase to UPPER_CASE', () => {
+    const input = 'programId';
+    const expected = 'PROGRAM_ID';
+    const output = camelToUpperCaseWithUnderscores(input);
+    assert(
+      expected === output,
+      `Failed to convert camelCase, expected ${expected}, received ${output}`
+    );
+  });
+
   it('Creates a test context', async () => {
     try {
       const testEnvironment = await SwitchboardTestContext.createEnvironment(
         payerKeypairPath
       );
+      console.log(testEnvironment.anchorToml);
+      console.log(testEnvironment.envFileString);
     } catch (error) {
       console.warn(`SwitchboardTestContext test failed, network issues?`);
       console.error(error);

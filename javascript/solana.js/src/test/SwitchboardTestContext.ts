@@ -231,9 +231,9 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
     return Object.keys(this)
       .map(key => {
         if (this[key] instanceof PublicKey) {
-          return `${camelCaseToUpperCaseWithUnderscores(key)}=${this[
+          return `${camelToUpperCaseWithUnderscores(key)}="${this[
             key
-          ].toBase58()}`;
+          ].toBase58()}"`;
         }
         return;
       })
@@ -253,10 +253,14 @@ startup_wait = 10000
 [test.validator]
 url = "https://api.devnet.solana.com"
 `,
-      Object.keys(this).map(
-        key => `[[test.validator.clone]] # ${key}
-address = "${this[key]}"`
-      ),
+      Object.keys(this)
+        .map(key => {
+          if (this[key] instanceof PublicKey) {
+            return `[[test.validator.clone]] # ${key}\naddress = "${this[key]}"`;
+          }
+        })
+        .filter(Boolean)
+        .join('\n\n'),
     ].join('\n\n');
   }
 
@@ -274,23 +278,23 @@ address = "${this[key]}"`
 
   public get dockerCompose(): string {
     return `version: "3.3"
-    services:
-      oracle:
-        image: "switchboardlabs/node:\${SBV2_ORACLE_VERSION:-${LATEST_DOCKER_VERSION}}" # https://hub.docker.com/r/switchboardlabs/node/tags
-        network_mode: host
-        restart: always
-        secrets:
-          - PAYER_SECRETS
-        environment:
-          - VERBOSE=1
-          - CLUSTER=\${CLUSTER:-localnet}
-          - HEARTBEAT_INTERVAL=30 # Seconds
-          - ORACLE_KEY=${this.oracle.toBase58()}
-          - TASK_RUNNER_SOLANA_RPC=${clusterApiUrl('mainnet-beta')}
-        #  - RPC_URL=\${RPC_URL}
+services:
+  oracle:
+    image: "switchboardlabs/node:\${SBV2_ORACLE_VERSION:-${LATEST_DOCKER_VERSION}}" # https://hub.docker.com/r/switchboardlabs/node/tags
+    network_mode: host
+    restart: always
     secrets:
-      PAYER_SECRETS:
-        file: ${this.payerKeypairPath}`;
+      - PAYER_SECRETS
+    environment:
+      - VERBOSE=1
+      - CLUSTER=\${CLUSTER:-localnet}
+      - HEARTBEAT_INTERVAL=30 # Seconds
+      - ORACLE_KEY=${this.oracle.toBase58()}
+      - TASK_RUNNER_SOLANA_RPC=${clusterApiUrl('mainnet-beta')}
+    #  - RPC_URL=\${RPC_URL}
+secrets:
+  PAYER_SECRETS:
+    file: ${this.payerKeypairPath}`;
   }
 
   public get localValidatorScript(): string {
@@ -306,9 +310,9 @@ solana-test-validator -r --ledger .anchor/test-ledger --mint ${this.oracleAuthor
   public get startOracleScript(): string {
     return `#!/usr/bin/env bash
 
-    script_dir=$( cd -- "$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-    
-    docker-compose -f  "$script_dir"/docker-compose.switchboard.yml up`;
+script_dir=$( cd -- "$( dirname -- "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+docker-compose -f  "$script_dir"/docker-compose.switchboard.yml up`;
   }
 
   public toJSON(): ISwitchboardTestEnvironment {
@@ -398,15 +402,14 @@ solana-test-validator -r --ledger .anchor/test-ledger --mint ${this.oracleAuthor
   }
 }
 
-function camelCaseToUpperCaseWithUnderscores(input: string) {
-  // Use a regular expression to match words that begin with a capital letter
-  const matches = input.match(/[A-Z][a-z]*/g);
-
-  // If there are no matches, return the original string
-  if (matches === null) {
-    return input;
-  }
-
-  // Convert the matches to upper case and join them with underscores
-  return matches.map(match => match.toUpperCase()).join('_');
+export function camelToUpperCaseWithUnderscores(str: string): string {
+  // Use a regular expression to match any uppercase or lowercase letters followed by uppercase letters
+  // and replace them with a matched group (the uppercase or lowercase letters) followed by an underscore
+  // and the uppercase letter
+  return (
+    str
+      .replace(/([a-z]+)([A-Z])/g, (_, p1, p2) => p1 + '_' + p2)
+      // Make the entire string uppercase
+      .toUpperCase()
+  );
 }
