@@ -1,11 +1,14 @@
 import * as anchor from '@project-serum/anchor';
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { QueueAccount } from '../accounts';
-import { SwitchboardProgram } from '../program';
+import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
+import { AnchorWallet, SwitchboardProgram } from '../program';
 import fs from 'fs';
 import path from 'path';
-import { BNtoDateTimeString } from '@switchboard-xyz/common';
+import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
 import { Mint } from '../mint';
+import { AggregatorRound } from '../generated';
+import { TransactionObject } from '../transaction';
+import { SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE } from '../const';
 
 export const LATEST_DOCKER_VERSION = 'dev-v2-RC_12_05_22_22_48';
 
@@ -34,31 +37,265 @@ export const getIdlAddress = async (
 export class SwitchboardTestContext {
   constructor(
     readonly program: SwitchboardProgram,
-    readonly queue: QueueAccount
+    readonly queue: QueueAccount,
+    readonly payerTokenWallet: PublicKey
   ) {}
 
-  // static async load(): Promise<SwitchboardTestContext> {
-  //   throw new Error(`Not implemented yet`);
-  // }
+  /** Load SwitchboardTestContext using a specified queue
+   * @param provider anchor Provider containing connection and payer Keypair
+   * @param queueKey the oracle queue to load
+   * @param tokenAmount number of tokens to populate in switchboard mint's associated token account
+   */
+  static async loadDevnetQueue(
+    provider: anchor.AnchorProvider,
+    queueKey: PublicKey | string = SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+    tokenAmount = 0
+  ) {
+    const payerKeypair = (provider.wallet as AnchorWallet).payer;
 
-  // public static findSwitchboardEnv(envFileName = 'switchboard.env'): string {
-  //   throw new Error(`Not implemented yet`);
-  // }
+    const balance = await provider.connection.getBalance(
+      payerKeypair.publicKey
+    );
+    if (!balance) {
+      try {
+        await provider.connection.requestAirdrop(
+          payerKeypair.publicKey,
+          1_000_000_000
+        );
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
 
-  // public async createStaticFeed(
-  //   value: number,
-  //   timeout = 30
-  // ): Promise<AggregatorAccount> {
-  //   throw new Error(`Not implemented yet`);
-  // }
+    const program = await SwitchboardProgram.load(
+      'devnet',
+      provider.connection,
+      payerKeypair
+    ).catch(error => {
+      throw new Error(
+        `Failed to load the SBV2 program for the given cluster, ${error.message}`
+      );
+    });
 
-  // public async updateStaticFeed(
-  //   aggregatorAccount: AggregatorAccount,
-  //   value: number,
-  //   timeout = 30
-  // ): Promise<AggregatorAccount> {
-  //   throw new Error(`Not implemented yet`);
-  // }
+    const queueAccount = new QueueAccount(
+      program,
+      typeof queueKey === 'string' ? new PublicKey(queueKey) : queueKey
+    );
+    try {
+      await queueAccount.loadData();
+      const oracles = await queueAccount.loadOracles();
+      if (oracles.length < 1) {
+        throw new Error(`OracleQueue has no active oracles heartbeating`);
+      }
+    } catch (error) {
+      throw new Error(
+        `Failed to load the SBV2 queue for the given cluster, ${
+          (error as any).message
+        }`
+      );
+    }
+
+    const [userTokenAmount] = await program.mint.getOrCreateWrappedUser(
+      program.walletPubkey,
+      { fundUpTo: tokenAmount }
+    );
+
+    return new SwitchboardTestContext(program, queueAccount, userTokenAmount);
+  }
+
+  /** Recursively loop through directories and return the filepath of switchboard.env
+   * @param envFileName alternative filename to search for. defaults to switchboard.env
+   * @returns the filepath for a switchboard env file to load
+   */
+  public static findSwitchboardEnv(envFileName = 'switchboard.env'): string {
+    const NotFoundError = new Error(
+      'failed to find switchboard.env file in current directory recursively'
+    );
+    let retryCount = 5;
+
+    let currentDirectory = process.cwd();
+    while (retryCount > 0) {
+      // look for switchboard.env
+      try {
+        const currentPath = path.join(currentDirectory, envFileName);
+        if (fs.existsSync(currentPath)) {
+          return currentPath;
+        }
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      // look for .switchboard directory
+      try {
+        const localSbvPath = path.join(currentDirectory, '.switchboard');
+        if (fs.existsSync(localSbvPath)) {
+          const localSbvEnvPath = path.join(localSbvPath, envFileName);
+          if (fs.existsSync(localSbvEnvPath)) {
+            return localSbvEnvPath;
+          }
+        }
+        // eslint-disable-next-line no-empty
+      } catch {}
+
+      currentDirectory = path.join(currentDirectory, '../');
+
+      --retryCount;
+    }
+
+    throw NotFoundError;
+  }
+
+  /** Load SwitchboardTestContext from an env file containing $SWITCHBOARD_PROGRAM_ID, $ORACLE_QUEUE, $AGGREGATOR
+   * @param provider anchor Provider containing connection and payer Keypair
+   * @param filePath filesystem path to env file
+   * @param tokenAmount number of tokens to populate in switchboard mint's associated token account
+   */
+  public static async loadFromEnv(
+    provider: anchor.AnchorProvider,
+    filePath = SwitchboardTestContext.findSwitchboardEnv(),
+    tokenAmount = 0
+  ): Promise<SwitchboardTestContext> {
+    // eslint-disable-next-line node/no-unpublished-require
+    require('dotenv').config({ path: filePath });
+    if (!process.env.SWITCHBOARD_PROGRAM_ID) {
+      throw new Error(`your env file must have $SWITCHBOARD_PROGRAM_ID set`);
+    }
+    if (!process.env.ORACLE_QUEUE) {
+      throw new Error(`your env file must have $ORACLE_QUEUE set`);
+    }
+
+    const program = await SwitchboardProgram.load(
+      'devnet',
+      provider.connection,
+      (provider.wallet as AnchorWallet).payer,
+      new PublicKey(process.env.SWITCHBOARD_PROGRAM_ID)
+    );
+
+    const balance = await provider.connection.getBalance(program.walletPubkey);
+    if (!balance) {
+      try {
+        const airdropSignature = await provider.connection.requestAirdrop(
+          program.walletPubkey,
+          1_000_000_000
+        );
+        await provider.connection.confirmTransaction(airdropSignature);
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    const queueAccount = new QueueAccount(
+      program,
+      new PublicKey(process.env.ORACLE_QUEUE)
+    );
+
+    const [userTokenAmount] = await program.mint.getOrCreateWrappedUser(
+      program.walletPubkey,
+      { fundUpTo: tokenAmount }
+    );
+
+    return new SwitchboardTestContext(program, queueAccount, userTokenAmount);
+  }
+
+  /** Create a static data feed that resolves to an expected value */
+  public async createStaticFeed(
+    value: number,
+    timeout = 30
+  ): Promise<[AggregatorAccount, AggregatorRound]> {
+    const [aggregatorAccount] = await this.queue.createFeed({
+      name: `Value ${value}`,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 10,
+      jobs: [
+        {
+          data: OracleJob.encodeDelimited(
+            OracleJob.create({
+              tasks: [
+                OracleJob.Task.create({
+                  valueTask: OracleJob.ValueTask.create({
+                    value,
+                  }),
+                }),
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const openRoundPromise = aggregatorAccount.nextRound(
+      undefined,
+      timeout * 1000
+    );
+    await aggregatorAccount.openRound();
+
+    const round = await openRoundPromise;
+
+    return [aggregatorAccount, round];
+  }
+
+  public async updateStaticFeed(
+    aggregatorAccount: AggregatorAccount,
+    value: number,
+    timeout = 30
+  ): Promise<[AggregatorAccount, AggregatorRound]> {
+    const aggregator = await aggregatorAccount.loadData();
+
+    const [jobAccount, jobInit] = JobAccount.createInstructions(
+      this.program,
+      this.program.walletPubkey,
+      {
+        data: OracleJob.encodeDelimited(
+          OracleJob.create({
+            tasks: [
+              OracleJob.Task.create({
+                valueTask: OracleJob.ValueTask.create({
+                  value,
+                }),
+              }),
+            ],
+          })
+        ).finish(),
+      }
+    );
+
+    const oldJobKeys = aggregator.jobPubkeysData.filter(
+      pubkey => !pubkey.equals(PublicKey.default)
+    );
+
+    const oldJobs: Array<[JobAccount, number]> = oldJobKeys.map((pubkey, i) => [
+      new JobAccount(this.program, pubkey),
+      i,
+    ]);
+
+    const removeJobTxns = oldJobs.map(job =>
+      aggregatorAccount.removeJobInstruction(this.program.walletPubkey, {
+        job: job[0],
+        jobIdx: job[1],
+      })
+    );
+
+    const addJobTxn = aggregatorAccount.addJobInstruction(
+      this.program.walletPubkey,
+      { job: jobAccount }
+    );
+
+    const txns = TransactionObject.pack([
+      ...jobInit,
+      ...removeJobTxns,
+      addJobTxn,
+    ]);
+    await this.program.signAndSendAll(txns);
+
+    const openRoundPromise = aggregatorAccount.nextRound(
+      undefined,
+      timeout * 1000
+    );
+    await aggregatorAccount.openRound();
+
+    const round = await openRoundPromise;
+
+    return [aggregatorAccount, round];
+  }
 
   static async createEnvironment(
     payerKeypairPath: string,
