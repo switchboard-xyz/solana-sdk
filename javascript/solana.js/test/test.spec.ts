@@ -65,8 +65,6 @@ describe('SwitchboardTestContext Tests', () => {
       const testEnvironment = await SwitchboardTestContext.createEnvironment(
         payerKeypairPath
       );
-      console.log(testEnvironment.anchorToml);
-      console.log(testEnvironment.envFileString);
     } catch (error) {
       console.warn(`SwitchboardTestContext test failed, network issues?`);
       console.error(error);
