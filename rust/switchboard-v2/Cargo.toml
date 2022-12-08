@@ -23,10 +23,15 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
-anchor-spl = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
+anchor-lang = "0.25.0"
+anchor-spl = "0.25.0"
 rust_decimal = "1.26.0"
-solana-program = "1.10"
+solana-program = "~1.10.29"
 bytemuck = "1.7.2"
 superslice = "1"
-spl-token = "3.5"
+spl-token = "3.3.1"
+
+# solana-program = "1.10"
+# spl-token = "3.5"
+# anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
+# anchor-spl = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
