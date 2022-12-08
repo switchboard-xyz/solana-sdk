@@ -17,12 +17,16 @@
     },
     "./package.json": "./package.json",
     "./idl/mainnet": {
-      "import": "./dist/esm/idl/mainnet.json",
-      "require": "./dist/cjs/idl/mainnet.json"
+      "import": "./lib/esm/idl/mainnet.json",
+      "require": "./lib/cjs/idl/mainnet.json"
     },
     "./idl/devnet": {
-      "import": "./dist/esm/idl/devnet.json",
-      "require": "./dist/cjs/idl/devnet.json"
+      "import": "./lib/esm/idl/devnet.json",
+      "require": "./lib/cjs/idl/devnet.json"
+    },
+    "./test": {
+      "import": "./lib/esm/test/index.js",
+      "require": "./lib/cjs/test/index.js"
     }
   },
   "main": "lib/cjs/index.js",

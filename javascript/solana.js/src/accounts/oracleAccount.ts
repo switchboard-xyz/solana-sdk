@@ -145,11 +145,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     } & OracleInitParams &
       OracleStakeParams
   ): Promise<[OracleAccount, TransactionObject]> {
-    const tokenWallet = Keypair.generate();
+    const tokenWallet = params.stakingWalletKeypair ?? Keypair.generate();
 
     const authority = params.authority?.publicKey ?? payer;
-
-    const txns: TransactionObject[] = [];
 
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       program,
@@ -208,8 +206,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.authority ? [params.authority, tokenWallet] : [tokenWallet]
     );
 
-    txns.push(oracleInit);
-
     if (params.stakeAmount && params.stakeAmount > 0) {
       const depositTxn = await oracleAccount.stakeInstructions(payer, {
         stakeAmount: params.stakeAmount,
@@ -217,15 +213,10 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         funderTokenAccount: params.funderTokenAccount,
         tokenAccount: tokenWallet.publicKey,
       });
-      txns.push(depositTxn);
+      oracleInit.combine(depositTxn);
     }
 
-    const packed = TransactionObject.pack(txns);
-    if (packed.length > 1) {
-      throw new Error(`Expected a single TransactionObject`);
-    }
-
-    return [oracleAccount, packed[0]];
+    return [oracleAccount, oracleInit];
   }
 
   public static async create(
@@ -542,6 +533,10 @@ export interface OracleInitParams {
   metadata?: string;
   /** Alternative keypair that will be the authority for the oracle. If not set the payer will be used. */
   authority?: Keypair;
+  /**
+   * Optional,
+   */
+  stakingWalletKeypair?: Keypair;
 }
 
 export interface OracleStakeParams {

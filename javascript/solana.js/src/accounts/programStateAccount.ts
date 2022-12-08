@@ -6,6 +6,7 @@ import * as spl from '@solana/spl-token';
 import * as errors from '../errors';
 import { Mint } from '../mint';
 import {
+  Keypair,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -45,105 +46,102 @@ export class ProgramStateAccount extends Account<types.SbState> {
    */
   static async getOrCreate(
     program: SwitchboardProgram,
-    params: {
-      mint?: PublicKey;
-      daoMint?: PublicKey;
+    mint: PublicKey = Mint.native
+  ): Promise<[ProgramStateAccount, number, TransactionSignature | undefined]> {
+    const [account, bump, txn] =
+      await ProgramStateAccount.getOrCreateInstructions(
+        program,
+        program.walletPubkey,
+        mint
+      );
+
+    if (txn) {
+      const txnSignature = await program.signAndSend(txn);
+      return [account, bump, txnSignature];
     }
-  ): Promise<[ProgramStateAccount, number]> {
-    const payer = program.wallet.payer;
+
+    return [account, bump, undefined];
+  }
+
+  static async getOrCreateInstructions(
+    program: SwitchboardProgram,
+    payer: PublicKey,
+    mint: PublicKey = Mint.native
+  ): Promise<[ProgramStateAccount, number, TransactionObject | undefined]> {
     const [account, bump] = ProgramStateAccount.fromSeed(program);
+
     try {
       await account.loadData();
     } catch (e) {
+      const vaultKeypair = Keypair.generate();
+      const ixns: TransactionInstruction[] = [];
+
+      // load the mint
+      let splMint: spl.Mint;
       try {
-        const [mint, vault]: [PublicKey, PublicKey] = await (async () => {
-          if (params.mint === undefined) {
-            const mint = await spl.createMint(
-              program.connection,
-              payer,
-              payer.publicKey,
-              null,
-              9
-            );
-            const vault = await spl.createAccount(
-              program.connection,
-              payer,
-              mint,
-              anchor.web3.Keypair.generate().publicKey
-            );
-            await spl.mintTo(
-              program.connection,
-              payer,
-              mint,
-              vault,
-              payer,
-              100_000_000
-            );
-            return [mint, vault];
-          } else {
-            return [
-              params.mint,
-              await spl.createAccount(
-                program.connection,
-                payer,
-                params.mint,
-                payer.publicKey
-              ),
-            ];
-          }
-        })();
-
-        const programInit = new TransactionObject(
-          program.walletPubkey,
-          [
-            types.programInit(
-              program,
-              { params: { stateBump: bump } },
-              {
-                state: account.publicKey,
-                authority: program.wallet.publicKey,
-                payer: program.wallet.publicKey,
-                tokenMint: mint,
-                vault: vault,
-                systemProgram: SystemProgram.programId,
-                tokenProgram: spl.TOKEN_PROGRAM_ID,
-                daoMint: params.daoMint ?? mint,
-              }
-            ),
-          ],
-          []
+        // try to load mint if it exists
+        splMint = await spl.getMint(program.connection, mint);
+      } catch {
+        // create new mint
+        const mintIxn = spl.createInitializeMintInstruction(
+          mint,
+          9,
+          payer,
+          payer
         );
-        await program.signAndSend(programInit);
-      } catch {} // eslint-disable-line no-empty
-    }
-    return [account, bump];
-  }
-
-  static createAccountInstruction(
-    program: SwitchboardProgram,
-    mint = Mint.native,
-    daoMint = Mint.native
-  ): [ProgramStateAccount, TransactionInstruction] {
-    const [programStateAccount, stateBump] =
-      ProgramStateAccount.fromSeed(program);
-
-    const vault = anchor.web3.Keypair.generate();
-
-    const ixn = types.programInit(
-      program,
-      { params: { stateBump: stateBump } },
-      {
-        state: programStateAccount.publicKey,
-        authority: program.wallet.publicKey,
-        payer: program.wallet.publicKey,
-        tokenMint: mint,
-        vault: vault.publicKey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
-        daoMint: daoMint ?? mint,
+        ixns.push(mintIxn);
+        splMint = {
+          address: mint,
+          mintAuthority: payer,
+          supply: BigInt('100000000000000000'),
+          decimals: 9,
+          isInitialized: true,
+          freezeAuthority: payer,
+          tlvData: Buffer.from(''),
+        };
       }
-    );
-    return [programStateAccount, ixn];
+
+      // create the vault
+      const vaultInitIxn = spl.createInitializeAccountInstruction(
+        vaultKeypair.publicKey,
+        splMint.address,
+        payer
+      );
+      ixns.push(vaultInitIxn);
+
+      if (splMint.mintAuthority?.equals(payer)) {
+        ixns.push(
+          spl.createMintToInstruction(
+            splMint.address,
+            vaultKeypair.publicKey,
+            payer,
+            BigInt('100000000000000000')
+          )
+        );
+      }
+
+      ixns.push(
+        types.programInit(
+          program,
+          { params: { stateBump: bump } },
+          {
+            state: account.publicKey,
+            authority: program.wallet.publicKey,
+            payer: program.wallet.publicKey,
+            tokenMint: splMint.address,
+            vault: vaultKeypair.publicKey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            daoMint: splMint.address,
+          }
+        )
+      );
+
+      const programInit = new TransactionObject(payer, ixns, []);
+
+      return [account, bump, programInit];
+    }
+    return [account, bump, undefined];
   }
 
   /**

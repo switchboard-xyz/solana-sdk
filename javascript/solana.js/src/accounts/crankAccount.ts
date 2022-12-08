@@ -96,7 +96,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
 
-    const buffer = anchor.web3.Keypair.generate();
+    const buffer = params.dataBufferKeypair ?? anchor.web3.Keypair.generate();
     program.verifyNewKeypair(buffer);
 
     const maxRows = params.maxRows ?? 500;
@@ -464,6 +464,10 @@ export interface CrankInitParams {
    * Optional
    */
   keypair?: Keypair;
+  /**
+   * Optional
+   */
+  dataBufferKeypair?: Keypair;
 }
 
 /**
