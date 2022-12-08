@@ -68,7 +68,7 @@ export async function setupTest(): Promise<TestContext> {
       program.programState.publicKey
     );
     if (!programState || programState.data === null) {
-      await sbv2.ProgramStateAccount.getOrCreate(program, {});
+      await sbv2.ProgramStateAccount.getOrCreate(program);
     }
   } catch (e) {
     console.error(e);

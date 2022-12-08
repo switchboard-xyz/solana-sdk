@@ -751,7 +751,10 @@ export class SwitchboardProgram {
     > = await Promise.all(
       (params.oracles ?? []).map(async oracleInitParams => {
         const [oracleAccount, oracleInit] =
-          await queueAccount.createOracleInstructions(payer, oracleInitParams);
+          await queueAccount.createOracleInstructions(payer, {
+            ...oracleInitParams,
+            queueAuthorityPubkey: payer,
+          });
 
         const [oraclePermissionAccount, oraclePermissionBump] =
           PermissionAccount.fromSeed(

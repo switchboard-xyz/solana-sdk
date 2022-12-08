@@ -71,6 +71,7 @@ export class SwitchboardTestContext {
     if (!fs.existsSync(fullKeypairPath)) {
       throw new Error('Failed to find payer keypair path');
     }
+
     const payerKeypair = Keypair.fromSecretKey(
       new Uint8Array(
         JSON.parse(
@@ -94,7 +95,7 @@ export class SwitchboardTestContext {
 
     const [userTokenWallet] = await program.mint.getOrCreateWrappedUser(
       program.walletPubkey,
-      { fundUpTo: 1 }
+      { fundUpTo: 0 }
     );
 
     const programDataAddress = getProgramDataAddress(program.programId);
