@@ -145,18 +145,18 @@ export class SwitchboardTestContext {
     const programState = await accounts.programState.account.loadData();
 
     return new SwitchboardTestEnvironment({
-      programId: program.programId,
-      programDataAddress: programDataAddress,
-      idlAddress: idlAddress,
-      programState: accounts.programState.account.publicKey,
+      switchboardProgramId: program.programId,
+      switchboardProgramDataAddress: programDataAddress,
+      switchboardIdlAddress: idlAddress,
+      switchboardProgramState: accounts.programState.account.publicKey,
       switchboardVault: programState.tokenVault,
       switchboardMint: programState.tokenMint.equals(PublicKey.default)
         ? Mint.native
         : programState.tokenMint,
       tokenWallet: userTokenWallet,
-      queue: accounts.queueAccount.publicKey,
-      queueAuthority: program.walletPubkey,
-      queueBuffer: dataBufferKeypair.publicKey,
+      oracleQueue: accounts.queueAccount.publicKey,
+      oracleQueueAuthority: program.walletPubkey,
+      oracleQueueBuffer: dataBufferKeypair.publicKey,
       crank: crank.publicKey,
       crankBuffer: crankBufferKeypair.publicKey,
       oracle: oracle.account.publicKey,
@@ -169,16 +169,16 @@ export class SwitchboardTestContext {
 }
 
 export interface ISwitchboardTestEnvironment {
-  programId: PublicKey;
-  programDataAddress: PublicKey;
-  idlAddress: PublicKey;
-  programState: PublicKey;
+  switchboardProgramId: PublicKey;
+  switchboardProgramDataAddress: PublicKey;
+  switchboardIdlAddress: PublicKey;
+  switchboardProgramState: PublicKey;
   switchboardVault: PublicKey;
   switchboardMint: PublicKey;
   tokenWallet: PublicKey;
-  queue: PublicKey;
-  queueAuthority: PublicKey;
-  queueBuffer: PublicKey;
+  oracleQueue: PublicKey;
+  oracleQueueAuthority: PublicKey;
+  oracleQueueBuffer: PublicKey;
   crank: PublicKey;
   crankBuffer: PublicKey;
   oracle: PublicKey;
@@ -189,16 +189,16 @@ export interface ISwitchboardTestEnvironment {
 }
 
 export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
-  programId: PublicKey;
-  programDataAddress: PublicKey;
-  idlAddress: PublicKey;
-  programState: PublicKey;
+  switchboardProgramId: PublicKey;
+  switchboardProgramDataAddress: PublicKey;
+  switchboardIdlAddress: PublicKey;
+  switchboardProgramState: PublicKey;
   switchboardVault: PublicKey;
   switchboardMint: PublicKey;
   tokenWallet: PublicKey;
-  queue: PublicKey;
-  queueAuthority: PublicKey;
-  queueBuffer: PublicKey;
+  oracleQueue: PublicKey;
+  oracleQueueAuthority: PublicKey;
+  oracleQueueBuffer: PublicKey;
   crank: PublicKey;
   crankBuffer: PublicKey;
   oracle: PublicKey;
@@ -208,16 +208,16 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
   payerKeypairPath: string;
 
   constructor(ctx: ISwitchboardTestEnvironment) {
-    this.programId = ctx.programId;
-    this.programDataAddress = ctx.programDataAddress;
-    this.idlAddress = ctx.idlAddress;
-    this.programState = ctx.programState;
+    this.switchboardProgramId = ctx.switchboardProgramId;
+    this.switchboardProgramDataAddress = ctx.switchboardProgramDataAddress;
+    this.switchboardIdlAddress = ctx.switchboardIdlAddress;
+    this.switchboardProgramState = ctx.switchboardProgramState;
     this.switchboardVault = ctx.switchboardVault;
     this.switchboardMint = ctx.switchboardMint;
     this.tokenWallet = ctx.tokenWallet;
-    this.queue = ctx.queue;
-    this.queueAuthority = ctx.queueAuthority;
-    this.queueBuffer = ctx.queueBuffer;
+    this.oracleQueue = ctx.oracleQueue;
+    this.oracleQueueAuthority = ctx.oracleQueueAuthority;
+    this.oracleQueueBuffer = ctx.oracleQueueBuffer;
     this.crank = ctx.crank;
     this.crankBuffer = ctx.crankBuffer;
     this.oracle = ctx.oracle;
@@ -317,16 +317,16 @@ docker-compose -f  "$script_dir"/docker-compose.switchboard.yml up`;
 
   public toJSON(): ISwitchboardTestEnvironment {
     return {
-      programId: this.programId,
-      programDataAddress: this.programDataAddress,
-      idlAddress: this.idlAddress,
-      programState: this.programState,
+      switchboardProgramId: this.switchboardProgramId,
+      switchboardProgramDataAddress: this.switchboardProgramDataAddress,
+      switchboardIdlAddress: this.switchboardIdlAddress,
+      switchboardProgramState: this.switchboardProgramState,
       switchboardVault: this.switchboardVault,
       switchboardMint: this.switchboardMint,
       tokenWallet: this.tokenWallet,
-      queue: this.queue,
-      queueAuthority: this.queueAuthority,
-      queueBuffer: this.queueBuffer,
+      oracleQueue: this.oracleQueue,
+      oracleQueueAuthority: this.oracleQueueAuthority,
+      oracleQueueBuffer: this.oracleQueueBuffer,
       crank: this.crank,
       crankBuffer: this.crankBuffer,
       oracle: this.oracle,
