@@ -36,6 +36,12 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public readonly size = this.program.account.vrfAccountData.size;
 
+  public static default(): types.VrfAccountData {
+    const buffer = Buffer.alloc(29058, 0);
+    types.VrfAccountData.discriminator.copy(buffer, 0);
+    return types.VrfAccountData.decode(buffer);
+  }
+
   /** Load an existing VrfAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,

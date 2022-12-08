@@ -35,6 +35,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   public size = this.program.account.crankAccountData.size;
 
+  public static default(): types.CrankAccountData {
+    const buffer = Buffer.alloc(432, 0);
+    types.CrankAccountData.discriminator.copy(buffer, 0);
+    return types.CrankAccountData.decode(buffer);
+  }
+
   /**
    * Invoke a callback each time a CrankAccount's data has changed on-chain.
    * @param callback - the callback invoked when the cranks state changes
@@ -94,7 +100,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     program.verifyNewKeypair(buffer);
 
     const maxRows = params.maxRows ?? 500;
-    const crankSize = maxRows * 40 + 8;
+    const crankSize = CrankDataBuffer.getAccountSize(maxRows);
 
     const crankInit = new TransactionObject(
       payer,

@@ -86,6 +86,12 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     );
   }
 
+  public static default(): types.PermissionAccountData {
+    const buffer = Buffer.alloc(372, 0);
+    types.PermissionAccountData.discriminator.copy(buffer, 0);
+    return types.PermissionAccountData.decode(buffer);
+  }
+
   /** Load an existing PermissionAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,

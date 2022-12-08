@@ -47,6 +47,12 @@ import { VrfAccount, VrfInitParams } from './vrfAccount';
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
   static accountName = 'OracleQueueAccountData';
 
+  public static default(): types.OracleQueueAccountData {
+    const buffer = Buffer.alloc(1269, 0);
+    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
+    return types.OracleQueueAccountData.decode(buffer);
+  }
+
   /** The {@linkcode QueueDataBuffer} storing a list of oracle's that are actively heartbeating */
   dataBuffer?: QueueDataBuffer;
 
@@ -166,7 +172,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     );
 
     const queueSize = params.queueSize ?? 500;
-    const queueDataSize = queueSize * 32 + 8;
+    const queueDataSize = QueueDataBuffer.getAccountSize(queueSize);
 
     const reward = program.mint.toTokenAmountBN(params.reward);
     const minStake = program.mint.toTokenAmountBN(params.minStake);

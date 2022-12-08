@@ -3,7 +3,11 @@ import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
-import { Account, OnAccountChangeCallback } from './account';
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
 
 /**
  * Account holding a priority queue of aggregators and their next available update time.
@@ -13,7 +17,7 @@ import { Account, OnAccountChangeCallback } from './account';
 export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
   static accountName = 'CrankDataBuffer';
 
-  public size = 0;
+  public size = 40;
 
   /**
    * Invoke a callback each time a crank's buffer has changed on-chain. The buffer stores a list of {@linkcode AggregatorAccount} public keys along with their next available update time.
@@ -82,8 +86,14 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
     return pqData;
   }
 
-  static getDataBufferSize(size: number): number {
+  public static getAccountSize(size: number): number {
     return 8 + size * 40;
+  }
+
+  public static default(size = 100): Buffer {
+    const buffer = Buffer.alloc(CrankDataBuffer.getAccountSize(size), 0);
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    return buffer;
   }
 
   /**

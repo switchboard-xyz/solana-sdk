@@ -1,7 +1,11 @@
 import * as types from '../generated';
 import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as anchor from '@project-serum/anchor';
-import { Account, OnAccountChangeCallback } from './account';
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
 import * as errors from '../errors';
 import { SwitchboardProgram } from '../program';
 import {
@@ -37,6 +41,19 @@ export class AggregatorHistoryBuffer extends Account<
   static accountName = 'AggregatorHistoryBuffer';
 
   public size = 28;
+
+  public static getAccountSize(size: number): number {
+    return 12 + size * 28;
+  }
+
+  public static default(size = 1000): Buffer {
+    const buffer = Buffer.alloc(
+      AggregatorHistoryBuffer.getAccountSize(size),
+      0
+    );
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    return buffer;
+  }
 
   /**
    * Decode an aggregators history buffer and return an array of historical samples
@@ -101,10 +118,6 @@ export class AggregatorHistoryBuffer extends Account<
    */
   public decode(historyBuffer: Buffer): Array<types.AggregatorHistoryRow> {
     return AggregatorHistoryBuffer.decode(historyBuffer);
-  }
-
-  static getHistoryBufferSize(maxSamples: number): number {
-    return 8 + 4 + maxSamples * 28;
   }
 
   /**
@@ -181,9 +194,7 @@ export class AggregatorHistoryBuffer extends Account<
       ? [params.aggregatorAuthority, buffer]
       : [buffer];
 
-    const size = AggregatorHistoryBuffer.getHistoryBufferSize(
-      params.maxSamples
-    );
+    const size = AggregatorHistoryBuffer.getAccountSize(params.maxSamples);
 
     ixns.push(
       SystemProgram.createAccount({

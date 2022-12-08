@@ -2,7 +2,11 @@ import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
-import { Account, OnAccountChangeCallback } from './account';
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
 
 /**
  * Account holding a list of oracles actively heartbeating on the queue
@@ -12,7 +16,7 @@ import { Account, OnAccountChangeCallback } from './account';
 export class QueueDataBuffer extends Account<Array<PublicKey>> {
   static accountName = 'QueueDataBuffer';
 
-  public size = 0;
+  public size = 32;
 
   /**
    * Invoke a callback each time a QueueAccount's oracle queue buffer has changed on-chain. The buffer stores a list of oracle's and their last heartbeat timestamp.
@@ -78,8 +82,14 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
     return oracles;
   }
 
-  static getDataBufferSize(size: number): number {
-    return 8 + size * 40;
+  public static getAccountSize(size: number): number {
+    return 8 + size * 32;
+  }
+
+  public static default(size = 100): Buffer {
+    const buffer = Buffer.alloc(QueueDataBuffer.getAccountSize(size), 0);
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    return buffer;
   }
 
   /**

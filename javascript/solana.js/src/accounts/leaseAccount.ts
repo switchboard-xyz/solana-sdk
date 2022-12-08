@@ -31,6 +31,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
    */
   public size = this.program.account.leaseAccountData.size;
 
+  public static default(): types.LeaseAccountData {
+    const buffer = Buffer.alloc(453, 0);
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    return types.LeaseAccountData.decode(buffer);
+  }
+
   /** Load an existing LeaseAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,

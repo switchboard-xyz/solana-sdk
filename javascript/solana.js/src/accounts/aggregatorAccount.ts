@@ -73,6 +73,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
   }
 
+  public static default(): types.AggregatorAccountData {
+    const buffer = Buffer.alloc(3851, 0);
+    types.AggregatorAccountData.discriminator.copy(buffer, 0);
+    return types.AggregatorAccountData.decode(buffer);
+  }
+
   /**
    * Invoke a callback each time an AggregatorAccount's data has changed on-chain.
    * @param callback - the callback invoked when the aggregator state changes

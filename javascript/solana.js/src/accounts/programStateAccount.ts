@@ -21,6 +21,12 @@ import { TransactionObject } from '../transaction';
 export class ProgramStateAccount extends Account<types.SbState> {
   static accountName = 'SbState';
 
+  public static default(): types.SbState {
+    const buffer = Buffer.alloc(1128, 0);
+    types.SbState.discriminator.copy(buffer, 0);
+    return types.SbState.decode(buffer);
+  }
+
   /** Load the ProgramStateAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,

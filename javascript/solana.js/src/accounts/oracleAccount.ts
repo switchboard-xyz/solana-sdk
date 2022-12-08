@@ -30,6 +30,12 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   public size = this.program.account.oracleAccountData.size;
 
+  public static default(): types.OracleAccountData {
+    const buffer = Buffer.alloc(636, 0);
+    types.OracleAccountData.discriminator.copy(buffer, 0);
+    return types.OracleAccountData.decode(buffer);
+  }
+
   /** Load an existing OracleAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
