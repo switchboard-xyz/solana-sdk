@@ -232,6 +232,7 @@ describe('Aggregator Tests', () => {
     await leaseAccount.withdraw({
       amount: 1,
       unwrap: true,
+      withdrawWallet: userTokenAddress,
     });
 
     const finalBalance = await leaseAccount.getBalance();
@@ -255,88 +256,6 @@ describe('Aggregator Tests', () => {
         `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`
       );
     }
-  });
-
-  it('Transfers aggregator to a new queue', async () => {
-    const newQueueAuthority = Keypair.generate();
-
-    const [newQueue] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'new-queue',
-      metadata: '',
-      authority: newQueueAuthority.publicKey,
-      queueSize: 1,
-      reward: 0,
-      minStake: 0,
-      oracleTimeout: 86400,
-      slashingEnabled: false,
-      unpermissionedFeeds: true,
-      unpermissionedVrf: true,
-      enableBufferRelayers: false,
-    });
-
-    const [aggregatorAccount] = await queueAccount.createFeed({
-      queueAuthority: queueAuthority,
-      batchSize: 1,
-      minRequiredOracleResults: 1,
-      minRequiredJobResults: 1,
-      minUpdateDelaySeconds: 60,
-      fundAmount: 1.25,
-      enable: true,
-      jobs: [
-        {
-          weight: 1,
-          data: OracleJob.encodeDelimited(
-            OracleJob.fromObject({
-              tasks: [
-                {
-                  valueTask: {
-                    value: 1,
-                  },
-                },
-              ],
-            })
-          ).finish(),
-        },
-      ],
-    });
-    await aggregatorAccount.loadData();
-
-    await aggregatorAccount.transfer({
-      newQueue,
-      enable: true,
-      queueAuthority: newQueueAuthority,
-    });
-
-    const aggregator = await aggregatorAccount.loadData();
-    assert(
-      aggregator.queuePubkey.equals(newQueue.publicKey),
-      `Aggregator queue mismatch, expected ${newQueue.publicKey}, received ${aggregator.queuePubkey}`
-    );
-
-    const [newLeaseAccount] = LeaseAccount.fromSeed(
-      ctx.program,
-      newQueue.publicKey,
-      aggregatorAccount.publicKey
-    );
-    const balance = await newLeaseAccount.getBalance();
-    assert(
-      balance === 1.25,
-      `Aggregator did not transfer full lease balance, expected 1.25, received ${balance}`
-    );
-
-    const [newPermissionAccount] = PermissionAccount.fromSeed(
-      ctx.program,
-      newQueueAuthority.publicKey,
-      newQueue.publicKey,
-      aggregatorAccount.publicKey
-    );
-    const newPermission = await newPermissionAccount.loadData();
-    assert(
-      newPermission.permissions === PermitOracleQueueUsage.discriminator + 1,
-      `Aggregator permission mismatch, expected ${
-        PermitOracleQueueUsage.discriminator + 1
-      }, received ${newPermission.permissions}`
-    );
   });
 
   it("Adds job, updates it's config, then removes it from aggregator", async () => {

@@ -454,7 +454,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     params: {
       amount: number;
       unwrap?: boolean;
-      withdrawWallet?: PublicKey;
+      withdrawWallet: PublicKey;
       withdrawAuthority?: Keypair;
     }
   ): Promise<TransactionObject> {
@@ -464,20 +464,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const withdrawAuthority = params.withdrawAuthority
       ? params.withdrawAuthority.publicKey
       : payer;
-    const withdrawWallet = params.withdrawWallet
-      ? params.withdrawWallet
-      : this.program.mint.getAssociatedAddress(withdrawAuthority);
+    const withdrawWallet = params.withdrawWallet;
 
-    // create token wallet if it doesnt exist
-    const withdrawWalletAccountInfo =
-      await this.program.connection.getAccountInfo(withdrawWallet);
-    if (withdrawWalletAccountInfo === null) {
-      const [createUserTxn] = this.program.mint.createAssocatedUserInstruction(
-        payer,
-        withdrawAuthority
-      );
-      txns.push(createUserTxn);
-    }
+    // // create token wallet if it doesnt exist
 
     const lease = await this.loadData();
     const accountInfos = await this.program.connection.getMultipleAccountsInfo([
@@ -558,7 +547,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   public async withdraw(params: {
     amount: number;
     unwrap?: boolean;
-    withdrawWallet?: PublicKey;
+    withdrawWallet: PublicKey;
     withdrawAuthority?: Keypair;
   }): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(
