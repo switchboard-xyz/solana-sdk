@@ -2,6 +2,7 @@ import {
   AccountInfo,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -15,7 +16,7 @@ import { Account } from './account';
 import { TransactionObject } from '../transaction';
 
 /**
- * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.ITask} dictating how to source data off-chain.
+ * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.
  *
  * Data: {@linkcode types.JobAccountData}
  */
@@ -35,6 +36,64 @@ export class JobAccount extends Account<types.JobAccountData> {
    * Get the size of an {@linkcode JobAccount} on-chain.
    */
   public size = this.program.account.jobAccountData.size;
+
+  public static getAccountSize(byteLength: number): number {
+    return 181 + byteLength;
+  }
+
+  public static default(byteLength: number): types.LeaseAccountData {
+    const buffer = Buffer.alloc(JobAccount.getAccountSize(byteLength), 0);
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    return types.LeaseAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.JobAccountData> &
+      ({ job: OracleJob } | { tasks: Array<OracleJob.Task> }),
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    let jobData: Buffer | undefined = undefined;
+    if ('data' in data && data.data && data.data.byteLength > 0) {
+      jobData = Buffer.from(data.data);
+    }
+    if ('job' in data) {
+      jobData = Buffer.from(OracleJob.encodeDelimited(data.job).finish());
+    } else if ('tasks' in data) {
+      jobData = Buffer.from(
+        OracleJob.encodeDelimited(OracleJob.fromObject(data.tasks)).finish()
+      );
+    }
+    if (!jobData) {
+      throw new Error(`No job data found to create mock`);
+    }
+
+    const fields: types.LeaseAccountDataFields = {
+      ...JobAccount.default(jobData.byteLength),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.LeaseAccountData(fields);
+
+    const buffer = Buffer.alloc(
+      JobAccount.getAccountSize(jobData.byteLength),
+      0
+    );
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    types.LeaseAccountData.layout.encode(state, buffer, 8);
+    jobData.copy(buffer, 181);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
+  }
 
   /** Load an existing JobAccount with its current on-chain state */
   public static async load(

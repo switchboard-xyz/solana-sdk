@@ -6,7 +6,9 @@ import * as spl from '@solana/spl-token';
 import * as errors from '../errors';
 import { Mint } from '../mint';
 import {
+  AccountInfo,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -22,10 +24,45 @@ import { TransactionObject } from '../transaction';
 export class ProgramStateAccount extends Account<types.SbState> {
   static accountName = 'SbState';
 
+  public static size = 1128;
+
+  /**
+   * @return account size of the global {@linkcode ProgramStateAccount}.
+   */
+  public readonly size = this.program.account.sbState.size;
+
   public static default(): types.SbState {
-    const buffer = Buffer.alloc(1128, 0);
+    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
     types.SbState.discriminator.copy(buffer, 0);
     return types.SbState.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.SbState>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.SbStateFields = {
+      ...ProgramStateAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.SbState(fields);
+
+    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
+    types.SbState.discriminator.copy(buffer, 0);
+    types.SbState.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /** Load the ProgramStateAccount with its current on-chain state */
@@ -39,6 +76,16 @@ export class ProgramStateAccount extends Account<types.SbState> {
     );
     const state = await account.loadData();
     return [account, state];
+  }
+
+  /**
+   * Retrieve and decode the {@linkcode types.SbState} stored in this account.
+   */
+  public async loadData(): Promise<types.SbState> {
+    const data = await types.SbState.fetch(this.program, this.publicKey);
+    if (data === null)
+      throw new errors.AccountNotFoundError('Program State', this.publicKey);
+    return data;
   }
 
   /**
@@ -157,6 +204,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
     );
     return [new ProgramStateAccount(program, publicKey), bump];
   }
+
   /**
    * Transfer N tokens from the program vault to a specified account.
    * @param to The recipient of the vault tokens.
@@ -192,29 +240,5 @@ export class ProgramStateAccount extends Account<types.SbState> {
     );
     const txnSignature = await program.signAndSend(vaultTransfer);
     return txnSignature;
-  }
-  /**
-   * @return account size of the global {@linkcode ProgramStateAccount}.
-   */
-  public readonly size = this.program.account.sbState.size;
-  /**
-   * Retrieve and decode the {@linkcode types.SbState} stored in this account.
-   */
-  public async loadData(): Promise<types.SbState> {
-    const data = await types.SbState.fetch(this.program, this.publicKey);
-    if (data === null)
-      throw new errors.AccountNotFoundError('Program State', this.publicKey);
-    return data;
-  }
-  /**
-   * Fetch the Switchboard token mint specified in the program state account.
-   */
-  public async getTokenMint(): Promise<spl.Mint> {
-    const state = await this.loadData();
-    const switchTokenMint = spl.getMint(
-      this.program.connection,
-      state.tokenMint
-    );
-    return switchTokenMint;
   }
 }

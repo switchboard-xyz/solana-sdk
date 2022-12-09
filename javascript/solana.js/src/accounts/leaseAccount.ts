@@ -5,8 +5,10 @@ import { SwitchboardProgram } from '../program';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
 import {
+  AccountInfo,
   AccountMeta,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -26,15 +28,45 @@ import Big from 'big.js';
 export class LeaseAccount extends Account<types.LeaseAccountData> {
   static accountName = 'LeaseAccountData';
 
+  public static size = 453;
+
   /**
    * Get the size of an {@linkcode LeaseAccount} on-chain.
    */
   public size = this.program.account.leaseAccountData.size;
 
   public static default(): types.LeaseAccountData {
-    const buffer = Buffer.alloc(453, 0);
+    const buffer = Buffer.alloc(LeaseAccount.size, 0);
     types.LeaseAccountData.discriminator.copy(buffer, 0);
     return types.LeaseAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.LeaseAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.LeaseAccountDataFields = {
+      ...LeaseAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.LeaseAccountData(fields);
+
+    const buffer = Buffer.alloc(LeaseAccount.size, 0);
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    types.LeaseAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /** Load an existing LeaseAccount with its current on-chain state */

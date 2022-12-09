@@ -5,9 +5,11 @@ import * as errors from '../errors';
 import Big from 'big.js';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountInfo,
   AccountMeta,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -57,6 +59,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    */
   public static getMetadata = (aggregator: types.AggregatorAccountData) =>
     toUtf8(aggregator.metadata);
+
+  public static size = 3851;
+
   /**
    * Get the size of an {@linkcode AggregatorAccount} on-chain.
    */
@@ -74,9 +79,37 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   public static default(): types.AggregatorAccountData {
-    const buffer = Buffer.alloc(3851, 0);
+    const buffer = Buffer.alloc(AggregatorAccount.size, 0);
     types.AggregatorAccountData.discriminator.copy(buffer, 0);
     return types.AggregatorAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.AggregatorAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.AggregatorAccountDataFields = {
+      ...AggregatorAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.AggregatorAccountData(fields);
+
+    const buffer = Buffer.alloc(AggregatorAccount.size, 0);
+    types.AggregatorAccountData.discriminator.copy(buffer, 0);
+    types.AggregatorAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /**

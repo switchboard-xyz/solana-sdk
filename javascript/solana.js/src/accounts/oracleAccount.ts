@@ -4,8 +4,10 @@ import { Account, OnAccountChangeCallback } from './account';
 import * as anchor from '@project-serum/anchor';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountInfo,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -25,15 +27,45 @@ import { TransactionObject } from '../transaction';
 export class OracleAccount extends Account<types.OracleAccountData> {
   static accountName = 'OracleAccountData';
 
+  public static size = 636;
+
   /**
    * Get the size of an {@linkcode OracleAccount} on-chain.
    */
   public size = this.program.account.oracleAccountData.size;
 
   public static default(): types.OracleAccountData {
-    const buffer = Buffer.alloc(636, 0);
+    const buffer = Buffer.alloc(OracleAccount.size, 0);
     types.OracleAccountData.discriminator.copy(buffer, 0);
     return types.OracleAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.OracleAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.OracleAccountDataFields = {
+      ...OracleAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.OracleAccountData(fields);
+
+    const buffer = Buffer.alloc(OracleAccount.size, 0);
+    types.OracleAccountData.discriminator.copy(buffer, 0);
+    types.OracleAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /** Load an existing OracleAccount with its current on-chain state */

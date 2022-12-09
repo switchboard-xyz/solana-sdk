@@ -1,4 +1,10 @@
-import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
+import {
+  AccountInfo,
+  Commitment,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+} from '@solana/web3.js';
+import assert from 'assert';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../program';
@@ -17,6 +23,48 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
   static accountName = 'QueueDataBuffer';
 
   public size = 32;
+
+  public static getAccountSize(size: number): number {
+    return 8 + size * 32;
+  }
+
+  public static default(size = 100): Buffer {
+    const buffer = Buffer.alloc(QueueDataBuffer.getAccountSize(size), 0);
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    return buffer;
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: { size?: number; oracles?: Array<PublicKey> },
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const size = data.size ?? 100;
+
+    const oracles: Array<PublicKey> = Array(size).fill(PublicKey.default);
+    for (const [n, oracle] of (data.oracles ?? []).entries()) {
+      oracles[n] = oracle;
+    }
+
+    const buffer = Buffer.alloc(QueueDataBuffer.getAccountSize(size), 0);
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    for (const [n, oracle] of oracles.entries()) {
+      const oracleBuffer = oracle.toBuffer();
+      assert(oracleBuffer.byteLength === 32);
+      oracleBuffer.copy(buffer, 8 + n * 32);
+    }
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
+  }
 
   /**
    * Invoke a callback each time a QueueAccount's oracle queue buffer has changed on-chain. The buffer stores a list of oracle's and their last heartbeat timestamp.
@@ -80,16 +128,6 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
     }
 
     return oracles;
-  }
-
-  public static getAccountSize(size: number): number {
-    return 8 + size * 32;
-  }
-
-  public static default(size = 100): Buffer {
-    const buffer = Buffer.alloc(QueueDataBuffer.getAccountSize(size), 0);
-    BUFFER_DISCRIMINATOR.copy(buffer, 0);
-    return buffer;
   }
 
   /**

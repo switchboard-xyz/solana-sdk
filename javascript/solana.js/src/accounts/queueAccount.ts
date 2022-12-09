@@ -1,8 +1,10 @@
 import * as anchor from '@project-serum/anchor';
 import * as spl from '@solana/spl-token';
 import {
+  AccountInfo,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -47,14 +49,10 @@ import { VrfAccount, VrfInitParams } from './vrfAccount';
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
   static accountName = 'OracleQueueAccountData';
 
-  public static default(): types.OracleQueueAccountData {
-    const buffer = Buffer.alloc(1269, 0);
-    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
-    return types.OracleQueueAccountData.decode(buffer);
-  }
-
   /** The {@linkcode QueueDataBuffer} storing a list of oracle's that are actively heartbeating */
   dataBuffer?: QueueDataBuffer;
+
+  public static size = 1269;
 
   /**
    * Get the size of an {@linkcode QueueAccount} on-chain.
@@ -66,6 +64,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public static getName = (queue: types.OracleQueueAccountData) =>
     toUtf8(queue.name);
+
   /**
    * Returns the queue's metadata buffer in a stringified format.
    */
@@ -82,6 +81,40 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     );
     const state = await account.loadData();
     return [account, state];
+  }
+
+  public static default(): types.OracleQueueAccountData {
+    const buffer = Buffer.alloc(1269, 0);
+    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
+    return types.OracleQueueAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.OracleQueueAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.OracleQueueAccountDataFields = {
+      ...QueueAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.OracleQueueAccountData(fields);
+
+    const buffer = Buffer.alloc(QueueAccount.size, 0);
+    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
+    types.OracleQueueAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /**

@@ -3,6 +3,7 @@ import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
 import {
   AccountInfo,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -67,6 +68,13 @@ export interface PermissionSetParams {
 export class PermissionAccount extends Account<types.PermissionAccountData> {
   static accountName = 'PermissionAccountData';
 
+  public static size = 372;
+
+  /**
+   * Returns the size of an on-chain {@linkcode PermissionAccount}.
+   */
+  public readonly size = this.program.account.permissionAccountData.size;
+
   static getPermissions(
     permission: types.PermissionAccountData
   ): types.SwitchboardPermissionKind | PermitNone {
@@ -87,9 +95,37 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   }
 
   public static default(): types.PermissionAccountData {
-    const buffer = Buffer.alloc(372, 0);
+    const buffer = Buffer.alloc(PermissionAccount.size, 0);
     types.PermissionAccountData.discriminator.copy(buffer, 0);
     return types.PermissionAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.PermissionAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.PermissionAccountDataFields = {
+      ...PermissionAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.PermissionAccountData(fields);
+
+    const buffer = Buffer.alloc(PermissionAccount.size, 0);
+    types.PermissionAccountData.discriminator.copy(buffer, 0);
+    types.PermissionAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /** Load an existing PermissionAccount with its current on-chain state */
@@ -173,11 +209,6 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     const txSignature = await program.signAndSend(txnObject);
     return [account, txSignature];
   }
-
-  /**
-   * Returns the size of an on-chain {@linkcode PermissionAccount}.
-   */
-  public readonly size = this.program.account.permissionAccountData.size;
 
   /**
    * Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
