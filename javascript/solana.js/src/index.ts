@@ -8,3 +8,4 @@ export * from './SolanaClock';
 export * from './switchboardError';
 export * from './switchboardEvents';
 export * from './transaction';
+export * from './test';
