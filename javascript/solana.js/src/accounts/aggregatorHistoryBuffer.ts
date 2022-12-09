@@ -56,7 +56,7 @@ export class AggregatorHistoryBuffer extends Account<
   }
 
   /**
-   * Decode an aggregators history buffer and return an array of historical samples
+   * Decode an aggregators history buffer and return an array of historical samples in ascending order by timestamp.
    * @params historyBuffer the historyBuffer AccountInfo stored on-chain
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
    */
@@ -74,13 +74,15 @@ export class AggregatorHistoryBuffer extends Account<
     const front: Array<types.AggregatorHistoryRow> = [];
     const tail: Array<types.AggregatorHistoryRow> = [];
 
-    for (let i = 12; i < historyBuffer.length; i += ROW_SIZE) {
-      if (i + ROW_SIZE > historyBuffer.length) {
+    const buffer = historyBuffer.slice(12);
+
+    for (let i = 0; i < buffer.length; i += ROW_SIZE) {
+      if (i + ROW_SIZE > buffer.length) {
         break;
       }
 
       const row = types.AggregatorHistoryRow.fromDecoded(
-        types.AggregatorHistoryRow.layout().decode(historyBuffer, i)
+        types.AggregatorHistoryRow.layout().decode(buffer, i)
       );
 
       if (row.timestamp.eq(new anchor.BN(0))) {
