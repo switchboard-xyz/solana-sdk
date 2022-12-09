@@ -501,6 +501,82 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     };
   }
 
+  public async requestAndAwaitResult(
+    params: { vrf?: types.VrfAccountData } & (
+      | VrfRequestRandomnessParams
+      | {
+          requestFunction: (...args: any[]) => Promise<TransactionSignature>;
+        }
+    ),
+    timeout = 30000
+  ): Promise<[types.VrfAccountData, TransactionSignature]> {
+    const vrf = params?.vrf ?? (await this.loadData());
+    const currentRoundOpenSlot = vrf.currentRound.requestSlot;
+
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
+    const statePromise: Promise<types.VrfAccountData> = promiseWithTimeout(
+      timeout,
+      new Promise(
+        (
+          resolve: (result: types.VrfAccountData) => void,
+          reject: (reason: string) => void
+        ) => {
+          ws = this.onChange(vrf => {
+            if (vrf.currentRound.requestSlot.gt(currentRoundOpenSlot)) {
+              if (
+                vrf.status.kind ===
+                  types.VrfStatus.StatusCallbackSuccess.kind ||
+                vrf.status.kind === types.VrfStatus.StatusVerified.kind
+              ) {
+                resolve(vrf);
+              }
+              if (
+                vrf.status.kind === types.VrfStatus.StatusVerifyFailure.kind
+              ) {
+                reject(
+                  `Vrf failed to verify with status ${vrf.status.kind} (${vrf.status.discriminator})`
+                );
+              }
+            }
+          });
+        }
+      )
+    ).finally(async () => {
+      await closeWebsocket();
+    });
+
+    let requestRandomnessSignature: string | undefined = undefined;
+    if ('requestFunction' in params) {
+      requestRandomnessSignature = await params
+        .requestFunction()
+        .catch(async error => {
+          await closeWebsocket();
+          throw new Error(`Failed to call requestRandomness, ${error}`);
+        });
+    } else {
+      requestRandomnessSignature = await this.requestRandomness(params).catch(
+        async error => {
+          await closeWebsocket();
+          throw new Error(`Failed to call requestRandomness, ${error}`);
+        }
+      );
+    }
+
+    const state = await statePromise;
+
+    await closeWebsocket();
+
+    return [state, requestRandomnessSignature];
+  }
+
   /**
    * Await for the next vrf result
    *
@@ -565,9 +641,14 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         )
       );
     } finally {
-      if (ws) {
+      if (ws !== undefined) {
         await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
       }
+    }
+
+    if (ws !== undefined) {
+      await this.program.connection.removeAccountChangeListener(ws);
     }
 
     return result;

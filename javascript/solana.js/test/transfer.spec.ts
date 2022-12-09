@@ -5,7 +5,7 @@ import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
 import { AggregatorAccount, CrankAccount, QueueAccount } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
-import { assert } from 'console';
+import assert from 'assert';
 
 describe('Transfer Tests', () => {
   let ctx: TestContext;
@@ -135,14 +135,20 @@ describe('Transfer Tests', () => {
       throw new Error(`No aggregatorAccount to transfer`);
     }
 
+    const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.program.walletPubkey,
+      { fundUpTo: 1.25 }
+    );
+
     const [permissionAccount, leaseAccount, signatures] =
       await aggregatorAccount.transferQueue({
-        newQueue: newQueueAccount,
-        loadAmount: 1,
         authority: aggregatorAuthority,
+        newQueue: newQueueAccount,
         newCrank: newCrankAccount,
         enable: true,
         queueAuthority: newQueueAuthority,
+        loadAmount: 1,
+        funderTokenAddress: userTokenAddress,
       });
 
     const accounts = await aggregatorAccount.fetchAccounts();
@@ -199,10 +205,16 @@ describe('Transfer Tests', () => {
       ],
     });
 
+    const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.program.walletPubkey,
+      { fundUpTo: 1.25 }
+    );
+
     const [permissionAccount, leaseAccount] =
       await aggregatorAccount.transferQueuePart1({
         newQueue: newQueueAccount,
         loadAmount: 0.75,
+        funderTokenAddress: userTokenAddress,
       });
 
     await aggregatorAccount.transferQueuePart2({

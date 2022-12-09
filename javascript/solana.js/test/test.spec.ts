@@ -19,7 +19,20 @@ describe('SwitchboardTestContext Tests', () => {
   let payerKeypair: Keypair;
   let payerKeypairPath: string;
 
-  before(async () => {
+  it('Converts camelCase to UPPER_CASE', () => {
+    const input = 'programId';
+    const expected = 'PROGRAM_ID';
+    const output = camelToUpperCaseWithUnderscores(input);
+    assert(
+      expected === output,
+      `Failed to convert camelCase, expected ${expected}, received ${output}`
+    );
+  });
+
+  it('Creates a test context', async () => {
+    if (process.env.SOLANA_LOCALNET) {
+      return;
+    }
     payerKeypairPath = fs.existsSync(DEFAULT_KEYPAIR_PATH)
       ? DEFAULT_KEYPAIR_PATH
       : path.join(__dirname, 'data', 'payer-keypair.json');
@@ -48,19 +61,6 @@ describe('SwitchboardTestContext Tests', () => {
         console.error(error);
       }
     }
-  });
-
-  it('Converts camelCase to UPPER_CASE', () => {
-    const input = 'programId';
-    const expected = 'PROGRAM_ID';
-    const output = camelToUpperCaseWithUnderscores(input);
-    assert(
-      expected === output,
-      `Failed to convert camelCase, expected ${expected}, received ${output}`
-    );
-  });
-
-  it('Creates a test context', async () => {
     try {
       const testEnvironment = await SwitchboardTestContext.createEnvironment(
         payerKeypairPath

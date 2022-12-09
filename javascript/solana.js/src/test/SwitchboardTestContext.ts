@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
 import { Mint } from '../mint';
-import { AggregatorRound } from '../generated';
+import { AggregatorAccountData, AggregatorRound } from '../generated';
 import { TransactionObject } from '../transaction';
 import { SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE } from '../const';
 
@@ -194,11 +194,15 @@ export class SwitchboardTestContext {
     return new SwitchboardTestContext(program, queueAccount, userTokenAmount);
   }
 
-  /** Create a static data feed that resolves to an expected value */
+  /**
+   * Create a static data feed that resolves to an expected value
+   * @param value - the static value the feed will resolve to
+   * @param timeout - the number of milliseconds to wait before timing out
+   */
   public async createStaticFeed(
     value: number,
-    timeout = 30
-  ): Promise<[AggregatorAccount, AggregatorRound]> {
+    timeout = 30000
+  ): Promise<[AggregatorAccount, AggregatorAccountData]> {
     const [aggregatorAccount] = await this.queue.createFeed({
       name: `Value ${value}`,
       batchSize: 1,
@@ -224,22 +228,22 @@ export class SwitchboardTestContext {
       ],
     });
 
-    const openRoundPromise = aggregatorAccount.nextRound(
-      undefined,
-      timeout * 1000
-    );
-    await aggregatorAccount.openRound();
+    const [state] = await aggregatorAccount.openRoundAndAwaitResult(undefined);
 
-    const round = await openRoundPromise;
-
-    return [aggregatorAccount, round];
+    return [aggregatorAccount, state];
   }
 
+  /**
+   * Update an existing aggregator that resolves to a new static value then await the new result
+   * @params aggregatorAccount - the aggregator account to modify
+   * @param value - the static value the feed will resolve to
+   * @param timeout - the number of milliseconds to wait before timing out
+   */
   public async updateStaticFeed(
     aggregatorAccount: AggregatorAccount,
     value: number,
-    timeout = 30
-  ): Promise<[AggregatorAccount, AggregatorRound]> {
+    timeout = 30000
+  ): Promise<[AggregatorAccount, AggregatorAccountData]> {
     const aggregator = await aggregatorAccount.loadData();
 
     const [jobAccount, jobInit] = JobAccount.createInstructions(
@@ -288,15 +292,9 @@ export class SwitchboardTestContext {
     ]);
     await this.program.signAndSendAll(txns);
 
-    const openRoundPromise = aggregatorAccount.nextRound(
-      undefined,
-      timeout * 1000
-    );
-    await aggregatorAccount.openRound();
+    const [state] = await aggregatorAccount.openRoundAndAwaitResult(undefined);
 
-    const round = await openRoundPromise;
-
-    return [aggregatorAccount, round];
+    return [aggregatorAccount, state];
   }
 
   static async createEnvironment(

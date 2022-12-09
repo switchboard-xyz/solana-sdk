@@ -326,7 +326,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
             params.funderTokenAddress ?? userTokenWallet ?? undefined,
           funderAuthority: params.funderAuthority ?? undefined,
           jobAuthorities,
-          loadAmount: 0,
+          loadAmount: params.loadAmount ?? 0,
           withdrawAuthority: aggregator.authority, // set to current authority
           jobPubkeys: aggregator.jobPubkeysData.slice(
             0,
@@ -567,12 +567,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   async transferQueueInstructions(
     payer: PublicKey,
     params: {
-      newQueue: QueueAccount;
-      loadAmount?: number;
       authority?: Keypair;
+      newQueue: QueueAccount;
       newCrank?: CrankAccount;
       enable: boolean;
       queueAuthority?: Keypair;
+      loadAmount?: number;
       funderTokenAddress?: PublicKey;
       funderAuthority?: Keypair;
     }
@@ -605,12 +605,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   async transferQueue(params: {
-    newQueue: QueueAccount;
-    loadAmount?: number;
     authority?: Keypair;
+    newQueue: QueueAccount;
     newCrank?: CrankAccount;
     enable: boolean;
     queueAuthority?: Keypair;
+    loadAmount?: number;
     funderTokenAddress?: PublicKey;
     funderAuthority?: Keypair;
   }): Promise<[PermissionAccount, LeaseAccount, Array<TransactionSignature>]> {
@@ -1673,6 +1673,67 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
+  async openRoundAndAwaitResult(
+    params?: { payoutWallet?: PublicKey } & {
+      aggregator?: types.AggregatorAccountData;
+    },
+    timeout = 30000
+  ): Promise<[types.AggregatorAccountData, TransactionSignature | undefined]> {
+    const aggregator = params?.aggregator ?? (await this.loadData());
+    const currentRoundOpenSlot = aggregator.latestConfirmedRound.roundOpenSlot;
+
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
+    const statePromise: Promise<types.AggregatorAccountData> =
+      promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: types.AggregatorAccountData) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(aggregator => {
+              // if confirmed round slot larger than last open slot
+              // AND sliding window mode or sufficient oracle results
+              if (
+                aggregator.latestConfirmedRound.roundOpenSlot.gt(
+                  currentRoundOpenSlot
+                ) &&
+                (aggregator.resolutionMode.kind ===
+                  types.AggregatorResolutionMode.ModeSlidingResolution.kind ||
+                  (aggregator.latestConfirmedRound.numSuccess ?? 0) >=
+                    aggregator.minOracleResults)
+              ) {
+                resolve(aggregator);
+              }
+            });
+          }
+        )
+      ).finally(async () => {
+        await closeWebsocket();
+      });
+
+    const openRoundSignature = await this.openRound(params).catch(
+      async error => {
+        await closeWebsocket();
+        throw new Error(`Failed to call openRound, ${error}`);
+      }
+    );
+
+    const state = await statePromise;
+
+    await closeWebsocket();
+
+    return [state, openRoundSignature];
+  }
+
   /**
    * Await for the next round to close and return the aggregator round result
    *
@@ -1684,28 +1745,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   async nextRound(
     roundOpenSlot?: anchor.BN,
     timeout = 30000
-  ): Promise<types.AggregatorRound> {
+  ): Promise<types.AggregatorAccountData> {
     const slot =
       roundOpenSlot ?? (await this.loadData()).currentRound.roundOpenSlot;
     let ws: number | undefined;
 
-    let result: types.AggregatorRound;
+    let result: types.AggregatorAccountData;
     try {
       result = await promiseWithTimeout(
         timeout,
         new Promise(
           (
-            resolve: (result: types.AggregatorRound) => void,
+            resolve: (result: types.AggregatorAccountData) => void,
             reject: (reason: string) => void
           ) => {
             ws = this.onChange(aggregator => {
-              if (aggregator.latestConfirmedRound.roundOpenSlot.gt(slot)) {
-                reject(
-                  `Latest confirmed round slot is higher than requested round`
-                );
-              }
               if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
-                resolve(aggregator.latestConfirmedRound);
+                resolve(aggregator);
               }
             });
           }
