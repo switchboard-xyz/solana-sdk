@@ -400,11 +400,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const funderBalance =
       (await this.program.mint.getAssociatedBalance(funderAuthority)) ?? 0;
     if (funderBalance < params.loadAmount) {
-      const wrapIxns = await this.program.mint.unwrapInstructions(
-        payer,
-        params.loadAmount,
-        params.funderAuthority
-      );
+      const wrapIxns = await this.program.mint.wrapInstructions(payer, {
+        amount: params.loadAmount,
+      });
       ixns.push(...wrapIxns.ixns);
       signers.push(...wrapIxns.signers);
     }
