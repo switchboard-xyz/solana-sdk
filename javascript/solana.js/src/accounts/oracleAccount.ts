@@ -176,7 +176,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       queueAccount: QueueAccount;
     } & OracleInitParams &
       OracleStakeParams
-  ): Promise<[OracleAccount, TransactionObject]> {
+  ): Promise<[OracleAccount, Array<TransactionObject>]> {
+    const txns: Array<TransactionObject> = [];
+
     const tokenWallet = params.stakingWalletKeypair ?? Keypair.generate();
 
     const authority = params.authority?.publicKey ?? payer;
@@ -238,6 +240,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.authority ? [params.authority, tokenWallet] : [tokenWallet]
     );
 
+    txns.push(oracleInit);
+
     if (params.stakeAmount && params.stakeAmount > 0) {
       const depositTxn = await oracleAccount.stakeInstructions(payer, {
         stakeAmount: params.stakeAmount,
@@ -245,10 +249,10 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         funderTokenAccount: params.funderTokenAccount,
         tokenAccount: tokenWallet.publicKey,
       });
-      oracleInit.combine(depositTxn);
+      txns.push(depositTxn);
     }
 
-    return [oracleAccount, oracleInit];
+    return [oracleAccount, txns];
   }
 
   public static async create(
@@ -257,16 +261,16 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       queueAccount: QueueAccount;
     } & OracleInitParams &
       OracleStakeParams
-  ): Promise<[OracleAccount, TransactionSignature]> {
-    const [oracleAccount, txnObject] = await OracleAccount.createInstructions(
+  ): Promise<[OracleAccount, Array<TransactionSignature>]> {
+    const [oracleAccount, txns] = await OracleAccount.createInstructions(
       program,
       program.walletPubkey,
       params
     );
 
-    const txnSignature = await program.signAndSend(txnObject);
+    const signatures = await program.signAndSendAll(txns);
 
-    return [oracleAccount, txnSignature];
+    return [oracleAccount, signatures];
   }
 
   async stakeInstructions(

@@ -411,9 +411,7 @@ export class NativeMint extends Mint {
       }
       wrapAmount = params.fundUpTo.sub(userTokenBalance);
     } else if ('amount' in params) {
-      wrapAmount = new Big(params.amount).mul(
-        new Big(10).pow(this.mint.decimals)
-      );
+      wrapAmount = new Big(params.amount);
     } else {
       throw new Error(
         `Must specify fundUpTo or amount to perform this actions`

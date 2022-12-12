@@ -4,6 +4,7 @@ import assert from 'assert';
 import * as anchor from '@project-serum/anchor';
 import { setupTest, TestContext } from './utilts';
 import { Keypair, PublicKey } from '@solana/web3.js';
+import Big from 'big.js';
 
 describe('Mint Tests', () => {
   let ctx: TestContext;
@@ -22,66 +23,77 @@ describe('Mint Tests', () => {
     );
     await ctx.program.connection.confirmTransaction(airdropTxn);
 
-    const [tokenAddress] = await ctx.program.mint.createAssocatedUser(
+    [userTokenAddress] = await ctx.program.mint.createAssocatedUser(
       ctx.payer.publicKey,
       user.publicKey
     );
-    userTokenAddress = tokenAddress;
 
     const userTokenBalance =
       (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
 
-    if (userTokenBalance !== 0) {
-      throw new Error(
-        `Incorrect user token balance, expected 0, received ${userTokenBalance}`
-      );
-    }
+    assert(
+      userTokenBalance === 0,
+      `Incorrect user token balance, expected 0, received ${userTokenBalance}`
+    );
   });
 
   it('Wraps SOL', async () => {
-    if (!userTokenAddress) {
-      throw new Error(`User token address does not exist`);
-    }
+    assert(userTokenAddress, `User token address does not exist`);
 
-    await ctx.program.mint.wrap(ctx.payer.publicKey, { amount: 0.25 }, user);
+    const WRAP_AMOUNT = 0.25;
+
+    await ctx.program.mint.wrap(
+      ctx.payer.publicKey,
+      { amount: WRAP_AMOUNT },
+      user
+    );
 
     const userTokenBalance =
       (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
-    if (userTokenBalance !== 0.25) {
-      throw new Error(
-        `Incorrect user token balance, expected 0.25, received ${userTokenBalance}`
-      );
-    }
+
+    assert(
+      userTokenBalance === WRAP_AMOUNT,
+      `Incorrect user token balance, expected ${WRAP_AMOUNT} wSOL, received ${userTokenBalance}`
+    );
   });
 
   it('Unwraps SOL', async () => {
-    if (!userTokenAddress) {
-      throw new Error(`User token address does not exist`);
-    }
+    assert(userTokenAddress, `User token address does not exist`);
 
-    const initialUserTokenBalance =
+    const UNWRAP_AMOUNT = 0.1;
+
+    let initialUserTokenBalance =
       (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
-    const expectedFinalBalance = initialUserTokenBalance - 0.1;
-    if (expectedFinalBalance < 0) {
-      throw new Error(`Final user token address would be negative`);
+    // if previous test failed, wrap some funds
+    if (initialUserTokenBalance <= 0) {
+      await ctx.program.mint.wrap(
+        ctx.payer.publicKey,
+        { fundUpTo: new Big(0.25) },
+        user
+      );
+      initialUserTokenBalance =
+        (await ctx.program.mint.getAssociatedBalance(user.publicKey)) ?? 0;
     }
 
-    await ctx.program.mint.unwrap(ctx.payer.publicKey, 0.1, user);
+    const expectedFinalBalance = initialUserTokenBalance - UNWRAP_AMOUNT;
+    assert(
+      expectedFinalBalance >= 0,
+      `Final user token address would be negative`
+    );
+
+    await ctx.program.mint.unwrap(ctx.payer.publicKey, UNWRAP_AMOUNT, user);
 
     const userTokenBalance = await ctx.program.mint.getAssociatedBalance(
       user.publicKey
     );
-    if (userTokenBalance !== expectedFinalBalance) {
-      throw new Error(
-        `Incorrect user token balance, expected ${expectedFinalBalance}, received ${userTokenBalance}`
-      );
-    }
+    assert(
+      userTokenBalance === expectedFinalBalance,
+      `Incorrect user token balance, expected ${expectedFinalBalance}, received ${userTokenBalance}`
+    );
   });
 
   it('Closes associated token account', async () => {
-    if (!userTokenAddress) {
-      throw new Error(`User token address does not exist`);
-    }
+    assert(userTokenAddress, `User token address does not exist`);
 
     await ctx.program.mint.getAssociatedBalance(user.publicKey);
 
@@ -90,8 +102,9 @@ describe('Mint Tests', () => {
     const userTokenAccount = await ctx.program.connection.getAccountInfo(
       userTokenAddress
     );
-    if (userTokenAccount !== null) {
-      throw new Error(`Failed to close associated token account`);
-    }
+    assert(
+      userTokenAccount === null,
+      `Failed to close associated token account`
+    );
   });
 });

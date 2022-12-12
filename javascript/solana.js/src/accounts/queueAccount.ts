@@ -374,7 +374,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [
       oracleAccount,
       TransactionObject.pack([
-        createOracleTxnObject,
+        ...createOracleTxnObject,
         createPermissionTxnObject,
       ]),
     ];
