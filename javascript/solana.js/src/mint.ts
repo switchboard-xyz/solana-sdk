@@ -395,34 +395,32 @@ export class NativeMint extends Mint {
 
     const owner = user ? user.publicKey : payer;
 
-    const ownerBalance = new Big(await this.connection.getBalance(owner));
+    const userBalance = new Big(await this.connection.getBalance(owner));
 
-    const userAddress = this.getAssociatedAddress(owner);
-    const userAccountInfo = await this.connection.getAccountInfo(userAddress);
-    const userAccount =
-      userAccountInfo === null
-        ? null
-        : spl.unpackAccount(userAddress, userAccountInfo);
-
-    const tokenBalance = userAccount
-      ? new Big(this.fromTokenAmount(userAccount.amount))
-      : new Big(0);
+    const userTokenAddress = this.getAssociatedAddress(owner);
+    const userAccount = await this.getAccount(userTokenAddress);
+    const userTokenBalance =
+      userAccount === null
+        ? new Big(0)
+        : new Big(this.fromTokenAmount(userAccount.amount));
 
     let wrapAmount: Big;
     if ('fundUpTo' in params) {
-      if (tokenBalance.gte(params.fundUpTo)) {
+      if (userTokenBalance.gte(params.fundUpTo)) {
         return new TransactionObject(payer, [], []);
       }
-      wrapAmount = params.fundUpTo.sub(tokenBalance);
+      wrapAmount = params.fundUpTo.sub(userTokenBalance);
     } else if ('amount' in params) {
-      wrapAmount = tokenBalance.add(params.amount);
+      wrapAmount = new Big(params.amount).mul(
+        new Big(10).pow(this.mint.decimals)
+      );
     } else {
       throw new Error(
         `Must specify fundUpTo or amount to perform this actions`
       );
     }
 
-    if (ownerBalance.lte(wrapAmount)) {
+    if (userBalance.lte(wrapAmount)) {
       throw new InsufficientFundsError();
     }
 
@@ -448,7 +446,7 @@ export class NativeMint extends Mint {
       spl.createSyncNativeInstruction(ephemeralWallet),
       spl.createTransferInstruction(
         ephemeralWallet,
-        userAddress,
+        userTokenAddress,
         ephemeralAccount.publicKey,
         wrapAmountLamports
       ),
