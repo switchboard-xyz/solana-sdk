@@ -559,7 +559,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       this.publicKey
     );
     const oldLease = await oldLeaseAccount.loadData();
-    const oldLeaseBalance = await oldLeaseAccount.getBalance(oldLease.escrow);
+    const oldLeaseBalance = await oldLeaseAccount.fetchBalance(oldLease.escrow);
     if (oldLease.withdrawAuthority.equals(payer) && oldLeaseBalance > 0) {
       const withdrawTxn = await oldLeaseAccount.withdrawInstruction(payer, {
         amount: oldLeaseBalance,

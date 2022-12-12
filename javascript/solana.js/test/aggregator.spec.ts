@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import 'mocha';
+import assert from 'assert';
 
 import * as sbv2 from '../src';
 import { setupTest, TestContext } from './utilts';
@@ -8,12 +9,9 @@ import {
   AggregatorAccount,
   JobAccount,
   LeaseAccount,
-  PermissionAccount,
   QueueAccount,
 } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
-import { assert } from 'console';
-import { PermitOracleQueueUsage } from '../src/generated/types/SwitchboardPermission';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;
@@ -23,12 +21,12 @@ describe('Aggregator Tests', () => {
 
   let jobAccount: JobAccount;
 
-  let fundedAggregator: AggregatorAccount;
+  let aggregatorAccount: AggregatorAccount;
 
   before(async () => {
     ctx = await setupTest();
 
-    const [oracleQueue] = await sbv2.QueueAccount.create(ctx.program, {
+    [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
       name: 'aggregator-queue',
       metadata: '',
       authority: queueAuthority.publicKey,
@@ -42,8 +40,6 @@ describe('Aggregator Tests', () => {
       enableBufferRelayers: false,
     });
 
-    queueAccount = oracleQueue;
-
     await ctx.program.mint.getOrCreateAssociatedUser(ctx.program.walletPubkey);
 
     // add a single oracle for open round calls
@@ -51,7 +47,7 @@ describe('Aggregator Tests', () => {
       name: 'oracle-1',
     });
 
-    const [jobAccount1] = await JobAccount.create(ctx.program, {
+    [jobAccount] = await JobAccount.create(ctx.program, {
       data: OracleJob.encodeDelimited(
         OracleJob.fromObject({
           tasks: [
@@ -65,14 +61,13 @@ describe('Aggregator Tests', () => {
       ).finish(),
       name: 'Job1',
     });
-    jobAccount = jobAccount1;
   });
 
   it("Adds job, updates it's weight, then removes it from aggregator", async () => {
     const aggregatorKeypair = Keypair.generate();
     const aggregatorAuthority = Keypair.generate();
 
-    const [aggregatorAccount] = await AggregatorAccount.create(ctx.program, {
+    const [aggregatorAccount1] = await AggregatorAccount.create(ctx.program, {
       queueAccount,
       queueAuthority: queueAuthority.publicKey,
       authority: aggregatorAuthority.publicKey,
@@ -82,7 +77,7 @@ describe('Aggregator Tests', () => {
       minUpdateDelaySeconds: 60,
       keypair: aggregatorKeypair,
     });
-    await aggregatorAccount.loadData();
+    await aggregatorAccount1.loadData();
 
     const oracleJob = OracleJob.fromObject({
       tasks: [
@@ -99,47 +94,44 @@ describe('Aggregator Tests', () => {
       name: 'Job1',
     });
 
-    await aggregatorAccount.addJob({
+    await aggregatorAccount1.addJob({
       job: jobAccount,
       weight: 1,
       authority: aggregatorAuthority,
     });
 
-    const postAddJobAggregatorState = await aggregatorAccount.loadData();
+    const postAddJobAggregatorState = await aggregatorAccount1.loadData();
     const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(pubkey =>
       pubkey.equals(jobAccount.publicKey)
     );
-    if (jobIdx === -1) {
-      throw new Error(`Failed to add job to aggregator`);
-    }
+    assert(jobIdx !== -1, `Failed to add job to aggregator`);
 
-    await aggregatorAccount.updateJobWeight({
+    await aggregatorAccount1.updateJobWeight({
       job: jobAccount,
       jobIdx: jobIdx,
       weight: 2,
       authority: aggregatorAuthority,
     });
-    const postUpdateWeightAggregatorState = await aggregatorAccount.loadData();
-    if (postUpdateWeightAggregatorState.jobWeights[0] !== 2) {
-      throw new Error(`Failed to update job weight in aggregator`);
-    }
+    const postUpdateWeightAggregatorState = await aggregatorAccount1.loadData();
+    assert(
+      postUpdateWeightAggregatorState.jobWeights[0] === 2,
+      `Failed to update job weight in aggregator`
+    );
 
-    await aggregatorAccount.removeJob({
+    await aggregatorAccount1.removeJob({
       job: jobAccount,
       jobIdx: jobIdx,
       authority: aggregatorAuthority,
     });
-    const postRemoveJobAggregatorState = await aggregatorAccount.loadData();
+    const postRemoveJobAggregatorState = await aggregatorAccount1.loadData();
     const jobIdx1 = postRemoveJobAggregatorState.jobPubkeysData.findIndex(
       pubkey => pubkey.equals(jobAccount.publicKey)
     );
-    if (jobIdx1 !== -1) {
-      throw new Error(`Failed to remove job from aggregator`);
-    }
+    assert(jobIdx1 === -1, `Failed to remove job from aggregator`);
   });
 
   it('Creates and funds aggregator', async () => {
-    const [aggregatorAccount] = await queueAccount.createFeed({
+    [aggregatorAccount] = await queueAccount.createFeed({
       queueAuthority: queueAuthority,
       batchSize: 1,
       minRequiredOracleResults: 1,
@@ -168,64 +160,81 @@ describe('Aggregator Tests', () => {
 
     const aggregator = await aggregatorAccount.loadData();
 
-    if (aggregator.jobPubkeysSize !== 2) {
-      throw new Error(`Aggregator failed to add the correct number of jobs`);
-    }
+    assert(
+      aggregator.jobPubkeysSize === 2,
+      `Aggregator failed to add the correct number of jobs`
+    );
 
-    if (aggregator.jobWeights[0] !== 1 || aggregator.jobWeights[1] !== 2) {
-      throw new Error(`Aggregator set the incorrect job weights`);
-    }
+    assert(
+      aggregator.jobWeights[0] === 1 && aggregator.jobWeights[1] === 2,
+      `Aggregator set the incorrect job weights`
+    );
 
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,
       queueAccount.publicKey,
       aggregatorAccount.publicKey
     );
-    const leaseBalance = await leaseAccount.getBalance();
-    if (leaseBalance !== 2.5) {
-      throw new Error(
-        `Lease balance has incorrect funds, expected 2.5 wSOL, received ${leaseBalance}`
-      );
+    const leaseBalance = await leaseAccount.fetchBalance();
+    assert(
+      leaseBalance === 2.5,
+      `Lease balance has incorrect funds, expected 2.5 wSOL, received ${leaseBalance}`
+    );
+  });
+
+  it('Extends an aggregator lease', async () => {
+    if (!aggregatorAccount) {
+      throw new Error(`Aggregator does not exist`);
     }
 
-    fundedAggregator = aggregatorAccount;
+    const extendAmount = 0.15;
+
+    const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.payer.publicKey,
+      { fundUpTo: extendAmount }
+    );
+
+    const [leaseAccount] = LeaseAccount.fromSeed(
+      ctx.program,
+      queueAccount.publicKey,
+      aggregatorAccount.publicKey
+    );
+
+    const leaseBalance = await leaseAccount.fetchBalance();
+
+    await leaseAccount.extend({
+      amount: extendAmount,
+      funderTokenAddress: userTokenAddress,
+    });
+
+    const expectedFinalBalance = leaseBalance + extendAmount;
+    const finalBalance = await leaseAccount.fetchBalance();
+    assert(
+      expectedFinalBalance === finalBalance,
+      `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
+    );
   });
 
   it('Withdraws funds from an aggregator lease', async () => {
-    if (!fundedAggregator) {
+    if (!aggregatorAccount) {
       throw new Error(`Aggregator does not exist`);
     }
-    const aggregatorAccount = fundedAggregator;
 
-    const userTokenAddress = ctx.program.mint.getAssociatedAddress(
-      ctx.payer.publicKey
+    const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.payer.publicKey,
+      { fundUpTo: 0.1 }
     );
 
-    let initialUserTokenBalance = await ctx.program.mint.getBalance(
+    const initialUserTokenBalance = await ctx.program.mint.fetchBalance(
       userTokenAddress
     );
-
-    if (initialUserTokenBalance === null || initialUserTokenBalance <= 0) {
-      const [user, userInit] =
-        await ctx.program.mint.getOrCreateWrappedUserInstructions(
-          ctx.payer.publicKey,
-          { fundUpTo: 0.1 }
-        );
-
-      if (userInit && userInit.ixns.length > 0) {
-        await ctx.program.signAndSend(userInit);
-      }
-
-      initialUserTokenBalance =
-        (await ctx.program.mint.getBalance(userTokenAddress)) ?? 0;
-    }
 
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,
       queueAccount.publicKey,
       aggregatorAccount.publicKey
     );
-    const leaseBalance = await leaseAccount.getBalance();
+    const leaseBalance = await leaseAccount.fetchBalance();
 
     const expectedFinalBalance = leaseBalance - 1;
 
@@ -235,27 +244,23 @@ describe('Aggregator Tests', () => {
       withdrawWallet: userTokenAddress,
     });
 
-    const finalBalance = await leaseAccount.getBalance();
-    if (expectedFinalBalance !== finalBalance) {
-      throw new Error(
-        `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
-      );
-    }
+    const finalBalance = await leaseAccount.fetchBalance();
+    assert(
+      expectedFinalBalance === finalBalance,
+      `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
+    );
 
-    const finalUserBalance = await ctx.program.mint.getBalance(
+    const finalUserBalance = await ctx.program.mint.fetchBalance(
       userTokenAddress
     );
-    if (!finalUserBalance) {
-      throw new Error(`Users wrapped account was closed`);
-    }
+    assert(finalUserBalance !== null, `Users wrapped account was closed`);
 
     const finalUserTokenBalance =
-      (await ctx.program.mint.getBalance(userTokenAddress)) ?? 0;
-    if (initialUserTokenBalance !== finalUserTokenBalance) {
-      throw new Error(
-        `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`
-      );
-    }
+      (await ctx.program.mint.fetchBalance(userTokenAddress)) ?? 0;
+    assert(
+      initialUserTokenBalance === finalUserTokenBalance,
+      `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`
+    );
   });
 
   it("Adds job, updates it's config, then removes it from aggregator", async () => {
@@ -301,11 +306,10 @@ describe('Aggregator Tests', () => {
       .setConfigInstruction(aggregatorAuthority.publicKey, { minJobResults: 2 })
       .catch(() => undefined);
     // If badSetConfigSignature isn't undefined, a (bad) transaction was built and sent.
-    if (badSetConfigSignature) {
-      throw new Error(
-        'Aggregator should not let minJobResults increase above numJobs'
-      );
-    }
+    assert(
+      badSetConfigSignature === undefined,
+      'Aggregator should not let minJobResults increase above numJobs'
+    );
 
     await aggregatorAccount.setConfig({
       authority: aggregatorAuthority,
@@ -313,8 +317,9 @@ describe('Aggregator Tests', () => {
       force: true, // Bypass validation rules.
     });
     const postUpdateAggregatorState = await aggregatorAccount.loadData();
-    if (postUpdateAggregatorState.minUpdateDelaySeconds !== 300) {
-      throw new Error(`Failed to setConfig on aggregator`);
-    }
+    assert(
+      postUpdateAggregatorState.minUpdateDelaySeconds === 300,
+      `Failed to setConfig on aggregator`
+    );
   });
 });

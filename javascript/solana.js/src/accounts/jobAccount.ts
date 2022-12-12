@@ -130,7 +130,7 @@ export class JobAccount extends Account<types.JobAccountData> {
     const jobKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(jobKeypair);
 
-    const authority = params.authority ?? payer;
+    const authority = params.authority ? params.authority.publicKey : payer;
 
     const CHUNK_SIZE = 800;
 
@@ -156,7 +156,13 @@ export class JobAccount extends Account<types.JobAccountData> {
           systemProgram: SystemProgram.programId,
         }
       );
-      txns.push(new TransactionObject(payer, [jobInitIxn], [jobKeypair]));
+      txns.push(
+        new TransactionObject(
+          payer,
+          [jobInitIxn],
+          params.authority ? [jobKeypair, params.authority] : [jobKeypair]
+        )
+      );
     } else {
       const chunks: Uint8Array[] = [];
 
@@ -189,7 +195,13 @@ export class JobAccount extends Account<types.JobAccountData> {
         }
       );
 
-      txns.push(new TransactionObject(payer, [jobInitIxn], [jobKeypair]));
+      txns.push(
+        new TransactionObject(
+          payer,
+          [jobInitIxn],
+          params.authority ? [jobKeypair, params.authority] : [jobKeypair]
+        )
+      );
 
       for (const [n, chunk] of chunks.entries()) {
         const jobSetDataIxn = types.jobSetData(
@@ -205,7 +217,13 @@ export class JobAccount extends Account<types.JobAccountData> {
             authority: authority,
           }
         );
-        txns.push(new TransactionObject(payer, [jobSetDataIxn], []));
+        txns.push(
+          new TransactionObject(
+            payer,
+            [jobSetDataIxn],
+            params.authority ? [params.authority] : []
+          )
+        );
       }
     }
 
@@ -312,7 +330,7 @@ export interface JobInitParams {
   data: Uint8Array;
   weight?: number;
   name?: string;
-  authority?: PublicKey;
+  authority?: Keypair;
   expiration?: number;
   variables?: Array<string>;
   keypair?: Keypair;

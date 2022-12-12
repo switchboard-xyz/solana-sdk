@@ -109,9 +109,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
   }
 
-  async getBalance(stakingWallet?: PublicKey): Promise<number> {
+  async fetchBalance(stakingWallet?: PublicKey): Promise<number> {
     const tokenAccount = stakingWallet ?? (await this.loadData()).tokenAccount;
-    const amount = await this.program.mint.getBalance(tokenAccount);
+    const amount = await this.program.mint.fetchBalance(tokenAccount);
     if (amount === null) {
       throw new Error(`Failed to fetch oracle staking wallet balance`);
     }
@@ -493,7 +493,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     }
 
     const oracleBalance =
-      (await this.program.mint.getBalance(oracle.tokenAccount)) ?? 0;
+      (await this.program.mint.fetchBalance(oracle.tokenAccount)) ?? 0;
 
     return {
       publicKey: this.publicKey,

@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 import 'mocha';
+import assert from 'assert';
 
 import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
 import { AggregatorAccount, CrankAccount, QueueAccount } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
 
 describe('Transfer Tests', () => {
   let ctx: TestContext;

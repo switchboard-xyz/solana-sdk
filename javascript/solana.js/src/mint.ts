@@ -97,7 +97,7 @@ export class Mint {
     return account;
   }
 
-  public async getBalance(tokenAddress: PublicKey): Promise<number | null> {
+  public async fetchBalance(tokenAddress: PublicKey): Promise<number | null> {
     const tokenAccount = await this.getAccount(tokenAddress);
     if (tokenAccount === null) return null;
     return this.fromTokenAmount(tokenAccount.amount);

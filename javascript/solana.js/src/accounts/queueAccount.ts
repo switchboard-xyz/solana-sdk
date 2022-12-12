@@ -523,7 +523,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
             {
               data: job.data,
               name: job.name ?? '',
-              authority: job.authority ?? payer,
+              authority: job.authority,
               expiration: job.expiration,
               variables: job.variables,
               keypair: job.keypair,
@@ -928,7 +928,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         {
           data: params.job.data,
           name: params.job.name ?? '',
-          authority: params.job.authority ?? payer,
+          authority: params.job.authority,
           expiration: params.job.expiration,
           variables: params.job.variables,
           keypair: params.job.keypair,

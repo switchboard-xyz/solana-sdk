@@ -19,6 +19,8 @@ import { QueueAccount } from './queueAccount';
 import { TransactionObject } from '../transaction';
 import { BN } from 'bn.js';
 import Big from 'big.js';
+import { JobAccount } from './jobAccount';
+import { OracleJob } from '@switchboard-xyz/common';
 
 /**
  * Account type representing an {@linkcode AggregatorAccount}'s pre-funded escrow used to reward {@linkcode OracleAccount}'s for responding to open round requests.
@@ -296,66 +298,80 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return [leaseAccount, signature];
   }
 
-  public async getBalance(escrow?: PublicKey): Promise<number> {
+  public async fetchBalance(escrow?: PublicKey): Promise<number> {
     const escrowPubkey =
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
-    const escrowBalance = await this.program.mint.getBalance(escrowPubkey);
+    const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
     if (escrowBalance === null) {
       throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
     }
     return escrowBalance;
   }
 
-  /**
-   * Estimate the time remaining on a given lease
-   * @params void
-   * @returns number milliseconds left in lease (estimate)
-   */
-  public async estimatedLeaseTimeRemaining(): Promise<number> {
-    // get lease data for escrow + aggregator pubkeys
-    const lease = await this.loadData();
-    const coder = this.program.coder;
+  public async extendInstruction(
+    payer: PublicKey,
+    params: {
+      amount: number;
+      funderTokenAddress: PublicKey;
+      funderAuthority?: Keypair;
+    }
+  ): Promise<TransactionObject> {
+    const owner = params.funderAuthority
+      ? params.funderAuthority.publicKey
+      : payer;
 
-    const accountInfos = await this.program.connection.getMultipleAccountsInfo([
-      lease.aggregator,
+    const { lease, jobs, wallets } = await this.fetchAllAccounts();
+
+    const leaseBump = LeaseAccount.fromSeed(
+      this.program,
       lease.queue,
-    ]);
+      lease.aggregator
+    )[1];
+    const walletBumps = new Uint8Array(wallets.map(w => w.bump));
 
-    // decode aggregator
-    const aggregatorAccountInfo = accountInfos.shift();
-    if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
-    }
-    const aggregator: types.AggregatorAccountData = coder.decode(
-      AggregatorAccount.accountName,
-      aggregatorAccountInfo.data
+    const leaseExtend = types.leaseExtend(
+      this.program,
+      {
+        params: {
+          loadAmount: this.program.mint.toTokenAmountBN(params.amount),
+          stateBump: this.program.programState.bump,
+          leaseBump,
+          walletBumps: new Uint8Array(walletBumps),
+        },
+      },
+      {
+        lease: this.publicKey,
+        escrow: lease.escrow,
+        aggregator: lease.aggregator,
+        queue: lease.queue,
+        funder: params.funderTokenAddress,
+        owner: owner,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        programState: this.program.programState.publicKey,
+        mint: this.program.mint.address,
+      }
     );
 
-    // decode queue
-    const queueAccountInfo = accountInfos.shift();
-    if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError('Queue', lease.queue);
-    }
-    const queue: types.OracleQueueAccountData = coder.decode(
-      QueueAccount.accountName,
-      queueAccountInfo.data
-    );
+    // add job and job authority associated token accounts to remaining accounts for lease payouts
+    const jobPubkeys = jobs.map(j => j.account.publicKey);
+    const walletPubkeys = wallets.map(w => w.publicKey);
+    const remainingAccounts: Array<AccountMeta> = jobPubkeys
+      .concat(walletPubkeys)
+      .map((pubkey: PublicKey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      });
+    leaseExtend.keys.push(...remainingAccounts);
 
-    const batchSize = aggregator.oracleRequestBatchSize + 1;
-    const minUpdateDelaySeconds = aggregator.minUpdateDelaySeconds * 1.5; // account for jitters with * 1.5
-    const updatesPerDay = (60 * 60 * 24) / minUpdateDelaySeconds;
-    const costPerDay = batchSize * queue.reward.toNumber() * updatesPerDay;
-    const oneDay = 24 * 60 * 60 * 1000; // ms in a day
-    const balance = await this.getBalance();
-    const endDate = new Date();
-    endDate.setTime(endDate.getTime() + (balance * oneDay) / costPerDay);
-    const timeLeft = endDate.getTime() - new Date().getTime();
-    return timeLeft;
+    return new TransactionObject(
+      payer,
+      [leaseExtend],
+      params.funderAuthority ? [params.funderAuthority] : []
+    );
   }
 
   public async extend(params: {
-    loadAmount: number;
-    funder?: PublicKey;
+    amount: number;
+    funderTokenAddress: PublicKey;
     funderAuthority?: Keypair;
   }): Promise<TransactionSignature> {
     const leaseExtend = await this.extendInstruction(
@@ -364,119 +380,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
     const txnSignature = await this.program.signAndSend(leaseExtend);
     return txnSignature;
-  }
-
-  public async extendInstruction(
-    payer: PublicKey,
-    params: {
-      loadAmount: number;
-      funder?: PublicKey;
-      funderAuthority?: Keypair;
-    }
-  ): Promise<TransactionObject> {
-    const ixns: TransactionInstruction[] = [];
-    const signers: Keypair[] = [];
-
-    const lease = await this.loadData();
-    const coder = this.program.coder;
-
-    const accountInfos = await this.program.connection.getMultipleAccountsInfo([
-      lease.aggregator,
-      lease.queue,
-    ]);
-
-    // decode aggregator
-    const aggregatorAccount = new AggregatorAccount(
-      this.program,
-      lease.aggregator
-    );
-    const aggregatorAccountInfo = accountInfos.shift();
-    if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
-    }
-    const aggregator: types.AggregatorAccountData = coder.decode(
-      AggregatorAccount.accountName,
-      aggregatorAccountInfo.data
-    );
-
-    const jobs = await aggregatorAccount.loadJobs(aggregator);
-
-    // decode queue
-    const queueAccountInfo = accountInfos.shift();
-    if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError('Queue', lease.queue);
-    }
-
-    const jobWallets: Array<PublicKey> = [];
-    const walletBumps: Array<number> = [];
-    for (const idx in jobs) {
-      const jobAccountData = jobs[idx].state;
-      const authority = jobAccountData.authority ?? PublicKey.default;
-      const [jobWallet, bump] = await PublicKey.findProgramAddress(
-        [
-          authority.toBuffer(),
-          spl.TOKEN_PROGRAM_ID.toBuffer(),
-          this.program.mint.address.toBuffer(),
-        ],
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      jobWallets.push(jobWallet);
-      walletBumps.push(bump);
-    }
-
-    const leaseBump = LeaseAccount.fromSeed(
-      this.program,
-      lease.queue,
-      lease.aggregator
-    )[1];
-
-    // const funder = params.funder ?? payer;
-    const funderAuthority = params.funderAuthority
-      ? params.funderAuthority.publicKey
-      : payer;
-    const funder = params.funder
-      ? params.funder
-      : this.program.mint.getAssociatedAddress(funderAuthority);
-    const funderBalance =
-      (await this.program.mint.getAssociatedBalance(funderAuthority)) ?? 0;
-    if (funderBalance < params.loadAmount) {
-      const wrapIxns = await this.program.mint.wrapInstructions(payer, {
-        amount: params.loadAmount,
-      });
-      ixns.push(...wrapIxns.ixns);
-      signers.push(...wrapIxns.signers);
-    }
-
-    const loadAmountLamports = this.program.mint.toTokenAmount(
-      params.loadAmount
-    );
-
-    ixns.push(
-      types.leaseExtend(
-        this.program,
-        {
-          params: {
-            loadAmount: new BN(loadAmountLamports.toString()),
-            stateBump: this.program.programState.bump,
-            leaseBump,
-            walletBumps: new Uint8Array(walletBumps),
-          },
-        },
-        {
-          lease: this.publicKey,
-          escrow: lease.escrow,
-          aggregator: lease.aggregator,
-          queue: lease.queue,
-          funder: funder,
-          owner: funderAuthority,
-          tokenProgram: spl.TOKEN_PROGRAM_ID,
-          programState: this.program.programState.publicKey,
-          mint: this.program.mint.address,
-        }
-      )
-    );
-
-    return new TransactionObject(payer, ixns, signers);
   }
 
   public async withdrawInstruction(
@@ -626,5 +529,106 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       ],
       params.withdrawAuthority ? [params.withdrawAuthority] : []
     );
+  }
+
+  /**
+   * Estimate the time remaining on a given lease
+   * @params void
+   * @returns number milliseconds left in lease (estimate)
+   */
+  public async estimatedLeaseTimeRemaining(): Promise<number> {
+    const { queue, aggregator } = await this.fetchAccounts();
+
+    const batchSize = aggregator.oracleRequestBatchSize + 1;
+    const minUpdateDelaySeconds = aggregator.minUpdateDelaySeconds * 1.5; // account for jitters with * 1.5
+    const updatesPerDay = (60 * 60 * 24) / minUpdateDelaySeconds;
+    const costPerDay = batchSize * queue.reward.toNumber() * updatesPerDay;
+    const oneDay = 24 * 60 * 60 * 1000; // ms in a day
+    const balance = await this.fetchBalance();
+    const endDate = new Date();
+    endDate.setTime(endDate.getTime() + (balance * oneDay) / costPerDay);
+    const timeLeft = endDate.getTime() - new Date().getTime();
+    return timeLeft;
+  }
+
+  async fetchAccounts(_lease?: types.LeaseAccountData): Promise<{
+    queueAccount: QueueAccount;
+    queue: types.OracleQueueAccountData;
+    aggregatorAccount: AggregatorAccount;
+    aggregator: types.AggregatorAccountData;
+    lease: types.LeaseAccountData;
+  }> {
+    const lease = _lease ?? (await this.loadData());
+
+    const aggregatorAccount = new AggregatorAccount(
+      this.program,
+      lease.aggregator
+    );
+
+    const queueAccount = new QueueAccount(this.program, lease.queue);
+
+    const accountInfos = await this.program.connection.getMultipleAccountsInfo([
+      lease.aggregator,
+      lease.queue,
+    ]);
+
+    // decode aggregator
+    const aggregatorAccountInfo = accountInfos.shift();
+    if (!aggregatorAccountInfo) {
+      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
+    }
+    const aggregator = types.AggregatorAccountData.decode(
+      aggregatorAccountInfo.data
+    );
+
+    // decode queue
+    const queueAccountInfo = accountInfos.shift();
+    if (!queueAccountInfo) {
+      throw new errors.AccountNotFoundError('Queue', lease.queue);
+    }
+    const queue = types.OracleQueueAccountData.decode(queueAccountInfo.data);
+
+    return {
+      lease,
+      queueAccount,
+      queue,
+      aggregatorAccount,
+      aggregator,
+    };
+  }
+
+  async fetchAllAccounts(_lease?: types.LeaseAccountData): Promise<{
+    queueAccount: QueueAccount;
+    queue: types.OracleQueueAccountData;
+    aggregatorAccount: AggregatorAccount;
+    aggregator: types.AggregatorAccountData;
+    lease: types.LeaseAccountData;
+    jobs: Array<{
+      account: JobAccount;
+      state: types.JobAccountData;
+      job: OracleJob;
+    }>;
+    wallets: Array<{ publicKey: PublicKey; bump: number }>;
+  }> {
+    const { lease, queueAccount, queue, aggregatorAccount, aggregator } =
+      await this.fetchAccounts();
+
+    // load aggregator jobs for lease bumps
+    const jobs = await aggregatorAccount.loadJobs(aggregator);
+    const jobAuthorities = jobs.map(j => j.state.authority);
+    const wallets = LeaseAccount.getWallets(
+      jobAuthorities ?? [],
+      this.program.mint.address
+    );
+
+    return {
+      lease,
+      queueAccount,
+      queue,
+      aggregatorAccount,
+      aggregator,
+      jobs,
+      wallets,
+    };
   }
 }

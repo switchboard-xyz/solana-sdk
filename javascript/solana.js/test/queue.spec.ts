@@ -146,7 +146,7 @@ describe('Queue Tests', () => {
 
     const oracle = await oracleAccount.loadData();
 
-    const initialStakeBalance = await oracleAccount.getBalance(
+    const initialStakeBalance = await oracleAccount.fetchBalance(
       oracle.tokenAccount
     );
 
@@ -155,7 +155,7 @@ describe('Queue Tests', () => {
       tokenAccount: oracle.tokenAccount,
     });
 
-    const finalStakeBalance = await oracleAccount.getBalance(
+    const finalStakeBalance = await oracleAccount.fetchBalance(
       oracle.tokenAccount
     );
 
@@ -194,7 +194,7 @@ describe('Queue Tests', () => {
 
     const oracle = await oracleAccount.loadData();
 
-    const initialStakeBalance = await oracleAccount.getBalance(
+    const initialStakeBalance = await oracleAccount.fetchBalance(
       oracle.tokenAccount
     );
 
@@ -203,7 +203,7 @@ describe('Queue Tests', () => {
       authority: oracleAuthority,
     });
 
-    const finalStakeBalance = await oracleAccount.getBalance(
+    const finalStakeBalance = await oracleAccount.fetchBalance(
       oracle.tokenAccount
     );
 

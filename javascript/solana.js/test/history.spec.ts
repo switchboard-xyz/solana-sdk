@@ -1,27 +1,17 @@
 import 'mocha';
 import assert from 'assert';
 
-import { AggregatorAccount, SwitchboardProgram } from '../src';
-import { clusterApiUrl, Connection } from '@solana/web3.js';
+import { AggregatorHistoryBuffer } from '../src';
+import HistoryBufferAccountInfo from './data/history_buffer_account_info.json';
 
 describe('History Tests', () => {
-  let program: SwitchboardProgram;
-
-  before(async () => {
-    program = await SwitchboardProgram.load(
-      'devnet',
-      new Connection(process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet'))
-    );
-  });
-
   /** History buffer should be returned with the oldest elements (lowest timestamps) first */
   it('Verifies a history buffer is decoded in order', async () => {
-    const [aggregatorAccount, aggregator] = await AggregatorAccount.load(
-      program,
-      'GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR'
+    const historyBuffer = Buffer.from(
+      HistoryBufferAccountInfo.data[0],
+      HistoryBufferAccountInfo.data[1] as 'base64'
     );
-
-    const history = await aggregatorAccount.loadHistory();
+    const history = AggregatorHistoryBuffer.decode(historyBuffer);
 
     let lastTimestamp: number | undefined = undefined;
     for (const [n, row] of history.entries()) {
