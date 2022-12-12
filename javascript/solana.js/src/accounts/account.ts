@@ -2,6 +2,8 @@ import { SwitchboardProgram } from '../program';
 import * as anchor from '@project-serum/anchor';
 
 export abstract class Account<T> {
+  public readonly publicKey: anchor.web3.PublicKey;
+
   /**
    * Account constructor
    * @param program SwitchboardProgram
@@ -9,8 +11,13 @@ export abstract class Account<T> {
    */
   public constructor(
     public readonly program: SwitchboardProgram,
-    public readonly publicKey: anchor.web3.PublicKey
-  ) {}
+    publicKey: anchor.web3.PublicKey | string
+  ) {
+    this.publicKey =
+      typeof publicKey === 'string'
+        ? new anchor.web3.PublicKey(publicKey)
+        : publicKey;
+  }
 
   /**
    * @return on-chain account size.

@@ -11,7 +11,7 @@ import {
   QueueAccount,
   types,
 } from '../src';
-import { OracleJob } from '@switchboard-xyz/common';
+import { OracleJob, sleep } from '@switchboard-xyz/common';
 import { PermitOracleQueueUsage } from '../src/generated/types/SwitchboardPermission';
 import Big from 'big.js';
 
@@ -191,7 +191,7 @@ describe('Open Round Tests', () => {
       })
     );
 
-    const currentRound = await confirmedRoundPromise;
+    const currentRound = (await confirmedRoundPromise).latestConfirmedRound;
     assert(
       currentRound.roundOpenSlot.eq(aggregator.currentRound.roundOpenSlot),
       `Current round open slot does not match expected round open slot, expected ${aggregator.currentRound.roundOpenSlot}, received ${currentRound.roundOpenSlot}`
@@ -199,6 +199,75 @@ describe('Open Round Tests', () => {
     assert(
       currentRound.result.toBig().eq(result),
       `Incorrect current round result, expected ${result}, received ${currentRound.result.toBig()}`
+    );
+  });
+
+  it('aggregator calls openRoundAndAwaitResult', async () => {
+    const result = new Big(1337);
+
+    const [newAggregatorAccount] = await queueAccount.createFeed({
+      batchSize: 2,
+      minRequiredOracleResults: 2,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 5,
+      fundAmount: 1,
+      enable: true,
+      queueAuthority: queueAuthority,
+      jobs: [
+        {
+          weight: 2,
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: result.toNumber(),
+                  },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const currentAggregatorState = await newAggregatorAccount.loadData();
+
+    const currentRequestOpenSlot =
+      currentAggregatorState.latestConfirmedRound.roundOpenSlot;
+
+    const jobs = (
+      await newAggregatorAccount.loadJobs(currentAggregatorState)
+    ).map(jobs => jobs.job);
+
+    const updatedAggregatorStatePromise =
+      newAggregatorAccount.openRoundAndAwaitResult(undefined, 10000);
+
+    await sleep(1000); // need time for open round to hit
+
+    await Promise.all(
+      [oracleAccount1, oracleAccount2].map(async oracleAccount => {
+        return await newAggregatorAccount.saveResult({
+          jobs,
+          oracleAccount,
+          value: result,
+          minResponse: result,
+          maxResponse: result,
+        });
+      })
+    );
+
+    const [updatedAggregatorState] = await updatedAggregatorStatePromise;
+
+    assert(
+      updatedAggregatorState.latestConfirmedRound.result.toBig().eq(result),
+      `Incorrect current round result, expected ${result}, received ${updatedAggregatorState.latestConfirmedRound.result.toBig()}`
+    );
+    assert(
+      updatedAggregatorState.latestConfirmedRound.roundOpenSlot.gt(
+        currentRequestOpenSlot
+      ),
+      `Incorrect current round, expected currentRoundOpenSlot > previousRoundOpenSlot, received ${updatedAggregatorState.latestConfirmedRound.roundOpenSlot} > ${currentRequestOpenSlot}`
     );
   });
 });

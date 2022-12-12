@@ -1,7 +1,11 @@
 import * as types from '../generated';
 import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as anchor from '@project-serum/anchor';
-import { Account, OnAccountChangeCallback } from './account';
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
 import * as errors from '../errors';
 import { SwitchboardProgram } from '../program';
 import {
@@ -38,8 +42,21 @@ export class AggregatorHistoryBuffer extends Account<
 
   public size = 28;
 
+  public static getAccountSize(size: number): number {
+    return 12 + size * 28;
+  }
+
+  public static default(size = 1000): Buffer {
+    const buffer = Buffer.alloc(
+      AggregatorHistoryBuffer.getAccountSize(size),
+      0
+    );
+    BUFFER_DISCRIMINATOR.copy(buffer, 0);
+    return buffer;
+  }
+
   /**
-   * Decode an aggregators history buffer and return an array of historical samples
+   * Decode an aggregators history buffer and return an array of historical samples in ascending order by timestamp.
    * @params historyBuffer the historyBuffer AccountInfo stored on-chain
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
    */
@@ -57,13 +74,15 @@ export class AggregatorHistoryBuffer extends Account<
     const front: Array<types.AggregatorHistoryRow> = [];
     const tail: Array<types.AggregatorHistoryRow> = [];
 
-    for (let i = 12; i < historyBuffer.length; i += ROW_SIZE) {
-      if (i + ROW_SIZE > historyBuffer.length) {
+    const buffer = historyBuffer.slice(12);
+
+    for (let i = 0; i < buffer.length; i += ROW_SIZE) {
+      if (i + ROW_SIZE > buffer.length) {
         break;
       }
 
       const row = types.AggregatorHistoryRow.fromDecoded(
-        types.AggregatorHistoryRow.layout().decode(historyBuffer, i)
+        types.AggregatorHistoryRow.layout().decode(buffer, i)
       );
 
       if (row.timestamp.eq(new anchor.BN(0))) {
@@ -101,10 +120,6 @@ export class AggregatorHistoryBuffer extends Account<
    */
   public decode(historyBuffer: Buffer): Array<types.AggregatorHistoryRow> {
     return AggregatorHistoryBuffer.decode(historyBuffer);
-  }
-
-  static getHistoryBufferSize(maxSamples: number): number {
-    return 8 + 4 + maxSamples * 28;
   }
 
   /**
@@ -181,9 +196,7 @@ export class AggregatorHistoryBuffer extends Account<
       ? [params.aggregatorAuthority, buffer]
       : [buffer];
 
-    const size = AggregatorHistoryBuffer.getHistoryBufferSize(
-      params.maxSamples
-    );
+    const size = AggregatorHistoryBuffer.getAccountSize(params.maxSamples);
 
     ixns.push(
       SystemProgram.createAccount({

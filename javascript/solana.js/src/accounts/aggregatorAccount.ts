@@ -5,9 +5,11 @@ import * as errors from '../errors';
 import Big from 'big.js';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountInfo,
   AccountMeta,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -19,13 +21,13 @@ import crypto from 'crypto';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
 import { LeaseAccount } from './leaseAccount';
-import { PermissionAccount, PermissionSetParams } from './permissionAccount';
+import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
-import { PermitOracleQueueUsage } from '../generated/types/SwitchboardPermission';
 import { CrankAccount } from './crankAccount';
+import assert from 'assert';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -57,6 +59,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    */
   public static getMetadata = (aggregator: types.AggregatorAccountData) =>
     toUtf8(aggregator.metadata);
+
+  public static size = 3851;
+
   /**
    * Get the size of an {@linkcode AggregatorAccount} on-chain.
    */
@@ -71,6 +76,40 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         data
       );
     }
+  }
+
+  public static default(): types.AggregatorAccountData {
+    const buffer = Buffer.alloc(AggregatorAccount.size, 0);
+    types.AggregatorAccountData.discriminator.copy(buffer, 0);
+    return types.AggregatorAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.AggregatorAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.AggregatorAccountDataFields = {
+      ...AggregatorAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.AggregatorAccountData(fields);
+
+    const buffer = Buffer.alloc(AggregatorAccount.size, 0);
+    types.AggregatorAccountData.discriminator.copy(buffer, 0);
+    types.AggregatorAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
   }
 
   /**
@@ -243,29 +282,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [account, txnSignature];
   }
 
-  async transferInstruction(
+  /**
+   * Create the {@linkcode PermissionAccount} and {@linkcode LeaseAccount} for a new oracle queue without affecting the feed's rhythm. This does not evict a feed from the current queue.
+   */
+  async transferQueuePart1Instructions(
     payer: PublicKey,
     params: {
       newQueue: QueueAccount;
-      authority?: Keypair;
-      crankPubkey?: PublicKey;
-    } & Partial<PermissionSetParams>
-  ): Promise<Array<TransactionObject>> {
+      loadAmount?: number;
+      funderTokenAddress?: PublicKey;
+      funderAuthority?: Keypair;
+    }
+  ): Promise<[TransactionObject, PermissionAccount, LeaseAccount]> {
     const txns: Array<TransactionObject> = [];
 
     const aggregator = await this.loadData();
     const newQueue = await params.newQueue.loadData();
-
-    const authorityPubkey = params.authority
-      ? params.authority.publicKey
-      : payer;
-
-    if (!aggregator.authority.equals(authorityPubkey)) {
-      throw new errors.IncorrectAuthority(
-        aggregator.authority,
-        authorityPubkey
-      );
-    }
 
     const jobs = await this.loadJobs(aggregator);
     const jobAuthorities = jobs.map(job => job.state.authority);
@@ -276,6 +308,221 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       this.publicKey
     );
 
+    const [newPermissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      newQueue.authority,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+    const newPermissionAccountInfo =
+      await this.program.connection.getAccountInfo(
+        newPermissionAccount.publicKey
+      );
+    if (newPermissionAccountInfo === null) {
+      const [_newPermissionAccount, permissionInitTxn] =
+        PermissionAccount.createInstruction(this.program, payer, {
+          authority: newQueue.authority,
+          granter: params.newQueue.publicKey,
+          grantee: this.publicKey,
+        });
+      assert(
+        newPermissionAccount.publicKey.equals(_newPermissionAccount.publicKey)
+      );
+      txns.push(permissionInitTxn);
+    }
+
+    const [newLeaseAccount] = LeaseAccount.fromSeed(
+      this.program,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+    const newLeaseAccountInfo = await this.program.connection.getAccountInfo(
+      newLeaseAccount.publicKey
+    );
+    if (newLeaseAccountInfo === null) {
+      const [userTokenWallet, userWrap] =
+        params.loadAmount && params.loadAmount > 0 && !params.funderTokenAddress
+          ? await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+              fundUpTo: params.loadAmount ?? 0,
+            })
+          : [undefined, undefined];
+      if (userWrap) {
+        txns.push(userWrap);
+      }
+
+      // create lease for the new queue but dont transfer any balance
+      const [_newLeaseAccount, leaseInit] =
+        await LeaseAccount.createInstructions(this.program, payer, {
+          aggregatorAccount: this,
+          queueAccount: params.newQueue,
+          funderTokenAccount:
+            params.funderTokenAddress ?? userTokenWallet ?? undefined,
+          funderAuthority: params.funderAuthority ?? undefined,
+          jobAuthorities,
+          loadAmount: params.loadAmount ?? 0,
+          withdrawAuthority: aggregator.authority, // set to current authority
+          jobPubkeys: aggregator.jobPubkeysData.slice(
+            0,
+            aggregator.jobPubkeysSize
+          ),
+        });
+      assert(newLeaseAccount.publicKey.equals(_newLeaseAccount.publicKey));
+      txns.push(leaseInit);
+    }
+
+    const packed = TransactionObject.pack(txns);
+    if (packed.length !== 1) {
+      throw new Error(
+        `QueueTransfer-Part1: Expected a single TransactionObject`
+      );
+    }
+
+    return [packed[0], newPermissionAccount, newLeaseAccount];
+  }
+
+  /**
+   * Create the {@linkcode PermissionAccount} and {@linkcode LeaseAccount} for a new oracle queue without affecting the feed's rhythm. This does not evict a feed from the current queue.
+   */
+  async transferQueuePart1(params: {
+    newQueue: QueueAccount;
+    loadAmount?: number;
+    funderTokenAddress?: PublicKey;
+    funderAuthority?: Keypair;
+  }): Promise<[PermissionAccount, LeaseAccount, TransactionSignature]> {
+    const [txn, permissionAccount, leaseAccount] =
+      await this.transferQueuePart1Instructions(
+        this.program.walletPubkey,
+        params
+      );
+    const signature = await this.program.signAndSend(txn);
+    return [permissionAccount, leaseAccount, signature];
+  }
+
+  /**
+   * Approve the feed to use the new queue. Must be signed by the {@linkcode QueueAccount} authority.
+   *
+   * This does not affect the feed's rhythm nor evict it from the current queue. The Aggregator authority is still required to sign a transaction to move the feed.
+   */
+  async transferQueuePart2Instructions(
+    payer: PublicKey,
+    params: {
+      newQueue: QueueAccount;
+      enable: boolean;
+      queueAuthority?: Keypair;
+      // dont check if new accounts have been created yet
+      force?: boolean;
+    }
+  ): Promise<[TransactionObject, PermissionAccount]> {
+    const newQueue = await params.newQueue.loadData();
+    if (
+      params.queueAuthority &&
+      !params.queueAuthority.publicKey.equals(newQueue.authority)
+    ) {
+      throw new errors.IncorrectAuthority(
+        newQueue.authority,
+        params.queueAuthority.publicKey
+      );
+    }
+
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      newQueue.authority,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+    if (!params.force) {
+      await permissionAccount.loadData().catch(() => {
+        throw new Error(`Expected permissionAccount to be created already`);
+      });
+    }
+
+    const permissionSet = permissionAccount.setInstruction(payer, {
+      enable: params.enable,
+      queueAuthority: params.queueAuthority,
+      permission: new types.SwitchboardPermission.PermitOracleQueueUsage(),
+    });
+
+    return [permissionSet, permissionAccount];
+  }
+
+  /**
+   * Approve the feed to use the new queue. Must be signed by the {@linkcode QueueAccount} authority.
+   *
+   * This does not affect the feed's rhythm nor evict it from the current queue. The Aggregator authority is still required to sign a transaction to move the feed.
+   */
+  async transferQueuePart2(params: {
+    newQueue: QueueAccount;
+    enable: boolean;
+    queueAuthority?: Keypair;
+    // dont check if new accounts have been created yet
+    force?: boolean;
+  }): Promise<[PermissionAccount, TransactionSignature]> {
+    const [txn, permissionAccount] = await this.transferQueuePart2Instructions(
+      this.program.walletPubkey,
+      params
+    );
+    const signature = await this.program.signAndSend(txn);
+    return [permissionAccount, signature];
+  }
+
+  /**
+   * Transfer the feed to the new {@linkcode QueueAccount} and optionally push it on a crank. Must be signed by the Aggregator authority to approve the transfer.
+   *
+   * This will evict a feed from the previous queue and crank.
+   */
+  async transferQueuePart3Instructions(
+    payer: PublicKey,
+    params: {
+      newQueue: QueueAccount;
+      authority?: Keypair;
+      newCrank?: CrankAccount;
+      // dont check if new accounts have been created yet
+      force?: boolean;
+    }
+  ): Promise<Array<TransactionObject>> {
+    const txns: TransactionObject[] = [];
+
+    const newQueue = await params.newQueue.loadData();
+    const aggregator = await this.loadData();
+
+    // new permission account needs to be created and approved
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      newQueue.authority,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+    if (!params.force) {
+      await permissionAccount
+        .loadData()
+        .catch(() => {
+          throw new Error(`Expected permissionAccount to be created already`);
+        })
+        .then(permission => {
+          if (
+            !newQueue.unpermissionedFeedsEnabled &&
+            permission.permissions !== 2
+          ) {
+            throw new Error(
+              `PermissionAccount missing required permissions to enable this queue`
+            );
+          }
+        });
+    }
+
+    // check the new lease has been created
+    const [newLeaseAccount] = LeaseAccount.fromSeed(
+      this.program,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+    if (!params.force) {
+      await newLeaseAccount.loadData().catch(() => {
+        throw new Error(`Expected leaseAccount to be created already`);
+      });
+    }
+
+    // set the feeds queue
     const setQueueTxn = new TransactionObject(
       payer,
       [
@@ -284,7 +531,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           { params: {} },
           {
             aggregator: this.publicKey,
-            authority: authorityPubkey,
+            authority: aggregator.authority,
             queue: params.newQueue.publicKey,
           }
         ),
@@ -293,114 +540,119 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     txns.push(setQueueTxn);
 
-    // create and set permissions
-    const [newPermissionAccount, permissionInitTxn] =
-      PermissionAccount.createInstruction(this.program, payer, {
-        authority: newQueue.authority,
-        granter: params.newQueue.publicKey,
-        grantee: this.publicKey,
-      });
-    if (params.enable) {
-      if (
-        params.queueAuthority &&
-        !params.queueAuthority.publicKey.equals(newQueue.authority)
-      ) {
-        throw new errors.IncorrectAuthority(
-          newQueue.authority,
-          params.queueAuthority.publicKey
-        );
+    // push to crank
+    if (params.newCrank) {
+      const newCrank = await params.newCrank.loadData();
+      if (!newCrank.queuePubkey.equals(params.newQueue.publicKey)) {
+        throw new Error(`Crank is owned by the wrong queue`);
       }
-      const permissionSetTxn = newPermissionAccount.setInstruction(payer, {
-        enable: true,
-        queueAuthority: params.queueAuthority ?? undefined,
-        permission: new PermitOracleQueueUsage(),
+      const crankPush = await params.newCrank.pushInstruction(payer, {
+        aggregatorAccount: this,
       });
-      permissionInitTxn.combine(permissionSetTxn);
+      txns.push(crankPush);
     }
-    txns.push(permissionInitTxn);
 
-    // create payer token account if we need to
-    const payerTokenAccount = this.program.mint.getAssociatedAddress(payer);
-    const payerTokenAccountInfo = await this.program.connection.getAccountInfo(
-      payerTokenAccount
+    // remove any funds from the old lease account
+    const [oldLeaseAccount] = LeaseAccount.fromSeed(
+      this.program,
+      aggregator.queuePubkey,
+      this.publicKey
     );
-    if (payerTokenAccountInfo === null) {
-      const createPayerTokenWallet =
-        await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
-          amount: 0,
-        });
-      txns.unshift(createPayerTokenWallet[1]);
-    }
-
-    // withdraw from lease
-    let oldLeaseWithdrawAuthority = payer;
-    let oldLeaseBalance = 0;
-    try {
-      const oldLease = await oldLeaseAccount.loadData();
-      oldLeaseBalance = await oldLeaseAccount.getBalance(oldLease.escrow);
-      oldLeaseWithdrawAuthority = oldLease.withdrawAuthority;
+    const oldLease = await oldLeaseAccount.loadData();
+    const oldLeaseBalance = await oldLeaseAccount.getBalance(oldLease.escrow);
+    if (oldLease.withdrawAuthority.equals(payer) && oldLeaseBalance > 0) {
       const withdrawTxn = await oldLeaseAccount.withdrawInstruction(payer, {
         amount: oldLeaseBalance,
-        withdrawWallet: payerTokenAccount,
         unwrap: false,
+        // withdraw old lease funds into the new lease
+        withdrawWallet: this.program.mint.getAssociatedAddress(
+          newLeaseAccount.publicKey
+        ),
       });
       txns.push(withdrawTxn);
-    } catch {
-      // failed to get old lease balance, skipping
-    }
-
-    // create lease for the new queue and transfer existing balance
-    const leaseInit = await LeaseAccount.createInstructions(
-      this.program,
-      payer,
-      {
-        aggregatorAccount: this,
-        queueAccount: params.newQueue,
-        jobAuthorities,
-        loadAmount: oldLeaseBalance ?? 0,
-        withdrawAuthority: oldLeaseWithdrawAuthority,
-        jobPubkeys: aggregator.jobPubkeysData.slice(
-          0,
-          aggregator.jobPubkeysSize
-        ),
-      }
-    );
-    txns.push(leaseInit[1]);
-
-    // push onto crank
-    if (params.crankPubkey) {
-      const crankAccount = new CrankAccount(this.program, params.crankPubkey);
-      const crank = await crankAccount.loadData();
-      if (!params.newQueue.publicKey.equals(crank.queuePubkey)) {
-        throw new Error(
-          `Desired crank does not belong to new queue, expected ${params.newQueue.publicKey}, received ${crank.queuePubkey}`
-        );
-      }
-      const crankPush = await crankAccount.pushInstruction(payer, {
-        aggregatorAccount: this,
-      });
-
-      txns.push(crankPush);
     }
 
     return TransactionObject.pack(txns);
   }
 
-  async transfer(
-    params: {
-      newQueue: QueueAccount;
-      authority?: Keypair;
-      crankPubkey?: PublicKey;
-    } & Partial<PermissionSetParams>
-  ): Promise<Array<TransactionSignature>> {
-    const transactions = await this.transferInstruction(
+  /**
+   * Transfer the feed to the new {@linkcode QueueAccount} and optionally push it on a crank. Must be signed by the Aggregator authority to approve the transfer.
+   *
+   * This will evict a feed from the previous queue and crank.
+   */
+  async transferQueuePart3(params: {
+    newQueue: QueueAccount;
+    authority?: Keypair;
+    newCrank?: CrankAccount;
+    // dont check if new accounts have been created yet
+    force?: boolean;
+  }): Promise<Array<TransactionSignature>> {
+    const txns = await this.transferQueuePart3Instructions(
       this.program.walletPubkey,
       params
     );
-    const txnSignatures = await this.program.signAndSendAll(transactions, {
+    const signatures = await this.program.signAndSendAll(txns, {
       skipPreflight: true,
     });
-    return txnSignatures;
+    return signatures;
+  }
+
+  async transferQueueInstructions(
+    payer: PublicKey,
+    params: {
+      authority?: Keypair;
+      newQueue: QueueAccount;
+      newCrank?: CrankAccount;
+      enable: boolean;
+      queueAuthority?: Keypair;
+      loadAmount?: number;
+      funderTokenAddress?: PublicKey;
+      funderAuthority?: Keypair;
+    }
+  ): Promise<[Array<TransactionObject>, PermissionAccount, LeaseAccount]> {
+    const [part1, permissionAccount, leaseAccount] =
+      await this.transferQueuePart1Instructions(payer, {
+        newQueue: params.newQueue,
+        loadAmount: params.loadAmount,
+        funderTokenAddress: params.funderTokenAddress,
+        funderAuthority: params.funderAuthority,
+      });
+    const [part2] = await this.transferQueuePart2Instructions(payer, {
+      newQueue: params.newQueue,
+      enable: params.enable,
+      queueAuthority: params.queueAuthority,
+      force: true,
+    });
+    const part3 = await this.transferQueuePart3Instructions(payer, {
+      newQueue: params.newQueue,
+      authority: params.authority,
+      newCrank: params.newCrank,
+      force: true,
+    });
+
+    return [
+      TransactionObject.pack([part1, part2, ...part3]),
+      permissionAccount,
+      leaseAccount,
+    ];
+  }
+
+  async transferQueue(params: {
+    authority?: Keypair;
+    newQueue: QueueAccount;
+    newCrank?: CrankAccount;
+    enable: boolean;
+    queueAuthority?: Keypair;
+    loadAmount?: number;
+    funderTokenAddress?: PublicKey;
+    funderAuthority?: Keypair;
+  }): Promise<[PermissionAccount, LeaseAccount, Array<TransactionSignature>]> {
+    const [txns, permissionAccount, leaseAccount] =
+      await this.transferQueueInstructions(this.program.walletPubkey, params);
+    const signatures = await this.program.signAndSendAll(txns, {
+      skipPreflight: true,
+    });
+    return [permissionAccount, leaseAccount, signatures];
   }
 
   public getAccounts(params: {
@@ -1454,6 +1706,67 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
+  async openRoundAndAwaitResult(
+    params?: { payoutWallet?: PublicKey } & {
+      aggregator?: types.AggregatorAccountData;
+    },
+    timeout = 30000
+  ): Promise<[types.AggregatorAccountData, TransactionSignature | undefined]> {
+    const aggregator = params?.aggregator ?? (await this.loadData());
+    const currentRoundOpenSlot = aggregator.latestConfirmedRound.roundOpenSlot;
+
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
+    const statePromise: Promise<types.AggregatorAccountData> =
+      promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: types.AggregatorAccountData) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(aggregator => {
+              // if confirmed round slot larger than last open slot
+              // AND sliding window mode or sufficient oracle results
+              if (
+                aggregator.latestConfirmedRound.roundOpenSlot.gt(
+                  currentRoundOpenSlot
+                ) &&
+                (aggregator.resolutionMode.kind ===
+                  types.AggregatorResolutionMode.ModeSlidingResolution.kind ||
+                  (aggregator.latestConfirmedRound.numSuccess ?? 0) >=
+                    aggregator.minOracleResults)
+              ) {
+                resolve(aggregator);
+              }
+            });
+          }
+        )
+      ).finally(async () => {
+        await closeWebsocket();
+      });
+
+    const openRoundSignature = await this.openRound(params).catch(
+      async error => {
+        await closeWebsocket();
+        throw new Error(`Failed to call openRound, ${error}`);
+      }
+    );
+
+    const state = await statePromise;
+
+    await closeWebsocket();
+
+    return [state, openRoundSignature];
+  }
+
   /**
    * Await for the next round to close and return the aggregator round result
    *
@@ -1465,28 +1778,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   async nextRound(
     roundOpenSlot?: anchor.BN,
     timeout = 30000
-  ): Promise<types.AggregatorRound> {
+  ): Promise<types.AggregatorAccountData> {
     const slot =
       roundOpenSlot ?? (await this.loadData()).currentRound.roundOpenSlot;
     let ws: number | undefined;
 
-    let result: types.AggregatorRound;
+    let result: types.AggregatorAccountData;
     try {
       result = await promiseWithTimeout(
         timeout,
         new Promise(
           (
-            resolve: (result: types.AggregatorRound) => void,
+            resolve: (result: types.AggregatorAccountData) => void,
             reject: (reason: string) => void
           ) => {
             ws = this.onChange(aggregator => {
-              if (aggregator.latestConfirmedRound.roundOpenSlot.gt(slot)) {
-                reject(
-                  `Latest confirmed round slot is higher than requested round`
-                );
-              }
               if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
-                resolve(aggregator.latestConfirmedRound);
+                resolve(aggregator);
               }
             });
           }
@@ -1516,6 +1824,44 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const history = await this.history.loadData();
 
     return history;
+  }
+
+  static async fetchMultiple(
+    program: SwitchboardProgram,
+    publicKeys: Array<PublicKey>,
+    commitment: Commitment = 'confirmed'
+  ): Promise<
+    Array<{
+      account: AggregatorAccount;
+      data: types.AggregatorAccountData;
+    }>
+  > {
+    const aggregators: Array<{
+      account: AggregatorAccount;
+      data: types.AggregatorAccountData;
+    }> = [];
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      program.connection,
+      publicKeys,
+      commitment
+    );
+
+    for (const accountInfo of accountInfos) {
+      if (!accountInfo?.publicKey) {
+        continue;
+      }
+      try {
+        const account = new AggregatorAccount(program, accountInfo.publicKey);
+        const data = types.AggregatorAccountData.decode(
+          accountInfo.account.data
+        );
+        aggregators.push({ account, data });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return aggregators;
   }
 }
 

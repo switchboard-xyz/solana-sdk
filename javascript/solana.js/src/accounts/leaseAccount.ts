@@ -5,8 +5,10 @@ import { SwitchboardProgram } from '../program';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
 import {
+  AccountInfo,
   AccountMeta,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -26,10 +28,46 @@ import Big from 'big.js';
 export class LeaseAccount extends Account<types.LeaseAccountData> {
   static accountName = 'LeaseAccountData';
 
+  public static size = 453;
+
   /**
    * Get the size of an {@linkcode LeaseAccount} on-chain.
    */
   public size = this.program.account.leaseAccountData.size;
+
+  public static default(): types.LeaseAccountData {
+    const buffer = Buffer.alloc(LeaseAccount.size, 0);
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    return types.LeaseAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.LeaseAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.LeaseAccountDataFields = {
+      ...LeaseAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.LeaseAccountData(fields);
+
+    const buffer = Buffer.alloc(LeaseAccount.size, 0);
+    types.LeaseAccountData.discriminator.copy(buffer, 0);
+    types.LeaseAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
+  }
 
   /** Load an existing LeaseAccount with its current on-chain state */
   public static async load(
@@ -120,7 +158,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const loadAmount = params.loadAmount ?? 0;
     const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
-    let tokenTxn: TransactionObject;
+    let tokenTxn: TransactionObject | undefined;
     let funderTokenAddress: PublicKey;
     if (params.funderTokenAccount) {
       funderTokenAddress = params.funderTokenAccount;
@@ -139,7 +177,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           params.funderAuthority
         );
     }
-    txns.push(tokenTxn);
+    if (tokenTxn) {
+      txns.push(tokenTxn);
+    }
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
       program,
@@ -444,7 +484,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     params: {
       amount: number;
       unwrap?: boolean;
-      withdrawWallet?: PublicKey;
+      withdrawWallet: PublicKey;
       withdrawAuthority?: Keypair;
     }
   ): Promise<TransactionObject> {
@@ -454,20 +494,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const withdrawAuthority = params.withdrawAuthority
       ? params.withdrawAuthority.publicKey
       : payer;
-    const withdrawWallet = params.withdrawWallet
-      ? params.withdrawWallet
-      : this.program.mint.getAssociatedAddress(withdrawAuthority);
+    const withdrawWallet = params.withdrawWallet;
 
-    // create token wallet if it doesnt exist
-    const withdrawWalletAccountInfo =
-      await this.program.connection.getAccountInfo(withdrawWallet);
-    if (withdrawWalletAccountInfo === null) {
-      const [createUserTxn] = this.program.mint.createAssocatedUserInstruction(
-        payer,
-        withdrawAuthority
-      );
-      txns.push(createUserTxn);
-    }
+    // // create token wallet if it doesnt exist
 
     const lease = await this.loadData();
     const accountInfos = await this.program.connection.getMultipleAccountsInfo([
@@ -548,7 +577,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   public async withdraw(params: {
     amount: number;
     unwrap?: boolean;
-    withdrawWallet?: PublicKey;
+    withdrawWallet: PublicKey;
     withdrawAuthority?: Keypair;
   }): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(

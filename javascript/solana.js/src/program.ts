@@ -29,11 +29,29 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from './generated';
-import { AggregatorAccount, DISCRIMINATOR_MAP } from './accounts';
-
-const DEVNET_GENESIS_HASH = 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG';
-
-const MAINNET_GENESIS_HASH = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
+import {
+  CrankAccount,
+  CrankInitParams,
+  DISCRIMINATOR_MAP,
+  OracleAccount,
+  OracleInitParams,
+  OracleStakeParams,
+  PermissionAccount,
+  PermissionSetParams,
+  ProgramStateAccount,
+  QueueAccount,
+  QueueInitParams,
+} from './accounts';
+import {
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
+} from './const';
 
 /**
  * Switchboard Devnet Program ID
@@ -332,6 +350,97 @@ export class SwitchboardProgram {
     return this._program.account;
   }
 
+  /**
+   * Load the Switchboard Labs permissionless Queue for either devnet or mainnet. The permissionless queue has the following permissions:
+   *  - unpermissionedFeedsEnabled: True
+   *  - unpermissionedVrfEnabled: True
+   *  - enableBufferRelayers: False
+   *
+   * **Note:** {@linkcode AggregatorAccount}s and {@linkcode VrfAccount}s do not require permissions to join this queue. {@linkcode BufferRelayerAccount}s are disabled.
+   */
+  async loadPermissionless(): Promise<{
+    queueAccount: QueueAccount;
+    queue: OracleQueueAccountData;
+    crankAccount: CrankAccount;
+    crank: CrankAccountData;
+  }> {
+    const queueKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
+        : null;
+    if (!queueKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [queueAccount, queue] = await QueueAccount.load(this, queueKey);
+
+    const crankKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK
+        : null;
+    if (!crankKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
+
+    return { queueAccount, queue, crankAccount, crank };
+  }
+
+  /**
+   * Load the Switchboard Labs permissionled Queue for either devnet or mainnet. The permissioned queue has the following permissions:
+   *  - unpermissionedFeedsEnabled: False
+   *  - unpermissionedVrfEnabled: False
+   *  - enableBufferRelayers: False
+   *
+   * **Note:** The queue authority must grant {@linkcode AggregatorAccount}s PERMIT_ORACLE_QUEUE_USAGE and {@linkcode VrfAccount}s PERMIT_VRF_REQUESTS permissions before joining the queue and requesting oracle updates. {@linkcode BufferRelayerAccount}s are disabled.
+   */
+  async loadPermissioned(): Promise<{
+    queueAccount: QueueAccount;
+    queue: OracleQueueAccountData;
+    crankAccount: CrankAccount;
+    crank: CrankAccountData;
+  }> {
+    const queueKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
+        : null;
+    if (!queueKey) {
+      throw new Error(
+        `Failed to load the permissioned queue for cluster ${this.cluster}`
+      );
+    }
+    const [queueAccount, queue] = await QueueAccount.load(
+      this,
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
+        : SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
+    );
+
+    const crankKey =
+      this.cluster === 'mainnet-beta'
+        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK
+        : this.cluster === 'devnet'
+        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK
+        : null;
+    if (!crankKey) {
+      throw new Error(
+        `Failed to load the permissionless queue for cluster ${this.cluster}`
+      );
+    }
+    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
+
+    return { queueAccount, queue, crankAccount, crank };
+  }
+
   public addEventListener<EventName extends keyof SwitchboardEvents>(
     eventName: EventName,
     callback: (
@@ -593,6 +702,120 @@ export class SwitchboardProgram {
 
     return null;
   }
+
+  async createNetworkInstructions(
+    payer: PublicKey,
+    params: QueueInitParams & {
+      cranks?: Array<Omit<CrankInitParams, 'queueAccount'>>;
+      oracles?: Array<
+        OracleInitParams &
+          OracleStakeParams &
+          Partial<PermissionSetParams> & {
+            queueAuthorityPubkey?: PublicKey;
+          }
+      >;
+    }
+  ): Promise<[Array<TransactionObject>, NetworkInitResponse]> {
+    const txns: TransactionObject[] = [];
+
+    // get or create the program state
+    const [programState, stateBump, programInit] =
+      await ProgramStateAccount.getOrCreateInstructions(
+        this,
+        this.walletPubkey
+      );
+    if (programInit) {
+      txns.push(programInit);
+    }
+
+    // create a new queue
+    const [queueAccount, queueInit] = await QueueAccount.createInstructions(
+      this,
+      this.walletPubkey,
+      params
+    );
+    txns.push(queueInit);
+
+    const cranks: Array<[CrankAccount, TransactionObject]> = await Promise.all(
+      (params.cranks ?? []).map(async crankInitParams => {
+        return await queueAccount.createCrankInstructions(
+          payer,
+          crankInitParams
+        );
+      })
+    );
+    txns.push(...cranks.map(crank => crank[1]));
+
+    const oracles: Array<
+      [TransactionObject[], OracleAccount, PermissionAccount, number]
+    > = await Promise.all(
+      (params.oracles ?? []).map(async oracleInitParams => {
+        const [oracleAccount, oracleInit] =
+          await queueAccount.createOracleInstructions(payer, {
+            ...oracleInitParams,
+            queueAuthorityPubkey:
+              oracleInitParams.queueAuthorityPubkey ?? payer,
+            enable: true,
+          });
+
+        const [oraclePermissionAccount, oraclePermissionBump] =
+          PermissionAccount.fromSeed(
+            this,
+            this.walletPubkey,
+            queueAccount.publicKey,
+            oracleAccount.publicKey
+          );
+
+        return [
+          oracleInit,
+          oracleAccount,
+          oraclePermissionAccount,
+          oraclePermissionBump,
+        ];
+      })
+    );
+    txns.push(...oracles.map(oracle => oracle[0]).flat());
+
+    const accounts: NetworkInitResponse = {
+      programState: {
+        account: programState,
+        bump: stateBump,
+      },
+      queueAccount,
+      cranks: cranks.map(c => c[0]),
+      oracles: oracles.map(o => {
+        return {
+          account: o[1],
+          permissions: {
+            account: o[2],
+            bump: o[3],
+          },
+        };
+      }),
+    };
+
+    return [TransactionObject.pack(txns), accounts];
+  }
+
+  async createNetwork(
+    params: QueueInitParams & {
+      cranks?: Array<Omit<CrankInitParams, 'queueAccount'>>;
+      oracles?: Array<
+        OracleInitParams &
+          OracleStakeParams &
+          Partial<PermissionSetParams> & {
+            queueAuthorityPubkey?: PublicKey;
+          }
+      >;
+    }
+  ): Promise<[NetworkInitResponse, Array<TransactionSignature>]> {
+    const [networkInit, accounts] = await this.createNetworkInstructions(
+      this.walletPubkey,
+      params
+    );
+    const txnSignatures = await this.signAndSendAll(networkInit);
+    return [accounts, txnSignatures];
+  }
 }
 
 export class AnchorWallet implements anchor.Wallet {
@@ -619,6 +842,18 @@ interface AccountInfoResponse {
   account: anchor.web3.AccountInfo<Buffer>;
 }
 
-interface DecodableAccount {
-  decode: (data: Buffer) => DecodableAccount;
+export interface NetworkInitResponse {
+  programState: {
+    account: ProgramStateAccount;
+    bump: number;
+  };
+  queueAccount: QueueAccount;
+  cranks: Array<CrankAccount>;
+  oracles: Array<{
+    account: OracleAccount;
+    permissions: {
+      account: PermissionAccount;
+      bump: number;
+    };
+  }>;
 }

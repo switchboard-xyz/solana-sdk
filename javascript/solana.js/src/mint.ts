@@ -224,6 +224,25 @@ export class NativeMint extends Mint {
     return new NativeMint(provider, splMint);
   }
 
+  public async getOrCreateWrappedUser(
+    payer: PublicKey,
+    params:
+      | {
+          amount: number;
+        }
+      | { fundUpTo: number },
+    user?: Keypair
+  ): Promise<[PublicKey, TransactionSignature | undefined]> {
+    const [userAddress, userInit] =
+      await this.getOrCreateWrappedUserInstructions(payer, params, user);
+    if (userInit && userInit.ixns.length > 0) {
+      const signature = await this.signAndSend(userInit);
+      return [userAddress, signature];
+    }
+
+    return [userAddress, undefined];
+  }
+
   public async getOrCreateWrappedUserInstructions(
     payer: PublicKey,
     params:
@@ -232,10 +251,11 @@ export class NativeMint extends Mint {
         }
       | { fundUpTo: number },
     user?: Keypair
-  ): Promise<[PublicKey, TransactionObject]> {
+  ): Promise<[PublicKey, TransactionObject | undefined]> {
     const owner = user ? user.publicKey : payer;
     const associatedToken = Mint.getAssociatedAddress(owner);
     const accountInfo = await this.connection.getAccountInfo(associatedToken);
+
     if (accountInfo === null) {
       const amount =
         'fundUpTo' in params
@@ -251,8 +271,11 @@ export class NativeMint extends Mint {
       return [associatedToken, userInit];
     } else {
       if ('fundUpTo' in params) {
-        if (!params.fundUpTo || params.fundUpTo < 0) {
+        if (params.fundUpTo < 0) {
           throw new Error(`fundUpTo must be a positive number`);
+        }
+        if (params.fundUpTo === 0) {
+          return [associatedToken, undefined];
         }
         const tokenBalance = (await this.getAssociatedBalance(owner)) ?? 0;
         if (tokenBalance > (params.fundUpTo ?? 0)) {
@@ -267,9 +290,15 @@ export class NativeMint extends Mint {
       }
 
       if ('amount' in params) {
+        if (params.amount < 0) {
+          throw new Error(`amount must be a positive number`);
+        }
+        if (params.amount === 0) {
+          return [associatedToken, undefined];
+        }
         const userWrap = await this.wrapInstructions(
           payer,
-          { amount: params.amount },
+          { amount: params.amount ?? 0 },
           user
         );
         return [associatedToken, userWrap];

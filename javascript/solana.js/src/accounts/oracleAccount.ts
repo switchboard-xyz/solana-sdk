@@ -4,8 +4,10 @@ import { Account, OnAccountChangeCallback } from './account';
 import * as anchor from '@project-serum/anchor';
 import { SwitchboardProgram } from '../program';
 import {
+  AccountInfo,
   Commitment,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -25,10 +27,46 @@ import { TransactionObject } from '../transaction';
 export class OracleAccount extends Account<types.OracleAccountData> {
   static accountName = 'OracleAccountData';
 
+  public static size = 636;
+
   /**
    * Get the size of an {@linkcode OracleAccount} on-chain.
    */
   public size = this.program.account.oracleAccountData.size;
+
+  public static default(): types.OracleAccountData {
+    const buffer = Buffer.alloc(OracleAccount.size, 0);
+    types.OracleAccountData.discriminator.copy(buffer, 0);
+    return types.OracleAccountData.decode(buffer);
+  }
+
+  public static createMock(
+    programId: PublicKey,
+    data: Partial<types.OracleAccountData>,
+    options?: {
+      lamports?: number;
+      rentEpoch?: number;
+    }
+  ): AccountInfo<Buffer> {
+    const fields: types.OracleAccountDataFields = {
+      ...OracleAccount.default(),
+      ...data,
+      // any cleanup actions here
+    };
+    const state = new types.OracleAccountData(fields);
+
+    const buffer = Buffer.alloc(OracleAccount.size, 0);
+    types.OracleAccountData.discriminator.copy(buffer, 0);
+    types.OracleAccountData.layout.encode(state, buffer, 8);
+
+    return {
+      executable: false,
+      owner: programId,
+      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
+      data: buffer,
+      rentEpoch: options?.rentEpoch ?? 0,
+    };
+  }
 
   /** Load an existing OracleAccount with its current on-chain state */
   public static async load(
@@ -139,11 +177,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     } & OracleInitParams &
       OracleStakeParams
   ): Promise<[OracleAccount, TransactionObject]> {
-    const tokenWallet = Keypair.generate();
+    const tokenWallet = params.stakingWalletKeypair ?? Keypair.generate();
 
     const authority = params.authority?.publicKey ?? payer;
-
-    const txns: TransactionObject[] = [];
 
     const [oracleAccount, oracleBump] = OracleAccount.fromSeed(
       program,
@@ -202,8 +238,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.authority ? [params.authority, tokenWallet] : [tokenWallet]
     );
 
-    txns.push(oracleInit);
-
     if (params.stakeAmount && params.stakeAmount > 0) {
       const depositTxn = await oracleAccount.stakeInstructions(payer, {
         stakeAmount: params.stakeAmount,
@@ -211,15 +245,10 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         funderTokenAccount: params.funderTokenAccount,
         tokenAccount: tokenWallet.publicKey,
       });
-      txns.push(depositTxn);
+      oracleInit.combine(depositTxn);
     }
 
-    const packed = TransactionObject.pack(txns);
-    if (packed.length > 1) {
-      throw new Error(`Expected a single TransactionObject`);
-    }
-
-    return [oracleAccount, packed[0]];
+    return [oracleAccount, oracleInit];
   }
 
   public static async create(
@@ -252,11 +281,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       params.tokenAccount ?? (await this.loadData()).tokenAccount;
 
     const funderAuthority = params.funderAuthority?.publicKey ?? payer;
-    // const funderTokenAccount =
-    //   this.program.mint.getAssociatedAddress(funderAuthority);
-    // const funderTokenAccountInfo = await this.program.connection.getAccountInfo(
-    //   funderTokenAccount
-    // );
 
     const [funderTokenAccount, wrapFundsTxn] =
       await this.program.mint.getOrCreateWrappedUserInstructions(
@@ -265,32 +289,22 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         params.funderAuthority
       );
 
-    // if (!funderTokenAccountInfo) {
-    //   let userTokenAccount: PublicKey;
-    //   [userTokenAccount, wrapFundsTxn] =
-    //     await this.program.mint.createWrappedUserInstructions(
-    //       payer,
-    //       params.stakeAmount,
-    //       params.funderAuthority
-    //     );
-    // } else {
-    //   wrapFundsTxn = await this.program.mint.wrapInstructions(
-    //     payer,
-    //     { amount: params.stakeAmount },
-    //     params.funderAuthority
-    //   );
-    // }
-
-    wrapFundsTxn.add(
-      spl.createTransferInstruction(
-        funderTokenAccount,
-        tokenWallet,
-        funderAuthority,
-        this.program.mint.toTokenAmount(params.stakeAmount)
-      )
+    const transferIxn = spl.createTransferInstruction(
+      funderTokenAccount,
+      tokenWallet,
+      funderAuthority,
+      this.program.mint.toTokenAmount(params.stakeAmount)
     );
 
-    return wrapFundsTxn;
+    if (wrapFundsTxn) {
+      return wrapFundsTxn.add(transferIxn);
+    }
+
+    return new TransactionObject(
+      payer,
+      [transferIxn],
+      params.funderAuthority ? [params.funderAuthority] : []
+    );
   }
 
   async stake(
@@ -491,6 +505,42 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       },
     };
   }
+
+  static async fetchMultiple(
+    program: SwitchboardProgram,
+    publicKeys: Array<PublicKey>,
+    commitment: Commitment = 'confirmed'
+  ): Promise<
+    Array<{
+      account: OracleAccount;
+      data: types.OracleAccountData;
+    }>
+  > {
+    const oracles: Array<{
+      account: OracleAccount;
+      data: types.OracleAccountData;
+    }> = [];
+
+    const accountInfos = await anchor.utils.rpc.getMultipleAccounts(
+      program.connection,
+      publicKeys,
+      commitment
+    );
+
+    for (const accountInfo of accountInfos) {
+      if (!accountInfo?.publicKey) {
+        continue;
+      }
+      try {
+        const account = new OracleAccount(program, accountInfo.publicKey);
+        const data = types.OracleAccountData.decode(accountInfo.account.data);
+        oracles.push({ account, data });
+        // eslint-disable-next-line no-empty
+      } catch {}
+    }
+
+    return oracles;
+  }
 }
 
 export interface OracleInitParams {
@@ -500,6 +550,10 @@ export interface OracleInitParams {
   metadata?: string;
   /** Alternative keypair that will be the authority for the oracle. If not set the payer will be used. */
   authority?: Keypair;
+  /**
+   * Optional,
+   */
+  stakingWalletKeypair?: Keypair;
 }
 
 export interface OracleStakeParams {

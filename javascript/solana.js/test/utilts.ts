@@ -9,7 +9,10 @@ dotenv.config();
 export const sleep = (ms: number): Promise<any> =>
   new Promise(s => setTimeout(s, ms));
 
-const DEFAULT_KEYPAIR_PATH = path.join(os.homedir(), '.config/solana/id.json');
+export const DEFAULT_KEYPAIR_PATH = path.join(
+  os.homedir(),
+  '.config/solana/id.json'
+);
 
 export interface TestContext {
   cluster: 'localnet' | 'devnet';
@@ -68,7 +71,7 @@ export async function setupTest(): Promise<TestContext> {
       program.programState.publicKey
     );
     if (!programState || programState.data === null) {
-      await sbv2.ProgramStateAccount.getOrCreate(program, {});
+      await sbv2.ProgramStateAccount.getOrCreate(program);
     }
   } catch (e) {
     console.error(e);
