@@ -16,6 +16,7 @@ import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../transaction';
+import BN from 'bn.js';
 
 /**
  * Account type holding an oracle's configuration including the authority and the reward/slashing wallet along with a set of metrics tracking its reliability.
@@ -112,6 +113,15 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   async fetchBalance(stakingWallet?: PublicKey): Promise<number> {
     const tokenAccount = stakingWallet ?? (await this.loadData()).tokenAccount;
     const amount = await this.program.mint.fetchBalance(tokenAccount);
+    if (amount === null) {
+      throw new Error(`Failed to fetch oracle staking wallet balance`);
+    }
+    return amount;
+  }
+
+  async fetchBalanceBN(stakingWallet?: PublicKey): Promise<BN> {
+    const tokenAccount = stakingWallet ?? (await this.loadData()).tokenAccount;
+    const amount = await this.program.mint.fetchBalanceBN(tokenAccount);
     if (amount === null) {
       throw new Error(`Failed to fetch oracle staking wallet balance`);
     }
