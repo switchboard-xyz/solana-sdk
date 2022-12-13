@@ -103,6 +103,12 @@ export class Mint {
     return this.fromTokenAmount(tokenAccount.amount);
   }
 
+  public async fetchBalanceBN(tokenAddress: PublicKey): Promise<BN | null> {
+    const tokenAccount = await this.getAccount(tokenAddress);
+    if (tokenAccount === null) return null;
+    return new BN(tokenAccount.amount.toString(10));
+  }
+
   public getAssociatedAddress(user: PublicKey): PublicKey {
     return Mint.getAssociatedAddress(user);
   }

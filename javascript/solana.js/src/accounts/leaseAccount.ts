@@ -17,7 +17,7 @@ import {
 import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
 import { TransactionObject } from '../transaction';
-import { BN } from 'bn.js';
+import BN from 'bn.js';
 import Big from 'big.js';
 import { JobAccount } from './jobAccount';
 import { OracleJob } from '@switchboard-xyz/common';
@@ -116,30 +116,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     if (data === null)
       throw new errors.AccountNotFoundError('Lease', this.publicKey);
     return data;
-  }
-
-  static getWallets(
-    jobAuthorities: Array<PublicKey>,
-    mint: PublicKey
-  ): Array<{ publicKey: PublicKey; bump: number }> {
-    const wallets: Array<{ publicKey: PublicKey; bump: number }> = [];
-
-    for (const jobAuthority of jobAuthorities) {
-      if (!jobAuthority || PublicKey.default.equals(jobAuthority)) {
-        continue;
-      }
-      const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
-        [
-          jobAuthority.toBuffer(),
-          spl.TOKEN_PROGRAM_ID.toBuffer(),
-          mint.toBuffer(),
-        ],
-        spl.ASSOCIATED_TOKEN_PROGRAM_ID
-      );
-      wallets.push({ publicKey: jobWallet, bump });
-    }
-
-    return wallets;
   }
 
   static async createInstructions(
@@ -308,6 +284,16 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return escrowBalance;
   }
 
+  public async fetchBalanceBN(escrow?: PublicKey): Promise<BN> {
+    const escrowPubkey =
+      escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
+    const escrowBalance = await this.program.mint.fetchBalanceBN(escrowPubkey);
+    if (escrowBalance === null) {
+      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
+    }
+    return escrowBalance;
+  }
+
   public async extendInstruction(
     payer: PublicKey,
     params: {
@@ -385,42 +371,40 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   public async withdrawInstruction(
     payer: PublicKey,
     params: {
-      amount: number;
+      amount: number | 'all';
       unwrap?: boolean;
       withdrawWallet: PublicKey;
       withdrawAuthority?: Keypair;
     }
   ): Promise<TransactionObject> {
     const txns: TransactionObject[] = [];
-    const loadAmountLamports = this.program.mint.toTokenAmount(params.amount);
 
     const withdrawAuthority = params.withdrawAuthority
       ? params.withdrawAuthority.publicKey
       : payer;
     const withdrawWallet = params.withdrawWallet;
 
-    // // create token wallet if it doesnt exist
+    const { lease, queue, aggregatorAccount, aggregator } =
+      await this.fetchAccounts();
 
-    const lease = await this.loadData();
-    const accountInfos = await this.program.connection.getMultipleAccountsInfo([
-      lease.aggregator,
-      lease.queue,
-    ]);
-
-    // decode aggregator
-    const aggregatorAccount = new AggregatorAccount(
-      this.program,
-      lease.aggregator
+    // calculate expected final balance
+    const leaseBalance = await this.fetchBalanceBN(lease.escrow);
+    const minRequiredBalance = queue.reward.mul(
+      new BN(aggregator.oracleRequestBatchSize + 1)
     );
-    const aggregatorAccountInfo = accountInfos.shift();
-    if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
-    }
+    const maxWithdrawAmount = leaseBalance.sub(minRequiredBalance);
 
-    // decode queue
-    const queueAccountInfo = accountInfos.shift();
-    if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError('Queue', lease.queue);
+    let withdrawAmountBN: BN;
+    if (params.amount === 'all') {
+      withdrawAmountBN = maxWithdrawAmount;
+    } else {
+      const requestedWithdrawAmount = this.program.mint.toTokenAmountBN(
+        params.amount
+      );
+      const expectedFinalBalance = leaseBalance.sub(requestedWithdrawAmount);
+      withdrawAmountBN = expectedFinalBalance.gt(minRequiredBalance)
+        ? requestedWithdrawAmount
+        : maxWithdrawAmount;
     }
 
     const leaseBump = LeaseAccount.fromSeed(
@@ -439,7 +423,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
               params: {
                 stateBump: this.program.programState.bump,
                 leaseBump: leaseBump,
-                amount: new BN(loadAmountLamports.toString()),
+                amount: withdrawAmountBN,
               },
             },
             {
@@ -460,10 +444,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
 
     if (params.unwrap) {
+      const unwrapAmount =
+        this.program.mint.fromTokenAmountBN(withdrawAmountBN);
       txns.push(
         await this.program.mint.unwrapInstructions(
           payer,
-          params.amount,
+          unwrapAmount,
           params.withdrawAuthority
         )
       );
@@ -478,7 +464,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   }
 
   public async withdraw(params: {
-    amount: number;
+    amount: number | 'all';
     unwrap?: boolean;
     withdrawWallet: PublicKey;
     withdrawAuthority?: Keypair;
@@ -549,6 +535,30 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     endDate.setTime(endDate.getTime() + (balance * oneDay) / costPerDay);
     const timeLeft = endDate.getTime() - new Date().getTime();
     return timeLeft;
+  }
+
+  static getWallets(
+    jobAuthorities: Array<PublicKey>,
+    mint: PublicKey
+  ): Array<{ publicKey: PublicKey; bump: number }> {
+    const wallets: Array<{ publicKey: PublicKey; bump: number }> = [];
+
+    for (const jobAuthority of jobAuthorities) {
+      if (!jobAuthority || PublicKey.default.equals(jobAuthority)) {
+        continue;
+      }
+      const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
+        [
+          jobAuthority.toBuffer(),
+          spl.TOKEN_PROGRAM_ID.toBuffer(),
+          mint.toBuffer(),
+        ],
+        spl.ASSOCIATED_TOKEN_PROGRAM_ID
+      );
+      wallets.push({ publicKey: jobWallet, bump });
+    }
+
+    return wallets;
   }
 
   async fetchAccounts(_lease?: types.LeaseAccountData): Promise<{
