@@ -11,7 +11,6 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { AggregatorAccount } from './aggregatorAccount';
@@ -384,11 +383,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       : payer;
     const withdrawWallet = params.withdrawWallet;
 
-    const { lease, queue, aggregatorAccount, aggregator } =
+    const { lease, queue, aggregatorAccount, aggregator, balance } =
       await this.fetchAccounts();
 
     // calculate expected final balance
-    const leaseBalance = await this.fetchBalanceBN(lease.escrow);
+    const leaseBalance = this.program.mint.toTokenAmountBN(balance);
     const minRequiredBalance = queue.reward.mul(
       new BN(aggregator.oracleRequestBatchSize + 1)
     );
@@ -562,11 +561,13 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   }
 
   async fetchAccounts(_lease?: types.LeaseAccountData): Promise<{
+    lease: types.LeaseAccountData;
     queueAccount: QueueAccount;
     queue: types.OracleQueueAccountData;
     aggregatorAccount: AggregatorAccount;
     aggregator: types.AggregatorAccountData;
-    lease: types.LeaseAccountData;
+    escrow: spl.Account;
+    balance: number;
   }> {
     const lease = _lease ?? (await this.loadData());
 
@@ -580,6 +581,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const accountInfos = await this.program.connection.getMultipleAccountsInfo([
       lease.aggregator,
       lease.queue,
+      lease.escrow,
     ]);
 
     // decode aggregator
@@ -598,21 +600,32 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     }
     const queue = types.OracleQueueAccountData.decode(queueAccountInfo.data);
 
+    const leaseAccountInfo = accountInfos.shift();
+    if (!leaseAccountInfo) {
+      throw new errors.AccountNotFoundError('LeaseEscrow', lease.escrow);
+    }
+    const escrow = spl.unpackAccount(lease.escrow, leaseAccountInfo);
+    const balance = this.program.mint.fromTokenAmount(escrow.amount);
+
     return {
       lease,
       queueAccount,
       queue,
       aggregatorAccount,
       aggregator,
+      escrow,
+      balance,
     };
   }
 
   async fetchAllAccounts(_lease?: types.LeaseAccountData): Promise<{
+    lease: types.LeaseAccountData;
     queueAccount: QueueAccount;
     queue: types.OracleQueueAccountData;
     aggregatorAccount: AggregatorAccount;
     aggregator: types.AggregatorAccountData;
-    lease: types.LeaseAccountData;
+    escrow: spl.Account;
+    balance: number;
     jobs: Array<{
       account: JobAccount;
       state: types.JobAccountData;
@@ -620,8 +633,15 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     }>;
     wallets: Array<{ publicKey: PublicKey; bump: number }>;
   }> {
-    const { lease, queueAccount, queue, aggregatorAccount, aggregator } =
-      await this.fetchAccounts();
+    const {
+      lease,
+      queueAccount,
+      queue,
+      aggregatorAccount,
+      aggregator,
+      escrow,
+      balance,
+    } = await this.fetchAccounts();
 
     // load aggregator jobs for lease bumps
     const jobs = await aggregatorAccount.loadJobs(aggregator);
@@ -637,6 +657,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       queue,
       aggregatorAccount,
       aggregator,
+      escrow,
+      balance,
       jobs,
       wallets,
     };
