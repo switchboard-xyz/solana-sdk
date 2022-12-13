@@ -516,23 +516,39 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
   }
 
+  public static estimatedLeaseTimeRemaining(
+    oracleRequestBatchSize: number,
+    minUpdateDelaySeconds: number,
+    queueReward: BN,
+    leaseBalance: number
+  ): number {
+    const msPerDay = 24 * 60 * 60 * 1000; // ms in a day
+    const updatesPerDay = (60 * 60 * 24) / (minUpdateDelaySeconds * 1.5); // account for jitter
+    const costPerDay =
+      (oracleRequestBatchSize + 1) * queueReward.toNumber() * updatesPerDay;
+
+    const endDate = new Date();
+    endDate.setTime((Date.now() + leaseBalance * msPerDay) / costPerDay);
+
+    return endDate.getTime() - Date.now();
+  }
+
   /**
    * Estimate the time remaining on a given lease
    * @params void
    * @returns number milliseconds left in lease (estimate)
    */
   public async estimatedLeaseTimeRemaining(): Promise<number> {
-    const { queue, aggregator } = await this.fetchAccounts();
+    const { queue, aggregator, balance } = await this.fetchAccounts();
 
     const batchSize = aggregator.oracleRequestBatchSize + 1;
     const minUpdateDelaySeconds = aggregator.minUpdateDelaySeconds * 1.5; // account for jitters with * 1.5
     const updatesPerDay = (60 * 60 * 24) / minUpdateDelaySeconds;
     const costPerDay = batchSize * queue.reward.toNumber() * updatesPerDay;
-    const oneDay = 24 * 60 * 60 * 1000; // ms in a day
-    const balance = await this.fetchBalance();
+    const msPerDay = 24 * 60 * 60 * 1000;
     const endDate = new Date();
-    endDate.setTime(endDate.getTime() + (balance * oneDay) / costPerDay);
-    const timeLeft = endDate.getTime() - new Date().getTime();
+    endDate.setTime(endDate.getTime() + (balance * msPerDay) / costPerDay);
+    const timeLeft = endDate.getTime() - Date.now();
     return timeLeft;
   }
 
