@@ -393,18 +393,15 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
     const maxWithdrawAmount = leaseBalance.sub(minRequiredBalance);
 
-    let withdrawAmountBN: BN;
-    if (params.amount === 'all') {
-      withdrawAmountBN = maxWithdrawAmount;
-    } else {
+    const withdrawAmount: BN = (() => {
+      if (params.amount === 'all') return maxWithdrawAmount;
       const requestedWithdrawAmount = this.program.mint.toTokenAmountBN(
         params.amount
       );
-      const expectedFinalBalance = leaseBalance.sub(requestedWithdrawAmount);
-      withdrawAmountBN = expectedFinalBalance.gt(minRequiredBalance)
+      return requestedWithdrawAmount.gte(maxWithdrawAmount)
         ? requestedWithdrawAmount
         : maxWithdrawAmount;
-    }
+    })();
 
     const leaseBump = LeaseAccount.fromSeed(
       this.program,
@@ -422,7 +419,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
               params: {
                 stateBump: this.program.programState.bump,
                 leaseBump: leaseBump,
-                amount: withdrawAmountBN,
+                amount: withdrawAmount,
               },
             },
             {
@@ -443,8 +440,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
 
     if (params.unwrap) {
-      const unwrapAmount =
-        this.program.mint.fromTokenAmountBN(withdrawAmountBN);
+      const unwrapAmount = this.program.mint.fromTokenAmountBN(withdrawAmount);
       txns.push(
         await this.program.mint.unwrapInstructions(
           payer,
@@ -516,26 +512,36 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
   }
 
+  /**
+   * Estimate the time remaining on a given lease
+   * @param oracleRequestBatchSize - the number of oracles to request per openRound call, for a given aggregator.
+   * @param minUpdateDelaySeconds - the number of seconds between openRound calls, for a given aggregator.
+   * @param queueReward - the number of tokens deducted from an aggregator's lease for each successful openRound call. This is dependent on the queue an aggregator belongs to.
+   * @param leaseBalance - the current balance in a lease in decimal format.
+   * @returns a tuple containing the number of milliseconds left in a lease and the estimated end date
+   */
   public static estimatedLeaseTimeRemaining(
     oracleRequestBatchSize: number,
     minUpdateDelaySeconds: number,
     queueReward: BN,
     leaseBalance: number
-  ): number {
+  ): [number, Date] {
+    const now = Date.now();
     const msPerDay = 24 * 60 * 60 * 1000; // ms in a day
     const updatesPerDay = (60 * 60 * 24) / (minUpdateDelaySeconds * 1.5); // account for jitter
     const costPerDay =
-      (oracleRequestBatchSize + 1) * queueReward.toNumber() * updatesPerDay;
+      (oracleRequestBatchSize + 1) * // add 1 to reward crank turner
+      queueReward.toNumber() *
+      updatesPerDay;
 
     const endDate = new Date();
-    endDate.setTime((Date.now() + leaseBalance * msPerDay) / costPerDay);
+    endDate.setTime((now + leaseBalance * msPerDay) / costPerDay);
 
-    return endDate.getTime() - Date.now();
+    return [endDate.getTime() - now, endDate];
   }
 
   /**
    * Estimate the time remaining on a given lease
-   * @params void
    * @returns number milliseconds left in lease (estimate)
    */
   public async estimatedLeaseTimeRemaining(): Promise<number> {
@@ -657,7 +663,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       aggregator,
       escrow,
       balance,
-    } = await this.fetchAccounts();
+    } = await this.fetchAccounts(_lease);
 
     // load aggregator jobs for lease bumps
     const jobs = await aggregatorAccount.loadJobs(aggregator);
