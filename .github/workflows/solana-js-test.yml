@@ -45,3 +45,4 @@ jobs:
           solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json --silent
           mkdir -p .anchor/test-ledger
           npm run localnet:up
+          npm run localnet:down
