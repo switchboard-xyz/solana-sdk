@@ -398,7 +398,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       const requestedWithdrawAmount = this.program.mint.toTokenAmountBN(
         params.amount
       );
-      return requestedWithdrawAmount.gte(maxWithdrawAmount)
+      return requestedWithdrawAmount.lte(maxWithdrawAmount)
         ? requestedWithdrawAmount
         : maxWithdrawAmount;
     })();
