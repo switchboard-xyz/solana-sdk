@@ -281,6 +281,30 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     };
   }
 
+  public async toAccountsJSON(
+    _bufferRelayer?: types.BufferRelayerAccountData,
+    _queueAccount?: QueueAccount,
+    _queue?: types.OracleQueueAccountData
+  ): Promise<BufferRelayerAccountsJSON> {
+    const { bufferRelayer, queue, permission, escrow } =
+      await this.fetchAccounts(_bufferRelayer, _queueAccount, _queue);
+
+    return {
+      publicKey: this.publicKey,
+      balance: this.program.mint.fromTokenAmount(escrow.data.amount),
+      ...bufferRelayer.data.toJSON(),
+      queue: {
+        publicKey: queue.publicKey,
+        ...queue.data.toJSON(),
+      },
+      permission: {
+        publicKey: permission.publicKey,
+        bump: permission.bump,
+        ...permission.data.toJSON(),
+      },
+    };
+  }
+
   public async fetchAccounts(
     _bufferRelayer?: types.BufferRelayerAccountData,
     _queueAccount?: QueueAccount,
@@ -359,5 +383,15 @@ export type BufferRelayerAccounts = {
     publicKey: PublicKey;
     data: spl.Account;
     balance: number;
+  };
+};
+
+export type BufferRelayerAccountsJSON = types.BufferRelayerAccountDataJSON & {
+  publicKey: PublicKey;
+  balance: number;
+  queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
+  permission: types.PermissionAccountDataJSON & {
+    bump: number;
+    publicKey: PublicKey;
   };
 };
