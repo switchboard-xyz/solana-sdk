@@ -1,6 +1,5 @@
 import * as anchor from '@project-serum/anchor';
 import * as errors from './errors';
-import * as sbv2 from './accounts';
 import {
   AccountInfo,
   Cluster,
@@ -11,8 +10,8 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { NativeMint } from './mint';
-import { TransactionObject } from './TransactionObject';
 import { SwitchboardEvents } from './SwitchboardEvents';
+import { TransactionObject } from './TransactionObject';
 import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
 import { fromCode as fromAnchorCode } from './generated/errors/anchor';
 import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
@@ -30,10 +29,14 @@ import {
   VrfAccountData,
 } from './generated';
 import {
+  BUFFER_DISCRIMINATOR,
   CrankAccount,
   DISCRIMINATOR_MAP,
   JobAccount,
+  ProgramStateAccount,
   QueueAccount,
+  SwitchboardAccountData,
+  SwitchboardAccountType,
 } from './accounts';
 import {
   SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
@@ -134,7 +137,7 @@ export class SwitchboardProgram {
     this._program = program;
     this.cluster = cluster;
 
-    const stateAccount = sbv2.ProgramStateAccount.fromSeed(this);
+    const stateAccount = ProgramStateAccount.fromSeed(this);
     this.programState = {
       publicKey: stateAccount[0].publicKey,
       bump: stateAccount[1],
@@ -444,7 +447,7 @@ export class SwitchboardProgram {
       signature: string
     ) => void
   ): number {
-    return this._program.addEventListener(eventName, callback);
+    return this._program.addEventListener(eventName as string, callback);
   }
 
   public async removeEventListener(listenerId: number) {
@@ -614,7 +617,7 @@ export class SwitchboardProgram {
       return map;
     }, new Map<string, Array<AccountInfoResponse>>());
 
-    function decodeAccounts<T extends sbv2.SwitchboardAccountData>(
+    function decodeAccounts<T extends SwitchboardAccountData>(
       accounts: Array<AccountInfoResponse>,
       decode: (data: Buffer) => T
     ): Map<string, T> {
@@ -638,7 +641,7 @@ export class SwitchboardProgram {
 
     // TODO: Use aggregator.historyBuffer, crank.dataBuffer, queue.dataBuffer to filter these down and decode
     const buffers: Map<string, Buffer> = (
-      discriminatorMap.get(sbv2.BUFFER_DISCRIMINATOR.toString('utf-8')) ?? []
+      discriminatorMap.get(BUFFER_DISCRIMINATOR.toString('utf-8')) ?? []
     ).reduce((map, buffer) => {
       map.set(buffer.pubkey.toBase58(), buffer.account.data);
       return map;
@@ -726,7 +729,7 @@ export class SwitchboardProgram {
 
   static getAccountType(
     accountInfo: AccountInfo<Buffer>
-  ): sbv2.SwitchboardAccountType | null {
+  ): SwitchboardAccountType | null {
     const discriminator = accountInfo.data
       .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
       .toString('utf-8');
