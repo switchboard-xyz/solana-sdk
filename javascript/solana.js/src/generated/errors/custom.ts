@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from '../../program';
+import { SwitchboardProgram } from '../../SwitchboardProgram';
 export type CustomError =
   | ArrayOperationError
   | QueueOperationError

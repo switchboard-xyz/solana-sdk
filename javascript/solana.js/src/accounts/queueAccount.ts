@@ -18,16 +18,16 @@ import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
 } from '../generated/types/SwitchboardPermission';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { SolanaClock } from '../SolanaClock';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
 import { CrankAccount, CrankInitParams } from './crankAccount';
 import { JobAccount, JobInitParams } from './jobAccount';
-import { LeaseAccount } from './leaseAccount';
+import { LeaseAccount, LeaseInitParams } from './leaseAccount';
 import {
   OracleAccount,
   OracleInitParams,
@@ -83,12 +83,18 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [account, state];
   }
 
+  /**
+   * Return a oracle queue account state initialized to the default values.
+   */
   public static default(): types.OracleQueueAccountData {
     const buffer = Buffer.alloc(1269, 0);
     types.OracleQueueAccountData.discriminator.copy(buffer, 0);
     return types.OracleQueueAccountData.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given oracle queue config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.OracleQueueAccountData>,
@@ -336,11 +342,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: OracleInitParams &
-      OracleStakeParams &
-      Partial<PermissionSetParams> & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueOracleParams
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
@@ -400,11 +402,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: OracleInitParams &
-      OracleStakeParams &
-      Partial<PermissionSetParams> & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueOracleParams
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -473,32 +471,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createFeedInstructions(
     payer: PublicKey,
-    params: Omit<
-      Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
-      'authority'
-    > & {
-      authority?: Keypair;
-      crankPubkey?: PublicKey;
-      historyLimit?: number;
-    } & {
-      // lease params
-      fundAmount?: number;
-      funderAuthority?: Keypair;
-      funderTokenAccount?: PublicKey;
-    } & Partial<PermissionSetParams> & {
-        // job params
-        jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
-      } & {
-        queueAuthorityPubkey?: PublicKey;
-      }
-  ): Promise<[AggregatorAccount, TransactionObject[]]> {
+    params: CreateQueueFeedParams
+  ): Promise<[AggregatorAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
       : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
-    const pre: TransactionObject[] = [];
-    const txns: TransactionObject[] = [];
-    const post: TransactionObject[] = [];
+    const pre: Array<TransactionObject> = [];
+    const txns: Array<TransactionObject> = [];
+    const post: Array<TransactionObject> = [];
 
     // getOrCreate token account for
     const userTokenAddress = this.program.mint.getAssociatedAddress(payer);
@@ -506,7 +487,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       userTokenAddress
     );
 
-    if (userTokenAccountInfo === null) {
+    if (userTokenAccountInfo === null && params.disableWrap !== true) {
       const [createTokenAccount] =
         this.program.mint.createAssocatedUserInstruction(payer);
       pre.push(createTokenAccount);
@@ -552,17 +533,20 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(aggregatorInit);
 
-    const leaseInit = (
-      await LeaseAccount.createInstructions(this.program, payer, {
-        loadAmount: params.fundAmount,
-        funderTokenAccount: params.funderTokenAccount ?? userTokenAddress,
+    const [leaseAccount, leaseInit] = await LeaseAccount.createInstructions(
+      this.program,
+      payer,
+      {
+        fundAmount: params.fundAmount,
+        funderTokenWallet: params.funderTokenWallet ?? userTokenAddress,
         funderAuthority: params.funderAuthority ?? undefined,
         aggregatorAccount: aggregatorAccount,
         queueAccount: this,
         jobAuthorities: [], // create lease before adding jobs to skip this step
         jobPubkeys: [],
-      })
-    )[1];
+        disableWrap: params.disableWrap,
+      }
+    );
     txns.push(leaseInit);
 
     // create permission account
@@ -573,7 +557,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         grantee: aggregatorAccount.publicKey,
       });
 
-    // // set permissions if needed
+    // set permissions
     if (
       params.enable &&
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
@@ -598,11 +582,52 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     if (params.crankPubkey) {
-      const crankAccount = new CrankAccount(this.program, params.crankPubkey);
+      const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+        this.program,
+        queueAuthorityPubkey,
+        this.publicKey,
+        aggregatorAccount.publicKey
+      );
+
+      const leaseEscrow = this.program.mint.getAssociatedAddress(
+        leaseAccount.publicKey
+      );
+
       post.push(
-        await crankAccount.pushInstruction(this.program.walletPubkey, {
-          aggregatorAccount: aggregatorAccount,
-        })
+        new TransactionObject(
+          payer,
+          [
+            types.crankPush(
+              this.program,
+              {
+                params: {
+                  stateBump: this.program.programState.bump,
+                  permissionBump: permissionBump,
+                  notifiRef: null,
+                },
+              },
+              {
+                crank: params.crankPubkey,
+                aggregator: aggregatorAccount.publicKey,
+                oracleQueue: this.publicKey,
+                queueAuthority: queueAuthorityPubkey,
+                permission: permissionAccount.publicKey,
+                lease: leaseAccount.publicKey,
+                escrow: leaseEscrow,
+                programState: this.program.programState.publicKey,
+                dataBuffer:
+                  params.crankDataBuffer ??
+                  (
+                    await new CrankAccount(
+                      this.program,
+                      params.crankPubkey
+                    ).loadData()
+                  ).dataBuffer,
+              }
+            ),
+          ],
+          []
+        )
       );
     }
 
@@ -617,9 +642,9 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     const packed = TransactionObject.pack([
-      ...TransactionObject.pack(pre),
-      ...TransactionObject.pack(txns),
-      ...TransactionObject.pack(post),
+      ...(pre.length ? TransactionObject.pack(pre) : []),
+      ...(txns.length ? TransactionObject.pack(txns) : []),
+      ...(post.length ? TransactionObject.pack(post) : []),
     ]);
 
     return [aggregatorAccount, packed];
@@ -665,24 +690,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createFeed(
-    params: Omit<
-      Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
-      'authority'
-    > & {
-      authority?: Keypair;
-      crankPubkey?: PublicKey;
-      historyLimit?: number;
-    } & {
-      // lease params
-      fundAmount?: number;
-      funderAuthority?: Keypair;
-      funderTokenAccount?: PublicKey;
-    } & Partial<PermissionSetParams> & {
-        // job params
-        jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
-      } & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueFeedParams
   ): Promise<[AggregatorAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -732,7 +740,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createCrankInstructions(
     payer: PublicKey,
-    params: Omit<CrankInitParams, 'queueAccount'>
+    params: CreateQueueCrankParams
   ): Promise<[CrankAccount, TransactionObject]> {
     return await CrankAccount.createInstructions(this.program, payer, {
       ...params,
@@ -761,7 +769,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createCrank(
-    params: Omit<CrankInitParams, 'queueAccount'>
+    params: CreateQueueCrankParams
   ): Promise<[CrankAccount, TransactionSignature]> {
     const [crankAccount, txn] = await this.createCrankInstructions(
       this.program.walletPubkey,
@@ -800,10 +808,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createVrfInstructions(
     payer: PublicKey,
-    params: Omit<VrfInitParams, 'queueAccount'> &
-      Partial<PermissionSetParams> & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueVrfParams
   ): Promise<[VrfAccount, TransactionObject]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
@@ -868,10 +873,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createVrf(
-    params: Omit<VrfInitParams, 'queueAccount'> &
-      Partial<PermissionSetParams> & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueVrfParams
   ): Promise<[VrfAccount, TransactionSignature]> {
     const [vrfAccount, txn] = await this.createVrfInstructions(
       this.program.walletPubkey,
@@ -906,19 +908,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createBufferRelayerInstructions(
     payer: PublicKey,
-    params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
-      Partial<PermissionSetParams> & {
-        // job params
-        job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
-      } & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueBufferRelayerParams
   ): Promise<[BufferRelayerAccount, TransactionObject]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
       : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
-    const txns: TransactionObject[] = [];
+    const txns: Array<TransactionObject> = [];
 
     let job: JobAccount;
     if ('data' in params.job) {
@@ -1013,13 +1009,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createBufferRelayer(
-    params: Omit<Omit<BufferRelayerInit, 'jobAccount'>, 'queueAccount'> &
-      Partial<PermissionSetParams> & {
-        // job params
-        job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
-      } & {
-        queueAuthorityPubkey?: PublicKey;
-      }
+    params: CreateQueueBufferRelayerParams
   ): Promise<[BufferRelayerAccount, TransactionSignature]> {
     const [bufferRelayerAccount, txn] =
       await this.createBufferRelayerInstructions(
@@ -1374,3 +1364,43 @@ export type QueueAccounts = {
     data: types.OracleAccountData;
   }>;
 };
+
+export type CreateQueueOracleParams = OracleInitParams &
+  Partial<OracleStakeParams> &
+  Partial<PermissionSetParams> & {
+    queueAuthorityPubkey?: PublicKey;
+  };
+
+export type CreateQueueCrankParams = Omit<CrankInitParams, 'queueAccount'>;
+
+export type CreateQueueFeedParams = Omit<
+  Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
+  'authority'
+> & {
+  authority?: Keypair;
+  crankPubkey?: PublicKey;
+  crankDataBuffer?: PublicKey;
+  historyLimit?: number;
+} & Partial<LeaseInitParams> &
+  Partial<PermissionSetParams> & {
+    // job params
+    jobs?: Array<{ pubkey: PublicKey; weight?: number } | JobInitParams>;
+  } & {
+    queueAuthorityPubkey?: PublicKey;
+  };
+
+export type CreateQueueVrfParams = Omit<VrfInitParams, 'queueAccount'> &
+  Partial<PermissionSetParams> & {
+    queueAuthorityPubkey?: PublicKey;
+  };
+
+export type CreateQueueBufferRelayerParams = Omit<
+  Omit<BufferRelayerInit, 'jobAccount'>,
+  'queueAccount'
+> &
+  Partial<PermissionSetParams> & {
+    // job params
+    job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
+  } & {
+    queueAuthorityPubkey?: PublicKey;
+  };

@@ -11,8 +11,8 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { NativeMint } from './mint';
-import { TransactionObject } from './transaction';
-import { SwitchboardEvents } from './switchboardEvents';
+import { TransactionObject } from './TransactionObject';
+import { SwitchboardEvents } from './SwitchboardEvents';
 import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
 import { fromCode as fromAnchorCode } from './generated/errors/anchor';
 import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
@@ -31,16 +31,9 @@ import {
 } from './generated';
 import {
   CrankAccount,
-  CrankInitParams,
   DISCRIMINATOR_MAP,
-  OracleAccount,
-  OracleInitParams,
-  OracleStakeParams,
-  PermissionAccount,
-  PermissionSetParams,
-  ProgramStateAccount,
+  JobAccount,
   QueueAccount,
-  QueueInitParams,
 } from './accounts';
 import {
   SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
@@ -52,6 +45,8 @@ import {
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
 } from './const';
+import { OracleJob } from '@switchboard-xyz/common';
+import { LoadedJobDefinition } from './types';
 
 /**
  * Switchboard Devnet Program ID
@@ -534,6 +529,46 @@ export class SwitchboardProgram {
     }
   }
 
+  async getProgramJobAccounts(): Promise<Map<Uint8Array, LoadedJobDefinition>> {
+    const accountInfos = await this.connection
+      .getProgramAccounts(this.programId, {
+        filters: [
+          {
+            memcmp: {
+              offset: 0,
+              bytes: anchor.utils.bytes.bs58.encode(
+                JobAccountData.discriminator
+              ),
+            },
+          },
+        ],
+      })
+      .then((values: Array<AccountInfoResponse | undefined>) => {
+        return values.filter(Boolean) as Array<AccountInfoResponse>;
+      });
+
+    const jobs: Array<LoadedJobDefinition> = accountInfos
+      .map((job): LoadedJobDefinition | undefined => {
+        const jobAccount = new JobAccount(this, job.pubkey);
+        const state = JobAccountData.decode(job.account.data);
+        let oracleJob: OracleJob;
+        try {
+          oracleJob = OracleJob.decodeDelimited(state.data);
+        } catch {
+          return undefined;
+        }
+
+        return {
+          account: jobAccount,
+          state: state,
+          job: oracleJob,
+        };
+      })
+      .filter(Boolean) as Array<LoadedJobDefinition>;
+
+    return new Map(jobs.map(job => [job.state.data, job]));
+  }
+
   async getProgramAccounts(): Promise<{
     aggregators: Map<string, AggregatorAccountData>;
     buffers: Map<string, Buffer>;
@@ -579,7 +614,7 @@ export class SwitchboardProgram {
       return map;
     }, new Map<string, Array<AccountInfoResponse>>());
 
-    function decodeAccounts<T extends sbv2.SwitchboardAccount>(
+    function decodeAccounts<T extends sbv2.SwitchboardAccountData>(
       accounts: Array<AccountInfoResponse>,
       decode: (data: Buffer) => T
     ): Map<string, T> {
@@ -702,120 +737,6 @@ export class SwitchboardProgram {
 
     return null;
   }
-
-  async createNetworkInstructions(
-    payer: PublicKey,
-    params: QueueInitParams & {
-      cranks?: Array<Omit<CrankInitParams, 'queueAccount'>>;
-      oracles?: Array<
-        OracleInitParams &
-          OracleStakeParams &
-          Partial<PermissionSetParams> & {
-            queueAuthorityPubkey?: PublicKey;
-          }
-      >;
-    }
-  ): Promise<[Array<TransactionObject>, NetworkInitResponse]> {
-    const txns: TransactionObject[] = [];
-
-    // get or create the program state
-    const [programState, stateBump, programInit] =
-      await ProgramStateAccount.getOrCreateInstructions(
-        this,
-        this.walletPubkey
-      );
-    if (programInit) {
-      txns.push(programInit);
-    }
-
-    // create a new queue
-    const [queueAccount, queueInit] = await QueueAccount.createInstructions(
-      this,
-      this.walletPubkey,
-      params
-    );
-    txns.push(queueInit);
-
-    const cranks: Array<[CrankAccount, TransactionObject]> = await Promise.all(
-      (params.cranks ?? []).map(async crankInitParams => {
-        return await queueAccount.createCrankInstructions(
-          payer,
-          crankInitParams
-        );
-      })
-    );
-    txns.push(...cranks.map(crank => crank[1]));
-
-    const oracles: Array<
-      [TransactionObject[], OracleAccount, PermissionAccount, number]
-    > = await Promise.all(
-      (params.oracles ?? []).map(async oracleInitParams => {
-        const [oracleAccount, oracleInit] =
-          await queueAccount.createOracleInstructions(payer, {
-            ...oracleInitParams,
-            queueAuthorityPubkey:
-              oracleInitParams.queueAuthorityPubkey ?? payer,
-            enable: true,
-          });
-
-        const [oraclePermissionAccount, oraclePermissionBump] =
-          PermissionAccount.fromSeed(
-            this,
-            this.walletPubkey,
-            queueAccount.publicKey,
-            oracleAccount.publicKey
-          );
-
-        return [
-          oracleInit,
-          oracleAccount,
-          oraclePermissionAccount,
-          oraclePermissionBump,
-        ];
-      })
-    );
-    txns.push(...oracles.map(oracle => oracle[0]).flat());
-
-    const accounts: NetworkInitResponse = {
-      programState: {
-        account: programState,
-        bump: stateBump,
-      },
-      queueAccount,
-      cranks: cranks.map(c => c[0]),
-      oracles: oracles.map(o => {
-        return {
-          account: o[1],
-          permissions: {
-            account: o[2],
-            bump: o[3],
-          },
-        };
-      }),
-    };
-
-    return [TransactionObject.pack(txns), accounts];
-  }
-
-  async createNetwork(
-    params: QueueInitParams & {
-      cranks?: Array<Omit<CrankInitParams, 'queueAccount'>>;
-      oracles?: Array<
-        OracleInitParams &
-          OracleStakeParams &
-          Partial<PermissionSetParams> & {
-            queueAuthorityPubkey?: PublicKey;
-          }
-      >;
-    }
-  ): Promise<[NetworkInitResponse, Array<TransactionSignature>]> {
-    const [networkInit, accounts] = await this.createNetworkInstructions(
-      this.walletPubkey,
-      params
-    );
-    const txnSignatures = await this.signAndSendAll(networkInit);
-    return [accounts, txnSignatures];
-  }
 }
 
 export class AnchorWallet implements anchor.Wallet {
@@ -840,20 +761,4 @@ export class AnchorWallet implements anchor.Wallet {
 interface AccountInfoResponse {
   pubkey: anchor.web3.PublicKey;
   account: anchor.web3.AccountInfo<Buffer>;
-}
-
-export interface NetworkInitResponse {
-  programState: {
-    account: ProgramStateAccount;
-    bump: number;
-  };
-  queueAccount: QueueAccount;
-  cranks: Array<CrankAccount>;
-  oracles: Array<{
-    account: OracleAccount;
-    permissions: {
-      account: PermissionAccount;
-      bump: number;
-    };
-  }>;
 }

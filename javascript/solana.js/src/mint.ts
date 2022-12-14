@@ -11,7 +11,7 @@ import { InsufficientFundsError, NativeMintOnlyError } from './errors';
 import { SwitchboardDecimal } from './generated';
 import Big from 'big.js';
 import BN from 'bn.js';
-import { TransactionObject } from './transaction';
+import { TransactionObject } from './TransactionObject';
 
 export class Mint {
   public static native = new PublicKey(
@@ -289,7 +289,7 @@ export class NativeMint extends Mint {
         }
         const userWrap = await this.wrapInstructions(
           payer,
-          { fundUpTo: new Big(params.fundUpTo ?? 0) },
+          { fundUpTo: params.fundUpTo ?? 0 },
           user
         );
         return [associatedToken, userWrap];
@@ -394,7 +394,7 @@ export class NativeMint extends Mint {
       | {
           amount: number;
         }
-      | { fundUpTo: Big },
+      | { fundUpTo: number },
     user?: Keypair
   ): Promise<TransactionObject> {
     const ixns: TransactionInstruction[] = [];
@@ -415,7 +415,7 @@ export class NativeMint extends Mint {
       if (userTokenBalance.gte(params.fundUpTo)) {
         return new TransactionObject(payer, [], []);
       }
-      wrapAmount = params.fundUpTo.sub(userTokenBalance);
+      wrapAmount = new Big(params.fundUpTo).sub(userTokenBalance);
     } else if ('amount' in params) {
       wrapAmount = new Big(params.amount);
     } else {
@@ -474,7 +474,7 @@ export class NativeMint extends Mint {
       | {
           amount: number;
         }
-      | { fundUpTo: Big },
+      | { fundUpTo: number },
     user?: Keypair
   ) {
     const wrapIxns = await this.wrapInstructions(payer, params, user);

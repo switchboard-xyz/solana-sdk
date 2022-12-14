@@ -10,8 +10,8 @@ import {
 } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
-import { TransactionObject } from '../transaction';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount } from './aggregatorAccount';
 import { CrankDataBuffer } from './crankDataBuffer';
@@ -35,6 +35,9 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   public size = this.program.account.crankAccountData.size;
 
+  /**
+   * Return a crank account initialized to the default values.
+   */
   public static default(): types.CrankAccountData {
     const buffer = Buffer.alloc(432, 0);
     types.CrankAccountData.discriminator.copy(buffer, 0);

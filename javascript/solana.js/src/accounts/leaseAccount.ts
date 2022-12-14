@@ -1,7 +1,7 @@
 import * as anchor from '@project-serum/anchor';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
 import {
@@ -15,9 +15,8 @@ import {
 } from '@solana/web3.js';
 import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 import BN from 'bn.js';
-import Big from 'big.js';
 import { JobAccount } from './jobAccount';
 import { OracleJob } from '@switchboard-xyz/common';
 
@@ -36,12 +35,18 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
    */
   public size = this.program.account.leaseAccountData.size;
 
+  /**
+   * Return a lease account state initialized to the default values.
+   */
   public static default(): types.LeaseAccountData {
     const buffer = Buffer.alloc(LeaseAccount.size, 0);
     types.LeaseAccountData.discriminator.copy(buffer, 0);
     return types.LeaseAccountData.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given lease config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.LeaseAccountData>,
@@ -120,42 +125,44 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: {
-      aggregatorAccount: AggregatorAccount;
-      queueAccount: QueueAccount;
-      jobAuthorities?: Array<PublicKey>;
-      jobPubkeys?: Array<PublicKey>;
-      loadAmount?: number;
-      funderTokenAccount?: PublicKey;
-      funderAuthority?: Keypair;
-      withdrawAuthority?: PublicKey;
-    }
+    params: LeaseInitParams
   ): Promise<[LeaseAccount, TransactionObject]> {
     const txns: Array<TransactionObject> = [];
-    const loadAmount = params.loadAmount ?? 0;
+    const loadAmount = params.fundAmount ?? 0;
     const loadTokenAmountBN = program.mint.toTokenAmountBN(loadAmount);
 
-    let tokenTxn: TransactionObject | undefined;
-    let funderTokenAddress: PublicKey;
-    if (params.funderTokenAccount) {
-      funderTokenAddress = params.funderTokenAccount;
-      tokenTxn = await program.mint.wrapInstructions(
-        payer,
-        {
-          fundUpTo: new Big(params.loadAmount ?? 0),
-        },
-        params.funderAuthority
-      );
+    const owner = params.funderAuthority
+      ? params.funderAuthority.publicKey
+      : payer;
+
+    let funderTokenWallet: PublicKey;
+    if (params.disableWrap === true) {
+      funderTokenWallet =
+        params.funderTokenWallet ?? program.mint.getAssociatedAddress(owner);
     } else {
-      [funderTokenAddress, tokenTxn] =
-        await program.mint.getOrCreateWrappedUserInstructions(
+      let tokenTxn: TransactionObject | undefined;
+      // now we need to wrap some funds
+      if (params.funderTokenWallet) {
+        funderTokenWallet = params.funderTokenWallet;
+        tokenTxn = await program.mint.wrapInstructions(
           payer,
-          { fundUpTo: params.loadAmount ?? 0 },
+          {
+            fundUpTo: params.fundAmount ?? 0,
+          },
           params.funderAuthority
         );
-    }
-    if (tokenTxn) {
-      txns.push(tokenTxn);
+      } else {
+        [funderTokenWallet, tokenTxn] =
+          await program.mint.getOrCreateWrappedUserInstructions(
+            payer,
+            { fundUpTo: params.fundAmount ?? 0 },
+            params.funderAuthority
+          );
+      }
+
+      if (tokenTxn) {
+        txns.push(tokenTxn);
+      }
     }
 
     const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
@@ -164,14 +171,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       params.aggregatorAccount.publicKey
     );
 
-    const [escrow] = anchor.utils.publicKey.findProgramAddressSync(
-      [
-        leaseAccount.publicKey.toBuffer(),
-        spl.TOKEN_PROGRAM_ID.toBuffer(),
-        program.mint.address.toBuffer(),
-      ],
-      spl.ASSOCIATED_TOKEN_PROGRAM_ID
-    );
+    const escrow = program.mint.getAssociatedAddress(leaseAccount.publicKey);
 
     // load jobPubkeys and authorities ONLY if undefined
     // we need to allow empty arrays for initial job creation or else loading aggregator will fail
@@ -223,10 +223,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         payer: payer,
         systemProgram: SystemProgram.programId,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
-        funder: funderTokenAddress,
-        owner: params.funderAuthority
-          ? params.funderAuthority.publicKey
-          : payer,
+        funder: funderTokenWallet,
+        owner: owner,
         escrow: escrow,
         programState: program.programState.publicKey,
         mint: program.mint.address,
@@ -252,16 +250,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
   public static async create(
     program: SwitchboardProgram,
-    params: {
-      aggregatorAccount: AggregatorAccount;
-      queueAccount: QueueAccount;
-      jobAuthorities?: Array<PublicKey>;
-      jobPubkeys?: Array<PublicKey>;
-      loadAmount?: number;
-      funderTokenAccount?: PublicKey;
-      funderAuthority?: Keypair;
-      withdrawAuthority?: PublicKey;
-    }
+    params: LeaseInitParams
   ): Promise<[LeaseAccount, TransactionSignature]> {
     const [leaseAccount, transaction] = await LeaseAccount.createInstructions(
       program,
@@ -295,15 +284,14 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
   public async extendInstruction(
     payer: PublicKey,
-    params: {
-      amount: number;
-      funderTokenAddress: PublicKey;
-      funderAuthority?: Keypair;
-    }
+    params: LeaseExtendParams
   ): Promise<TransactionObject> {
     const owner = params.funderAuthority
       ? params.funderAuthority.publicKey
       : payer;
+
+    const funderTokenWallet =
+      params.funderTokenWallet ?? this.program.mint.getAssociatedAddress(owner);
 
     const { lease, jobs, wallets } = await this.fetchAllAccounts();
 
@@ -318,7 +306,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       this.program,
       {
         params: {
-          loadAmount: this.program.mint.toTokenAmountBN(params.amount),
+          loadAmount: this.program.mint.toTokenAmountBN(params.fundAmount),
           stateBump: this.program.programState.bump,
           leaseBump,
           walletBumps: new Uint8Array(walletBumps),
@@ -329,7 +317,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         escrow: lease.escrow,
         aggregator: lease.aggregator,
         queue: lease.queue,
-        funder: params.funderTokenAddress,
+        funder: funderTokenWallet,
         owner: owner,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         programState: this.program.programState.publicKey,
@@ -354,11 +342,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
   }
 
-  public async extend(params: {
-    amount: number;
-    funderTokenAddress: PublicKey;
-    funderAuthority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async extend(
+    params: LeaseExtendParams
+  ): Promise<TransactionSignature> {
     const leaseExtend = await this.extendInstruction(
       this.program.walletPubkey,
       params
@@ -376,7 +362,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       withdrawAuthority?: Keypair;
     }
   ): Promise<TransactionObject> {
-    const txns: TransactionObject[] = [];
+    const txns: Array<TransactionObject> = [];
 
     const withdrawAuthority = params.withdrawAuthority
       ? params.withdrawAuthority.publicKey
@@ -388,9 +374,11 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
     // calculate expected final balance
     const leaseBalance = this.program.mint.toTokenAmountBN(balance);
-    const minRequiredBalance = queue.reward.mul(
-      new BN(aggregator.oracleRequestBatchSize + 1)
+    const minRequiredBalance = LeaseAccount.minimumLeaseAmount(
+      aggregator.oracleRequestBatchSize,
+      queue.reward
     );
+
     const maxWithdrawAmount = leaseBalance.sub(minRequiredBalance);
 
     const withdrawAmount: BN = (() => {
@@ -510,6 +498,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       ],
       params.withdrawAuthority ? [params.withdrawAuthority] : []
     );
+  }
+  public static minimumLeaseAmount(
+    oracleRequestBatchSize: number,
+    queueReward: BN
+  ): BN {
+    return queueReward.mul(new BN(oracleRequestBatchSize + 1));
   }
 
   /**
@@ -685,4 +679,32 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       wallets,
     };
   }
+}
+
+export interface LeaseInitParams extends Partial<LeaseExtendParams> {
+  withdrawAuthority?: PublicKey;
+
+  // maybe?
+  aggregatorAccount: AggregatorAccount;
+  queueAccount: QueueAccount;
+  jobAuthorities?: Array<PublicKey>;
+  jobPubkeys?: Array<PublicKey>;
+}
+
+export interface LeaseExtendParams {
+  /** The amount to fund the lease with. */
+  fundAmount: number;
+  /** Optional, the token account to fund the lease from. Defaults to payer's associated token account if not provided. */
+  funderTokenWallet?: PublicKey;
+  /** Optional, the funderTokenWallet authority if it differs from the provided payer. */
+  funderAuthority?: Keypair;
+  /** Optional, disable auto wrapping funds if funderTokenWallet is missing funds */
+  disableWrap?: boolean;
+}
+
+export interface LeaseWithdrawParams {
+  amount: number | 'all';
+  unwrap?: boolean;
+  withdrawWallet: PublicKey;
+  withdrawAuthority?: Keypair;
 }

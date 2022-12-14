@@ -15,8 +15,8 @@ import {
 import { promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
-import { TransactionObject } from '../transaction';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
@@ -36,6 +36,9 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public readonly size = this.program.account.vrfAccountData.size;
 
+  /**
+   * Return a vrf account state initialized to the default values.
+   */
   public static default(): types.VrfAccountData {
     const buffer = Buffer.alloc(29058, 0);
     types.VrfAccountData.discriminator.copy(buffer, 0);

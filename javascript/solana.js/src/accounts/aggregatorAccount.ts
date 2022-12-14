@@ -3,7 +3,7 @@ import * as anchor from '@project-serum/anchor';
 import { Account, OnAccountChangeCallback } from './account';
 import * as errors from '../errors';
 import Big from 'big.js';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   AccountInfo,
   AccountMeta,
@@ -20,10 +20,10 @@ import { OracleJob, promiseWithTimeout, toUtf8 } from '@switchboard-xyz/common';
 import crypto from 'crypto';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
-import { LeaseAccount } from './leaseAccount';
+import { LeaseAccount, LeaseExtendParams } from './leaseAccount';
 import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
@@ -78,12 +78,18 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
   }
 
+  /**
+   * Return an aggregator account state initialized to the default values.
+   */
   public static default(): types.AggregatorAccountData {
     const buffer = Buffer.alloc(AggregatorAccount.size, 0);
     types.AggregatorAccountData.discriminator.copy(buffer, 0);
     return types.AggregatorAccountData.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given aggregator config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.AggregatorAccountData>,
@@ -289,10 +295,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     payer: PublicKey,
     params: {
       newQueue: QueueAccount;
-      loadAmount?: number;
-      funderTokenAddress?: PublicKey;
-      funderAuthority?: Keypair;
-    }
+    } & LeaseExtendParams
   ): Promise<[TransactionObject, PermissionAccount, LeaseAccount]> {
     const txns: Array<TransactionObject> = [];
 
@@ -341,9 +344,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     if (newLeaseAccountInfo === null) {
       const [userTokenWallet, userWrap] =
-        params.loadAmount && params.loadAmount > 0 && !params.funderTokenAddress
+        params.fundAmount && params.fundAmount > 0 && !params.funderTokenWallet
           ? await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
-              fundUpTo: params.loadAmount ?? 0,
+              fundUpTo: params.fundAmount ?? 0,
             })
           : [undefined, undefined];
       if (userWrap) {
@@ -355,11 +358,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         await LeaseAccount.createInstructions(this.program, payer, {
           aggregatorAccount: this,
           queueAccount: params.newQueue,
-          funderTokenAccount:
-            params.funderTokenAddress ?? userTokenWallet ?? undefined,
+          funderTokenWallet:
+            params.funderTokenWallet ?? userTokenWallet ?? undefined,
           funderAuthority: params.funderAuthority ?? undefined,
           jobAuthorities,
-          loadAmount: params.loadAmount ?? 0,
+          fundAmount: params.fundAmount ?? 0,
           withdrawAuthority: aggregator.authority, // set to current authority
           jobPubkeys: aggregator.jobPubkeysData.slice(
             0,
@@ -383,12 +386,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   /**
    * Create the {@linkcode PermissionAccount} and {@linkcode LeaseAccount} for a new oracle queue without affecting the feed's rhythm. This does not evict a feed from the current queue.
    */
-  async transferQueuePart1(params: {
-    newQueue: QueueAccount;
-    loadAmount?: number;
-    funderTokenAddress?: PublicKey;
-    funderAuthority?: Keypair;
-  }): Promise<[PermissionAccount, LeaseAccount, TransactionSignature]> {
+  async transferQueuePart1(
+    params: {
+      newQueue: QueueAccount;
+    } & LeaseExtendParams
+  ): Promise<[PermissionAccount, LeaseAccount, TransactionSignature]> {
     const [txn, permissionAccount, leaseAccount] =
       await this.transferQueuePart1Instructions(
         this.program.walletPubkey,
@@ -480,7 +482,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       force?: boolean;
     }
   ): Promise<Array<TransactionObject>> {
-    const txns: TransactionObject[] = [];
+    const txns: Array<TransactionObject> = [];
 
     const newQueue = await params.newQueue.loadData();
     const aggregator = await this.loadData();
@@ -605,16 +607,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       newCrank?: CrankAccount;
       enable: boolean;
       queueAuthority?: Keypair;
-      loadAmount?: number;
-      funderTokenAddress?: PublicKey;
-      funderAuthority?: Keypair;
-    }
+    } & LeaseExtendParams
   ): Promise<[Array<TransactionObject>, PermissionAccount, LeaseAccount]> {
     const [part1, permissionAccount, leaseAccount] =
       await this.transferQueuePart1Instructions(payer, {
         newQueue: params.newQueue,
-        loadAmount: params.loadAmount,
-        funderTokenAddress: params.funderTokenAddress,
+        fundAmount: params.fundAmount,
+        funderTokenWallet: params.funderTokenWallet,
         funderAuthority: params.funderAuthority,
       });
     const [part2] = await this.transferQueuePart2Instructions(payer, {
@@ -637,16 +636,15 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     ];
   }
 
-  async transferQueue(params: {
-    authority?: Keypair;
-    newQueue: QueueAccount;
-    newCrank?: CrankAccount;
-    enable: boolean;
-    queueAuthority?: Keypair;
-    loadAmount?: number;
-    funderTokenAddress?: PublicKey;
-    funderAuthority?: Keypair;
-  }): Promise<[PermissionAccount, LeaseAccount, Array<TransactionSignature>]> {
+  async transferQueue(
+    params: {
+      authority?: Keypair;
+      newQueue: QueueAccount;
+      newCrank?: CrankAccount;
+      enable: boolean;
+      queueAuthority?: Keypair;
+    } & LeaseExtendParams
+  ): Promise<[PermissionAccount, LeaseAccount, Array<TransactionSignature>]> {
     const [txns, permissionAccount, leaseAccount] =
       await this.transferQueueInstructions(this.program.walletPubkey, params);
     const signatures = await this.program.signAndSendAll(txns, {

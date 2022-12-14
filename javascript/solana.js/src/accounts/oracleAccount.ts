@@ -2,7 +2,7 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { Account, OnAccountChangeCallback } from './account';
 import * as anchor from '@project-serum/anchor';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   AccountInfo,
   Commitment,
@@ -15,7 +15,7 @@ import {
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 import * as spl from '@solana/spl-token';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 import BN from 'bn.js';
 
 /**
@@ -35,12 +35,18 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   public size = this.program.account.oracleAccountData.size;
 
+  /**
+   * Return an oracle account state initialized to the default values.
+   */
   public static default(): types.OracleAccountData {
     const buffer = Buffer.alloc(OracleAccount.size, 0);
     types.OracleAccountData.discriminator.copy(buffer, 0);
     return types.OracleAccountData.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given oracle config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.OracleAccountData>,
@@ -185,7 +191,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams &
-      OracleStakeParams
+      Partial<OracleStakeParams>
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const txns: Array<TransactionObject> = [];
 
@@ -254,15 +260,14 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     if (params.stakeAmount && params.stakeAmount > 0) {
       const depositTxn = await oracleAccount.stakeInstructions(payer, {
-        stakeAmount: params.stakeAmount,
-        funderAuthority: params.funderAuthority,
-        funderTokenAccount: params.funderTokenAccount,
+        ...params,
         tokenAccount: tokenWallet.publicKey,
+        stakeAmount: params.stakeAmount ?? 0,
       });
       txns.push(depositTxn);
     }
 
-    return [oracleAccount, txns];
+    return [oracleAccount, TransactionObject.pack(txns)];
   }
 
   public static async create(
@@ -270,7 +275,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams &
-      OracleStakeParams
+      Partial<OracleStakeParams>
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const [oracleAccount, txns] = await OracleAccount.createInstructions(
       program,
@@ -283,10 +288,29 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return [oracleAccount, signatures];
   }
 
+  stakeInstruction(
+    stakeAmount: number,
+    oracleStakingWallet: PublicKey,
+    funderTokenWallet: PublicKey,
+    funderAuthority: PublicKey
+  ) {
+    if (stakeAmount <= 0) {
+      throw new Error(`stake amount should be greater than 0`);
+    }
+    return spl.createTransferInstruction(
+      funderTokenWallet,
+      oracleStakingWallet,
+      funderAuthority,
+      this.program.mint.toTokenAmount(stakeAmount)
+    );
+  }
+
   async stakeInstructions(
     payer: PublicKey,
     params: OracleStakeParams & { tokenAccount?: PublicKey }
   ): Promise<TransactionObject> {
+    const txns: Array<TransactionObject> = [];
+
     if (!params.stakeAmount || params.stakeAmount <= 0) {
       throw new Error(`stake amount should be greater than 0`);
     }
@@ -294,31 +318,61 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     const tokenWallet =
       params.tokenAccount ?? (await this.loadData()).tokenAccount;
 
-    const funderAuthority = params.funderAuthority?.publicKey ?? payer;
+    const owner = params.funderAuthority
+      ? params.funderAuthority.publicKey
+      : payer;
 
-    const [funderTokenAccount, wrapFundsTxn] =
-      await this.program.mint.getOrCreateWrappedUserInstructions(
-        payer,
-        { fundUpTo: params.stakeAmount },
-        params.funderAuthority
-      );
+    let funderTokenWallet: PublicKey;
+    if (params.disableWrap) {
+      funderTokenWallet =
+        params.funderTokenWallet ??
+        this.program.mint.getAssociatedAddress(owner);
+    } else {
+      let tokenTxn: TransactionObject | undefined;
+      // now we need to wrap some funds
+      if (params.funderTokenWallet) {
+        funderTokenWallet = params.funderTokenWallet;
+        tokenTxn = await this.program.mint.wrapInstructions(
+          payer,
+          {
+            fundUpTo: params.stakeAmount ?? 0,
+          },
+          params.funderAuthority
+        );
+      } else {
+        [funderTokenWallet, tokenTxn] =
+          await this.program.mint.getOrCreateWrappedUserInstructions(
+            payer,
+            { fundUpTo: params.stakeAmount ?? 0 },
+            params.funderAuthority
+          );
+      }
 
-    const transferIxn = spl.createTransferInstruction(
-      funderTokenAccount,
-      tokenWallet,
-      funderAuthority,
-      this.program.mint.toTokenAmount(params.stakeAmount)
-    );
-
-    if (wrapFundsTxn) {
-      return wrapFundsTxn.add(transferIxn);
+      if (tokenTxn) {
+        txns.push(tokenTxn);
+      }
     }
 
-    return new TransactionObject(
+    const transferTxn = new TransactionObject(
       payer,
-      [transferIxn],
+      [
+        spl.createTransferInstruction(
+          funderTokenWallet,
+          tokenWallet,
+          params.funderAuthority ? params.funderAuthority.publicKey : payer,
+          this.program.mint.toTokenAmount(params.stakeAmount)
+        ),
+      ],
       params.funderAuthority ? [params.funderAuthority] : []
     );
+    txns.push(transferTxn);
+
+    const packed = TransactionObject.pack(txns);
+    if (packed.length > 1) {
+      throw new Error(`Failed to pack transactions into a single transactions`);
+    }
+
+    return packed[0];
   }
 
   async stake(
@@ -572,11 +626,14 @@ export interface OracleInitParams {
 
 export interface OracleStakeParams {
   /** The amount of funds to deposit into the oracle's staking wallet. The oracle must have the {@linkcode QueueAccount} minStake before being permitted to heartbeat and join the queue. */
-  stakeAmount?: number;
+  stakeAmount: number;
   /** The tokenAccount for the account funding the staking wallet. Will default to the payer's associatedTokenAccount if not provided. */
-  funderTokenAccount?: PublicKey;
-  /** The funderTokenAccount authority for approving the transfer of funds from the funderTokenAccount into the oracle staking wallet. Will default to the payer if not provided. */
+  funderTokenWallet?: PublicKey;
+  /** The funderTokenWallet authority for approving the transfer of funds from the funderTokenWallet into the oracle staking wallet. Will default to the payer if not provided. */
   funderAuthority?: Keypair;
+
+  /** Do not wrap funds if funderTokenWallet is missing funds */
+  disableWrap?: boolean;
 }
 
 export interface OracleWithdrawParams {

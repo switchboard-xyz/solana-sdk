@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import * as anchor from '@project-serum/anchor';
 
 export abstract class Account<T> {
@@ -46,6 +46,19 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from '../generated';
+import { ProgramStateAccount } from './programStateAccount';
+import { QueueAccount } from './queueAccount';
+import { AggregatorAccount } from './aggregatorAccount';
+import { BufferRelayerAccount } from './bufferRelayAccount';
+import { CrankAccount } from './crankAccount';
+import { JobAccount } from './jobAccount';
+import { LeaseAccount } from './leaseAccount';
+import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { VrfAccount } from './vrfAccount';
+import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
+import { CrankDataBuffer } from './crankDataBuffer';
+import { QueueDataBuffer } from './queueDataBuffer';
 
 export const BUFFER_DISCRIMINATOR = Buffer.from([
   42,
@@ -76,6 +89,21 @@ export type SwitchboardAccountType =
   | 'Buffer';
 
 export type SwitchboardAccount =
+  | AggregatorAccount
+  | AggregatorHistoryBuffer
+  | BufferRelayerAccount
+  | CrankAccount
+  | CrankDataBuffer
+  | JobAccount
+  | LeaseAccount
+  | OracleAccount
+  | PermissionAccount
+  | ProgramStateAccount
+  | QueueAccount
+  | QueueDataBuffer
+  | VrfAccount;
+
+export type SwitchboardAccountData =
   | AggregatorAccountData
   | BufferRelayerAccountData
   | CrankAccountData

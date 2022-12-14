@@ -15,8 +15,8 @@ import {
   PermitOracleQueueUsage,
   PermitVrfRequests,
 } from '../generated/types/SwitchboardPermission';
-import { SwitchboardProgram } from '../program';
-import { TransactionObject } from '../transaction';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
 import { Account } from './account';
 
 /**
@@ -94,12 +94,18 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     );
   }
 
+  /**
+   * Return a permission account state initialized to the default values.
+   */
   public static default(): types.PermissionAccountData {
     const buffer = Buffer.alloc(PermissionAccount.size, 0);
     types.PermissionAccountData.discriminator.copy(buffer, 0);
     return types.PermissionAccountData.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given permission config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.PermissionAccountData>,

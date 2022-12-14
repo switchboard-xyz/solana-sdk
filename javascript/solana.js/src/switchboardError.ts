@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from './program';
+import { SwitchboardProgram } from './SwitchboardProgram';
 
 /**
  * Switchboard wrapper for anchor program errors.
