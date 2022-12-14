@@ -1,14 +1,15 @@
 import * as anchor from '@project-serum/anchor';
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
-import { AnchorWallet, SwitchboardProgram } from '../program';
+import { AnchorWallet, SwitchboardProgram } from '../SwitchboardProgram';
 import fs from 'fs';
 import path from 'path';
 import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
 import { Mint } from '../mint';
-import { AggregatorAccountData, AggregatorRound } from '../generated';
-import { TransactionObject } from '../transaction';
+import { AggregatorAccountData } from '../generated';
+import { TransactionObject } from '../TransactionObject';
 import { SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE } from '../const';
+import { SwitchboardNetwork } from '../SwitchboardNetwork';
 
 export const LATEST_DOCKER_VERSION = 'dev-v2-RC_12_05_22_22_48';
 
@@ -343,12 +344,12 @@ export class SwitchboardTestContext {
     const crankBufferKeypair = Keypair.generate();
     const oracleStakingWalletKeypair = Keypair.generate();
 
-    const [accounts] = await program.createNetwork({
+    const [accounts] = await SwitchboardNetwork.create(program, {
       name: 'Test Queue',
       metadata: `created ${BNtoDateTimeString(
         new anchor.BN(Math.floor(Date.now() / 1000))
       )}`,
-      authority: program.walletPubkey,
+      authority: payerKeypair,
       reward: 0,
       minStake: 0,
       queueSize: 10,
@@ -397,15 +398,15 @@ export class SwitchboardTestContext {
         ? Mint.native
         : programState.tokenMint,
       tokenWallet: userTokenWallet,
-      oracleQueue: accounts.queueAccount.publicKey,
+      oracleQueue: accounts.queue.account.publicKey,
       oracleQueueAuthority: program.walletPubkey,
       oracleQueueBuffer: dataBufferKeypair.publicKey,
-      crank: crank.publicKey,
+      crank: crank.account.publicKey,
       crankBuffer: crankBufferKeypair.publicKey,
       oracle: oracle.account.publicKey,
       oracleAuthority: program.walletPubkey,
       oracleEscrow: oracleStakingWalletKeypair.publicKey,
-      oraclePermissions: oracle.permissions.account.publicKey,
+      oraclePermissions: oracle.permission.account.publicKey,
       payerKeypairPath: fullKeypairPath,
     });
   }

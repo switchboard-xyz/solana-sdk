@@ -14,12 +14,11 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import Big from 'big.js';
 import { BN } from 'bn.js';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
-import { TransactionObject } from '../transaction';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { JobAccount } from './jobAccount';
 import { PermissionAccount } from './permissionAccount';
@@ -208,7 +207,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     const tokenAmountBN = new BN(tokenAccount.amount.toString());
     if (tokenAmountBN.lt(queue.reward)) {
       const wrapTxn = await this.program.mint.wrapInstructions(payer, {
-        fundUpTo: new Big(this.program.mint.fromTokenAmountBN(queue.reward)),
+        fundUpTo: this.program.mint.fromTokenAmountBN(queue.reward),
       });
       ixns.push(...wrapTxn.ixns);
     }

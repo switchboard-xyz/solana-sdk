@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from '../../program';
+import { SwitchboardProgram } from '../../SwitchboardProgram';
 import { PublicKey, Connection } from '@solana/web3.js';
 import BN from 'bn.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars

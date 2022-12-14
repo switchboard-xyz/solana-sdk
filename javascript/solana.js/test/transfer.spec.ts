@@ -4,7 +4,12 @@ import assert from 'assert';
 
 import { setupTest, TestContext } from './utilts';
 import { Keypair } from '@solana/web3.js';
-import { AggregatorAccount, CrankAccount, QueueAccount } from '../src';
+import {
+  AggregatorAccount,
+  CrankAccount,
+  QueueAccount,
+  SwitchboardNetwork,
+} from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
 
 describe('Transfer Tests', () => {
@@ -26,53 +31,63 @@ describe('Transfer Tests', () => {
   before(async () => {
     ctx = await setupTest();
 
-    const [accounts, signatures] = await ctx.program.createNetwork({
-      name: 'Queue-1',
-      reward: 0,
-      minStake: 0,
-      unpermissionedFeeds: false,
-      unpermissionedVrf: false,
-      authority: origQueueAuthority.publicKey,
-      oracles: [
-        { name: 'Oracle-1', enable: true, queueAuthority: origQueueAuthority },
-      ],
-      cranks: [{ name: 'Crank-1', maxRows: 100 }],
-    });
+    const [accounts, signatures] = await SwitchboardNetwork.create(
+      ctx.program,
+      {
+        name: 'Queue-1',
+        reward: 0,
+        minStake: 0,
+        unpermissionedFeeds: false,
+        unpermissionedVrf: false,
+        authority: origQueueAuthority,
+        oracles: [
+          {
+            name: 'Oracle-1',
+            enable: true,
+            queueAuthority: origQueueAuthority,
+          },
+        ],
+        cranks: [{ name: 'Crank-1', maxRows: 100 }],
+      }
+    );
     if (accounts.oracles.length < 1) {
       throw new Error(`Failed to create an oracle`);
     }
     if (accounts.cranks.length < 1) {
       throw new Error(`Failed to create a crank`);
     }
-    origQueueAccount = accounts.queueAccount;
-    origCrankAccount = accounts.cranks[0];
+    origQueueAccount = accounts.queue.account;
+    origCrankAccount = accounts.cranks[0].account;
     await accounts.oracles[0].account.heartbeat({
-      queueAccount: accounts.queueAccount,
+      queueAccount: accounts.queue.account,
       queueAuthority: origQueueAuthority.publicKey,
     });
 
-    const [accounts2, signatures2] = await ctx.program.createNetwork({
-      name: 'Queue-2',
-      reward: 0,
-      minStake: 0,
-      unpermissionedFeeds: false,
-      unpermissionedVrf: false,
-      authority: newQueueAuthority.publicKey,
-      oracles: [
-        { name: 'Oracle-2', enable: true, queueAuthority: newQueueAuthority },
-      ],
-      cranks: [{ name: 'Crank-2', maxRows: 100 }],
-    });
+    const [accounts2, signatures2] = await SwitchboardNetwork.create(
+      ctx.program,
+      {
+        name: 'Queue-2',
+        reward: 0,
+        minStake: 0,
+        unpermissionedFeeds: false,
+        unpermissionedVrf: false,
+        authority: newQueueAuthority,
+        oracles: [
+          { name: 'Oracle-2', enable: true, queueAuthority: newQueueAuthority },
+        ],
+        cranks: [{ name: 'Crank-2', maxRows: 100 }],
+      }
+    );
     if (accounts2.oracles.length < 1) {
       throw new Error(`Failed to create an oracle`);
     }
     if (accounts2.cranks.length < 1) {
       throw new Error(`Failed to create a crank`);
     }
-    newQueueAccount = accounts2.queueAccount;
-    newCrankAccount = accounts2.cranks[0];
+    newQueueAccount = accounts2.queue.account;
+    newCrankAccount = accounts2.cranks[0].account;
     await accounts2.oracles[0].account.heartbeat({
-      queueAccount: accounts2.queueAccount,
+      queueAccount: accounts2.queue.account,
       queueAuthority: newQueueAuthority.publicKey,
     });
   });
@@ -147,8 +162,8 @@ describe('Transfer Tests', () => {
         newCrank: newCrankAccount,
         enable: true,
         queueAuthority: newQueueAuthority,
-        loadAmount: 1,
-        funderTokenAddress: userTokenAddress,
+        fundAmount: 1,
+        funderTokenWallet: userTokenAddress,
       });
 
     const accounts = await aggregatorAccount.fetchAccounts();
@@ -213,8 +228,8 @@ describe('Transfer Tests', () => {
     const [permissionAccount, leaseAccount] =
       await aggregatorAccount.transferQueuePart1({
         newQueue: newQueueAccount,
-        loadAmount: 0.75,
-        funderTokenAddress: userTokenAddress,
+        fundAmount: 0.75,
+        funderTokenWallet: userTokenAddress,
       });
 
     await aggregatorAccount.transferQueuePart2({

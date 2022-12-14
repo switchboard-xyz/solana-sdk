@@ -1,5 +1,5 @@
 import * as anchor from '@project-serum/anchor';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import * as types from '../generated';
 import { Account } from './account';
 import * as spl from '@solana/spl-token';
@@ -14,7 +14,7 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 
 /**
  * Account type representing Switchboard global program state.
@@ -31,12 +31,18 @@ export class ProgramStateAccount extends Account<types.SbState> {
    */
   public readonly size = this.program.account.sbState.size;
 
+  /**
+   * Return a program state account state initialized to the default values.
+   */
   public static default(): types.SbState {
     const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
     types.SbState.discriminator.copy(buffer, 0);
     return types.SbState.decode(buffer);
   }
 
+  /**
+   * Create a mock account info for a given program state config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.SbState>,

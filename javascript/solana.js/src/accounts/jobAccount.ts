@@ -11,9 +11,9 @@ import * as anchor from '@project-serum/anchor';
 import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { Account } from './account';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.
@@ -41,12 +41,20 @@ export class JobAccount extends Account<types.JobAccountData> {
     return 181 + byteLength;
   }
 
+  /**
+   * Return a job account initialized to the default values.
+   *
+   * @params byteLength - the length of the serialized job
+   */
   public static default(byteLength: number): types.LeaseAccountData {
     const buffer = Buffer.alloc(JobAccount.getAccountSize(byteLength), 0);
     types.LeaseAccountData.discriminator.copy(buffer, 0);
     return types.LeaseAccountData.decode(buffer);
   }
 
+  /**
+   * Creates a mock account info for a given job. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: Partial<types.JobAccountData> &

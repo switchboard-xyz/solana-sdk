@@ -12,6 +12,7 @@ import {
   QueueAccount,
 } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
+import BN from 'bn.js';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;
@@ -203,8 +204,9 @@ describe('Aggregator Tests', () => {
     const leaseBalance = await leaseAccount.fetchBalance();
 
     await leaseAccount.extend({
-      amount: extendAmount,
-      funderTokenAddress: userTokenAddress,
+      fundAmount: extendAmount,
+      funderTokenWallet: userTokenAddress,
+      disableWrap: true,
     });
 
     const expectedFinalBalance = leaseBalance + extendAmount;
@@ -220,14 +222,15 @@ describe('Aggregator Tests', () => {
       throw new Error(`Aggregator does not exist`);
     }
 
+    const WITHDRAW_AMOUNT = 1;
+
     const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
       ctx.payer.publicKey,
-      { fundUpTo: 0.1 }
+      { fundUpTo: 0 }
     );
 
-    const initialUserTokenBalance = await ctx.program.mint.fetchBalance(
-      userTokenAddress
-    );
+    const initialUserTokenBalance =
+      (await ctx.program.mint.fetchBalance(userTokenAddress)) ?? 0;
 
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,
@@ -236,11 +239,11 @@ describe('Aggregator Tests', () => {
     );
     const leaseBalance = await leaseAccount.fetchBalance();
 
-    const expectedFinalBalance = leaseBalance - 1;
+    const expectedFinalBalance = leaseBalance - WITHDRAW_AMOUNT;
 
     await leaseAccount.withdraw({
-      amount: 1,
-      unwrap: true,
+      amount: WITHDRAW_AMOUNT,
+      unwrap: false,
       withdrawWallet: userTokenAddress,
     });
 
@@ -250,13 +253,67 @@ describe('Aggregator Tests', () => {
       `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
     );
 
-    const finalUserBalance = await ctx.program.mint.fetchBalance(
+    const finalUserTokenBalance = await ctx.program.mint.fetchBalance(
       userTokenAddress
     );
-    assert(finalUserBalance !== null, `Users wrapped account was closed`);
+    assert(finalUserTokenBalance !== null, `Users wrapped account was closed`);
 
-    const finalUserTokenBalance =
+    const expectedFinalUserTokenBalance =
+      initialUserTokenBalance + WITHDRAW_AMOUNT;
+    assert(
+      expectedFinalUserTokenBalance === finalUserTokenBalance,
+      `User token balance has incorrect funds, expected ${expectedFinalUserTokenBalance} wSOL, received ${finalUserTokenBalance}`
+    );
+  });
+
+  it('Terminates a lease and closes the users wrapped SOL wallet', async () => {
+    if (!aggregatorAccount) {
+      throw new Error(`Aggregator does not exist`);
+    }
+
+    const [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.payer.publicKey,
+      { fundUpTo: 0 }
+    );
+
+    const initialUserTokenBalance =
       (await ctx.program.mint.fetchBalance(userTokenAddress)) ?? 0;
+
+    const [leaseAccount] = LeaseAccount.fromSeed(
+      ctx.program,
+      queueAccount.publicKey,
+      aggregatorAccount.publicKey
+    );
+    const leaseBalance = await leaseAccount.fetchBalance();
+
+    const { lease, queue, aggregator, balance } =
+      await leaseAccount.fetchAccounts();
+
+    const expectedFinalBalance = LeaseAccount.minimumLeaseAmount(
+      aggregator.oracleRequestBatchSize,
+      queue.reward
+    );
+
+    await leaseAccount.withdraw({
+      amount: 'all',
+      unwrap: true,
+      withdrawWallet: userTokenAddress,
+    });
+
+    const finalBalance = await leaseAccount.fetchBalanceBN();
+    assert(
+      expectedFinalBalance.eq(finalBalance),
+      `Lease balance has incorrect funds, expected ${expectedFinalBalance} wSOL, received ${finalBalance}`
+    );
+
+    const finalUserTokenBalance = await ctx.program.mint.fetchBalance(
+      userTokenAddress
+    );
+    assert(
+      finalUserTokenBalance !== null,
+      `Users wrapped account was unexpectedly closed`
+    );
+
     assert(
       initialUserTokenBalance === finalUserTokenBalance,
       `User token balance has incorrect funds, expected ${initialUserTokenBalance} wSOL, received ${finalUserTokenBalance}`

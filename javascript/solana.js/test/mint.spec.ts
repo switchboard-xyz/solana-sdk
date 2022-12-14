@@ -68,7 +68,7 @@ describe('Mint Tests', () => {
     if (initialUserTokenBalance <= 0) {
       await ctx.program.mint.wrap(
         ctx.payer.publicKey,
-        { fundUpTo: new Big(0.25) },
+        { fundUpTo: 0.25 },
         user
       );
       initialUserTokenBalance =

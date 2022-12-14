@@ -7,7 +7,7 @@ import {
   OnAccountChangeCallback,
 } from './account';
 import * as errors from '../errors';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   Commitment,
   Keypair,
@@ -16,7 +16,7 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { TransactionObject } from '../transaction';
+import { TransactionObject } from '../TransactionObject';
 import { AggregatorAccount } from './aggregatorAccount';
 
 export interface AggregatorHistoryInit {
@@ -46,6 +46,7 @@ export class AggregatorHistoryBuffer extends Account<
     return 12 + size * 28;
   }
 
+  /** Return a history buffer account initialized to the default values. */
   public static default(size = 1000): Buffer {
     const buffer = Buffer.alloc(
       AggregatorHistoryBuffer.getAccountSize(size),

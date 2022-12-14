@@ -170,7 +170,6 @@ export class TransactionObject implements ITransactionObject {
       reqSigners.size * 64 +
       encodeLength(reqSigners.size).length;
 
-    // console.log(`txnSize: ${txnSize}`);
     return txnSize;
   }
 
@@ -290,7 +289,7 @@ export class TransactionObject implements ITransactionObject {
     _ixns: Array<TransactionInstruction>
   ): Array<TransactionObject> {
     const ixns = [..._ixns];
-    const txns: TransactionObject[] = [];
+    const txns: Array<TransactionObject> = [];
 
     let txn = new TransactionObject(payer, [], []);
     while (ixns.length) {

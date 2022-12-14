@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from '../../program';
+import { SwitchboardProgram } from '../../SwitchboardProgram';
 import {
   TransactionInstruction,
   PublicKey,

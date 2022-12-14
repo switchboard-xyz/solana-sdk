@@ -90,8 +90,8 @@ describe('Lease Tests', () => {
     const [leaseAccount] = await sbv2.LeaseAccount.create(ctx.program, {
       aggregatorAccount,
       queueAccount,
-      loadAmount: fundAmount,
-      funderTokenAccount: userTokenAddress,
+      fundAmount: fundAmount,
+      funderTokenWallet: userTokenAddress,
     });
 
     await leaseAccount.loadData();
@@ -114,8 +114,8 @@ describe('Lease Tests', () => {
     const initialLeaseBalance = await leaseAccount.fetchBalance();
 
     await leaseAccount.extend({
-      amount: 0.075,
-      funderTokenAddress: userTokenAddress,
+      fundAmount: 0.075,
+      funderTokenWallet: userTokenAddress,
     });
 
     const expectedFinalBalance = initialLeaseBalance + 0.075;

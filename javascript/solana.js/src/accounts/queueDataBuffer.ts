@@ -7,7 +7,7 @@ import {
 import assert from 'assert';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   Account,
   BUFFER_DISCRIMINATOR,
@@ -28,12 +28,20 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
     return 8 + size * 32;
   }
 
+  /**
+   * Return an oracle queue buffer initialized to the default values.
+   *
+   * @param size - the number of oracles the buffer should support
+   */
   public static default(size = 100): Buffer {
     const buffer = Buffer.alloc(QueueDataBuffer.getAccountSize(size), 0);
     BUFFER_DISCRIMINATOR.copy(buffer, 0);
     return buffer;
   }
 
+  /**
+   * Create a mock account info for a given vrf config. Useful for test integrations.
+   */
   public static createMock(
     programId: PublicKey,
     data: { size?: number; oracles?: Array<PublicKey> },

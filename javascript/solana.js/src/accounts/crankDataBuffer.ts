@@ -2,7 +2,7 @@ import * as anchor from '@project-serum/anchor';
 import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
-import { SwitchboardProgram } from '../program';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   Account,
   BUFFER_DISCRIMINATOR,
