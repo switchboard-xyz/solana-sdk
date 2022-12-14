@@ -21,8 +21,6 @@ import {
   ProgramStateAccount,
   QueueAccount,
   VrfAccount,
-  SwitchboardAccount,
-  SwitchboardAccountData,
   JobAccount,
   QueueInitParams,
   CreateQueueCrankParams,
