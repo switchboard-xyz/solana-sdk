@@ -6,6 +6,14 @@ const { execSync } = require('child_process');
 const projectRoot = __dirname;
 // const shx = path.join(projectRoot, 'node_modules', '.bin', 'shx');
 
+// Super hacky. Some files need to be reset to the previous git state and will be manually managed
+const ignoreFiles = [
+  './src/generated/types/SwitchboardPermission.ts', // we manually added NONE enumeration
+  './src/generated/types/SwitchboardDecimal.ts', // added toBig methods
+  './src/generated/types/Lanes.ts', // anchor-client-gen struggles with dual exports
+  './src/generated/types/index.ts', // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
+];
+
 /**
  * Fetch a list of filepaths for a given directory and desired file extension
  * @param [dirPath] Filesystem path to a directory to search.
@@ -65,10 +73,10 @@ async function main() {
   fs.writeFileSync(
     './src/generated/index.ts',
     [
-      "export * from './accounts/index.js';",
-      "export * from './errors/index.js';",
-      "export * from './instructions/index.js';",
-      "export * from './types/index.js';",
+      "export * from './accounts';",
+      "export * from './errors';",
+      "export * from './instructions';",
+      "export * from './types';",
     ].join('\n')
   );
 
@@ -85,7 +93,7 @@ async function main() {
     const fileString = fs.readFileSync(file, 'utf-8');
     fs.writeFileSync(
       file,
-      `import { SwitchboardProgram } from "../../program"\n${fileString}`
+      `import { SwitchboardProgram } from "../../SwitchboardProgram"\n${fileString}`
     );
 
     console.log(file);
@@ -117,6 +125,11 @@ async function main() {
   }
 
   execSync('npx prettier ./src/generated --write');
+
+  // reset files
+  for (const file of ignoreFiles) {
+    execSync(`git restore ${file}`);
+  }
 }
 
 main()

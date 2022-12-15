@@ -3971,6 +3971,22 @@
       }
     },
     {
+      "name": "BorshDecimal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mantissa",
+            "type": "i128"
+          },
+          {
+            "name": "scale",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
       "name": "Hash",
       "type": {
         "kind": "struct",
@@ -4614,22 +4630,6 @@
       }
     },
     {
-      "name": "BorshDecimal",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "mantissa",
-            "type": "i128"
-          },
-          {
-            "name": "scale",
-            "type": "u32"
-          }
-        ]
-      }
-    },
-    {
       "name": "Lanes",
       "type": {
         "kind": "enum",
@@ -4862,16 +4862,6 @@
     }
   ],
   "events": [
-    {
-      "name": "AggregatorInitEvent",
-      "fields": [
-        {
-          "name": "feedPubkey",
-          "type": "publicKey",
-          "index": false
-        }
-      ]
-    },
     {
       "name": "VrfRequestRandomnessEvent",
       "fields": [
@@ -5451,6 +5441,108 @@
         {
           "name": "fee",
           "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorAddJobEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "jobPubkey",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorRemoveJobEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "jobPubkey",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorLockEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorInitEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorSetAuthorityEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "oldAuthority",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newAuthority",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "AggregatorSetConfigsEvent",
+      "fields": [
+        {
+          "name": "feedPubkey",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PermissionSetEvent",
+      "fields": [
+        {
+          "name": "permissionKey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "permission",
+          "type": {
+            "defined": "SwitchboardPermission"
+          },
+          "index": false
+        },
+        {
+          "name": "enable",
+          "type": "bool",
           "index": false
         }
       ]
