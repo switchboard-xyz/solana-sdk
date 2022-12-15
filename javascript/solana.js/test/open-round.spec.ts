@@ -132,7 +132,7 @@ describe('Open Round Tests', () => {
     const permissions = await aggregatorPermissionAccount.loadData();
 
     assert(
-      permissions.permissions === PermitOracleQueueUsage.discriminator + 1,
+      permissions.permissions === PermitOracleQueueUsage.discriminator,
       `Aggregator has incorrect permissions, expected ${
         PermitOracleQueueUsage.kind
       }, received ${PermissionAccount.getPermissions(permissions).kind}`

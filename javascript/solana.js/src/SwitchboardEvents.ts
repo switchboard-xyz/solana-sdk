@@ -2,8 +2,32 @@ import * as anchor from '@project-serum/anchor';
 import * as types from './generated';
 
 export type SwitchboardEvents = {
+  AggregatorAddJobEvent: {
+    feedPubkey: anchor.web3.PublicKey;
+    jobPubkey: anchor.web3.PublicKey;
+  };
+  AggregatorRemoveJobEvent: {
+    feedPubkey: anchor.web3.PublicKey;
+    jobPubkey: anchor.web3.PublicKey;
+  };
+  AggregatorLockEvent: {
+    feedPubkey: anchor.web3.PublicKey;
+  };
   AggregatorInitEvent: {
     feedPubkey: anchor.web3.PublicKey;
+  };
+  AggregatorSetAuthorityEvent: {
+    feedPubkey: anchor.web3.PublicKey;
+    oldAuthority: anchor.web3.PublicKey;
+    newAuthority: anchor.web3.PublicKey;
+  };
+  AggregatorSetConfigsEvent: {
+    feedPubkey: anchor.web3.PublicKey;
+  };
+  PermissionSetEvent: {
+    permissionKey: anchor.web3.PublicKey;
+    permission: types.SwitchboardPermissionKind;
+    enable: boolean;
   };
   VrfRequestRandomnessEvent: {
     vrfPubkey: anchor.web3.PublicKey;

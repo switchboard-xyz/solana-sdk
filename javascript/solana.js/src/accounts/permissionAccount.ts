@@ -11,6 +11,7 @@ import {
 import * as errors from '../errors';
 import * as types from '../generated';
 import {
+  PermitNone,
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
@@ -26,29 +27,6 @@ export interface PermissionAccountInitParams {
   granter: PublicKey;
   grantee: PublicKey;
   authority: PublicKey;
-}
-
-export interface PermitNoneJSON {
-  kind: 'PermitNone';
-}
-
-export class PermitNone {
-  static readonly discriminator = 0;
-  static readonly kind = 'NONE';
-  readonly discriminator = 0;
-  readonly kind = 'PermitNone';
-
-  toJSON(): PermitNoneJSON {
-    return {
-      kind: 'PermitNone',
-    };
-  }
-
-  toEncodable() {
-    return {
-      PermitOracleHeartbeat: {},
-    };
-  }
 }
 
 export interface PermissionSetParams {
@@ -75,9 +53,22 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
    */
   public readonly size = this.program.account.permissionAccountData.size;
 
+  /**
+   * Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   */
+  public async loadData(): Promise<types.PermissionAccountData> {
+    const data = await types.PermissionAccountData.fetch(
+      this.program,
+      this.publicKey
+    );
+    if (data === null)
+      throw new errors.AccountNotFoundError('Permissions', this.publicKey);
+    return data;
+  }
+
   static getPermissions(
     permission: types.PermissionAccountData
-  ): types.SwitchboardPermissionKind | PermitNone {
+  ): types.SwitchboardPermissionKind {
     switch (permission.permissions) {
       case 0:
         return new PermitNone();
@@ -217,38 +208,11 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   }
 
   /**
-   * Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
-   */
-  public async loadData(): Promise<types.PermissionAccountData> {
-    const data = await types.PermissionAccountData.fetch(
-      this.program,
-      this.publicKey
-    );
-    if (data === null)
-      throw new errors.AccountNotFoundError('Permissions', this.publicKey);
-    return data;
-  }
-
-  /**
    * Check if a specific permission is enabled on this permission account
    */
   public async isPermissionEnabled(permission): Promise<boolean> {
     const permissions = (await this.loadData()).permissions;
     return (permissions & (permission as number)) !== 0;
-  }
-
-  /**
-   * Sets the permission in the PermissionAccount
-   */
-  public async set(
-    params: PermissionSetParams & {
-      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
-      permission: types.SwitchboardPermissionKind;
-    }
-  ): Promise<string> {
-    const setTxn = this.setInstruction(this.program.walletPubkey, params);
-    const txnSignature = await this.program.signAndSend(setTxn);
-    return txnSignature;
   }
 
   /**
@@ -284,6 +248,20 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     );
   }
 
+  /**
+   * Sets the permission in the PermissionAccount
+   */
+  public async set(
+    params: PermissionSetParams & {
+      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
+      permission: types.SwitchboardPermissionKind;
+    }
+  ): Promise<string> {
+    const setTxn = this.setInstruction(this.program.walletPubkey, params);
+    const txnSignature = await this.program.signAndSend(setTxn);
+    return txnSignature;
+  }
+
   static getGranteePermissions(
     grantee: AccountInfo<Buffer>
   ): types.SwitchboardPermissionKind {
@@ -300,7 +278,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     // check aggregator and buffer relayer
     if (
       types.AggregatorAccountData.discriminator.compare(discriminator) === 0 ||
-      types.BufferRelayerAccountData.discriminator.compare(discriminator)
+      types.BufferRelayerAccountData.discriminator.compare(discriminator) === 0
     ) {
       return new PermitOracleQueueUsage();
     }
