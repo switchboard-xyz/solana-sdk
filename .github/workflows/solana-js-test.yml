@@ -141,6 +141,7 @@ jobs:
       - name: Run Tests
         working-directory: javascript/solana.js
         env:
-          SWITCHBOARD_PROGRAM_ID: SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
           SOLANA_LOCALNET: 1
+          SOLANA_CLUSTER: mainnet-beta
+          SWITCHBOARD_PROGRAM_ID: SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
         run: npm run test:localnet:mainnet
