@@ -91,6 +91,8 @@ jobs:
             FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy"
       - name: Run Tests
         working-directory: javascript/solana.js
+        env:
+          SOLANA_LOCALNET: 1
         run: npm run test:localnet
 
   job3:
@@ -138,4 +140,7 @@ jobs:
             J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD"
       - name: Run Tests
         working-directory: javascript/solana.js
+        env:
+          SWITCHBOARD_PROGRAM_ID: SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+          SOLANA_LOCALNET: 1
         run: npm run test:localnet:mainnet
