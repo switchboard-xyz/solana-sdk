@@ -157,11 +157,76 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     return [crankAccount, txnSignature];
   }
 
+  /**
+   * Pushes a new aggregator onto the crank.
+   * @param params The crank push parameters.
+   * @return TransactionSignature
+   */
+  async pushInstruction(
+    payer: PublicKey,
+    params: CrankPushParams
+  ): Promise<TransactionObject> {
+    const crankData = await this.loadData();
+    const queueAccount = new QueueAccount(this.program, crankData.queuePubkey);
+    const queue = await queueAccount.loadData();
+
+    const { permissionAccount, permissionBump, leaseAccount, leaseEscrow } =
+      params.aggregatorAccount.getAccounts({
+        queueAccount: queueAccount,
+        queueAuthority: queue.authority,
+      });
+
+    return new TransactionObject(
+      payer,
+      [
+        types.crankPush(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              permissionBump: permissionBump,
+              notifiRef: null,
+            },
+          },
+          {
+            crank: this.publicKey,
+            aggregator: params.aggregatorAccount.publicKey,
+            oracleQueue: queueAccount.publicKey,
+            queueAuthority: queue.authority,
+            permission: permissionAccount.publicKey,
+            lease: leaseAccount.publicKey,
+            escrow: leaseEscrow,
+            programState: this.program.programState.publicKey,
+            dataBuffer:
+              this.dataBuffer?.publicKey ?? (await this.loadData()).dataBuffer,
+          }
+        ),
+      ],
+      []
+    );
+  }
+
+  /**
+   * Pushes a new aggregator onto the crank.
+   * @param params The crank push parameters.
+   * @return TransactionSignature
+   */
+  async push(params: CrankPushParams): Promise<TransactionSignature> {
+    const pushTxn = await this.pushInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(pushTxn);
+    return txnSignature;
+  }
+
   public async popInstruction(
     payer: PublicKey,
     params: CrankPopParams
   ): Promise<TransactionObject> {
-    const next = params.readyPubkeys ?? (await this.peakNextReady(5));
+    const next =
+      params.readyPubkeys ??
+      (await this.peakNextReady(5, params.unixTimestamp));
     if (next.length === 0) throw new Error('Crank is not ready to be turned.');
 
     const remainingAccounts: PublicKey[] = [];
@@ -249,83 +314,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   }
 
   /**
-   * Pushes a new aggregator onto the crank.
-   * @param params The crank push parameters.
-   * @return TransactionSignature
-   */
-  async pushInstruction(
-    payer: PublicKey,
-    params: CrankPushParams
-  ): Promise<TransactionObject> {
-    const crankData = await this.loadData();
-    const queueAccount = new QueueAccount(this.program, crankData.queuePubkey);
-    const queue = await queueAccount.loadData();
-
-    const { permissionAccount, permissionBump, leaseAccount, leaseEscrow } =
-      params.aggregatorAccount.getAccounts({
-        queueAccount: queueAccount,
-        queueAuthority: queue.authority,
-      });
-
-    return new TransactionObject(
-      payer,
-      [
-        types.crankPush(
-          this.program,
-          {
-            params: {
-              stateBump: this.program.programState.bump,
-              permissionBump: permissionBump,
-              notifiRef: null,
-            },
-          },
-          {
-            crank: this.publicKey,
-            aggregator: params.aggregatorAccount.publicKey,
-            oracleQueue: queueAccount.publicKey,
-            queueAuthority: queue.authority,
-            permission: permissionAccount.publicKey,
-            lease: leaseAccount.publicKey,
-            escrow: leaseEscrow,
-            programState: this.program.programState.publicKey,
-            dataBuffer:
-              this.dataBuffer?.publicKey ?? (await this.loadData()).dataBuffer,
-          }
-        ),
-      ],
-      []
-    );
-  }
-
-  /**
-   * Pushes a new aggregator onto the crank.
-   * @param params The crank push parameters.
-   * @return TransactionSignature
-   */
-  async push(params: CrankPushParams): Promise<TransactionSignature> {
-    const pushTxn = await this.pushInstruction(
-      this.program.walletPubkey,
-      params
-    );
-    const txnSignature = await this.program.signAndSend(pushTxn);
-    return txnSignature;
-  }
-
-  /**
    * Get an array of the next aggregator pubkeys to be popped from the crank, limited by n
    * @param num The limit of pubkeys to return.
    * @return List of {@linkcode types.CrankRow}, ordered by timestamp.
    */
   async peakNextWithTime(num?: number): Promise<types.CrankRow[]> {
-    let crank: CrankDataBuffer;
-    if (this.dataBuffer) {
-      crank = this.dataBuffer;
-    } else {
-      const crankData = await this.loadData();
-      crank = new CrankDataBuffer(this.program, crankData.dataBuffer);
-    }
-    const crankRows = await crank.loadData();
-
+    const crankRows = await this.loadCrank();
     return crankRows.slice(0, num ?? crankRows.length);
   }
 
@@ -335,8 +329,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    * @param num The limit of pubkeys to return.
    * @return Pubkey list of Aggregator pubkeys.
    */
-  async peakNextReady(num?: number): Promise<PublicKey[]> {
-    const now = Math.floor(Date.now() / 1000);
+  async peakNextReady(
+    num?: number,
+    unixTimestamp?: number
+  ): Promise<PublicKey[]> {
+    console.log(`unix: ${unixTimestamp}`);
+    const now = unixTimestamp ?? Math.floor(Date.now() / 1000);
     const crankRows = await this.peakNextWithTime(num);
     return crankRows
       .filter(row => now >= row.nextTimestamp.toNumber())
@@ -504,6 +502,10 @@ export interface CrankPopParams {
   nonce?: number;
   failOpenOnMismatch?: boolean;
   popIdx?: number;
+  /**
+   * Unix timestamp to use to determine readyPubkeys (if not provided)
+   */
+  unixTimestamp?: number;
 }
 
 export type CrankAccountsJSON = Omit<

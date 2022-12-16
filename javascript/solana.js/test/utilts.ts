@@ -2,9 +2,26 @@ import * as sbv2 from '../src';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { Connection, Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import {
+  clusterApiUrl,
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+} from '@solana/web3.js';
 import dotenv from 'dotenv';
+import {
+  AggregatorAccount,
+  CreateQueueFeedParams,
+  QueueAccount,
+  SBV2_DEVNET_PID,
+  SBV2_MAINNET_PID,
+  TransactionObject,
+} from '../src';
+import { OracleJob } from '@switchboard-xyz/common';
 dotenv.config();
+
+type SolanaCluster = 'localnet' | 'devnet' | 'mainnet-beta';
 
 export const sleep = (ms: number): Promise<any> =>
   new Promise(s => setTimeout(s, ms));
@@ -15,7 +32,7 @@ export const DEFAULT_KEYPAIR_PATH = path.join(
 );
 
 export interface TestContext {
-  cluster: 'localnet' | 'devnet';
+  cluster: SolanaCluster;
   program: sbv2.SwitchboardProgram;
   payer: Keypair;
   toUrl: (signature: string) => string;
@@ -34,8 +51,55 @@ export function isLocalnet(): boolean {
   return false;
 }
 
+export function getCluster(): SolanaCluster {
+  if (process.env.SOLANA_CLUSTER) {
+    const cluster = String(process.env.SOLANA_CLUSTER);
+    if (
+      cluster === 'localnet' ||
+      cluster === 'devnet' ||
+      cluster === 'mainnet-beta'
+    ) {
+      return cluster;
+    } else {
+      throw new Error(
+        `SOLANA_CLUSTER must be localnet, devnet, or mainnet-beta`
+      );
+    }
+  }
+
+  if (isLocalnet()) {
+    return 'localnet';
+  }
+
+  return 'devnet';
+}
+
+export function getProgramId(cluster: SolanaCluster): PublicKey {
+  if (process.env.SWITCHBOARD_PROGRAM_ID) {
+    return new PublicKey(process.env.SWITCHBOARD_PROGRAM_ID);
+  }
+
+  if (cluster === 'mainnet-beta') {
+    return SBV2_MAINNET_PID;
+  }
+
+  return SBV2_DEVNET_PID;
+}
+
+export function getRpcUrl(cluster: SolanaCluster): string {
+  if (process.env.SOLANA_RPC_URL) {
+    return String(process.env.SOLANA_RPC_URL);
+  }
+
+  if (cluster === 'localnet') {
+    return 'http://localhost:8899';
+  }
+
+  return clusterApiUrl(cluster);
+}
+
 export async function setupTest(): Promise<TestContext> {
-  const cluster = isLocalnet() ? 'localnet' : 'devnet';
+  const cluster = getCluster();
   const payer: Keypair = fs.existsSync(DEFAULT_KEYPAIR_PATH)
     ? Keypair.fromSecretKey(
         new Uint8Array(
@@ -44,14 +108,14 @@ export async function setupTest(): Promise<TestContext> {
       )
     : Keypair.generate();
 
+  const programId = getProgramId(cluster);
+  console.log(`PROGRAM_ID: ${programId.toBase58()}`);
+
   const program = await sbv2.SwitchboardProgram.load(
     cluster,
-    new Connection(
-      isLocalnet() ? 'http://localhost:8899' : 'https://api.devnet.solana.com',
-      { commitment: 'confirmed' }
-    ),
+    new Connection(getRpcUrl(cluster), { commitment: 'confirmed' }),
     payer,
-    sbv2.SBV2_DEVNET_PID
+    programId
   );
 
   // request airdrop if low on funds
@@ -84,8 +148,99 @@ export async function setupTest(): Promise<TestContext> {
     program,
     payer,
     toUrl: signature =>
-      isLocalnet()
+      cluster === 'localnet'
         ? `https://explorer.solana.com/tx/${signature}?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899`
-        : `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
+        : `https://explorer.solana.com/tx/${signature}${
+            cluster === 'devnet' ? '?cluster=devnet' : ''
+          }`,
   };
+}
+
+export async function createFeed(
+  queueAccount: QueueAccount,
+  feedConfig?: Partial<CreateQueueFeedParams>
+): Promise<AggregatorAccount> {
+  const [aggregatorAccount] = await queueAccount.createFeed({
+    name: feedConfig?.name ?? `Aggregator`,
+    queueAuthority: feedConfig?.queueAuthority,
+    batchSize: feedConfig?.batchSize ?? 1,
+    minRequiredOracleResults: feedConfig?.minRequiredOracleResults ?? 1,
+    minRequiredJobResults: feedConfig?.minRequiredOracleResults ?? 1,
+    minUpdateDelaySeconds: feedConfig?.minUpdateDelaySeconds ?? 10,
+    fundAmount: feedConfig?.fundAmount ?? 0,
+    enable: feedConfig?.enable ?? true,
+    jobs:
+      feedConfig?.jobs && feedConfig?.jobs.length > 0
+        ? feedConfig?.jobs
+        : [
+            {
+              weight: 2,
+              data: OracleJob.encodeDelimited(
+                OracleJob.fromObject({
+                  tasks: [
+                    {
+                      valueTask: {
+                        value: 1,
+                      },
+                    },
+                  ],
+                })
+              ).finish(),
+            },
+          ],
+  });
+
+  return aggregatorAccount;
+}
+
+export async function createFeeds(
+  queueAccount: QueueAccount,
+  numFeeds: number,
+  feedConfig?: Partial<CreateQueueFeedParams>
+): Promise<Array<AggregatorAccount>> {
+  const aggregators: Array<AggregatorAccount> = [];
+  const txns: Array<Array<TransactionObject>> = [];
+  for (const i of Array.from(Array(numFeeds).keys())) {
+    const [aggregatorAccount, txn] = await queueAccount.createFeedInstructions(
+      queueAccount.program.walletPubkey,
+      {
+        name: feedConfig?.name ?? `Aggregator-${i + 1}`,
+        queueAuthority: feedConfig?.queueAuthority,
+        batchSize: feedConfig?.batchSize ?? 1,
+        minRequiredOracleResults: feedConfig?.minRequiredOracleResults ?? 1,
+        minRequiredJobResults: feedConfig?.minRequiredOracleResults ?? 1,
+        minUpdateDelaySeconds: feedConfig?.minUpdateDelaySeconds ?? 10,
+        fundAmount: feedConfig?.fundAmount ?? 0,
+        enable: feedConfig?.enable ?? true,
+        jobs:
+          feedConfig?.jobs && feedConfig?.jobs.length > 0
+            ? feedConfig?.jobs
+            : [
+                {
+                  weight: 2,
+                  data: OracleJob.encodeDelimited(
+                    OracleJob.fromObject({
+                      tasks: [
+                        {
+                          valueTask: {
+                            value: 1,
+                          },
+                        },
+                      ],
+                    })
+                  ).finish(),
+                },
+              ],
+      }
+    );
+
+    aggregators.push(aggregatorAccount);
+    txns.push(txn);
+  }
+
+  await queueAccount.program.signAndSendAll(
+    TransactionObject.pack(txns.flat())
+  );
+
+  return aggregators;
 }
