@@ -30,19 +30,21 @@ jobs:
           node-version: 16
           cache: "npm"
           cache-dependency-path: "javascript/solana.js/package-lock.json"
-      - name: Cache Build For Next Jobs
+      - name: Install Dependencies
+        working-directory: javascript/solana.js
+        run: npm ci
+      - name: Setup Solana SDK Cache
         id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
           key:
-            ${{ runner.os }}-Solana-SDK-${{ hashFiles(
-            'javascript/solana.js/package-lock.json',
-            'javascript/solana.js/src/**') }}
+            ${{ runner.os }}-Solana.js-${{
+            hashFiles('javascript/solana.js/src/**') }}
           path: |
             javascript/solana.js/lib
       - name: Build solana.js
         working-directory: javascript/solana.js
-        run: npm install && npm run build
+        run: npm run build
 
   job2:
     name: "@switchboard-xyz/solana.js Devnet Tests"
@@ -136,4 +138,6 @@ jobs:
             J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD"
       - name: Run Tests
         working-directory: javascript/solana.js
-        run: npm run test:localnet
+        run:
+          SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f npm
+          run test:localnet
