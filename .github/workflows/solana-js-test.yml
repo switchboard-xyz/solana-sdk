@@ -31,7 +31,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: "javascript/solana.js/package-lock.json"
       - name: Cache Build For Next Jobs
-        id: cache-solana.js-install
+        id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
           key:
@@ -52,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Cache Build For Next Jobs
-        id: cache-solana.js-install
+        id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
           key:
@@ -61,14 +61,14 @@ jobs:
           path: |
             javascript/solana.js/lib
       - name: Use Node.js
-        if: steps.cache-solana.js-install.outputs.cache-hit != 'true'
+        if: steps.cache-solana-sdk-build.outputs.cache-hit != 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
       - name: Build solana.js
-        if: steps.cache-solana.js-install.outputs.cache-hit != 'true'
+        if: steps.cache-solana-sdk-build.outputs.cache-hit != 'true'
         working-directory: javascript/solana.js
         run: npm install && npm run build
       - name: Start Local Validator
@@ -97,7 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Cache Build For Next Jobs
-        id: cache-solana.js-install
+        id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
           key:
@@ -106,14 +106,14 @@ jobs:
           path: |
             javascript/solana.js/lib
       - name: Use Node.js
-        if: steps.cache-solana.js-install.outputs.cache-hit != 'true'
+        if: steps.cache-solana-sdk-build.outputs.cache-hit != 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: "npm"
           cache-dependency-path: "**/package-lock.json"
       - name: Build solana.js
-        if: steps.cache-solana.js-install.outputs.cache-hit != 'true'
+        if: steps.cache-solana-sdk-build.outputs.cache-hit != 'true'
         working-directory: javascript/solana.js
         run: npm install && npm run build
       - name: Start Local Validator
