@@ -1,8 +1,6 @@
 name: solana-js-test
 on:
   push:
-    branches:
-      - main
     paths:
       - ".github/workflows/**"
       - "javascript/solana.js/src/**"
@@ -143,4 +141,7 @@ jobs:
         env:
           SOLANA_LOCALNET: 1
           SWITCHBOARD_PROGRAM_ID: SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
-        run: npm run test:localnet:mainnet
+        run: |
+          export SOLANA_LOCALNET=1
+          export SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+          npm run test:localnet:mainnet
