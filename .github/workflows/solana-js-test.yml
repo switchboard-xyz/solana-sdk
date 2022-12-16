@@ -138,6 +138,4 @@ jobs:
             J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD"
       - name: Run Tests
         working-directory: javascript/solana.js
-        run:
-          SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f npm
-          run test:localnet
+        run: npm run test:localnet:mainnet
