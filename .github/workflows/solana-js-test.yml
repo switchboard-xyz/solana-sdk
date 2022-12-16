@@ -45,6 +45,7 @@ jobs:
 
   job2:
     name: "@switchboard-xyz/solana.js Devnet Tests"
+    needs: job1
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -90,6 +91,7 @@ jobs:
 
   job3:
     name: "@switchboard-xyz/solana.js Mainnet Tests"
+    needs: job1
     runs-on: ubuntu-latest
     defaults:
       run:
