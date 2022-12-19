@@ -23,13 +23,13 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = "0.25.0"
-anchor-spl = "0.25.0"
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
 rust_decimal = "1.26.0"
-solana-program = "~1.10.29"
+solana-program = "1.1.14"
 bytemuck = "1.7.2"
 superslice = "1"
-spl-token = "3.3.1"
+spl-token = "3.5"
 
 # solana-program = "1.10"
 # spl-token = "3.5"
