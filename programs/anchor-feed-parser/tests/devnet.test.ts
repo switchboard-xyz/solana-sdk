@@ -1,8 +1,11 @@
 import * as anchor from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
-import type { AnchorWallet } from "@switchboard-xyz/switchboard-v2";
 import chai from "chai";
+import { sleep } from "@switchboard-xyz/common";
+import {
+  AnchorWallet,
+  SwitchboardTestContext,
+} from "@switchboard-xyz/solana.js";
 import { PROGRAM_ID } from "../client/programId";
 import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 const expect = chai.expect;
@@ -31,7 +34,9 @@ describe("anchor-feed-parser test", () => {
   let switchboard: SwitchboardTestContext;
   let aggregatorKey: PublicKey;
 
-  console.log(`rpc: ${feedParserProgram.provider.connection.rpcEndpoint}`);
+  console.log(
+    `devnet tests rpc: ${feedParserProgram.provider.connection.rpcEndpoint}`
+  );
 
   before(async () => {
     try {

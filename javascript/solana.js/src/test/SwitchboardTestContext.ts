@@ -1,3 +1,4 @@
+import * as dotenv from 'dotenv';
 import * as anchor from '@project-serum/anchor';
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
@@ -8,7 +9,10 @@ import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
 import { Mint } from '../mint';
 import { AggregatorAccountData } from '../generated';
 import { TransactionObject } from '../TransactionObject';
-import { SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE } from '../const';
+import {
+  DEVNET_GENESIS_HASH,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+} from '../const';
 import { SwitchboardNetwork } from '../SwitchboardNetwork';
 
 export const LATEST_DOCKER_VERSION = 'dev-v2-RC_12_05_22_22_48';
@@ -41,6 +45,63 @@ export class SwitchboardTestContext {
     readonly queue: QueueAccount,
     readonly payerTokenWallet: PublicKey
   ) {}
+
+  public static async load(
+    provider: anchor.AnchorProvider,
+    params?: {
+      tokenAmount?: number;
+      queueKey?: PublicKey | string;
+      filePath?: string;
+    }
+  ): Promise<SwitchboardTestContext> {
+    // fetch genesis hash
+
+    const genesisHash = await provider.connection.getGenesisHash();
+    if (genesisHash === DEVNET_GENESIS_HASH) {
+      // if queueKey is defined should we bother loading the local env?
+
+      // first try to load the local env
+      try {
+        const testContext = await SwitchboardTestContext.loadFromEnv(
+          provider,
+          params?.filePath ?? undefined,
+          params?.tokenAmount ?? undefined
+        );
+        // verify the oracle is heartbeating
+        const oracles = await testContext.queue.loadActiveOracleAccounts();
+        if (oracles.length > 0) {
+          return testContext;
+        }
+        // eslint-disable-next-line no-empty
+      } catch (error) {}
+
+      // fallback to the devnet permissionless queue
+      try {
+        const testContext = await SwitchboardTestContext.loadDevnetQueue(
+          provider,
+          params?.queueKey ?? undefined,
+          params?.tokenAmount ?? undefined
+        );
+        // verify the oracle is heartbeating
+        const oracles = await testContext.queue.loadActiveOracleAccounts();
+        if (oracles.length > 0) {
+          return testContext;
+        }
+        // eslint-disable-next-line no-empty
+      } catch (error) {}
+
+      throw new Error(
+        `Failed to load a Switchboard environment from a local file or the devnet permissionless queue`
+      );
+    } else {
+      const testContext = await SwitchboardTestContext.loadFromEnv(
+        provider,
+        params?.filePath ?? undefined,
+        params?.tokenAmount ?? undefined
+      );
+      return testContext;
+    }
+  }
 
   /** Load SwitchboardTestContext using a specified queue
    * @param provider anchor Provider containing connection and payer Keypair
@@ -155,7 +216,7 @@ export class SwitchboardTestContext {
     tokenAmount = 0
   ): Promise<SwitchboardTestContext> {
     // eslint-disable-next-line node/no-unpublished-require
-    require('dotenv').config({ path: filePath });
+    dotenv.config({ path: filePath });
     if (!process.env.SWITCHBOARD_PROGRAM_ID) {
       throw new Error(`your env file must have $SWITCHBOARD_PROGRAM_ID set`);
     }

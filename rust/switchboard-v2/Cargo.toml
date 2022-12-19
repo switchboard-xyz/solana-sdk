@@ -6,7 +6,7 @@ description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
 keywords = ["switchboard", "oracle", "solana"]
 homepage = "https://docs.switchboard.xyz"
-repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/libraries/rs"
+repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-v2"
 license = "MIT"
 documentation = "https://docs.rs/switchboard-v2/"
 
@@ -23,15 +23,10 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = "0.26.0"
-anchor-spl = "0.26.0"
-rust_decimal = "1.26.0"
-solana-program = "1.1.14"
+anchor-lang = "^0.26.0"
+anchor-spl = "^0.26.0"
+rust_decimal = "^1.18.0"
+solana-program = "^1.13.6"
 bytemuck = "1.7.2"
 superslice = "1"
 spl-token = "3.5"
-
-# solana-program = "1.10"
-# spl-token = "3.5"
-# anchor-lang = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }
-# anchor-spl = { git = "https://github.com/coral-xyz/anchor.git", rev = "66e4295fe0d2cc2456055bea50e8d227492bdbad" }

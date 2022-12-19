@@ -4,7 +4,7 @@ members = [
 ]
 
 [programs.localnet]
-anchor_feed_parser = "5cjAZXFoY4KN1Sq35ZYE72fGdVy8sy5YGpNix1N4rtHY"
+anchor_feed_parser = "Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb"
 
 [provider]
 cluster = "devnet"

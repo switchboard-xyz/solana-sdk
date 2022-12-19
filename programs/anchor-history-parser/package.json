@@ -4,10 +4,9 @@
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.25.0",
-    "@switchboard-xyz/common": "^2.1.7",
-    "@switchboard-xyz/sbv2-utils": "^0.1.53",
-    "@switchboard-xyz/switchboard-v2": "^0.0.165"
+    "@project-serum/anchor": "^0.26.0",
+    "@switchboard-xyz/common": "^2.1.8",
+    "@switchboard-xyz/solana.js": "^2.0.52"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

@@ -5,7 +5,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
+import { SwitchboardTestContext } from "@switchboard-xyz/solana.js";
 import fs from "fs";
 import path from "path";
 
@@ -58,7 +58,7 @@ describe("native-feed-parser test", () => {
     // If fails, fallback to looking for a local env file
     try {
       switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      const aggregatorAccount = await switchboard.createStaticFeed(100);
+      const [aggregatorAccount] = await switchboard.createStaticFeed(100);
       aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
       console.log("local env detected");
       return;

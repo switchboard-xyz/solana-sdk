@@ -6,7 +6,7 @@ use anchor_spl::token::TokenAccount;
 
 pub use switchboard_v2::SWITCHBOARD_PROGRAM_ID;
 
-declare_id!("HjjRFjCyQH3ne6Gg8Yn3TQafrrYecRrphwLwnh2A26vM");
+declare_id!("4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN");
 
 const MAX_RESULT: u64 = u64::MAX;
 
