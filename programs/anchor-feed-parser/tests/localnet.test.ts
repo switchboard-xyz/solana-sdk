@@ -1,16 +1,16 @@
 import * as anchor from "@project-serum/anchor";
 import { Connection } from "@solana/web3.js";
-import { sleep, SwitchboardTestContext } from "@switchboard-xyz/sbv2-utils";
-import type {
+import { sleep } from "@switchboard-xyz/common";
+import {
   AggregatorAccount,
-  AnchorWallet,
-} from "@switchboard-xyz/switchboard-v2";
+  SwitchboardTestContext,
+} from "@switchboard-xyz/solana.js";
 import chai from "chai";
 import { PROGRAM_ID } from "../client/programId";
 import { AnchorFeedParser, IDL } from "../target/types/anchor_feed_parser";
 const expect = chai.expect;
 
-describe("anchor-feed-parser test", () => {
+describe("anchor-feed-parser localnet test", () => {
   const tomlProvider = anchor.AnchorProvider.env();
   const provider = new anchor.AnchorProvider(
     new Connection("http://localhost:8899"),
@@ -25,35 +25,27 @@ describe("anchor-feed-parser test", () => {
   const feedParserProgram = new anchor.Program(
     IDL,
     PROGRAM_ID,
-    provider,
-    new anchor.BorshCoder(IDL)
+    provider
   ) as anchor.Program<AnchorFeedParser>;
-
-  const payer = (provider.wallet as AnchorWallet).payer;
 
   let switchboard: SwitchboardTestContext;
   let aggregatorAccount: AggregatorAccount;
 
   before(async () => {
-    try {
-      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      console.log("local env detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Localnet - ${error.message}`);
-      console.error(error);
-    }
-
-    throw new Error(`Failed to load the localnet Switchboard environment`);
+    switchboard = await SwitchboardTestContext.loadFromEnv(provider);
   });
 
   it("Creates a static feed that resolves to 100", async () => {
-    aggregatorAccount = await switchboard.createStaticFeed(100);
+    [aggregatorAccount] = await switchboard.createStaticFeed(100);
 
     console.log(`Created Feed: ${aggregatorAccount.publicKey}`);
   });
 
   it("Reads the static feed", async () => {
+    if (!aggregatorAccount) {
+      throw new Error(`No aggregatorAccount to read`);
+    }
+
     const signature = await feedParserProgram.methods
       .readResult({ maxConfidenceInterval: 0.25 })
       .accounts({ aggregator: aggregatorAccount.publicKey })
@@ -73,6 +65,10 @@ describe("anchor-feed-parser test", () => {
   });
 
   it("Fails to read feed if confidence interval is exceeded", async () => {
+    if (!aggregatorAccount) {
+      throw new Error(`No aggregatorAccount to read`);
+    }
+
     try {
       await feedParserProgram.methods
         .readResult({ maxConfidenceInterval: 0.0000000001 })
@@ -86,6 +82,10 @@ describe("anchor-feed-parser test", () => {
   });
 
   it("Updates static feed to resolve to 110", async () => {
+    if (!aggregatorAccount) {
+      throw new Error(`No aggregatorAccount to read`);
+    }
+
     await switchboard.updateStaticFeed(aggregatorAccount, 110, 45);
 
     const signature = await feedParserProgram.methods

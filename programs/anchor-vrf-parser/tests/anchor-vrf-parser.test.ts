@@ -1,27 +1,24 @@
-import * as anchor from "@project-serum/anchor";
-import { AnchorProvider } from "@project-serum/anchor";
-import * as spl from "@solana/spl-token-v2";
+import "mocha";
+
+import * as anchor from "@coral-xyz/anchor";
+import { AnchorProvider } from "@coral-xyz/anchor";
 import {
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
 } from "@solana/web3.js";
-import {
-  promiseWithTimeout,
-  sleep,
-  SwitchboardTestContext,
-} from "@switchboard-xyz/sbv2-utils";
+
+import { AnchorVrfParser, IDL } from "../target/types/anchor_vrf_parser";
+import { VrfClient } from "../client/accounts";
+import { PROGRAM_ID } from "../client/programId";
 import {
   AnchorWallet,
   Callback,
   PermissionAccount,
-  ProgramStateAccount,
-  SwitchboardPermission,
-  VrfAccount,
-} from "@switchboard-xyz/switchboard-v2";
-import "mocha";
-import { AnchorVrfParser, IDL } from "../target/types/anchor_vrf_parser";
-import { VrfClient } from "../client/accounts";
-import { PROGRAM_ID } from "../client/programId";
+  SwitchboardTestContext,
+  types,
+} from "@switchboard-xyz/solana.js";
+import { sleep } from "@switchboard-xyz/common";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
@@ -98,65 +95,28 @@ describe("anchor-vrf-parser test", () => {
     );
   });
 
-  beforeEach(async () => {
-    const maxTime = 60000;
-    const retryCount = 10;
-    const retryInterval = maxTime / retryCount;
-
-    let isReady = false;
-
-    const timer = setInterval(async () => {
-      const queue = await switchboard.queue.loadData();
-      const oracles = queue.queue as anchor.web3.PublicKey[];
-      if (oracles.length > 0) {
-        // console.log(`oracle ready, ${oracles.length}`);
-        isReady = true;
-        clearTimeout(timer);
-      } else {
-        // console.log(`oracle not ready, ${oracles.length}`);
-      }
-    }, retryInterval);
-
-    let n = maxTime / 1000;
-    while (!isReady && n > 0) {
-      if (isReady) {
-        // console.log(`finally ready`);
-        break;
-      }
-      // console.log(`still not ready ${n} ...`);
-      await sleep(1 * 1000);
-      --n;
-    }
-    if (!isReady) {
-      throw new Error(`Docker oracle failed to initialize in 60seconds`);
-    }
-
-    clearTimeout(timer);
-  });
-
   it("Creates a vrfClient account", async () => {
     const queue = switchboard.queue;
     const { unpermissionedVrfEnabled, authority, dataBuffer } =
       await queue.loadData();
 
     // Create Switchboard VRF and Permission account
-    const vrfAccount = await VrfAccount.create(switchboard.program, {
-      queue,
+    const [vrfAccount] = await queue.createVrf({
       callback: vrfClientCallback,
       authority: vrfClientKey, // vrf authority
-      keypair: vrfSecret,
+      vrfKeypair: vrfSecret,
+      enable: false,
     });
 
     console.log(`Created VRF Account: ${vrfAccount.publicKey}`);
 
-    const permissionAccount = await PermissionAccount.create(
-      switchboard.program,
-      {
-        authority,
-        granter: queue.publicKey,
-        grantee: vrfAccount.publicKey,
-      }
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      queue.program,
+      authority,
+      queue.publicKey,
+      vrfAccount.publicKey
     );
+
     console.log(`Created Permission Account: ${permissionAccount.publicKey}`);
 
     // If queue requires permissions to use VRF, check the correct authority was provided
@@ -168,8 +128,8 @@ describe("anchor-vrf-parser test", () => {
       }
 
       await permissionAccount.set({
-        authority: payer,
-        permission: SwitchboardPermission.PERMIT_VRF_REQUESTS,
+        queueAuthority: payer,
+        permission: new types.SwitchboardPermission.PermitVrfRequests(),
         enable: true,
       });
       console.log(`Set VRF Permissions`);
@@ -190,32 +150,22 @@ describe("anchor-vrf-parser test", () => {
       .rpc();
     console.log(`Created VrfClient Account: ${vrfClientKey}`);
 
-    // Get required switchboard accounts
-    const [programStateAccount, programStateBump] =
-      ProgramStateAccount.fromSeed(switchboard.program);
-    const [permissionKey, permissionBump] = PermissionAccount.fromSeed(
-      switchboard.program,
-      authority,
-      queue.publicKey,
-      vrfAccount.publicKey
-    );
-    const mint = await programStateAccount.getTokenMint();
-    const payerTokenAccount = await spl.getOrCreateAssociatedTokenAccount(
-      provider.connection,
-      payer,
-      mint.address,
-      payer.publicKey
-    );
+    const [payerTokenWallet] =
+      await switchboard.program.mint.getOrCreateWrappedUser(
+        switchboard.program.walletPubkey,
+        { fundUpTo: 0.002 }
+      );
 
-    const { escrow } = await vrfAccount.loadData();
+    const vrf = await vrfAccount.loadData();
 
     // give account time to propagate to oracle RPCs
     await sleep(2000);
 
     // Request randomness
     await vrfClientProgram.methods.requestResult!({
-      switchboardStateBump: programStateBump,
+      switchboardStateBump: switchboard.program.programState.bump,
       permissionBump,
+      // callback: vrf.callback,
     })
       .accounts({
         state: vrfClientKey,
@@ -226,68 +176,30 @@ describe("anchor-vrf-parser test", () => {
         queueAuthority: authority,
         dataBuffer,
         permission: permissionAccount.publicKey,
-        escrow,
-        payerWallet: payerTokenAccount.address,
+        escrow: vrf.escrow,
+        payerWallet: payerTokenWallet,
         payerAuthority: payer.publicKey,
         recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-        programState: programStateAccount.publicKey,
-        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        programState: switchboard.program.programState.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
-    // .then((sig) => {
-    //   console.log(`RequestRandomness Txn: ${sig}`);
-    // });
 
-    const result = await awaitCallback(
-      vrfClientProgram.provider.connection,
-      vrfClientKey,
+    const result = await vrfAccount.nextResult(
+      new anchor.BN(vrf.counter.toNumber() + 1),
       45_000
     );
+    if (!result.success) {
+      throw new Error(`Failed to get VRF Result: ${result.status}`);
+    }
 
-    console.log(`VrfClient Result: ${result}`);
+    const vrfClient = await VrfClient.fetch(
+      vrfClientProgram.provider.connection,
+      vrfClientKey
+    );
+
+    console.log(`VrfClient Result: ${vrfClient.result}`);
+
+    return;
   });
 });
-
-async function awaitCallback(
-  connection: anchor.web3.Connection,
-  vrfClientKey: anchor.web3.PublicKey,
-  timeoutInterval: number,
-  errorMsg = "Timed out waiting for VRF Client callback"
-) {
-  let ws: number | undefined = undefined;
-  const result: anchor.BN = await promiseWithTimeout(
-    timeoutInterval,
-    new Promise(
-      (
-        resolve: (result: anchor.BN) => void,
-        reject: (reason: string) => void
-      ) => {
-        ws = connection.onAccountChange(
-          vrfClientKey,
-          async (
-            accountInfo: anchor.web3.AccountInfo<Buffer>,
-            context: anchor.web3.Context
-          ) => {
-            const clientState = VrfClient.decode(accountInfo.data);
-            if (clientState.result.gt(new anchor.BN(0))) {
-              resolve(clientState.result);
-            }
-          }
-        );
-      }
-    ).finally(async () => {
-      if (ws) {
-        await connection.removeAccountChangeListener(ws);
-      }
-      ws = undefined;
-    }),
-    new Error(errorMsg)
-  ).finally(async () => {
-    if (ws) {
-      await connection.removeAccountChangeListener(ws);
-    }
-    ws = undefined;
-  });
-
-  return result;
-}

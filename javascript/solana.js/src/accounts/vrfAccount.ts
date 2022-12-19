@@ -606,6 +606,13 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     }
     let ws: number | undefined;
 
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
     let result: VrfResult;
     try {
       result = await promiseWithTimeout(
@@ -644,15 +651,10 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         )
       );
     } finally {
-      if (ws !== undefined) {
-        await this.program.connection.removeAccountChangeListener(ws);
-        ws = undefined;
-      }
+      closeWebsocket();
     }
 
-    if (ws !== undefined) {
-      await this.program.connection.removeAccountChangeListener(ws);
-    }
+    closeWebsocket();
 
     return result;
   }

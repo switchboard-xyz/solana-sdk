@@ -3,7 +3,7 @@ use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
 pub use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID};
 
-declare_id!("5cjAZXFoY4KN1Sq35ZYE72fGdVy8sy5YGpNix1N4rtHY");
+declare_id!("Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb");
 
 #[derive(Accounts)]
 #[instruction(params: ReadResultParams)]

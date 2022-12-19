@@ -12,10 +12,9 @@ anchor_history_parser = "C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS"
 url = "https://anchor.projectserum.com"
 
 [provider]
-cluster = "devnet"
-# cluster = "localnet"
-wallet = "../../../payer-keypair.json"
-# wallet = "~/.config/solana/id.json"
+# cluster = "devnet"
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
 
 
 [scripts]

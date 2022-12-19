@@ -23,6 +23,7 @@ import { Account, OnAccountChangeCallback } from './account';
 import { JobAccount } from './jobAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
+import { promiseWithTimeout } from '@switchboard-xyz/common';
 
 /**
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.
@@ -185,12 +186,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
 
   public async openRoundInstructions(
     payer: PublicKey,
-    params: {
-      tokenWallet: PublicKey;
-      bufferRelayer?: types.BufferRelayerAccountData;
-      queueAccount?: QueueAccount;
-      queue?: types.OracleQueueAccountData;
-    }
+    params: BufferRelayerOpenRoundParams
   ): Promise<TransactionObject> {
     const ixns: TransactionInstruction[] = [];
     const bufferRelayer = params.bufferRelayer ?? (await this.loadData());
@@ -247,18 +243,64 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     return new TransactionObject(payer, ixns, []);
   }
 
-  public async openRound(params: {
-    tokenWallet: PublicKey;
-    bufferRelayer?: types.BufferRelayerAccountData;
-    queueAccount?: QueueAccount;
-    queue?: types.OracleQueueAccountData;
-  }): Promise<TransactionSignature> {
+  public async openRound(
+    params: BufferRelayerOpenRoundParams
+  ): Promise<TransactionSignature> {
     const openRound = await this.openRoundInstructions(
       this.program.walletPubkey,
       params
     );
     const txnSignature = await this.program.signAndSend(openRound);
     return txnSignature;
+  }
+
+  public async openRoundAndAwaitResult(
+    params: BufferRelayerOpenRoundParams,
+    timeout = 30000
+  ): Promise<[types.BufferRelayerAccountData, TransactionSignature]> {
+    const bufferRelayer = params?.bufferRelayer ?? (await this.loadData());
+    const currentRoundOpenSlot = bufferRelayer.currentRound.roundOpenSlot;
+
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
+    const statePromise: Promise<types.BufferRelayerAccountData> =
+      promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: types.BufferRelayerAccountData) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(bufferRelayer => {
+              if (
+                bufferRelayer.currentRound.roundOpenSlot.gt(
+                  currentRoundOpenSlot
+                ) &&
+                bufferRelayer.currentRound.numSuccess > 0
+              ) {
+                resolve(bufferRelayer);
+              }
+            });
+          }
+        )
+      ).finally(async () => {
+        await closeWebsocket();
+      });
+
+    const openRoundSignature = await this.openRound(params);
+
+    const state = await statePromise;
+
+    await closeWebsocket();
+
+    return [state, openRoundSignature];
   }
 
   public getAccounts(params: {
@@ -394,4 +436,11 @@ export type BufferRelayerAccountsJSON = types.BufferRelayerAccountDataJSON & {
     bump: number;
     publicKey: PublicKey;
   };
+};
+
+export type BufferRelayerOpenRoundParams = {
+  tokenWallet: PublicKey;
+  bufferRelayer?: types.BufferRelayerAccountData;
+  queueAccount?: QueueAccount;
+  queue?: types.OracleQueueAccountData;
 };

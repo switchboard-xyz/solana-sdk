@@ -395,6 +395,13 @@ export type SwitchboardPermissionJSON =
   | SwitchboardPermission.PermitOracleQueueUsageJSON
   | SwitchboardPermission.PermitVrfRequestsJSON;
 
+export {
+  PermitNone,
+  PermitOracleHeartbeat,
+  PermitOracleQueueUsage,
+  PermitVrfRequests,
+} from './SwitchboardPermission';
+
 export { OracleResponseType };
 
 export type OracleResponseTypeKind =

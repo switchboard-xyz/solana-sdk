@@ -6,8 +6,7 @@ members = [
 [provider]
 # cluster = "devnet"
 cluster = "localnet"
-wallet = "../../../payer-keypair.json"
-# wallet = "~/.config/solana/id.json"
+wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
 anchor_buffer_parser = "96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP"
