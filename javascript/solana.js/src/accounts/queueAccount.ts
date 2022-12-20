@@ -572,6 +572,28 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(permissionInit);
 
+    // set priority fees
+    if (
+      params.basePriorityFee !== undefined ||
+      params.priorityFeeBump !== undefined ||
+      params.priorityFeeBumpPeriod !== undefined ||
+      params.maxPriorityFeeMultiplier !== undefined
+    ) {
+      const setAggregatorConfig = await aggregatorAccount.setConfigInstruction(
+        payer,
+        {
+          force: true,
+          authority: params.authority,
+          basePriorityFee: params.basePriorityFee,
+          priorityFeeBump: params.priorityFeeBump,
+          priorityFeeBumpPeriod: params.priorityFeeBumpPeriod,
+          maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier,
+        }
+      );
+
+      post.push(setAggregatorConfig);
+    }
+
     for await (const { job, weight } of jobs) {
       const addJobTxn = aggregatorAccount.addJobInstruction(payer, {
         job: job,
@@ -1381,6 +1403,11 @@ export type CreateQueueFeedParams = Omit<
   crankPubkey?: PublicKey;
   crankDataBuffer?: PublicKey;
   historyLimit?: number;
+} & {
+  basePriorityFee?: number;
+  priorityFeeBump?: number;
+  priorityFeeBumpPeriod?: number;
+  maxPriorityFeeMultiplier?: number;
 } & Partial<LeaseInitParams> &
   Partial<PermissionSetParams> & {
     // job params

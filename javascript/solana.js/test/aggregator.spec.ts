@@ -12,7 +12,6 @@ import {
   QueueAccount,
 } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
-import BN from 'bn.js';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;
@@ -377,6 +376,63 @@ describe('Aggregator Tests', () => {
     assert(
       postUpdateAggregatorState.minUpdateDelaySeconds === 300,
       `Failed to setConfig on aggregator`
+    );
+  });
+
+  it('Sets priority fees during feed creation', async () => {
+    const basePriorityFee = 10000;
+    const priorityFeeBump = 1000;
+    const priorityFeeBumpPeriod = 60;
+    const maxPriorityFeeMultiplier = 10;
+
+    const [myAggregatorAccount] = await queueAccount.createFeed({
+      queueAuthority: queueAuthority,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 60,
+      fundAmount: 2.5,
+      enable: true,
+      basePriorityFee,
+      priorityFeeBump,
+      priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier,
+      jobs: [
+        { pubkey: jobAccount.publicKey },
+        {
+          weight: 2,
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: 1,
+                  },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const myAggregator = await myAggregatorAccount.loadData();
+
+    assert(
+      myAggregator.basePriorityFee === basePriorityFee,
+      `basePriorityFee mismatch, expected ${basePriorityFee}, received ${myAggregator.basePriorityFee}`
+    );
+    assert(
+      myAggregator.priorityFeeBump === priorityFeeBump,
+      `priorityFeeBump mismatch, expected ${priorityFeeBump}, received ${myAggregator.priorityFeeBump}`
+    );
+    assert(
+      myAggregator.priorityFeeBumpPeriod === priorityFeeBumpPeriod,
+      `priorityFeeBumpPeriod mismatch, expected ${priorityFeeBumpPeriod}, received ${myAggregator.priorityFeeBumpPeriod}`
+    );
+    assert(
+      myAggregator.maxPriorityFeeMultiplier === maxPriorityFeeMultiplier,
+      `maxPriorityFeeMultiplier mismatch, expected ${maxPriorityFeeMultiplier}, received ${myAggregator.maxPriorityFeeMultiplier}`
     );
   });
 });

@@ -976,10 +976,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
                   )
                 )
               : null,
-          basePriorityFee: params.basePriorityFee ?? 0,
-          priorityFeeBump: params.priorityFeeBump ?? 0,
-          priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? 0,
-          maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? 0,
+          basePriorityFee: params.basePriorityFee ?? null,
+          priorityFeeBump: params.priorityFeeBump ?? null,
+          priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? null,
+          maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? null,
         },
       },
       {

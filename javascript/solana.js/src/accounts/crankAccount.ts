@@ -333,7 +333,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     num?: number,
     unixTimestamp?: number
   ): Promise<PublicKey[]> {
-    console.log(`unix: ${unixTimestamp}`);
+
     const now = unixTimestamp ?? Math.floor(Date.now() / 1000);
     const crankRows = await this.peakNextWithTime(num);
     return crankRows

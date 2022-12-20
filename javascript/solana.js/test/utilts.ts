@@ -109,7 +109,6 @@ export async function setupTest(): Promise<TestContext> {
     : Keypair.generate();
 
   const programId = getProgramId(cluster);
-  console.log(`PROGRAM_ID: ${programId.toBase58()}`);
 
   const program = await sbv2.SwitchboardProgram.load(
     cluster,

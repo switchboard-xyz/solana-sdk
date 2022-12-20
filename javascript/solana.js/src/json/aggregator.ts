@@ -24,6 +24,11 @@ export class AggregatorJson implements CreateQueueFeedParams {
   disableCrank: boolean;
   crankIndex?: number;
 
+  basePriorityFee?: number;
+  priorityFeeBump?: number;
+  priorityFeeBumpPeriod?: number;
+  maxPriorityFeeMultiplier?: number;
+
   // lease params
   fundAmount: number;
 
@@ -63,6 +68,22 @@ export class AggregatorJson implements CreateQueueFeedParams {
     this.disableCrank = parseBoolean(object, 'disableCrank', false);
     this.crankIndex =
       'crankIndex' in object ? Number(object.crankIndex) : undefined;
+    this.basePriorityFee =
+      'basePriorityFee' in object
+        ? Number.parseInt(object.basePriorityFee)
+        : undefined;
+    this.priorityFeeBump =
+      'priorityFeeBump' in object
+        ? Number.parseInt(object.priorityFeeBump)
+        : undefined;
+    this.priorityFeeBumpPeriod =
+      'priorityFeeBumpPeriod' in object
+        ? Number.parseInt(object.priorityFeeBumpPeriod)
+        : undefined;
+    this.maxPriorityFeeMultiplier =
+      'maxPriorityFeeMultiplier' in object
+        ? Number.parseInt(object.maxPriorityFeeMultiplier)
+        : undefined;
 
     // lease
     this.fundAmount = parseNumber(object, 'fundAmount', 0);
