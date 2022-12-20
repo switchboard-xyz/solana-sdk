@@ -46,7 +46,7 @@
     "watch": "tsc -p tsconfig.cjs.json --watch",
     "pretest": "npm run build",
     "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
-    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
+    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000",
     "test:localnet:mainnet": "SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
     "localnet:up": "npm run local:validator & sleep 20 && npm run test:localnet",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",

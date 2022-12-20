@@ -10,6 +10,7 @@ import {
   JobAccount,
   LeaseAccount,
   QueueAccount,
+  types,
 } from '../src';
 import { OracleJob } from '@switchboard-xyz/common';
 
@@ -393,6 +394,7 @@ describe('Aggregator Tests', () => {
       minUpdateDelaySeconds: 60,
       fundAmount: 2.5,
       enable: true,
+      slidingWindow: true,
       basePriorityFee,
       priorityFeeBump,
       priorityFeeBumpPeriod,
@@ -418,6 +420,11 @@ describe('Aggregator Tests', () => {
 
     const myAggregator = await myAggregatorAccount.loadData();
 
+    assert(
+      myAggregator.resolutionMode.discriminator ===
+        types.AggregatorResolutionMode.ModeSlidingResolution.discriminator,
+      `resolutionMode mismatch, expected ${types.AggregatorResolutionMode.ModeSlidingResolution.discriminator}, received ${myAggregator.resolutionMode.discriminator}`
+    );
     assert(
       myAggregator.basePriorityFee === basePriorityFee,
       `basePriorityFee mismatch, expected ${basePriorityFee}, received ${myAggregator.basePriorityFee}`

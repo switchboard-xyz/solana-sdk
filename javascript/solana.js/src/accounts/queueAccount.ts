@@ -572,6 +572,18 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(permissionInit);
 
+    // set resolution mode
+    if (params.slidingWindow !== undefined && params.slidingWindow === true) {
+      const setResolutionMode = aggregatorAccount.setSlidingWindowInstruction(
+        payer,
+        {
+          authority: params.authority,
+          mode: new types.AggregatorResolutionMode.ModeSlidingResolution(),
+        }
+      );
+      post.push(setResolutionMode);
+    }
+
     // set priority fees
     if (
       params.basePriorityFee !== undefined ||
@@ -1404,6 +1416,7 @@ export type CreateQueueFeedParams = Omit<
   crankDataBuffer?: PublicKey;
   historyLimit?: number;
 } & {
+  slidingWindow?: boolean;
   basePriorityFee?: number;
   priorityFeeBump?: number;
   priorityFeeBumpPeriod?: number;
