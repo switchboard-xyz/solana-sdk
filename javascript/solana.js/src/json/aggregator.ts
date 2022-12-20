@@ -26,7 +26,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
   disableCrank: boolean;
   crankIndex?: number;
 
-  resolutionMode?: number;
+  slidingWindow?: boolean;
   basePriorityFee?: number;
   priorityFeeBump?: number;
   priorityFeeBumpPeriod?: number;
@@ -77,10 +77,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
     this.crankIndex =
       'crankIndex' in object ? Number(object.crankIndex) : undefined;
 
-    this.resolutionMode =
-      'resolutionMode' in object
-        ? parseNumber(object, 'resolutionMode', 0)
-        : undefined;
+    this.slidingWindow = parseBoolean(object, 'slidingWindow', undefined);
 
     this.basePriorityFee =
       'basePriorityFee' in object
@@ -141,6 +138,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
       forceReportPeriod: this.forceReportPeriod,
       historyLimit: this.historyLimit,
       disableCrank: this.disableCrank,
+      slidingWindow: this.slidingWindow,
       basePriorityFee: this.basePriorityFee,
       priorityFeeBump: this.priorityFeeBump,
       priorityFeeBumpPeriod: this.priorityFeeBumpPeriod,
