@@ -15,7 +15,7 @@ export class CrankJson implements CreateQueueCrankParams {
 
   // accounts
   keypair: Keypair;
-  dataBuffer: Keypair;
+  dataBufferKeypair: Keypair;
 
   constructor(object: Record<string, any>) {
     this.name = parseString(object, 'name', '');
@@ -27,7 +27,7 @@ export class CrankJson implements CreateQueueCrankParams {
     this.keypair = keypairPath ? loadKeypair(keypairPath) : Keypair.generate();
 
     const dataBufferPath = parseString(object, 'dataBufferKeypair');
-    this.dataBuffer = dataBufferPath
+    this.dataBufferKeypair = dataBufferPath
       ? loadKeypair(dataBufferPath)
       : Keypair.generate();
   }
@@ -51,7 +51,7 @@ export class CrankJson implements CreateQueueCrankParams {
       metadata: this.metadata,
       maxRows: this.maxRows,
       keypair: keypairToString(this.keypair),
-      dataBuffer: keypairToString(this.dataBuffer),
+      dataBufferKeypair: keypairToString(this.dataBufferKeypair),
     };
   }
 }
