@@ -166,6 +166,8 @@ describe('Crank Tests', () => {
       return (await SolanaClock.fetch(ctx.program.connection)).unixTimestamp;
     };
 
+    const crank = await crankAccount.loadData();
+
     let timestamp = await getTimestamp();
 
     const nextAvailable = (await crankAccount.loadCrank()).reduce(
@@ -225,10 +227,12 @@ describe('Crank Tests', () => {
       ctx.payer.publicKey,
       {
         payoutTokenWallet: userTokenAddress,
-        crank: await crankAccount.loadData(),
-        crankRows: initialCrankRows,
-        queueAccount,
-        queue,
+
+        queuePubkey: queueAccount.publicKey,
+        queueAuthority: queue.authority,
+        queueDataBuffer: queue.dataBuffer,
+        crankDataBuffer: crank.dataBuffer,
+
         readyAggregators: readyAggregators,
         failOpenOnMismatch: true,
       }

@@ -313,10 +313,11 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     payer: PublicKey,
     params: {
       payoutTokenWallet: PublicKey;
-      crank: types.CrankAccountData;
-      crankRows: Array<types.CrankRow>;
-      queueAccount: QueueAccount;
-      queue: types.OracleQueueAccountData;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
 
       remainingAccounts: Array<PublicKey>;
       leaseBumps: Map<string, number>;
@@ -353,13 +354,13 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       },
       {
         crank: this.publicKey,
-        oracleQueue: params.queueAccount.publicKey,
-        queueAuthority: params.queue.authority,
+        oracleQueue: params.queuePubkey,
+        queueAuthority: params.queueAuthority,
         programState: this.program.programState.publicKey,
         payoutWallet: params.payoutTokenWallet,
         tokenProgram: TOKEN_PROGRAM_ID,
-        crankDataBuffer: params.crank.dataBuffer,
-        queueDataBuffer: params.queue.dataBuffer,
+        crankDataBuffer: params.crankDataBuffer,
+        queueDataBuffer: params.queueDataBuffer,
         mint: this.program.mint.address,
       }
     );
@@ -377,10 +378,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     payer: PublicKey,
     params: {
       payoutTokenWallet: PublicKey;
-      crank: types.CrankAccountData;
-      crankRows: Array<types.CrankRow>;
-      queueAccount: QueueAccount;
-      queue: types.OracleQueueAccountData;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
       readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
 
       nonce?: number;
@@ -466,10 +469,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     payer: PublicKey,
     params: {
       payoutTokenWallet: PublicKey;
-      crank: types.CrankAccountData;
-      crankRows: Array<types.CrankRow>;
-      queueAccount: QueueAccount;
-      queue: types.OracleQueueAccountData;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
       readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
 
       nonce?: number;
@@ -510,10 +515,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   public async packAndPop(
     params: {
       payoutTokenWallet: PublicKey;
-      crank: types.CrankAccountData;
-      crankRows: Array<types.CrankRow>;
-      queueAccount: QueueAccount;
-      queue: types.OracleQueueAccountData;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
       readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
 
       nonce?: number;
