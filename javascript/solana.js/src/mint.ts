@@ -49,7 +49,7 @@ export class Mint {
   toTokenAmountBN(amount: number): BN {
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
-    return new BN(tokenAmount.toString());
+    return new BN(tokenAmount.toFixed(0));
   }
 
   fromTokenAmount(amount: bigint): number {

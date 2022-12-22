@@ -11,9 +11,12 @@ import {
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
-import { AggregatorAccount } from './aggregatorAccount';
+import { AggregatorAccount, AggregatorPdaAccounts } from './aggregatorAccount';
 import { CrankDataBuffer } from './crankDataBuffer';
 import { QueueAccount } from './queueAccount';
 
@@ -171,10 +174,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const queue = await queueAccount.loadData();
 
     const { permissionAccount, permissionBump, leaseAccount, leaseEscrow } =
-      params.aggregatorAccount.getAccounts({
-        queueAccount: queueAccount,
-        queueAuthority: queue.authority,
-      });
+      params.aggregatorAccount.getAccounts(queueAccount, queue.authority);
 
     return new TransactionObject(
       payer,
@@ -248,10 +248,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
         permissionAccount,
         permissionBump,
         leaseEscrow,
-      } = aggregatorAccount.getAccounts({
-        queueAccount: queueAccount,
-        queueAuthority: queueData.authority,
-      });
+      } = aggregatorAccount.getAccounts(queueAccount, queueData.authority);
 
       remainingAccounts.push(aggregatorAccount.publicKey);
       remainingAccounts.push(leaseAccount.publicKey);
@@ -261,6 +258,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       leaseBumpsMap.set(row.toBase58(), leaseBump);
       permissionBumpsMap.set(row.toBase58(), permissionBump);
     }
+
     remainingAccounts.sort((a: PublicKey, b: PublicKey) =>
       a.toBuffer().compare(b.toBuffer())
     );
@@ -276,7 +274,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           leaseBumps: toBumps(leaseBumpsMap),
           permissionBumps: toBumps(permissionBumpsMap),
           nonce: params.nonce ?? null,
-          failOpenOnAccountMismatch: null,
+          failOpenOnAccountMismatch: false,
         },
       },
       {
@@ -297,13 +295,11 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       })
     );
 
-    const txnObject: TransactionObject =
-      (await this.program.connection.getAccountInfo(payoutWallet)) === null
-        ? (() =>
-            this.program.mint
-              .createAssocatedUserInstruction(payer)[0]
-              .add(crankPopIxn))()
-        : new TransactionObject(payer, [crankPopIxn], []);
+    const txnObject: TransactionObject = new TransactionObject(
+      payer,
+      [crankPopIxn],
+      []
+    );
     return txnObject;
   }
 
@@ -311,6 +307,235 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const popTxn = await this.popInstruction(this.program.walletPubkey, params);
     const txnSignature = await this.program.signAndSend(popTxn);
     return txnSignature;
+  }
+
+  private getPopTxn(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+      crank: types.CrankAccountData;
+      crankRows: Array<types.CrankRow>;
+      queueAccount: QueueAccount;
+      queue: types.OracleQueueAccountData;
+
+      remainingAccounts: Array<PublicKey>;
+      leaseBumps: Map<string, number>;
+      permissionBumps: Map<string, number>;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ) {
+    const remainingAccounts = params.remainingAccounts.sort(
+      (a: PublicKey, b: PublicKey) => a.toBuffer().compare(b.toBuffer())
+    );
+
+    const leaseBumps: Array<number> = [];
+    const permissionBumps: Array<number> = [];
+    for (const remainingAccount of remainingAccounts) {
+      leaseBumps.push(params.leaseBumps.get(remainingAccount.toBase58()) ?? 0);
+      permissionBumps.push(
+        params.permissionBumps.get(remainingAccount.toBase58()) ?? 0
+      );
+    }
+
+    const crankPopIxn = types.crankPop(
+      this.program,
+      {
+        params: {
+          stateBump: this.program.programState.bump,
+          leaseBumps: new Uint8Array(leaseBumps),
+          permissionBumps: new Uint8Array(permissionBumps),
+          nonce: params.nonce ?? null,
+          failOpenOnAccountMismatch: params.failOpenOnMismatch ?? false,
+        },
+      },
+      {
+        crank: this.publicKey,
+        oracleQueue: params.queueAccount.publicKey,
+        queueAuthority: params.queue.authority,
+        programState: this.program.programState.publicKey,
+        payoutWallet: params.payoutTokenWallet,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        crankDataBuffer: params.crank.dataBuffer,
+        queueDataBuffer: params.queue.dataBuffer,
+        mint: this.program.mint.address,
+      }
+    );
+
+    crankPopIxn.keys.push(
+      ...remainingAccounts.map((pubkey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      })
+    );
+
+    return new TransactionObject(payer, [crankPopIxn], [], options);
+  }
+
+  public popSync(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+      crank: types.CrankAccountData;
+      crankRows: Array<types.CrankRow>;
+      queueAccount: QueueAccount;
+      queue: types.OracleQueueAccountData;
+      readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+      popIdx?: number;
+    },
+    options?: TransactionObjectOptions
+  ): TransactionObject {
+    if (params.readyAggregators.length < 1) {
+      throw new Error(`No aggregators ready`);
+    }
+
+    let remainingAccounts: PublicKey[] = [];
+    let txn: TransactionObject | undefined = undefined;
+
+    const allLeaseBumps = params.readyAggregators.reduce(
+      (map, [aggregatorAccount, pdaAccounts]) => {
+        map.set(aggregatorAccount.publicKey.toBase58(), pdaAccounts.leaseBump);
+        return map;
+      },
+      new Map<string, number>()
+    );
+    const allPermissionBumps = params.readyAggregators.reduce(
+      (map, [aggregatorAccount, pdaAccounts]) => {
+        map.set(
+          aggregatorAccount.publicKey.toBase58(),
+          pdaAccounts.permissionBump
+        );
+        return map;
+      },
+      new Map<string, number>()
+    );
+
+    // add as many readyAggregators until the txn overflows
+    for (const [
+      readyAggregator,
+      aggregatorPdaAccounts,
+    ] of params.readyAggregators) {
+      const { leaseAccount, leaseEscrow, permissionAccount } =
+        aggregatorPdaAccounts;
+
+      const newRemainingAccounts = [
+        ...remainingAccounts,
+        readyAggregator.publicKey,
+        leaseAccount.publicKey,
+        leaseEscrow,
+        permissionAccount.publicKey,
+      ];
+
+      try {
+        const newTxn = this.getPopTxn(
+          payer,
+          {
+            ...params,
+            remainingAccounts: newRemainingAccounts,
+            leaseBumps: allLeaseBumps,
+            permissionBumps: allPermissionBumps,
+          },
+          options
+        );
+        // succeeded, so set running txn and remaining accounts and try again
+        txn = newTxn;
+        remainingAccounts = newRemainingAccounts;
+      } catch (error) {
+        if (error instanceof errors.TransactionOverflowError) {
+          if (txn === undefined) {
+            throw new Error(`Failed to create crank pop transaction, ${error}`);
+          }
+          return txn;
+        }
+        throw error;
+      }
+    }
+
+    if (txn === undefined) {
+      throw new Error(`Failed to create crank pop transaction`);
+    }
+
+    return txn;
+  }
+
+  public packAndPopInstructions(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+      crank: types.CrankAccountData;
+      crankRows: Array<types.CrankRow>;
+      queueAccount: QueueAccount;
+      queue: types.OracleQueueAccountData;
+      readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ): Array<TransactionObject> {
+    const numReady = params.readyAggregators.length;
+
+    if (numReady < 6) {
+      // send as-is
+      return Array.from(Array(numReady).keys()).map(() =>
+        this.popSync(
+          payer,
+          {
+            ...params,
+            nonce: Math.random(),
+          },
+          options
+        )
+      );
+    } else {
+      // stagger the ready accounts
+      return Array.from(Array(numReady).keys()).map(n => {
+        return this.popSync(
+          payer,
+          {
+            ...params,
+            readyAggregators: params.readyAggregators.slice(Math.max(0, n - 4)),
+            nonce: Math.random(),
+          },
+          options
+        );
+      });
+    }
+  }
+
+  public async packAndPop(
+    params: {
+      payoutTokenWallet: PublicKey;
+      crank: types.CrankAccountData;
+      crankRows: Array<types.CrankRow>;
+      queueAccount: QueueAccount;
+      queue: types.OracleQueueAccountData;
+      readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<Array<TransactionSignature>> {
+    const popTxns = this.packAndPopInstructions(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignatures = await this.program.signAndSendAll(
+      popTxns,
+      {
+        skipPreflight: true,
+        skipConfrimation: true,
+      },
+      undefined,
+      10 // 10ms delay between txns to help ordering
+    );
+    return txnSignatures;
   }
 
   /**
@@ -354,7 +579,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    * Load a cranks {@linkcode CrankDataBuffer}.
    * @return the list of aggregtors and their next available update time.
    */
-  async loadCrank(): Promise<Array<types.CrankRow>> {
+  async loadCrank(sorted = true): Promise<Array<types.CrankRow>> {
     if (!this.dataBuffer) {
       this.dataBuffer = new CrankDataBuffer(
         this.program,
@@ -363,8 +588,28 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     }
 
     const crankRows = await this.dataBuffer.loadData();
+    if (sorted) {
+      return CrankDataBuffer.sort(crankRows);
+    }
 
     return crankRows;
+  }
+
+  getCrankAccounts(
+    crankRows: Array<types.CrankRow>,
+    queueAccount: QueueAccount,
+    queueAuthority: PublicKey
+  ): Map<string, AggregatorPdaAccounts> {
+    const crankAccounts: Map<string, AggregatorPdaAccounts> = new Map();
+    for (const row of crankRows) {
+      const aggregatorAccount = new AggregatorAccount(this.program, row.pubkey);
+      const accounts = aggregatorAccount.getAccounts(
+        queueAccount,
+        queueAuthority
+      );
+      crankAccounts.set(aggregatorAccount.publicKey.toBase58(), accounts);
+    }
+    return crankAccounts;
   }
 
   /** Whether an aggregator pubkey is active on a Crank */

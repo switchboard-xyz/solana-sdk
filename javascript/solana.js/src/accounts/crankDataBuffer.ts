@@ -96,6 +96,25 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
     return buffer;
   }
 
+  public static sort(crankRows: Array<types.CrankRow>): Array<types.CrankRow> {
+    const sorted: Array<types.CrankRow> = [];
+
+    const rows = [...crankRows];
+
+    while (rows.length > 0) {
+      const popped = pqPop(rows);
+      if (popped !== undefined) {
+        sorted.push(popped);
+      }
+    }
+
+    if (sorted.length !== crankRows.length) {
+      throw new Error(`Crank sort error`);
+    }
+
+    return sorted;
+  }
+
   /**
    * Return a crank's dataBuffer
    *
@@ -111,4 +130,46 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
 
     return new CrankDataBuffer(program, crank.dataBuffer);
   }
+}
+
+function pqPop<T extends types.CrankRow>(crankData: Array<T>): T | undefined {
+  const ret = crankData[0]!;
+  crankData[0] = crankData.at(-1)!;
+  crankData.pop();
+  let current = 0;
+
+  let maxLoops = crankData.length * 2;
+  while (maxLoops > 0) {
+    const leftChildIdx = current * 2 + 1;
+    const rightChildIdx = current * 2 + 2;
+    let swapIdx = rightChildIdx;
+    if (rightChildIdx < crankData.length) {
+      const leftChild = crankData[leftChildIdx];
+      const rightChild = crankData[rightChildIdx];
+      if (leftChild.nextTimestamp < rightChild.nextTimestamp) {
+        swapIdx = leftChildIdx;
+      }
+    }
+    if (swapIdx >= crankData.length) {
+      swapIdx = leftChildIdx;
+    }
+    if (swapIdx >= crankData.length) {
+      break;
+    }
+    const currentItem = crankData[current];
+    const swapItem = crankData[swapIdx];
+    if (currentItem.nextTimestamp < swapItem.nextTimestamp) {
+      break;
+    }
+    crankData[current] = swapItem;
+    crankData[swapIdx] = currentItem;
+    current = swapIdx;
+    --maxLoops;
+    if (maxLoops === 0) {
+      throw new Error(
+        `Failed to sort crank rows in ${crankData.length * 2} loops`
+      );
+    }
+  }
+  return ret;
 }

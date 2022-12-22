@@ -287,22 +287,29 @@ export class TransactionObject implements ITransactionObject {
       throw new errors.SwitchboardProgramReadOnlyError();
     }
 
-    const ixnLength = enableDurableNonce ? ixns.length + 1 : ixns.length;
-
     // if empty object, return
-    if (ixnLength === 0) {
+    if (ixns.length === 0) {
       return;
     }
 
+    const ixnLength = enableDurableNonce ? ixns.length + 1 : ixns.length;
     // verify num ixns
     if (ixnLength > 10) {
       throw new errors.TransactionInstructionOverflowError(ixnLength);
     }
 
+    const uniqueAccounts = ixns.reduce((accounts, ixn) => {
+      ixn.keys.forEach(a => accounts.add(a.pubkey.toBase58()));
+      return accounts;
+    }, new Set<string>());
+    if (uniqueAccounts.size > 32) {
+      throw new errors.TransactionAccountOverflowError(uniqueAccounts.size);
+    }
+
     const padding: number = enableDurableNonce ? 96 : 0;
 
     // verify serialized size
-    const size = TransactionObject.size(ixns);
+    const size = TransactionObject.size(payer, ixns);
     if (size > PACKET_DATA_SIZE - padding) {
       throw new errors.TransactionSerializationOverflowError(size);
     }
@@ -314,7 +321,7 @@ export class TransactionObject implements ITransactionObject {
   /**
    * Return the serialized size of an array of TransactionInstructions
    */
-  public static size(ixns: Array<TransactionInstruction>) {
+  public static size(payer: PublicKey, ixns: Array<TransactionInstruction>) {
     const encodeLength = (len: number) => {
       const bytes = new Array<number>();
       let remLen = len;
@@ -341,6 +348,11 @@ export class TransactionObject implements ITransactionObject {
       return signers;
     }, new Set<string>());
 
+    // need to include the payer as a signer
+    if (!reqSigners.has(payer.toBase58())) {
+      reqSigners.add(payer.toBase58());
+    }
+
     const txn = new Transaction({
       feePayer: PublicKey.default,
       blockhash: '1'.repeat(32),
@@ -356,7 +368,7 @@ export class TransactionObject implements ITransactionObject {
   }
 
   get size(): number {
-    return TransactionObject.size(this.ixns);
+    return TransactionObject.size(this.payer, this.ixns);
   }
 
   /**
