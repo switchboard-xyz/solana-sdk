@@ -210,6 +210,7 @@ export async function createFeeds(
         minRequiredJobResults: feedConfig?.minRequiredOracleResults ?? 1,
         minUpdateDelaySeconds: feedConfig?.minUpdateDelaySeconds ?? 10,
         fundAmount: feedConfig?.fundAmount ?? 0,
+        disableWrap: true,
         enable: feedConfig?.enable ?? true,
         jobs:
           feedConfig?.jobs && feedConfig?.jobs.length > 0

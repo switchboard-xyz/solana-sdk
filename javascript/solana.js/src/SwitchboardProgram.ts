@@ -3,15 +3,17 @@ import * as errors from './errors';
 import {
   AccountInfo,
   Cluster,
+  ConfirmOptions,
   Connection,
   Keypair,
   PublicKey,
+  SendOptions,
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { NativeMint } from './mint';
 import { SwitchboardEvents } from './SwitchboardEvents';
-import { TransactionObject } from './TransactionObject';
+import { TransactionObject, TransactionOptions } from './TransactionObject';
 import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
 import { fromCode as fromAnchorCode } from './generated/errors/anchor';
 import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
@@ -48,8 +50,17 @@ import {
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
 } from './const';
-import { OracleJob } from '@switchboard-xyz/common';
+import { OracleJob, sleep } from '@switchboard-xyz/common';
 import { LoadedJobDefinition } from './types';
+
+export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
+  skipConfrimation?: boolean;
+};
+export const DEFAULT_SEND_TRANSACTION_OPTIONS: SendTransactionOptions = {
+  skipPreflight: false,
+  maxRetries: 10,
+  skipConfrimation: false,
+};
 
 /**
  * Switchboard Devnet Program ID
@@ -57,12 +68,14 @@ import { LoadedJobDefinition } from './types';
 export const SBV2_DEVNET_PID = new PublicKey(
   '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
 );
+
 /**
  * Switchboard Mainnet Program ID
  */
 export const SBV2_MAINNET_PID = new PublicKey(
   'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 );
+
 /**
  *  A generated keypair that is assigned as the _payerKeypair_ when in read-only mode.
  */
@@ -83,6 +96,7 @@ export const getSwitchboardProgramId = (
       throw new Error(`Switchboard PID not found for cluster (${cluster})`);
   }
 };
+
 /**
  * Returns true if being run inside a web browser, false if in a Node process or electron app.
  *
@@ -456,11 +470,9 @@ export class SwitchboardProgram {
 
   public async signAndSendAll(
     txns: Array<TransactionObject>,
-    opts: anchor.web3.ConfirmOptions = {
-      skipPreflight: false,
-      maxRetries: 10,
-    },
-    blockhash?: { blockhash: string; lastValidBlockHeight: number }
+    opts: SendTransactionOptions = DEFAULT_SEND_TRANSACTION_OPTIONS,
+    txnOptions?: TransactionOptions,
+    delay = 0
   ): Promise<Array<TransactionSignature>> {
     if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
     if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
@@ -468,8 +480,16 @@ export class SwitchboardProgram {
     const packed = TransactionObject.pack(txns);
 
     const txnSignatures: Array<TransactionSignature> = [];
-    for await (const txn of packed) {
-      txnSignatures.push(await this.signAndSend(txn, opts, blockhash));
+    for await (const [i, txn] of packed.entries()) {
+      txnSignatures.push(await this.signAndSend(txn, opts, txnOptions));
+      if (
+        i !== packed.length - 1 &&
+        delay &&
+        typeof delay === 'number' &&
+        delay > 0
+      ) {
+        await sleep(delay);
+      }
     }
 
     return txnSignatures;
@@ -477,11 +497,8 @@ export class SwitchboardProgram {
 
   public async signAndSend(
     txn: TransactionObject,
-    opts: anchor.web3.ConfirmOptions = {
-      skipPreflight: false,
-      maxRetries: 10,
-    },
-    blockhash?: { blockhash: string; lastValidBlockHeight: number }
+    opts: SendTransactionOptions = DEFAULT_SEND_TRANSACTION_OPTIONS,
+    txnOptions?: TransactionOptions
   ): Promise<TransactionSignature> {
     if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
     if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
@@ -502,16 +519,29 @@ export class SwitchboardProgram {
     );
 
     const transaction = txn.toTxn(
-      blockhash ?? (await this.connection.getLatestBlockhash())
+      txnOptions ?? (await this.connection.getLatestBlockhash())
     );
 
     try {
+      // skip confirmation
+      if (
+        opts &&
+        typeof opts.skipConfrimation === 'boolean' &&
+        opts.skipConfrimation
+      ) {
+        const txnSignature = await this.connection.sendTransaction(
+          transaction,
+          filteredSigners,
+          opts
+        );
+        return txnSignature;
+      }
+
       const txnSignature = await this.provider.sendAndConfirm(
         transaction,
         filteredSigners,
         {
-          skipPreflight: false,
-          maxRetries: 10,
+          ...DEFAULT_SEND_TRANSACTION_OPTIONS,
           ...opts,
         }
       );

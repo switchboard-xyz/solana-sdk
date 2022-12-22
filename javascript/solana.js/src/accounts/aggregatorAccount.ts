@@ -653,22 +653,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [permissionAccount, leaseAccount, signatures];
   }
 
-  public getAccounts(params: {
-    queueAccount: QueueAccount;
-    queueAuthority: PublicKey;
-  }): {
-    queueAccount: QueueAccount;
-    permissionAccount: PermissionAccount;
-    permissionBump: number;
-    leaseAccount: LeaseAccount;
-    leaseBump: number;
-    leaseEscrow: PublicKey;
-  } {
-    const queueAccount = params.queueAccount;
-
+  public getAccounts(
+    queueAccount: QueueAccount,
+    queueAuthority: PublicKey
+  ): AggregatorPdaAccounts {
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
-      params.queueAuthority,
+      queueAuthority,
       queueAccount.publicKey,
       this.publicKey
     );
@@ -684,7 +675,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
 
     return {
-      queueAccount,
       permissionAccount,
       permissionBump,
       leaseAccount,
@@ -813,10 +803,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return aggregator.jobPubkeysData.slice(0, aggregator.jobPubkeysSize);
   }
 
-  public async loadJobs(
-    aggregator: types.AggregatorAccountData
-  ): Promise<
-    Array<{ account: JobAccount; state: types.JobAccountData; job: OracleJob }>
+  public async loadJobs(aggregator: types.AggregatorAccountData): Promise<
+    Array<{
+      account: JobAccount;
+      state: types.JobAccountData;
+      job: OracleJob;
+      weight: number;
+    }>
   > {
     const jobAccountDatas = await anchor.utils.rpc.getMultipleAccounts(
       this.program.connection,
@@ -839,6 +832,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           account: jobAccount,
           state: jobState,
           job: OracleJob.decodeDelimited(jobState.data),
+          weight: Math.max(
+            aggregator.jobWeights[
+              aggregator.jobPubkeysData.findIndex((x: PublicKey) =>
+                x.equals(j.publicKey)
+              )
+            ] ?? 1,
+            1
+          ),
         };
       })
     );
@@ -1250,10 +1251,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       leaseAccount,
       leaseBump,
       leaseEscrow,
-    } = this.getAccounts({
-      queueAccount: queueAccount,
-      queueAuthority: queue.authority,
-    });
+    } = this.getAccounts(queueAccount, queue.authority);
 
     const ixns: Array<TransactionInstruction> = [];
 
@@ -1456,10 +1454,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       leaseAccount,
       leaseBump,
       leaseEscrow,
-    } = this.getAccounts({
-      queueAccount: queueAccount,
-      queueAuthority: queueAuthority,
-    });
+    } = this.getAccounts(queueAccount, queueAuthority);
 
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission ??
@@ -1534,10 +1529,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       leaseAccount,
       leaseEscrow,
       leaseBump,
-    } = this.getAccounts({
-      queueAccount,
-      queueAuthority: queue.authority,
-    });
+    } = this.getAccounts(queueAccount, queue.authority);
 
     const jobPubkeys = aggregator.jobPubkeysData.slice(
       0,
@@ -2053,4 +2045,12 @@ export type AggregatorAccounts = {
     data: types.JobAccountData;
     tasks: Array<OracleJob.ITask>;
   }>;
+};
+
+export type AggregatorPdaAccounts = {
+  permissionAccount: PermissionAccount;
+  permissionBump: number;
+  leaseAccount: LeaseAccount;
+  leaseBump: number;
+  leaseEscrow: PublicKey;
 };

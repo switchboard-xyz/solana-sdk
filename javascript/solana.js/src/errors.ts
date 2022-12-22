@@ -55,6 +55,12 @@ export class TransactionInstructionOverflowError extends TransactionOverflowErro
     Object.setPrototypeOf(this, TransactionInstructionOverflowError.prototype);
   }
 }
+export class TransactionAccountOverflowError extends TransactionOverflowError {
+  constructor(numAccounts: number) {
+    super(`number of accounts exceeded (${numAccounts})`);
+    Object.setPrototypeOf(this, TransactionAccountOverflowError.prototype);
+  }
+}
 export class TransactionSerializationOverflowError extends TransactionOverflowError {
   constructor(numBytes: number) {
     super(`serialized transaction size exceeded (${numBytes})`);
