@@ -486,16 +486,17 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
     if (numReady < 6) {
       // send as-is
-      return Array.from(Array(numReady).keys()).map(() =>
-        this.popSync(
+      return Array.from(Array(numReady).keys()).map(() => {
+        return this.popSync(
           payer,
           {
             ...params,
+            readyAggregators: params.readyAggregators,
             nonce: Math.random(),
           },
           options
-        )
-      );
+        );
+      });
     } else {
       // stagger the ready accounts
       return Array.from(Array(numReady).keys()).map(n => {

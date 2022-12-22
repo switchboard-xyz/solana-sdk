@@ -459,7 +459,7 @@ export class SwitchboardProgram {
       data: SwitchboardEvents[EventName],
       slot: number,
       signature: string
-    ) => void
+    ) => void | Promise<void>
   ): number {
     return this._program.addEventListener(eventName as string, callback);
   }
