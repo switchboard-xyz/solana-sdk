@@ -2,20 +2,14 @@ name: solana-js-test
 on:
   push:
     paths:
-      - ".github/workflows/**"
       - "javascript/solana.js/src/**"
       - "javascript/solana.js/test/**"
       - "javascript/solana.js/package.json"
       - "javascript/solana.js/package-lock.json"
 
-env:
-  ANCHOR_VERSION: 0.25.0
-  CARGO_TERM_COLOR: always
-  SOLANA_VERSION: 1.13.5
-
 jobs:
   job1:
-    name: Build @switchboard-xyz/solana.js
+    name: "Build JS SDK"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,7 +39,7 @@ jobs:
         run: npm run build
 
   job2:
-    name: "@switchboard-xyz/solana.js Devnet Tests"
+    name: "Devnet JS SDK Tests"
     needs: job1
     runs-on: ubuntu-latest
     defaults:
@@ -94,7 +88,7 @@ jobs:
         run: npm run test:localnet
 
   job3:
-    name: "@switchboard-xyz/solana.js Mainnet Tests"
+    name: "Mainnet JS SDK Tests"
     needs: job1
     runs-on: ubuntu-latest
     defaults:
