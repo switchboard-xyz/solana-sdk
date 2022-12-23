@@ -23,7 +23,10 @@ import { QueueAccount } from './queueAccount';
 import { LeaseAccount, LeaseExtendParams } from './leaseAccount';
 import { PermissionAccount } from './permissionAccount';
 import * as spl from '@solana/spl-token';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
@@ -1306,42 +1309,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
-  public saveResultInstruction(
-    params: {
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      feedPermission: [PermissionAccount, number];
-      jobs: Array<OracleJob>;
-      // oracle
-      oracleAccount: OracleAccount;
-      oracleAuthority: PublicKey;
-      oracleIdx: number;
-      oraclePermission: [PermissionAccount, number];
-      // response
-      value: Big;
-      minResponse: Big;
-      maxResponse: Big;
-      // token
-      mint: PublicKey;
-      payoutWallet: PublicKey;
-      lease: [LeaseAccount, number];
-      leaseEscrow: PublicKey;
-    } & Partial<{
-      error?: boolean;
-      historyBuffer?: PublicKey;
-      oracles: Array<types.OracleAccountData>;
-    }>
-  ): TransactionInstruction {
-    const [leaseAccount, leaseBump] = params.lease;
-    const [feedPermissionAccount, feedPermissionBump] = params.feedPermission;
+  public saveResultInstructionSync(
+    payer: PublicKey,
+    params: AggregatorSaveResultSyncParams,
+    options?: TransactionObjectOptions
+  ): TransactionObject {
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission;
 
-    if (params.oracleIdx < 0) {
+    if (params.oracleIdx < 0 || params.oracleIdx > params.oracles.length - 1) {
       throw new Error('Failed to find oracle in current round');
     }
 
-    return types.aggregatorSaveResult(
+    const saveResultIxn = types.aggregatorSaveResult(
       this.program,
       {
         params: {
@@ -1353,108 +1333,73 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
             .borsh,
           maxResponse: types.SwitchboardDecimal.fromBig(params.maxResponse)
             .borsh,
-          feedPermissionBump: feedPermissionBump,
+          feedPermissionBump: params.permissionBump,
           oraclePermissionBump: oraclePermissionBump,
-          leaseBump: leaseBump,
+          leaseBump: params.leaseBump,
           stateBump: this.program.programState.bump,
         },
       },
       {
         aggregator: this.publicKey,
-        oracle: params.oracleAccount.publicKey,
-        oracleAuthority: params.oracleAuthority,
+        oracle: params.oracles[params.oracleIdx].account.publicKey,
+        oracleAuthority: params.oracles[params.oracleIdx].state.oracleAuthority,
         oracleQueue: params.queueAccount.publicKey,
         queueAuthority: params.queueAuthority,
-        feedPermission: feedPermissionAccount.publicKey,
+        feedPermission: params.permissionAccount.publicKey,
         oraclePermission: oraclePermissionAccount.publicKey,
-        lease: leaseAccount.publicKey,
+        lease: params.leaseAccount.publicKey,
         escrow: params.leaseEscrow,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         programState: this.program.programState.publicKey,
         historyBuffer: params.historyBuffer ?? this.publicKey,
-        mint: params.mint,
+        mint: this.program.mint.address,
       }
     );
-  }
-
-  public async saveResult(
-    params: {
-      jobs: Array<OracleJob>;
-      oracleAccount: OracleAccount;
-      value: Big;
-      minResponse: Big;
-      maxResponse: Big;
-    } & Partial<{
-      queueAccount: QueueAccount;
-      queueAuthority: PublicKey;
-      aggregator: types.AggregatorAccountData;
-      feedPermission: [PermissionAccount, number];
-      historyBuffer: PublicKey;
-      oracleIdx: number;
-      oracleAuthority: PublicKey;
-      oraclePermission: [PermissionAccount, number];
-      error: boolean;
-      mint: PublicKey;
-      payoutWallet: PublicKey;
-      lease: [LeaseAccount, number];
-      leaseEscrow: PublicKey;
-      oracles: Array<types.OracleAccountData>;
-    }>
-  ): Promise<TransactionSignature> {
-    const payer = this.program.walletPubkey;
-    const aggregator = params.aggregator ?? (await this.loadData());
 
     const remainingAccounts: Array<PublicKey> = [];
-    for (let i = 0; i < aggregator.oracleRequestBatchSize; ++i) {
-      remainingAccounts.push(aggregator.currentRound.oraclePubkeysData[i]);
-    }
-    for (const oracle of params?.oracles ??
-      (await this.loadCurrentRoundOracles(aggregator)).map(a => a.state)) {
-      remainingAccounts.push(oracle.tokenAccount);
-    }
+    params.oracles.forEach(oracle =>
+      remainingAccounts.push(oracle.account.publicKey)
+    );
+    params.oracles.forEach(oracle =>
+      remainingAccounts.push(oracle.state.tokenAccount)
+    );
     remainingAccounts.push(this.slidingWindowKey);
+
+    saveResultIxn.keys.push(
+      ...remainingAccounts.map((pubkey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      })
+    );
+
+    return new TransactionObject(payer, [saveResultIxn], [], options);
+  }
+
+  public async saveResultInstruction(
+    payer: PublicKey,
+    params: AggregatorSaveResultAsyncParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const aggregator = params.aggregator ?? (await this.loadData());
+
+    const oracles =
+      params.oracles ?? (await this.loadCurrentRoundOracles(aggregator));
 
     const oracleIdx =
       params.oracleIdx ??
-      aggregator.currentRound.oraclePubkeysData
-        .slice(0, aggregator.oracleRequestBatchSize)
-        .findIndex(o => o.equals(params.oracleAccount.publicKey));
+      oracles.findIndex(o =>
+        o.account.publicKey.equals(params.oracleAccount.publicKey)
+      );
 
-    if (oracleIdx < 0) {
+    if (oracleIdx < 0 || oracleIdx > oracles.length - 1) {
       throw new Error('Failed to find oracle in current round');
-    }
-
-    const ixns: Array<TransactionInstruction> = [];
-
-    const payoutWallet =
-      params.payoutWallet ?? this.program.mint.getAssociatedAddress(payer);
-    const payoutWalletAccountInfo =
-      await this.program.connection.getAccountInfo(payoutWallet);
-    if (payoutWalletAccountInfo === null) {
-      const [createTokenAccountTxn] =
-        this.program.mint.createAssocatedUserInstruction(payer);
-      ixns.push(...createTokenAccountTxn.ixns);
     }
 
     const queueAccount =
       params.queueAccount ??
       new QueueAccount(this.program, aggregator.queuePubkey);
 
-    let queueAuthority = params.queueAuthority;
-    let mint = params.mint;
-    if (!queueAuthority || !mint) {
-      const queue = await queueAccount.loadData();
-      queueAuthority = queue.authority;
-      mint = mint ?? queue.mint ?? spl.NATIVE_MINT;
-    }
-
-    const {
-      permissionAccount,
-      permissionBump,
-      leaseAccount,
-      leaseBump,
-      leaseEscrow,
-    } = this.getAccounts(queueAccount, queueAuthority);
+    const queueAuthority =
+      params.queueAuthority ?? (await queueAccount.loadData()).authority;
 
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission ??
@@ -1464,50 +1409,54 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         queueAccount.publicKey,
         params.oracleAccount.publicKey
       );
-    try {
-      await oraclePermissionAccount.loadData();
-    } catch (_) {
-      throw new Error(
-        'A requested oracle permission pda account has not been initialized.'
-      );
-    }
 
-    const historyBuffer = params.historyBuffer ?? aggregator.historyBuffer;
+    const accounts: AggregatorPdaAccounts =
+      params.permissionAccount === undefined ||
+      params.leaseAccount === undefined ||
+      params.leaseEscrow === undefined ||
+      params.permissionBump === undefined ||
+      params.leaseBump === undefined
+        ? this.getAccounts(queueAccount, queueAuthority)
+        : {
+            permissionAccount: params.permissionAccount,
+            permissionBump: params.permissionBump,
+            leaseAccount: params.leaseAccount,
+            leaseBump: params.leaseBump,
+            leaseEscrow: params.leaseEscrow,
+          };
 
-    const saveResultIxn = this.saveResultInstruction({
-      queueAccount,
-      queueAuthority,
-      feedPermission: [permissionAccount, permissionBump],
-      jobs: params.jobs,
-      historyBuffer: historyBuffer.equals(PublicKey.default)
-        ? undefined
-        : historyBuffer,
-      oracleAccount: params.oracleAccount,
-      oracleAuthority: (await params.oracleAccount.loadData()).oracleAuthority,
-      oracleIdx,
-      oraclePermission: [oraclePermissionAccount, oraclePermissionBump],
-      value: params.value,
-      minResponse: params.minResponse,
-      maxResponse: params.maxResponse,
-      error: params.error ?? false,
-      mint,
-      payoutWallet: payoutWallet,
-      lease: [leaseAccount, leaseBump],
-      leaseEscrow: leaseEscrow,
-    });
-
-    // add remaining accounts
-    saveResultIxn.keys.push(
-      ...remainingAccounts.map((pubkey): AccountMeta => {
-        return { isSigner: false, isWritable: true, pubkey };
-      })
+    const saveResultTxn = this.saveResultInstructionSync(
+      payer,
+      {
+        ...accounts,
+        queueAccount,
+        queueAuthority,
+        jobs: params.jobs,
+        historyBuffer: aggregator.historyBuffer.equals(PublicKey.default)
+          ? undefined
+          : aggregator.historyBuffer,
+        oracleIdx,
+        oraclePermission: [oraclePermissionAccount, oraclePermissionBump],
+        value: params.value,
+        minResponse: params.minResponse,
+        maxResponse: params.maxResponse,
+        error: params.error ?? false,
+        aggregator: aggregator,
+        oracles: oracles,
+      },
+      options
     );
+    return saveResultTxn;
+  }
 
-    ixns.push(saveResultIxn);
-    const saveResultTxn = new TransactionObject(
+  public async saveResult(
+    params: AggregatorSaveResultAsyncParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const saveResultTxn = await this.saveResultInstruction(
       this.program.walletPubkey,
-      ixns,
-      []
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(saveResultTxn);
     return txnSignature;
@@ -2054,3 +2003,30 @@ export type AggregatorPdaAccounts = {
   leaseBump: number;
   leaseEscrow: PublicKey;
 };
+
+export type SaveResultResponse = {
+  jobs: Array<OracleJob>;
+  // oracleAccount: OracleAccount;
+  value: Big;
+  minResponse: Big;
+  maxResponse: Big;
+  error?: boolean;
+};
+
+export type SaveResultAccounts = AggregatorPdaAccounts & {
+  aggregator: types.AggregatorAccountData;
+  // queue
+  queueAccount: QueueAccount;
+  queueAuthority: PublicKey;
+  // oracle
+  oraclePermission: [PermissionAccount, number];
+  oracles: Array<{ account: OracleAccount; state: types.OracleAccountData }>;
+  oracleIdx: number;
+  // history
+  historyBuffer?: PublicKey;
+};
+
+export type AggregatorSaveResultSyncParams = SaveResultResponse &
+  SaveResultAccounts;
+export type AggregatorSaveResultAsyncParams = SaveResultResponse &
+  (Partial<SaveResultAccounts> & { oracleAccount: OracleAccount });
