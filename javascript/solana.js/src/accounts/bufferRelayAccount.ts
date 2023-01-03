@@ -18,12 +18,17 @@ import { BN } from 'bn.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { JobAccount } from './jobAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 import { promiseWithTimeout } from '@switchboard-xyz/common';
+import { OracleAccount } from './oracleAccount';
+import { bufferRelayerSaveResult } from '../generated';
 
 /**
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.
@@ -186,27 +191,44 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
 
   public async openRoundInstructions(
     payer: PublicKey,
-    params: BufferRelayerOpenRoundParams
+    params?: BufferRelayerOpenRoundParams
   ): Promise<TransactionObject> {
-    const ixns: TransactionInstruction[] = [];
-    const bufferRelayer = params.bufferRelayer ?? (await this.loadData());
+    const txns: TransactionObject[] = [];
+    const bufferRelayer = params?.bufferRelayer ?? (await this.loadData());
 
     const queueAccount =
-      params.queueAccount ??
+      params?.queueAccount ??
       new QueueAccount(this.program, bufferRelayer.queuePubkey);
-    const queue = params.queue ?? (await queueAccount.loadData());
+    const queue = params?.queue ?? (await queueAccount.loadData());
 
-    const tokenAccount = await getAccount(
-      this.program.connection,
-      params.tokenWallet
-    );
-    const tokenAmountBN = new BN(tokenAccount.amount.toString());
-    if (tokenAmountBN.lt(queue.reward)) {
-      const wrapTxn = await this.program.mint.wrapInstructions(payer, {
-        fundUpTo: this.program.mint.fromTokenAmountBN(queue.reward),
-      });
-      ixns.push(...wrapTxn.ixns);
+    const openRoundAmount = this.program.mint.fromTokenAmountBN(queue.reward);
+
+    let tokenWallet: PublicKey;
+    if (params?.tokenWallet) {
+      tokenWallet = params.tokenWallet;
+      // check if we need to wrap any funds
+      const tokenAccount = await getAccount(
+        this.program.connection,
+        tokenWallet
+      );
+      const tokenAmountBN = new BN(tokenAccount.amount.toString());
+      if (tokenAmountBN.lt(queue.reward)) {
+        const wrapTxn = await this.program.mint.wrapInstructions(payer, {
+          fundUpTo: openRoundAmount,
+        });
+        txns.push(wrapTxn);
+      }
+    } else {
+      const [userTokenWallet, txn] =
+        await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+          fundUpTo: openRoundAmount,
+        });
+      tokenWallet = userTokenWallet;
+      if (txn !== undefined) {
+        txns.push(txn);
+      }
     }
+
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
       queue.authority,
@@ -214,37 +236,47 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       this.publicKey
     );
 
-    ixns.push(
-      createTransferInstruction(
-        params.tokenWallet,
-        bufferRelayer.escrow,
-        payer,
-        BigInt(queue.reward.toString())
-      ),
-      types.bufferRelayerOpenRound(
-        this.program,
-        {
-          params: {
-            stateBump: this.program.programState.bump,
-            permissionBump,
+    const openRoundTxn = new TransactionObject(
+      payer,
+      [
+        createTransferInstruction(
+          tokenWallet,
+          bufferRelayer.escrow,
+          payer,
+          BigInt(queue.reward.toString())
+        ),
+        types.bufferRelayerOpenRound(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              permissionBump,
+            },
           },
-        },
-        {
-          bufferRelayer: this.publicKey,
-          oracleQueue: queueAccount.publicKey,
-          dataBuffer: queue.dataBuffer,
-          permission: permissionAccount.publicKey,
-          escrow: bufferRelayer.escrow,
-          programState: this.program.programState.publicKey,
-        }
-      )
+          {
+            bufferRelayer: this.publicKey,
+            oracleQueue: queueAccount.publicKey,
+            dataBuffer: queue.dataBuffer,
+            permission: permissionAccount.publicKey,
+            escrow: bufferRelayer.escrow,
+            programState: this.program.programState.publicKey,
+          }
+        ),
+      ],
+      []
     );
+    txns.push(openRoundTxn);
 
-    return new TransactionObject(payer, ixns, []);
+    const packed = TransactionObject.pack(txns);
+    if (packed.length > 1) {
+      throw new Error(`Failed to pack instructions into a single txn`);
+    }
+
+    return packed[0];
   }
 
   public async openRound(
-    params: BufferRelayerOpenRoundParams
+    params?: BufferRelayerOpenRoundParams
   ): Promise<TransactionSignature> {
     const openRound = await this.openRoundInstructions(
       this.program.walletPubkey,
@@ -303,15 +335,109 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     return [state, openRoundSignature];
   }
 
-  public getAccounts(params: {
-    queueAccount: QueueAccount;
-    queueAuthority: PublicKey;
-  }) {
-    const queueAccount = params.queueAccount;
+  public async saveResultInstructions(
+    payer: PublicKey,
+    params: BufferRelayerSaveResultParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const bufferRelayer = await this.loadData();
 
+    const [queueAccount, queue] = await QueueAccount.load(
+      this.program,
+      bufferRelayer.queuePubkey
+    );
+
+    const { permissionAccount, permissionBump } = this.getAccounts(
+      queueAccount,
+      queue.authority
+    );
+
+    const [oracleAccount, oracle] = await OracleAccount.load(
+      this.program,
+      bufferRelayer.currentRound.oraclePubkey
+    );
+
+    return this.saveResultSyncInstructions(
+      payer,
+      {
+        ...params,
+        escrow: bufferRelayer.escrow,
+        queueAccount: queueAccount,
+        queueAuthority: queue.authority,
+        queueDataBuffer: queue.dataBuffer,
+        oracleAccount: oracleAccount,
+        oracleAuthority: oracle.oracleAuthority,
+        oracleTokenAccount: oracle.tokenAccount,
+        permissionAccount: permissionAccount,
+        permissionBump: permissionBump,
+      },
+      options
+    );
+  }
+
+  public async saveResult(
+    params: BufferRelayerSaveResultParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const saveResult = await this.saveResultInstructions(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignature = await this.program.signAndSend(saveResult);
+    return txnSignature;
+  }
+
+  public async saveResultSyncInstructions(
+    payer: PublicKey,
+    params: BufferRelayerSaveResultSyncParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const saveResultIxn = bufferRelayerSaveResult(
+      this.program,
+      {
+        params: {
+          stateBump: this.program.programState.bump,
+          permissionBump: params.permissionBump,
+          result: params.result,
+          success: params.success,
+        },
+      },
+      {
+        bufferRelayer: this.publicKey,
+        oracleAuthority: params.oracleAuthority,
+        oracle: params.oracleAccount.publicKey,
+        oracleQueue: params.queueAccount.publicKey,
+        dataBuffer: params.queueDataBuffer,
+        queueAuthority: params.queueAuthority,
+        permission: params.permissionAccount.publicKey,
+        escrow: params.escrow,
+        programState: this.program.programState.publicKey,
+        oracleWallet: params.oracleTokenAccount,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+      }
+    );
+
+    return new TransactionObject(payer, [saveResultIxn], [], options);
+  }
+
+  public async saveResultSync(
+    params: BufferRelayerSaveResultSyncParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const saveResult = await this.saveResultSyncInstructions(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignature = await this.program.signAndSend(saveResult);
+    return txnSignature;
+  }
+
+  public getAccounts(queueAccount: QueueAccount, queueAuthority: PublicKey) {
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
       this.program,
-      params.queueAuthority,
+      queueAuthority,
       queueAccount.publicKey,
       this.publicKey
     );
@@ -359,10 +485,10 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       new QueueAccount(this.program, bufferRelayer.queuePubkey);
     const queue = _queue ?? (await queueAccount.loadData());
 
-    const { permissionAccount, permissionBump } = this.getAccounts({
+    const { permissionAccount, permissionBump } = this.getAccounts(
       queueAccount,
-      queueAuthority: queue.authority,
-    });
+      queue.authority
+    );
     const permission = await permissionAccount.loadData();
 
     const bufferEscrow = await this.program.mint.getAccount(
@@ -439,8 +565,26 @@ export type BufferRelayerAccountsJSON = types.BufferRelayerAccountDataJSON & {
 };
 
 export type BufferRelayerOpenRoundParams = {
-  tokenWallet: PublicKey;
+  tokenWallet?: PublicKey;
   bufferRelayer?: types.BufferRelayerAccountData;
   queueAccount?: QueueAccount;
   queue?: types.OracleQueueAccountData;
 };
+
+export type BufferRelayerSaveResultParams = {
+  result: Buffer;
+  success: boolean;
+};
+
+export type BufferRelayerSaveResultSyncParams =
+  BufferRelayerSaveResultParams & {
+    escrow: PublicKey;
+    queueAccount: QueueAccount;
+    queueAuthority: PublicKey;
+    queueDataBuffer: PublicKey;
+    oracleAccount: OracleAccount;
+    oracleAuthority: PublicKey;
+    oracleTokenAccount: PublicKey;
+    permissionAccount: PermissionAccount;
+    permissionBump: number;
+  };

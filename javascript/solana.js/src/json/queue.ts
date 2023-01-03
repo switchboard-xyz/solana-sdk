@@ -32,7 +32,7 @@ export class QueueJson implements IQueueInitParams {
   // accounts
   authority?: Keypair;
   keypair: Keypair;
-  dataBuffer: Keypair;
+  dataBufferKeypair: Keypair;
 
   constructor(object: Record<string, any>) {
     this.name = parseString(object, 'name', '');
@@ -82,7 +82,7 @@ export class QueueJson implements IQueueInitParams {
     this.authority = authorityPath ? loadKeypair(authorityPath) : undefined;
 
     const dataBufferPath = parseString(object, 'dataBufferKeypair');
-    this.dataBuffer = dataBufferPath
+    this.dataBufferKeypair = dataBufferPath
       ? loadKeypair(dataBufferPath)
       : Keypair.generate();
   }
@@ -105,7 +105,7 @@ export class QueueJson implements IQueueInitParams {
       enableBufferRelayers: this.enableBufferRelayers,
       authority: this.authority ? keypairToString(this.authority) : undefined,
       keypair: keypairToString(this.keypair),
-      dataBuffer: keypairToString(this.dataBuffer),
+      dataBufferKeypair: keypairToString(this.dataBufferKeypair),
     };
   }
 }
