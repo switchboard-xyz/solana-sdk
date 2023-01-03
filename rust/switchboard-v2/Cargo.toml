@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.17"
+version = "0.1.18"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
@@ -23,10 +23,10 @@ cpi = ["no-entrypoint"]
 devnet = []
 
 [dependencies]
-anchor-lang = "^0.26.0"
-anchor-spl = "^0.26.0"
-rust_decimal = "^1.18.0"
-solana-program = "^1.13.6"
+anchor-lang = "~0.26.0"
+anchor-spl = "~0.26.0"
+rust_decimal = "^1.18"
+solana-program = "^1.13.5"
 bytemuck = "1.7.2"
 superslice = "1"
 spl-token = "3.5"

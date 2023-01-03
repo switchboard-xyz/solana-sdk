@@ -742,6 +742,7 @@ impl<'info> VrfSetCallback<'info> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use solana_program::pubkey;
 
     const VRF_ACCOUNT_DATA: [u8; 29058] = [
         101, 35, 62, 239, 103, 151, 6, 18, 4, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 141,
@@ -1775,13 +1776,14 @@ mod tests {
     fn test_vrf_decoding() {
         let mut vrf_data = VRF_ACCOUNT_DATA.clone();
         let mut lamports = 0;
+        let owner: Pubkey = pubkey!("2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG");
         let vrf_account_info = AccountInfo::new(
             &VRF_PUBKEY,
             false,
             false,
             &mut lamports,
             &mut vrf_data,
-            &SWITCHBOARD_V2_DEVNET,
+            &owner,
             false,
             0,
         );
