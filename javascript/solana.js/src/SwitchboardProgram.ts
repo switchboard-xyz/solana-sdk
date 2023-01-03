@@ -296,7 +296,7 @@ export class SwitchboardProgram {
     return this._program.programId;
   }
   /**
-   * The Switchboard Program ID for the currently connected cluster.
+   * The Switchboard Program IDL.
    */
   public get idl(): anchor.Idl {
     return this._program.idl;

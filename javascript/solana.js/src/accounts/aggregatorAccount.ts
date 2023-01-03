@@ -31,6 +31,7 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
 import assert from 'assert';
+import { BN } from 'bn.js';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -1801,6 +1802,51 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     return aggregators;
+  }
+
+  /**
+   * Calculates the required priority fee for a given aggregator
+   *
+   * Multiplier = the minimum of maxPriorityFeeMultiplier and (timestamp - lastUpdatedTimestamp) / priorityFeeBumpPeriod
+   * Fee = baseFee + basePriorityFee + priorityFeeBump * multiplier
+   *
+   * @param aggregator - the current aggregator state including its last updated timestamp and priority fee config
+   * @param timestamp - optional, the current unix timestamp. can provide the SolanaClock timestamp for better accuracy
+   * @param baseFee - optional, the Solana compute unit base fee
+   *
+   * @returns the solana priority fee to include in the save_result action
+   */
+  public static calculatePriorityFee(
+    aggregator: types.AggregatorAccountData,
+    timestamp = Math.round(Date.now() / 1000),
+    baseFee = 5000 // base compute unit price
+  ): number {
+    // parse defaults
+    const lastUpdateTimestamp =
+      aggregator.latestConfirmedRound.roundOpenTimestamp.gt(new BN(0))
+        ? aggregator.latestConfirmedRound.roundOpenTimestamp.toNumber()
+        : timestamp; // on first update this would cause max multiplier
+    const priorityFeeBumpPeriod = Math.max(1, aggregator.priorityFeeBumpPeriod); // cant divide by 0
+    const maxPriorityFeeMultiplier = Math.max(
+      1,
+      aggregator.maxPriorityFeeMultiplier
+    );
+
+    // calculate staleness multiplier
+    const multiplier = Math.min(
+      (timestamp - lastUpdateTimestamp) / priorityFeeBumpPeriod,
+      maxPriorityFeeMultiplier
+    );
+
+    const feeBump = aggregator.priorityFeeBump * multiplier;
+    const fee = baseFee + aggregator.basePriorityFee + feeBump;
+    if (Number.isNaN(fee)) {
+      return 0;
+    }
+
+    // Should we enforce some upper limit? Like 1 SOL?
+    // Probably not, gives MEV bots a floor
+    return Math.round(fee);
   }
 }
 
