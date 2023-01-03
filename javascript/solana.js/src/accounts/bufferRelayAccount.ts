@@ -388,11 +388,11 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     return txnSignature;
   }
 
-  public async saveResultSyncInstructions(
+  public saveResultSyncInstructions(
     payer: PublicKey,
     params: BufferRelayerSaveResultSyncParams,
     options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
+  ): TransactionObject {
     const saveResultIxn = bufferRelayerSaveResult(
       this.program,
       {
