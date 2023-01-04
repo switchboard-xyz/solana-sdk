@@ -193,6 +193,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
         neededWrappedFunds = neededWrappedFunds + o.stakeAmount;
       }
     });
+
     (params.aggregators ?? []).forEach(a => {
       if (a.fundAmount) {
         neededWrappedFunds = neededWrappedFunds + a.fundAmount;
