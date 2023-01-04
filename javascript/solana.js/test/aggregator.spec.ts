@@ -284,10 +284,7 @@ describe('Aggregator Tests', () => {
       queueAccount.publicKey,
       aggregatorAccount.publicKey
     );
-    const leaseBalance = await leaseAccount.fetchBalance();
-
-    const { lease, queue, aggregator, balance } =
-      await leaseAccount.fetchAccounts();
+    const { queue, aggregator } = await leaseAccount.fetchAccounts();
 
     const expectedFinalBalance = LeaseAccount.minimumLeaseAmount(
       aggregator.oracleRequestBatchSize,
