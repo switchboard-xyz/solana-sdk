@@ -333,6 +333,7 @@ describe('Aggregator Tests', () => {
       minRequiredJobResults: 1,
       minUpdateDelaySeconds: 60,
       keypair: aggregatorKeypair,
+      varianceThreshold: 1,
     });
     await aggregatorAccount.loadData();
 
@@ -372,11 +373,16 @@ describe('Aggregator Tests', () => {
       authority: aggregatorAuthority,
       minUpdateDelaySeconds: 300,
       force: true, // Bypass validation rules.
+      varianceThreshold: 0,
     });
     const postUpdateAggregatorState = await aggregatorAccount.loadData();
     assert(
       postUpdateAggregatorState.minUpdateDelaySeconds === 300,
-      `Failed to setConfig on aggregator`
+      `Failed to setConfig on aggregator (minUpdateDelaySeconds)`
+    );
+    assert(
+      postUpdateAggregatorState.varianceThreshold.toBig().toNumber() === 0,
+      `Failed to setConfig on aggregator (varianceThreshold)`
     );
   });
 

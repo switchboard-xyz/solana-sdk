@@ -32,6 +32,7 @@ import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
 import assert from 'assert';
 import { BN } from 'bn.js';
+import _ from 'lodash';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -954,6 +955,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       });
     }
 
+    const varianceThreshold = params.varianceThreshold ?? 0;
     const setConfigIxn = types.aggregatorSetConfig(
       this.program,
       {
@@ -974,11 +976,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           minJobResults: params.minJobResults ?? null,
           forceReportPeriod: params.forceReportPeriod ?? null,
           varianceThreshold:
-            params.varianceThreshold && params.varianceThreshold >= 0
+            varianceThreshold >= 0
               ? new types.BorshDecimal(
-                  types.SwitchboardDecimal.fromBig(
-                    new Big(params.varianceThreshold)
-                  )
+                  types.SwitchboardDecimal.fromBig(new Big(varianceThreshold))
                 )
               : null,
           basePriorityFee: params.basePriorityFee ?? null,
