@@ -1,6 +1,6 @@
 import { AccountMeta, Keypair, PublicKey } from '@solana/web3.js';
-import { CreateQueueVrfParams } from '../accounts';
-import { Callback } from '../generated';
+import { CreateQueueVrfParams, Callback } from '../accounts';
+import { Callback as CallbackJson } from '../generated';
 import {
   keypairToString,
   loadKeypair,
@@ -28,7 +28,18 @@ export class VrfJson implements IVrfJson {
     if (!('callback' in object)) {
       throw new Error(`VRF has no callback defined`);
     }
-    this.callback = Callback.fromJSON(object.callback);
+    const callbackJson = CallbackJson.fromJSON(object.callback);
+    this.callback = {
+      programId: callbackJson.programId,
+      accounts: callbackJson.accounts.map((a): AccountMeta => {
+        return {
+          pubkey: a.pubkey,
+          isSigner: a.isSigner,
+          isWritable: a.isWritable,
+        };
+      }),
+      ixData: Buffer.from(callbackJson.ixData),
+    };
 
     // permissions
     this.enable = parseBoolean(object, 'enable', false);
@@ -69,15 +80,15 @@ export class VrfJson implements IVrfJson {
   toJSON() {
     return {
       callback: {
-        programId: this.callback.programId,
-        accounts: this.callback.accounts.map((a): AccountMeta => {
+        programId: this.callback.programId.toBase58(),
+        accounts: this.callback.accounts.map(a => {
           return {
-            pubkey: a.pubkey,
+            pubkey: a.pubkey.toBase58(),
             isSigner: a.isSigner,
             isWritable: a.isWritable,
           };
         }),
-        isData: Buffer.from(this.callback.ixData),
+        isData: `[${new Uint8Array(this.callback.ixData)}]`,
       },
       keypair: keypairToString(this.vrfKeypair),
       authority: this.authority?.toBase58() ?? undefined,
