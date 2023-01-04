@@ -309,12 +309,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const jobs = await this.loadJobs(aggregator);
     const jobAuthorities = jobs.map(job => job.state.authority);
 
-    const [oldLeaseAccount] = LeaseAccount.fromSeed(
-      this.program,
-      aggregator.queuePubkey,
-      this.publicKey
-    );
-
     const [newPermissionAccount] = PermissionAccount.fromSeed(
       this.program,
       newQueue.authority,
@@ -954,6 +948,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       });
     }
 
+    const varianceThreshold = params.varianceThreshold ?? 0;
     const setConfigIxn = types.aggregatorSetConfig(
       this.program,
       {
@@ -974,11 +969,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           minJobResults: params.minJobResults ?? null,
           forceReportPeriod: params.forceReportPeriod ?? null,
           varianceThreshold:
-            params.varianceThreshold && params.varianceThreshold >= 0
+            varianceThreshold >= 0
               ? new types.BorshDecimal(
-                  types.SwitchboardDecimal.fromBig(
-                    new Big(params.varianceThreshold)
-                  )
+                  types.SwitchboardDecimal.fromBig(new Big(varianceThreshold))
                 )
               : null,
           basePriorityFee: params.basePriorityFee ?? null,
@@ -1668,10 +1661,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       promiseWithTimeout(
         timeout,
         new Promise(
-          (
-            resolve: (result: types.AggregatorAccountData) => void,
-            reject: (reason: string) => void
-          ) => {
+          (resolve: (result: types.AggregatorAccountData) => void) => {
             ws = this.onChange(aggregator => {
               // if confirmed round slot larger than last open slot
               // AND sliding window mode or sufficient oracle results
@@ -1728,10 +1718,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       result = await promiseWithTimeout(
         timeout,
         new Promise(
-          (
-            resolve: (result: types.AggregatorAccountData) => void,
-            reject: (reason: string) => void
-          ) => {
+          (resolve: (result: types.AggregatorAccountData) => void) => {
             ws = this.onChange(aggregator => {
               if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
                 resolve(aggregator);
