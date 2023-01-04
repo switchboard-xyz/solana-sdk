@@ -32,7 +32,6 @@ import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
 import assert from 'assert';
 import { BN } from 'bn.js';
-import _ from 'lodash';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -309,12 +308,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     const jobs = await this.loadJobs(aggregator);
     const jobAuthorities = jobs.map(job => job.state.authority);
-
-    const [oldLeaseAccount] = LeaseAccount.fromSeed(
-      this.program,
-      aggregator.queuePubkey,
-      this.publicKey
-    );
 
     const [newPermissionAccount] = PermissionAccount.fromSeed(
       this.program,
@@ -1668,10 +1661,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       promiseWithTimeout(
         timeout,
         new Promise(
-          (
-            resolve: (result: types.AggregatorAccountData) => void,
-            reject: (reason: string) => void
-          ) => {
+          (resolve: (result: types.AggregatorAccountData) => void) => {
             ws = this.onChange(aggregator => {
               // if confirmed round slot larger than last open slot
               // AND sliding window mode or sufficient oracle results
@@ -1728,10 +1718,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       result = await promiseWithTimeout(
         timeout,
         new Promise(
-          (
-            resolve: (result: types.AggregatorAccountData) => void,
-            reject: (reason: string) => void
-          ) => {
+          (resolve: (result: types.AggregatorAccountData) => void) => {
             ws = this.onChange(aggregator => {
               if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
                 resolve(aggregator);
