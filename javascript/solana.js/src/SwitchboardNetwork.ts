@@ -56,6 +56,8 @@ import {
   QueueDefinition,
   VrfDefinition,
 } from './types';
+import path from 'path';
+import fs from 'fs';
 
 export const isKeypairString = (value: string): boolean =>
   /^\[(\s)?[0-9]+((\s)?,(\s)?[0-9]+){31,}\]/.test(value);
@@ -113,17 +115,122 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
   vrfs: Array<VrfDefinition>;
   bufferRelayers: Array<BufferRelayerDefinition>;
 
+  crankMap: Map<string, CrankDefinition>;
+  oracleMap: Map<string, OracleDefinition>;
+  aggregatorMap: Map<string, AggregatorDefinition>;
+  vrfMap: Map<string, VrfDefinition>;
+  bufferRelayerMap: Map<string, BufferRelayerDefinition>;
+
   constructor(
     // readonly program: SwitchboardProgram,
     fields: ISwitchboardNetwork
   ) {
     this.programState = fields.programState;
     this.queue = fields.queue;
+
     this.cranks = fields.cranks;
+    this.crankMap = this.cranks.reduce((map, crank) => {
+      map.set(crank.account.publicKey.toBase58(), crank);
+      return map;
+    }, new Map<string, CrankDefinition>());
+
     this.oracles = fields.oracles;
+    this.oracleMap = this.oracles.reduce((map, oracle) => {
+      map.set(oracle.account.publicKey.toBase58(), oracle);
+      return map;
+    }, new Map<string, OracleDefinition>());
+
     this.aggregators = fields.aggregators;
+    this.aggregatorMap = this.aggregators.reduce((map, aggregator) => {
+      map.set(aggregator.account.publicKey.toBase58(), aggregator);
+      return map;
+    }, new Map<string, AggregatorDefinition>());
+
     this.vrfs = fields.vrfs;
+    this.vrfMap = this.vrfs.reduce((map, vrf) => {
+      map.set(vrf.account.publicKey.toBase58(), vrf);
+      return map;
+    }, new Map<string, VrfDefinition>());
+
     this.bufferRelayers = fields.bufferRelayers;
+    this.bufferRelayerMap = this.bufferRelayers.reduce((map, bufferRelayer) => {
+      map.set(bufferRelayer.account.publicKey.toBase58(), bufferRelayer);
+      return map;
+    }, new Map<string, BufferRelayerDefinition>());
+  }
+
+  get program(): SwitchboardProgram {
+    return this.queue.account.program;
+  }
+
+  getCrank(crankPubkey: PublicKey | string): CrankDefinition | undefined {
+    return this.crankMap.get(
+      typeof crankPubkey === 'string' ? crankPubkey : crankPubkey.toBase58()
+    );
+  }
+
+  getOracle(oraclePubkey: PublicKey | string): OracleDefinition | undefined {
+    return this.oracleMap.get(
+      typeof oraclePubkey === 'string' ? oraclePubkey : oraclePubkey.toBase58()
+    );
+  }
+
+  getAggregator(
+    aggregatorPubkey: PublicKey | string
+  ): AggregatorDefinition | undefined {
+    return this.aggregatorMap.get(
+      typeof aggregatorPubkey === 'string'
+        ? aggregatorPubkey
+        : aggregatorPubkey.toBase58()
+    );
+  }
+
+  getVrf(vrfPubkey: PublicKey | string): VrfDefinition | undefined {
+    return this.vrfMap.get(
+      typeof vrfPubkey === 'string' ? vrfPubkey : vrfPubkey.toBase58()
+    );
+  }
+
+  getBufferRelayer(
+    bufferRelayerPubkey: PublicKey | string
+  ): BufferRelayerDefinition | undefined {
+    return this.bufferRelayerMap.get(
+      typeof bufferRelayerPubkey === 'string'
+        ? bufferRelayerPubkey
+        : bufferRelayerPubkey.toBase58()
+    );
+  }
+
+  public static find(
+    program: SwitchboardProgram,
+    networkName = 'default',
+    switchboardDir = path.join(process.cwd(), '.switchboard')
+  ): SwitchboardNetwork {
+    if (
+      !fs.existsSync(switchboardDir) ||
+      !fs.statSync(switchboardDir).isDirectory
+    ) {
+      throw new Error(
+        `Failed to find switchboard directory: ${switchboardDir}`
+      );
+    }
+    const networkDir = path.join(switchboardDir, 'networks');
+    if (!fs.existsSync(networkDir) || !fs.statSync(networkDir).isDirectory) {
+      throw new Error(
+        `Failed to find switchboard network directory: ${networkDir}`
+      );
+    }
+    const networkFile = path.join(networkDir, `${networkName}.json`);
+    if (!fs.existsSync(networkFile) || !fs.statSync(networkFile).isFile) {
+      throw new Error(
+        `Failed to find switchboard network ${networkName}: ${networkFile}`
+      );
+    }
+    const obj: Record<string, any> = JSON.parse(
+      fs.readFileSync(networkFile, 'utf-8')
+    );
+
+    return SwitchboardNetwork.from(program, obj);
   }
 
   /**
@@ -720,92 +827,246 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     });
   }
 
-  // static from(
-  //   program: SwitchboardProgram,
-  //   obj: Record<string, any>
-  // ): SwitchboardNetwork {
-  //   if (!('queue' in obj) || typeof obj.queue !== 'object') {
-  //     throw new Error(`SwitchboardNetwork requires a queue object`);
-  //   }
+  static from(
+    program: SwitchboardProgram,
+    obj: Record<string, any>
+  ): SwitchboardNetwork {
+    const programState: ProgramStateDefinition = {
+      account: new ProgramStateAccount(program, program.programState.publicKey),
+      bump: program.programState.bump,
+    };
+    if (!('queue' in obj) || typeof obj.queue !== 'object') {
+      throw new Error(`SwitchboardNetwork requires a queue object`);
+    }
 
-  //   let queueAccount: QueueAccount;
-  //   if ('publicKey' in obj.queue) {
-  //     queueAccount = new QueueAccount(program, obj.queue.publicKey);
-  //   } else if (
-  //     'keypair' in obj.queue &&
-  //     typeof obj.queue.keypair === 'string' &&
-  //     isKeypairString(obj.queue.keypair)
-  //   ) {
-  //     const queueKeypair = Keypair.fromSecretKey(
-  //       new Uint8Array(JSON.parse(obj.queue.keypair))
-  //     );
-  //     queueAccount = new QueueAccount(program, queueKeypair.publicKey);
-  //   } else {
-  //     throw new Error(`Failed to load queue`);
-  //   }
+    let queueAccount: QueueAccount;
+    if ('publicKey' in obj.queue) {
+      queueAccount = new QueueAccount(program, obj.queue.publicKey);
+    } else if (
+      'keypair' in obj.queue &&
+      typeof obj.queue.keypair === 'string' &&
+      isKeypairString(obj.queue.keypair)
+    ) {
+      const queueKeypair = Keypair.fromSecretKey(
+        new Uint8Array(JSON.parse(obj.queue.keypair))
+      );
+      queueAccount = new QueueAccount(program, queueKeypair.publicKey);
+    } else {
+      throw new Error(`Failed to load queue`);
+    }
+    const queue: QueueDefinition = {
+      account: queueAccount,
+    };
 
-  //   const cranks: Array<CrankDefinition> = [];
-  //   if ('cranks' in obj && Array.isArray(obj.cranks)) {
-  //     for (const crank of obj.cranks ?? []) {
-  //       if ('publicKey' in crank) {
-  //         const account = new CrankAccount(program, crank.publicKey);
-  //         cranks.push({
-  //           account,
-  //         });
-  //       } else if (
-  //         'keypair' in crank &&
-  //         typeof crank.keypair === 'string' &&
-  //         isKeypairString(crank.keypair)
-  //       ) {
-  //         const keypair = Keypair.fromSecretKey(
-  //           new Uint8Array(JSON.parse(crank.keypair))
-  //         );
-  //         const account = new CrankAccount(program, keypair.publicKey);
-  //         cranks.push({
-  //           account,
-  //         });
-  //       }
-  //     }
-  //   }
+    let queueAuthority: PublicKey;
+    if ('authority' in obj.queue && typeof obj.queue.authority === 'string') {
+      queueAuthority = new PublicKey(obj.queue.authority);
+    } else if (
+      'queueAuthorityKeypair' in obj.queue &&
+      typeof obj.queue.queueAuthorityKeypair === 'string' &&
+      isKeypairString(obj.queue.queueAuthorityKeypair)
+    ) {
+      const queueAuthorityKeypair = Keypair.fromSecretKey(
+        new Uint8Array(JSON.parse(obj.queue.queueAuthorityKeypair))
+      );
+      queueAuthority = queueAuthorityKeypair.publicKey;
+    } else {
+      throw new Error(`Failed to load queue authority`);
+    }
 
-  //   const oracles: Array<OracleDefinition> = [];
-  //   if ('oracles' in obj && Array.isArray(obj.oracles)) {
-  //     for (const oracle of obj.oracles ?? []) {
-  //       let account: OracleAccount | undefined = undefined;
-  //       if ('publicKey' in oracle) {
-  //         account = new OracleAccount(program, oracle.publicKey);
-  //       } else if (
-  //         'keypair' in oracle &&
-  //         typeof oracle.keypair === 'string' &&
-  //         isKeypairString(oracle.keypair)
-  //       ) {
-  //         const keypair = Keypair.fromSecretKey(
-  //           new Uint8Array(JSON.parse(oracle.keypair))
-  //         );
-  //         account = new OracleAccount(program, keypair.publicKey);
-  //       } else if (
-  //         'stakingWalletKeypair' in oracle &&
-  //         typeof oracle.stakingWalletKeypair === 'string' &&
-  //         isKeypairString(oracle.stakingWalletKeypair)
-  //       ) {
-  //         const keypair = Keypair.fromSecretKey(
-  //           new Uint8Array(JSON.parse(oracle.stakingWalletKeypair))
-  //         );
-  //         [account] = OracleAccount.fromSeed(
-  //           program,
-  //           queueAccount.publicKey,
-  //           keypair.publicKey
-  //         );
-  //       }
+    const cranks: Array<CrankDefinition> = [];
+    if ('cranks' in obj && Array.isArray(obj.cranks)) {
+      for (const crank of obj.cranks ?? []) {
+        if ('publicKey' in crank) {
+          const account = new CrankAccount(program, crank.publicKey);
+          cranks.push({
+            account,
+          });
+        } else if (
+          'keypair' in crank &&
+          typeof crank.keypair === 'string' &&
+          isKeypairString(crank.keypair)
+        ) {
+          const keypair = Keypair.fromSecretKey(
+            new Uint8Array(JSON.parse(crank.keypair))
+          );
+          const account = new CrankAccount(program, keypair.publicKey);
+          cranks.push({
+            account,
+          });
+        }
+      }
+    }
 
-  //       if (account) {
-  //         // const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(program, queue.a)
-  //       }
-  //     }
-  //   }
+    const oracles: Array<OracleDefinition> = [];
+    if ('oracles' in obj && Array.isArray(obj.oracles)) {
+      for (const oracle of obj.oracles ?? []) {
+        let account: OracleAccount | undefined = undefined;
+        if ('publicKey' in oracle) {
+          account = new OracleAccount(program, oracle.publicKey);
+        } else if (
+          'stakingWalletKeypair' in oracle &&
+          typeof oracle.stakingWalletKeypair === 'string' &&
+          isKeypairString(oracle.stakingWalletKeypair)
+        ) {
+          const keypair = Keypair.fromSecretKey(
+            new Uint8Array(JSON.parse(oracle.stakingWalletKeypair))
+          );
+          [account] = OracleAccount.fromSeed(
+            program,
+            queueAccount.publicKey,
+            keypair.publicKey
+          );
+        }
 
-  //   throw new Error(`Not finished yet`);
-  // }
+        if (account) {
+          const [permissionAccount, permissionBump] =
+            PermissionAccount.fromSeed(
+              program,
+              queueAuthority,
+              queueAccount.publicKey,
+              account.publicKey
+            );
+          oracles.push({
+            account,
+            permission: {
+              account: permissionAccount,
+              bump: permissionBump,
+            },
+          });
+        }
+      }
+    }
+
+    const aggregators: Array<AggregatorDefinition> = [];
+    if ('aggregators' in obj && Array.isArray(obj.aggregators)) {
+      for (const aggregator of obj.aggregators ?? []) {
+        let account: AggregatorAccount | undefined = undefined;
+        if ('publicKey' in aggregator) {
+          account = new AggregatorAccount(program, aggregator.publicKey);
+        } else if (
+          'keypair' in aggregator &&
+          typeof aggregator.keypair === 'string' &&
+          isKeypairString(aggregator.keypair)
+        ) {
+          const keypair = Keypair.fromSecretKey(
+            new Uint8Array(JSON.parse(aggregator.keypair))
+          );
+          account = new AggregatorAccount(program, keypair.publicKey);
+        }
+
+        if (account) {
+          const [permissionAccount, permissionBump] =
+            PermissionAccount.fromSeed(
+              program,
+              queueAuthority,
+              queueAccount.publicKey,
+              account.publicKey
+            );
+
+          const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+            program,
+            queueAccount.publicKey,
+            account.publicKey
+          );
+
+          aggregators.push({
+            account,
+            permission: {
+              account: permissionAccount,
+              bump: permissionBump,
+            },
+            lease: {
+              account: leaseAccount,
+              bump: leaseBump,
+            },
+          });
+        }
+      }
+    }
+
+    const vrfs: Array<VrfDefinition> = [];
+    if ('vrfs' in obj && Array.isArray(obj.vrfs)) {
+      for (const vrf of obj.vrfs ?? []) {
+        let account: VrfAccount | undefined = undefined;
+        if ('publicKey' in vrf) {
+          account = new VrfAccount(program, vrf.publicKey);
+        } else if (
+          'keypair' in vrf &&
+          typeof vrf.keypair === 'string' &&
+          isKeypairString(vrf.keypair)
+        ) {
+          const keypair = Keypair.fromSecretKey(
+            new Uint8Array(JSON.parse(vrf.keypair))
+          );
+          account = new VrfAccount(program, keypair.publicKey);
+        }
+
+        if (account) {
+          const [permissionAccount, permissionBump] =
+            PermissionAccount.fromSeed(
+              program,
+              queueAuthority,
+              queueAccount.publicKey,
+              account.publicKey
+            );
+          vrfs.push({
+            account,
+            permission: {
+              account: permissionAccount,
+              bump: permissionBump,
+            },
+          });
+        }
+      }
+    }
+
+    const bufferRelayers: Array<BufferRelayerDefinition> = [];
+    if ('bufferRelayers' in obj && Array.isArray(obj.bufferRelayers)) {
+      for (const bufferRelayer of obj.bufferRelayers ?? []) {
+        let account: BufferRelayerAccount | undefined = undefined;
+        if ('publicKey' in bufferRelayer) {
+          account = new BufferRelayerAccount(program, bufferRelayer.publicKey);
+        } else if (
+          'keypair' in bufferRelayer &&
+          typeof bufferRelayer.keypair === 'string' &&
+          isKeypairString(bufferRelayer.keypair)
+        ) {
+          const keypair = Keypair.fromSecretKey(
+            new Uint8Array(JSON.parse(bufferRelayer.keypair))
+          );
+          account = new BufferRelayerAccount(program, keypair.publicKey);
+        }
+
+        if (account) {
+          const [permissionAccount, permissionBump] =
+            PermissionAccount.fromSeed(
+              program,
+              queueAuthority,
+              queueAccount.publicKey,
+              account.publicKey
+            );
+          bufferRelayers.push({
+            account,
+            permission: {
+              account: permissionAccount,
+              bump: permissionBump,
+            },
+          });
+        }
+      }
+    }
+
+    return new SwitchboardNetwork({
+      programState,
+      queue,
+      oracles,
+      cranks,
+      aggregators,
+      vrfs,
+      bufferRelayers,
+    });
+  }
 
   /**
    * Load the associated accounts and states for a given {@linkcode QueueAccount}.
@@ -1191,6 +1452,15 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
           authority: vrf.state.authority.toBase58(),
           state: {
             ...vrf.state.toJSON(),
+            callback: {
+              ...vrf.state.callback.toJSON(),
+              accounts: vrf.state.callback.accounts
+                .slice(0, vrf.state.callback.accountsLen)
+                .map(a => a.toJSON()),
+              ixData: `[${new Uint8Array(
+                vrf.state.callback.ixData.slice(0, vrf.state.callback.ixDataLen)
+              )}]`,
+            },
             ebuf: undefined,
             builders: undefined,
           },

@@ -68,7 +68,7 @@ export class VrfJson implements IVrfJson {
 
   static loadMultiple(object: Record<string, any>): Array<VrfJson> {
     const vrfJsons: Array<VrfJson> = [];
-    if ('vrfs' in object && Array.isArray(object.aggregators)) {
+    if ('vrfs' in object && Array.isArray(object.vrfs)) {
       for (const vrf of object.vrfs) {
         vrfJsons.push(new VrfJson(vrf));
       }
@@ -81,13 +81,15 @@ export class VrfJson implements IVrfJson {
     return {
       callback: {
         programId: this.callback.programId.toBase58(),
-        accounts: this.callback.accounts.map(a => {
-          return {
-            pubkey: a.pubkey.toBase58(),
-            isSigner: a.isSigner,
-            isWritable: a.isWritable,
-          };
-        }),
+        accounts: this.callback.accounts
+          .filter(a => !a.pubkey.equals(PublicKey.default))
+          .map(a => {
+            return {
+              pubkey: a.pubkey.toBase58(),
+              isSigner: a.isSigner,
+              isWritable: a.isWritable,
+            };
+          }),
         isData: `[${new Uint8Array(this.callback.ixData)}]`,
       },
       keypair: keypairToString(this.vrfKeypair),

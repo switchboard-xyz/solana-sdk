@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.0.68",
+  "version": "2.0.76",
   "author": "",
   "license": "MIT",
   "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
@@ -15,19 +15,7 @@
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
     },
-    "./package.json": "./package.json",
-    "./idl/mainnet": {
-      "import": "./lib/esm/idl/mainnet.json",
-      "require": "./lib/cjs/idl/mainnet.json"
-    },
-    "./idl/devnet": {
-      "import": "./lib/esm/idl/devnet.json",
-      "require": "./lib/cjs/idl/devnet.json"
-    },
-    "./test": {
-      "import": "./lib/esm/test/index.js",
-      "require": "./lib/cjs/test/index.js"
-    }
+    "./package.json": "./package.json"
   },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
