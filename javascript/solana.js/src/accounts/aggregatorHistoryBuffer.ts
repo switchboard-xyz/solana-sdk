@@ -18,6 +18,9 @@ import {
 } from '@solana/web3.js';
 import { TransactionObject } from '../TransactionObject';
 import { AggregatorAccount } from './aggregatorAccount';
+import { SwitchboardDecimal } from '../generated';
+import Big from 'big.js';
+import BN from 'bn.js';
 
 export interface AggregatorHistoryInit {
   /** Aggregator account to add a history buffer for. */
@@ -261,4 +264,100 @@ export class AggregatorHistoryBuffer extends Account<
     const txnSignature = await program.signAndSend(transaction);
     return [account, txnSignature];
   }
+
+  public static collectMetrics(
+    history: Array<types.AggregatorHistoryRow>,
+    minUpdateDelaySeconds: number,
+    period?: number
+  ): AggregatorHistoryMetrics {
+    const endTimestamp = history
+      .map(row => row.timestamp)
+      .reduce((max, ts) => (ts.gt(max) ? ts : max), new BN(0));
+
+    const startTimestamp = period
+      ? history.reduce((val, row) => {
+          const expectedStartTimestamp = endTimestamp.sub(new BN(period));
+          return row.timestamp.gte(expectedStartTimestamp) &&
+            val
+              .sub(expectedStartTimestamp)
+              .abs()
+              .gt(row.timestamp.sub(expectedStartTimestamp).abs())
+            ? row.timestamp
+            : val;
+        }, new BN(0))
+      : history
+          .map(row => row.timestamp)
+          .reduce((min, ts) => (ts.lt(min) ? ts : min), history[0].timestamp);
+
+    const parsedHistory = history.filter(
+      row =>
+        row.timestamp.gte(startTimestamp) && row.timestamp.lte(endTimestamp)
+    );
+
+    const start = parsedHistory.slice(0)[0];
+    const end = parsedHistory.slice(-1)[0];
+
+    const bigValues = parsedHistory.map(r => r.value.toBig());
+    const values = parsedHistory.map(r => Number(r.value.toString()));
+
+    const minValue = Math.min(...values);
+    const min = parsedHistory.find(r => Number(r.value) === minValue);
+
+    const maxValue = Math.max(...values);
+    const max = parsedHistory.find(r => Number(r.value) === maxValue);
+
+    const actualPeriod = endTimestamp.sub(startTimestamp).toNumber();
+    const numSamples = parsedHistory.length;
+
+    const updateIntervalWithMaxJitter =
+      minUpdateDelaySeconds + (15 % minUpdateDelaySeconds);
+
+    const averageUpdateDelay =
+      Math.round((actualPeriod / numSamples) * 10000) / 10000;
+    const updateCoefficient =
+      Math.round((averageUpdateDelay / minUpdateDelaySeconds) * 10000) / 10000;
+
+    const averageValue = parsedHistory
+      .map(r => r.value.toBig())
+      .reduce((sum, val) => sum.add(val))
+      .div(numSamples);
+
+    const standardDeviation = parsedHistory
+      .map(r => r.value.toBig())
+      .reduce((sum, val) => sum.add(val.sub(averageValue).pow(2)), new Big(0))
+      .div(numSamples)
+      .sqrt();
+
+    return {
+      history: parsedHistory,
+      period: actualPeriod,
+      numSamples,
+      minUpdateDelaySeconds: minUpdateDelaySeconds,
+      updateIntervalWithMaxJitter,
+      averageUpdateDelay,
+      updateCoefficient,
+      averageValue: averageValue.toNumber(),
+      standardDeviation: standardDeviation.toNumber(),
+      start,
+      end,
+      min: min!,
+      max: max!,
+    };
+  }
 }
+
+export type AggregatorHistoryMetrics = {
+  history: Array<types.AggregatorHistoryRow>;
+  period: number;
+  numSamples: number;
+  minUpdateDelaySeconds: number;
+  updateIntervalWithMaxJitter: number;
+  averageUpdateDelay: number;
+  updateCoefficient: number;
+  averageValue: number;
+  standardDeviation: number;
+  start: types.AggregatorHistoryRow;
+  end: types.AggregatorHistoryRow;
+  min: types.AggregatorHistoryRow;
+  max: types.AggregatorHistoryRow;
+};
