@@ -13,7 +13,10 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import { Account } from './account';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.
@@ -129,7 +132,8 @@ export class JobAccount extends Account<types.JobAccountData> {
   public static createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: JobInitParams
+    params: JobInitParams,
+    options?: TransactionObjectOptions
   ): [JobAccount, Array<TransactionObject>] {
     if (params.data.byteLength > 6400) {
       throw new Error('Switchboard jobs need to be less than 6400 bytes');
@@ -168,7 +172,8 @@ export class JobAccount extends Account<types.JobAccountData> {
         new TransactionObject(
           payer,
           [jobInitIxn],
-          params.authority ? [jobKeypair, params.authority] : [jobKeypair]
+          params.authority ? [jobKeypair, params.authority] : [jobKeypair],
+          options
         )
       );
     } else {
@@ -207,7 +212,8 @@ export class JobAccount extends Account<types.JobAccountData> {
         new TransactionObject(
           payer,
           [jobInitIxn],
-          params.authority ? [jobKeypair, params.authority] : [jobKeypair]
+          params.authority ? [jobKeypair, params.authority] : [jobKeypair],
+          options
         )
       );
 
@@ -229,7 +235,8 @@ export class JobAccount extends Account<types.JobAccountData> {
           new TransactionObject(
             payer,
             [jobSetDataIxn],
-            params.authority ? [params.authority] : []
+            params.authority ? [params.authority] : [],
+            options
           )
         );
       }
@@ -240,12 +247,14 @@ export class JobAccount extends Account<types.JobAccountData> {
 
   public static async create(
     program: SwitchboardProgram,
-    params: JobInitParams
+    params: JobInitParams,
+    options?: TransactionObjectOptions
   ): Promise<[JobAccount, Array<TransactionSignature>]> {
     const [account, transactions] = JobAccount.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
     const txSignature = await program.signAndSendAll(transactions);
     return [account, txSignature];

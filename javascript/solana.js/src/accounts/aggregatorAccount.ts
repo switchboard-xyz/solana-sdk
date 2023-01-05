@@ -931,7 +931,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBumpPeriod: number;
       maxPriorityFeeMultiplier: number;
       force: boolean;
-    }>
+    }>,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     if (!(params.force ?? false)) {
       const aggregator = await this.loadData();
@@ -989,7 +990,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return new TransactionObject(
       payer,
       [setConfigIxn],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
@@ -1009,11 +1011,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBumpPeriod?: number;
       maxPriorityFeeMultiplier?: number;
       force: boolean;
-    }>
+    }>,
+    options?: TransactionObjectOptions
   ): Promise<TransactionSignature> {
     const setConfigTxn = await this.setConfigInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(setConfigTxn);
     return txnSignature;
@@ -1024,7 +1028,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params: {
       queueAccount: QueueAccount;
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     const setQueueIxn = types.aggregatorSetQueue(
       this.program,
@@ -1040,17 +1045,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return new TransactionObject(
       payer,
       [setQueueIxn],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  public async setQueue(params: {
-    queueAccount: QueueAccount;
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async setQueue(
+    params: {
+      queueAccount: QueueAccount;
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const setQueueTxn = this.setQueueInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(setQueueTxn);
     return txnSignature;
@@ -1062,7 +1072,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       job: JobAccount;
       weight?: number;
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     const authority = params.authority ? params.authority.publicKey : payer;
     const addJobIxn = types.aggregatorAddJob(
@@ -1077,16 +1088,24 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return new TransactionObject(
       payer,
       [addJobIxn],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  public async addJob(params: {
-    job: JobAccount;
-    weight?: number;
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
-    const txn = this.addJobInstruction(this.program.walletPubkey, params);
+  public async addJob(
+    params: {
+      job: JobAccount;
+      weight?: number;
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const txn = this.addJobInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
     const txnSignature = await this.program.signAndSend(txn);
     return txnSignature;
   }
@@ -1095,7 +1114,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     payer: PublicKey,
     params: {
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -1109,14 +1129,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           }
         ),
       ],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  public async lock(params: {
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
-    const lockTxn = this.lockInstruction(this.program.walletPubkey, params);
+  public async lock(
+    params: {
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const lockTxn = this.lockInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
     const txnSignature = await this.program.signAndSend(lockTxn);
     return txnSignature;
   }
@@ -1126,7 +1154,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params: {
       newAuthority: PublicKey;
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -1141,17 +1170,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           }
         ),
       ],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  public async setAuthority(params: {
-    newAuthority: PublicKey;
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async setAuthority(
+    params: {
+      newAuthority: PublicKey;
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const setAuthorityTxn = this.setAuthorityInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(setAuthorityTxn);
     return txnSignature;
@@ -1164,13 +1198,18 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       jobIdx: number;
       weight: number;
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
-    const removeJob = this.removeJobInstruction(payer, {
-      job: params.job,
-      jobIdx: params.jobIdx,
-      authority: params.authority,
-    });
+    const removeJob = this.removeJobInstruction(
+      payer,
+      {
+        job: params.job,
+        jobIdx: params.jobIdx,
+        authority: params.authority,
+      },
+      options
+    );
     const addJob = this.addJobInstruction(payer, {
       job: params.job,
       weight: params.weight,
@@ -1179,15 +1218,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return removeJob.combine(addJob);
   }
 
-  public async updateJobWeight(params: {
-    job: JobAccount;
-    jobIdx: number;
-    weight: number;
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async updateJobWeight(
+    params: {
+      job: JobAccount;
+      jobIdx: number;
+      weight: number;
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const transaction = this.updateJobWeightInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const signature = await this.program.signAndSend(transaction);
     return signature;
@@ -1199,7 +1242,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       job: JobAccount;
       jobIdx: number;
       authority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     const authority = params.authority ? params.authority.publicKey : payer;
     const removeJobIxn = types.aggregatorRemoveJob(
@@ -1214,18 +1258,23 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return new TransactionObject(
       payer,
       [removeJobIxn],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  public async removeJob(params: {
-    job: JobAccount;
-    jobIdx: number;
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async removeJob(
+    params: {
+      job: JobAccount;
+      jobIdx: number;
+      authority?: Keypair;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const removeJobTxn = this.removeJobInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(removeJobTxn);
     return txnSignature;
@@ -1233,7 +1282,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   public async openRoundInstruction(
     payer: PublicKey,
-    params?: { payoutWallet?: PublicKey }
+    params?: { payoutWallet?: PublicKey },
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const aggregatorData = await this.loadData();
     const queueAccount = new QueueAccount(
@@ -1289,15 +1339,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       )
     );
 
-    return new TransactionObject(payer, ixns, []);
+    return new TransactionObject(payer, ixns, [], options);
   }
 
-  public async openRound(params?: {
-    payoutWallet?: PublicKey;
-  }): Promise<TransactionSignature> {
+  public async openRound(
+    params?: {
+      payoutWallet?: PublicKey;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const openRoundTxn = await this.openRoundInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(openRoundTxn);
     return txnSignature;
@@ -1604,7 +1658,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params: {
       authority?: Keypair;
       mode: types.AggregatorResolutionModeKind;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -1623,17 +1678,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           }
         ),
       ],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
   }
 
-  async setSlidingWindow(params: {
-    authority?: Keypair;
-    mode: types.AggregatorResolutionModeKind;
-  }): Promise<TransactionSignature> {
+  async setSlidingWindow(
+    params: {
+      authority?: Keypair;
+      mode: types.AggregatorResolutionModeKind;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const setSlidingWindowTxn = this.setSlidingWindowInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(setSlidingWindowTxn);
     return txnSignature;
@@ -1643,7 +1703,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params?: { payoutWallet?: PublicKey } & {
       aggregator?: types.AggregatorAccountData;
     },
-    timeout = 30000
+    timeout = 30000,
+    options?: TransactionObjectOptions
   ): Promise<[types.AggregatorAccountData, TransactionSignature | undefined]> {
     const aggregator = params?.aggregator ?? (await this.loadData());
     const currentRoundOpenSlot = aggregator.latestConfirmedRound.roundOpenSlot;
@@ -1683,7 +1744,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         await closeWebsocket();
       });
 
-    const openRoundSignature = await this.openRound(params).catch(
+    const openRoundSignature = await this.openRound(params, options).catch(
       async error => {
         await closeWebsocket();
         throw new Error(`Failed to call openRound, ${error}`);

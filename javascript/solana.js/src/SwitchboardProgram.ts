@@ -477,13 +477,11 @@ export class SwitchboardProgram {
     if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
     if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
 
-    const packed = TransactionObject.pack(txns);
-
     const txnSignatures: Array<TransactionSignature> = [];
-    for await (const [i, txn] of packed.entries()) {
+    for await (const [i, txn] of txns.entries()) {
       txnSignatures.push(await this.signAndSend(txn, opts, txnOptions));
       if (
-        i !== packed.length - 1 &&
+        i !== txns.length - 1 &&
         delay &&
         typeof delay === 'number' &&
         delay > 0

@@ -15,7 +15,7 @@ anchor_vrf_parser = "4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 30000 ./tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts"
 
 [test.validator]
 url="https://api.devnet.solana.com"

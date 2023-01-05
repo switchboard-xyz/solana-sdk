@@ -14,11 +14,11 @@ import {
   AnchorWallet,
   Callback,
   PermissionAccount,
-  SwitchboardTestContext,
   types,
 } from "@switchboard-xyz/solana.js";
 import { sleep } from "@switchboard-xyz/common";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { Switchboard } from "./init";
 
 describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
@@ -36,7 +36,7 @@ describe("anchor-vrf-parser test", () => {
 
   const payer = (provider.wallet as AnchorWallet).payer;
 
-  let switchboard: SwitchboardTestContext;
+  let switchboard: Switchboard;
 
   const vrfSecret = anchor.web3.Keypair.generate();
   console.log(`VRF Account: ${vrfSecret.publicKey}`);
@@ -63,40 +63,11 @@ describe("anchor-vrf-parser test", () => {
   };
 
   before(async () => {
-    // First, attempt to load the switchboard devnet PID
-    try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        provider as anchor.AnchorProvider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy",
-        5_000_000 // .005 wSOL
-      );
-      console.log("devnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Devnet - ${error.message}`);
-      // console.error(error);
-    }
-    // If fails, fallback to looking for a local env file
-    try {
-      switchboard = await SwitchboardTestContext.loadFromEnv(
-        provider,
-        undefined,
-        5_000_000 // .005 wSOL
-      );
-      console.log("localnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Localnet - ${error.message}`);
-      console.error(error);
-    }
-    // If fails, throw error
-    throw new Error(
-      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
-    );
+    switchboard = await Switchboard.load(provider);
   });
 
   it("Creates a vrfClient account", async () => {
-    const queue = switchboard.queue;
+    const queue = switchboard.queue.account;
     const { unpermissionedVrfEnabled, authority, dataBuffer } =
       await queue.loadData();
 

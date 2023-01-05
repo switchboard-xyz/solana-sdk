@@ -16,7 +16,10 @@ import { promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
@@ -229,88 +232,69 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   public proveAndVerifyInstructions(
     params: VrfProveAndVerifyParams,
-    tryCount = 278
-  ): TransactionInstruction[] {
-    const ixns: TransactionInstruction[] = [];
-
-    const vrf = params.vrf;
-
-    const idx = vrf.builders.findIndex(builder =>
+    options?: TransactionObjectOptions,
+    numTxns = 40
+  ): Array<TransactionObject> {
+    const idx = params.vrf.builders.findIndex(builder =>
       params.oraclePubkey.equals(builder.producer)
     );
     if (idx === -1) {
       throw new Error('OracleNotFoundError');
     }
 
-    // only add proof in first ixn to optimally pack
-    ixns.push(
-      types.vrfProveAndVerify(
+    const remainingAccounts = params.vrf.callback.accounts.slice(
+      0,
+      params.vrf.callback.accountsLen
+    );
+
+    const txns = Array.from(Array(numTxns).keys()).map(i => {
+      const proveIxn = types.vrfProveAndVerify(
         this.program,
         {
           params: {
-            nonce: 1,
+            nonce: i,
             stateBump: this.program.programState.bump,
             idx: idx,
             proof: new Uint8Array(),
             proofEncoded: params.proof,
-            counter: vrf.counter,
+            counter: params.vrf.counter,
           },
         },
         {
           vrf: this.publicKey,
-          callbackPid: vrf.callback.programId,
+          callbackPid: params.vrf.callback.programId,
           tokenProgram: TOKEN_PROGRAM_ID,
-          escrow: vrf.escrow,
+          escrow: params.vrf.escrow,
           programState: this.program.programState.publicKey,
           oracle: params.oraclePubkey,
           oracleAuthority: params.oracleAuthority,
           oracleWallet: params.oracleTokenWallet,
           instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
         }
-      )
-    );
-
-    // add verify ixns
-    for (let i = 0; i < tryCount; ++i) {
-      ixns.push(
-        types.vrfProveAndVerify(
-          this.program,
-          {
-            params: {
-              nonce: i,
-              stateBump: this.program.programState.bump,
-              idx: idx,
-              proof: new Uint8Array(),
-              proofEncoded: '',
-              counter: vrf.counter,
-            },
-          },
-          {
-            vrf: this.publicKey,
-            callbackPid: vrf.callback.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            escrow: vrf.escrow,
-            programState: this.program.programState.publicKey,
-            oracle: params.oraclePubkey,
-            oracleAuthority: params.oracleAuthority,
-            oracleWallet: params.oracleTokenWallet,
-            instructionsSysvar: SYSVAR_INSTRUCTIONS_PUBKEY,
-          }
-        )
       );
-    }
+      proveIxn.keys = proveIxn.keys.concat(remainingAccounts);
 
-    return ixns;
+      return new TransactionObject(this.program.walletPubkey, [proveIxn], [], {
+        computeUnitLimit: 1_400_000, // allow user to override
+        ...options,
+      });
+    });
+
+    return txns;
   }
 
-  public async proveAndVerify(params: {
-    vrf?: types.VrfAccountData;
-    proof?: string;
-    oraclePubkey?: PublicKey;
-    oracleTokenWallet?: PublicKey;
-    oracleAuthority?: PublicKey;
-    skipPreflight?: boolean;
-  }): Promise<Array<TransactionSignature>> {
+  public async proveAndVerify(
+    params: {
+      vrf?: types.VrfAccountData;
+      proof?: string;
+      oraclePubkey?: PublicKey;
+      oracleTokenWallet?: PublicKey;
+      oracleAuthority?: PublicKey;
+      skipPreflight?: boolean;
+    },
+    options?: TransactionObjectOptions,
+    numTxns = 40
+  ): Promise<Array<TransactionSignature>> {
     const vrf = params.vrf ?? (await this.loadData());
     const oraclePubkey = params.oraclePubkey ?? vrf.builders[0].producer;
 
@@ -323,15 +307,18 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       oracleAuthority = oracle.oracleAuthority;
     }
 
-    const ixns = this.proveAndVerifyInstructions({
-      vrf,
-      proof: params.proof ?? '',
-      oraclePubkey,
-      oracleTokenWallet,
-      oracleAuthority,
-    });
+    const txns = this.proveAndVerifyInstructions(
+      {
+        vrf,
+        proof: params.proof ?? '',
+        oraclePubkey,
+        oracleTokenWallet,
+        oracleAuthority,
+      },
+      options,
+      numTxns
+    );
 
-    const txns = TransactionObject.packIxns(this.program.walletPubkey, ixns);
     const txnSignatures = await this.program.signAndSendAll(txns, {
       skipPreflight: params.skipPreflight ?? true,
     });
