@@ -297,8 +297,10 @@ export class AggregatorHistoryBuffer extends Account<
     const start = parsedHistory.slice(0)[0];
     const end = parsedHistory.slice(-1)[0];
 
+    const timestamps = parsedHistory.map(r => r.timestamp);
     const bigValues = parsedHistory.map(r => r.value.toBig());
-    const values = parsedHistory.map(r => Number(r.value.toString()));
+
+    const values = bigValues.map(val => Number.parseFloat(val.toString()));
 
     const minValue = Math.min(...values);
     const min = parsedHistory.find(r => Number(r.value) === minValue);
@@ -309,7 +311,7 @@ export class AggregatorHistoryBuffer extends Account<
     const actualPeriod = endTimestamp.sub(startTimestamp).toNumber();
     const numSamples = parsedHistory.length;
 
-    const updateIntervalWithMaxJitter =
+    const maxUpdateIntervalWithJitter =
       minUpdateDelaySeconds + (15 % minUpdateDelaySeconds);
 
     const averageUpdateDelay =
@@ -317,13 +319,11 @@ export class AggregatorHistoryBuffer extends Account<
     const updateCoefficient =
       Math.round((averageUpdateDelay / minUpdateDelaySeconds) * 10000) / 10000;
 
-    const averageValue = parsedHistory
-      .map(r => r.value.toBig())
+    const averageValue = bigValues
       .reduce((sum, val) => sum.add(val))
       .div(numSamples);
 
-    const standardDeviation = parsedHistory
-      .map(r => r.value.toBig())
+    const standardDeviation = bigValues
       .reduce((sum, val) => sum.add(val.sub(averageValue).pow(2)), new Big(0))
       .div(numSamples)
       .sqrt();
@@ -333,7 +333,7 @@ export class AggregatorHistoryBuffer extends Account<
       period: actualPeriod,
       numSamples,
       minUpdateDelaySeconds: minUpdateDelaySeconds,
-      updateIntervalWithMaxJitter,
+      maxUpdateIntervalWithJitter,
       averageUpdateDelay,
       updateCoefficient,
       averageValue: averageValue.toNumber(),
@@ -351,7 +351,7 @@ export type AggregatorHistoryMetrics = {
   period: number;
   numSamples: number;
   minUpdateDelaySeconds: number;
-  updateIntervalWithMaxJitter: number;
+  maxUpdateIntervalWithJitter: number;
   averageUpdateDelay: number;
   updateCoefficient: number;
   averageValue: number;
