@@ -257,7 +257,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
             idx: idx,
             proof: new Uint8Array(),
             proofEncoded: params.proof,
-            counter: params.vrf.counter,
+            counter: params.counter ?? params.vrf.counter,
           },
         },
         {
@@ -284,14 +284,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   }
 
   public async proveAndVerify(
-    params: {
-      vrf?: types.VrfAccountData;
-      proof?: string;
-      oraclePubkey?: PublicKey;
-      oracleTokenWallet?: PublicKey;
-      oracleAuthority?: PublicKey;
-      skipPreflight?: boolean;
-    },
+    params: Partial<VrfProveAndVerifyParams> & { skipPreflight?: boolean },
     options?: TransactionObjectOptions,
     numTxns = 40
   ): Promise<Array<TransactionSignature>> {
@@ -693,6 +686,7 @@ export interface VrfSetCallbackParams {
 
 export interface VrfProveAndVerifyParams {
   vrf: types.VrfAccountData;
+  counter?: anchor.BN;
   proof: string;
   oraclePubkey: PublicKey;
   oracleTokenWallet: PublicKey;
