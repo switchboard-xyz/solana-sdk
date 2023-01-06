@@ -4,12 +4,12 @@ dist
 lib
 build
 tsconfig.tsbuildinfo
-javascript/*/docs
-
+**/docs
 *.env
 
-**/.switchboard/*
-!**/.switchboard/networks/*.config.json
+# Yarn
+**/.yarn
+
 # Python
 __pycache__
 .pytest_cache
@@ -30,5 +30,8 @@ secrets
 *-error.log
 *-debug.log
 
-# Yarn
-**/.yarn
+# Switchboard
+**/.switchboard/*
+!**/.switchboard/networks/
+**/.switchboard/networks/*
+!**/.switchboard/networks/*.config.json

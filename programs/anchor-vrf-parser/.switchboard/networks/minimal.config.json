@@ -1,0 +1,59 @@
+{
+  "queue": {
+    "queueSize": 10,
+    "oracleTimeout": 900,
+    "unpermissionedFeeds": true,
+    "unpermissionedVrf": true,
+    "enableBufferRelayers": false
+  },
+  "cranks": [
+    {
+      "maxRows": 200
+    }
+  ],
+  "oracles": [
+    {
+      "stakeAmount": 1.5,
+      "enable": true
+    }
+  ],
+  "aggregators": [
+    {
+      "name": "Aggregator #1",
+      "crankIndex": 0,
+      "enable": true,
+      "fundAmount": 1,
+      "minUpdateDelaySeconds": 30,
+      "historyLimit": 1000,
+      "jobs": [
+        {
+          "weight": 1,
+          "name": "Job #1",
+          "tasks": [
+            {
+              "valueTask": {
+                "value": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "vrfs": [
+    {
+      "enable": true,
+      "callback": {
+        "programId": "11111111111111111111111111111111",
+        "accounts": [
+          {
+            "pubkey": "11111111111111111111111111111111",
+            "isWritable": true,
+            "isSigner": false
+          }
+        ],
+        "ixData": [0, 0, 0, 0, 0, 0, 0, 0]
+      }
+    }
+  ]
+}
