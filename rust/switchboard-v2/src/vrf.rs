@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
+use anchor_lang::Discriminator;
 use anchor_spl::token::TokenAccount;
 use bytemuck::{Pod, Zeroable};
 use solana_program::entrypoint::ProgramResult;
@@ -525,11 +526,11 @@ pub struct VrfRequestRandomnessParams {
     pub state_bump: u8,
 }
 
-impl<'info> VrfRequestRandomness<'info> {
-    fn discriminator() -> [u8; 8] {
-        [230, 121, 14, 164, 28, 222, 117, 118]
-    }
+impl Discriminator for VrfRequestRandomness<'_> {
+    const DISCRIMINATOR: [u8; 8] = [230, 121, 14, 164, 28, 222, 117, 118];
+}
 
+impl<'info> VrfRequestRandomness<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,
@@ -677,11 +678,11 @@ pub struct VrfSetCallbackParams {
     pub callback: Callback,
 }
 
-impl<'info> VrfSetCallback<'info> {
-    fn discriminator() -> [u8; 8] {
-        [121, 167, 168, 191, 180, 247, 251, 78]
-    }
+impl Discriminator for VrfSetCallback<'_> {
+    const DISCRIMINATOR: [u8; 8] = [121, 167, 168, 191, 180, 247, 251, 78];
+}
 
+impl<'info> VrfSetCallback<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,

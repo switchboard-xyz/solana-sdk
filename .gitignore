@@ -7,12 +7,9 @@ tsconfig.tsbuildinfo
 javascript/*/docs
 
 *.env
-.switchboard
-start-local-validator.sh
-start-oracle.sh
-switchboard.json
-docker-compose.switchboard.yml
 
+**/.switchboard/*
+!**/.switchboard/networks/*.config.json
 # Python
 __pycache__
 .pytest_cache
@@ -32,18 +29,6 @@ secrets
 .archive
 *-error.log
 *-debug.log
-
-# Root level jsons ignored
-job-directory/*.json
-
-
-# Docusaurus
-public
-.docusaurus
-# Auto generated
-website/static/api/ts
-website/static/api/ts-lite
-website/static/api/sbv2-utils
 
 # Yarn
 **/.yarn

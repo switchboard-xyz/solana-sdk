@@ -1,6 +1,7 @@
 use super::decimal::SwitchboardDecimal;
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
+use anchor_lang::Discriminator;
 use rust_decimal::Decimal;
 use std::cell::Ref;
 
@@ -200,7 +201,9 @@ impl AggregatorAccountData {
             return Err(ErrorCode::AccountDiscriminatorMismatch.into());
         }
 
-        Ok(bytemuck::from_bytes(&data[8..std::mem::size_of::<AggregatorAccountData>() + 8]))
+        Ok(bytemuck::from_bytes(
+            &data[8..std::mem::size_of::<AggregatorAccountData>() + 8],
+        ))
     }
 
     /// If sufficient oracle responses, returns the latest on-chain result in SwitchboardDecimal format
@@ -285,10 +288,6 @@ impl AggregatorAccountData {
             return Err(SwitchboardError::StaleFeed.into());
         }
         Ok(())
-    }
-
-    fn discriminator() -> [u8; 8] {
-        [217, 230, 65, 101, 201, 162, 27, 125]
     }
 }
 
