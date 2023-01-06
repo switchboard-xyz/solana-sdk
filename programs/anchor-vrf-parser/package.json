@@ -17,9 +17,9 @@
     "localnet:wait": "for attempt in {1..30}; do sleep 1; if curl -sS http://localhost:8899 -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1, \"method\":\"getBlockHeight\"}'; then echo ready; break; fi; done",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "network:create": "sbv2 solana network create --keypair ~/.config/solana/id.json --configFile .switchboard/networks/default.config.json --schemaFile .switchboard/networks/default.json --cluster localnet --force",
-    "network:start": "sbv2 solana network start --keypair ~/.config/solana/id.json --schemaFile .switchboard/networks/default.json --cluster localnet --nodeImage dev-v2-RC_01_05_23_18_41a-beta",
+    "network:start": "sbv2 solana network start --keypair ~/.config/solana/id.json --schemaFile .switchboard/networks/default.json --cluster localnet --nodeImage dev-v2-RC_01_05_23_20_01-beta",
     "network:start:dev": "VERBOSE=1 DEBUG=1 CHAIN=solana CLUSTER=localnet TASK_RUNNER_SOLANA_RPC=https://api.mainnet-beta.solana.com FS_PAYER_SECRET_PATH=~/.config/solana/id.json RPC_URL=http://localhost:8899 ORACLE_KEY=Ei4HcqRQtf6TfwbuRXKRwCtt8PDXhmq9NhYLWpoh23xp ts-node ../../../switchboard-oracle-v2/node/src/apps/oracle",
-    "build": "anchor build && npx anchor-client-gen target/idl/lottery.json client/generated --program-id $(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json) && npx prettier client/generated --write",
+    "build": "anchor build && npx anchor-client-gen target/idl/anchor_vrf_parser.json client/generated --program-id $(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json) && npx prettier client/generated --write",
     "test": "npm run localnet && npm run network:create && npm run network:start & sleep 60 && anchor test --skip-local-validator",
     "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
   },

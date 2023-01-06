@@ -110,6 +110,8 @@ describe("anchor-vrf-parser test", () => {
     await vrfClientProgram.methods
       .initState({
         maxResult: new anchor.BN(1337000),
+        permissionBump: permissionBump,
+        switchboardStateBump: switchboard.program.programState.bump,
       })
       .accounts({
         state: vrfClientKey,
@@ -133,11 +135,7 @@ describe("anchor-vrf-parser test", () => {
     await sleep(2000);
 
     // Request randomness
-    await vrfClientProgram.methods.requestResult!({
-      switchboardStateBump: switchboard.program.programState.bump,
-      permissionBump,
-      // callback: vrf.callback,
-    })
+    await vrfClientProgram.methods.requestResult!({})
       .accounts({
         state: vrfClientKey,
         authority: payer.publicKey,

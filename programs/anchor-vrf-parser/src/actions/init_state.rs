@@ -1,7 +1,6 @@
 use crate::*;
 use anchor_lang::prelude::*;
 pub use switchboard_v2::VrfAccountData;
-use std::mem;
 
 #[derive(Accounts)]
 #[instruction(params: InitStateParams)]
@@ -14,7 +13,7 @@ pub struct InitState<'info> {
             authority.key().as_ref(),
         ],
         payer = payer,
-        space = 8 + mem::size_of::<VrfClient>(),
+        space = 8 + std::mem::size_of::<VrfClient>(),
         bump,
     )]
     pub state: AccountLoader<'info, VrfClient>,
@@ -36,6 +35,8 @@ pub struct InitState<'info> {
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct InitStateParams {
     pub max_result: u64,
+    pub permission_bump: u8,
+    pub switchboard_state_bump: u8,
 }
 
 impl InitState<'_> {
@@ -63,9 +64,11 @@ impl InitState<'_> {
         let mut state = ctx.accounts.state.load_init()?;
         *state = VrfClient::default();
         state.bump = ctx.bumps.get("state").unwrap().clone();
-        state.authority =  ctx.accounts.authority.key.clone();
+        state.authority = ctx.accounts.authority.key.clone();
         state.vrf = ctx.accounts.vrf.key();
-        
+        state.permission_bump = params.permission_bump;
+        state.switchboard_state_bump = params.switchboard_state_bump;
+
         msg!("Setting VrfClient max_result");
         if params.max_result == 0 {
             state.max_result = MAX_RESULT;

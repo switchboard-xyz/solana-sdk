@@ -6,6 +6,8 @@ use anchor_spl::token::TokenAccount;
 
 pub use switchboard_v2::SWITCHBOARD_PROGRAM_ID;
 
+pub use switchboard_v2::Callback;
+
 declare_id!("4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN");
 
 const MAX_RESULT: u64 = u64::MAX;
@@ -21,9 +23,9 @@ pub mod anchor_vrf_parser {
         InitState::actuate(&ctx, &params)
     }
 
-    #[access_control(ctx.accounts.validate(&ctx))]
-    pub fn update_result(ctx: Context<UpdateResult>) -> Result<()> {
-        UpdateResult::actuate(&ctx)
+    #[access_control(ctx.accounts.validate(&ctx, &params))]
+    pub fn update_result(ctx: Context<UpdateResult>, params: UpdateResultParams) -> Result<()> {
+        UpdateResult::actuate(&ctx, &params)
     }
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]
@@ -42,6 +44,8 @@ pub struct VrfClient {
     pub last_timestamp: i64,
     pub authority: Pubkey,
     pub vrf: Pubkey,
+    pub permission_bump: u8,
+    pub switchboard_state_bump: u8,
 }
 impl Default for VrfClient {
     fn default() -> Self {

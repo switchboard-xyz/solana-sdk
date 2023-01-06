@@ -1,8 +1,11 @@
 use crate::*;
 use anchor_lang::prelude::*;
-pub use switchboard_v2::{VrfAccountData, VrfRequestRandomness, OracleQueueAccountData, PermissionAccountData, SbState};
-use anchor_spl::token::Token;
 use anchor_lang::solana_program::clock;
+use anchor_spl::token::Token;
+pub use switchboard_v2::{
+    OracleQueueAccountData, PermissionAccountData, SbState, VrfAccountData, VrfRequestRandomness,
+    VrfSetCallback,
+};
 
 #[derive(Accounts)]
 #[instruction(params: RequestResultParams)] // rpc parameters hint
@@ -64,7 +67,7 @@ pub struct RequestResult<'info> {
             *program_state.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub program_state: AccountLoader<'info, SbState>,
-    /// CHECK: 
+    /// CHECK:
     #[account(
         constraint = 
             switchboard_program.executable == true 
@@ -92,24 +95,53 @@ pub struct RequestResult<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct RequestResultParams {
-    pub permission_bump: u8,
-    pub switchboard_state_bump: u8,
-}
+pub struct RequestResultParams {}
 
 impl RequestResult<'_> {
     pub fn validate(&self, _ctx: &Context<Self>, _params: &RequestResultParams) -> Result<()> {
         Ok(())
     }
 
-    pub fn actuate(ctx: &Context<Self>, params: &RequestResultParams) -> Result<()> {
+    pub fn actuate(ctx: &Context<Self>, _params: &RequestResultParams) -> Result<()> {
         let client_state = ctx.accounts.state.load()?;
         let bump = client_state.bump.clone();
         let max_result = client_state.max_result;
+
+        let permission_bump = client_state.permission_bump.clone();
+        let switchboard_state_bump = client_state.switchboard_state_bump.clone();
         drop(client_state);
 
-        let switchboard_program = ctx.accounts.switchboard_program.to_account_info();
+        // get pda seeds
+        let vrf_key = ctx.accounts.vrf.key();
+        let authority_key = ctx.accounts.authority.key.clone();
+        msg!("bump: {}", bump);
+        msg!("authority: {}", authority_key);
+        msg!("vrf: {}", vrf_key);
+        let state_seeds: &[&[&[u8]]] = &[&[
+            &STATE_SEED,
+            vrf_key.as_ref(),
+            authority_key.as_ref(),
+            &[bump],
+        ]];
 
+        // first set callback
+        let vrf_set_callback = VrfSetCallback {
+            authority: ctx.accounts.state.to_account_info(),
+            vrf: ctx.accounts.vrf.to_account_info(),
+        };
+        let callback = UpdateResult::to_callback(
+            &vrf_set_callback.authority,
+            &vrf_set_callback.vrf.key(),
+            &UpdateResultParams {},
+        )?;
+        msg!("setting callback");
+        vrf_set_callback.invoke_signed(
+            ctx.accounts.switchboard_program.to_account_info(),
+            callback,
+            state_seeds,
+        )?;
+
+        // then request randomness
         let vrf_request_randomness = VrfRequestRandomness {
             authority: ctx.accounts.state.to_account_info(),
             vrf: ctx.accounts.vrf.to_account_info(),
@@ -125,31 +157,18 @@ impl RequestResult<'_> {
             token_program: ctx.accounts.token_program.to_account_info(),
         };
 
-        let vrf_key = ctx.accounts.vrf.key();
-        let authority_key = ctx.accounts.authority.key.clone();
-
-        msg!("bump: {}", bump);
-        msg!("authority: {}", authority_key);
-        msg!("vrf: {}", vrf_key);
-
-        let state_seeds: &[&[&[u8]]] = &[&[
-            &STATE_SEED,
-            vrf_key.as_ref(),
-            authority_key.as_ref(),
-            &[bump],
-        ]];
         msg!("requesting randomness");
         vrf_request_randomness.invoke_signed(
-            switchboard_program,
-            params.switchboard_state_bump,
-            params.permission_bump,
+            ctx.accounts.switchboard_program.to_account_info(),
+            switchboard_state_bump,
+            permission_bump,
             state_seeds,
         )?;
 
         let mut client_state = ctx.accounts.state.load_mut()?;
         client_state.result = 0;
 
-        emit!(RequestingRandomness{
+        emit!(RequestingRandomness {
             vrf_client: ctx.accounts.state.key(),
             max_result: max_result,
             timestamp: clock::Clock::get().unwrap().unix_timestamp

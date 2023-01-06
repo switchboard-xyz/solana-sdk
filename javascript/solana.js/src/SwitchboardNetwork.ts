@@ -827,6 +827,13 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     });
   }
 
+  /**
+   * Load a SwitchboardNetwork from an outputted JSON file
+   *
+   * @param program
+   * @param obj
+   * @returns
+   */
   static from(
     program: SwitchboardProgram,
     obj: Record<string, any>
