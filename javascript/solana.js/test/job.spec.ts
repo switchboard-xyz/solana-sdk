@@ -1,7 +1,7 @@
 import 'mocha';
 import assert from 'assert';
 
-import { setupTest, TestContext } from './utilts';
+import { setupTest, TestContext } from './utils';
 import { OracleJob } from '@switchboard-xyz/common';
 import { JobAccount } from '../src';
 

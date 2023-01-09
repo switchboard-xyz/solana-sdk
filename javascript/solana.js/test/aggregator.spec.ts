@@ -3,7 +3,7 @@ import 'mocha';
 import assert from 'assert';
 
 import * as sbv2 from '../src';
-import { setupTest, TestContext } from './utilts';
+import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
 import {
   AggregatorAccount,

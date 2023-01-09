@@ -2,7 +2,7 @@ import 'mocha';
 import assert from 'assert';
 
 import * as anchor from '@project-serum/anchor';
-import { setupTest, TestContext } from './utilts';
+import { setupTest, TestContext } from './utils';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import Big from 'big.js';
 

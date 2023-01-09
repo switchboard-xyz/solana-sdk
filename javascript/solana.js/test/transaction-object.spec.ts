@@ -13,7 +13,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { setupTest, TestContext } from './utilts';
+import { setupTest, TestContext } from './utils';
 import {
   ixnsDeepEqual,
   ixnsEqual,

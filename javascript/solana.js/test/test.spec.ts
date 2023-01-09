@@ -1,7 +1,7 @@
 import 'mocha';
 import assert from 'assert';
 
-import { DEFAULT_KEYPAIR_PATH } from './utilts';
+import { DEFAULT_KEYPAIR_PATH } from './utils';
 import {
   camelToUpperCaseWithUnderscores,
   SwitchboardTestContext,

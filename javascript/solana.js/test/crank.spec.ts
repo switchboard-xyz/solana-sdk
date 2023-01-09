@@ -1,7 +1,7 @@
 import 'mocha';
 import assert from 'assert';
 
-import { createFeed, createFeeds, setupTest, TestContext } from './utilts';
+import { createFeed, createFeeds, setupTest, TestContext } from './utils';
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import {
   AggregatorAccount,

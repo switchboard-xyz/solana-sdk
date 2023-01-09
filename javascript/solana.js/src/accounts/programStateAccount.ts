@@ -99,13 +99,16 @@ export class ProgramStateAccount extends Account<types.SbState> {
    */
   static async getOrCreate(
     program: SwitchboardProgram,
-    mint: PublicKey = Mint.native
+    params: ProgramInitParams = {
+      mint: Mint.native,
+      daoMint: Mint.native,
+    }
   ): Promise<[ProgramStateAccount, number, TransactionSignature | undefined]> {
     const [account, bump, txn] =
       await ProgramStateAccount.getOrCreateInstructions(
         program,
         program.walletPubkey,
-        mint
+        params
       );
 
     if (txn) {
@@ -119,15 +122,22 @@ export class ProgramStateAccount extends Account<types.SbState> {
   static async getOrCreateInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    mint: PublicKey = Mint.native
+    params: ProgramInitParams = {
+      mint: Mint.native,
+      daoMint: Mint.native,
+    }
   ): Promise<[ProgramStateAccount, number, TransactionObject | undefined]> {
     const [account, bump] = ProgramStateAccount.fromSeed(program);
 
     try {
       await account.loadData();
+      return [account, bump, undefined];
     } catch (e) {
-      const vaultKeypair = Keypair.generate();
       const ixns: TransactionInstruction[] = [];
+
+      const mint = params.mint ?? Keypair.generate().publicKey;
+      const daoMint = params.daoMint ?? Keypair.generate().publicKey;
+      const vaultKeypair = params.vaultKeypair ?? Keypair.generate();
 
       // load the mint
       let splMint: spl.Mint;
@@ -154,6 +164,31 @@ export class ProgramStateAccount extends Account<types.SbState> {
         };
       }
 
+      // load the daoMint
+      let daoSplMint: spl.Mint;
+      try {
+        // try to load mint if it exists
+        daoSplMint = await spl.getMint(program.connection, daoMint);
+      } catch {
+        // create new mint
+        const mintIxn = spl.createInitializeMintInstruction(
+          daoMint,
+          9,
+          payer,
+          payer
+        );
+        ixns.push(mintIxn);
+        daoSplMint = {
+          address: daoMint,
+          mintAuthority: payer,
+          supply: BigInt('100000000000000000'),
+          decimals: 9,
+          isInitialized: true,
+          freezeAuthority: payer,
+          tlvData: Buffer.from(''),
+        };
+      }
+
       // create the vault
       const vaultInitIxn = spl.createInitializeAccountInstruction(
         vaultKeypair.publicKey,
@@ -162,10 +197,26 @@ export class ProgramStateAccount extends Account<types.SbState> {
       );
       ixns.push(vaultInitIxn);
 
+      // if authorized, mint tokens to vault
       if (splMint.mintAuthority?.equals(payer)) {
         ixns.push(
           spl.createMintToInstruction(
             splMint.address,
+            vaultKeypair.publicKey,
+            payer,
+            BigInt('100000000000000000')
+          )
+        );
+      }
+
+      // if authorized and daoMint != mint, mint tokens to vault
+      if (
+        !splMint.address.equals(daoSplMint.address) &&
+        daoSplMint.mintAuthority?.equals(payer)
+      ) {
+        ixns.push(
+          spl.createMintToInstruction(
+            daoSplMint.address,
             vaultKeypair.publicKey,
             payer,
             BigInt('100000000000000000')
@@ -185,7 +236,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
             vault: vaultKeypair.publicKey,
             systemProgram: SystemProgram.programId,
             tokenProgram: spl.TOKEN_PROGRAM_ID,
-            daoMint: splMint.address,
+            daoMint: daoSplMint.address,
           }
         )
       );
@@ -194,7 +245,6 @@ export class ProgramStateAccount extends Account<types.SbState> {
 
       return [account, bump, programInit];
     }
-    return [account, bump, undefined];
   }
 
   /**
@@ -247,4 +297,10 @@ export class ProgramStateAccount extends Account<types.SbState> {
     const txnSignature = await program.signAndSend(vaultTransfer);
     return txnSignature;
   }
+}
+
+export interface ProgramInitParams {
+  mint?: PublicKey;
+  daoMint?: PublicKey;
+  vaultKeypair?: Keypair;
 }
