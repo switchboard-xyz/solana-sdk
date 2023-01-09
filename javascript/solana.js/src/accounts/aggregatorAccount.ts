@@ -1867,7 +1867,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   public static calculatePriorityFee(
     aggregator: types.AggregatorAccountData,
     timestamp = Math.round(Date.now() / 1000),
-    baseFee = 5000 // base compute unit price
+    baseFee = 0 // base compute unit price
   ): number {
     // parse defaults
     const lastUpdateTimestamp =
