@@ -1,5 +1,5 @@
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token-v2";
+import * as spl from "@solana/spl-token-v3";
 import {
   AggregatorAccount,
   AggregatorInitParams,

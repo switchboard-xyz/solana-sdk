@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as anchor from "@project-serum/anchor";
-import * as spl from "@solana/spl-token-v2";
+import * as spl from "@solana/spl-token-v3";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
