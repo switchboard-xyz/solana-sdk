@@ -172,7 +172,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   public async requestRandomnessInstruction(
     payer: PublicKey,
-    params: VrfRequestRandomnessParams
+    params: VrfRequestRandomnessParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const vrf = params.vrf ?? (await this.loadData());
     const queueAccount =
@@ -205,26 +206,31 @@ export class VrfAccount extends Account<types.VrfAccountData> {
             dataBuffer: queue.dataBuffer,
             permission: permissionAccount.publicKey,
             escrow: vrf.escrow,
-            payerWallet: payer,
-            payerAuthority: PublicKey.default,
+            payerWallet: params.payerTokenWallet,
+            payerAuthority: params.payerAuthority
+              ? params.payerAuthority.publicKey
+              : payer,
             recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
             programState: this.program.programState.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
           }
         ),
       ],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      options
     );
 
     return requestRandomness;
   }
 
   public async requestRandomness(
-    params: VrfRequestRandomnessParams
+    params: VrfRequestRandomnessParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionSignature> {
     const requestRandomness = await this.requestRandomnessInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
     const txnSignature = await this.program.signAndSend(requestRandomness);
     return txnSignature;
@@ -373,11 +379,15 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     // TODO: Add options and allow getting signatures by slot
     const transactions = await this.program.connection.getSignaturesForAddress(
       this.publicKey,
-      { limit: txnLimit, minContextSlot: slot.toNumber() }
+      { limit: txnLimit, minContextSlot: slot.toNumber() },
+      'confirmed'
     );
     const signatures = transactions.map(txn => txn.signature);
     const parsedTransactions =
-      await this.program.connection.getParsedTransactions(signatures);
+      await this.program.connection.getParsedTransactions(
+        signatures,
+        'confirmed'
+      );
 
     const callbackTransactions: ParsedTransactionWithMeta[] = [];
 
@@ -491,7 +501,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
           requestFunction: (...args: any[]) => Promise<TransactionSignature>;
         }
     ),
-    timeout = 30000
+    timeout = 30000,
+    options?: TransactionObjectOptions
   ): Promise<[types.VrfAccountData, TransactionSignature]> {
     const vrf = params?.vrf ?? (await this.loadData());
     const currentRoundOpenSlot = vrf.currentRound.requestSlot;
@@ -545,12 +556,13 @@ export class VrfAccount extends Account<types.VrfAccountData> {
           throw new Error(`Failed to call requestRandomness, ${error}`);
         });
     } else {
-      requestRandomnessSignature = await this.requestRandomness(params).catch(
-        async error => {
-          await closeWebsocket();
-          throw new Error(`Failed to call requestRandomness, ${error}`);
-        }
-      );
+      requestRandomnessSignature = await this.requestRandomness(
+        params,
+        options
+      ).catch(async error => {
+        await closeWebsocket();
+        throw new Error(`Failed to call requestRandomness, ${error}`);
+      });
     }
 
     const state = await statePromise;

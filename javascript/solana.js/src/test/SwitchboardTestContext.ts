@@ -548,10 +548,7 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
 
   public get anchorToml(): string {
     return [
-      `[provider]
-cluster = "localnet"
-wallet = "${this.payerKeypairPath}"
-
+      `
 [test]
 startup_wait = 10000
 
