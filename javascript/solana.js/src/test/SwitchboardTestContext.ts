@@ -290,7 +290,10 @@ export class SwitchboardTestContext {
       ],
     });
 
-    const [state] = await aggregatorAccount.openRoundAndAwaitResult(undefined);
+    const [state] = await aggregatorAccount.openRoundAndAwaitResult(
+      undefined,
+      timeout
+    );
 
     return [aggregatorAccount, state];
   }
@@ -354,7 +357,10 @@ export class SwitchboardTestContext {
     ]);
     await this.program.signAndSendAll(txns);
 
-    const [state] = await aggregatorAccount.openRoundAndAwaitResult(undefined);
+    const [state] = await aggregatorAccount.openRoundAndAwaitResult(
+      undefined,
+      timeout
+    );
 
     return [aggregatorAccount, state];
   }
@@ -533,17 +539,33 @@ export class SwitchboardTestEnvironment implements ISwitchboardTestEnvironment {
   }
 
   public get envFileString(): string {
-    return Object.keys(this)
-      .map(key => {
-        if (this[key] instanceof PublicKey) {
-          return `${camelToUpperCaseWithUnderscores(key)}="${this[
-            key
-          ].toBase58()}"`;
-        }
-        return;
-      })
-      .filter(Boolean)
-      .join('\n');
+    // const fileString = Object.keys(this)
+    //   .map(key => {
+    //     if (this[key] instanceof PublicKey) {
+    //       return `${camelToUpperCaseWithUnderscores(key)}="${this[
+    //         key
+    //       ].toBase58()}"`;
+    //     }
+    //     return;
+    //   })
+    //   .filter(Boolean)
+    //   .join('\n');
+    return `SWITCHBOARD_PROGRAM_ID="${this.switchboardProgramId.toBase58()}"
+SWITCHBOARD_PROGRAM_DATA_ADDRESS="${this.switchboardProgramDataAddress.toBase58()}"
+SWITCHBOARD_IDL_ADDRESS="${this.switchboardIdlAddress.toBase58()}"
+SWITCHBOARD_PROGRAM_STATE="${this.switchboardProgramState.toBase58()}"
+SWITCHBOARD_VAULT="${this.switchboardVault.toBase58()}"
+SWITCHBOARD_MINT="${this.switchboardMint.toBase58()}"
+TOKEN_WALLET="${this.tokenWallet.toBase58()}"
+ORACLE_QUEUE="${this.oracleQueue.toBase58()}"
+ORACLE_QUEUE_AUTHORITY="${this.oracleQueueAuthority.toBase58()}"
+ORACLE_QUEUE_BUFFER="${this.oracleQueueBuffer.toBase58()}"
+CRANK="${this.crank.toBase58()}"
+CRANK_BUFFER="${this.crankBuffer.toBase58()}"
+ORACLE="${this.oracle.toBase58()}"
+ORACLE_AUTHORITY="${this.oracleAuthority.toBase58()}"
+ORACLE_ESCROW="${this.oracleEscrow.toBase58()}"
+ORACLE_PERMISSIONS="${this.oraclePermissions.toBase58()}"`;
   }
 
   public get anchorToml(): string {
