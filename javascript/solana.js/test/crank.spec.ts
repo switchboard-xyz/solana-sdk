@@ -11,7 +11,7 @@ import {
   SolanaClock,
   types,
 } from '../src';
-import { sleep } from '@switchboard-xyz/common';
+import { promiseWithTimeout, sleep } from '@switchboard-xyz/common';
 import BN from 'bn.js';
 
 describe('Crank Tests', () => {
@@ -253,7 +253,15 @@ describe('Crank Tests', () => {
       10
     );
 
-    await sleep(2500);
+    await promiseWithTimeout(
+      5000,
+      Promise.allSettled(
+        signatures.map(
+          async s => await ctx.program.connection.confirmTransaction(s)
+        )
+      )
+    );
+
     const newCrankRows = await crankAccount.loadCrank();
 
     let numPopped = 0;

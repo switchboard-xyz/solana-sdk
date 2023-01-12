@@ -33,7 +33,7 @@ describe('Priority Fees Tests', () => {
       aggregator,
       startingTimestamp
     );
-    const expectedNoStalenessFee = Math.round(5000 + basePriorityFee);
+    const expectedNoStalenessFee = Math.round(basePriorityFee);
     assert(
       expectedNoStalenessFee === noStalenessFee,
       `priorityFee mismatch with no staleness, expected ${expectedNoStalenessFee}, received ${noStalenessFee}`
@@ -49,7 +49,7 @@ describe('Priority Fees Tests', () => {
         startingTimestamp + multiplier * priorityFeeBumpPeriod
       );
       const expectedPriorityFee = Math.round(
-        5000 + basePriorityFee + multiplier * priorityFeeBump
+        basePriorityFee + multiplier * priorityFeeBump
       );
       assert(
         expectedPriorityFee === priorityFee,
@@ -61,7 +61,7 @@ describe('Priority Fees Tests', () => {
   it('Calculates the priority fee with max multiplier', async () => {
     // with max multiplier
     const expectedPriorityFee = Math.round(
-      5000 + basePriorityFee + maxPriorityFeeMultiplier * priorityFeeBump
+      basePriorityFee + maxPriorityFeeMultiplier * priorityFeeBump
     ); // should never exceed this
 
     const multipliers = [

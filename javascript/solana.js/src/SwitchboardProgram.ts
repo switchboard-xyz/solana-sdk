@@ -14,8 +14,6 @@ import {
 import { NativeMint } from './mint';
 import { SwitchboardEvents } from './SwitchboardEvents';
 import { TransactionObject, TransactionOptions } from './TransactionObject';
-import { fromCode as fromSwitchboardCode } from './generated/errors/custom';
-import { fromCode as fromAnchorCode } from './generated/errors/anchor';
 import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
 import {
   AggregatorAccountData,
@@ -50,7 +48,7 @@ import {
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
 } from './const';
-import { OracleJob, sleep } from '@switchboard-xyz/common';
+import { OracleJob } from '@switchboard-xyz/common';
 import { LoadedJobDefinition } from './types';
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
@@ -102,7 +100,7 @@ export const getSwitchboardProgramId = (
  *
  * Taken from @project-serum/anchor implementation.
  */
-const isBrowser =
+export const isBrowser =
   process.env.ANCHOR_BROWSER ||
   (typeof window !== 'undefined' && !window.process?.hasOwnProperty('type')); // eslint-disable-line no-prototype-builtins
 
@@ -474,22 +472,13 @@ export class SwitchboardProgram {
     txnOptions?: TransactionOptions,
     delay = 0
   ): Promise<Array<TransactionSignature>> {
-    if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
-    if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
-
-    const txnSignatures: Array<TransactionSignature> = [];
-    for await (const [i, txn] of txns.entries()) {
-      txnSignatures.push(await this.signAndSend(txn, opts, txnOptions));
-      if (
-        i !== txns.length - 1 &&
-        delay &&
-        typeof delay === 'number' &&
-        delay > 0
-      ) {
-        await sleep(delay);
-      }
-    }
-
+    const txnSignatures = await TransactionObject.signAndSendAll(
+      this.provider,
+      txns,
+      opts,
+      txnOptions,
+      delay
+    );
     return txnSignatures;
   }
 
@@ -498,66 +487,8 @@ export class SwitchboardProgram {
     opts: SendTransactionOptions = DEFAULT_SEND_TRANSACTION_OPTIONS,
     txnOptions?: TransactionOptions
   ): Promise<TransactionSignature> {
-    if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
-    if (this.isReadOnly) throw new errors.SwitchboardProgramReadOnlyError();
-
-    // filter extra signers
-    const signers = [this.wallet.payer, ...txn.signers];
-    const reqSigners = txn.ixns.reduce((signers, ixn) => {
-      ixn.keys.map(a => {
-        if (a.isSigner) {
-          signers.add(a.pubkey.toBase58());
-        }
-      });
-      return signers;
-    }, new Set<string>());
-    const filteredSigners = signers.filter(
-      s =>
-        s.publicKey.equals(txn.payer) || reqSigners.has(s.publicKey.toBase58())
-    );
-
-    const transaction = txn.toTxn(
-      txnOptions ?? (await this.connection.getLatestBlockhash())
-    );
-
-    try {
-      // skip confirmation
-      if (
-        opts &&
-        typeof opts.skipConfrimation === 'boolean' &&
-        opts.skipConfrimation
-      ) {
-        const txnSignature = await this.connection.sendTransaction(
-          transaction,
-          filteredSigners,
-          opts
-        );
-        return txnSignature;
-      }
-
-      const txnSignature = await this.provider.sendAndConfirm(
-        transaction,
-        filteredSigners,
-        {
-          ...DEFAULT_SEND_TRANSACTION_OPTIONS,
-          ...opts,
-        }
-      );
-
-      return txnSignature;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      if ('code' in error && typeof error.code === 'number') {
-        // Check for other switchboard error.
-        const switchboardError = fromSwitchboardCode(error.code);
-        if (switchboardError) throw switchboardError;
-        // Check for other anchor error.
-        const anchorError = fromAnchorCode(error.code);
-        if (anchorError) throw anchorError;
-      }
-
-      throw error;
-    }
+    const txnSignature = await txn.signAndSend(this.provider, opts, txnOptions);
+    return txnSignature;
   }
 
   async getProgramJobAccounts(): Promise<Map<Uint8Array, LoadedJobDefinition>> {

@@ -8,7 +8,19 @@ import {
   PublicKey,
   Transaction,
   TransactionInstruction,
+  TransactionMessage,
+  TransactionSignature,
+  VersionedTransaction,
 } from '@solana/web3.js';
+import {
+  AnchorWallet,
+  DEFAULT_SEND_TRANSACTION_OPTIONS,
+  isBrowser,
+  SendTransactionOptions,
+} from './SwitchboardProgram';
+import { AnchorProvider } from '@project-serum/anchor';
+import { fromTxError } from './generated';
+import { sleep } from '@switchboard-xyz/common';
 
 export interface ITransactionObject extends Required<TransactionObjectOptions> {
   /** The public key of the account that will pay the transaction fees */
@@ -433,6 +445,26 @@ export class TransactionObject implements ITransactionObject {
     return txn;
   }
 
+  public toVersionedTxn(options: TransactionOptions): VersionedTransaction {
+    if ('nonceInfo' in options) {
+      const messageV0 = new TransactionMessage({
+        payerKey: this.payer,
+        recentBlockhash: options.nonceInfo.nonce,
+        instructions: this.ixns,
+      }).compileToLegacyMessage();
+      const transaction = new VersionedTransaction(messageV0);
+      return transaction;
+    }
+
+    const messageV0 = new TransactionMessage({
+      payerKey: this.payer,
+      recentBlockhash: options.blockhash,
+      instructions: this.ixns,
+    }).compileToLegacyMessage();
+    const transaction = new VersionedTransaction(messageV0);
+    return transaction;
+  }
+
   /**
    * Return a Transaction signed by the provided signers
    */
@@ -444,7 +476,7 @@ export class TransactionObject implements ITransactionObject {
     const allSigners = [...this.signers];
 
     if (signers) {
-      allSigners.push(...signers);
+      allSigners.unshift(...signers);
     }
 
     if (allSigners.length) {
@@ -503,7 +535,7 @@ export class TransactionObject implements ITransactionObject {
     let txn = TransactionObject.new(payer, options);
     while (ixns.length) {
       const ixn = ixns.shift()!;
-      const reqSigners = filterSigners(payer, ixn, signers ?? []);
+      const reqSigners = filterSigners(payer, [ixn], signers ?? []);
       try {
         txn.insert(
           ixn,
@@ -524,31 +556,101 @@ export class TransactionObject implements ITransactionObject {
     txns.push(txn);
     return txns;
   }
+
+  public static async signAndSendAll(
+    provider: AnchorProvider,
+    txns: Array<TransactionObject>,
+    opts: SendTransactionOptions = DEFAULT_SEND_TRANSACTION_OPTIONS,
+    txnOptions?: TransactionOptions,
+    delay = 0
+  ): Promise<Array<TransactionSignature>> {
+    if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
+
+    const txnSignatures: Array<TransactionSignature> = [];
+    for await (const [i, txn] of txns.entries()) {
+      txnSignatures.push(await txn.signAndSend(provider, opts, txnOptions));
+      if (
+        i !== txns.length - 1 &&
+        delay &&
+        typeof delay === 'number' &&
+        delay > 0
+      ) {
+        await sleep(delay);
+      }
+    }
+
+    return txnSignatures;
+  }
+
+  async signAndSend(
+    provider: AnchorProvider,
+    opts: SendTransactionOptions = DEFAULT_SEND_TRANSACTION_OPTIONS,
+    txnOptions?: TransactionOptions
+  ): Promise<TransactionSignature> {
+    if (isBrowser) throw new errors.SwitchboardProgramIsBrowserError();
+    if (this.payer.equals(PublicKey.default))
+      throw new errors.SwitchboardProgramReadOnlyError();
+    if (!this.payer.equals(provider.publicKey)) {
+      throw new Error(`Payer keypair mismatch`);
+    }
+
+    const signers = filterSigners(this.payer, this.ixns, this.signers);
+    signers.unshift((provider.wallet as AnchorWallet).payer);
+
+    try {
+      // skip confirmation
+      if (
+        opts &&
+        typeof opts.skipConfrimation === 'boolean' &&
+        opts.skipConfrimation
+      ) {
+        const transaction = this.toTxn(
+          txnOptions ?? (await provider.connection.getLatestBlockhash())
+        );
+        const txnSignature = await provider.connection.sendTransaction(
+          transaction,
+          signers,
+          opts
+        );
+        return txnSignature;
+      }
+
+      const transaction = this.toTxn(
+        txnOptions ?? (await provider.connection.getLatestBlockhash())
+      );
+      return await provider.sendAndConfirm(transaction, signers, {
+        ...DEFAULT_SEND_TRANSACTION_OPTIONS,
+        ...opts,
+      });
+    } catch (error) {
+      const err = fromTxError(error);
+      if (err === null) {
+        throw error;
+      }
+
+      throw err;
+    }
+  }
 }
 
 function filterSigners(
   payer: PublicKey,
-  ixn: TransactionInstruction,
+  ixns: Array<TransactionInstruction>,
   signers: Array<Keypair>
-) {
-  const filteredSigners: Array<Keypair> = [];
-
-  const reqSigners = ixn.keys.reduce((signers, accountMeta) => {
-    if (accountMeta.isSigner && !accountMeta.pubkey.equals(payer)) {
-      signers.add(accountMeta.pubkey.toBase58());
-    }
+): Array<Keypair> {
+  const allSigners = [...signers];
+  const reqSigners = ixns.reduce((signers, ixn) => {
+    ixn.keys.map(a => {
+      if (a.isSigner) {
+        signers.add(a.pubkey.toBase58());
+      }
+    });
     return signers;
   }, new Set<string>());
 
-  for (const reqSigner of reqSigners) {
-    const filteredKeypairs = signers.filter(
-      s => s.publicKey.toBase58() === reqSigner
-    );
-    if (filteredKeypairs.length === 0) {
-      throw new errors.TransactionMissingSignerError(Array.from(reqSigner));
-    }
-    filteredSigners.push(filteredKeypairs.shift()!);
-  }
+  const filteredSigners = allSigners.filter(
+    s => !s.publicKey.equals(payer) && reqSigners.has(s.publicKey.toBase58())
+  );
 
   return filteredSigners;
 }
