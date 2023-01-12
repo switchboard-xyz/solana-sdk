@@ -15,7 +15,7 @@ import {
 } from '../const';
 import { SwitchboardNetwork } from '../SwitchboardNetwork';
 
-export const LATEST_DOCKER_VERSION = 'dev-v2-RC_12_05_22_22_48';
+export const LATEST_DOCKER_VERSION = 'dev-v2-RC_01_05_23_03_24';
 
 /** Get the program data address for a given programId
  * @param programId the programId for a given on-chain program
