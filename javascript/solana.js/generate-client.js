@@ -12,6 +12,7 @@ const ignoreFiles = [
   './src/generated/types/SwitchboardDecimal.ts', // added toBig methods
   './src/generated/types/Lanes.ts', // anchor-client-gen struggles with dual exports
   './src/generated/types/index.ts', // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
+  './src/generated/errors/index.ts', // need to revert the program ID check
 ];
 
 /**

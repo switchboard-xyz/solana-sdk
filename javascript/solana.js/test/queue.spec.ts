@@ -121,17 +121,13 @@ describe('Queue Tests', () => {
 
     const oracle = await oracleAccount.loadData();
 
-    await assert.rejects(
-      async () => {
-        await oracleAccount.heartbeat({
-          queueAccount,
-          tokenWallet: oracle.tokenAccount,
-          authority: oracleAuthority,
-        });
-      },
-      new RegExp(/custom program error: 0x1771/g)
-      // { code: 6001 } // QueueOperationError
-    );
+    await assert.rejects(async () => {
+      await oracleAccount.heartbeat({
+        queueAccount,
+        tokenWallet: oracle.tokenAccount,
+        authority: oracleAuthority,
+      });
+    }, new RegExp(/QueueOperationError|6001|0x1771/g));
   });
 
   it('Deposits into an oracle staking wallet', async () => {

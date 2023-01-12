@@ -137,13 +137,9 @@ describe('Crank Tests', () => {
       // queueAuthority,
     });
 
-    await assert.rejects(
-      async () => {
-        await crankAccount.push({ aggregatorAccount: newAggregatorAccount });
-      },
-      new RegExp(/custom program error: 0x1793/g)
-      // { code: 6035 } // PermissionDenied
-    );
+    await assert.rejects(async () => {
+      await crankAccount.push({ aggregatorAccount: newAggregatorAccount });
+    }, new RegExp(/PermissionDenied|6035|0x1793/g));
   });
 
   it('Fails to push a new aggregator onto a full crank', async () => {
@@ -152,13 +148,9 @@ describe('Crank Tests', () => {
       queueAuthority,
     });
 
-    await assert.rejects(
-      async () => {
-        await crankAccount.push({ aggregatorAccount: newAggregatorAccount });
-      },
-      new RegExp(/custom program error: 0x1786/g)
-      // { code: 6022 } // CrankMaxCapacityError
-    );
+    await assert.rejects(async () => {
+      await crankAccount.push({ aggregatorAccount: newAggregatorAccount });
+    }, new RegExp(/CrankMaxCapacityError|6022|0x1786/g));
   });
 
   it('Crank pop tests', async () => {

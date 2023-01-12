@@ -114,13 +114,9 @@ describe('Open Round Tests', () => {
   });
 
   it('fails to call open round when aggregator lacks permissions', async () => {
-    await assert.rejects(
-      async () => {
-        await aggregatorAccount.openRound();
-      },
-      new RegExp(/custom program error: 0x1793/g)
-      // { code: 6035 } // PermissionDenied
-    );
+    await assert.rejects(async () => {
+      await aggregatorAccount.openRound();
+    }, new RegExp(/PermissionDenied|6035|0x1793/g));
   });
 
   it('sets aggregator permissions', async () => {
@@ -140,23 +136,15 @@ describe('Open Round Tests', () => {
   });
 
   it('fails to call open round when not enough oracles are heartbeating', async () => {
-    await assert.rejects(
-      async () => {
-        await aggregatorAccount.openRound();
-      },
-      new RegExp(/custom program error: 0x17a4/g)
-      // { code: 6052 } // InsufficientOracleQueueError
-    );
+    await assert.rejects(async () => {
+      await aggregatorAccount.openRound();
+    }, new RegExp(/InsufficientOracleQueueError|6052|0x17a4/g));
 
     // still fails when queueSize < batchSize
     await oracleAccount1.heartbeat();
-    await assert.rejects(
-      async () => {
-        await aggregatorAccount.openRound();
-      },
-      new RegExp(/custom program error: 0x17a4/g)
-      // { code: 6052 } // InsufficientOracleQueueError
-    );
+    await assert.rejects(async () => {
+      await aggregatorAccount.openRound();
+    }, new RegExp(/InsufficientOracleQueueError|6052|0x17a4/g));
   });
 
   it('successfully calls open round', async () => {
