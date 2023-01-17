@@ -9,7 +9,6 @@ import {
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { promiseWithTimeout } from '@switchboard-xyz/common';

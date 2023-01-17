@@ -55,6 +55,16 @@ export type {
   VrfAccountDataFields,
   VrfAccountDataJSON,
 } from './VrfAccountData';
+export { VrfLiteAccountData } from './VrfLiteAccountData';
+export type {
+  VrfLiteAccountDataFields,
+  VrfLiteAccountDataJSON,
+} from './VrfLiteAccountData';
+export { VrfPoolAccountData } from './VrfPoolAccountData';
+export type {
+  VrfPoolAccountDataFields,
+  VrfPoolAccountDataJSON,
+} from './VrfPoolAccountData';
 export { BufferRelayerAccountData } from './BufferRelayerAccountData';
 export type {
   BufferRelayerAccountDataFields,

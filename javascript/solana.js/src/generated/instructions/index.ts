@@ -133,6 +133,29 @@ export { vaultTransfer } from './vaultTransfer';
 export type { VaultTransferArgs, VaultTransferAccounts } from './vaultTransfer';
 export { vrfInit } from './vrfInit';
 export type { VrfInitArgs, VrfInitAccounts } from './vrfInit';
+export { vrfLiteInit } from './vrfLiteInit';
+export type { VrfLiteInitArgs, VrfLiteInitAccounts } from './vrfLiteInit';
+export { vrfLiteProveAndVerify } from './vrfLiteProveAndVerify';
+export type {
+  VrfLiteProveAndVerifyArgs,
+  VrfLiteProveAndVerifyAccounts,
+} from './vrfLiteProveAndVerify';
+export { vrfLiteRequestRandomness } from './vrfLiteRequestRandomness';
+export type {
+  VrfLiteRequestRandomnessArgs,
+  VrfLiteRequestRandomnessAccounts,
+} from './vrfLiteRequestRandomness';
+export { vrfPoolInit } from './vrfPoolInit';
+export type { VrfPoolInitArgs, VrfPoolInitAccounts } from './vrfPoolInit';
+export { vrfPoolRemove } from './vrfPoolRemove';
+export type { VrfPoolRemoveArgs, VrfPoolRemoveAccounts } from './vrfPoolRemove';
+export { vrfPoolAdd } from './vrfPoolAdd';
+export type { VrfPoolAddArgs, VrfPoolAddAccounts } from './vrfPoolAdd';
+export { vrfPoolRequest } from './vrfPoolRequest';
+export type {
+  VrfPoolRequestArgs,
+  VrfPoolRequestAccounts,
+} from './vrfPoolRequest';
 export { vrfProveAndVerify } from './vrfProveAndVerify';
 export type {
   VrfProveAndVerifyArgs,
