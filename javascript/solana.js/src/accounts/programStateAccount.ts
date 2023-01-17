@@ -134,10 +134,17 @@ export class ProgramStateAccount extends Account<types.SbState> {
       return [account, bump, undefined];
     } catch (e) {
       const ixns: TransactionInstruction[] = [];
+      const signers: Keypair[] = [];
 
-      const mint = params.mint ?? Keypair.generate().publicKey;
-      const daoMint = params.daoMint ?? Keypair.generate().publicKey;
+      let mint = params.mint;
+      if (!mint) {
+        const mintKeypair = Keypair.generate();
+        mint = mintKeypair.publicKey;
+        signers.push(mintKeypair);
+      }
+      const daoMint = params.daoMint ?? mint;
       const vaultKeypair = params.vaultKeypair ?? Keypair.generate();
+      signers.push(vaultKeypair);
 
       // load the mint
       let splMint: spl.Mint;
@@ -146,13 +153,19 @@ export class ProgramStateAccount extends Account<types.SbState> {
         splMint = await spl.getMint(program.connection, mint);
       } catch {
         // create new mint
-        const mintIxn = spl.createInitializeMintInstruction(
-          mint,
-          9,
-          payer,
-          payer
+        ixns.push(
+          SystemProgram.createAccount({
+            fromPubkey: payer,
+            newAccountPubkey: vaultKeypair.publicKey,
+            space: spl.MintLayout.span,
+            lamports:
+              await program.connection.getMinimumBalanceForRentExemption(
+                spl.MintLayout.span
+              ),
+            programId: spl.TOKEN_PROGRAM_ID,
+          }),
+          spl.createInitializeMintInstruction(mint, 9, payer, payer)
         );
-        ixns.push(mintIxn);
         splMint = {
           address: mint,
           mintAuthority: payer,
@@ -164,59 +177,29 @@ export class ProgramStateAccount extends Account<types.SbState> {
         };
       }
 
-      // load the daoMint
-      let daoSplMint: spl.Mint;
-      try {
-        // try to load mint if it exists
-        daoSplMint = await spl.getMint(program.connection, daoMint);
-      } catch {
-        // create new mint
-        const mintIxn = spl.createInitializeMintInstruction(
-          daoMint,
-          9,
-          payer,
-          payer
-        );
-        ixns.push(mintIxn);
-        daoSplMint = {
-          address: daoMint,
-          mintAuthority: payer,
-          supply: BigInt('100000000000000000'),
-          decimals: 9,
-          isInitialized: true,
-          freezeAuthority: payer,
-          tlvData: Buffer.from(''),
-        };
-      }
-
       // create the vault
-      const vaultInitIxn = spl.createInitializeAccountInstruction(
-        vaultKeypair.publicKey,
-        splMint.address,
-        payer
+      ixns.push(
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: vaultKeypair.publicKey,
+          space: spl.AccountLayout.span,
+          lamports: await program.connection.getMinimumBalanceForRentExemption(
+            spl.AccountLayout.span
+          ),
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
+        spl.createInitializeAccountInstruction(
+          vaultKeypair.publicKey,
+          splMint.address,
+          payer
+        )
       );
-      ixns.push(vaultInitIxn);
 
       // if authorized, mint tokens to vault
       if (splMint.mintAuthority?.equals(payer)) {
         ixns.push(
           spl.createMintToInstruction(
             splMint.address,
-            vaultKeypair.publicKey,
-            payer,
-            BigInt('100000000000000000')
-          )
-        );
-      }
-
-      // if authorized and daoMint != mint, mint tokens to vault
-      if (
-        !splMint.address.equals(daoSplMint.address) &&
-        daoSplMint.mintAuthority?.equals(payer)
-      ) {
-        ixns.push(
-          spl.createMintToInstruction(
-            daoSplMint.address,
             vaultKeypair.publicKey,
             payer,
             BigInt('100000000000000000')
@@ -236,12 +219,12 @@ export class ProgramStateAccount extends Account<types.SbState> {
             vault: vaultKeypair.publicKey,
             systemProgram: SystemProgram.programId,
             tokenProgram: spl.TOKEN_PROGRAM_ID,
-            daoMint: daoSplMint.address,
+            daoMint: daoMint,
           }
         )
       );
 
-      const programInit = new TransactionObject(payer, ixns, []);
+      const programInit = new TransactionObject(payer, ixns, signers);
 
       return [account, bump, programInit];
     }

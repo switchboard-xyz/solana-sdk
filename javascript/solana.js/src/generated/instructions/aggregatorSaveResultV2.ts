@@ -9,7 +9,7 @@ import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescrip
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorSaveResultV2Args {
-  params: types.AggregatorSaveResultParamsV2Fields;
+  params: types.AggregatorSaveResultParamsFields;
 }
 
 export interface AggregatorSaveResultV2Accounts {
@@ -29,7 +29,7 @@ export interface AggregatorSaveResultV2Accounts {
 }
 
 export const layout = borsh.struct([
-  types.AggregatorSaveResultParamsV2.layout('params'),
+  types.AggregatorSaveResultParams.layout('params'),
 ]);
 
 export function aggregatorSaveResultV2(
@@ -56,7 +56,7 @@ export function aggregatorSaveResultV2(
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.AggregatorSaveResultParamsV2.toEncodable(args.params),
+      params: types.AggregatorSaveResultParams.toEncodable(args.params),
     },
     buffer
   );

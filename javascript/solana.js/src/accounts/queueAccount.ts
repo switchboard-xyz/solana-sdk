@@ -36,6 +36,7 @@ import {
 import { PermissionAccount, PermissionSetParams } from './permissionAccount';
 import { QueueDataBuffer } from './queueDataBuffer';
 import { VrfAccount, VrfInitParams } from './vrfAccount';
+import { VrfLiteAccount, VrfLiteInitParams } from './vrfLiteAccount';
 
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a list of oracles that are actively heartbeating.
@@ -1054,6 +1055,61 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     return [bufferRelayerAccount, txnSignature];
   }
 
+  public async createVrfLiteInstructions(
+    payer: PublicKey,
+    params: CreateVrfLiteParams
+  ): Promise<[VrfLiteAccount, TransactionObject]> {
+    const queueAuthorityPubkey = params.queueAuthority
+      ? params.queueAuthority.publicKey
+      : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+
+    const txns: Array<TransactionObject> = [];
+
+    const [vrfLite, vrfLiteInit] = await VrfLiteAccount.createInstruction(
+      this.program,
+      payer,
+      {
+        ...params,
+        queueAccount: this,
+      }
+    );
+    txns.push(vrfLiteInit);
+
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      queueAuthorityPubkey,
+      this.publicKey,
+      vrfLite.publicKey
+    );
+
+    if (
+      params.enable &&
+      (params.queueAuthority || queueAuthorityPubkey.equals(payer))
+    ) {
+      const permissionSet = permissionAccount.setInstruction(payer, {
+        permission: new types.PermitVrfRequests(),
+        enable: true,
+        queueAuthority: params.queueAuthority,
+      });
+      vrfLiteInit.combine(permissionSet);
+    }
+
+    return [vrfLite, vrfLiteInit];
+  }
+
+  public async createVrfLite(
+    params: CreateVrfLiteParams
+  ): Promise<[VrfLiteAccount, TransactionSignature]> {
+    const [vrfLiteAccount, txn] = await this.createVrfLiteInstructions(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(txn, {
+      skipPreflight: true,
+    });
+    return [vrfLiteAccount, txnSignature];
+  }
+
   /** Load the list of oracles that are currently stored in the buffer */
   public async loadOracles(): Promise<Array<PublicKey>> {
     let queue: QueueDataBuffer;
@@ -1442,5 +1498,10 @@ export type CreateQueueBufferRelayerParams = Omit<
     // job params
     job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
   } & {
+    queueAuthorityPubkey?: PublicKey;
+  };
+
+export type CreateVrfLiteParams = VrfLiteInitParams &
+  Partial<PermissionSetParams> & {
     queueAuthorityPubkey?: PublicKey;
   };

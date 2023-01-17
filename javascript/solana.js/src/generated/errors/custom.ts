@@ -90,7 +90,12 @@ export type CustomError =
   | JobDataLocked
   | JobNotInitialized
   | BufferRelayerIllegalRoundOpenCall
-  | InvalidSliderAccount;
+  | InvalidSliderAccount
+  | VrfLiteHasExistingPool
+  | VrfPoolFull
+  | VrfPoolEmpty
+  | VrfAccountNotFound
+  | AccountCloseNotReady;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1127,6 +1132,61 @@ export class InvalidSliderAccount extends Error {
   }
 }
 
+export class VrfLiteHasExistingPool extends Error {
+  static readonly code = 6091;
+  readonly code = 6091;
+  readonly name = 'VrfLiteHasExistingPool';
+  readonly msg = 'VRF lite account belongs to an existing pool.';
+
+  constructor(readonly logs?: string[]) {
+    super('6091: VRF lite account belongs to an existing pool.');
+  }
+}
+
+export class VrfPoolFull extends Error {
+  static readonly code = 6092;
+  readonly code = 6092;
+  readonly name = 'VrfPoolFull';
+  readonly msg = 'VRF pool is at max capacity.';
+
+  constructor(readonly logs?: string[]) {
+    super('6092: VRF pool is at max capacity.');
+  }
+}
+
+export class VrfPoolEmpty extends Error {
+  static readonly code = 6093;
+  readonly code = 6093;
+  readonly name = 'VrfPoolEmpty';
+  readonly msg = 'VRF pool is empty.';
+
+  constructor(readonly logs?: string[]) {
+    super('6093: VRF pool is empty.');
+  }
+}
+
+export class VrfAccountNotFound extends Error {
+  static readonly code = 6094;
+  readonly code = 6094;
+  readonly name = 'VrfAccountNotFound';
+  readonly msg = 'Failed to find VRF account in remaining accounts array.';
+
+  constructor(readonly logs?: string[]) {
+    super('6094: Failed to find VRF account in remaining accounts array.');
+  }
+}
+
+export class AccountCloseNotReady extends Error {
+  static readonly code = 6095;
+  readonly code = 6095;
+  readonly name = 'AccountCloseNotReady';
+  readonly msg = 'Account is not ready to be closed.';
+
+  constructor(readonly logs?: string[]) {
+    super('6095: Account is not ready to be closed.');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1311,6 +1371,16 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new BufferRelayerIllegalRoundOpenCall(logs);
     case 6090:
       return new InvalidSliderAccount(logs);
+    case 6091:
+      return new VrfLiteHasExistingPool(logs);
+    case 6092:
+      return new VrfPoolFull(logs);
+    case 6093:
+      return new VrfPoolEmpty(logs);
+    case 6094:
+      return new VrfAccountNotFound(logs);
+    case 6095:
+      return new AccountCloseNotReady(logs);
   }
 
   return null;

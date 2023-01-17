@@ -215,6 +215,46 @@ export type {
 } from './VaultTransferParams';
 export { VrfInitParams } from './VrfInitParams';
 export type { VrfInitParamsFields, VrfInitParamsJSON } from './VrfInitParams';
+export { VrfLiteCloseParams } from './VrfLiteCloseParams';
+export type {
+  VrfLiteCloseParamsFields,
+  VrfLiteCloseParamsJSON,
+} from './VrfLiteCloseParams';
+export { VrfLiteInitParams } from './VrfLiteInitParams';
+export type {
+  VrfLiteInitParamsFields,
+  VrfLiteInitParamsJSON,
+} from './VrfLiteInitParams';
+export { VrfLiteProveAndVerifyParams } from './VrfLiteProveAndVerifyParams';
+export type {
+  VrfLiteProveAndVerifyParamsFields,
+  VrfLiteProveAndVerifyParamsJSON,
+} from './VrfLiteProveAndVerifyParams';
+export { VrfLiteRequestRandomnessParams } from './VrfLiteRequestRandomnessParams';
+export type {
+  VrfLiteRequestRandomnessParamsFields,
+  VrfLiteRequestRandomnessParamsJSON,
+} from './VrfLiteRequestRandomnessParams';
+export { VrfPoolInitParams } from './VrfPoolInitParams';
+export type {
+  VrfPoolInitParamsFields,
+  VrfPoolInitParamsJSON,
+} from './VrfPoolInitParams';
+export { VrfPoolRemoveParams } from './VrfPoolRemoveParams';
+export type {
+  VrfPoolRemoveParamsFields,
+  VrfPoolRemoveParamsJSON,
+} from './VrfPoolRemoveParams';
+export { VrfPoolAddParams } from './VrfPoolAddParams';
+export type {
+  VrfPoolAddParamsFields,
+  VrfPoolAddParamsJSON,
+} from './VrfPoolAddParams';
+export { VrfPoolRequestParams } from './VrfPoolRequestParams';
+export type {
+  VrfPoolRequestParamsFields,
+  VrfPoolRequestParamsJSON,
+} from './VrfPoolRequestParams';
 export { VrfProveParams } from './VrfProveParams';
 export type {
   VrfProveParamsFields,
@@ -305,6 +345,8 @@ export { CallbackZC } from './CallbackZC';
 export type { CallbackZCFields, CallbackZCJSON } from './CallbackZC';
 export { VrfRound } from './VrfRound';
 export type { VrfRoundFields, VrfRoundJSON } from './VrfRound';
+export { VrfPoolRow } from './VrfPoolRow';
+export type { VrfPoolRowFields, VrfPoolRowJSON } from './VrfPoolRow';
 export { BufferRelayerRound } from './BufferRelayerRound';
 export type {
   BufferRelayerRoundFields,

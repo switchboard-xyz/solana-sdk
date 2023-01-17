@@ -12,3 +12,5 @@ export * from './programStateAccount';
 export * from './queueAccount';
 export * from './queueDataBuffer';
 export * from './vrfAccount';
+export * from './vrfLiteAccount';
+export * from './vrfPoolAccount';
