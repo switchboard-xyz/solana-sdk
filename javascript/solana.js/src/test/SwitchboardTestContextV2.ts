@@ -142,7 +142,26 @@ export class SwitchboardTestContextV2 {
 
     const program = await SwitchboardProgram.fromConnection(connection, wallet);
 
-    const networkParams = networkInitParams ?? DEFAULT_LOCALNET_NETWORK;
+    const networkInit = networkInitParams ?? DEFAULT_LOCALNET_NETWORK;
+    // only allow creating a single oracle
+    // ensure authority matches Anchor.toml wallet so we dont need to worry about transferring oracle funds
+    const networkParams: NetworkInitParams = _.merge(
+      { reward: 0, minStake: 0, size: 10 },
+      networkInit,
+      {
+        authority: undefined,
+        oracles: [
+          networkInit.oracle
+            ? _.merge(networkInit.oracle, {
+                authority: undefined,
+                enable: true,
+              })
+            : { authority: undefined, enable: true },
+        ],
+      }
+    );
+
+    // try to load existing network
     try {
       if ('keypair' in networkParams) {
         const queuePubkey = networkParams.keypair!.publicKey;
@@ -160,25 +179,7 @@ export class SwitchboardTestContextV2 {
       // eslint-disable-next-line no-empty
     } catch {}
 
-    // only allow creating a single oracle
-    // ensure authority matches Anchor.toml wallet so we dont need to worry about transferring oracle funds
-    const mergedNetworkParams = _.merge(
-      DEFAULT_LOCALNET_NETWORK,
-      networkParams,
-      {
-        authority: undefined,
-        oracles: [
-          _.merge(DEFAULT_LOCALNET_NETWORK.oracle, networkParams.oracle, {
-            authority: undefined,
-          }),
-        ],
-      }
-    );
-
-    const [network] = await SwitchboardNetwork.create(
-      program,
-      mergedNetworkParams
-    );
+    const [network] = await SwitchboardNetwork.create(program, networkParams);
     const loadedNetwork = await network.load();
 
     if (loadedNetwork.oracles.length !== 1) {
