@@ -38,7 +38,10 @@ import {
   SbState,
   VrfAccountData,
 } from './generated';
-import { SwitchboardProgram } from './SwitchboardProgram';
+import {
+  SendTransactionOptions,
+  SwitchboardProgram,
+} from './SwitchboardProgram';
 import { TransactionObject } from './TransactionObject';
 import {
   AggregatorDefinition,
@@ -587,7 +590,8 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
  */
   public static async create(
     program: SwitchboardProgram,
-    params: NetworkInitParams
+    params: NetworkInitParams,
+    opts?: SendTransactionOptions
   ): Promise<[SwitchboardNetwork, Array<TransactionSignature>]> {
     const [networkInit, accounts] = await SwitchboardNetwork.createInstructions(
       program,
@@ -596,6 +600,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     );
     const txnSignatures = await program.signAndSendAll(networkInit, {
       skipPreflight: true,
+      ...opts,
     });
     return [accounts, txnSignatures];
   }

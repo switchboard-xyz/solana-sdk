@@ -23,7 +23,7 @@ export function findAnchorTomlWallet(workingDir = process.cwd()): string {
     if (fs.existsSync(filePath)) {
       const fileString = fs.readFileSync(filePath, 'utf-8');
       const matches = Array.from(
-        fileString.matchAll(new RegExp(/wallet = "(?<wallet_path>.*)"/g))
+        fileString.matchAll(new RegExp(/wallet\s?=\s?"(?<wallet_path>.*)"/g))
       );
       if (
         matches &&
@@ -129,11 +129,18 @@ export class SwitchboardTestContextV2 {
     networkInitParams?: Partial<SwitchboardTestContextV2Init>,
     walletPath?: string
   ): Promise<SwitchboardTestContextV2> {
-    const program = await SwitchboardProgram.fromConnection(connection);
     const walletFsPath = walletPath ?? findAnchorTomlWallet();
     const wallet = Keypair.fromSecretKey(
       new Uint8Array(JSON.parse(fs.readFileSync(walletFsPath, 'utf-8')))
     );
+    const walletBalance = await connection.getBalance(wallet.publicKey);
+    if (walletBalance === 0) {
+      throw new Error(
+        `Wallet is empty, balance: ${walletBalance}, wallet: ${wallet.publicKey.toBase58()}`
+      );
+    }
+
+    const program = await SwitchboardProgram.fromConnection(connection, wallet);
 
     const networkParams = networkInitParams ?? DEFAULT_LOCALNET_NETWORK;
     try {
@@ -155,18 +162,23 @@ export class SwitchboardTestContextV2 {
 
     // only allow creating a single oracle
     // ensure authority matches Anchor.toml wallet so we dont need to worry about transferring oracle funds
-    const [network] = await SwitchboardNetwork.create(program, {
-      ...DEFAULT_LOCALNET_NETWORK,
-      ...networkParams,
-      authority: undefined,
-      oracles: [
-        {
-          ...DEFAULT_LOCALNET_NETWORK.oracle,
-          ...networkParams.oracle,
-          authority: undefined,
-        },
-      ],
-    });
+    const mergedNetworkParams = _.merge(
+      DEFAULT_LOCALNET_NETWORK,
+      networkParams,
+      {
+        authority: undefined,
+        oracles: [
+          _.merge(DEFAULT_LOCALNET_NETWORK.oracle, networkParams.oracle, {
+            authority: undefined,
+          }),
+        ],
+      }
+    );
+
+    const [network] = await SwitchboardNetwork.create(
+      program,
+      mergedNetworkParams
+    );
     const loadedNetwork = await network.load();
 
     if (loadedNetwork.oracles.length !== 1) {
