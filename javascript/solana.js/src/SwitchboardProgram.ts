@@ -1,5 +1,5 @@
 import * as anchor from '@project-serum/anchor';
-import * as errors from './errors';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
 import {
   AccountInfo,
   Cluster,
@@ -11,10 +11,30 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { NativeMint } from './mint';
-import { SwitchboardEvents } from './SwitchboardEvents';
-import { TransactionObject, TransactionOptions } from './TransactionObject';
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
+import { OracleJob } from '@switchboard-xyz/common';
+import {
+  BUFFER_DISCRIMINATOR,
+  CrankAccount,
+  DISCRIMINATOR_MAP,
+  JobAccount,
+  ProgramStateAccount,
+  QueueAccount,
+  SwitchboardAccountData,
+  SwitchboardAccountType,
+} from './accounts';
+import {
+  DEVNET_GENESIS_HASH,
+  MAINNET_GENESIS_HASH,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
+} from './const';
+import * as errors from './errors';
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -28,29 +48,9 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from './generated';
-import {
-  BUFFER_DISCRIMINATOR,
-  CrankAccount,
-  DISCRIMINATOR_MAP,
-  JobAccount,
-  ProgramStateAccount,
-  QueueAccount,
-  SwitchboardAccountData,
-  SwitchboardAccountType,
-} from './accounts';
-import {
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
-  DEVNET_GENESIS_HASH,
-  MAINNET_GENESIS_HASH,
-} from './const';
-import { OracleJob } from '@switchboard-xyz/common';
+import { NativeMint } from './mint';
+import { SwitchboardEvents } from './SwitchboardEvents';
+import { TransactionObject, TransactionOptions } from './TransactionObject';
 import { LoadedJobDefinition } from './types';
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
@@ -87,10 +87,11 @@ export const getSwitchboardProgramId = (
   cluster: Cluster | 'localnet'
 ): PublicKey => {
   switch (cluster) {
-    case 'devnet':
-      return SBV2_DEVNET_PID;
     case 'mainnet-beta':
       return SBV2_MAINNET_PID;
+    case 'localnet':
+    case 'devnet':
+      return SBV2_DEVNET_PID;
     case 'testnet':
     default:
       throw new Error(`Switchboard PID not found for cluster (${cluster})`);
@@ -163,19 +164,20 @@ export class SwitchboardProgram {
     cluster: Cluster | 'localnet',
     connection: Connection,
     payerKeypair: Keypair = READ_ONLY_KEYPAIR,
-    programId: PublicKey = getSwitchboardProgramId(cluster)
+    programId?: PublicKey
   ): Promise<anchor.Program> {
+    const pid = programId ?? getSwitchboardProgramId(cluster);
     const provider = new anchor.AnchorProvider(
       connection,
       // If no keypair is provided, default to dummy keypair
       new AnchorWallet(payerKeypair ?? SwitchboardProgram._readOnlyKeypair),
       { commitment: 'confirmed' }
     );
-    const anchorIdl = await anchor.Program.fetchIdl(programId, provider);
+    const anchorIdl = await anchor.Program.fetchIdl(pid, provider);
     if (!anchorIdl) {
-      throw new Error(`Failed to find IDL for ${programId.toBase58()}`);
+      throw new Error(`Failed to find IDL for ${pid.toBase58()}`);
     }
-    const program = new anchor.Program(anchorIdl, programId, provider);
+    const program = new anchor.Program(anchorIdl, pid, provider);
 
     return program;
   }
