@@ -234,7 +234,11 @@ export class SwitchboardTestContextV2 {
     return switchboard;
   }
 
-  async start(nodeImage: string, dockerParams?: Partial<SolanaOracleConfig>) {
+  async start(
+    nodeImage: string,
+    dockerParams?: Partial<SolanaOracleConfig>,
+    silent = true
+  ) {
     const config: SolanaOracleConfig = _.merge(
       {
         network: 'localnet',
@@ -252,7 +256,7 @@ export class SwitchboardTestContextV2 {
       { ...config, chain: 'solana' },
       nodeImage,
       undefined,
-      true
+      silent
     );
 
     console.log(`Starting Switchboard oracle ...`);
