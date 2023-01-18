@@ -1,6 +1,8 @@
 import { AnchorProvider } from '@project-serum/anchor';
 import { Connection, Keypair } from '@solana/web3.js';
+import { DockerOracle } from '@switchboard-xyz/common';
 import fs from 'fs';
+import _ from 'lodash';
 import os from 'os';
 import path from 'path';
 import {
@@ -12,7 +14,7 @@ import {
   SwitchboardNetwork,
   SwitchboardProgram,
 } from '..';
-import { SolanaDockerOracle, SolanaOracleConfig } from '../SolanaDockerOracle';
+import { SolanaOracleConfig } from '../SolanaDockerOracle';
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
@@ -103,7 +105,7 @@ export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextV2Init = {
 };
 
 export class SwitchboardTestContextV2 {
-  dockerOracle?: SolanaDockerOracle;
+  dockerOracle?: DockerOracle;
 
   constructor(
     readonly network: LoadedSwitchboardNetwork,
@@ -124,7 +126,7 @@ export class SwitchboardTestContextV2 {
 
   static async load(
     connection: Connection,
-    networkInitParams?: SwitchboardTestContextV2Init,
+    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
     walletPath?: string
   ): Promise<SwitchboardTestContextV2> {
     const program = await SwitchboardProgram.fromConnection(connection);
@@ -181,7 +183,7 @@ export class SwitchboardTestContextV2 {
 
   static async loadFromProvider(
     provider: AnchorProvider,
-    networkInitParams?: SwitchboardTestContextV2Init
+    networkInitParams?: Partial<SwitchboardTestContextV2Init>
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.load(
       provider.connection,
@@ -193,8 +195,8 @@ export class SwitchboardTestContextV2 {
   static async initFromProvider(
     provider: AnchorProvider,
     nodeImage: string,
-    networkInitParams?: SwitchboardTestContextV2Init,
-    dockerParams?: SolanaOracleConfig
+    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
+    dockerParams?: Partial<SolanaOracleConfig>
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.loadFromProvider(
       provider,
@@ -207,8 +209,8 @@ export class SwitchboardTestContextV2 {
   static async init(
     connection: Connection,
     nodeImage: string,
-    networkInitParams?: SwitchboardTestContextV2Init,
-    dockerParams?: SolanaOracleConfig,
+    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
+    dockerParams?: Partial<SolanaOracleConfig>,
     walletPath?: string
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.load(
@@ -220,8 +222,8 @@ export class SwitchboardTestContextV2 {
     return switchboard;
   }
 
-  async start(nodeImage: string, dockerParams?: SolanaOracleConfig) {
-    this.dockerOracle = new SolanaDockerOracle(
+  async start(nodeImage: string, dockerParams?: Partial<SolanaOracleConfig>) {
+    const config: SolanaOracleConfig = _.merge(
       {
         network: 'localnet',
         rpcUrl: this.program.connection.rpcEndpoint,
@@ -230,10 +232,12 @@ export class SwitchboardTestContextV2 {
         envVariables: {
           VERBOSE: '1',
           DEBUG: '1',
-          ...(dockerParams?.envVariables ?? {}),
         },
-        ...(dockerParams ?? {}),
       },
+      dockerParams
+    );
+    this.dockerOracle = new DockerOracle(
+      { ...config, chain: 'solana' },
       nodeImage,
       undefined,
       true
