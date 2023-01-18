@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.0.99",
+  "version": "2.0.100",
   "author": "",
   "license": "MIT",
   "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
@@ -15,7 +15,11 @@
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./docker": {
+      "import": "./lib/esm/SolanaDockerOracle.js",
+      "require": "./lib/cjs/SolanaDockerOracle.js"
+    }
   },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -51,7 +55,7 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
-    "@switchboard-xyz/common": "^2.1.14",
+    "@switchboard-xyz/common": "^2.1.16",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21"
   },

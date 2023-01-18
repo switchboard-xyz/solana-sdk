@@ -1,5 +1,4 @@
 export * from './accounts';
-export * from './SolanaDockerOracle';
 export * from './const';
 export * from './errors';
 export * as types from './generated';
