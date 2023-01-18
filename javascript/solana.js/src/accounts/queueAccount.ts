@@ -11,7 +11,7 @@ import {
 } from '@solana/web3.js';
 import { SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 import { Big } from '@switchboard-xyz/common';
-import { BN } from 'bn.js';
+import { BN } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import {

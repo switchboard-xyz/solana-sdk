@@ -31,7 +31,7 @@ import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
 import assert from 'assert';
-import { BN } from 'bn.js';
+import { BN } from '@switchboard-xyz/common';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
