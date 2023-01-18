@@ -1,6 +1,6 @@
 import { Keypair } from '@solana/web3.js';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 
 export function parseString(
   object: Record<string, any>,

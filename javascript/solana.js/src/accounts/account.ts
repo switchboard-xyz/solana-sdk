@@ -1,5 +1,5 @@
-import { SwitchboardProgram } from '../SwitchboardProgram';
 import * as anchor from '@project-serum/anchor';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 
 export abstract class Account<T> {
   public readonly publicKey: anchor.web3.PublicKey;
@@ -46,19 +46,19 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from '../generated';
-import { ProgramStateAccount } from './programStateAccount';
-import { QueueAccount } from './queueAccount';
 import { AggregatorAccount } from './aggregatorAccount';
+import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { BufferRelayerAccount } from './bufferRelayAccount';
 import { CrankAccount } from './crankAccount';
+import { CrankDataBuffer } from './crankDataBuffer';
 import { JobAccount } from './jobAccount';
 import { LeaseAccount } from './leaseAccount';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
-import { VrfAccount } from './vrfAccount';
-import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
-import { CrankDataBuffer } from './crankDataBuffer';
+import { ProgramStateAccount } from './programStateAccount';
+import { QueueAccount } from './queueAccount';
 import { QueueDataBuffer } from './queueDataBuffer';
+import { VrfAccount } from './vrfAccount';
 
 export const BUFFER_DISCRIMINATOR = Buffer.from([
   42,

@@ -1,9 +1,6 @@
-import * as types from '../generated';
 import * as anchor from '@project-serum/anchor';
-import { Account, OnAccountChangeCallback } from './account';
-import * as errors from '../errors';
-import { Big } from '@switchboard-xyz/common';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as spl from '@solana/spl-token';
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
   AccountInfo,
   AccountMeta,
@@ -15,23 +12,30 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { OracleAccount } from './oracleAccount';
-import { OracleJob, promiseWithTimeout, toUtf8 } from '@switchboard-xyz/common';
+import {
+  Big,
+  BN,
+  OracleJob,
+  promiseWithTimeout,
+  toUtf8,
+} from '@switchboard-xyz/common';
+import assert from 'assert';
 import crypto from 'crypto';
-import { JobAccount } from './jobAccount';
-import { QueueAccount } from './queueAccount';
-import { LeaseAccount, LeaseExtendParams } from './leaseAccount';
-import { PermissionAccount } from './permissionAccount';
-import * as spl from '@solana/spl-token';
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { CrankAccount } from './crankAccount';
-import assert from 'assert';
-import { BN } from '@switchboard-xyz/common';
+import { JobAccount } from './jobAccount';
+import { LeaseAccount, LeaseExtendParams } from './leaseAccount';
+import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { QueueAccount } from './queueAccount';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.

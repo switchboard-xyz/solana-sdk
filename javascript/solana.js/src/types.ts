@@ -1,3 +1,18 @@
+import { OracleJob } from '@switchboard-xyz/common';
+import {
+  AggregatorAccount,
+  BufferRelayerAccount,
+  CrankAccount,
+  JobAccount,
+  LeaseAccount,
+  OracleAccount,
+  PermissionAccount,
+  ProgramStateAccount,
+  QueueAccount,
+  SwitchboardAccount,
+  SwitchboardAccountData,
+  VrfAccount,
+} from './accounts';
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -10,21 +25,6 @@ import {
   SbState,
   VrfAccountData,
 } from './generated';
-import {
-  AggregatorAccount,
-  BufferRelayerAccount,
-  CrankAccount,
-  LeaseAccount,
-  OracleAccount,
-  PermissionAccount,
-  ProgramStateAccount,
-  QueueAccount,
-  VrfAccount,
-  SwitchboardAccount,
-  SwitchboardAccountData,
-  JobAccount,
-} from './accounts';
-import { OracleJob } from '@switchboard-xyz/common';
 
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;

@@ -1,10 +1,5 @@
 import * as anchor from '@project-serum/anchor';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import * as types from '../generated';
-import { Account } from './account';
 import * as spl from '@solana/spl-token';
-import * as errors from '../errors';
-import { Mint } from '../mint';
 import {
   AccountInfo,
   Keypair,
@@ -14,7 +9,12 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+import * as errors from '../errors';
+import * as types from '../generated';
+import { Mint } from '../mint';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
+import { Account } from './account';
 
 /**
  * Account type representing Switchboard global program state.

@@ -1,8 +1,5 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { Account, OnAccountChangeCallback } from './account';
 import * as anchor from '@project-serum/anchor';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as spl from '@solana/spl-token';
 import {
   AccountInfo,
   Commitment,
@@ -12,11 +9,14 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
+import { BN } from '@switchboard-xyz/common';
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
+import { Account, OnAccountChangeCallback } from './account';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
-import * as spl from '@solana/spl-token';
-import { TransactionObject } from '../TransactionObject';
-import { BN } from '@switchboard-xyz/common';
 
 /**
  * Account type holding an oracle's configuration including the authority and the reward/slashing wallet along with a set of metrics tracking its reliability.

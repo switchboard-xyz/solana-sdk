@@ -1,5 +1,32 @@
 import * as anchor from '@project-serum/anchor';
 import {
+  AccountInfo,
+  Keypair,
+  PublicKey,
+  TransactionSignature,
+} from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
+import fs from 'fs';
+import path from 'path';
+import {
+  AggregatorAccount,
+  BufferRelayerAccount,
+  CrankAccount,
+  CreateQueueBufferRelayerParams,
+  CreateQueueCrankParams,
+  CreateQueueFeedParams,
+  CreateQueueOracleParams,
+  CreateQueueVrfParams,
+  JobAccount,
+  LeaseAccount,
+  OracleAccount,
+  PermissionAccount,
+  ProgramStateAccount,
+  QueueAccount,
+  QueueInitParams,
+  VrfAccount,
+} from './accounts';
+import {
   AggregatorAccountData,
   BufferRelayerAccountData,
   CrankAccountData,
@@ -11,32 +38,7 @@ import {
   SbState,
   VrfAccountData,
 } from './generated';
-import {
-  AggregatorAccount,
-  BufferRelayerAccount,
-  CrankAccount,
-  LeaseAccount,
-  OracleAccount,
-  PermissionAccount,
-  ProgramStateAccount,
-  QueueAccount,
-  VrfAccount,
-  JobAccount,
-  QueueInitParams,
-  CreateQueueCrankParams,
-  CreateQueueOracleParams,
-  CreateQueueFeedParams,
-  CreateQueueVrfParams,
-  CreateQueueBufferRelayerParams,
-} from './accounts';
-import {
-  AccountInfo,
-  Keypair,
-  PublicKey,
-  TransactionSignature,
-} from '@solana/web3.js';
 import { SwitchboardProgram } from './SwitchboardProgram';
-import { OracleJob } from '@switchboard-xyz/common';
 import { TransactionObject } from './TransactionObject';
 import {
   AggregatorDefinition,
@@ -56,8 +58,6 @@ import {
   QueueDefinition,
   VrfDefinition,
 } from './types';
-import path from 'path';
-import fs from 'fs';
 
 export const isKeypairString = (value: string): boolean =>
   /^\[(\s)?[0-9]+((\s)?,(\s)?[0-9]+){31,}\]/.test(value);

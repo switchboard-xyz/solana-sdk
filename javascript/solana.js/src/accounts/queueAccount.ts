@@ -9,17 +9,15 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
-import { SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
-import { Big } from '@switchboard-xyz/common';
-import { BN } from '@switchboard-xyz/common';
+import { Big, BN, SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
 } from '../generated/types/SwitchboardPermission';
-import { SwitchboardProgram } from '../SwitchboardProgram';
 import { SolanaClock } from '../SolanaClock';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';

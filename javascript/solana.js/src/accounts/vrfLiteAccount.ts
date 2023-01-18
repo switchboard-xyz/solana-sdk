@@ -11,20 +11,20 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionSignature,
 } from '@solana/web3.js';
+import { BN } from '@switchboard-xyz/common';
+import * as errors from '../errors';
+import * as types from '../generated';
+import { vrfLiteInit } from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-import { SwitchboardProgram } from '../SwitchboardProgram';
 import { Account } from './account';
-import * as types from '../generated';
-import * as errors from '../errors';
-import { BN } from '@switchboard-xyz/common';
-import { vrfLiteInit } from '../generated';
-import { Callback } from './vrfAccount';
-import { QueueAccount } from './queueAccount';
-import { PermissionAccount } from './permissionAccount';
 import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { QueueAccount } from './queueAccount';
+import { Callback } from './vrfAccount';
 
 export interface VrfLiteInitParams {
   callback?: Callback;

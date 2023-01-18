@@ -1,3 +1,4 @@
+import * as anchor from '@project-serum/anchor';
 import {
   AccountInfo,
   Commitment,
@@ -7,16 +8,15 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
-import * as anchor from '@project-serum/anchor';
 import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { Account } from './account';
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { Account } from './account';
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.

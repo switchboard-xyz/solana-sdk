@@ -1,4 +1,3 @@
-import { Keypair } from '@solana/web3.js';
 import { AggregatorJson } from './aggregator';
 import { CrankJson } from './crank';
 import { OracleJson } from './oracle';

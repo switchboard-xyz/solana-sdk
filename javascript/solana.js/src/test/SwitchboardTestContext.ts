@@ -1,19 +1,19 @@
-import * as dotenv from 'dotenv';
 import * as anchor from '@project-serum/anchor';
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
-import { AnchorWallet, SwitchboardProgram } from '../SwitchboardProgram';
+import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
+import * as dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
-import { Mint } from '../mint';
-import { AggregatorAccountData } from '../generated';
-import { TransactionObject } from '../TransactionObject';
+import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
 import {
   DEVNET_GENESIS_HASH,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
 } from '../const';
+import { AggregatorAccountData } from '../generated';
+import { Mint } from '../mint';
 import { SwitchboardNetwork } from '../SwitchboardNetwork';
+import { AnchorWallet, SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
 
 export const LATEST_DOCKER_VERSION = 'dev-v2-RC_01_05_23_03_24';
 

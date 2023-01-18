@@ -1,5 +1,5 @@
 import { AccountMeta, Keypair, PublicKey } from '@solana/web3.js';
-import { CreateQueueVrfParams, Callback } from '../accounts';
+import { Callback, CreateQueueVrfParams } from '../accounts';
 import { Callback as CallbackJson } from '../generated';
 import {
   keypairToString,

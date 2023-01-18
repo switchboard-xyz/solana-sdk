@@ -1,5 +1,6 @@
-import * as errors from './errors';
 import _ from 'lodash';
+
+import { AnchorProvider } from '@project-serum/anchor';
 import {
   ComputeBudgetProgram,
   Keypair,
@@ -12,15 +13,16 @@ import {
   TransactionSignature,
   VersionedTransaction,
 } from '@solana/web3.js';
+import { sleep } from '@switchboard-xyz/common';
+
+import * as errors from './errors';
+import { fromTxError } from './generated';
 import {
   AnchorWallet,
   DEFAULT_SEND_TRANSACTION_OPTIONS,
   isBrowser,
   SendTransactionOptions,
 } from './SwitchboardProgram';
-import { AnchorProvider } from '@project-serum/anchor';
-import { fromTxError } from './generated';
-import { sleep } from '@switchboard-xyz/common';
 
 export interface ITransactionObject extends Required<TransactionObjectOptions> {
   /** The public key of the account that will pay the transaction fees */

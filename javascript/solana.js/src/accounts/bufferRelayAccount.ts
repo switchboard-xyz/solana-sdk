@@ -1,10 +1,10 @@
+import * as spl from '@solana/spl-token';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
   getAccount,
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
-import * as spl from '@solana/spl-token';
 import {
   Commitment,
   Keypair,
@@ -14,9 +14,10 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common';
+import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
+import { bufferRelayerSaveResult } from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
@@ -24,11 +25,9 @@ import {
 } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { JobAccount } from './jobAccount';
+import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
-import { promiseWithTimeout } from '@switchboard-xyz/common';
-import { OracleAccount } from './oracleAccount';
-import { bufferRelayerSaveResult } from '../generated';
 
 /**
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.

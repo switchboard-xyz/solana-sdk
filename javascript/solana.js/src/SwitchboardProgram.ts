@@ -47,6 +47,8 @@ import {
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
+  DEVNET_GENESIS_HASH,
+  MAINNET_GENESIS_HASH,
 } from './const';
 import { OracleJob } from '@switchboard-xyz/common';
 import { LoadedJobDefinition } from './types';
@@ -252,39 +254,69 @@ export class SwitchboardProgram {
    * ```
    */
   static fromProvider = async (
-    provider: anchor.AnchorProvider
+    provider: anchor.AnchorProvider,
+    programId?: PublicKey
   ): Promise<SwitchboardProgram> => {
     const payer = (provider.wallet as AnchorWallet).payer;
-
-    // try mainnet program ID
-    const mainnetAccountInfo = await provider.connection.getAccountInfo(
-      SBV2_MAINNET_PID
+    const program = await SwitchboardProgram.fromConnection(
+      provider.connection,
+      payer,
+      programId
     );
-    if (mainnetAccountInfo && mainnetAccountInfo.executable) {
-      return await SwitchboardProgram.load(
-        'mainnet-beta',
-        provider.connection,
-        payer,
-        SBV2_MAINNET_PID
+    return program;
+  };
+
+  /**
+   * Create and initialize a {@linkcode SwitchboardProgram} connection object.
+   *
+   * @param provider - the anchor provider containing the rpc and wallet connection.
+   *
+   * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import * as anchor from "@project-serum/anchor";
+   * import { Connection } from "@solana/web3.js";
+   * import { AnchorWallet, SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
+   *
+   * const connection = new Connection("https://api.mainnet-beta.solana.com");
+   * const program = await SwitchboardProgram.fromConnection(connection);
+   * ```
+   */
+  static fromConnection = async (
+    connection: Connection,
+    payer = READ_ONLY_KEYPAIR,
+    programId?: PublicKey
+  ): Promise<SwitchboardProgram> => {
+    const genesisHash = await connection.getGenesisHash();
+    const cluster =
+      genesisHash === MAINNET_GENESIS_HASH
+        ? 'mainnet-beta'
+        : genesisHash === DEVNET_GENESIS_HASH
+        ? 'devnet'
+        : 'localnet';
+    const pid =
+      programId ?? cluster === 'mainnet-beta'
+        ? SBV2_MAINNET_PID
+        : cluster === 'devnet'
+        ? SBV2_DEVNET_PID
+        : SBV2_DEVNET_PID;
+
+    const programAccountInfo = await connection.getAccountInfo(pid);
+    if (programAccountInfo === null) {
+      throw new Error(
+        `Failed to load Switchboard at ${pid}, try manually providing a programId`
       );
     }
 
-    // try devnet program ID
-    const devnetAccountInfo = await provider.connection.getAccountInfo(
-      SBV2_DEVNET_PID
+    const program = await SwitchboardProgram.load(
+      cluster,
+      connection,
+      payer,
+      pid
     );
-    if (devnetAccountInfo && devnetAccountInfo.executable) {
-      return await SwitchboardProgram.load(
-        'devnet',
-        provider.connection,
-        payer,
-        SBV2_DEVNET_PID
-      );
-    }
-
-    throw new Error(
-      `Failed to find the Switchboard program using the mainnet or devnet program ID`
-    );
+    return program;
   };
 
   /**

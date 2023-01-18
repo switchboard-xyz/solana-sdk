@@ -1,13 +1,4 @@
-import * as types from '../generated';
-import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as anchor from '@project-serum/anchor';
-import {
-  Account,
-  BUFFER_DISCRIMINATOR,
-  OnAccountChangeCallback,
-} from './account';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   Commitment,
   Keypair,
@@ -16,11 +7,17 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+import { Big, BN } from '@switchboard-xyz/common';
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
 import { AggregatorAccount } from './aggregatorAccount';
-import { SwitchboardDecimal } from '../generated';
-import { Big } from '@switchboard-xyz/common';
-import { BN } from '@switchboard-xyz/common';
 
 export interface AggregatorHistoryInit {
   /** Aggregator account to add a history buffer for. */
