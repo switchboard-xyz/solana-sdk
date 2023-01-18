@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.0.105",
+  "version": "2.0.106",
   "author": "",
   "license": "MIT",
   "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
@@ -55,7 +55,7 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
-    "@switchboard-xyz/common": "^2.1.19",
+    "@switchboard-xyz/common": "^2.1.20",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21"
   },
