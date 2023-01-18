@@ -16,7 +16,7 @@ import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
 import * as spl from '@solana/spl-token';
 import { TransactionObject } from '../TransactionObject';
-import BN from 'bn.js';
+import { BN } from '@switchboard-xyz/common';
 
 /**
  * Account type holding an oracle's configuration including the authority and the reward/slashing wallet along with a set of metrics tracking its reliability.

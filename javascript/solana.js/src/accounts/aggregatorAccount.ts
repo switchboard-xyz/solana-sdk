@@ -2,7 +2,7 @@ import * as types from '../generated';
 import * as anchor from '@project-serum/anchor';
 import { Account, OnAccountChangeCallback } from './account';
 import * as errors from '../errors';
-import Big from 'big.js';
+import { Big } from '@switchboard-xyz/common';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   AccountInfo,

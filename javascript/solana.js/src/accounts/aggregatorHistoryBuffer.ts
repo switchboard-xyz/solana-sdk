@@ -19,8 +19,8 @@ import {
 import { TransactionObject } from '../TransactionObject';
 import { AggregatorAccount } from './aggregatorAccount';
 import { SwitchboardDecimal } from '../generated';
-import Big from 'big.js';
-import BN from 'bn.js';
+import { Big } from '@switchboard-xyz/common';
+import { BN } from '@switchboard-xyz/common';
 
 export interface AggregatorHistoryInit {
   /** Aggregator account to add a history buffer for. */

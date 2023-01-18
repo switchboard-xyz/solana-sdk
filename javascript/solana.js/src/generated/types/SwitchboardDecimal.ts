@@ -1,8 +1,8 @@
 import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import BN from 'bn.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as borsh from '@project-serum/borsh';
-import Big from 'big.js';
+import { Big } from '@switchboard-xyz/common';
 
 export interface SwitchboardDecimalFields {
   /**

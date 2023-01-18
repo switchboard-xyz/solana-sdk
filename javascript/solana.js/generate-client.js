@@ -98,6 +98,10 @@ async function main() {
     );
 
     console.log(file);
+    // replace BN import
+    execSync(
+      `sed -i '' 's/import BN from \\"bn.js\\"/import { BN } from \\"@switchboard-xyz\\/common\\"/g' ${file}`
+    );
     // remove PROGRAM_ID import, we will use SwitchboardProgram instead
     execSync(
       `sed -i '' 's/import { PROGRAM_ID } from "..\\/programId"/ /g' ${file}`

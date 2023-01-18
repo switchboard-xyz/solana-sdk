@@ -16,7 +16,7 @@ import {
 import { AggregatorAccount } from './aggregatorAccount';
 import { QueueAccount } from './queueAccount';
 import { TransactionObject } from '../TransactionObject';
-import BN from 'bn.js';
+import { BN } from '@switchboard-xyz/common';
 import { JobAccount } from './jobAccount';
 import { OracleJob } from '@switchboard-xyz/common';
 

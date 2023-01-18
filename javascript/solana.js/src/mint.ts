@@ -9,8 +9,8 @@ import {
 } from '@solana/web3.js';
 import { InsufficientFundsError, NativeMintOnlyError } from './errors';
 import { SwitchboardDecimal } from './generated';
-import Big from 'big.js';
-import BN from 'bn.js';
+import { Big } from '@switchboard-xyz/common';
+import { BN } from '@switchboard-xyz/common';
 import { TransactionObject } from './TransactionObject';
 
 export class Mint {

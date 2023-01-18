@@ -19,7 +19,7 @@ import { SwitchboardProgram } from '../SwitchboardProgram';
 import { Account } from './account';
 import * as types from '../generated';
 import * as errors from '../errors';
-import BN from 'bn.js';
+import { BN } from '@switchboard-xyz/common';
 import { vrfLiteInit } from '../generated';
 import { Callback } from './vrfAccount';
 import { QueueAccount } from './queueAccount';
