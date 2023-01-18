@@ -24,5 +24,5 @@ url="https://api.devnet.solana.com"
 [test]
 startup_wait = 10000
 
-[[testnet.validator.clone]]
+[[test.validator.clone]]
 address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed

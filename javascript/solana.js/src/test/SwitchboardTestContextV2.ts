@@ -4,17 +4,15 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import {
-  AnchorWallet,
   CreateQueueOracleParams,
   LoadedSwitchboardNetwork,
   NetworkInitParams,
   OracleAccount,
   QueueAccount,
-  READ_ONLY_KEYPAIR,
   SwitchboardNetwork,
   SwitchboardProgram,
 } from '..';
-import { SolanaDockerOracle } from '../SolanaDockerOracle';
+import { SolanaDockerOracle, SolanaOracleConfig } from '../SolanaDockerOracle';
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
@@ -126,17 +124,14 @@ export class SwitchboardTestContextV2 {
 
   static async load(
     connection: Connection,
-    payer = READ_ONLY_KEYPAIR,
-    networkInitParams?: SwitchboardTestContextV2Init
+    networkInitParams?: SwitchboardTestContextV2Init,
+    walletPath?: string
   ): Promise<SwitchboardTestContextV2> {
     const program = await SwitchboardProgram.fromConnection(connection);
-    const walletPath = findAnchorTomlWallet();
+    const walletFsPath = walletPath ?? findAnchorTomlWallet();
     const wallet = Keypair.fromSecretKey(
-      new Uint8Array(JSON.parse(fs.readFileSync(walletPath, 'utf-8')))
+      new Uint8Array(JSON.parse(fs.readFileSync(walletFsPath, 'utf-8')))
     );
-    if (!payer.publicKey.equals(wallet.publicKey)) {
-      throw new Error(`Anchor wallet pubkey mismatch`);
-    }
 
     const networkParams = networkInitParams ?? DEFAULT_LOCALNET_NETWORK;
     try {
@@ -151,7 +146,7 @@ export class SwitchboardTestContextV2 {
         }
 
         const network = await SwitchboardNetwork.fromQueue(queueAccount);
-        return new SwitchboardTestContextV2(network, walletPath);
+        return new SwitchboardTestContextV2(network, walletFsPath);
       }
       // eslint-disable-next-line no-empty
     } catch {}
@@ -181,51 +176,51 @@ export class SwitchboardTestContextV2 {
         throw new Error(`Anchor wallet pubkey mismatch`);
       }
     }
-    return new SwitchboardTestContextV2(loadedNetwork, walletPath);
+    return new SwitchboardTestContextV2(loadedNetwork, walletFsPath);
   }
 
   static async loadFromProvider(
     provider: AnchorProvider,
     networkInitParams?: SwitchboardTestContextV2Init
   ): Promise<SwitchboardTestContextV2> {
-    const payer = (provider.wallet as AnchorWallet).payer;
     const switchboard = await SwitchboardTestContextV2.load(
       provider.connection,
-      payer,
       networkInitParams
     );
     return switchboard;
   }
 
-  static async upFromProvider(
+  static async initFromProvider(
     provider: AnchorProvider,
     nodeImage: string,
-    networkInitParams?: SwitchboardTestContextV2Init
+    networkInitParams?: SwitchboardTestContextV2Init,
+    dockerParams?: SolanaOracleConfig
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.loadFromProvider(
       provider,
       networkInitParams
     );
-    await switchboard.start(nodeImage);
+    await switchboard.start(nodeImage, dockerParams);
     return switchboard;
   }
 
-  static async up(
+  static async init(
     connection: Connection,
     nodeImage: string,
-    payer = READ_ONLY_KEYPAIR,
-    networkInitParams?: SwitchboardTestContextV2Init
+    networkInitParams?: SwitchboardTestContextV2Init,
+    dockerParams?: SolanaOracleConfig,
+    walletPath?: string
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.load(
       connection,
-      payer,
-      networkInitParams
+      networkInitParams,
+      walletPath
     );
-    await switchboard.start(nodeImage);
+    await switchboard.start(nodeImage, dockerParams);
     return switchboard;
   }
 
-  async start(nodeImage: string) {
+  async start(nodeImage: string, dockerParams?: SolanaOracleConfig) {
     this.dockerOracle = new SolanaDockerOracle(
       {
         network: 'localnet',
@@ -235,7 +230,9 @@ export class SwitchboardTestContextV2 {
         envVariables: {
           VERBOSE: '1',
           DEBUG: '1',
+          ...(dockerParams?.envVariables ?? {}),
         },
+        ...(dockerParams ?? {}),
       },
       nodeImage,
       undefined,

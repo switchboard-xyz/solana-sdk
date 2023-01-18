@@ -23,8 +23,8 @@ test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.test.ts"
 [test.validator]
 url="https://api.devnet.solana.com"
 
-[[testnet.validator.clone]]
+[[test.validator.clone]]
 address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed
 
-[[testnet.validator.clone]]
+[[test.validator.clone]]
 address="7LLvRhMs73FqcLkA8jvEE1AM2mYZXTmqfUv8GAEurymx" # sbv2 SOL/USD History Buffer
