@@ -1,45 +1,50 @@
 import * as anchor from "@project-serum/anchor";
 import { OracleJob, sleep } from "@switchboard-xyz/common";
-import {
-  AnchorWallet,
-  SwitchboardTestContext,
-} from "@switchboard-xyz/solana.js";
+import { SwitchboardTestContextV2 } from "@switchboard-xyz/solana.js";
 import fetch from "node-fetch";
-import { PROGRAM_ID } from "../client/programId";
-import { AnchorBufferParser, IDL } from "../target/types/anchor_buffer_parser";
+import { AnchorBufferParser } from "../target/types/anchor_buffer_parser";
 
 describe("anchor-buffer-parser test", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  // const bufferParserProgram = anchor.workspace
-  //   .AnchorBufferParser as Program<AnchorBufferParser>;
+  const bufferParserProgram = anchor.workspace
+    .AnchorBufferParser as anchor.Program<AnchorBufferParser>;
 
-  const bufferParserProgram = new anchor.Program(
-    IDL,
-    PROGRAM_ID,
-    provider,
-    new anchor.BorshCoder(IDL)
-  ) as anchor.Program<AnchorBufferParser>;
+  // const bufferParserProgram = new anchor.Program(
+  //   IDL,
+  //   PROGRAM_ID,
+  //   provider,
+  //   new anchor.BorshCoder(IDL)
+  // ) as anchor.Program<AnchorBufferParser>;
 
-  const payer = (provider.wallet as AnchorWallet).payer;
-
-  let switchboard: SwitchboardTestContext;
+  let switchboard: SwitchboardTestContextV2;
 
   before(async () => {
-    // Attempt to load the env from a local file
-    try {
-      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      console.log("local env file detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Localnet - ${error.message}`);
-      console.error(error);
+    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+      // You can provide a keypair to so the PDA schemes dont change between test runs
+      name: "Test Queue",
+      // keypair: Keypair.generate(),
+      queueSize: 10,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 900,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: true,
+      oracle: {
+        name: "Test Oracle",
+        enable: true,
+        // stakingWalletKeypair: Keypair.generate(),
+      },
+    });
+    await switchboard.start("dev-v2-RC_01_17_23_16_22", undefined);
+  });
+
+  after(async () => {
+    if (switchboard) {
+      switchboard.stop();
     }
-    // If fails, throw error
-    throw new Error(
-      `Failed to load the SwitchboardTestContext from a switchboard.env file`
-    );
   });
 
   it("Create and read buffer account", async () => {
@@ -76,10 +81,16 @@ describe("anchor-buffer-parser test", () => {
 
     console.log(`BufferRelayer ${bufferAccount.publicKey}`);
 
+    const [payerTokenWallet] =
+      await switchboard.program.mint.getOrCreateWrappedUser(
+        provider.publicKey,
+        { fundUpTo: 0.01 }
+      );
+
     const [buffer, openRoundSignature] =
       await bufferAccount.openRoundAndAwaitResult(
         {
-          tokenWallet: switchboard.payerTokenWallet,
+          tokenWallet: payerTokenWallet,
         },
         30_000
       );

@@ -9,13 +9,9 @@
     "noEmit": true,
     "esModuleInterop": true,
     "paths": {
-      "@switchboard-xyz/switchboard-v2": ["../../javascript/switchboard-v2"],
-      "@switchboard-xyz/sbv2-utils": ["../../javascript/sbv2-utils"]
+      "@switchboard-xyz/solana.js": ["../../javascript/solana.js"]
     }
   },
   "include": ["tests/**/*", "client/**/*", "./target/types/anchor_feed_parser"],
-  "references": [
-    { "path": "../../javascript/switchboard-v2" },
-    { "path": "../../javascript/sbv2-utils" }
-  ]
+  "references": [{ "path": "../../javascript/solana.js" }]
 }

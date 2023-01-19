@@ -4,8 +4,7 @@ import { Program } from "@project-serum/anchor";
 import { OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
-  JobAccount,
-  SwitchboardTestContext,
+  SwitchboardTestContextV2,
 } from "@switchboard-xyz/solana.js";
 import { AnchorHistoryParser } from "../target/types/anchor_history_parser";
 
@@ -20,7 +19,8 @@ export const sleep = (ms: number): Promise<any> =>
 
 describe("anchor-history-parser", () => {
   // Configure the client to use the local cluster.
-  anchor.setProvider(anchor.AnchorProvider.env());
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
 
   const program = anchor.workspace
     .AnchorHistoryParser as Program<AnchorHistoryParser>;
@@ -28,21 +28,33 @@ describe("anchor-history-parser", () => {
   let aggregatorAccount: AggregatorAccount;
   let historyBuffer: anchor.web3.PublicKey;
 
-  let switchboard: SwitchboardTestContext;
+  let switchboard: SwitchboardTestContextV2;
 
   before(async () => {
-    try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        program.provider as anchor.AnchorProvider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
-      );
-      console.log("devnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Devnet - ${error.message}`);
+    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+      // You can provide a keypair to so the PDA schemes dont change between test runs
+      name: "Test Queue",
+      // keypair: Keypair.generate(),
+      queueSize: 10,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 900,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: true,
+      oracle: {
+        name: "Test Oracle",
+        enable: true,
+        // stakingWalletKeypair: Keypair.generate(),
+      },
+    });
+    await switchboard.start("dev-v2-RC_01_17_23_16_22", undefined);
+  });
+
+  after(async () => {
+    if (switchboard) {
+      switchboard.stop();
     }
-    // If fails, throw error
-    throw new Error(`Failed to load the SwitchboardTestContext from devnet`);
   });
 
   /** Example showing how to create a new data feed with a history buffer storing 200k samples.

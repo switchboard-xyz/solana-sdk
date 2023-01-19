@@ -7,36 +7,33 @@ import {
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
 } from "@solana/web3.js";
 
-import { AnchorVrfParser, IDL } from "../target/types/anchor_vrf_parser";
-import { VrfClient } from "../client/accounts";
-import { PROGRAM_ID } from "../client/programId";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { sleep } from "@switchboard-xyz/common";
 import {
   AnchorWallet,
   Callback,
   PermissionAccount,
+  SwitchboardTestContextV2,
   types,
 } from "@switchboard-xyz/solana.js";
-import { sleep } from "@switchboard-xyz/common";
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { Switchboard } from "./init";
+import { VrfClient } from "../client/accounts";
+import { AnchorVrfParser } from "../target/types/anchor_vrf_parser";
 
 describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
   anchor.setProvider(provider);
 
-  // const vrfClientProgram = anchor.workspace
-  //   .AnchorVrfParser as Program<AnchorVrfParser>;
+  const vrfClientProgram = anchor.workspace
+    .AnchorVrfParser as anchor.Program<AnchorVrfParser>;
 
-  const vrfClientProgram = new anchor.Program(
-    IDL,
-    PROGRAM_ID,
-    provider,
-    new anchor.BorshCoder(IDL)
-  ) as anchor.Program<AnchorVrfParser>;
+  // const vrfClientProgram = new anchor.Program(
+  //   IDL,
+  //   PROGRAM_ID,
+  //   provider,
+  //   new anchor.BorshCoder(IDL)
+  // ) as anchor.Program<AnchorVrfParser>;
 
   const payer = (provider.wallet as AnchorWallet).payer;
-
-  let switchboard: Switchboard;
 
   const vrfSecret = anchor.web3.Keypair.generate();
   console.log(`VRF Account: ${vrfSecret.publicKey}`);
@@ -62,12 +59,31 @@ describe("anchor-vrf-parser test", () => {
     ixData: vrfIxCoder.encode("updateResult", ""), // pass any params for instruction here
   };
 
+  let switchboard: SwitchboardTestContextV2;
+
   before(async () => {
-    switchboard = await Switchboard.load(provider);
+    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+      // You can provide a keypair to so the PDA schemes dont change between test runs
+      name: "Test Queue",
+      // keypair: Keypair.generate(),
+      queueSize: 10,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 900,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: true,
+      oracle: {
+        name: "Test Oracle",
+        enable: true,
+        // stakingWalletKeypair: Keypair.generate(),
+      },
+    });
+    await switchboard.start("dev-v2-RC_01_17_23_16_22", undefined);
   });
 
   it("Creates a vrfClient account", async () => {
-    const queue = switchboard.queue.account;
+    const queue = switchboard.queue;
     const { unpermissionedVrfEnabled, authority, dataBuffer } =
       await queue.loadData();
 

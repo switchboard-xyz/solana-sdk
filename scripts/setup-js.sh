@@ -8,28 +8,28 @@ javascript_dir="$project_dir"/javascript
 program_dir="$project_dir"/programs
 
 cd "$javascript_dir"/solana.js
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$javascript_dir"/sbv2-utils
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$javascript_dir"/sbv2-lite
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$javascript_dir"/feed-parser
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$javascript_dir"/feed-walkthrough
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$javascript_dir"/lease-observer
-yarn install && yarn build
+npm ci && npm run build
 
 cd "$program_dir"/anchor-buffer-parser
-yarn install
+npm ci && anchor build
 
 cd "$program_dir"/anchor-feed-parser
-yarn install
+npm ci && anchor build
 
 cd "$program_dir"/anchor-vrf-parser
-yarn install
+npm ci && anchor build

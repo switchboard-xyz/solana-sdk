@@ -7,6 +7,8 @@ members = [
 seeds = false
 [programs.localnet]
 anchor_history_parser = "C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS"
+[programs.devnet]
+anchor_history_parser = "C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -21,10 +23,25 @@ wallet = "~/.config/solana/id.json"
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.test.ts"
 
 [test.validator]
-url="https://api.devnet.solana.com"
+url = "https://api.devnet.solana.com"
 
-[[test.validator.clone]]
-address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" # sbv2 SOL/USD Feed
+[test]
+startup_wait = 15000
 
-[[test.validator.clone]]
-address="7LLvRhMs73FqcLkA8jvEE1AM2mYZXTmqfUv8GAEurymx" # sbv2 SOL/USD History Buffer
+[[test.validator.clone]] # sbv2 devnet programID
+address = "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
+
+[[test.validator.clone]] # sbv2 devnet IDL
+address = "CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp"
+
+[[test.validator.clone]] # sbv2 devnet SbState
+address = "BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt"
+
+[[test.validator.clone]] # sbv2 devnet tokenVault
+address = "FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy"
+
+[[test.validator.clone]] # sbv2 SOL/USD Feed
+address="GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR" 
+
+[[test.validator.clone]] # sbv2 SOL/USD History Buffer
+address="7LLvRhMs73FqcLkA8jvEE1AM2mYZXTmqfUv8GAEurymx" 

@@ -29,8 +29,8 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.67.0",
-    "@switchboard-xyz/common": "^2.1.8",
-    "@switchboard-xyz/solana.js": "^2.0.79",
+    "@switchboard-xyz/common": "^2.1.26",
+    "@switchboard-xyz/solana.js": "file:../../javascript/solana.js",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",
     "yargs": "^17.5.1"

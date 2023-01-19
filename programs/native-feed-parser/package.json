@@ -16,8 +16,8 @@
   "dependencies": {
     "@project-serum/anchor": "^0.26.0",
     "@solana/web3.js": "^1.66.2",
-    "@switchboard-xyz/common": "^2.1.8",
-    "@switchboard-xyz/solana.js": "^2.0.52"
+    "@switchboard-xyz/common": "^2.1.26",
+    "@switchboard-xyz/solana.js": "file:../../javascript/solana.js"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
