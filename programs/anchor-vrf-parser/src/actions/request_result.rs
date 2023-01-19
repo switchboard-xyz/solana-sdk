@@ -23,7 +23,7 @@ pub struct RequestResult<'info> {
     )]
     pub state: AccountLoader<'info, VrfClient>,
     /// CHECK:
-    #[account(signer)] // client authority needs to sign
+    #[account(signer)]
     pub authority: AccountInfo<'info>,
 
     // SWITCHBOARD ACCOUNTS

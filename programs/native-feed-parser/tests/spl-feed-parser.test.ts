@@ -5,7 +5,12 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import { SwitchboardTestContext } from "@switchboard-xyz/solana.js";
+import { OracleJob, sleep } from "@switchboard-xyz/common";
+import {
+  AggregatorAccount,
+  SwitchboardTestContextV2,
+} from "@switchboard-xyz/solana.js";
+import assert from "assert";
 import fs from "fs";
 import path from "path";
 
@@ -27,58 +32,80 @@ function getProgramId(): PublicKey {
   return PROGRAM_ID;
 }
 
-const sleep = (ms: number): Promise<any> =>
-  new Promise((s) => setTimeout(s, ms));
-
-// Anchor.toml will copy this to localnet when we start our tests
-const DEFAULT_SOL_USD_FEED = new PublicKey(
-  "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
-);
-
 describe("native-feed-parser test", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  let switchboard: SwitchboardTestContext;
-  let aggregatorKey: PublicKey;
+  let aggregatorAccount: AggregatorAccount;
+  let switchboard: SwitchboardTestContextV2;
 
   before(async () => {
-    // First, attempt to load the switchboard devnet PID
-    try {
-      switchboard = await SwitchboardTestContext.loadDevnetQueue(
-        provider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
-      );
-      aggregatorKey = DEFAULT_SOL_USD_FEED;
-      console.log("devnet detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Devnet - ${error.message}`);
+    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+      // You can provide a keypair to so the PDA schemes dont change between test runs
+      name: "Test Queue",
+      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
+      queueSize: 10,
+      reward: 0,
+      minStake: 0,
+      oracleTimeout: 900,
+      unpermissionedFeeds: true,
+      unpermissionedVrf: true,
+      enableBufferRelayers: true,
+      oracle: {
+        name: "Test Oracle",
+        enable: true,
+        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+          "~/.keypairs/oracleWallet.json"
+        ),
+      },
+    });
+    await switchboard.start("dev-v2-RC_01_19_23_06_39", undefined, 60);
+  });
+
+  after(async () => {
+    if (switchboard) {
+      switchboard.stop();
     }
-    // If fails, fallback to looking for a local env file
-    try {
-      switchboard = await SwitchboardTestContext.loadFromEnv(provider);
-      const [aggregatorAccount] = await switchboard.createStaticFeed(100);
-      aggregatorKey = aggregatorAccount.publicKey ?? PublicKey.default;
-      console.log("local env detected");
-      return;
-    } catch (error: any) {
-      console.log(`Error: SBV2 Localnet - ${error.message}`);
-    }
-    // If fails, throw error
-    throw new Error(
-      `Failed to load the SwitchboardTestContext from devnet or from a switchboard.env file`
-    );
   });
 
   it("Read SOL/USD Feed", async () => {
+    [aggregatorAccount] = await switchboard.queue.createFeed({
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 10,
+      fundAmount: 0.15,
+      enable: true,
+      slidingWindow: true,
+      jobs: [
+        {
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: 100,
+                  },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const aggregator = await aggregatorAccount.loadData();
+    const [updatedState] = await aggregatorAccount.openRoundAndAwaitResult();
+    const result = AggregatorAccount.decodeLatestValue(updatedState);
+    assert(result.toNumber() === 100, "Aggregator result mismatch");
+
     const PROGRAM_ID = getProgramId();
 
     const readSwitchboardAggregatorTxn = new Transaction().add(
       new TransactionInstruction({
         keys: [
           {
-            pubkey: aggregatorKey,
+            pubkey: aggregatorAccount.publicKey,
             isSigner: false,
             isWritable: false,
           },
@@ -95,11 +122,17 @@ describe("native-feed-parser test", () => {
     // wait for RPC
     await sleep(2000);
 
-    const confirmedTxn = await provider.connection.getParsedTransaction(
+    const logs = await provider.connection.getParsedTransaction(
       signature,
       "confirmed"
     );
 
-    console.log(JSON.stringify(confirmedTxn?.meta?.logMessages, undefined, 2));
+    console.log(JSON.stringify(logs?.meta?.logMessages, undefined, 2));
+    const match = JSON.stringify(logs?.meta?.logMessages ?? []).match(
+      new RegExp(/Current feed result is (?<feed_result>\d+)/)
+    );
+    const feedResult = Number(match?.groups?.feed_result ?? null);
+    console.log(`Feed Result: ${feedResult}`);
+    assert(feedResult === 100, "FeedResultMismatch");
   });
 });

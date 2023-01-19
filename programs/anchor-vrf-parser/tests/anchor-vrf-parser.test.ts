@@ -23,15 +23,8 @@ describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const vrfClientProgram = anchor.workspace
-    .AnchorVrfParser as anchor.Program<AnchorVrfParser>;
-
-  // const vrfClientProgram = new anchor.Program(
-  //   IDL,
-  //   PROGRAM_ID,
-  //   provider,
-  //   new anchor.BorshCoder(IDL)
-  // ) as anchor.Program<AnchorVrfParser>;
+  const vrfClientProgram: anchor.Program<AnchorVrfParser> =
+    anchor.workspace.AnchorVrfParser;
 
   const payer = (provider.wallet as AnchorWallet).payer;
 
@@ -65,7 +58,7 @@ describe("anchor-vrf-parser test", () => {
     switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
       // You can provide a keypair to so the PDA schemes dont change between test runs
       name: "Test Queue",
-      // keypair: Keypair.generate(),
+      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
       queueSize: 10,
       reward: 0,
       minStake: 0,
@@ -76,10 +69,18 @@ describe("anchor-vrf-parser test", () => {
       oracle: {
         name: "Test Oracle",
         enable: true,
-        // stakingWalletKeypair: Keypair.generate(),
+        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+          "~/.keypairs/oracleWallet.json"
+        ),
       },
     });
-    await switchboard.start("dev-v2-RC_01_17_23_16_22", undefined);
+    await switchboard.start("dev-v2-RC_01_19_23_06_39", undefined, 60);
+  });
+
+  after(async () => {
+    if (switchboard) {
+      switchboard.stop();
+    }
   });
 
   it("Creates a vrfClient account", async () => {
@@ -184,7 +185,5 @@ describe("anchor-vrf-parser test", () => {
     );
 
     console.log(`VrfClient Result: ${vrfClient.result}`);
-
-    return;
   });
 });

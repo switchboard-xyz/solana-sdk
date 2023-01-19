@@ -8,15 +8,8 @@ describe("anchor-buffer-parser test", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const bufferParserProgram = anchor.workspace
-    .AnchorBufferParser as anchor.Program<AnchorBufferParser>;
-
-  // const bufferParserProgram = new anchor.Program(
-  //   IDL,
-  //   PROGRAM_ID,
-  //   provider,
-  //   new anchor.BorshCoder(IDL)
-  // ) as anchor.Program<AnchorBufferParser>;
+  const bufferParserProgram: anchor.Program<AnchorBufferParser> =
+    anchor.workspace.AnchorBufferParser;
 
   let switchboard: SwitchboardTestContextV2;
 
@@ -24,7 +17,7 @@ describe("anchor-buffer-parser test", () => {
     switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
       // You can provide a keypair to so the PDA schemes dont change between test runs
       name: "Test Queue",
-      // keypair: Keypair.generate(),
+      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
       queueSize: 10,
       reward: 0,
       minStake: 0,
@@ -35,10 +28,12 @@ describe("anchor-buffer-parser test", () => {
       oracle: {
         name: "Test Oracle",
         enable: true,
-        // stakingWalletKeypair: Keypair.generate(),
+        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+          "~/.keypairs/oracleWallet.json"
+        ),
       },
     });
-    await switchboard.start("dev-v2-RC_01_17_23_16_22", undefined);
+    await switchboard.start("dev-v2-RC_01_19_23_06_39", undefined, 60);
   });
 
   after(async () => {
