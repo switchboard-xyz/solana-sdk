@@ -1,8 +1,8 @@
 import { Keypair } from '@solana/web3.js';
 import { CreateQueueOracleParams } from '../accounts';
+import { loadKeypair } from '../utils';
 import {
   keypairToString,
-  loadKeypair,
   parseBoolean,
   parseNumber,
   parseString,

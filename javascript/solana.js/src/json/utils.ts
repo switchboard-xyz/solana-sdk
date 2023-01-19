@@ -1,6 +1,4 @@
 import { Keypair } from '@solana/web3.js';
-import fs from 'fs';
-import path from 'path';
 
 export function parseString(
   object: Record<string, any>,
@@ -55,32 +53,3 @@ export function parseBoolean(
 
 export const keypairToString = (keypair: Keypair): string =>
   `[${keypair.secretKey}]`;
-
-export function loadKeypair(keypairPath: string): Keypair {
-  if (keypairPath.startsWith('[') && keypairPath.endsWith(']')) {
-    const walletKeypair = Keypair.fromSecretKey(
-      new Uint8Array(JSON.parse(keypairPath))
-    );
-    return walletKeypair;
-  }
-
-  const fullPath =
-    keypairPath.startsWith('/') || keypairPath.startsWith('C:')
-      ? keypairPath
-      : path.join(process.cwd(), keypairPath);
-
-  if (!fs.existsSync(fullPath)) {
-    throw new Error(`keypair file does not exist, ${fullPath}`);
-  }
-
-  const keypair = Keypair.fromSecretKey(
-    new Uint8Array(
-      JSON.parse(
-        fs.readFileSync(fullPath, {
-          encoding: 'utf-8',
-        })
-      )
-    )
-  );
-  return keypair;
-}

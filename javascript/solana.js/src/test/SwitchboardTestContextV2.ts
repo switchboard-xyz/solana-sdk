@@ -8,6 +8,7 @@ import path from 'path';
 import {
   CreateQueueOracleParams,
   LoadedSwitchboardNetwork,
+  loadKeypair,
   NetworkInitParams,
   OracleAccount,
   QueueAccount,
@@ -238,17 +239,19 @@ export class SwitchboardTestContextV2 {
   async start(
     nodeImage: string,
     dockerParams?: Partial<SolanaOracleConfig>,
+    timeout = 60,
     silent = true
   ) {
     const config: SolanaOracleConfig = _.merge(
       {
-        network: 'localnet',
+        network: this.program.cluster,
         rpcUrl: this.program.connection.rpcEndpoint,
         oracleKey: this.oracle.publicKey.toBase58(),
         secretPath: this.walletPath,
         envVariables: {
           VERBOSE: '1',
           DEBUG: '1',
+          DISABLE_NONE_QUEUE: true,
         },
       },
       dockerParams
@@ -262,7 +265,7 @@ export class SwitchboardTestContextV2 {
 
     console.log(`Starting Switchboard oracle ...`);
 
-    await this.dockerOracle.startAndAwait();
+    await this.dockerOracle.startAndAwait(timeout);
   }
 
   stop() {
@@ -285,5 +288,10 @@ export class SwitchboardTestContextV2 {
     }
 
     throw new Error(`Failed to find wallet path in Anchor.toml`);
+  }
+
+  /** Load a keypair from a file path. If one doesn't exist, it will be created */
+  public static loadKeypair(keypairPath: string): Keypair {
+    return loadKeypair(keypairPath);
   }
 }

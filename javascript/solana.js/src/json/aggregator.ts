@@ -1,9 +1,9 @@
 import { Keypair } from '@solana/web3.js';
 import { CreateQueueFeedParams } from '../accounts';
+import { loadKeypair } from '../utils';
 import { JobJson } from './job';
 import {
   keypairToString,
-  loadKeypair,
   parseBoolean,
   parseNumber,
   parseString,

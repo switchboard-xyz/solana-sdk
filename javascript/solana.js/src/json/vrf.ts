@@ -1,12 +1,8 @@
 import { AccountMeta, Keypair, PublicKey } from '@solana/web3.js';
 import { Callback, CreateQueueVrfParams } from '../accounts';
 import { Callback as CallbackJson } from '../generated';
-import {
-  keypairToString,
-  loadKeypair,
-  parseBoolean,
-  parseString,
-} from './utils';
+import { loadKeypair } from '../utils';
+import { keypairToString, parseBoolean, parseString } from './utils';
 
 export type IVrfJson = Omit<CreateQueueVrfParams, 'callback'> & {
   callback: Callback;
