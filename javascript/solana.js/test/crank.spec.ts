@@ -95,7 +95,7 @@ describe('Crank Tests', () => {
         Math.round(CRANK_SIZE / 10),
         {
           queueAuthority,
-          minUpdateDelaySeconds: 5,
+          minUpdateDelaySeconds: 5 + Math.floor(Math.random() * 25), // 5 - 30 sec
           fundAmount: QUEUE_REWARD * 10,
           funderTokenWallet: userTokenAddress,
         }
