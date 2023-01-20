@@ -13,7 +13,7 @@ import {
 } from '../src';
 import { createFeed, createFeeds, setupTest, TestContext } from './utils';
 
-describe('Crank Tests', () => {
+describe('Crank V2 Tests', () => {
   const CRANK_SIZE = 50;
   const QUEUE_REWARD = 15_000 / LAMPORTS_PER_SOL;
   // const QUEUE_REWARD = 0;
@@ -161,7 +161,7 @@ describe('Crank Tests', () => {
 
     let timestamp = await getTimestamp();
 
-    const nextAvailable = (await crankAccount.loadCrank()).reduce(
+    const nextAvailable = (await crankAccount.loadCrank(false)).reduce(
       (nextTimestamp, row) => {
         return nextTimestamp < row.nextTimestamp.toNumber()
           ? row.nextTimestamp.toNumber()
@@ -176,7 +176,7 @@ describe('Crank Tests', () => {
       await sleep((delay + 1) * 1000);
     }
 
-    const initialCrankRows = await crankAccount.loadCrank();
+    const initialCrankRows = await crankAccount.loadCrank(true);
 
     const crankAccounts = crankAccount.getCrankAccounts(
       initialCrankRows,
@@ -190,31 +190,33 @@ describe('Crank Tests', () => {
 
     timestamp = await getTimestamp();
 
-    const readyRows = initialCrankRows.filter(row =>
-      timestamp.gte(row.nextTimestamp)
+    let readyRows: Array<[number, types.CrankRow]> = [];
+    for (const [idx, row] of initialCrankRows.entries()) {
+      if (timestamp.gte(row.nextTimestamp)) {
+        readyRows.push([idx, row]);
+      }
+    }
+    readyRows = readyRows.sort(([idxA, rowA], [idxB, rowB]) =>
+      rowA.nextTimestamp.cmp(rowB.nextTimestamp)
     );
+
     assert(readyRows.length > 0, `No aggregators ready!`);
 
-    const readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]> =
-      readyRows.map(r => {
-        if (crankAccounts.has(r.pubkey.toBase58())) {
-          return [
-            new AggregatorAccount(ctx.program, r.pubkey),
-            crankAccounts.get(r.pubkey.toBase58())!,
-          ];
-        } else {
-          const aggregatorAccount = new AggregatorAccount(
-            ctx.program,
-            r.pubkey
-          );
-          return [
-            aggregatorAccount,
-            aggregatorAccount.getAccounts(queueAccount, queue.authority),
-          ];
-        }
-      });
+    const readyAggregators: Array<
+      [number, AggregatorAccount, AggregatorPdaAccounts]
+    > = readyRows.map(([idx, row]) => {
+      const aggregatorAccount = new AggregatorAccount(
+        crankAccount.program,
+        row.pubkey
+      );
+      const pdaAccounts = aggregatorAccount.getAccounts(
+        queueAccount,
+        queueAuthority.publicKey
+      );
+      return [idx, aggregatorAccount, pdaAccounts];
+    });
 
-    const packedTxns = crankAccount.packAndPopInstructions(
+    const packedTxns = crankAccount.packAndPopInstructionsV2(
       ctx.payer.publicKey,
       {
         payoutTokenWallet: userTokenAddress,

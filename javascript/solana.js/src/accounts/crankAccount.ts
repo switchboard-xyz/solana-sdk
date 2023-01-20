@@ -546,6 +546,218 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     return txnSignatures;
   }
 
+  private getPopTxnV2(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
+      remainingAccounts: Array<PublicKey>;
+      leaseBumps: Map<string, number>;
+      permissionBumps: Map<string, number>;
+
+      idx: number;
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ) {
+    const remainingAccounts = params.remainingAccounts.sort(
+      (a: PublicKey, b: PublicKey) => a.toBuffer().compare(b.toBuffer())
+    );
+
+    const leaseBumps: Array<number> = [];
+    const permissionBumps: Array<number> = [];
+    for (const remainingAccount of remainingAccounts) {
+      leaseBumps.push(params.leaseBumps.get(remainingAccount.toBase58()) ?? 0);
+      permissionBumps.push(
+        params.permissionBumps.get(remainingAccount.toBase58()) ?? 0
+      );
+    }
+
+    const crankPopIxn = types.crankPopV2(
+      this.program,
+      {
+        params: {
+          stateBump: this.program.programState.bump,
+          leaseBumps: new Uint8Array(leaseBumps),
+          permissionBumps: new Uint8Array(permissionBumps),
+          nonce: params.nonce ?? null,
+          failOpenOnAccountMismatch: params.failOpenOnMismatch ?? false,
+          popIdx: params.idx,
+        },
+      },
+      {
+        crank: this.publicKey,
+        oracleQueue: params.queuePubkey,
+        queueAuthority: params.queueAuthority,
+        programState: this.program.programState.publicKey,
+        payoutWallet: params.payoutTokenWallet,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        crankDataBuffer: params.crankDataBuffer,
+        queueDataBuffer: params.queueDataBuffer,
+        mint: this.program.mint.address,
+      }
+    );
+
+    crankPopIxn.keys.push(
+      ...remainingAccounts.map((pubkey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      })
+    );
+
+    return new TransactionObject(payer, [crankPopIxn], [], options);
+  }
+
+  public popSyncV2(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
+      readyAggregators: Array<
+        [number, AggregatorAccount, AggregatorPdaAccounts]
+      >;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+      popIdx?: number;
+    },
+    options?: TransactionObjectOptions
+  ): TransactionObject {
+    if (params.readyAggregators.length < 1) {
+      throw new Error(`No aggregators ready`);
+    }
+
+    let remainingAccounts: PublicKey[] = [];
+    let txn: TransactionObject | undefined = undefined;
+
+    const allLeaseBumps = params.readyAggregators.reduce(
+      (map, [idx, aggregatorAccount, pdaAccounts]) => {
+        map.set(aggregatorAccount.publicKey.toBase58(), pdaAccounts.leaseBump);
+        return map;
+      },
+      new Map<string, number>()
+    );
+    const allPermissionBumps = params.readyAggregators.reduce(
+      (map, [idx, aggregatorAccount, pdaAccounts]) => {
+        map.set(
+          aggregatorAccount.publicKey.toBase58(),
+          pdaAccounts.permissionBump
+        );
+        return map;
+      },
+      new Map<string, number>()
+    );
+
+    // add as many readyAggregators until the txn overflows
+    for (const [
+      idx,
+      readyAggregator,
+      aggregatorPdaAccounts,
+    ] of params.readyAggregators) {
+      const { leaseAccount, leaseEscrow, permissionAccount } =
+        aggregatorPdaAccounts;
+
+      const newRemainingAccounts = [
+        ...remainingAccounts,
+        readyAggregator.publicKey,
+        leaseAccount.publicKey,
+        leaseEscrow,
+        permissionAccount.publicKey,
+      ];
+
+      try {
+        const newTxn = this.getPopTxnV2(
+          payer,
+          {
+            ...params,
+            remainingAccounts: newRemainingAccounts,
+            leaseBumps: allLeaseBumps,
+            permissionBumps: allPermissionBumps,
+            idx,
+          },
+          options
+        );
+        // succeeded, so set running txn and remaining accounts and try again
+        txn = newTxn;
+        remainingAccounts = newRemainingAccounts;
+      } catch (error) {
+        if (error instanceof errors.TransactionOverflowError) {
+          if (txn === undefined) {
+            throw new Error(`Failed to create crank pop transaction, ${error}`);
+          }
+          return txn;
+        }
+        throw error;
+      }
+    }
+
+    if (txn === undefined) {
+      throw new Error(`Failed to create crank pop transaction`);
+    }
+
+    return txn;
+  }
+
+  public packAndPopInstructionsV2(
+    payer: PublicKey,
+    params: {
+      payoutTokenWallet: PublicKey;
+
+      queuePubkey: PublicKey;
+      queueAuthority: PublicKey;
+      queueDataBuffer: PublicKey;
+      crankDataBuffer: PublicKey;
+
+      readyAggregators: Array<
+        [number, AggregatorAccount, AggregatorPdaAccounts]
+      >;
+
+      nonce?: number;
+      failOpenOnMismatch?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ): Array<TransactionObject> {
+    if (params.readyAggregators.length < 6) {
+      // send as-is
+      return Array.from(Array(params.readyAggregators.length).keys()).map(
+        () => {
+          return this.popSyncV2(
+            payer,
+            {
+              ...params,
+              readyAggregators: params.readyAggregators,
+              nonce: Math.random(),
+            },
+            options
+          );
+        }
+      );
+    } else {
+      // stagger the ready accounts
+      return Array.from(Array(params.readyAggregators.length).keys()).map(n => {
+        return this.popSyncV2(
+          payer,
+          {
+            ...params,
+            readyAggregators: params.readyAggregators.slice(Math.max(0, n - 4)),
+            nonce: Math.random(),
+          },
+          options
+        );
+      });
+    }
+  }
+
   /**
    * Get an array of the next aggregator pubkeys to be popped from the crank, limited by n
    * @param num The limit of pubkeys to return.
