@@ -15,12 +15,12 @@ import {
 } from '@solana/web3.js';
 import { sleep } from '@switchboard-xyz/common';
 
+import { isBrowser } from './browser';
 import * as errors from './errors';
 import { fromTxError } from './generated';
 import {
   AnchorWallet,
   DEFAULT_SEND_TRANSACTION_OPTIONS,
-  isBrowser,
   SendTransactionOptions,
 } from './SwitchboardProgram';
 

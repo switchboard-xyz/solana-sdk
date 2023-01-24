@@ -240,9 +240,11 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     options?: TransactionObjectOptions,
     numTxns = 40
   ): Array<TransactionObject> {
-    const idx = params.vrf.builders.findIndex(builder =>
-      params.oraclePubkey.equals(builder.producer)
-    );
+    const idx =
+      params.idx ??
+      params.vrf.builders.findIndex(builder =>
+        params.oraclePubkey.equals(builder.producer)
+      );
     if (idx === -1) {
       throw new Error('OracleNotFoundError');
     }
@@ -698,6 +700,7 @@ export interface VrfSetCallbackParams {
 export interface VrfProveAndVerifyParams {
   vrf: types.VrfAccountData;
   counter?: anchor.BN;
+  idx?: number;
   proof: string;
   oraclePubkey: PublicKey;
   oracleTokenWallet: PublicKey;

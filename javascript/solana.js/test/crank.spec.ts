@@ -89,15 +89,16 @@ describe('Crank Tests', () => {
     const aggregatorAccounts: Array<AggregatorAccount> = [];
 
     // create in batches
-    for (const _ of Array.from(Array(10).keys())) {
+    for (const i of Array.from(Array(10).keys())) {
       const newAggregatorAccounts = await createFeeds(
         queueAccount,
         Math.round(CRANK_SIZE / 10),
         {
           queueAuthority,
-          minUpdateDelaySeconds: 5 + Math.floor(Math.random() * 25), // 5 - 30 sec
+          // minUpdateDelaySeconds: 5 + Math.floor(Math.random() * 25), // 5 - 30 sec
           fundAmount: QUEUE_REWARD * 10,
           funderTokenWallet: userTokenAddress,
+          slidingWindow: Boolean(i % 2),
         }
       );
       await Promise.all(

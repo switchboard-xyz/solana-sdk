@@ -5,7 +5,6 @@ export * as types from './generated';
 export * from './json';
 export * from './mint';
 export * from './SolanaClock';
-export * from './SolanaDockerOracle';
 export * from './SwitchboardError';
 export * from './SwitchboardEvents';
 export * from './SwitchboardNetwork';

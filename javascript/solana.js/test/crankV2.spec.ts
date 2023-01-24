@@ -95,7 +95,7 @@ describe('Crank V2 Tests', () => {
         Math.round(CRANK_SIZE / 10),
         {
           queueAuthority,
-          minUpdateDelaySeconds: 5 + Math.floor(Math.random() * 25), // 5 - 30 sec
+          // minUpdateDelaySeconds: 5 + Math.floor(Math.random() * 25), // 5 - 30 sec
           fundAmount: QUEUE_REWARD * 10,
           funderTokenWallet: userTokenAddress,
         }
@@ -176,7 +176,7 @@ describe('Crank V2 Tests', () => {
       await sleep((delay + 1) * 1000);
     }
 
-    const initialCrankRows = await crankAccount.loadCrank();
+    const initialCrankRows = await crankAccount.loadCrank(true);
 
     const crankAccounts = crankAccount.getCrankAccounts(
       initialCrankRows,

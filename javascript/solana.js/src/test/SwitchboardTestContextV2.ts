@@ -15,7 +15,7 @@ import {
   SwitchboardNetwork,
   SwitchboardProgram,
 } from '..';
-import { SolanaOracleConfig } from '../SolanaDockerOracle';
+import { SolanaOracleConfig } from './SolanaDockerOracle';
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;

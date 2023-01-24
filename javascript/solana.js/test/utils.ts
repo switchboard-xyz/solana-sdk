@@ -1,7 +1,3 @@
-import * as sbv2 from '../src';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
 import {
   clusterApiUrl,
   Connection,
@@ -9,7 +5,12 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
 } from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import * as sbv2 from '../src';
 import {
   AggregatorAccount,
   CreateQueueFeedParams,
@@ -18,7 +19,6 @@ import {
   SBV2_MAINNET_PID,
   TransactionObject,
 } from '../src';
-import { OracleJob } from '@switchboard-xyz/common';
 dotenv.config();
 
 type SolanaCluster = 'localnet' | 'devnet' | 'mainnet-beta';
@@ -208,10 +208,13 @@ export async function createFeeds(
         batchSize: feedConfig?.batchSize ?? 1,
         minRequiredOracleResults: feedConfig?.minRequiredOracleResults ?? 1,
         minRequiredJobResults: feedConfig?.minRequiredOracleResults ?? 1,
-        minUpdateDelaySeconds: feedConfig?.minUpdateDelaySeconds ?? 10,
+        minUpdateDelaySeconds:
+          feedConfig?.minUpdateDelaySeconds ??
+          5 + Math.floor(Math.random() * 25), // 5 - 30 sec,
         fundAmount: feedConfig?.fundAmount ?? 0,
         disableWrap: true,
         enable: feedConfig?.enable ?? true,
+        slidingWindow: feedConfig?.slidingWindow ?? false,
         jobs:
           feedConfig?.jobs && feedConfig?.jobs.length > 0
             ? feedConfig?.jobs
