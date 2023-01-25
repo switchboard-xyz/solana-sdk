@@ -289,12 +289,16 @@ export class SwitchboardProgram {
         : genesisHash === DEVNET_GENESIS_HASH
         ? 'devnet'
         : 'localnet';
-    const pid =
-      programId ?? cluster === 'mainnet-beta'
-        ? SBV2_MAINNET_PID
-        : cluster === 'devnet'
-        ? SBV2_DEVNET_PID
-        : SBV2_DEVNET_PID;
+
+    let pid = programId;
+    if (!pid) {
+      pid =
+        programId ?? cluster === 'mainnet-beta'
+          ? SBV2_MAINNET_PID
+          : cluster === 'devnet'
+          ? SBV2_DEVNET_PID
+          : SBV2_DEVNET_PID;
+    }
 
     const programAccountInfo = await connection.getAccountInfo(pid);
     if (programAccountInfo === null) {

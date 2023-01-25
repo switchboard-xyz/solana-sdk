@@ -16,7 +16,13 @@ export class SolanaDockerOracle extends DockerOracle {
     readonly silent = false
   ) {
     super(
-      { ...config, chain: 'solana' },
+      {
+        ...config,
+        chain: 'solana',
+        envVariables: {
+          DISABLE_NONCE_QUEUE: 'true',
+        },
+      },
       nodeImage,
       switchboardDirectory,
       silent
