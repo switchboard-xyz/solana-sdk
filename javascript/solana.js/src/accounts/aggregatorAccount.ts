@@ -416,8 +416,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       // dont check if new accounts have been created yet
       force?: boolean;
     }
-  ): Promise<[TransactionObject, PermissionAccount]> {
+  ): Promise<[TransactionObject | undefined, PermissionAccount]> {
     const newQueue = await params.newQueue.loadData();
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      newQueue.authority,
+      params.newQueue.publicKey,
+      this.publicKey
+    );
+
+    if (!params.enable) {
+      return [undefined, permissionAccount];
+    }
+
     if (
       params.queueAuthority &&
       !params.queueAuthority.publicKey.equals(newQueue.authority)
@@ -428,12 +439,6 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       );
     }
 
-    const [permissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      newQueue.authority,
-      params.newQueue.publicKey,
-      this.publicKey
-    );
     if (!params.force) {
       await permissionAccount.loadData().catch(() => {
         throw new Error(`Expected permissionAccount to be created already`);
@@ -460,11 +465,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     queueAuthority?: Keypair;
     // dont check if new accounts have been created yet
     force?: boolean;
-  }): Promise<[PermissionAccount, TransactionSignature]> {
+  }): Promise<[PermissionAccount, TransactionSignature | undefined]> {
     const [txn, permissionAccount] = await this.transferQueuePart2Instructions(
       this.program.walletPubkey,
       params
     );
+    if (!txn) {
+      return [permissionAccount, undefined];
+    }
     const signature = await this.program.signAndSend(txn);
     return [permissionAccount, signature];
   }
@@ -550,8 +558,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       if (!newCrank.queuePubkey.equals(params.newQueue.publicKey)) {
         throw new Error(`Crank is owned by the wrong queue`);
       }
-      const crankPush = await params.newCrank.pushInstruction(payer, {
+      const crankPush = params.newCrank.pushInstructionSync(payer, {
         aggregatorAccount: this,
+        queue: newQueue,
+        crank: newCrank,
       });
       txns.push(crankPush);
     }
@@ -609,8 +619,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       newCrank?: CrankAccount;
       enable: boolean;
       queueAuthority?: Keypair;
-    } & LeaseExtendParams
+    } & LeaseExtendParams,
+    opts?: TransactionObjectOptions
   ): Promise<[Array<TransactionObject>, PermissionAccount, LeaseAccount]> {
+    const txns: Array<TransactionObject> = [];
+
     const [part1, permissionAccount, leaseAccount] =
       await this.transferQueuePart1Instructions(payer, {
         newQueue: params.newQueue,
@@ -618,21 +631,27 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         funderTokenWallet: params.funderTokenWallet,
         funderAuthority: params.funderAuthority,
       });
+    txns.push(part1);
+
     const [part2] = await this.transferQueuePart2Instructions(payer, {
       newQueue: params.newQueue,
       enable: params.enable,
       queueAuthority: params.queueAuthority,
       force: true,
     });
+    if (part2) {
+      txns.push(part2);
+    }
     const part3 = await this.transferQueuePart3Instructions(payer, {
       newQueue: params.newQueue,
       authority: params.authority,
       newCrank: params.newCrank,
       force: true,
     });
+    txns.push(...part3);
 
     return [
-      TransactionObject.pack([part1, part2, ...part3]),
+      TransactionObject.pack(txns, opts),
       permissionAccount,
       leaseAccount,
     ];

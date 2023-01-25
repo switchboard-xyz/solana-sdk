@@ -206,6 +206,49 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     );
   }
 
+  pushInstructionSync(
+    payer: PublicKey,
+    params: CrankPushSyncParams
+  ): TransactionObject {
+    const queueAccount = new QueueAccount(
+      this.program,
+      params.crank.queuePubkey
+    );
+    const { permissionAccount, permissionBump, leaseAccount, leaseEscrow } =
+      params.aggregatorAccount.getAccounts(
+        queueAccount,
+        params.queue.authority
+      );
+
+    return new TransactionObject(
+      payer,
+      [
+        types.crankPush(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              permissionBump: permissionBump,
+              notifiRef: null,
+            },
+          },
+          {
+            crank: this.publicKey,
+            aggregator: params.aggregatorAccount.publicKey,
+            oracleQueue: queueAccount.publicKey,
+            queueAuthority: params.queue.authority,
+            permission: permissionAccount.publicKey,
+            lease: leaseAccount.publicKey,
+            escrow: leaseEscrow,
+            programState: this.program.programState.publicKey,
+            dataBuffer: this.dataBuffer?.publicKey ?? params.crank.dataBuffer,
+          }
+        ),
+      ],
+      []
+    );
+  }
+
   /**
    * Pushes a new aggregator onto the crank.
    * @param params The crank push parameters.
@@ -943,6 +986,24 @@ export interface CrankPushParams {
    * Specifies the aggregator to push onto the crank.
    */
   aggregatorAccount: AggregatorAccount;
+
+  crank?: types.CrankAccountData;
+
+  queue?: types.OracleQueueAccountData;
+
+  queueAuthority?: PublicKey;
+}
+
+/**
+ * Parameters for pushing an element into a CrankAccount.
+ */
+export interface CrankPushSyncParams {
+  /**
+   * Specifies the aggregator to push onto the crank.
+   */
+  aggregatorAccount: AggregatorAccount;
+  crank: types.CrankAccountData;
+  queue: types.OracleQueueAccountData;
 }
 
 /**

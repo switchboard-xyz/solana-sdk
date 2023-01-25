@@ -495,7 +495,7 @@ export class TransactionObject implements ITransactionObject {
     _txns: Array<TransactionObject>,
     options?: TransactionPackOptions
   ): Array<TransactionObject> {
-    const txns = [..._txns];
+    const txns = [..._txns.filter(Boolean)];
     if (txns.length === 0) {
       throw new Error(`No transactions to pack`);
     }
