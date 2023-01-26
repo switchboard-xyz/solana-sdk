@@ -1,16 +1,18 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
 import assert from 'assert';
+import 'mocha';
 
-import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
 import {
   AggregatorAccount,
   CrankAccount,
+  PermissionAccount,
   QueueAccount,
   SwitchboardNetwork,
+  types,
 } from '../src';
-import { OracleJob } from '@switchboard-xyz/common';
+import { setupTest, TestContext } from './utils';
 
 describe('Transfer Tests', () => {
   let ctx: TestContext;
@@ -257,6 +259,75 @@ describe('Transfer Tests', () => {
     assert(
       accounts.lease.balance === 1,
       `Incorrect lease balance, expected 1.0, received ${accounts.lease.balance}`
+    );
+    assert(
+      accounts.permission.data.permissions === 2,
+      `Incorrect permissions, expected PermitOracleQueueUsage (2), received ${accounts.permission.data.permissions}`
+    );
+  });
+
+  it('Transfers the aggregator to a new queue and crank with an existing permission account', async () => {
+    const myAggregatorAuthority = Keypair.generate();
+    const [myAggregatorAccount] = await origQueueAccount.createFeed({
+      name: 'Aggregator-2',
+      authority: myAggregatorAuthority,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 10,
+      crankPubkey: origCrankAccount.publicKey,
+      fundAmount: 0.65,
+      enable: true,
+      queueAuthority: origQueueAuthority,
+      jobs: [
+        {
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: 1,
+                  },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const [newPermissionAccount] = await PermissionAccount.create(ctx.program, {
+      granter: newQueueAccount.publicKey,
+      grantee: myAggregatorAccount.publicKey,
+      authority: newQueueAuthority.publicKey,
+    });
+    await newPermissionAccount.set({
+      permission: new types.SwitchboardPermission.PermitOracleQueueUsage(),
+      enable: true,
+      queueAuthority: newQueueAuthority,
+    });
+
+    await myAggregatorAccount.transferQueue({
+      newQueue: newQueueAccount,
+      newCrank: newCrankAccount,
+      authority: myAggregatorAuthority,
+      enable: false,
+      fundAmount: 0,
+    });
+
+    const accounts = await myAggregatorAccount.fetchAccounts();
+
+    assert(
+      accounts.aggregator.data.queuePubkey.equals(newQueueAccount.publicKey),
+      `Incorrect queue, expected ${origQueueAccount.publicKey}, received ${accounts.aggregator.data.queuePubkey}`
+    );
+    assert(
+      accounts.aggregator.data.crankPubkey.equals(newCrankAccount.publicKey),
+      `Incorrect crank, expected ${origCrankAccount.publicKey}, received ${accounts.aggregator.data.crankPubkey}`
+    );
+    assert(
+      accounts.lease.balance === 0.65,
+      `Incorrect lease balance, expected 0.65, received ${accounts.lease.balance}`
     );
     assert(
       accounts.permission.data.permissions === 2,
