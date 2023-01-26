@@ -269,8 +269,8 @@ export class SwitchboardTestContextV2 {
       dockerParams
     );
     this.dockerOracle = new DockerOracle(
-      { ...config, chain: 'solana' },
       nodeImage,
+      { ...config, chain: 'solana' },
       undefined,
       silent
     );
