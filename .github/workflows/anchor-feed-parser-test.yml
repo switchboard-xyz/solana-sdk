@@ -86,7 +86,7 @@ jobs:
         run: cargo build
 
       - name: Build AnchorFeedParser
-        working-directory: rust/switchboard-v2
+        working-directory: programs/anchor-feed-parser
         run: anchor build
 
       - name: Start Local Validator
