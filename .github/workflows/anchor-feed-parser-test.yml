@@ -74,7 +74,7 @@ jobs:
         run: npm ci
 
       - name: Setup Anchor
-        uses: .github/actions/setup-anchor
+        uses: ./.github/actions/setup-anchor
         with:
           solana-version: v1.14.10
           anchor-version: v0.26.0
