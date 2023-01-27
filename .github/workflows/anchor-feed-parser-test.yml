@@ -73,19 +73,28 @@ jobs:
         working-directory: programs/anchor-feed-parser
         run: npm ci
 
-      - name: Start Local Validator
-        uses: switchboard-xyz/solana-local-validator@v0.1
+      - name: Setup Anchor
+        uses: .github/actions/setup-anchor
         with:
           solana-version: v1.14.10
           anchor-version: v0.26.0
           cluster: devnet
-          args:
-            "--url https://api.devnet.solana.com  --clone
-            2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone
-            J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone
-            CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp --clone
-            BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt --clone
-            FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy"
+
+      # TODO: Cache rust SDK and anchor build commands
+      - name: Build Rust SDK
+        working-directory: rust/switchboard-v2
+        run: cargo build
+
+      - name: Build AnchorFeedParser
+        working-directory: rust/switchboard-v2
+        run: anchor build
+
+      - name: Start Local Validator
+        shell: bash
+        run: |
+          solana-test-validator ${{ env.SOLANA_QUIET_FLAG }} -r --bind-address 0.0.0.0 --rpc-port 8899 ${{ env.SOLANA_FEATURES }} --url https://api.devnet.solana.com --clone 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp --clone BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt --clone FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy --bpf-program Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb programs/anchor-feed-parser/target/deploy/anchor_feed_parser.so &
+          for attempt in {1..30}; do sleep 1; if curl -sS http://localhost:8899 -X POST -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1, "method":"getBlockHeight"}'; then echo ready; break; fi; echo waiting...; done
+
       - name: Run Tests
         working-directory: programs/anchor-feed-parser
-        run: anchor test --skip-local-validator
+        run: anchor test --skip-local-validator --skip-build --skip-deploy
