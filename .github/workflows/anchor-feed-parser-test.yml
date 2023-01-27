@@ -77,7 +77,7 @@ jobs:
         uses: switchboard-xyz/solana-local-validator@v0.1
         with:
           solana-version: v1.14.10
-          anchor-version: 0.26.0
+          anchor-version: v0.26.0
           cluster: devnet
           args:
             "--url https://api.devnet.solana.com  --clone
