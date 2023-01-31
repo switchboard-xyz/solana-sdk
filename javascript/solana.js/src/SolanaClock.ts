@@ -1,5 +1,5 @@
-import * as anchor from '@project-serum/anchor';
-import * as borsh from '@project-serum/borsh';
+import * as anchor from '@coral-xyz/anchor';
+import * as borsh from '@coral-xyz/borsh';
 import { Connection, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 
 export interface SolanaClockDataFields {

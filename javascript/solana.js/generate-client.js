@@ -86,7 +86,7 @@ async function main() {
     ...getAllFiles('./src/generated/accounts'),
     ...getAllFiles('./src/generated/errors'),
     ...getAllFiles('./src/generated/instructions'),
-    // ...getAllFiles('./src/generated/types'),
+    ...getAllFiles('./src/generated/types'),
   ]) {
     if (file.includes('index.ts')) {
       continue;
@@ -102,6 +102,8 @@ async function main() {
     execSync(
       `sed -i '' 's/import BN from \\"bn.js\\"/import { BN } from \\"@switchboard-xyz\\/common\\"/g' ${file}`
     );
+    // replace borsh import
+    execSync(`sed -i '' 's/@project-serum/@coral-xyz/g' ${file}`);
     // remove PROGRAM_ID import, we will use SwitchboardProgram instead
     execSync(
       `sed -i '' 's/import { PROGRAM_ID } from "..\\/programId"/ /g' ${file}`

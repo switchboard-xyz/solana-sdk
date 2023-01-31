@@ -1,4 +1,4 @@
-import * as anchor from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 
 export abstract class Account<T> {

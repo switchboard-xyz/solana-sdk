@@ -1,7 +1,7 @@
 /**
  * Returns true if being run inside a web browser, false if in a Node process or electron app.
  *
- * Taken from @project-serum/anchor implementation.
+ * Taken from @coral-xyz/anchor implementation.
  */
 export const isBrowser =
   process.env.ANCHOR_BROWSER ||

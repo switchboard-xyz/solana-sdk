@@ -8,53 +8,47 @@ import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript
 import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface VrfPoolInitArgs {
-  params: types.VrfPoolInitParamsFields;
+export interface VrfLiteCloseActionArgs {
+  params: types.VrfLiteCloseParamsFields;
 }
 
-export interface VrfPoolInitAccounts {
-  vrfPool: PublicKey;
+export interface VrfLiteCloseActionAccounts {
+  vrfLite: PublicKey;
+  permission: PublicKey;
   authority: PublicKey;
   queue: PublicKey;
-  mint: PublicKey;
-  escrow: PublicKey;
+  queueAuthority: PublicKey;
   programState: PublicKey;
-  payer: PublicKey;
+  escrow: PublicKey;
+  solDest: PublicKey;
+  escrowDest: PublicKey;
   tokenProgram: PublicKey;
-  associatedTokenProgram: PublicKey;
-  systemProgram: PublicKey;
-  rent: PublicKey;
 }
 
-export const layout = borsh.struct([types.VrfPoolInitParams.layout('params')]);
+export const layout = borsh.struct([types.VrfLiteCloseParams.layout('params')]);
 
-export function vrfPoolInit(
+export function vrfLiteCloseAction(
   program: SwitchboardProgram,
-  args: VrfPoolInitArgs,
-  accounts: VrfPoolInitAccounts
+  args: VrfLiteCloseActionArgs,
+  accounts: VrfLiteCloseActionAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.vrfPool, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.vrfLite, isSigner: false, isWritable: true },
+    { pubkey: accounts.permission, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.queue, isSigner: false, isWritable: false },
-    { pubkey: accounts.mint, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
     { pubkey: accounts.programState, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
+    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.solDest, isSigner: false, isWritable: false },
+    { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
-    {
-      pubkey: accounts.associatedTokenProgram,
-      isSigner: false,
-      isWritable: false,
-    },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
-    { pubkey: accounts.rent, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([213, 10, 27, 81, 131, 152, 33, 195]);
+  const identifier = Buffer.from([200, 82, 160, 32, 59, 80, 50, 137]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.VrfPoolInitParams.toEncodable(args.params),
+      params: types.VrfLiteCloseParams.toEncodable(args.params),
     },
     buffer
   );

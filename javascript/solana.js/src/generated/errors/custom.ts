@@ -95,7 +95,10 @@ export type CustomError =
   | VrfPoolFull
   | VrfPoolEmpty
   | VrfAccountNotFound
-  | AccountCloseNotReady;
+  | AccountCloseNotReady
+  | VrfPoolRequestTooSoon
+  | VrfPoolMiss
+  | VrfLiteOwnedByPool;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1187,6 +1190,39 @@ export class AccountCloseNotReady extends Error {
   }
 }
 
+export class VrfPoolRequestTooSoon extends Error {
+  static readonly code = 6096;
+  readonly code = 6096;
+  readonly name = 'VrfPoolRequestTooSoon';
+  readonly msg = 'VRF requested too soon.';
+
+  constructor(readonly logs?: string[]) {
+    super('6096: VRF requested too soon.');
+  }
+}
+
+export class VrfPoolMiss extends Error {
+  static readonly code = 6097;
+  readonly code = 6097;
+  readonly name = 'VrfPoolMiss';
+  readonly msg = 'VRF pool miss.';
+
+  constructor(readonly logs?: string[]) {
+    super('6097: VRF pool miss.');
+  }
+}
+
+export class VrfLiteOwnedByPool extends Error {
+  static readonly code = 6098;
+  readonly code = 6098;
+  readonly name = 'VrfLiteOwnedByPool';
+  readonly msg = 'VRF lite belongs to a pool.';
+
+  constructor(readonly logs?: string[]) {
+    super('6098: VRF lite belongs to a pool.');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1381,6 +1417,12 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new VrfAccountNotFound(logs);
     case 6095:
       return new AccountCloseNotReady(logs);
+    case 6096:
+      return new VrfPoolRequestTooSoon(logs);
+    case 6097:
+      return new VrfPoolMiss(logs);
+    case 6098:
+      return new VrfLiteOwnedByPool(logs);
   }
 
   return null;

@@ -1,4 +1,4 @@
-import { AnchorProvider } from '@project-serum/anchor';
+import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { DockerOracle } from '@switchboard-xyz/common';
 import fs from 'fs';
