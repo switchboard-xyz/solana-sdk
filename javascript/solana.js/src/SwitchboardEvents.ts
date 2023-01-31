@@ -1,4 +1,4 @@
-import * as anchor from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
 import * as types from './generated';
 
 export type AggregatorAddJobEvent = {
@@ -190,6 +190,23 @@ export type VrfVerifyEvent = {
   amount: anchor.BN;
 };
 
+export type VrfPoolUpdateEvent = {
+  queuePubkey: anchor.web3.PublicKey;
+  vrfPoolPubkey: anchor.web3.PublicKey;
+  vrfPubkey: anchor.web3.PublicKey;
+  newSize: number;
+  minInterval: number;
+};
+
+export type VrfPoolRequestEvent = {
+  queuePubkey: anchor.web3.PublicKey;
+  vrfPoolPubkey: anchor.web3.PublicKey;
+  vrfPubkey: anchor.web3.PublicKey;
+  oraclePubkey: anchor.web3.PublicKey;
+  slot: anchor.BN;
+  timestamp: anchor.BN;
+};
+
 export type SwitchboardEvents = {
   AggregatorAddJobEvent: AggregatorAddJobEvent;
   AggregatorCrankEvictionEvent: AggregatorCrankEvictionEvent;
@@ -230,4 +247,7 @@ export type SwitchboardEvents = {
   VrfRequestEvent: VrfRequestEvent;
   VrfRequestRandomnessEvent: VrfRequestRandomnessEvent;
   VrfVerifyEvent: VrfVerifyEvent;
+
+  VrfPoolUpdateEvent: VrfPoolUpdateEvent;
+  VrfPoolRequestEvent: VrfPoolRequestEvent;
 };

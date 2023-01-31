@@ -1,5 +1,5 @@
+import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
-import * as anchor from '@project-serum/anchor';
 import {
   Keypair,
   PublicKey,
@@ -7,10 +7,9 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+import { Big, BN } from '@switchboard-xyz/common';
 import { InsufficientFundsError, NativeMintOnlyError } from './errors';
 import { SwitchboardDecimal } from './generated';
-import { Big } from '@switchboard-xyz/common';
-import { BN } from '@switchboard-xyz/common';
 import { TransactionObject } from './TransactionObject';
 
 export class Mint {

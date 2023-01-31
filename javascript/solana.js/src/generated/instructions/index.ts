@@ -133,6 +133,11 @@ export { vaultTransfer } from './vaultTransfer';
 export type { VaultTransferArgs, VaultTransferAccounts } from './vaultTransfer';
 export { vrfInit } from './vrfInit';
 export type { VrfInitArgs, VrfInitAccounts } from './vrfInit';
+export { vrfLiteCloseAction } from './vrfLiteCloseAction';
+export type {
+  VrfLiteCloseActionArgs,
+  VrfLiteCloseActionAccounts,
+} from './vrfLiteCloseAction';
 export { vrfLiteInit } from './vrfLiteInit';
 export type { VrfLiteInitArgs, VrfLiteInitAccounts } from './vrfLiteInit';
 export { vrfLiteProveAndVerify } from './vrfLiteProveAndVerify';

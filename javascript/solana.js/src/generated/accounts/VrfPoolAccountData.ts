@@ -1,73 +1,73 @@
 import { SwitchboardProgram } from '../../SwitchboardProgram';
 import { PublicKey, Connection } from '@solana/web3.js';
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface VrfPoolAccountDataFields {
-  stateBump: number;
-  minInterval: number;
   /** ACCOUNTS */
   authority: PublicKey;
   queue: PublicKey;
   escrow: PublicKey;
+  minInterval: number;
   maxRows: number;
   size: number;
   idx: number;
-  pool: Array<types.VrfPoolRowFields>;
+  stateBump: number;
+  ebuf: Array<number>;
 }
 
 export interface VrfPoolAccountDataJSON {
-  stateBump: number;
-  minInterval: number;
   /** ACCOUNTS */
   authority: string;
   queue: string;
   escrow: string;
+  minInterval: number;
   maxRows: number;
   size: number;
   idx: number;
-  pool: Array<types.VrfPoolRowJSON>;
+  stateBump: number;
+  ebuf: Array<number>;
 }
 
 export class VrfPoolAccountData {
-  readonly stateBump: number;
-  readonly minInterval: number;
   /** ACCOUNTS */
   readonly authority: PublicKey;
   readonly queue: PublicKey;
   readonly escrow: PublicKey;
+  readonly minInterval: number;
   readonly maxRows: number;
   readonly size: number;
   readonly idx: number;
-  readonly pool: Array<types.VrfPoolRow>;
+  readonly stateBump: number;
+  readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
     86, 67, 58, 9, 46, 21, 101, 248,
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.u8('stateBump'),
-    borsh.u32('minInterval'),
     borsh.publicKey('authority'),
     borsh.publicKey('queue'),
     borsh.publicKey('escrow'),
+    borsh.u32('minInterval'),
     borsh.u32('maxRows'),
     borsh.u32('size'),
     borsh.u32('idx'),
-    borsh.vec(types.VrfPoolRow.layout(), 'pool'),
+    borsh.u8('stateBump'),
+    borsh.array(borsh.u8(), 135, 'ebuf'),
   ]);
 
   constructor(fields: VrfPoolAccountDataFields) {
-    this.stateBump = fields.stateBump;
-    this.minInterval = fields.minInterval;
     this.authority = fields.authority;
     this.queue = fields.queue;
     this.escrow = fields.escrow;
+    this.minInterval = fields.minInterval;
     this.maxRows = fields.maxRows;
     this.size = fields.size;
     this.idx = fields.idx;
-    this.pool = fields.pool.map(item => new types.VrfPoolRow({ ...item }));
+    this.stateBump = fields.stateBump;
+    this.ebuf = fields.ebuf;
   }
 
   static async fetch(
@@ -112,47 +112,43 @@ export class VrfPoolAccountData {
     const dec = VrfPoolAccountData.layout.decode(data.slice(8));
 
     return new VrfPoolAccountData({
-      stateBump: dec.stateBump,
-      minInterval: dec.minInterval,
       authority: dec.authority,
       queue: dec.queue,
       escrow: dec.escrow,
+      minInterval: dec.minInterval,
       maxRows: dec.maxRows,
       size: dec.size,
       idx: dec.idx,
-      pool: dec.pool.map(
-        (
-          item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */
-        ) => types.VrfPoolRow.fromDecoded(item)
-      ),
+      stateBump: dec.stateBump,
+      ebuf: dec.ebuf,
     });
   }
 
   toJSON(): VrfPoolAccountDataJSON {
     return {
-      stateBump: this.stateBump,
-      minInterval: this.minInterval,
       authority: this.authority.toString(),
       queue: this.queue.toString(),
       escrow: this.escrow.toString(),
+      minInterval: this.minInterval,
       maxRows: this.maxRows,
       size: this.size,
       idx: this.idx,
-      pool: this.pool.map(item => item.toJSON()),
+      stateBump: this.stateBump,
+      ebuf: this.ebuf,
     };
   }
 
   static fromJSON(obj: VrfPoolAccountDataJSON): VrfPoolAccountData {
     return new VrfPoolAccountData({
-      stateBump: obj.stateBump,
-      minInterval: obj.minInterval,
       authority: new PublicKey(obj.authority),
       queue: new PublicKey(obj.queue),
       escrow: new PublicKey(obj.escrow),
+      minInterval: obj.minInterval,
       maxRows: obj.maxRows,
       size: obj.size,
       idx: obj.idx,
-      pool: obj.pool.map(item => types.VrfPoolRow.fromJSON(item)),
+      stateBump: obj.stateBump,
+      ebuf: obj.ebuf,
     });
   }
 }

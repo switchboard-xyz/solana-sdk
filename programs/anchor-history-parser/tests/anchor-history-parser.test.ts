@@ -1,6 +1,6 @@
 /** This test will only work on devnet because we need a populated history to read */
-import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
+import { Program } from "@coral-xyz/anchor";
 import { OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,

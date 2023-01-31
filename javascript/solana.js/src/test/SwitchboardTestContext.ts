@@ -1,4 +1,4 @@
-import * as anchor from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
 import * as dotenv from 'dotenv';

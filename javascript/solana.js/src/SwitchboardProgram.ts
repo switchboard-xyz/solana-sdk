@@ -1,5 +1,5 @@
-import * as anchor from '@project-serum/anchor';
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@project-serum/anchor';
+import * as anchor from '@coral-xyz/anchor';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
 import {
   AccountInfo,
   Cluster,
@@ -230,7 +230,7 @@ export class SwitchboardProgram {
    * Basic usage example:
    *
    * ```ts
-   * import * as anchor from "@project-serum/anchor";
+   * import * as anchor from "@coral-xyz/anchor";
    * import { Connection } from "@solana/web3.js";
    * import { AnchorWallet, SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
    *
@@ -269,7 +269,7 @@ export class SwitchboardProgram {
    * Basic usage example:
    *
    * ```ts
-   * import * as anchor from "@project-serum/anchor";
+   * import * as anchor from "@coral-xyz/anchor";
    * import { Connection } from "@solana/web3.js";
    * import { AnchorWallet, SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
    *

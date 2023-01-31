@@ -5,6 +5,7 @@ import {
 } from '@solana/spl-token';
 import {
   AccountMeta,
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -12,14 +13,16 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionSignature,
 } from '@solana/web3.js';
+import { promiseWithTimeout } from '@switchboard-xyz/common';
 import _ from 'lodash';
-import * as errors from '../errors';
+import { AccountNotFoundError } from '../errors';
 import * as types from '../generated';
+import { VrfPoolRequestEvent } from '../SwitchboardEvents';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
-import { Account } from './account';
+import { Account, OnAccountChangeCallback } from './account';
 import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
+import { CreateVrfLiteParams, QueueAccount } from './queueAccount';
 import { Callback } from './vrfAccount';
 import { VrfLiteAccount } from './vrfLiteAccount';
 
@@ -28,9 +31,15 @@ import { VrfLiteAccount } from './vrfLiteAccount';
 //   pubkey: PublicKey;
 // };
 
+export type VrfPoolPushNewParams = CreateVrfLiteParams &
+  Omit<VrfPoolPushParams, 'vrf'> & {
+    queueAccount?: QueueAccount;
+    vrfPool?: types.VrfPoolAccountData;
+  };
+
 export interface VrfPoolInitParams {
   maxRows: number;
-  minInterval: number;
+  minInterval?: number;
   authority?: PublicKey;
   keypair?: Keypair;
 }
@@ -56,41 +65,73 @@ export type VrfPoolDepositParams = {
   amount: number;
 };
 
-// export type VrfPoolAccountData = types.VrfPoolAccountData & {
-//   pool: Array<VrfPoolRow>;
-// };
+export type VrfPoolAccountData = types.VrfPoolAccountData & {
+  pool: Array<types.VrfPoolRow>;
+};
 
-export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
+export class VrfPoolAccount extends Account<VrfPoolAccountData> {
   public size = this.program.account.vrfPoolAccountData.size;
 
-  public async loadData(): Promise<types.VrfPoolAccountData> {
-    const data = await types.VrfPoolAccountData.fetch(
-      this.program,
-      this.publicKey
+  /**
+   * Invoke a callback each time a VrfAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the vrf state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
+  onChange(
+    callback: OnAccountChangeCallback<VrfPoolAccountData>,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    return this.program.connection.onAccountChange(
+      this.publicKey,
+      accountInfo => callback(VrfPoolAccount.decode(accountInfo.data)),
+      commitment
     );
-    if (data === null)
-      throw new errors.AccountNotFoundError('VrfPool', this.publicKey);
-    return data;
-    // const info = await this.program.connection.getAccountInfo(this.publicKey);
-    // if (info === null) {
-    //   throw new AccountNotFoundError("VrfPool", this.publicKey);
-    // }
-    // if (!info.owner.equals(this.program.programId)) {
-    //   throw new Error("account doesn't belong to this program");
-    // }
-    // const data = types.VrfPoolAccountData.decode(info.data);
-    // const remainingData = info.data.slice(125);
-    // const pool: Array<VrfPoolRow> = [];
-    // for (let i = 0; i <= remainingData.byteLength; i += 40) {
-    //   const timestamp = new BN(remainingData.slice(i, i + 8));
-    //   const pubkey = new PublicKey(remainingData.slice(i + 8, i + 40));
-    //   pool.push({ timestamp: timestamp.toNumber(), pubkey });
-    // }
-    // return { ...data, pool };
+  }
+
+  public static decode(data: Buffer): VrfPoolAccountData {
+    const accountData = types.VrfPoolAccountData.decode(
+      data.slice(0, 8 + types.VrfPoolAccountData.layout.span)
+    );
+
+    const poolBytes = data.slice(8 + types.VrfPoolAccountData.layout.span);
+    const ROW_SIZE = types.VrfPoolRow.layout().span;
+    const pool: Array<types.VrfPoolRow> = [];
+    for (let i = 0; i < poolBytes.length; i += ROW_SIZE) {
+      if (i + ROW_SIZE > poolBytes.length) {
+        break;
+      }
+
+      const row = types.VrfPoolRow.fromDecoded(
+        types.VrfPoolRow.layout().decode(poolBytes, i)
+      );
+      if (row.pubkey.equals(PublicKey.default)) {
+        break;
+      }
+
+      pool.push(row);
+    }
+
+    accountData['pool'] = pool;
+
+    return accountData as VrfPoolAccountData;
+  }
+
+  public async loadData(): Promise<VrfPoolAccountData> {
+    const info = await this.program.connection.getAccountInfo(this.publicKey);
+
+    if (info === null) {
+      throw new AccountNotFoundError('VrfPool', this.publicKey);
+    }
+    if (!info.owner.equals(this.program.programId)) {
+      throw new Error("account doesn't belong to this program");
+    }
+
+    return VrfPoolAccount.decode(info.data);
   }
 
   public static getSize(program: SwitchboardProgram, maxRows: number) {
-    return program.account.vrfPoolAccountData.size + 4 + maxRows * 40;
+    return 8 + types.VrfPoolAccountData.layout.span + maxRows * 40;
   }
 
   public static async createInstruction(
@@ -99,7 +140,7 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     params: VrfPoolInitParams & { queueAccount: QueueAccount }
   ): Promise<[VrfPoolAccount, TransactionObject]> {
     const vrfPoolKeypair = params.keypair ?? Keypair.generate();
-    const size = VrfPoolAccount.getSize(program, params.maxRows);
+    const space = VrfPoolAccount.getSize(program, params.maxRows);
 
     const vrfPoolAccount = new VrfPoolAccount(
       program,
@@ -113,12 +154,21 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     const vrfPoolInitTxn = new TransactionObject(
       payer,
       [
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: vrfPoolKeypair.publicKey,
+          lamports: await program.connection.getMinimumBalanceForRentExemption(
+            space
+          ),
+          space: space,
+          programId: program.programId,
+        }),
         types.vrfPoolInit(
           program,
           {
             params: {
               maxRows: params.maxRows,
-              minInterval: params.minInterval,
+              minInterval: params.minInterval ?? 0,
               stateBump: program.programState.bump,
             },
           },
@@ -158,6 +208,45 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     return [account, txnSignature];
   }
 
+  public async pushNewInstruction(
+    payer: PublicKey,
+    params?: VrfPoolPushNewParams
+  ): Promise<[VrfLiteAccount, TransactionObject]> {
+    const vrfPool = params?.vrfPool ?? (await this.loadData());
+    const queueAccount =
+      params?.queueAccount ?? new QueueAccount(this.program, vrfPool.queue);
+
+    const [vrfLiteAccount, vrfLiteInit] =
+      await queueAccount.createVrfLiteInstructions(payer, {
+        ...params,
+        authority: vrfPool.authority,
+      });
+    const pushTxn = await this.pushInstruction(payer, {
+      ...params,
+      vrf: vrfLiteAccount,
+    });
+
+    const packed = TransactionObject.pack([vrfLiteInit, pushTxn]);
+    if (packed.length > 1) {
+      throw new Error(`Packing error`);
+    }
+
+    return [vrfLiteAccount, packed[0]];
+  }
+
+  public async pushNew(
+    params?: VrfPoolPushNewParams
+  ): Promise<[VrfLiteAccount, TransactionSignature]> {
+    const [vrfLiteAccount, transaction] = await this.pushNewInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(transaction, {
+      skipPreflight: true,
+    });
+    return [vrfLiteAccount, txnSignature];
+  }
+
   public async pushInstruction(
     payer: PublicKey,
     params: VrfPoolPushParams
@@ -174,7 +263,6 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
       queueAccount.publicKey,
       params.vrf.publicKey
     );
-    const permission = await permissionAccount.loadData();
 
     // verify permissions
 
@@ -260,6 +348,7 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     payer: PublicKey,
     params?: VrfPoolRequestParams
   ): Promise<TransactionObject> {
+    const REQUEST_ACCOUNT_SIZE = 7;
     const vrfPool = await this.loadData();
 
     const [queueAccount, queue] = await QueueAccount.load(
@@ -269,8 +358,14 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
 
     const permissionBumpsMap: Map<string, number> = new Map();
 
-    const vrfRows = vrfPool.pool.slice(vrfPool.idx, vrfPool.idx + 1); // TODO: handle round-robin
-    const vrfs = vrfRows.map((row): Array<AccountMeta> => {
+    const vrfRows = [
+      ...vrfPool.pool.slice(vrfPool.idx),
+      ...vrfPool.pool.slice(0, vrfPool.idx),
+    ];
+
+    const slice = vrfRows.slice(0, REQUEST_ACCOUNT_SIZE);
+
+    const vrfs = slice.map((row): Array<AccountMeta> => {
       const escrow = this.program.mint.getAssociatedAddress(row.pubkey);
       const [permission, bump] = PermissionAccount.fromSeed(
         this.program,
@@ -331,11 +426,18 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     );
     requestIxn.keys = requestIxn.keys.concat(remainingAccounts);
 
-    return new TransactionObject(
-      payer,
-      [requestIxn],
-      params?.authority ? [params.authority] : []
-    );
+    const [wrapAccount, wrapTxn] =
+      await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+        fundUpTo: 0.002,
+      });
+
+    return wrapTxn
+      ? wrapTxn.add(requestIxn, params?.authority ? [params.authority] : [])
+      : new TransactionObject(
+          payer,
+          [requestIxn],
+          params?.authority ? [params.authority] : []
+        );
   }
 
   public async request(
@@ -350,6 +452,97 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     });
     return txnSignature;
   }
+
+  // public requestSync(
+  //   payer: PublicKey,
+  //   params: {
+  //     payoutTokenWallet: PublicKey;
+
+  //     queuePubkey: PublicKey;
+  //     queueAuthority: PublicKey;
+  //     queueDataBuffer: PublicKey;
+  //     crankDataBuffer: PublicKey;
+
+  //     readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]>;
+
+  //     nonce?: number;
+  //     failOpenOnMismatch?: boolean;
+  //     popIdx?: number;
+  //   },
+  //   options?: TransactionObjectOptions
+  // ): TransactionObject {
+  //   if (params.readyAggregators.length < 1) {
+  //     throw new Error(`No aggregators ready`);
+  //   }
+
+  //   let remainingAccounts: PublicKey[] = [];
+  //   let txn: TransactionObject | undefined = undefined;
+
+  //   const allLeaseBumps = params.readyAggregators.reduce(
+  //     (map, [aggregatorAccount, pdaAccounts]) => {
+  //       map.set(aggregatorAccount.publicKey.toBase58(), pdaAccounts.leaseBump);
+  //       return map;
+  //     },
+  //     new Map<string, number>()
+  //   );
+  //   const allPermissionBumps = params.readyAggregators.reduce(
+  //     (map, [aggregatorAccount, pdaAccounts]) => {
+  //       map.set(
+  //         aggregatorAccount.publicKey.toBase58(),
+  //         pdaAccounts.permissionBump
+  //       );
+  //       return map;
+  //     },
+  //     new Map<string, number>()
+  //   );
+
+  //   // add as many readyAggregators until the txn overflows
+  //   for (const [
+  //     readyAggregator,
+  //     aggregatorPdaAccounts,
+  //   ] of params.readyAggregators) {
+  //     const { leaseAccount, leaseEscrow, permissionAccount } =
+  //       aggregatorPdaAccounts;
+
+  //     const newRemainingAccounts = [
+  //       ...remainingAccounts,
+  //       readyAggregator.publicKey,
+  //       leaseAccount.publicKey,
+  //       leaseEscrow,
+  //       permissionAccount.publicKey,
+  //     ];
+
+  //     try {
+  //       const newTxn = this.getPopTxn(
+  //         payer,
+  //         {
+  //           ...params,
+  //           remainingAccounts: newRemainingAccounts,
+  //           leaseBumps: allLeaseBumps,
+  //           permissionBumps: allPermissionBumps,
+  //         },
+  //         options
+  //       );
+  //       // succeeded, so set running txn and remaining accounts and try again
+  //       txn = newTxn;
+  //       remainingAccounts = newRemainingAccounts;
+  //     } catch (error) {
+  //       if (error instanceof errors.TransactionOverflowError) {
+  //         if (txn === undefined) {
+  //           throw new Error(`Failed to create crank pop transaction, ${error}`);
+  //         }
+  //         return txn;
+  //       }
+  //       throw error;
+  //     }
+  //   }
+
+  //   if (txn === undefined) {
+  //     throw new Error(`Failed to create crank pop transaction`);
+  //   }
+
+  //   return txn;
+  // }
 
   public async depositInstructions(
     payer: PublicKey,
@@ -384,5 +577,62 @@ export class VrfPoolAccount extends Account<types.VrfPoolAccountData> {
     );
     const txnSignature = await this.program.signAndSend(transaction);
     return txnSignature;
+  }
+
+  public async requestAndAwaitEvent(
+    params?: { vrf?: types.VrfAccountData } & (
+      | VrfPoolRequestParams
+      | {
+          requestFunction: (...args: any[]) => Promise<TransactionSignature>;
+        }
+    ),
+    timeout = 30000
+  ): Promise<[VrfPoolRequestEvent, TransactionSignature]> {
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.removeEventListener(ws).catch();
+        ws = undefined;
+      }
+    };
+
+    const eventPromise: Promise<VrfPoolRequestEvent> = promiseWithTimeout(
+      timeout,
+      new Promise((resolve: (result: VrfPoolRequestEvent) => void) => {
+        ws = this.program.addEventListener(
+          'VrfPoolRequestEvent',
+          (event, slot, signature) => {
+            if (event.vrfPoolPubkey.equals(this.publicKey)) {
+              resolve(event);
+            }
+          }
+        );
+      })
+    ).finally(async () => {
+      await closeWebsocket();
+    });
+
+    let requestRandomnessSignature: string | undefined = undefined;
+    if (params && 'requestFunction' in params) {
+      requestRandomnessSignature = await params
+        .requestFunction()
+        .catch(async error => {
+          await closeWebsocket();
+          throw new Error(`Failed to call requestRandomness, ${error}`);
+        });
+    } else {
+      requestRandomnessSignature = await this.request(params).catch(
+        async error => {
+          await closeWebsocket();
+          throw new Error(`Failed to call requestRandomness, ${error}`);
+        }
+      );
+    }
+
+    const event = await eventPromise;
+    await closeWebsocket();
+
+    return [event, requestRandomnessSignature];
   }
 }

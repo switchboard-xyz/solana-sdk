@@ -4,6 +4,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from '@solana/spl-token';
 import {
+  Commitment,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -11,16 +12,17 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionSignature,
 } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common';
+import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { vrfLiteInit } from '../generated';
+import { vrfLiteCloseAction } from '../generated/instructions/vrfLiteCloseAction';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-import { Account } from './account';
+import { Account, OnAccountChangeCallback } from './account';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
@@ -48,37 +50,33 @@ export interface VrfLiteProveAndVerifyParams {
   oracleAuthority: PublicKey;
 }
 
+export interface VrfLiteCloseParams {
+  destination?: PublicKey;
+  authority?: Keypair;
+  queueAccount?: QueueAccount;
+  queueAuthority?: PublicKey;
+}
+
 export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
   public size = this.program.account.vrfLiteAccountData.size;
 
-  // private _permission: Promise<PermissionAccount> | undefined;
-
-  // get permissionAccount(): Promise<PermissionAccount> {
-  //   return (
-  //     this._permission?.catch(() => {
-  //       this._permission = undefined;
-  //       return this.permissionAccount;
-  //     }) ??
-  //     new Promise(async (resolve, reject) => {
-  //       try {
-  //         const vrfLite = await this.loadData();
-  //         const [queueAccount, queue] = await QueueAccount.load(
-  //           this.program,
-  //           vrfLite.queue
-  //         );
-  //         const [permissionAccount] = PermissionAccount.fromSeed(
-  //           this.program,
-  //           queue.authority,
-  //           queueAccount.publicKey,
-  //           this.publicKey
-  //         );
-  //         resolve(permissionAccount);
-  //       } catch (error) {
-  //         reject(error);
-  //       }
-  //     })
-  //   );
-  // }
+  /**
+   * Invoke a callback each time a VrfAccount's data has changed on-chain.
+   * @param callback - the callback invoked when the vrf state changes
+   * @param commitment - optional, the desired transaction finality. defaults to 'confirmed'
+   * @returns the websocket subscription id
+   */
+  onChange(
+    callback: OnAccountChangeCallback<types.VrfLiteAccountData>,
+    commitment: Commitment = 'confirmed'
+  ): number {
+    return this.program.connection.onAccountChange(
+      this.publicKey,
+      accountInfo =>
+        callback(types.VrfLiteAccountData.decode(accountInfo.data)),
+      commitment
+    );
+  }
 
   public async loadData(): Promise<types.VrfLiteAccountData> {
     const data = await types.VrfLiteAccountData.fetch(
@@ -275,5 +273,132 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
     });
 
     return txnSignatures;
+  }
+
+  public async awaitRandomness(
+    params: { requestSlot: BN },
+    timeout = 30000
+  ): Promise<types.VrfLiteAccountData> {
+    let ws: number | undefined = undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws).catch();
+        ws = undefined;
+      }
+    };
+
+    // const vrfLite = await this.loadData();
+    // if (vrfLite.requestSlot.gt(params.requestSlot)) {
+    //   throw new Error(`VRF request expired`);
+    // }
+
+    const statePromise: Promise<types.VrfLiteAccountData> = promiseWithTimeout(
+      timeout,
+      new Promise(
+        (
+          resolve: (result: types.VrfLiteAccountData) => void,
+          reject: (reason: string) => void
+        ) => {
+          ws = this.onChange(vrfLite => {
+            if (vrfLite.requestSlot.gt(params.requestSlot)) {
+              reject(`VRF request expired`);
+            }
+
+            if (
+              vrfLite.status.kind ===
+                types.VrfStatus.StatusCallbackSuccess.kind ||
+              vrfLite.status.kind === types.VrfStatus.StatusVerified.kind
+            ) {
+              resolve(vrfLite);
+            }
+            if (
+              vrfLite.status.kind === types.VrfStatus.StatusVerifyFailure.kind
+            ) {
+              reject(
+                `Vrf failed to verify with status ${vrfLite.status.kind} (${vrfLite.status.discriminator})`
+              );
+            }
+          });
+        }
+      )
+    ).finally(async () => {
+      await closeWebsocket();
+    });
+
+    const state = await statePromise;
+    // .catch(async e => {
+    //   await closeWebsocket();
+    //   throw e;
+    // })
+    // .finally(async () => {
+    //   await closeWebsocket();
+    // });
+
+    await closeWebsocket();
+
+    return state;
+  }
+
+  async closeAccountInstruction(
+    payer: PublicKey,
+    params?: VrfLiteCloseParams
+  ): Promise<TransactionObject> {
+    const vrfLite = await this.loadData();
+    const queueAccount =
+      params?.queueAccount ?? new QueueAccount(this.program, vrfLite.queue);
+    const queueAuthority =
+      params?.queueAuthority ?? (await queueAccount.loadData()).authority;
+    const [permissionAccount] = PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queueAccount.publicKey,
+      this.publicKey
+    );
+    const [escrowDest, escrowInit] =
+      await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+        fundUpTo: 0,
+      });
+    const vrfLiteClose = new TransactionObject(
+      payer,
+      [
+        vrfLiteCloseAction(
+          this.program,
+          { params: {} },
+          {
+            vrfLite: this.publicKey,
+            permission: permissionAccount.publicKey,
+            authority: vrfLite.authority,
+            queue: queueAccount.publicKey,
+            queueAuthority,
+            programState: this.program.programState.publicKey,
+            escrow: vrfLite.escrow,
+            solDest: params?.destination ?? payer,
+            escrowDest: escrowDest,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        ),
+      ],
+      params?.authority ? [params.authority] : []
+    );
+
+    if (escrowInit) {
+      return escrowInit.combine(vrfLiteClose);
+    }
+
+    return vrfLiteClose;
+  }
+
+  async closeAccount(
+    params?: VrfLiteCloseParams
+  ): Promise<TransactionSignature> {
+    const transaction = await this.closeAccountInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(transaction, {
+      skipPreflight: true,
+    });
+    return txnSignature;
   }
 }

@@ -1,4 +1,4 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { OracleJob, sleep } from "@switchboard-xyz/common";
 import { SwitchboardTestContextV2 } from "@switchboard-xyz/solana.js";
 import fetch from "node-fetch";

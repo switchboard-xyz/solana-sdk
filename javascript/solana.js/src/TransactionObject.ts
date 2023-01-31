@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { AnchorProvider } from '@project-serum/anchor';
+import { AnchorProvider } from '@coral-xyz/anchor';
 import {
   ComputeBudgetProgram,
   Keypair,

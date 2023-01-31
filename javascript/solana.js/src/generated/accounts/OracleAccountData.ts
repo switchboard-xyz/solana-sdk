@@ -1,7 +1,7 @@
 import { SwitchboardProgram } from '../../SwitchboardProgram';
 import { PublicKey, Connection } from '@solana/web3.js';
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@project-serum/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface OracleAccountDataFields {
