@@ -1,4 +1,4 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
 import * as sbv2 from "@switchboard-xyz/switchboard-v2";
 import {

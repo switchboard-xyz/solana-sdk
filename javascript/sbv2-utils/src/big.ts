@@ -1,5 +1,5 @@
+import * as anchor from "@coral-xyz/anchor";
 import type { OrcaU64 } from "@orca-so/sdk";
-import * as anchor from "@project-serum/anchor";
 import type {
   Fraction,
   Price,

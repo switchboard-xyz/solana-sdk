@@ -1,4 +1,4 @@
-import type * as anchor from "@project-serum/anchor";
+import type * as anchor from "@coral-xyz/anchor";
 
 const padTime = (number_: number): string => {
   return number_.toString().padStart(2, "0");

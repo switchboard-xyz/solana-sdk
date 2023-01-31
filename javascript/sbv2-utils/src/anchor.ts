@@ -1,6 +1,6 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 /*eslint-disable import/extensions */
-import { findProgramAddressSync } from "@project-serum/anchor/dist/cjs/utils/pubkey.js";
+import { findProgramAddressSync } from "@coral-xyz/anchor/dist/cjs/utils/pubkey.js";
 import {
   Cluster,
   clusterApiUrl,

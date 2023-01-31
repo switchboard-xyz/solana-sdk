@@ -1,4 +1,4 @@
-import * as anchor from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
 import { AccountMeta, PublicKey, TokenAmount } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import {

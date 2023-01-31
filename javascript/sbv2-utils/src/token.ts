@@ -1,4 +1,4 @@
-import type * as anchor from "@project-serum/anchor";
+import type * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token-v3";
 import {
   Connection,
