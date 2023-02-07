@@ -522,14 +522,30 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
       nonce?: number;
       failOpenOnMismatch?: boolean;
+
+      priorityFeeMultiplier?: number;
     },
     options?: TransactionObjectOptions
   ): Array<TransactionObject> {
     const numReady = params.readyAggregators.length;
 
+    // stagger priority fees so feeds are procssed in order of staleness
+    const getTxnOptions = (
+      index: number
+    ): TransactionObjectOptions | undefined => {
+      return params.priorityFeeMultiplier && params.priorityFeeMultiplier > 0
+        ? {
+            ...options,
+            computeUnitPrice:
+              (options?.computeUnitPrice ?? 1) +
+              (numReady - index) * params.priorityFeeMultiplier,
+          }
+        : options;
+    };
+
     if (numReady < 6) {
       // send as-is
-      return Array.from(Array(numReady).keys()).map(() => {
+      return Array.from(Array(numReady).keys()).map(n => {
         return this.popSync(
           payer,
           {
@@ -537,7 +553,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
             readyAggregators: params.readyAggregators,
             nonce: Math.random(),
           },
-          options
+          getTxnOptions(n)
         );
       });
     } else {
@@ -550,7 +566,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
             readyAggregators: params.readyAggregators.slice(Math.max(0, n - 4)),
             nonce: Math.random(),
           },
-          options
+          getTxnOptions(n)
         );
       });
     }
