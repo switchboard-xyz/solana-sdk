@@ -15,6 +15,7 @@ import * as types from '../generated';
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
+  PermitVrfRequests,
 } from '../generated/types/SwitchboardPermission';
 import { SolanaClock } from '../SolanaClock';
 import { SwitchboardProgram } from '../SwitchboardProgram';
@@ -871,7 +872,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
     ) {
       const permissionSet = permissionAccount.setInstruction(payer, {
-        permission: new PermitOracleQueueUsage(),
+        permission: new PermitVrfRequests(),
         enable: true,
         queueAuthority: params.queueAuthority,
       });
@@ -1085,7 +1086,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
     ) {
       const permissionSet = permissionAccount.setInstruction(payer, {
-        permission: new types.PermitVrfRequests(),
+        permission: new PermitVrfRequests(),
         enable: true,
         queueAuthority: params.queueAuthority,
       });
