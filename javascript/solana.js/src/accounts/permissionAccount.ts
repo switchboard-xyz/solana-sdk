@@ -70,18 +70,18 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     permission: types.PermissionAccountData
   ): types.SwitchboardPermissionKind {
     switch (permission.permissions) {
-      case 0:
+      case PermitNone.discriminator:
         return new PermitNone();
-      case 1:
+      case PermitOracleHeartbeat.discriminator:
         return new PermitOracleHeartbeat();
-      case 2:
+      case PermitOracleQueueUsage.discriminator:
         return new PermitOracleQueueUsage();
-      case 3:
+      case PermitVrfRequests.discriminator:
         return new PermitVrfRequests();
     }
 
     throw new Error(
-      `Failed to find the assigned permissions, expected a value from 0 - 3, received ${permission.permissions}`
+      `Failed to find the assigned permissions, expected [${PermitNone.discriminator}, ${PermitOracleHeartbeat.discriminator}, ${PermitOracleQueueUsage.discriminator}, or ${PermitVrfRequests.discriminator}], received ${permission.permissions}`
     );
   }
 

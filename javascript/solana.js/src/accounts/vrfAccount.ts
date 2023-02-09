@@ -14,6 +14,7 @@ import {
 import { promiseWithTimeout } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
+import { vrfCloseAction } from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
@@ -179,11 +180,9 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       params.queueAccount ?? new QueueAccount(this.program, vrf.oracleQueue);
     const queue = params.queue ?? (await queueAccount.loadData());
 
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      queue.authority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queue.authority
     );
 
     const requestRandomness = new TransactionObject(
@@ -412,11 +411,9 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   }) {
     const queueAccount = params.queueAccount;
 
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      params.queueAuthority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      params.queueAuthority
     );
 
     return {
@@ -651,6 +648,89 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
     return result;
   }
+
+  async closeAccountInstruction(
+    payer: PublicKey,
+    params?: VrfCloseParams
+  ): Promise<TransactionObject> {
+    const vrfLite = await this.loadData();
+    const queueAccount =
+      params?.queueAccount ??
+      new QueueAccount(this.program, vrfLite.oracleQueue);
+    const queueAuthority =
+      params?.queueAuthority ?? (await queueAccount.loadData()).authority;
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
+      queueAccount.publicKey,
+      queueAuthority
+    );
+    const [escrowDest, escrowInit] =
+      await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+        fundUpTo: 0,
+      });
+    const vrfClose = new TransactionObject(
+      payer,
+      [
+        vrfCloseAction(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              permissionBump: permissionBump,
+            },
+          },
+          {
+            vrf: this.publicKey,
+            permission: permissionAccount.publicKey,
+            authority: vrfLite.authority,
+            oracleQueue: queueAccount.publicKey,
+            queueAuthority,
+            programState: this.program.programState.publicKey,
+            escrow: vrfLite.escrow,
+            solDest: params?.destination ?? payer,
+            escrowDest: escrowDest,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          }
+        ),
+      ],
+      params?.authority ? [params.authority] : []
+    );
+
+    if (escrowInit) {
+      return escrowInit.combine(vrfClose);
+    }
+
+    return vrfClose;
+  }
+
+  async closeAccount(params?: VrfCloseParams): Promise<TransactionSignature> {
+    const transaction = await this.closeAccountInstruction(
+      this.program.walletPubkey,
+      params
+    );
+    const txnSignature = await this.program.signAndSend(transaction, {
+      skipPreflight: true,
+    });
+    return txnSignature;
+  }
+
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+}
+
+export interface VrfCloseParams {
+  destination?: PublicKey;
+  authority?: Keypair;
+  queueAccount?: QueueAccount;
+  queueAuthority?: PublicKey;
 }
 
 export interface VrfResult {

@@ -58,8 +58,6 @@ export type {
   AggregatorSetQueueArgs,
   AggregatorSetQueueAccounts,
 } from './aggregatorSetQueue';
-export { crankInit } from './crankInit';
-export type { CrankInitArgs, CrankInitAccounts } from './crankInit';
 export { bufferRelayerInit } from './bufferRelayerInit';
 export type {
   BufferRelayerInitArgs,
@@ -75,6 +73,8 @@ export type {
   BufferRelayerSaveResultArgs,
   BufferRelayerSaveResultAccounts,
 } from './bufferRelayerSaveResult';
+export { crankInit } from './crankInit';
+export type { CrankInitArgs, CrankInitAccounts } from './crankInit';
 export { crankPop } from './crankPop';
 export type { CrankPopArgs, CrankPopAccounts } from './crankPop';
 export { crankPopV2 } from './crankPopV2';
@@ -133,6 +133,11 @@ export { vaultTransfer } from './vaultTransfer';
 export type { VaultTransferArgs, VaultTransferAccounts } from './vaultTransfer';
 export { vrfInit } from './vrfInit';
 export type { VrfInitArgs, VrfInitAccounts } from './vrfInit';
+export { vrfCloseAction } from './vrfCloseAction';
+export type {
+  VrfCloseActionArgs,
+  VrfCloseActionAccounts,
+} from './vrfCloseAction';
 export { vrfLiteCloseAction } from './vrfLiteCloseAction';
 export type {
   VrfLiteCloseActionArgs,

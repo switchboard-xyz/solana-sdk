@@ -8,15 +8,15 @@ import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript
 import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface VrfLiteCloseActionArgs {
-  params: types.VrfLiteCloseParamsFields;
+export interface VrfCloseActionArgs {
+  params: types.VrfCloseParamsFields;
 }
 
-export interface VrfLiteCloseActionAccounts {
+export interface VrfCloseActionAccounts {
   authority: PublicKey;
-  vrfLite: PublicKey;
+  vrf: PublicKey;
   permission: PublicKey;
-  queue: PublicKey;
+  oracleQueue: PublicKey;
   queueAuthority: PublicKey;
   programState: PublicKey;
   escrow: PublicKey;
@@ -25,18 +25,18 @@ export interface VrfLiteCloseActionAccounts {
   tokenProgram: PublicKey;
 }
 
-export const layout = borsh.struct([types.VrfLiteCloseParams.layout('params')]);
+export const layout = borsh.struct([types.VrfCloseParams.layout('params')]);
 
-export function vrfLiteCloseAction(
+export function vrfCloseAction(
   program: SwitchboardProgram,
-  args: VrfLiteCloseActionArgs,
-  accounts: VrfLiteCloseActionAccounts
+  args: VrfCloseActionArgs,
+  accounts: VrfCloseActionAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.vrfLite, isSigner: false, isWritable: true },
+    { pubkey: accounts.vrf, isSigner: false, isWritable: true },
     { pubkey: accounts.permission, isSigner: false, isWritable: true },
-    { pubkey: accounts.queue, isSigner: false, isWritable: false },
+    { pubkey: accounts.oracleQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
     { pubkey: accounts.programState, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
@@ -44,11 +44,11 @@ export function vrfLiteCloseAction(
     { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([200, 82, 160, 32, 59, 80, 50, 137]);
+  const identifier = Buffer.from([97, 172, 124, 16, 175, 10, 246, 147]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.VrfLiteCloseParams.toEncodable(args.params),
+      params: types.VrfCloseParams.toEncodable(args.params),
     },
     buffer
   );

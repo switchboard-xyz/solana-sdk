@@ -13,8 +13,8 @@ export interface VrfLiteInitArgs {
 }
 
 export interface VrfLiteInitAccounts {
-  vrf: PublicKey;
   authority: PublicKey;
+  vrf: PublicKey;
   mint: PublicKey;
   escrow: PublicKey;
   queueAuthority: PublicKey;
@@ -36,8 +36,8 @@ export function vrfLiteInit(
   accounts: VrfLiteInitAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.vrf, isSigner: true, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.vrf, isSigner: true, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },

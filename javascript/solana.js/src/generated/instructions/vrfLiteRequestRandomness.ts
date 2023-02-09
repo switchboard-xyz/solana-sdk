@@ -15,7 +15,6 @@ export interface VrfLiteRequestRandomnessArgs {
 export interface VrfLiteRequestRandomnessAccounts {
   authority: PublicKey;
   vrfLite: PublicKey;
-  mint: PublicKey;
   queue: PublicKey;
   queueAuthority: PublicKey;
   dataBuffer: PublicKey;
@@ -38,7 +37,6 @@ export function vrfLiteRequestRandomness(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.vrfLite, isSigner: false, isWritable: true },
-    { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.queue, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
     { pubkey: accounts.dataBuffer, isSigner: false, isWritable: false },

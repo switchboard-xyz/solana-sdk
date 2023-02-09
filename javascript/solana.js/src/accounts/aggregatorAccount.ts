@@ -27,6 +27,7 @@ import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   TransactionObject,
   TransactionObjectOptions,
+  TransactionPackOptions,
 } from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
@@ -313,12 +314,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const jobs = await this.loadJobs(aggregator);
     const jobAuthorities = jobs.map(job => job.state.authority);
 
-    const [newPermissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      newQueue.authority,
+    const [newPermissionAccount] = this.getPermissionAccount(
       params.newQueue.publicKey,
-      this.publicKey
+      newQueue.authority
     );
+
     const newPermissionAccountInfo =
       await this.program.connection.getAccountInfo(
         newPermissionAccount.publicKey
@@ -336,11 +336,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       txns.push(permissionInitTxn);
     }
 
-    const [newLeaseAccount] = LeaseAccount.fromSeed(
-      this.program,
-      params.newQueue.publicKey,
-      this.publicKey
-    );
+    const [newLeaseAccount] = this.getLeaseAccount(params.newQueue.publicKey);
     const newLeaseAccountInfo = await this.program.connection.getAccountInfo(
       newLeaseAccount.publicKey
     );
@@ -418,11 +414,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
   ): Promise<[TransactionObject | undefined, PermissionAccount]> {
     const newQueue = await params.newQueue.loadData();
-    const [permissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      newQueue.authority,
+    const [permissionAccount] = this.getPermissionAccount(
       params.newQueue.publicKey,
-      this.publicKey
+      newQueue.authority
     );
 
     if (!params.enable) {
@@ -498,12 +492,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const aggregator = await this.loadData();
 
     // new permission account needs to be created and approved
-    const [permissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      newQueue.authority,
+    const [permissionAccount] = this.getPermissionAccount(
       params.newQueue.publicKey,
-      this.publicKey
+      newQueue.authority
     );
+
     if (!params.force) {
       await permissionAccount
         .loadData()
@@ -523,11 +516,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     // check the new lease has been created
-    const [newLeaseAccount] = LeaseAccount.fromSeed(
-      this.program,
-      params.newQueue.publicKey,
-      this.publicKey
-    );
+    const [newLeaseAccount] = this.getLeaseAccount(params.newQueue.publicKey);
     if (!params.force) {
       await newLeaseAccount.loadData().catch(() => {
         throw new Error(`Expected leaseAccount to be created already`);
@@ -567,11 +556,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
 
     // remove any funds from the old lease account
-    const [oldLeaseAccount] = LeaseAccount.fromSeed(
-      this.program,
-      aggregator.queuePubkey,
-      this.publicKey
-    );
+    const [oldLeaseAccount] = this.getLeaseAccount(aggregator.queuePubkey);
     const oldLease = await oldLeaseAccount.loadData();
     const oldLeaseBalance = await oldLeaseAccount.fetchBalance(oldLease.escrow);
     if (oldLease.withdrawAuthority.equals(payer) && oldLeaseBalance > 0) {
@@ -674,25 +659,44 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [permissionAccount, leaseAccount, signatures];
   }
 
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
+  public getLeaseAccount(
+    queuePubkey: PublicKey
+  ): [LeaseAccount, PublicKey, number] {
+    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
+      this.program,
+      queuePubkey,
+      this.publicKey
+    );
+    const leaseEscrow = this.program.mint.getAssociatedAddress(
+      leaseAccount.publicKey
+    );
+
+    return [leaseAccount, leaseEscrow, leaseBump];
+  }
+
   public getAccounts(
     queueAccount: QueueAccount,
     queueAuthority: PublicKey
   ): AggregatorPdaAccounts {
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      queueAuthority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queueAuthority
     );
 
-    const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
-      this.program,
-      queueAccount.publicKey,
-      this.publicKey
-    );
-
-    const leaseEscrow = this.program.mint.getAssociatedAddress(
-      leaseAccount.publicKey
+    const [leaseAccount, leaseEscrow, leaseBump] = this.getLeaseAccount(
+      queueAccount.publicKey
     );
 
     return {
@@ -1474,12 +1478,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission ??
-      PermissionAccount.fromSeed(
-        this.program,
-        queueAuthority,
-        queueAccount.publicKey,
-        params.oracleAccount.publicKey
-      );
+      this.getPermissionAccount(queueAccount.publicKey, queueAuthority);
 
     const accounts: AggregatorPdaAccounts =
       params.permissionAccount === undefined ||
@@ -1918,6 +1917,126 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     // Should we enforce some upper limit? Like 1 SOL?
     // Probably not, gives MEV bots a floor
     return Math.round(fee);
+  }
+
+  /** Fetch the balance of an aggregator's lease */
+  public async fetchBalance(
+    leaseEscrow?: PublicKey,
+    queuePubkey?: PublicKey
+  ): Promise<number> {
+    const escrowPubkey =
+      leaseEscrow ??
+      this.getLeaseAccount(
+        queuePubkey ?? (await this.loadData()).queuePubkey
+      )[1];
+    const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
+    if (escrowBalance === null) {
+      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
+    }
+    return escrowBalance;
+  }
+
+  /** Create a transaction object that will fund an aggregator's lease up to a given balance */
+  public async fundUpToInstruction(
+    payer: PublicKey,
+    fundUpTo: number,
+    disableWrap = false
+  ): Promise<[TransactionObject | undefined, number | undefined]> {
+    const [leaseAccount, leaseEscrow] = this.getLeaseAccount(
+      (await this.loadData()).queuePubkey
+    );
+    const balance = await this.fetchBalance(leaseEscrow);
+    if (balance >= fundUpTo) {
+      return [undefined, undefined];
+    }
+
+    const fundAmount = fundUpTo - balance;
+
+    const leaseExtend = await leaseAccount.extendInstruction(payer, {
+      fundAmount,
+      disableWrap,
+    });
+    return [leaseExtend, fundAmount];
+  }
+
+  /** Fund an aggregator's lease up to a given balance */
+  public async fundUpTo(
+    payer: PublicKey,
+    fundUpTo: number,
+    disableWrap = false
+  ): Promise<[TransactionSignature | undefined, number | undefined]> {
+    const [fundUpToTxn, fundAmount] = await this.fundUpToInstruction(
+      payer,
+      fundUpTo,
+      disableWrap
+    );
+    if (!fundUpToTxn) {
+      return [undefined, undefined];
+    }
+
+    const txnSignature = await this.program.signAndSend(fundUpToTxn);
+    return [txnSignature, fundAmount!];
+  }
+
+  /** Create a set of transactions that will fund an aggregator's lease up to a given balance */
+  public static async fundMultipleUpToInstructions(
+    payer: PublicKey,
+    fundUpTo: number,
+    aggregators: Array<AggregatorAccount>,
+    options?: TransactionPackOptions | undefined
+  ): Promise<Array<TransactionObject>> {
+    if (aggregators.length === 0) {
+      throw new Error(`No aggregator accounts provided`);
+    }
+    const program = aggregators[0].program;
+
+    const txns: Array<TransactionObject> = [];
+    let wrapAmount = 0;
+
+    for (const aggregator of aggregators) {
+      const [depositTxn, depositAmount] = await aggregator.fundUpToInstruction(
+        payer,
+        fundUpTo,
+        true
+      );
+      if (depositTxn && depositAmount) {
+        txns.push(depositTxn);
+        wrapAmount = wrapAmount + depositAmount;
+      }
+    }
+
+    const [_, wrapTxn] = await program.mint.getOrCreateWrappedUserInstructions(
+      payer,
+      {
+        fundUpTo: wrapAmount,
+      }
+    );
+    if (wrapTxn) {
+      txns.unshift(wrapTxn);
+    }
+
+    return TransactionObject.pack(txns, options);
+  }
+
+  /** Fund multiple aggregator account lease's up to a given balance */
+  public static async fundMultipleUpTo(
+    fundUpTo: number,
+    aggregators: Array<AggregatorAccount>,
+    options?: TransactionPackOptions | undefined
+  ): Promise<Array<TransactionSignature>> {
+    if (aggregators.length === 0) {
+      throw new Error(`No aggregator accounts provided`);
+    }
+    const program = aggregators[0].program;
+
+    const txns = await AggregatorAccount.fundMultipleUpToInstructions(
+      program.walletPubkey,
+      fundUpTo,
+      aggregators,
+      options
+    );
+    const txnSignatures = await program.signAndSendAll(txns);
+    return txnSignatures;
   }
 }
 

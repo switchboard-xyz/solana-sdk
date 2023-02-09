@@ -15,7 +15,8 @@ import {
 } from '@solana/web3.js';
 import { promiseWithTimeout } from '@switchboard-xyz/common';
 import _ from 'lodash';
-import { AccountNotFoundError } from '../errors';
+import { VRF_POOL_REQUEST_AMOUNT } from '../const';
+import { AccountNotFoundError, InsufficientFundsError } from '../errors';
 import * as types from '../generated';
 import { VrfPoolRequestEvent } from '../SwitchboardEvents';
 import { SwitchboardProgram } from '../SwitchboardProgram';
@@ -63,6 +64,7 @@ export type VrfPoolDepositParams = {
   tokenWallet?: PublicKey;
   tokenAuthority?: Keypair;
   amount: number;
+  disableWrap?: boolean;
 };
 
 export type VrfPoolAccountData = types.VrfPoolAccountData & {
@@ -257,11 +259,9 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       vrfPool.queue
     );
 
-    const [permissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      queue.authority,
+    const [permissionAccount] = this.getPermissionAccount(
       queueAccount.publicKey,
-      params.vrf.publicKey
+      queue.authority
     );
 
     // verify permissions
@@ -344,36 +344,24 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     return txnSignature;
   }
 
-  public async requestInstructions(
-    payer: PublicKey,
-    params?: VrfPoolRequestParams
-  ): Promise<TransactionObject> {
-    const REQUEST_ACCOUNT_SIZE = 7;
-    const vrfPool = await this.loadData();
-
-    const [queueAccount, queue] = await QueueAccount.load(
-      this.program,
-      vrfPool.queue
-    );
-
-    const permissionBumpsMap: Map<string, number> = new Map();
-
+  /** Returns the sorted, next {@param size} rows in the pool */
+  public getRemainingAccounts(
+    vrfPool: VrfPoolAccountData,
+    queueAuthority: PublicKey,
+    size = 7
+  ): Array<AccountMeta> {
     const vrfRows = [
       ...vrfPool.pool.slice(vrfPool.idx),
       ...vrfPool.pool.slice(0, vrfPool.idx),
-    ];
+    ].slice(0, size);
 
-    const slice = vrfRows.slice(0, REQUEST_ACCOUNT_SIZE);
-
-    const vrfs = slice.map((row): Array<AccountMeta> => {
+    const accountMetas = vrfRows.map((row): Array<AccountMeta> => {
       const escrow = this.program.mint.getAssociatedAddress(row.pubkey);
-      const [permission, bump] = PermissionAccount.fromSeed(
-        this.program,
-        queue.authority,
-        queueAccount.publicKey,
-        row.pubkey
+      const [permission] = this.getPermissionAccount(
+        vrfPool.queue,
+        queueAuthority
       );
-      permissionBumpsMap.set(row.pubkey.toBase58(), bump);
+
       return [
         {
           pubkey: row.pubkey,
@@ -393,21 +381,42 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       ];
     });
 
-    const remainingAccounts: Array<AccountMeta> = _.flatten(vrfs).sort((a, b) =>
-      Buffer.compare(a.pubkey.toBuffer(), b.pubkey.toBuffer())
+    const remainingAccounts: Array<AccountMeta> = _.flatten(accountMetas).sort(
+      (a, b) => Buffer.compare(a.pubkey.toBuffer(), b.pubkey.toBuffer())
     );
-    const permissionBumps: Array<number> = [];
-    for (const remainingAccount of remainingAccounts) {
-      permissionBumps.push(
-        permissionBumpsMap.get(remainingAccount.pubkey.toBase58()) ?? 0
-      );
+
+    return remainingAccounts;
+  }
+
+  public async requestInstructions(
+    payer: PublicKey,
+    params?: VrfPoolRequestParams,
+    size = 7
+  ): Promise<TransactionObject> {
+    const vrfPool = await this.loadData();
+
+    const [queueAccount, queue] = await QueueAccount.load(
+      this.program,
+      vrfPool.queue
+    );
+
+    const remainingAccounts = this.getRemainingAccounts(
+      vrfPool,
+      queue.authority,
+      size
+    );
+
+    // we dont want to wrap any funds. it will take up space in the txn needed for remainingAccounts
+    // to increase probability of popping the next row
+    const vrfPoolBalance = await this.fetchBalance(vrfPool.escrow);
+    if (vrfPoolBalance < VRF_POOL_REQUEST_AMOUNT) {
+      throw new InsufficientFundsError(VRF_POOL_REQUEST_AMOUNT, vrfPoolBalance);
     }
 
     const requestIxn = types.vrfPoolRequest(
       this.program,
       {
         params: {
-          permissionBumps: new Uint8Array(permissionBumps),
           callback: params?.callback ?? null,
         },
       },
@@ -426,18 +435,13 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     );
     requestIxn.keys = requestIxn.keys.concat(remainingAccounts);
 
-    const [wrapAccount, wrapTxn] =
-      await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
-        fundUpTo: 0.002,
-      });
+    const requestTxn = new TransactionObject(
+      payer,
+      [requestIxn],
+      params?.authority ? [params.authority] : []
+    );
 
-    return wrapTxn
-      ? wrapTxn.add(requestIxn, params?.authority ? [params.authority] : [])
-      : new TransactionObject(
-          payer,
-          [requestIxn],
-          params?.authority ? [params.authority] : []
-        );
+    return requestTxn;
   }
 
   public async request(
@@ -553,18 +557,45 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       this.program.mint.getAssociatedAddress(
         params.tokenAuthority?.publicKey ?? payer
       );
+
+    const userBalance = await this.program.mint.fetchBalance(userTokenAddress);
+    if (params.disableWrap && !userBalance) {
+      throw new InsufficientFundsError(params.amount, 0);
+    }
+    if (params.disableWrap && params.amount > (userBalance ?? 0)) {
+      throw new InsufficientFundsError(params.amount, userBalance ?? 0);
+    }
+
     const transferTxn = new TransactionObject(
       payer,
       [
         createTransferInstruction(
           userTokenAddress,
-          this.program.mint.getAssociatedAddress(this.publicKey),
+          this.getEscrow(),
           params.tokenAuthority?.publicKey ?? payer,
           this.program.mint.toTokenAmount(params.amount)
         ),
       ],
       params.tokenAuthority ? [params.tokenAuthority] : []
     );
+
+    if (params.amount > (userBalance ?? 0)) {
+      const [wrapAccount, wrapIxn] =
+        await this.program.mint.getOrCreateWrappedUserInstructions(
+          payer,
+          { amount: params.amount },
+          params.tokenAuthority
+        );
+      if (wrapIxn) {
+        if (!wrapAccount.equals(userTokenAddress)) {
+          throw new Error(
+            `Incorrect token account, expected ${userTokenAddress}, received ${wrapAccount}`
+          );
+        }
+        return wrapIxn.combine(transferTxn);
+      }
+    }
+
     return transferTxn;
   }
 
@@ -634,5 +665,69 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     await closeWebsocket();
 
     return [event, requestRandomnessSignature];
+  }
+
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
+  public getEscrow(): PublicKey {
+    return this.program.mint.getAssociatedAddress(this.publicKey);
+  }
+
+  public async fetchBalance(escrow?: PublicKey): Promise<number> {
+    const escrowPubkey =
+      escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
+    const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
+    if (escrowBalance === null) {
+      throw new AccountNotFoundError('VrfPool Escrow', escrowPubkey);
+    }
+    return escrowBalance;
+  }
+
+  public async fundUpToInstruction(
+    payer: PublicKey,
+    fundUpTo: number,
+    disableWrap = false
+  ): Promise<[TransactionObject | undefined, number | undefined]> {
+    const escrowPubkey = this.getEscrow();
+    const balance = await this.fetchBalance(escrowPubkey);
+    if (balance >= fundUpTo) {
+      return [undefined, undefined];
+    }
+
+    const fundAmount = fundUpTo - balance;
+
+    const depositTxn = await this.depositInstructions(payer, {
+      amount: fundAmount,
+      disableWrap,
+    });
+    return [depositTxn, fundAmount];
+  }
+
+  public async fundUpTo(
+    payer: PublicKey,
+    fundUpTo: number,
+    disableWrap = false
+  ): Promise<[TransactionSignature | undefined, number | undefined]> {
+    const [fundUpToTxn, fundAmount] = await this.fundUpToInstruction(
+      payer,
+      fundUpTo,
+      disableWrap
+    );
+    if (!fundUpToTxn) {
+      return [undefined, undefined];
+    }
+
+    const txnSignature = await this.program.signAndSend(fundUpToTxn);
+    return [txnSignature, fundAmount!];
   }
 }

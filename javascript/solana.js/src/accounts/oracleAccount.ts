@@ -175,11 +175,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     const queueAccount =
       _queueAccount ?? new QueueAccount(this.program, oracle.queuePubkey);
     const queue = _queue ?? (await queueAccount.loadData());
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      queue.authority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queue.authority
     );
     const permission = await permissionAccount.loadData();
     return [permissionAccount, permissionBump, permission];
@@ -439,12 +437,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     const [permissionAccount, permissionBump] =
       params?.permission ??
-      PermissionAccount.fromSeed(
-        this.program,
-        queue.authority,
-        queueAccount.publicKey,
-        this.publicKey
-      );
+      this.getPermissionAccount(queueAccount.publicKey, queue.authority);
+
     try {
       await permissionAccount.loadData();
     } catch (_) {
@@ -540,6 +534,18 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return txnSignature;
   }
 
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
   public async toAccountsJSON(
     _oracle?: types.OracleAccountData & { balance: number },
     _permissionAccount?: PermissionAccount,
@@ -551,11 +557,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     if (!permissionAccount || !permission) {
       const queueAccount = new QueueAccount(this.program, oracle.queuePubkey);
       const queue = await queueAccount.loadData();
-      [permissionAccount] = PermissionAccount.fromSeed(
-        this.program,
-        queue.authority,
+      [permissionAccount] = this.getPermissionAccount(
         queueAccount.publicKey,
-        this.publicKey
+        queue.authority
       );
       permission = await permissionAccount.loadData();
     }

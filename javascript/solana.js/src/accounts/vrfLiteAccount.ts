@@ -349,11 +349,9 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
       params?.queueAccount ?? new QueueAccount(this.program, vrfLite.queue);
     const queueAuthority =
       params?.queueAuthority ?? (await queueAccount.loadData()).authority;
-    const [permissionAccount] = PermissionAccount.fromSeed(
-      this.program,
-      queueAuthority,
+    const [permissionAccount] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queueAuthority
     );
     const [escrowDest, escrowInit] =
       await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
@@ -400,5 +398,21 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
       skipPreflight: true,
     });
     return txnSignature;
+  }
+
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
+  public getEscrow(): PublicKey {
+    return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 }

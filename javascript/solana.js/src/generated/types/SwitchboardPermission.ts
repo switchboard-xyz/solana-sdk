@@ -75,9 +75,9 @@ export interface PermitVrfRequestsJSON {
 }
 
 export class PermitVrfRequests {
-  static readonly discriminator = 3;
+  static readonly discriminator = 4;
   static readonly kind = 'PermitVrfRequests';
-  readonly discriminator = 3;
+  readonly discriminator = 4;
   readonly kind = 'PermitVrfRequests';
 
   toJSON(): PermitVrfRequestsJSON {

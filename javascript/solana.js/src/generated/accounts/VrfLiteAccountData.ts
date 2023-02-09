@@ -36,6 +36,7 @@ export interface VrfLiteAccountDataFields {
   /** The incremental VRF proof calculation. */
   builder: types.VrfBuilderFields;
   expiration: BN;
+  ebuf: Array<number>;
 }
 
 export interface VrfLiteAccountDataJSON {
@@ -70,6 +71,7 @@ export interface VrfLiteAccountDataJSON {
   /** The incremental VRF proof calculation. */
   builder: types.VrfBuilderJSON;
   expiration: string;
+  ebuf: Array<number>;
 }
 
 export class VrfLiteAccountData {
@@ -104,6 +106,7 @@ export class VrfLiteAccountData {
   /** The incremental VRF proof calculation. */
   readonly builder: types.VrfBuilder;
   readonly expiration: BN;
+  readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
     98, 127, 126, 124, 166, 81, 97, 100,
@@ -126,6 +129,7 @@ export class VrfLiteAccountData {
     types.CallbackZC.layout('callback'),
     types.VrfBuilder.layout('builder'),
     borsh.i64('expiration'),
+    borsh.array(borsh.u8(), 1024, 'ebuf'),
   ]);
 
   constructor(fields: VrfLiteAccountDataFields) {
@@ -145,6 +149,7 @@ export class VrfLiteAccountData {
     this.callback = new types.CallbackZC({ ...fields.callback });
     this.builder = new types.VrfBuilder({ ...fields.builder });
     this.expiration = fields.expiration;
+    this.ebuf = fields.ebuf;
   }
 
   static async fetch(
@@ -205,6 +210,7 @@ export class VrfLiteAccountData {
       callback: types.CallbackZC.fromDecoded(dec.callback),
       builder: types.VrfBuilder.fromDecoded(dec.builder),
       expiration: dec.expiration,
+      ebuf: dec.ebuf,
     });
   }
 
@@ -226,6 +232,7 @@ export class VrfLiteAccountData {
       callback: this.callback.toJSON(),
       builder: this.builder.toJSON(),
       expiration: this.expiration.toString(),
+      ebuf: this.ebuf,
     };
   }
 
@@ -247,6 +254,7 @@ export class VrfLiteAccountData {
       callback: types.CallbackZC.fromJSON(obj.callback),
       builder: types.VrfBuilder.fromJSON(obj.builder),
       expiration: new BN(obj.expiration),
+      ebuf: obj.ebuf,
     });
   }
 }

@@ -98,7 +98,8 @@ export type CustomError =
   | AccountCloseNotReady
   | VrfPoolRequestTooSoon
   | VrfPoolMiss
-  | VrfLiteOwnedByPool;
+  | VrfLiteOwnedByPool
+  | InsufficientTokenBalance;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1223,6 +1224,17 @@ export class VrfLiteOwnedByPool extends Error {
   }
 }
 
+export class InsufficientTokenBalance extends Error {
+  static readonly code = 6099;
+  readonly code = 6099;
+  readonly name = 'InsufficientTokenBalance';
+  readonly msg = 'Escrow has insufficient funds to perform this action.';
+
+  constructor(readonly logs?: string[]) {
+    super('6099: Escrow has insufficient funds to perform this action.');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1423,6 +1435,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new VrfPoolMiss(logs);
     case 6098:
       return new VrfLiteOwnedByPool(logs);
+    case 6099:
+      return new InsufficientTokenBalance(logs);
   }
 
   return null;

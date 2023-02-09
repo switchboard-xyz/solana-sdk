@@ -13,8 +13,8 @@ export interface VrfPoolInitArgs {
 }
 
 export interface VrfPoolInitAccounts {
-  vrfPool: PublicKey;
   authority: PublicKey;
+  vrfPool: PublicKey;
   queue: PublicKey;
   mint: PublicKey;
   escrow: PublicKey;
@@ -34,8 +34,8 @@ export function vrfPoolInit(
   accounts: VrfPoolInitAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.vrfPool, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.vrfPool, isSigner: false, isWritable: true },
     { pubkey: accounts.queue, isSigner: false, isWritable: false },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },

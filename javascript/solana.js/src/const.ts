@@ -41,3 +41,5 @@ export const DEVNET_GENESIS_HASH =
 
 export const MAINNET_GENESIS_HASH =
   '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
+
+export const VRF_POOL_REQUEST_AMOUNT = 0.002;

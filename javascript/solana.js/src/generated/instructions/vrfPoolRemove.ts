@@ -13,8 +13,8 @@ export interface VrfPoolRemoveArgs {
 }
 
 export interface VrfPoolRemoveAccounts {
-  vrfPool: PublicKey;
   authority: PublicKey;
+  vrfPool: PublicKey;
   queue: PublicKey;
 }
 
@@ -28,8 +28,8 @@ export function vrfPoolRemove(
   accounts: VrfPoolRemoveAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.vrfPool, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
+    { pubkey: accounts.vrfPool, isSigner: false, isWritable: true },
     { pubkey: accounts.queue, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([15, 73, 86, 124, 75, 183, 20, 199]);

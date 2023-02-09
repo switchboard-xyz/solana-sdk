@@ -38,8 +38,10 @@ export class NativeMintOnlyError extends Error {
   }
 }
 export class InsufficientFundsError extends Error {
-  constructor() {
-    super('Insufficient funds to perform this action');
+  constructor(required: number, current: number) {
+    super(
+      `Insufficient funds to perform this action, required ${required}, current balance ${current}`
+    );
     Object.setPrototypeOf(this, InsufficientFundsError.prototype);
   }
 }

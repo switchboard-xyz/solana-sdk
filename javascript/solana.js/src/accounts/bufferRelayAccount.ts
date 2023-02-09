@@ -228,11 +228,9 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       }
     }
 
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      queue.authority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queue.authority
     );
 
     const openRoundTxn = new TransactionObject(
@@ -434,11 +432,9 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
   }
 
   public getAccounts(queueAccount: QueueAccount, queueAuthority: PublicKey) {
-    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      this.program,
-      queueAuthority,
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
       queueAccount.publicKey,
-      this.publicKey
+      queueAuthority
     );
 
     return {
@@ -520,6 +516,22 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
         balance: vrfEscrowBalance,
       },
     };
+  }
+
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [PermissionAccount, number] {
+    return PermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
+  public getEscrow(): PublicKey {
+    return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 }
 

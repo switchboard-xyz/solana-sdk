@@ -430,7 +430,10 @@ export class NativeMint extends Mint {
     }
 
     if (userBalance.lte(wrapAmount)) {
-      throw new InsufficientFundsError();
+      throw new InsufficientFundsError(
+        wrapAmount.toNumber(),
+        userBalance.toNumber()
+      );
     }
 
     const ephemeralAccount = Keypair.generate();
