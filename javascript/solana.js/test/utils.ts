@@ -92,7 +92,7 @@ export function getRpcUrl(cluster: SolanaCluster): string {
   }
 
   if (cluster === 'localnet') {
-    return 'http://localhost:8899';
+    return 'http://0.0.0.0:8899';
   }
 
   return clusterApiUrl(cluster);

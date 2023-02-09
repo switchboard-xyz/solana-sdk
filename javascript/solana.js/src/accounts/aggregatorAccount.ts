@@ -1478,7 +1478,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission ??
-      this.getPermissionAccount(queueAccount.publicKey, queueAuthority);
+      params.oracleAccount.getPermissionAccount(
+        queueAccount.publicKey,
+        queueAuthority
+      );
 
     const accounts: AggregatorPdaAccounts =
       params.permissionAccount === undefined ||
