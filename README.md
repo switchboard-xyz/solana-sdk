@@ -1,21 +1,27 @@
 <div align="center">
-  <img height="170" style="border-radius:25px" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+  <a href="#">
+    <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+  </a>
 
   <h1>Switchboard V2</h1>
 
   <p>
     <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
-	<a href="https://crates.io/crates/switchboard-v2"><img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2"></a>
-	<a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js"><img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?filename=javascript%2Fsolana.js%2Fpackage.json&logo=npm"></a>
+	<a href="https://crates.io/crates/switchboard-v2"><img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust"></a>
+	<a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js"><img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm"></a>
   </p>
 
   <p>
-    <a href="https://discord.gg/switchboardxyz"><img alt="Discord" src="https://img.shields.io/discord/841525135311634443"></a>
-    <a href="https://twitter.com/switchboardxyz"><img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" /></a>
+    <a href="https://discord.gg/switchboardxyz">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+    </a>
+    <a href="https://twitter.com/switchboardxyz">
+      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
+    </a>
   </p>
 
   <h4>
-    <a href="https://docs.switchboard.xyz/">Official Documentation</a>
+    <strong>Documentation: </strong><a href="https://docs.switchboard.xyz">docs.switchboard.xyz</a>
   </h4>
 </div>
 
@@ -30,10 +36,10 @@ git clone https://github.com/switchboard-xyz/sbv2-solana
 
 ## SDKs
 
-- [Rust](/rust/switchboard-v2/): Rust crate to deserialize Switchboard
-  aggregator's on-chain
-- [Typescript](/javascript/solana.js/): Typescript package to create and manage
-  Switchboard accounts
+- [Rust](/rust/switchboard-v2/): Rust crate to deserialize and read Switchboard
+  data feeds and VRF accounts
+- [Typescript](/javascript/solana.js/): Typescript package to interact with
+  Switchboard V2
 - [Python](/python/switchboardpy/) **(No longer Maintained)**
 
 ## Programs
