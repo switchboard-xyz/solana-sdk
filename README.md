@@ -49,11 +49,11 @@ git clone https://github.com/switchboard-xyz/sbv2-solana
 
 ## Libraries
 
-| **Lang** | **Name**                                                                                                                                                                                              | **Description**                                                          |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Rust     | [switchboard-v2](/rust/switchboard-v2/) <br />[Crates.io](https://crates.io/crates/switchboard-v2), [Typedocs](https://docs.rs/switchboard-v2/latest/sbv2_solana/)                                    | Rust crate to deserialize and read Switchboard data feeds                |
-| JS       | [@switchboard-xyz/solana.js](/javascript/solana.js/) <br />[npmjs](https://www.npmjs.com/package/@switchboard-xyz/solana.js), [Typedocs](https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js) | Typescript package to interact with Switchboard V2                       |
-| Python   | [switchboardpy](/python/switchboardpy/) <br />[pypi](https://pypi.org/project/switchboardpy/), [Typedocs](https://docs.switchboard.xyz/api/switchboardpy/)                                            | Python package to interact with Switchboard V2. **No longer maintained** |
+| **Lang** | **Name**                                                                                                                                                                                                | **Description**                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Rust     | [switchboard-v2](/rust/switchboard-v2/) <br />[[Crates.io](https://crates.io/crates/switchboard-v2), [Typedocs](https://docs.rs/switchboard-v2/latest/sbv2_solana/)]                                    | Rust crate to deserialize and read Switchboard data feeds                |
+| JS       | [@switchboard-xyz/solana.js](/javascript/solana.js/) <br />[[npmjs](https://www.npmjs.com/package/@switchboard-xyz/solana.js), [Typedocs](https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js)] | Typescript package to interact with Switchboard V2                       |
+| Python   | [switchboardpy](/python/switchboardpy/) <br />[[pypi](https://pypi.org/project/switchboardpy/), [Typedocs](https://docs.switchboard.xyz/api/switchboardpy/)]                                            | Python package to interact with Switchboard V2. **No longer maintained** |
 
 ## Example Programs
 
