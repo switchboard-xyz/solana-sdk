@@ -35,13 +35,13 @@ Build the example program
 anchor build
 ```
 
-Get your program ID
+Get your program ID and update `Anchor.toml` and `src/lib.rs` with your pubkey
 
 ```bash
-solana-keygen pubkey target/deploy/anchor_buffer_parser-keypair.json
+export ANCHOR_BUFFER_PARSER_PUBKEY=$(solana-keygen pubkey target/deploy/anchor_buffer_parser-keypair.json)
+sed -i '' s/96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP/"$ANCHOR_BUFFER_PARSER_PUBKEY"/g Anchor.toml
+sed -i '' s/96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP/"$ANCHOR_BUFFER_PARSER_PUBKEY"/g src/lib.rs
 ```
-
-Update `Anchor.toml` and `src/lib.rs` with your pubkey
 
 Then run Anchor test
 

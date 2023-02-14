@@ -1,78 +1,50 @@
-# Switchboard VRF Cross Program Invocation Example
+<div align="center">
+  <a href="#">
+    <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+  </a>
 
-Example repo
+  <h1>sbv2-solana / anchor-vrf-parser</h1>
 
-## Setup
+  <p>An example program written in Anchor demonstrating how to deserialize and read a Switchboard VRF account on Solana.</p>
 
-```
-npm i
-find secrets/payer-keypair.json || solana-keygen new -s --no-bip39-passphrase --outfile secrets/payer-keypair.json
-solana airdrop 1 secrets/payer-keypair.json
-solana airdrop 1 secrets/payer-keypair.json
-solana airdrop 1 secrets/payer-keypair.json
+  <p>
+	<a href="https://crates.io/crates/switchboard-v2">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+    </a>
+  </p>
+
+  <p>
+    <a href="https://discord.gg/switchboardxyz">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+    </a>
+    <a href="https://twitter.com/switchboardxyz">
+      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
+    </a>
+  </p>
+
+  <h4>
+    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
+  </h4>
+</div>
+
+## Usage
+
+Build the example program
+
+```bash
 anchor build
-solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json
 ```
 
-Note the program ID.
+Get your program ID and update `Anchor.toml` and `src/lib.rs` with your pubkey
 
-In the following files, replace the program ID from above:
-
-- `programs/anchor-vrf-example/src/lib.rs`
-- `Anchor.toml`
-
-Rebuild the program `anchor build`.
-
-## Devnet Testing
-
-**NOTE:** Need to re-write test so use switchboard permissionless devnet queue
-
-In `Anchor.toml`, set the cluster to devnet.
-
-```toml
-[provider]
-cluster = "devnet"
-wallet = "secrets/payer-keypair.json"
+```bash
+export ANCHOR_VRF_PARSER_PUBKEY=$(solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json)
+sed -i '' s/4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN/"$ANCHOR_VRF_PARSER_PUBKEY"/g Anchor.toml
+sed -i '' s/4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN/"$ANCHOR_VRF_PARSER_PUBKEY"/g src/lib.rs
 ```
 
-Then deploy and run the tests.
+Then run Anchor test
 
-```
+```bash
 anchor test
-```
-
-## Localnet Testing
-
-In `Anchor.toml`, set the cluster to localnet.
-
-```toml
-[provider]
-cluster = "localnet"
-wallet = "secrets/payer-keypair.json"
-```
-
-Create a localnet switchboard environment
-
-```
-npx sbv2 localnet:env --keypair secrets/payer-keypair.json
-```
-
-In a new shell, start the local validator using the script output from above
-
-```
-chmod +x ./start-local-validator.sh
-./start-local-validator.sh
-```
-
-In a new shell, start the local Switchboard oracle
-
-```
-chmod +x ./start-oracle.sh
-CLUSTER=localnet ./start-oracle.sh
-```
-
-Run the anchor test using the already running localnet validator
-
-```
-anchor test --skip-local-validator
 ```

@@ -47,6 +47,12 @@ git clone https://github.com/switchboard-xyz/sbv2-solana
 | Mainnet-Beta | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
 | Devnet       | `2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG` |
 
+See [switchboard.xyz/explorer](https://switchboard.xyz/explorer) for a list of
+feeds deployed on Solana.
+
+See [app.switchboard.xyz](https://app.switchboard.xyz) to create your own Solana
+feeds.
+
 ## Libraries
 
 | **Lang** | **Name**                                                                                                                                                                                                | **Description**                                                          |
