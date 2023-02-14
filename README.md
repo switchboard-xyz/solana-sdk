@@ -5,10 +5,16 @@
 
   <h1>Switchboard V2</h1>
 
+  <p>A collection of libraries and examples for interacting with Switchboard V2 on Solana.</p>
+
   <p>
     <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
-	<a href="https://crates.io/crates/switchboard-v2"><img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust"></a>
-	<a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js"><img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm"></a>
+	  <a href="https://crates.io/crates/switchboard-v2">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+    </a>
+	  <a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">
+      <img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm">
+    </a>
   </p>
 
   <p>
@@ -34,7 +40,14 @@ To get started, clone the
 git clone https://github.com/switchboard-xyz/sbv2-solana
 ```
 
-## SDKs
+## Program IDs
+
+| Network      | Program ID                                     |
+| ------------ | ---------------------------------------------- |
+| Mainnet-Beta | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
+| Devnet       | `2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG` |
+
+## Libraries
 
 - [Rust](/rust/switchboard-v2/): Rust crate to deserialize and read Switchboard
   data feeds and VRF accounts
@@ -42,7 +55,7 @@ git clone https://github.com/switchboard-xyz/sbv2-solana
   Switchboard V2
 - [Python](/python/switchboardpy/) **(No longer Maintained)**
 
-## Programs
+## Example Programs
 
 - [native-feed-parser](/programs/native-feed-parser/): Read a Switchboard feed
   using Solana's native program library

@@ -3,9 +3,9 @@
     <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
   </a>
 
-  <h1>sbv2-solana / anchor-feed-parser</h1>
+  <h1>sbv2-solana / anchor-buffer-parser</h1>
 
-  <p>An example program written in Anchor demonstrating how to deserialize and read a Switchboard data feed on Solana.</p>
+  <p>An example program written in Anchor demonstrating how to deserialize and read a Switchboard buffer relayer on Solana.</p>
 
   <p>
 	<a href="https://crates.io/crates/switchboard-v2">
@@ -38,7 +38,7 @@ anchor build
 Get your program ID
 
 ```bash
-solana-keygen pubkey target/deploy/anchor_feed_parser-keypair.json
+solana-keygen pubkey target/deploy/anchor_buffer_parser-keypair.json
 ```
 
 Update `Anchor.toml` and `src/lib.rs` with your pubkey

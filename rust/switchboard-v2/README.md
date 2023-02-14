@@ -1,14 +1,43 @@
-[![cargo](https://badgen.net/crates/v/switchboard-v2)](https://crates.io/crates/switchboard-v2)&nbsp;&nbsp;
-[![twitter](https://badgen.net/twitter/follow/switchboardxyz)](https://twitter.com/switchboardxyz)&nbsp;&nbsp;
+<div align="center">
+  <a href="#">
+    <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+  </a>
 
-# switchboard-v2
+  <h1>switchboard-v2</h1>
 
-A Rust library to interact with Switchboard V2 accounts.
+  <p>A Rust library to interact with Switchboard V2 accounts on Solana.</p>
 
-This package can be used to interact and deserialize Switchboard V2 accounts.
+  <p>
+	<a href="https://crates.io/crates/switchboard-v2">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+    </a>
+  </p>
 
-See the [documentation](https://docs.switchboard.xyz/introduction) for more info
-on Switchboard.
+  <p>
+    <a href="https://discord.gg/switchboardxyz">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+    </a>
+    <a href="https://twitter.com/switchboardxyz">
+      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
+    </a>
+  </p>
+
+  <h4>
+    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-v2/latest/switchboard-v2/">docs.rs/switchboard-v2</a>
+  </h4>
+  <h4>
+    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
+  </h4>
+</div>
+
+## Install
+
+Add the following to your Cargo.toml
+
+```toml
+[dependencies]
+switchboard-v2 = "0.1.20"
+```
 
 ## Features
 
