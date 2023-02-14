@@ -24,6 +24,9 @@
   </p>
 
   <h4>
+    <strong>Npm: </strong><a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">npmjs.com/package/@switchboard-xyz/solana.js</a>
+  </h4>
+  <h4>
     <strong>Typedocs: </strong><a href="https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js">docs.switchboard.xyz/api/@switchboard-xyz/solana.js</a>
   </h4>
   <h4>
@@ -39,7 +42,7 @@ npm i --save @switchboard-xyz/solana.js
 
 ## Usage
 
-Load the Switchboard Program
+### Load the Switchboard Program
 
 ```ts
 import { Connection } from '@solana/web3.js';
@@ -55,7 +58,7 @@ const program = await SwitchboardProgram.load(
 );
 ```
 
-Create a queue
+### Create a queue
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -75,7 +78,7 @@ const [queueAccount, txnSignature] = await QueueAccount.create(program, {
 const queue = await queueAccount.loadData();
 ```
 
-Add an oracle
+### Add an oracle
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -92,7 +95,7 @@ const oracle = await oracleAccount.loadData();
 await oracleAccount.heartbeat();
 ```
 
-Add a data feed
+### Add a data feed
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -127,7 +130,7 @@ const [aggregatorAccount, aggregatorInitSignatures] =
 const aggregator = await aggregatorAccount.loadData();
 ```
 
-Request a new value
+### Request a new value
 
 ```ts
 import { AggregatorAccount } from '@switchboard-xyz/solana.js';
@@ -136,6 +139,8 @@ const aggregatorAccount = new AggregatorAccount(program, aggregatorPubkey);
 
 await aggregatorAccount.openRound();
 ```
+
+### Read a Data Feed
 
 After the oracles respond, read the feed result
 
@@ -151,6 +156,8 @@ if (result === null) {
 }
 console.log(result.toString());
 ```
+
+### History Buffer
 
 Optionally, add a history buffer to your feed to store the last N historical samples
 
@@ -170,6 +177,8 @@ const [historyBuffer, addHistorySignature] =
   });
 const history = await historyBuffer.loadData();
 ```
+
+### Watch a Data Feed
 
 Setup a websocket listener to invoke a callback whenever an aggregator is updated
 
