@@ -8,8 +8,8 @@
   <p>A Rust library to interact with Switchboard V2 accounts on Solana.</p>
 
   <p>
-	<a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+	  <a href="https://crates.io/crates/switchboard-v2">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
     </a>
   </p>
 
