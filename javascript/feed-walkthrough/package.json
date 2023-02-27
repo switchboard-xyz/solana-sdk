@@ -18,8 +18,9 @@
   },
   "dependencies": {
     "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
-    "@solana/web3.js": "^1.67.2",
-    "@switchboard-xyz/common": "^2.1.29",
+    "@solana/web3.js": "^1.73.3",
+    "@switchboard-xyz/common": "^2.1.31",
+    "@switchboard-xyz/oracle": "^2.1.4",
     "@switchboard-xyz/solana.js": "file:../solana.js",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",

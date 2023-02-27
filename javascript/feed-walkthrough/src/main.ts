@@ -1,22 +1,21 @@
 import type { PublicKey } from "@solana/web3.js";
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/common";
+import { OracleJob, sleep } from "@switchboard-xyz/common";
+import { NodeOracle } from "@switchboard-xyz/oracle";
 import {
+  AggregatorAccount,
+  SwitchboardNetwork,
   SwitchboardProgram,
-  QueueAccount,
-  TransactionObject,
-  PermissionAccount,
-  LeaseAccount,
-  types,
 } from "@switchboard-xyz/solana.js";
 import chalk from "chalk";
 import dotenv from "dotenv";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import readlineSync from "readline-sync";
 
 dotenv.config();
+
+let oracle: NodeOracle | undefined = undefined;
 
 export const toAccountString = (
   label: string,
@@ -32,9 +31,6 @@ export const toAccountString = (
     publicKey.toString()
   )}`;
 };
-
-export const sleep = (ms: number): Promise<any> =>
-  new Promise((s) => setTimeout(s, ms));
 
 export const getKeypair = (keypairPath: string): Keypair => {
   if (!fs.existsSync(keypairPath)) {
@@ -60,13 +56,15 @@ async function main() {
   }
   const authority = getKeypair(payerKeypairPath);
 
+  if ((process.env.CLUSTER ?? "").startsWith("mainnet")) {
+    throw new Error(`This script should not be used on mainnet`);
+  }
+
   // get cluster
-  let cluster: "mainnet-beta" | "devnet" | "localnet";
+  let cluster: "devnet" | "localnet";
   if (
     process.env.CLUSTER &&
-    (process.env.CLUSTER === "mainnet-beta" ||
-      process.env.CLUSTER === "devnet" ||
-      process.env.CLUSTER === "localnet")
+    (process.env.CLUSTER === "devnet" || process.env.CLUSTER === "localnet")
   ) {
     cluster = process.env.CLUSTER;
   } else {
@@ -84,196 +82,107 @@ async function main() {
 
   const program = await SwitchboardProgram.load(
     cluster === "localnet" ? "devnet" : cluster,
-    new Connection(rpcUrl),
+    new Connection(rpcUrl, "confirmed"),
     authority
   );
 
-  console.log(program.cluster);
-
   console.log(chalk.yellow("######## Switchboard Setup ########"));
 
-  // create our token wallet for the wrapped SOL mint
-  const tokenAccount = await program.mint.getOrCreateAssociatedUser(
-    program.walletPubkey
-  );
+  const [network, signatures] = await SwitchboardNetwork.create(program, {
+    name: "Queue-1",
+    slashingEnabled: false,
+    reward: 0,
+    minStake: 0,
+    cranks: [{ name: "Crank", maxRows: 10 }],
+    oracles: [
+      {
+        name: "Oracle",
+        enable: true,
+      },
+    ],
+  });
 
-  // Oracle Queue
-  const [queueAccount, queueInit] = await QueueAccount.createInstructions(
-    program,
-    program.walletPubkey,
-    {
-      name: "Queue-1",
-      slashingEnabled: false,
-      reward: 0,
-      minStake: 0,
-    }
-  );
+  const queueAccount = network.queue.account;
   console.log(toAccountString("Oracle Queue", queueAccount.publicKey));
 
-  // Crank
-  const [crankAccount, crankInit] = await queueAccount.createCrankInstructions(
-    program.walletPubkey,
-    {
-      name: "Crank",
-      maxRows: 10,
-    }
-  );
+  const crankAccount = network.cranks[0].account;
   console.log(toAccountString("Crank", crankAccount.publicKey));
 
-  // Oracle
-  const [oracleAccount, oracleInit] =
-    await queueAccount.createOracleInstructions(program.walletPubkey, {
-      name: "Oracle",
-      enable: true,
-      queueAuthority: authority,
-    });
+  const oracleAccount = network.oracles[0].account;
   console.log(toAccountString("Oracle", oracleAccount.publicKey));
 
-  // Aggregator
-  const [aggregatorAccount, aggregatorInit] =
-    await queueAccount.createFeedInstructions(program.walletPubkey, {
-      name: "SOL_USD",
-      queueAuthority: authority,
-      batchSize: 1,
-      minRequiredOracleResults: 1,
-      minRequiredJobResults: 1,
-      minUpdateDelaySeconds: 10,
-      fundAmount: 0.5,
-      enable: true,
-      jobs: [
-        {
-          weight: 2,
-          data: OracleJob.encodeDelimited(
-            OracleJob.fromObject({
-              tasks: [
-                {
-                  httpTask: {
-                    url: `https://ftx.us/api/markets/SOL_USD`,
-                  },
+  const [aggregatorAccount] = await queueAccount.createFeed({
+    name: "SOL_USD",
+    batchSize: 1,
+    minRequiredOracleResults: 1,
+    minRequiredJobResults: 1,
+    minUpdateDelaySeconds: 10,
+    fundAmount: 0.5,
+    queueAuthority: authority,
+    enable: true,
+    crankPubkey: crankAccount.publicKey,
+    jobs: [
+      {
+        weight: 2,
+        data: OracleJob.encodeDelimited(
+          OracleJob.fromObject({
+            tasks: [
+              {
+                valueTask: {
+                  value: 10,
                 },
-                {
-                  jsonParseTask: { path: "$.result.price" },
-                },
-              ],
-            })
-          ).finish(),
-        },
-      ],
-    });
-  console.log(toAccountString("Aggregator", aggregatorAccount.publicKey));
-
-  const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-    program,
-    authority.publicKey,
-    queueAccount.publicKey,
-    aggregatorAccount.publicKey
-  );
-  const [leaseAccount, leaseBump] = LeaseAccount.fromSeed(
-    program,
-    queueAccount.publicKey,
-    aggregatorAccount.publicKey
-  );
-  const leaseEscrow = program.mint.getAssociatedAddress(leaseAccount.publicKey);
-
-  const crankPushIxn = types.crankPush(
-    program,
-    {
-      params: {
-        stateBump: program.programState.bump,
-        permissionBump: permissionBump,
-        notifiRef: null,
+              },
+            ],
+          })
+        ).finish(),
       },
-    },
-    {
-      crank: crankAccount.publicKey,
-      aggregator: aggregatorAccount.publicKey,
-      oracleQueue: queueAccount.publicKey,
-      queueAuthority: authority.publicKey,
-      permission: permissionAccount.publicKey,
-      lease: leaseAccount.publicKey,
-      escrow: leaseEscrow,
-      programState: program.programState.publicKey,
-      dataBuffer: crankAccount.dataBuffer!.publicKey,
-    }
-  );
-
-  const packedTxns = TransactionObject.pack([
-    queueInit,
-    crankInit,
-    ...oracleInit,
-    ...aggregatorInit,
-    new TransactionObject(authority.publicKey, [crankPushIxn], []),
-  ]);
-  const txnSignatures = await program.signAndSendAll(packedTxns, {
-    skipPreflight: true,
+    ],
   });
-  console.log(JSON.stringify(txnSignatures, undefined, 2));
-
-  const aggregator = await aggregatorAccount.loadData();
-
-  await oracleAccount.heartbeat();
+  console.log(toAccountString("Aggregator", aggregatorAccount.publicKey));
 
   console.log(chalk.green("\u2714 Switchboard setup complete"));
 
-  // Run the oracle
   console.log(chalk.yellow("######## Start the Oracle ########"));
-  console.log(chalk.blue("Run the following command in a new shell\r\n"));
+  oracle = await NodeOracle.fromReleaseChannel({
+    releaseChannel: "testnet",
+    chain: "solana",
+    network: program.cluster === "mainnet-beta" ? "mainnet" : program.cluster,
+    rpcUrl: program.connection.rpcEndpoint,
+    oracleKey: oracleAccount.publicKey.toBase58(),
+    secretPath: payerKeypairPath,
+    envVariables: {
+      VERBOSE: "1",
+      DEBUG: "1",
+      DISABLE_NONE_QUEUE: "1",
+    },
+  });
+  await oracle.startAndAwait();
+  await sleep(1000); // wait 1 extra second for oracle to heartbeat
+  console.log(chalk.green("\u2714 Oracle ready"));
+
+  console.log(chalk.yellow("######## Calling OpenRound ########"));
+  const [newAggregatorState] =
+    await aggregatorAccount.openRoundAndAwaitResult();
   console.log(
-    `      ORACLE_KEY=${oracleAccount.publicKey} PAYER_KEYPAIR=${payerKeypairPath} RPC_URL=${rpcUrl} docker-compose up\r\n`
-  );
-  if (
-    !readlineSync.keyInYN(
-      `Select 'Y' when the docker container displays ${chalk.underline(
-        "Starting listener..."
-      )}`
-    )
-  ) {
-    console.log(chalk.red("\u2716 User exited..."));
-    return;
-  }
-  console.log("");
-
-  const confirmedRoundPromise = aggregatorAccount.nextRound();
-
-  // Turn the Crank
-  async function turnCrank(retryCount: number): Promise<number> {
-    try {
-      const readyPubkeys = await crankAccount.peakNextReady(5);
-      if (readyPubkeys) {
-        await crankAccount.pop({
-          payoutWallet: tokenAccount,
-          readyPubkeys,
-          nonce: 0,
-        });
-        console.log(chalk.green("\u2714 Crank turned"));
-        return 0;
-      } else {
-        console.log(chalk.red("\u2716 No feeds ready, exiting"));
-        return --retryCount;
-      }
-    } catch {
-      return --retryCount;
-    }
-  }
-  // Might need time for accounts to propagate
-  let retryCount = 3;
-  while (retryCount) {
-    await sleep(3000);
-    retryCount = await turnCrank(retryCount);
-  }
-
-  // Read Aggregators latest result
-  console.log(chalk.yellow("######## Aggregator Result ########"));
-  const confirmedRound = await confirmedRoundPromise;
-  console.log(
-    `${chalk.blue("Result:")} ${chalk.green(confirmedRound.result.toBig())}\r\n`
+    `${chalk.blue("Result:")} ${chalk.green(
+      AggregatorAccount.decodeLatestValue(newAggregatorState).toString()
+    )}\r\n`
   );
   console.log(chalk.green("\u2714 Aggregator succesfully updated!"));
+
+  if (oracle) {
+    oracle.stop();
+    oracle = undefined;
+  }
 }
 
 main().then(
-  () => process.exit(),
+  () => {
+    oracle?.stop();
+    process.exit();
+  },
   (error) => {
+    oracle?.stop();
     console.error("Failed to create a private feed");
     console.error(error);
     process.exit(-1);
