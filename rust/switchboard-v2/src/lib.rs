@@ -5,6 +5,7 @@ pub mod aggregator;
 pub mod buffer_relayer;
 pub mod crank;
 pub mod decimal;
+pub mod ecvrf;
 pub mod error;
 pub mod history_buffer;
 pub mod job;
@@ -13,22 +14,24 @@ pub mod permission;
 pub mod queue;
 pub mod sb_state;
 pub mod vrf;
+pub mod vrf_lite;
+pub mod vrf_pool;
 
-pub use aggregator::{AggregatorAccountData, AggregatorRound};
-pub use buffer_relayer::{BufferRelayerAccountData, BufferRelayerRound};
-pub use crank::{CrankAccountData, CrankRow};
-pub use decimal::SwitchboardDecimal;
+pub use aggregator::*;
+pub use buffer_relayer::*;
+pub use crank::*;
+pub use decimal::*;
+pub use ecvrf::*;
 pub use error::SwitchboardError;
-pub use history_buffer::{AggregatorHistoryBuffer, AggregatorHistoryRow};
-pub use job::JobAccountData;
-pub use oracle::{OracleAccountData, OracleMetrics};
-pub use permission::{PermissionAccountData, PermissionSet, SwitchboardPermission};
-pub use queue::OracleQueueAccountData;
-pub use sb_state::SbState;
-pub use vrf::{
-    AccountMetaBorsh, AccountMetaZC, Callback, CallbackZC, VrfAccountData, VrfRequestRandomness,
-    VrfRound, VrfSetCallback, VrfStatus,
-};
+pub use history_buffer::*;
+pub use job::*;
+pub use oracle::*;
+pub use permission::*;
+pub use queue::*;
+pub use sb_state::*;
+pub use vrf::*;
+pub use vrf_lite::*;
+pub use vrf_pool::*;
 
 /// Seed used to derive the SbState PDA.
 pub const STATE_SEED: &[u8] = b"STATE";

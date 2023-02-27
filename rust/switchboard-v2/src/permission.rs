@@ -1,10 +1,11 @@
 use super::error::SwitchboardError;
 use anchor_lang::prelude::*;
-// use bytemuck::{Pod, Zeroable};
+use anchor_lang::Discriminator;
 use solana_program::entrypoint::ProgramResult;
 use solana_program::instruction::Instruction;
 use solana_program::program::{invoke, invoke_signed};
-// use std::cell::Ref;
+
+// PermissionSet
 
 #[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize, Eq, PartialEq)]
 pub enum SwitchboardPermission {
@@ -52,11 +53,11 @@ pub struct PermissionSetParams {
     pub enable: bool,
 }
 
-impl<'info> PermissionSet<'info> {
-    fn discriminator() -> [u8; 8] {
-        [211, 122, 185, 120, 129, 182, 55, 103]
-    }
+impl Discriminator for PermissionSet<'_> {
+    const DISCRIMINATOR: [u8; 8] = [211, 122, 185, 120, 129, 182, 55, 103];
+}
 
+impl<'info> PermissionSet<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,

@@ -218,3 +218,23 @@ msg!("Buffer string {:?}!", result_string);
 
 **Example**:
 [anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-buffer-parser/src/lib.rs)
+
+## Supported CPI Calls
+
+| Instruction                 | is supported |
+| --------------------------- | ------------ |
+| permission_set              | true         |
+| vrf_request_randomness      | true         |
+| vrf_set_callback            | true         |
+| vrf_close                   | true         |
+| vrf_lite_request_randomness | true         |
+| vrf_lite_close              | true         |
+| vrf_pool_request_randomness | true         |
+| vrf_pool_remove             | true         |
+| vrf_pool_add                | TODO         |
+| aggregator_open_round       | TODO         |
+| buffer_relayer_open_round   | TODO         |
+
+See
+[https://docs.switchboard.xyz/solana/idl](https://docs.switchboard.xyz/solana/idl)
+for a list of all program instructions.
