@@ -1,6 +1,6 @@
 import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { DockerOracle } from '@switchboard-xyz/common';
+import { IOracleConfig, NodeOracle } from '@switchboard-xyz/oracle';
 import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
@@ -15,7 +15,6 @@ import {
   SwitchboardNetwork,
   SwitchboardProgram,
 } from '..';
-import { SolanaOracleConfig } from './SolanaDockerOracle';
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
@@ -106,7 +105,7 @@ export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextV2Init = {
 };
 
 export class SwitchboardTestContextV2 {
-  dockerOracle?: DockerOracle;
+  _oracle?: NodeOracle;
 
   constructor(
     readonly network: LoadedSwitchboardNetwork,
@@ -216,9 +215,8 @@ export class SwitchboardTestContextV2 {
 
   static async initFromProvider(
     provider: AnchorProvider,
-    nodeImage: string,
     networkInitParams?: Partial<SwitchboardTestContextV2Init>,
-    dockerParams?: Partial<SolanaOracleConfig>,
+    oracleParams?: Partial<IOracleConfig>,
     programId?: PublicKey
   ): Promise<SwitchboardTestContextV2> {
     const switchboard = await SwitchboardTestContextV2.loadFromProvider(
@@ -226,15 +224,14 @@ export class SwitchboardTestContextV2 {
       networkInitParams,
       programId
     );
-    await switchboard.start(nodeImage, dockerParams);
+    await switchboard.start(oracleParams);
     return switchboard;
   }
 
   static async init(
     connection: Connection,
-    nodeImage: string,
     networkInitParams?: Partial<SwitchboardTestContextV2Init>,
-    dockerParams?: Partial<SolanaOracleConfig>,
+    oracleParams?: Partial<IOracleConfig>,
     walletPath?: string,
     programId?: PublicKey
   ): Promise<SwitchboardTestContextV2> {
@@ -244,18 +241,14 @@ export class SwitchboardTestContextV2 {
       walletPath,
       programId
     );
-    await switchboard.start(nodeImage, dockerParams);
+    await switchboard.start(oracleParams);
     return switchboard;
   }
 
-  async start(
-    nodeImage: string,
-    dockerParams?: Partial<SolanaOracleConfig>,
-    timeout = 60,
-    silent = true
-  ) {
-    const config: SolanaOracleConfig = _.merge(
+  async start(oracleParams?: Partial<IOracleConfig>, timeout = 60) {
+    const config: IOracleConfig = _.merge(
       {
+        chain: 'solana',
         network: this.program.cluster,
         rpcUrl: this.program.connection.rpcEndpoint,
         oracleKey: this.oracle.publicKey.toBase58(),
@@ -266,23 +259,22 @@ export class SwitchboardTestContextV2 {
           DISABLE_NONE_QUEUE: true,
         },
       },
-      dockerParams
+      oracleParams
     );
-    this.dockerOracle = new DockerOracle(
-      nodeImage,
-      { ...config, chain: 'solana' },
-      undefined,
-      silent
-    );
+    this._oracle = await NodeOracle.fromReleaseChannel({
+      releaseChannel: 'testnet',
+      ...config,
+      chain: 'solana',
+    });
 
     console.log(`Starting Switchboard oracle ...`);
 
-    await this.dockerOracle.startAndAwait(timeout);
+    await this._oracle.startAndAwait(timeout);
   }
 
   stop() {
-    if (this.dockerOracle) {
-      const stopped = this.dockerOracle.stop();
+    if (this._oracle) {
+      const stopped = this._oracle.stop();
       if (!stopped) {
         console.error(`Failed to stop docker oracle`);
 

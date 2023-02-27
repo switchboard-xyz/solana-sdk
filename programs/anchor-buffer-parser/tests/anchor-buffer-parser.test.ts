@@ -33,7 +33,7 @@ describe("anchor-buffer-parser test", () => {
         ),
       },
     });
-    await switchboard.start("dev-v2-RC_01_19_23_06_39", undefined, 60);
+    await switchboard.start();
   });
 
   after(async () => {

@@ -50,7 +50,7 @@ describe("anchor-history-parser", () => {
         ),
       },
     });
-    await switchboard.start("dev-v2-RC_01_19_23_06_39", undefined, 60);
+    await switchboard.start();
   });
 
   after(async () => {
