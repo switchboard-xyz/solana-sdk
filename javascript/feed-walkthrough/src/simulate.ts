@@ -1,9 +1,13 @@
-import { simulateOracleJobs } from "@switchboard-xyz/common";
+import OracleJobJson from "./oracle-job.json";
+
+import { OracleJob, simulateOracleJobs } from "@switchboard-xyz/common";
 import chalk from "chalk";
-import { myOracleJob } from "./oracle-job";
 
 async function main() {
-  const response = await simulateOracleJobs([myOracleJob], "devnet");
+  const response = await simulateOracleJobs(
+    [OracleJob.fromObject(OracleJobJson)],
+    "devnet"
+  );
 
   console.log(
     chalk.blue(`\u2139 TaskRunner Version: ${response.taskRunnerVersion}`)

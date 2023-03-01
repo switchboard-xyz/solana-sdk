@@ -10,6 +10,9 @@
  *  - call open round on the feed and await the result
  */
 
+import OracleJobJson from "./oracle-job.json";
+import { getKeypair, toAccountString } from "./utils";
+
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import {
@@ -22,8 +25,6 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import os from "os";
 import path from "path";
-import { myOracleJob } from "./oracle-job";
-import { getKeypair, toAccountString } from "./utils";
 
 dotenv.config();
 
@@ -96,7 +97,9 @@ async function main() {
     jobs: [
       {
         weight: 2,
-        data: OracleJob.encodeDelimited(myOracleJob).finish(),
+        data: OracleJob.encodeDelimited(
+          OracleJob.fromObject(OracleJobJson)
+        ).finish(),
       },
     ],
   });

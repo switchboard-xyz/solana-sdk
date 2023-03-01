@@ -8,6 +8,9 @@
  *  - call open round on the feed and await the result
  */
 
+import OracleJobJson from "./oracle-job.json";
+import { getKeypair, toAccountString } from "./utils";
+
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { OracleJob, sleep } from "@switchboard-xyz/common";
 import { NodeOracle } from "@switchboard-xyz/oracle";
@@ -20,8 +23,6 @@ import chalk from "chalk";
 import dotenv from "dotenv";
 import os from "os";
 import path from "path";
-import { myOracleJob } from "./oracle-job";
-import { getKeypair, toAccountString } from "./utils";
 
 dotenv.config();
 
@@ -40,7 +41,7 @@ async function main() {
   const authority = getKeypair(payerKeypairPath);
 
   if ((process.env.CLUSTER ?? "").startsWith("mainnet")) {
-    throw new Error(`This script should not be used on mainnet`);
+    throw new Error("This script should not be used on mainnet");
   }
 
   // get cluster
@@ -107,7 +108,9 @@ async function main() {
     jobs: [
       {
         weight: 2,
-        data: OracleJob.encodeDelimited(myOracleJob).finish(),
+        data: OracleJob.encodeDelimited(
+          OracleJob.fromObject(OracleJobJson)
+        ).finish(),
       },
     ],
   });
@@ -132,7 +135,8 @@ async function main() {
   await oracle.startAndAwait();
   let retryCount = 5;
   while (retryCount) {
-    if (queueAccount.isReady()) {
+    const activeOracles = await queueAccount.loadActiveOracleAccounts();
+    if (activeOracles.length > 0) {
       retryCount = 0;
       break;
     }

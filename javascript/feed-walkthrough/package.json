@@ -16,23 +16,28 @@
     "start:devnet": "ts-node src/devnet",
     "start:simulate": "ts-node src/simulate",
     "build": "rimraf dist && ./esbuild.js -inline-sourcemap",
-    "test": "echo \"No test script for @switchboard-xyz/v2-feed-walkthrough\" && exit 0"
+    "test": "echo \"No test script for @switchboard-xyz/v2-feed-walkthrough\" && exit 0",
+    "lint": "gts lint ./src",
+    "fix": "gts fix ./src"
   },
   "dependencies": {
-    "@solana/spl-token-v2": "npm:@solana/spl-token@^0.2.0",
     "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.1.31",
-    "@switchboard-xyz/oracle": "^2.1.4",
+    "@switchboard-xyz/common": "^2.1.33",
+    "@switchboard-xyz/oracle": "^2.1.6",
     "@switchboard-xyz/solana.js": "file:../solana.js",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
+    "@switchboard-xyz/eslint-config": "^0.1.2",
     "@types/node": "^18.7.18",
     "@types/readline-sync": "^1.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
     "esbuild-node-externals": "^1.4.1",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
     "estrella": "^1.4.1",
+    "gts": "^3.1.1",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.3"
