@@ -29,5 +29,5 @@
   "include": ["src/**/*"],
   "exclude": ["esbuild.js", "dist"],
   "references": [{ "path": "../switchboard-v2" }],
-  "files": ["src/main.ts"]
+  "files": ["src/private-queue.ts"]
 }

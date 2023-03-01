@@ -12,7 +12,9 @@
   "homepage": "https://docs.switchboard.xyz",
   "main": "dist/main.js",
   "scripts": {
-    "start": "ts-node src/main",
+    "start": "ts-node src/private-queue",
+    "start:devnet": "ts-node src/devnet",
+    "start:simulate": "ts-node src/simulate",
     "build": "rimraf dist && ./esbuild.js -inline-sourcemap",
     "test": "echo \"No test script for @switchboard-xyz/v2-feed-walkthrough\" && exit 0"
   },

@@ -1,5 +1,14 @@
-import type { PublicKey } from "@solana/web3.js";
-import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
+/**
+ * Create a private switchboard oracle queue and fulfill your own open round request.
+ *
+ * This script will:
+ *  - create a new private switchboard network with a single oracle and crank
+ *  - create a new data feed for the queue and crank
+ *  - start a new switchboard oracle and heartbeat on-chain to signal readiness
+ *  - call open round on the feed and await the result
+ */
+
+import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { OracleJob, sleep } from "@switchboard-xyz/common";
 import { NodeOracle } from "@switchboard-xyz/oracle";
 import {
@@ -9,40 +18,14 @@ import {
 } from "@switchboard-xyz/solana.js";
 import chalk from "chalk";
 import dotenv from "dotenv";
-import fs from "fs";
 import os from "os";
 import path from "path";
+import { myOracleJob } from "./oracle-job";
+import { getKeypair, toAccountString } from "./utils";
 
 dotenv.config();
 
 let oracle: NodeOracle | undefined = undefined;
-
-export const toAccountString = (
-  label: string,
-  publicKey: PublicKey | string | undefined
-): string => {
-  if (typeof publicKey === "string") {
-    return `${chalk.blue(label.padEnd(24, " "))} ${chalk.yellow(publicKey)}`;
-  }
-  if (!publicKey) {
-    return "";
-  }
-  return `${chalk.blue(label.padEnd(24, " "))} ${chalk.yellow(
-    publicKey.toString()
-  )}`;
-};
-
-export const getKeypair = (keypairPath: string): Keypair => {
-  if (!fs.existsSync(keypairPath)) {
-    throw new Error(
-      `failed to load authority keypair from ${keypairPath}, try providing a path to your keypair with the script 'ts-node src/main KEYPAIR_PATH'`
-    );
-  }
-  const keypairString = fs.readFileSync(keypairPath, "utf8");
-  const keypairBuffer = new Uint8Array(JSON.parse(keypairString));
-  const walletKeypair = Keypair.fromSecretKey(keypairBuffer);
-  return walletKeypair;
-};
 
 async function main() {
   // get payer keypair
@@ -124,17 +107,7 @@ async function main() {
     jobs: [
       {
         weight: 2,
-        data: OracleJob.encodeDelimited(
-          OracleJob.fromObject({
-            tasks: [
-              {
-                valueTask: {
-                  value: 10,
-                },
-              },
-            ],
-          })
-        ).finish(),
+        data: OracleJob.encodeDelimited(myOracleJob).finish(),
       },
     ],
   });
@@ -157,7 +130,15 @@ async function main() {
     },
   });
   await oracle.startAndAwait();
-  await sleep(1000); // wait 1 extra second for oracle to heartbeat
+  let retryCount = 5;
+  while (retryCount) {
+    if (queueAccount.isReady()) {
+      retryCount = 0;
+      break;
+    }
+    await sleep(1000);
+    --retryCount;
+  }
   console.log(chalk.green("\u2714 Oracle ready"));
 
   console.log(chalk.yellow("######## Calling OpenRound ########"));
@@ -185,6 +166,6 @@ main().then(
     oracle?.stop();
     console.error("Failed to create a private feed");
     console.error(error);
-    process.exit(-1);
+    process.exit(1);
   }
 );

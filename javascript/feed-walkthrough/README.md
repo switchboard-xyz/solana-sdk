@@ -1,59 +1,130 @@
-# Switchboard-V2 Feed Walkthrough
+<div align="center">
+  <a href="#">
+    <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+  </a>
 
-This example will walk you through
+  <h1>Sbv2 Feed Walkthrough</h1>
 
-- creating a personal oracle queue with a crank
-- add a SOL/USD data feed onto the crank
-- spin up a docker environment to run your own oracle
-- fulfill your update request on-chain
+  <p>An example showing how to create your own feed using Switchboard.</p>
+
+  <p>
+    <a href="https://discord.gg/switchboardxyz">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+    </a>
+    <a href="https://twitter.com/switchboardxyz">
+      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
+    </a>
+  </p>
+
+  <h4>
+    <strong>Npm: </strong><a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">npmjs.com/package/@switchboard-xyz/solana.js</a>
+  </h4>
+  <h4>
+    <strong>Typedocs: </strong><a href="https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js">docs.switchboard.xyz/api/@switchboard-xyz/solana.js</a>
+  </h4>
+  <h4>
+    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
+  </h4>
+</div>
+
+## Install
+
+```bash
+npm i
+```
 
 ## Usage
 
-```bash
-ts-node src/main [PAYER_KEYPAIR_PATH]
-```
+### Simulate an OracleJob
 
-where **PAYER_KEYPAIR_PATH** is the location of your Solana keypair, defaulting
-to `~/.config/solana/id.json` if not provided
-
-When prompted, run the docker compose script in a new shell to start your local
-oracle then confirm the prompt to turn the crank and request an update on-chain.
-The oracle is ready to fulfill updates when it sees the following logs:
+Edit the OracleJob file `src/oracle-job.json`, then run
 
 ```bash
-{"timestamp":"2022-09-23T19:24:11.874Z","level":"info","message":"Loaded 1000 nonce accounts"}
-{"timestamp":"2022-09-23T19:24:11.885Z","level":"info","message":"started health check handler"}
-{"timestamp":"2022-09-23T19:24:11.886Z","level":"info","message":"Heartbeat routine started with an interval of 15 seconds."}
-{"timestamp":"2022-09-23T19:24:11.887Z","level":"info","message":"Watching event: AggregatorOpenRoundEvent ..."}
-{"timestamp":"2022-09-23T19:24:11.893Z","level":"info","message":"Watching event: VrfRequestRandomnessEvent ..."}
-{"timestamp":"2022-09-23T19:24:11.894Z","level":"info","message":"Using default performance monitoring"}
+ts-node src/simulate
 ```
 
-Example Output:
+### Create a Feed on Devnet
+
+You can create your own feeds using the devnet permissionless network. This
+network does _NOT_ require the queue authority to grant you permissions so you
+are free to use it as a testing environment.
+
+You do **_NOT_** need to run your own oracles for this network.
+
+Edit the OracleJob file `src/oracle-job.json`, then run
 
 ```bash
-$ ts-node src/main
-######## Switchboard Setup ########
-Program State            BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt
-Oracle Queue             AVbBmSeKJppRcphaPY1fPbFQW48Eg851G4XfqyTPMZNF
-Crank                    6fNsrJhaB2MPpwpcxW7AL5zyoiq7Gyz2mM6q3aVz7xxh
-Oracle                   CmTr9FSeuhMPBLEPa3o2M71RwRnBz6LMcsfzHaW721Ak
-  Permission             2pC5ESkVKGx4yowGrVB21f6eXaaMRQY5cBazfqn1bAQs
-Aggregator (SOL/USD)     FLixyyJVzfCF4PmDG2VcFm1LUBu1aBTXox3oCWNVU88m
-  Permission             EVerqanwRrHRvtPXDRdFHPc7VnXuyEPRr9XA5udpFA4E
-  Lease                  FC6SfAEuoB1SoZAnCqkMyyYnSfLSy8KfPUFH9SASBUzU
-  Job (FTX)              BbNzfRQjTYiCZVfvK1qpQkkon3kP2tbvaCHfzsyjeBU3
-✔ Switchboard setup complete
-######## Start the Oracle ########
-Run the following command in a new shell
-
-      ORACLE_KEY=CmTr9FSeuhMPBLEPa3o2M71RwRnBz6LMcsfzHaW721Ak PAYER_KEYPAIR=/Users/switchboard/.config/solana/id.json RPC_URL=https://api.devnet.solana.com docker-compose up
-
-Select 'Y' when the docker container displays Starting listener... [y/n]: y
-
-✔ Crank turned
-######## Aggregator Result ########
-Result: 30.91
-
-✔ Aggregator succesfully updated!
+ts-node src/devnet
 ```
+
+Optionally, provide these env variables
+
+```bash
+RPC_URL=https://my_custom_rpc_url.com \
+PAYER_KEYPAIR=~/my_keypair.json \
+ts-node src/devnet
+```
+
+### Create a Private Queue and Oracle
+
+You can also create your own private Switchboard network and run your own
+oracles. This requires you to run your own oracles for this network.
+
+The following script will
+
+- Create a private queue and crank
+- Create a new data feed on this network
+- Start a local oracle
+- Call OpenRound and await the updated result from your local oracle
+
+```bash
+ts-node src/private-queue
+```
+
+Optionally, provide these env variables
+
+```bash
+RPC_URL=https://my_custom_rpc_url.com \
+PAYER_KEYPAIR=~/my_keypair.json \
+ts-node src/private-queue
+```
+
+### Create a Feed with the CLI
+
+First install the sbv2 cli
+
+```bash
+npm install -g @switchboard-xyz/cli^2
+```
+
+Then run the following command to create your own feed using the devnet
+permissionless queue and crank
+
+```bash
+export QUEUE_KEY=F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy
+export CRANK_KEY=GN9jjCy2THzZxhYqZETmPM3my8vg4R5JyNkgULddUMa5
+sbv2 solana aggregator create "$QUEUE_KEY" \
+    --keypair ~/.config/solana/id.json \
+    --crankKey "$CRANK_KEY" \
+    --name "My_Test_Feed" \
+    --updateInterval 10 \
+    --minOracles 1 \
+    --batchSize 1 \
+    --leaseAmount 0.1 \
+    --job ./src/oracle-job.json \
+    --verbose
+```
+
+Then request an update for your new feed
+
+```bash
+sbv2 solana aggregator update $AGGREGATOR_KEY \
+    --keypair ~/.config/solana/id.json
+```
+
+See
+[docs.switchboard.xyz/solana/program/devnet](https://docs.switchboard.xyz/solana/program/devnet)
+for a list of devnet accounts to use
+
+**_NOTE:_** You can provide multiple `--job` flags to add additional oracle jobs
+to your data feed
