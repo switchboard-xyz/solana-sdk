@@ -419,9 +419,7 @@ describe('Vrf Pool Tests', () => {
       for await (const n of Array.from(
         Array(Math.ceil(POOL_SIZE * 1.25)).keys()
       )) {
-        console.log(n);
         const idx = n % pool.length;
-        console.log(`${vrfPool.idx} === ${idx}`);
         assert(vrfPool.idx === idx, 'VrfPoolIdxMismatch');
 
         const [event, signature] =
@@ -436,9 +434,8 @@ describe('Vrf Pool Tests', () => {
           'VrfRowMismatch'
         );
 
-        await sleep(1000);
+        await sleep(1500);
         const nextIdx = (idx + 1) % pool.length;
-        console.log(`${vrfPool.idx} === ${nextIdx}`);
         assert(vrfPool.idx === nextIdx, 'VrfPoolIdxMismatch');
       }
 
