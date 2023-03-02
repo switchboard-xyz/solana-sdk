@@ -259,7 +259,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       vrfPool.queue
     );
 
-    const [permissionAccount] = this.getPermissionAccount(
+    const [permissionAccount] = params.vrf.getPermissionAccount(
       queueAccount.publicKey,
       queue.authority
     );
@@ -357,7 +357,8 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
 
     const accountMetas = vrfRows.map((row): Array<AccountMeta> => {
       const escrow = this.program.mint.getAssociatedAddress(row.pubkey);
-      const [permission] = this.getPermissionAccount(
+      const vrfLiteAccount = new VrfLiteAccount(this.program, row.pubkey);
+      const [permission] = vrfLiteAccount.getPermissionAccount(
         vrfPool.queue,
         queueAuthority
       );

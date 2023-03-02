@@ -1,5 +1,6 @@
 name: solana-js-test
 on:
+  workflow_dispatch:
   push:
     paths:
       - "javascript/solana.js/src/**"

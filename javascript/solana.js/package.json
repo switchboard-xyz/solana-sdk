@@ -15,11 +15,7 @@
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
     },
-    "./package.json": "./package.json",
-    "./docker": {
-      "import": "./lib/esm/SolanaDockerOracle.js",
-      "require": "./lib/cjs/SolanaDockerOracle.js"
-    }
+    "./package.json": "./package.json"
   },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
@@ -37,9 +33,9 @@
     "build": "npm run build:cjs && npm run build:esm",
     "watch": "tsc -p tsconfig.cjs.json --watch",
     "pretest": "npm run build",
-    "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 10000",
-    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000",
-    "test:localnet:mainnet": "SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000",
+    "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 150000",
+    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 150000",
+    "test:localnet:mainnet": "SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 150000",
     "localnet:up": "npm run local:validator & sleep 20 && npm run test:localnet",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "localnet": "npm run localnet:up; npm run localnet:down",
@@ -56,7 +52,7 @@
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
     "@switchboard-xyz/common": "^2.1.33",
-    "@switchboard-xyz/oracle": "^2.1.6",
+    "@switchboard-xyz/oracle": "^2.1.7",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21"
   },

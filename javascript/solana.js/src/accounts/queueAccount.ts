@@ -1161,7 +1161,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     oraclesNeeded = 1
   ): Promise<boolean> {
     const activeOracles = await this.loadActiveOracleAccounts(_queue);
-    return activeOracles.length >= oraclesNeeded ? true : false;
+    return activeOracles.length >= oraclesNeeded;
   }
 
   public async setConfig(
