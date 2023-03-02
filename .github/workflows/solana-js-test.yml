@@ -42,6 +42,7 @@ jobs:
   job2:
     name: "Devnet JS SDK Tests"
     needs: job1
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -91,6 +92,7 @@ jobs:
   job3:
     name: "Mainnet JS SDK Tests"
     needs: job1
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     defaults:
       run:
