@@ -363,7 +363,6 @@ describe('Vrf Pool Tests', () => {
       chalkString('VrfPool', bigVrfPoolAccount.publicKey.toBase58());
       await sleep(3000);
       const initialVrfPool = await bigVrfPoolAccount.loadData();
-      console.log(initialVrfPool.toJSON());
 
       const txns: Array<[VrfLiteAccount, TransactionObject]> =
         await Promise.all(
@@ -379,7 +378,7 @@ describe('Vrf Pool Tests', () => {
         );
 
       const packed = TransactionObject.pack(txns.map(t => t[1]));
-      const signatures = await TransactionObject.signAndSendAll(
+      await TransactionObject.signAndSendAll(
         ctx.program.provider,
         packed,
         { skipPreflight: true },
@@ -387,13 +386,9 @@ describe('Vrf Pool Tests', () => {
         10
       );
 
-      console.log(signatures);
-      console.log(signatures.length, 'signatures');
-
       await sleep(5000);
 
       const newVrfPool = await bigVrfPoolAccount.loadData();
-      console.log(newVrfPool.toJSON());
 
       const pool = [...newVrfPool.pool];
 
@@ -412,7 +407,7 @@ describe('Vrf Pool Tests', () => {
       });
 
       let vrfPool = newVrfPool;
-      const ws = bigVrfPoolAccount.onChange(updVrfPool => {
+      let ws: number | undefined = bigVrfPoolAccount.onChange(updVrfPool => {
         vrfPool = updVrfPool;
       });
 
@@ -439,9 +434,16 @@ describe('Vrf Pool Tests', () => {
         assert(vrfPool.idx === nextIdx, 'VrfPoolIdxMismatch');
       }
 
-      await bigVrfPoolAccount.program.connection
-        .removeAccountChangeListener(ws)
-        .catch();
+      if (ws) {
+        await bigVrfPoolAccount.program.connection
+          .removeAccountChangeListener(ws)
+          .then(() => {
+            ws = undefined;
+          })
+          .catch();
+      }
+
+      return;
     });
   });
 });
