@@ -151,39 +151,44 @@ describe("anchor-vrf-parser test", () => {
     // give account time to propagate to oracle RPCs
     await sleep(2000);
 
-    // Request randomness
-    await vrfClientProgram.methods.requestResult!({})
-      .accounts({
-        state: vrfClientKey,
-        authority: payer.publicKey,
-        switchboardProgram: switchboard.program.programId,
-        vrf: vrfAccount.publicKey,
-        oracleQueue: queue.publicKey,
-        queueAuthority: authority,
-        dataBuffer,
-        permission: permissionAccount.publicKey,
-        escrow: vrf.escrow,
-        payerWallet: payerTokenWallet,
-        payerAuthority: payer.publicKey,
-        recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-        programState: switchboard.program.programState.publicKey,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      })
-      .rpc();
+    try {
+      // Request randomness
+      await vrfClientProgram.methods.requestResult!({})
+        .accounts({
+          state: vrfClientKey,
+          authority: payer.publicKey,
+          switchboardProgram: switchboard.program.programId,
+          vrf: vrfAccount.publicKey,
+          oracleQueue: queue.publicKey,
+          queueAuthority: authority,
+          dataBuffer,
+          permission: permissionAccount.publicKey,
+          escrow: vrf.escrow,
+          payerWallet: payerTokenWallet,
+          payerAuthority: payer.publicKey,
+          recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+          programState: switchboard.program.programState.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
 
-    const result = await vrfAccount.nextResult(
-      new anchor.BN(vrf.counter.toNumber() + 1),
-      45_000
-    );
-    if (!result.success) {
-      throw new Error(`Failed to get VRF Result: ${result.status}`);
+      const result = await vrfAccount.nextResult(
+        new anchor.BN(vrf.counter.toNumber() + 1),
+        45_000
+      );
+      if (!result.success) {
+        throw new Error(`Failed to get VRF Result: ${result.status}`);
+      }
+
+      const vrfClient = await VrfClient.fetch(
+        vrfClientProgram.provider.connection,
+        vrfClientKey
+      );
+
+      console.log(`VrfClient Result: ${vrfClient.result}`);
+    } catch (error) {
+      console.log(await vrfAccount.getCallbackTransactions());
+      throw error;
     }
-
-    const vrfClient = await VrfClient.fetch(
-      vrfClientProgram.provider.connection,
-      vrfClientKey
-    );
-
-    console.log(`VrfClient Result: ${vrfClient.result}`);
   });
 });
