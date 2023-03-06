@@ -1,6 +1,11 @@
 import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { IOracleConfig, NodeOracle } from '@switchboard-xyz/oracle';
+import {
+  IOracleConfig,
+  NodeOracle,
+  ReleaseChannel,
+  ReleaseChannelVersion,
+} from '@switchboard-xyz/oracle';
 import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
@@ -15,6 +20,8 @@ import {
   SwitchboardNetwork,
   SwitchboardProgram,
 } from '..';
+
+export type NodeConfig = IOracleConfig & Partial<ReleaseChannelVersion>;
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
@@ -245,25 +252,44 @@ export class SwitchboardTestContextV2 {
     return switchboard;
   }
 
-  async start(oracleParams?: Partial<IOracleConfig>, timeout = 60) {
-    const config: IOracleConfig = _.merge(
-      {
-        chain: 'solana',
-        network: this.program.cluster,
-        rpcUrl: this.program.connection.rpcEndpoint,
-        oracleKey: this.oracle.publicKey.toBase58(),
-        secretPath: this.walletPath,
-        envVariables: {
-          VERBOSE: '1',
-          DEBUG: '1',
-          DISABLE_NONE_QUEUE: true,
-        },
+  async start(
+    oracleParams?: Partial<NodeConfig> | ReleaseChannel,
+    timeout = 60
+  ) {
+    const releaseChannel: ReleaseChannel =
+      typeof oracleParams === 'string' &&
+      (oracleParams === 'testnet' ||
+        oracleParams === 'mainnet' ||
+        oracleParams === 'latest')
+        ? oracleParams
+        : 'testnet';
+
+    const baseConfig: NodeConfig = {
+      chain: 'solana',
+      releaseChannel: releaseChannel,
+      network:
+        this.program.cluster === 'mainnet-beta'
+          ? 'mainnet'
+          : this.program.cluster,
+      rpcUrl: this.program.connection.rpcEndpoint,
+      oracleKey: this.oracle.publicKey.toBase58(),
+      secretPath: this.walletPath,
+      envVariables: {
+        VERBOSE: '1',
+        DEBUG: '1',
+        DISABLE_NONE_QUEUE: '1',
+        DISABLE_METRICS: '1',
       },
-      oracleParams
-    );
+    };
+
+    const config: NodeConfig =
+      typeof oracleParams === 'string'
+        ? baseConfig
+        : _.merge(baseConfig, oracleParams);
+
     this._oracle = await NodeOracle.fromReleaseChannel({
-      releaseChannel: 'testnet',
       ...config,
+      releaseChannel: releaseChannel,
       chain: 'solana',
     });
 
