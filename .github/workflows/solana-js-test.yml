@@ -77,7 +77,7 @@ jobs:
           solana-version: v1.14.10
           cluster: devnet
           args:
-            "--url https://api.devnet.solana.com  --clone
+            "--url ${{ secrets.DEVNET_RPC_URL }} --clone
             2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone
             J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone
             CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp --clone
@@ -128,7 +128,7 @@ jobs:
           solana-version: v1.14.10
           cluster: mainnet
           args:
-            "--url https://api.mainnet-beta.solana.com  --clone
+            "--url ${{ secrets.MAINNET_RPC_URL }} --clone
             SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
             7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
             Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone
