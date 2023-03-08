@@ -9,6 +9,5 @@ export * from './SwitchboardError';
 export * from './SwitchboardEvents';
 export * from './SwitchboardNetwork';
 export * from './SwitchboardProgram';
-export * from './test';
 export * from './TransactionObject';
 export * from './utils';

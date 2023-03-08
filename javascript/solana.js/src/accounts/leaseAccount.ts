@@ -502,7 +502,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     oracleRequestBatchSize: number,
     queueReward: BN
   ): BN {
-    return queueReward.mul(new BN(oracleRequestBatchSize + 1));
+    return queueReward.mul(new BN(oracleRequestBatchSize + 1)).mul(new BN(2));
   }
 
   /**

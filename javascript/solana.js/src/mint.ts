@@ -352,29 +352,34 @@ export class NativeMint extends Mint {
             owner,
             Mint.native
           ),
-          spl.createAssociatedTokenAccountInstruction(
-            payer,
-            ephemeralWallet,
-            ephemeralAccount.publicKey,
-            spl.NATIVE_MINT
-          ),
-          SystemProgram.transfer({
-            fromPubkey: owner,
-            toPubkey: ephemeralWallet,
-            lamports: wrapAmountLamports,
-          }),
-          spl.createSyncNativeInstruction(ephemeralWallet),
-          spl.createTransferInstruction(
-            ephemeralWallet,
-            associatedAddress,
-            ephemeralAccount.publicKey,
-            wrapAmountLamports
-          ),
-          spl.createCloseAccountInstruction(
-            ephemeralWallet,
-            owner,
-            ephemeralAccount.publicKey
-          ),
+          // only wrap funds if needed
+          ...(amount > 0
+            ? [
+                spl.createAssociatedTokenAccountInstruction(
+                  payer,
+                  ephemeralWallet,
+                  ephemeralAccount.publicKey,
+                  spl.NATIVE_MINT
+                ),
+                SystemProgram.transfer({
+                  fromPubkey: owner,
+                  toPubkey: ephemeralWallet,
+                  lamports: wrapAmountLamports,
+                }),
+                spl.createSyncNativeInstruction(ephemeralWallet),
+                spl.createTransferInstruction(
+                  ephemeralWallet,
+                  associatedAddress,
+                  ephemeralAccount.publicKey,
+                  wrapAmountLamports
+                ),
+                spl.createCloseAccountInstruction(
+                  ephemeralWallet,
+                  owner,
+                  ephemeralAccount.publicKey
+                ),
+              ]
+            : []),
         ],
         user ? [user, ephemeralAccount] : [ephemeralAccount]
       ),
