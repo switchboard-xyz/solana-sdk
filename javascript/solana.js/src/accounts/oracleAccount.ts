@@ -13,7 +13,10 @@ import { BN } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 import { Account, OnAccountChangeCallback } from './account';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
@@ -412,14 +415,17 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
   }
 
-  async heartbeat(params?: {
-    queueAccount: QueueAccount;
-    tokenWallet?: PublicKey;
-    queueAuthority?: PublicKey;
-    queue?: types.OracleQueueAccountData;
-    permission?: [PermissionAccount, number];
-    authority?: Keypair;
-  }): Promise<TransactionSignature> {
+  async heartbeat(
+    params?: {
+      queueAccount: QueueAccount;
+      tokenWallet?: PublicKey;
+      queueAuthority?: PublicKey;
+      queue?: types.OracleQueueAccountData;
+      permission?: [PermissionAccount, number];
+      authority?: Keypair;
+    },
+    opts?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const oracle = await this.loadData();
     const tokenWallet = params?.tokenWallet ?? oracle.tokenAccount;
 
@@ -469,7 +475,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           authority: oracle.oracleAuthority,
         }),
       ],
-      params?.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : [],
+      opts
     );
 
     const txnSignature = await this.program.signAndSend(heartbeatTxn);
@@ -478,7 +485,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
   async withdrawInstruction(
     payer: PublicKey,
-    params: OracleWithdrawParams
+    params: OracleWithdrawParams,
+    opts?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const tokenAmount = this.program.mint.toTokenAmountBN(params.amount);
 
@@ -548,7 +556,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         ixns,
         params.authority
           ? [params.authority, ephemeralWallet]
-          : [ephemeralWallet]
+          : [ephemeralWallet],
+        opts
       );
       return txn;
     }
@@ -582,14 +591,19 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return new TransactionObject(
       payer,
       [withdrawIxn],
-      params.authority ? [params.authority] : []
+      params.authority ? [params.authority] : [],
+      opts
     );
   }
 
-  async withdraw(params: OracleWithdrawParams): Promise<TransactionSignature> {
+  async withdraw(
+    params: OracleWithdrawParams,
+    opts?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      opts
     );
     const txnSignature = await this.program.signAndSend(withdrawTxn);
     return txnSignature;
