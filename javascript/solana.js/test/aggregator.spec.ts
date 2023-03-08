@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
 import assert from 'assert';
+import 'mocha';
 
-import * as sbv2 from '../src';
-import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
+import * as sbv2 from '../src';
 import {
   AggregatorAccount,
   JobAccount,
@@ -12,7 +12,7 @@ import {
   QueueAccount,
   types,
 } from '../src';
-import { OracleJob } from '@switchboard-xyz/common';
+import { setupTest, TestContext } from './utils';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;
@@ -294,7 +294,6 @@ describe('Aggregator Tests', () => {
     await leaseAccount.withdraw({
       amount: 'all',
       unwrap: true,
-      withdrawWallet: userTokenAddress,
     });
 
     const finalBalance = await leaseAccount.fetchBalanceBN();
