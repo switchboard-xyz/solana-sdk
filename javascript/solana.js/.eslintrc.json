@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/gts/",
+  "extends": "@switchboard-xyz",
   "rules": {
     "quotes": "off"
   }

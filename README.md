@@ -40,6 +40,13 @@ To get started, clone the
 git clone https://github.com/switchboard-xyz/sbv2-solana
 ```
 
+Then install the dependencies
+
+```bash
+cd sbv2-solana
+pnpm install
+```
+
 ## Program IDs
 
 | **Network**  | **Program ID**                                 |

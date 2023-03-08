@@ -1,0 +1,20 @@
+{
+  "name": "sbv2-solana",
+  "private": true,
+  "scripts": {
+    "preinstall": "npx only-allow pnpm"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^17.0.2",
+    "@switchboard-xyz/eslint-config": "latest",
+    "commitlint": "^17.4.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/sbv2-solana.git"
+  },
+  "packageManager": "pnpm@7.17.0"
+}
