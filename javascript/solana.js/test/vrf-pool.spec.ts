@@ -83,7 +83,7 @@ describe('Vrf Pool Tests', () => {
     chalkString('QueueAccount', queueAccount.publicKey.toBase58());
     chalkString('OracleAccount', oracle1.publicKey.toBase58());
 
-    await nodeOracle.startAndAwait();
+    await nodeOracle.startAndAwait(180); // gh actions can be slow to pull this
   });
 
   after(async () => {
