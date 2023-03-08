@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.0.134",
+  "version": "2.0.135-beta.0",
   "author": "",
   "license": "MIT",
   "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
@@ -15,7 +15,11 @@
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./test": {
+      "import": "./lib/esm/test/index.js",
+      "require": "./lib/cjs/test/index.js"
+    }
   },
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
