@@ -1,10 +1,10 @@
-import 'mocha';
 import assert from 'assert';
+import 'mocha';
 
-import * as sbv2 from '../src';
-import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
+import * as sbv2 from '../src';
 import { PermissionAccount, TransactionMissingSignerError } from '../src';
+import { setupTest, TestContext } from './utils';
 
 describe('Queue Tests', () => {
   let ctx: TestContext;
@@ -174,6 +174,7 @@ describe('Queue Tests', () => {
     await assert.rejects(async () => {
       await oracleAccount.withdraw({
         amount: 1,
+        unwrap: false,
       });
     }, TransactionMissingSignerError);
   });
@@ -197,6 +198,7 @@ describe('Queue Tests', () => {
     await oracleAccount.withdraw({
       amount: WITHDRAW_AMOUNT,
       authority: oracleAuthority,
+      unwrap: false,
     });
 
     const finalStakeBalance = await oracleAccount.fetchBalance(

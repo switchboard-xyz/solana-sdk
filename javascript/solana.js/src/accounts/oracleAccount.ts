@@ -492,6 +492,67 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       queue
     );
 
+    if (params.unwrap) {
+      const ephemeralWallet = Keypair.generate();
+
+      const ixns = [
+        // initialize space for ephemeral token account
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: ephemeralWallet.publicKey,
+          lamports:
+            await this.program.connection.getMinimumBalanceForRentExemption(
+              spl.ACCOUNT_SIZE
+            ),
+          space: spl.ACCOUNT_SIZE,
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
+        // initialize ephemeral token account
+        spl.createInitializeAccountInstruction(
+          ephemeralWallet.publicKey,
+          this.program.mint.address,
+          payer,
+          spl.TOKEN_PROGRAM_ID
+        ),
+        types.oracleWithdraw(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              permissionBump,
+              amount: tokenAmount,
+            },
+          },
+          {
+            oracle: this.publicKey,
+            oracleAuthority: oracle.oracleAuthority,
+            tokenAccount: oracle.tokenAccount,
+            withdrawAccount: ephemeralWallet.publicKey,
+            oracleQueue: queueAccount.publicKey,
+            permission: permissionAccount.publicKey,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            programState: this.program.programState.publicKey,
+            payer: payer,
+            systemProgram: SystemProgram.programId,
+          }
+        ),
+        spl.createCloseAccountInstruction(
+          ephemeralWallet.publicKey,
+          oracle.oracleAuthority,
+          payer
+        ),
+      ];
+
+      const txn = new TransactionObject(
+        payer,
+        ixns,
+        params.authority
+          ? [params.authority, ephemeralWallet]
+          : [ephemeralWallet]
+      );
+      return txn;
+    }
+
     const withdrawAccount =
       params.withdrawAccount ?? this.program.mint.getAssociatedAddress(payer);
 
@@ -640,17 +701,40 @@ export interface OracleStakeParams {
   disableWrap?: boolean;
 }
 
-export interface OracleWithdrawParams {
-  /** The amount of tokens to withdraw from the oracle staking wallet. Ex: 1.25 would withdraw 1250000000 wSOL tokens from the staking wallet */
-  amount: number;
-  /** SPL token account where the tokens will be sent. Defaults to the payers associated token account. */
-  withdrawAccount?: PublicKey;
-  /** Alternative keypair that is the oracle authority and required to withdraw from the staking wallet. */
-  authority?: Keypair;
-}
+// export interface OracleWithdrawParams {
+//   /** The amount of tokens to withdraw from the oracle staking wallet. Ex: 1.25 would withdraw 1250000000 wSOL tokens from the staking wallet */
+//   amount: number;
+//   /** SPL token account where the tokens will be sent. Defaults to the payers associated token account. */
+//   withdrawAccount?: PublicKey;
+//   /** Alternative keypair that is the oracle authority and required to withdraw from the staking wallet. */
+//   authority?: Keypair;
+// }
 
 export type OracleAccountsJSON = types.OracleAccountDataJSON & {
   publicKey: PublicKey;
   balance: number;
   permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
 };
+
+export interface OracleWithdrawBaseParams {
+  /** The amount of tokens to withdraw from the oracle staking wallet. Ex: 1.25 would withdraw 1250000000 wSOL tokens from the staking wallet */
+  amount: number;
+  /** Unwrap funds directly to oracle authority */
+  unwrap: boolean;
+  /** Alternative keypair that is the oracle authority and required to withdraw from the staking wallet. */
+  authority?: Keypair;
+}
+
+export interface OracleWithdrawUnwrapParams extends OracleWithdrawBaseParams {
+  unwrap: true;
+}
+
+export interface OracleWithdrawWalletParams extends OracleWithdrawBaseParams {
+  unwrap: false;
+  /** SPL token account where the tokens will be sent. Defaults to the payers associated token account. */
+  withdrawAccount?: PublicKey;
+}
+
+export type OracleWithdrawParams =
+  | OracleWithdrawUnwrapParams
+  | OracleWithdrawWalletParams;
