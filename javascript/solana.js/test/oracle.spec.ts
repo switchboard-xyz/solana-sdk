@@ -156,21 +156,14 @@ describe('OracleAccount Tests', () => {
       LAMPORTS_PER_SOL;
 
     // round to two decimal places
-    const stakingBalanceDiff =
-      Math.round(
-        (finalOracleStakingBalance -
-          initialOracleStakingBalance +
-          Number.EPSILON) *
-          100
-      ) / 100;
-
-    const authorityBalanceDiff =
-      Math.round(
-        (finalOracleAuthorityBalance -
-          initialOracleAuthorityBalance +
-          Number.EPSILON) *
-          100
-      ) / 100;
+    const stakingBalanceDiff = ctx.round(
+      finalOracleStakingBalance - initialOracleStakingBalance,
+      2
+    );
+    const authorityBalanceDiff = ctx.round(
+      finalOracleAuthorityBalance - initialOracleAuthorityBalance,
+      2
+    );
 
     assert(
       -1 * withdrawAmount === stakingBalanceDiff,

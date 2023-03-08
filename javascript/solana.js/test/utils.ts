@@ -6,6 +6,7 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 import { OracleJob } from '@switchboard-xyz/common';
+import assert from 'assert';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import os from 'os';
@@ -36,6 +37,7 @@ export interface TestContext {
   program: sbv2.SwitchboardProgram;
   payer: Keypair;
   toUrl: (signature: string) => string;
+  round: (num: number, decimalPlaces: number) => number;
 }
 
 export function isLocalnet(): boolean {
@@ -152,6 +154,11 @@ export async function setupTest(): Promise<TestContext> {
         : `https://explorer.solana.com/tx/${signature}${
             cluster === 'devnet' ? '?cluster=devnet' : ''
           }`,
+    round: (num: number, decimalPlaces = 2): number => {
+      assert(decimalPlaces > 0 && decimalPlaces < 16);
+      const base = Math.pow(10, decimalPlaces);
+      return Math.round((num + Number.EPSILON) * base) / base;
+    },
   };
 }
 
