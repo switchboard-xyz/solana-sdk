@@ -354,20 +354,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
   public async withdrawInstruction(
     payer: PublicKey,
-    params: {
-      amount: number | 'all';
-      unwrap?: boolean;
-      withdrawWallet: PublicKey;
-      withdrawAuthority?: Keypair;
-    }
+    params: LeaseWithdrawParams
   ): Promise<TransactionObject> {
-    const txns: Array<TransactionObject> = [];
-
-    const withdrawAuthority = params.withdrawAuthority
-      ? params.withdrawAuthority.publicKey
-      : payer;
-    const withdrawWallet = params.withdrawWallet;
-
     const { lease, queue, aggregatorAccount, aggregator, balance } =
       await this.fetchAccounts();
 
@@ -396,61 +384,99 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       lease.aggregator
     )[1];
 
-    txns.push(
-      new TransactionObject(
-        payer,
-        [
-          types.leaseWithdraw(
-            this.program,
-            {
-              params: {
-                stateBump: this.program.programState.bump,
-                leaseBump: leaseBump,
-                amount: withdrawAmount,
-              },
+    if (params.unwrap) {
+      const ephemeralWallet = Keypair.generate();
+
+      const ixns = [
+        // initialize space for ephemeral token account
+        SystemProgram.createAccount({
+          fromPubkey: payer,
+          newAccountPubkey: ephemeralWallet.publicKey,
+          lamports:
+            await this.program.connection.getMinimumBalanceForRentExemption(
+              spl.ACCOUNT_SIZE
+            ),
+          space: spl.ACCOUNT_SIZE,
+          programId: spl.TOKEN_PROGRAM_ID,
+        }),
+        // initialize ephemeral token account
+        spl.createInitializeAccountInstruction(
+          ephemeralWallet.publicKey,
+          this.program.mint.address,
+          payer,
+          spl.TOKEN_PROGRAM_ID
+        ),
+        types.leaseWithdraw(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              leaseBump: leaseBump,
+              amount: withdrawAmount,
             },
-            {
-              lease: this.publicKey,
-              escrow: lease.escrow,
-              aggregator: aggregatorAccount.publicKey,
-              queue: lease.queue,
-              withdrawAuthority: withdrawAuthority,
-              withdrawAccount: withdrawWallet,
-              tokenProgram: spl.TOKEN_PROGRAM_ID,
-              programState: this.program.programState.publicKey,
-              mint: this.program.mint.address,
-            }
-          ),
-        ],
-        params.withdrawAuthority ? [params.withdrawAuthority] : []
-      )
+          },
+          {
+            lease: this.publicKey,
+            escrow: lease.escrow,
+            aggregator: aggregatorAccount.publicKey,
+            queue: lease.queue,
+            withdrawAuthority: payer,
+            withdrawAccount: ephemeralWallet.publicKey,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            programState: this.program.programState.publicKey,
+            mint: this.program.mint.address,
+          }
+        ),
+        spl.createCloseAccountInstruction(
+          ephemeralWallet.publicKey,
+          payer,
+          payer
+        ),
+      ];
+
+      const txn = new TransactionObject(payer, ixns, [ephemeralWallet]);
+      return txn;
+    }
+
+    const withdrawAuthority = params.withdrawAuthority
+      ? params.withdrawAuthority.publicKey
+      : payer;
+    const withdrawWallet = params.withdrawWallet;
+
+    const txn = new TransactionObject(
+      payer,
+      [
+        types.leaseWithdraw(
+          this.program,
+          {
+            params: {
+              stateBump: this.program.programState.bump,
+              leaseBump: leaseBump,
+              amount: withdrawAmount,
+            },
+          },
+          {
+            lease: this.publicKey,
+            escrow: lease.escrow,
+            aggregator: aggregatorAccount.publicKey,
+            queue: lease.queue,
+            withdrawAuthority: withdrawAuthority,
+            withdrawAccount: withdrawWallet,
+            tokenProgram: spl.TOKEN_PROGRAM_ID,
+            programState: this.program.programState.publicKey,
+            mint: this.program.mint.address,
+          }
+        ),
+      ],
+      params.withdrawAuthority ? [params.withdrawAuthority] : []
     );
 
-    if (params.unwrap) {
-      const unwrapAmount = this.program.mint.fromTokenAmountBN(withdrawAmount);
-      txns.push(
-        await this.program.mint.unwrapInstructions(
-          payer,
-          unwrapAmount,
-          params.withdrawAuthority
-        )
-      );
-    }
-
-    const packed = TransactionObject.pack(txns);
-    if (packed.length > 1) {
-      throw new Error(`TransactionOverflowError`);
-    }
-
-    return packed[0];
+    return txn;
   }
 
-  public async withdraw(params: {
-    amount: number | 'all';
-    unwrap?: boolean;
-    withdrawWallet: PublicKey;
-    withdrawAuthority?: Keypair;
-  }): Promise<TransactionSignature> {
+  public async withdraw(
+    params: LeaseWithdrawParams
+  ): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(
       this.program.walletPubkey,
       params
@@ -701,9 +727,21 @@ export interface LeaseExtendParams {
   disableWrap?: boolean;
 }
 
-export interface LeaseWithdrawParams {
+export interface LeaseWithdrawBaseParams {
   amount: number | 'all';
-  unwrap?: boolean;
+  unwrap: boolean;
+}
+
+export interface LeaseWithdrawUnwrapParams extends LeaseWithdrawBaseParams {
+  unwrap: true;
+}
+
+export interface LeaseWithdrawWalletParams extends LeaseWithdrawBaseParams {
+  unwrap: false;
   withdrawWallet: PublicKey;
   withdrawAuthority?: Keypair;
 }
+
+export type LeaseWithdrawParams =
+  | LeaseWithdrawUnwrapParams
+  | LeaseWithdrawWalletParams;
