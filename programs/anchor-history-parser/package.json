@@ -1,5 +1,14 @@
 {
+  "name": "anchor-history-parser",
+  "version": "1.0.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/switchboard-xyz/sbv2-solana",
+    "directory": "programs/anchor-history-parser"
+  },
   "scripts": {
+    "build": "echo \"For workspace anchor-history-parser, run 'anchor build' from the project root\" && exit 0",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
   },
