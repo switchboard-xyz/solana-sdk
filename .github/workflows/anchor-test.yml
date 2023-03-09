@@ -13,6 +13,7 @@ jobs:
   vrfParserTest:
     name: "Anchor VRF Parser Tests"
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         shell: bash
@@ -51,6 +52,7 @@ jobs:
   feedParserTest:
     name: "Anchor Feed Parser Tests"
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         shell: bash
