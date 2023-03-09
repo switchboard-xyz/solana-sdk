@@ -16,7 +16,7 @@ inputs:
   anchor-version:
     description: "the Anchor version to install"
     required: false
-    default: "0.26.0"
+    default: "v0.26.0"
   node-version:
     description: "the NodeJS version to install"
     required: false
