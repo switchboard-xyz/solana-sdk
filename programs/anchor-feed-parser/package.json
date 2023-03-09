@@ -8,7 +8,7 @@
     "directory": "programs/anchor-feed-parser"
   },
   "scripts": {
-    "build": "echo \"For workspace anchor-feed-parser, run 'anchor build' from the project root\" && exit 0",
+    "build": "node ../build.js anchor-feed-parser Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb",
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
   },
   "dependencies": {

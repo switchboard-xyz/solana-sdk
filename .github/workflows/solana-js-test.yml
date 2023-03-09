@@ -1,4 +1,4 @@
-name: solana-js-test
+name: Solana.js Tests
 on:
   workflow_dispatch:
   push:

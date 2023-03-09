@@ -2,12 +2,17 @@
   "name": "sbv2-solana",
   "private": true,
   "scripts": {
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "fix": "pnpm -r fix"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^17.0.2",
     "@switchboard-xyz/eslint-config": "latest",
-    "commitlint": "^17.4.2"
+    "commitlint": "^17.4.2",
+    "shelljs": "^0.8.5",
+    "shx": "^0.3.4"
   },
   "engines": {
     "node": ">=14.0.0"

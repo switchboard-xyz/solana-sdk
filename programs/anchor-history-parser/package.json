@@ -8,7 +8,7 @@
     "directory": "programs/anchor-history-parser"
   },
   "scripts": {
-    "build": "echo \"For workspace anchor-history-parser, run 'anchor build' from the project root\" && exit 0",
+    "build": "node ../build.js anchor-history-parser C7rn1qJkq9FjTwV86RrY5Uih91NgymRVLdJ81rqLNXRS",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
   },

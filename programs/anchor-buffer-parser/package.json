@@ -8,7 +8,7 @@
     "directory": "programs/anchor-buffer-parser"
   },
   "scripts": {
-    "build": "echo \"For workspace anchor-buffer-parser, run 'anchor build' from the project root\" && exit 0",
+    "build": "node ../build.js anchor-buffer-parser 96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP",
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
   },
   "dependencies": {

@@ -9,9 +9,6 @@ export * from './SwitchboardError';
 export * from './SwitchboardEvents';
 export * from './SwitchboardNetwork';
 export * from './SwitchboardProgram';
-export {
-  NodeConfig,
-  SwitchboardTestContextV2,
-} from './test/SwitchboardTestContextV2';
+export * from './test';
 export * from './TransactionObject';
 export * from './utils';

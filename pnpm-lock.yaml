@@ -7,10 +7,14 @@ importers:
       '@commitlint/config-conventional': ^17.0.2
       '@switchboard-xyz/eslint-config': latest
       commitlint: ^17.4.2
+      shelljs: ^0.8.5
+      shx: ^0.3.4
     devDependencies:
       '@commitlint/config-conventional': 17.4.4
       '@switchboard-xyz/eslint-config': 0.1.8
       commitlint: 17.4.4
+      shelljs: 0.8.5
+      shx: 0.3.4
 
   javascript/feed-walkthrough:
     specifiers:

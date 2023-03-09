@@ -1,0 +1,81 @@
+name: Anchor Tests
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "javascript/solana.js/**"
+      - "programs/**"
+      - "rust/switchboard-v2/**"
+
+jobs:
+  vrfParserTest:
+    name: "Anchor VRF Parser Tests"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Cache Build
+        id: cache-anchor-vrf-build
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ./programs/anchor-vrf-parser/deploy
+            ./programs/anchor-vrf-parser/target
+          key:
+            ${{ runner.os }}-AnchorVrfParser-${{
+            hashFiles('./programs/anchor-vrf-parser/Cargo.toml',
+            './programs/anchor-vrf-parser/src/**') }}
+
+      - name: Anchor Build
+        working-directory: programs/anchor-vrf-parser
+        run: pnpm build
+
+      - name: Anchor Test
+        working-directory: programs/anchor-vrf-parser
+        run: anchor test
+
+  feedParserTest:
+    name: "Anchor Feed Parser Tests"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Cache Build
+        id: cache-anchor-feed-build
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ./programs/anchor-feed-parser/deploy
+            ./programs/anchor-feed-parser/target
+          key:
+            ${{ runner.os }}-AnchorFeedParser-${{
+            hashFiles('./programs/anchor-feed-parser/Cargo.toml',
+            './programs/anchor-feed-parser/src/**') }}
+
+      - name: Anchor Build
+        working-directory: programs/anchor-feed-parser
+        run: pnpm build
+
+      - name: Anchor Test
+        working-directory: programs/anchor-feed-parser
+        run: anchor test
