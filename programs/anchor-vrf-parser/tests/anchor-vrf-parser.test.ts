@@ -17,7 +17,6 @@ import {
   types,
 } from "@switchboard-xyz/solana.js";
 
-import { VrfClient } from "../client/accounts";
 import { AnchorVrfParser } from "../target/types/anchor_vrf_parser";
 
 describe("anchor-vrf-parser test", () => {
@@ -181,8 +180,7 @@ describe("anchor-vrf-parser test", () => {
         throw new Error(`Failed to get VRF Result: ${result.status}`);
       }
 
-      const vrfClient = await VrfClient.fetch(
-        vrfClientProgram.provider.connection,
+      const vrfClient = await vrfClientProgram.account.vrfClient.fetch(
         vrfClientKey
       );
 
