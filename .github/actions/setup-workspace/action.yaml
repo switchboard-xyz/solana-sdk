@@ -87,30 +87,51 @@ runs:
         solana --version
 
     # Install Anchor
-    - name: Setup AVM Cache
+    - name: Setup Anchor Cache
       uses: actions/cache@v3
-      id: cache-avm-cli
+      id: cache-anchor-cli
+      if: inputs.anchor-version != ''
       with:
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
-        key: ${{ runner.os }}-avm
-    - name: Install AVM
-      if: steps.cache-avm-cli.outputs.cache-hit != 'true'
+        key: anchor-cli-${{ runner.os }}-${{ inputs.anchor-version }}
+    - name: Install Anchor
       shell: bash
+      if: steps.cache-anchor-cli.outputs.cache-hit != 'true'
       run:
-        cargo install --git https://github.com/project-serum/anchor avm --locked
-        --force
-    - name: Set Anchor Version
-      shell: bash
-      run: |
-        avm install ${{ inputs.anchor-version }}
-        avm use ${{ inputs.anchor-version }}
+        cargo install --git https://github.com/coral-xyz/anchor --tag
+        v"${{inputs.anchor-version }}" anchor-cli --locked
     - name: Verify Anchor install
       shell: bash
       run: anchor --version
+
+    # - name: Setup AVM Cache
+    #   uses: actions/cache@v3
+    #   id: cache-avm-cli
+    #   with:
+    #     path: |
+    #       ~/.cargo/bin/
+    #       ~/.cargo/registry/index/
+    #       ~/.cargo/registry/cache/
+    #       ~/.cargo/git/db/
+    #     key: ${{ runner.os }}-avm
+    # - name: Install AVM
+    #   if: steps.cache-avm-cli.outputs.cache-hit != 'true'
+    #   shell: bash
+    #   run:
+    #     cargo install --git https://github.com/project-serum/anchor avm --locked
+    #     --force
+    # - name: Set Anchor Version
+    #   shell: bash
+    #   run: |
+    #     avm install ${{ inputs.anchor-version }}
+    #     avm use ${{ inputs.anchor-version }}
+    # - name: Verify Anchor install
+    #   shell: bash
+    #   run: anchor --version
 
     # Setup Keypair
     - name: Find or Create Keypair
