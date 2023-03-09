@@ -40,7 +40,7 @@
     "prepack": "npm run lint && npm run build",
     "lint": "gts lint ./src",
     "clean": "gts clean",
-    "fix": "gts fix ./test"
+    "fix": "gts fix ./src ./tests"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",

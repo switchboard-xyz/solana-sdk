@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",
-    "@switchboard-xyz/common": "^2.1.26",
-    "@switchboard-xyz/solana.js": "file:../../javascript/solana.js"
+    "@switchboard-xyz/common": "^2.1.33",
+    "@switchboard-xyz/solana.js": "workspace:*"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",
