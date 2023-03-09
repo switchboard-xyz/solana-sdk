@@ -1,13 +1,3 @@
-import * as anchor from '@coral-xyz/anchor';
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
-import {
-  AccountInfo,
-  Keypair,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  TransactionSignature,
-} from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import {
@@ -18,7 +8,19 @@ import {
 } from '../generated/types/SwitchboardPermission';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
+
 import { Account } from './account';
+
+import * as anchor from '@coral-xyz/anchor';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
+import {
+  AccountInfo,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  TransactionSignature,
+} from '@solana/web3.js';
 
 /**
  *  Parameters for initializing an {@linkcode PermissionAccount}

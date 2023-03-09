@@ -1,13 +1,3 @@
-import * as anchor from '@coral-xyz/anchor';
-import {
-  AccountInfo,
-  Keypair,
-  PublicKey,
-  TransactionSignature,
-} from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import fs from 'fs';
-import path from 'path';
 import {
   AggregatorAccount,
   BufferRelayerAccount,
@@ -61,6 +51,17 @@ import {
   QueueDefinition,
   VrfDefinition,
 } from './types';
+
+import * as anchor from '@coral-xyz/anchor';
+import {
+  AccountInfo,
+  Keypair,
+  PublicKey,
+  TransactionSignature,
+} from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
+import fs from 'fs';
+import path from 'path';
 
 export const isKeypairString = (value: string): boolean =>
   /^\[(\s)?[0-9]+((\s)?,(\s)?[0-9]+){31,}\]/.test(value);

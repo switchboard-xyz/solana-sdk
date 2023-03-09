@@ -1,7 +1,5 @@
-import assert from 'assert';
 import 'mocha';
 
-import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from '@solana/web3.js';
 import * as sbv2 from '../src';
 import {
   OracleAccount,
@@ -11,7 +9,11 @@ import {
   types,
 } from '../src';
 import { SwitchboardPermission } from '../src/generated';
+
 import { setupTest, TestContext } from './utils';
+
+import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from '@solana/web3.js';
+import assert from 'assert';
 
 describe('OracleAccount Tests', () => {
   let ctx: TestContext;

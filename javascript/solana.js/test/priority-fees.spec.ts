@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
-import assert from 'assert';
 import 'mocha';
 
-import { BN } from '@switchboard-xyz/common';
 import { AggregatorAccount, types } from '../src';
+
+import { BN } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('Priority Fees Tests', () => {
   const defaultState = AggregatorAccount.default();

@@ -1,8 +1,5 @@
-import assert from 'assert';
 import 'mocha';
 
-import { Keypair } from '@solana/web3.js';
-import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
 import * as sbv2 from '../src';
 import {
   AggregatorAccount,
@@ -12,7 +9,12 @@ import {
   types,
 } from '../src';
 import { PermitOracleQueueUsage } from '../src/generated/types/SwitchboardPermission';
+
 import { setupTest, TestContext } from './utils';
+
+import { Keypair } from '@solana/web3.js';
+import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('Open Round Tests', () => {
   let ctx: TestContext;

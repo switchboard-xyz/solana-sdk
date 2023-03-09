@@ -1,10 +1,12 @@
-import assert from 'assert';
 import 'mocha';
 
-import { Keypair } from '@solana/web3.js';
 import * as sbv2 from '../src';
 import { PermissionAccount, TransactionMissingSignerError } from '../src';
+
 import { setupTest, TestContext } from './utils';
+
+import { Keypair } from '@solana/web3.js';
+import assert from 'assert';
 
 describe('Queue Tests', () => {
   let ctx: TestContext;

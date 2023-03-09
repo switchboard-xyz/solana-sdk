@@ -1,8 +1,10 @@
 import 'mocha';
-import assert from 'assert';
 
 import { AggregatorHistoryBuffer } from '../src';
+
 import HistoryBufferAccountInfo from './data/history_buffer_account_info.json';
+
+import assert from 'assert';
 
 describe('History Tests', () => {
   /** History buffer should be returned with the oldest elements (lowest timestamps) first */

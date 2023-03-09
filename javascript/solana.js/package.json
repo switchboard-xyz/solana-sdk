@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.0.138",
+  "version": "2.0.139",
   "author": "",
   "license": "MIT",
   "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
@@ -40,7 +40,7 @@
     "prepack": "npm run lint && npm run build",
     "lint": "gts lint ./src",
     "clean": "gts clean",
-    "fix": "gts fix ./src ./tests"
+    "fix": "gts fix ./src ./test"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.26.0",

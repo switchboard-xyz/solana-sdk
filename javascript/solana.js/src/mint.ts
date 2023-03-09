@@ -1,3 +1,7 @@
+import { InsufficientFundsError, NativeMintOnlyError } from './errors';
+import { SwitchboardDecimal } from './generated';
+import { TransactionObject } from './TransactionObject';
+
 import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
 import {
@@ -8,9 +12,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { Big, BN } from '@switchboard-xyz/common';
-import { InsufficientFundsError, NativeMintOnlyError } from './errors';
-import { SwitchboardDecimal } from './generated';
-import { TransactionObject } from './TransactionObject';
 
 export class Mint {
   public static native = new PublicKey(

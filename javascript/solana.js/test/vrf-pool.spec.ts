@@ -1,6 +1,5 @@
-import { Keypair, PublicKey } from '@solana/web3.js';
-import assert from 'assert';
 import 'mocha';
+
 import {
   OracleAccount,
   PermissionAccount,
@@ -10,10 +9,13 @@ import {
   VrfLiteAccount,
   VrfPoolAccount,
 } from '../src';
+
 import { setupTest, TestContext } from './utils';
 
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { sleep } from '@switchboard-xyz/common';
 import { NodeOracle } from '@switchboard-xyz/oracle';
+import assert from 'assert';
 
 describe('Vrf Pool Tests', () => {
   let ctx: TestContext;

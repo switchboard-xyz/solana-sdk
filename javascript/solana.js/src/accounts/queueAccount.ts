@@ -1,15 +1,3 @@
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
-import {
-  AccountInfo,
-  Commitment,
-  Keypair,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  TransactionSignature,
-} from '@solana/web3.js';
-import { Big, BN, SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 import * as errors from '../errors';
 import * as types from '../generated';
 import {
@@ -20,6 +8,7 @@ import {
 import { SolanaClock } from '../SolanaClock';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
+
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
@@ -36,6 +25,19 @@ import { PermissionAccount, PermissionSetParams } from './permissionAccount';
 import { QueueDataBuffer } from './queueDataBuffer';
 import { VrfAccount, VrfInitParams } from './vrfAccount';
 import { VrfLiteAccount, VrfLiteInitParams } from './vrfLiteAccount';
+
+import * as anchor from '@coral-xyz/anchor';
+import * as spl from '@solana/spl-token';
+import {
+  AccountInfo,
+  Commitment,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  TransactionSignature,
+} from '@solana/web3.js';
+import { Big, BN, SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
 
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a list of oracles that are actively heartbeating.

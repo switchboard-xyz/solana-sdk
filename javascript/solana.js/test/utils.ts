@@ -1,3 +1,13 @@
+import * as sbv2 from '../src';
+import {
+  AggregatorAccount,
+  CreateQueueFeedParams,
+  QueueAccount,
+  SBV2_DEVNET_PID,
+  SBV2_MAINNET_PID,
+  TransactionObject,
+} from '../src';
+
 import {
   clusterApiUrl,
   Connection,
@@ -11,15 +21,6 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import * as sbv2 from '../src';
-import {
-  AggregatorAccount,
-  CreateQueueFeedParams,
-  QueueAccount,
-  SBV2_DEVNET_PID,
-  SBV2_MAINNET_PID,
-  TransactionObject,
-} from '../src';
 dotenv.config();
 
 type SolanaCluster = 'localnet' | 'devnet' | 'mainnet-beta';

@@ -1,7 +1,9 @@
+import { loadKeypair } from '../utils';
+
+import { keypairToString, parseNumber, parseString } from './utils';
+
 import { Keypair } from '@solana/web3.js';
 import { OracleJob } from '@switchboard-xyz/common';
-import { loadKeypair } from '../utils';
-import { keypairToString, parseNumber, parseString } from './utils';
 
 export class JobJson {
   // params

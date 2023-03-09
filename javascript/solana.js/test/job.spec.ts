@@ -1,9 +1,11 @@
 import 'mocha';
-import assert from 'assert';
+
+import { JobAccount } from '../src';
 
 import { setupTest, TestContext } from './utils';
+
 import { OracleJob } from '@switchboard-xyz/common';
-import { JobAccount } from '../src';
+import assert from 'assert';
 
 describe('Job Tests', () => {
   let ctx: TestContext;

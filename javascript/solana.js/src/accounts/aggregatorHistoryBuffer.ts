@@ -1,3 +1,15 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
+
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
+import { AggregatorAccount } from './aggregatorAccount';
+
 import * as anchor from '@coral-xyz/anchor';
 import {
   Commitment,
@@ -8,16 +20,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { Big, BN } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
-import {
-  Account,
-  BUFFER_DISCRIMINATOR,
-  OnAccountChangeCallback,
-} from './account';
-import { AggregatorAccount } from './aggregatorAccount';
 
 export interface AggregatorHistoryInit {
   /** Aggregator account to add a history buffer for. */

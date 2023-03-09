@@ -1,5 +1,6 @@
-import * as anchor from '@coral-xyz/anchor';
 import * as types from './generated';
+
+import * as anchor from '@coral-xyz/anchor';
 
 export type AggregatorAddJobEvent = {
   feedPubkey: anchor.web3.PublicKey;

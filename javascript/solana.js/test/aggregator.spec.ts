@@ -1,9 +1,6 @@
 /* eslint-disable no-unused-vars */
-import assert from 'assert';
 import 'mocha';
 
-import { Keypair } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
 import * as sbv2 from '../src';
 import {
   AggregatorAccount,
@@ -12,7 +9,12 @@ import {
   QueueAccount,
   types,
 } from '../src';
+
 import { setupTest, TestContext } from './utils';
+
+import { Keypair } from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('Aggregator Tests', () => {
   let ctx: TestContext;

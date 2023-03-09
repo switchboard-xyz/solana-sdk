@@ -1,3 +1,13 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+
+import {
+  Account,
+  BUFFER_DISCRIMINATOR,
+  OnAccountChangeCallback,
+} from './account';
+
 import {
   AccountInfo,
   Commitment,
@@ -5,14 +15,6 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 import assert from 'assert';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  Account,
-  BUFFER_DISCRIMINATOR,
-  OnAccountChangeCallback,
-} from './account';
 
 /**
  * Account holding a list of oracles actively heartbeating on the queue

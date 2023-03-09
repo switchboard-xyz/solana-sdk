@@ -1,13 +1,15 @@
-import * as anchor from '@coral-xyz/anchor';
-import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
+
 import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
 } from './account';
+
+import * as anchor from '@coral-xyz/anchor';
+import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
 
 /**
  * Account holding a priority queue of aggregators and their next available update time.

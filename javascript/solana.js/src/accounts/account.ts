@@ -1,5 +1,6 @@
-import * as anchor from '@coral-xyz/anchor';
 import { SwitchboardProgram } from '../SwitchboardProgram';
+
+import * as anchor from '@coral-xyz/anchor';
 
 export abstract class Account<T> {
   public readonly publicKey: anchor.web3.PublicKey;
@@ -46,6 +47,7 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from '../generated';
+
 import { AggregatorAccount } from './aggregatorAccount';
 import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
 import { BufferRelayerAccount } from './bufferRelayAccount';

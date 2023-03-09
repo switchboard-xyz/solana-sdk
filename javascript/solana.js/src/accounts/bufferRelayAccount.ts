@@ -1,3 +1,18 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { bufferRelayerSaveResult } from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { Account, OnAccountChangeCallback } from './account';
+import { JobAccount } from './jobAccount';
+import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { QueueAccount } from './queueAccount';
+
 import * as spl from '@solana/spl-token';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -15,19 +30,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { bufferRelayerSaveResult } from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account, OnAccountChangeCallback } from './account';
-import { JobAccount } from './jobAccount';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
 
 /**
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.

@@ -1,3 +1,16 @@
+import { VRF_POOL_REQUEST_AMOUNT } from '../const';
+import { AccountNotFoundError, InsufficientFundsError } from '../errors';
+import * as types from '../generated';
+import { VrfPoolRequestEvent } from '../SwitchboardEvents';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
+
+import { Account, OnAccountChangeCallback } from './account';
+import { PermissionAccount } from './permissionAccount';
+import { CreateVrfLiteParams, QueueAccount } from './queueAccount';
+import { Callback } from './vrfAccount';
+import { VrfLiteAccount } from './vrfLiteAccount';
+
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
@@ -15,17 +28,6 @@ import {
 } from '@solana/web3.js';
 import { promiseWithTimeout } from '@switchboard-xyz/common';
 import _ from 'lodash';
-import { VRF_POOL_REQUEST_AMOUNT } from '../const';
-import { AccountNotFoundError, InsufficientFundsError } from '../errors';
-import * as types from '../generated';
-import { VrfPoolRequestEvent } from '../SwitchboardEvents';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
-import { Account, OnAccountChangeCallback } from './account';
-import { PermissionAccount } from './permissionAccount';
-import { CreateVrfLiteParams, QueueAccount } from './queueAccount';
-import { Callback } from './vrfAccount';
-import { VrfLiteAccount } from './vrfLiteAccount';
 
 // export type VrfPoolRow = {
 //   timestamp: number;

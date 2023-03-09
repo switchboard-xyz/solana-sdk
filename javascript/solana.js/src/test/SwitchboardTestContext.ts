@@ -1,9 +1,3 @@
-import * as anchor from '@coral-xyz/anchor';
-import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
-import * as dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
 import { AggregatorAccount, JobAccount, QueueAccount } from '../accounts';
 import {
   DEVNET_GENESIS_HASH,
@@ -14,6 +8,13 @@ import { Mint } from '../mint';
 import { SwitchboardNetwork } from '../SwitchboardNetwork';
 import { AnchorWallet, SwitchboardProgram } from '../SwitchboardProgram';
 import { TransactionObject } from '../TransactionObject';
+
+import * as anchor from '@coral-xyz/anchor';
+import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { BNtoDateTimeString, OracleJob } from '@switchboard-xyz/common';
+import * as dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 export const LATEST_DOCKER_VERSION = 'dev-v2-RC_01_05_23_03_24';
 

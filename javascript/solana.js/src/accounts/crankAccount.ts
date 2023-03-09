@@ -1,3 +1,16 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { Account, OnAccountChangeCallback } from './account';
+import { AggregatorAccount, AggregatorPdaAccounts } from './aggregatorAccount';
+import { CrankDataBuffer } from './crankDataBuffer';
+import { QueueAccount } from './queueAccount';
+
 import * as anchor from '@coral-xyz/anchor';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import {
@@ -8,17 +21,6 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account, OnAccountChangeCallback } from './account';
-import { AggregatorAccount, AggregatorPdaAccounts } from './aggregatorAccount';
-import { CrankDataBuffer } from './crankDataBuffer';
-import { QueueAccount } from './queueAccount';
 
 /**
  * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.

@@ -1,6 +1,6 @@
-import { Keypair } from '@solana/web3.js';
 import { CreateQueueFeedParams } from '../accounts';
 import { loadKeypair } from '../utils';
+
 import { JobJson } from './job';
 import {
   keypairToString,
@@ -8,6 +8,8 @@ import {
   parseNumber,
   parseString,
 } from './utils';
+
+import { Keypair } from '@solana/web3.js';
 
 export class AggregatorJson implements CreateQueueFeedParams {
   // aggregator params

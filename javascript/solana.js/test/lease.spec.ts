@@ -1,16 +1,18 @@
 import 'mocha';
-import assert from 'assert';
 
 import * as sbv2 from '../src';
-import { setupTest, TestContext } from './utils';
-import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   AggregatorAccount,
   JobAccount,
   LeaseAccount,
   QueueAccount,
 } from '../src';
+
+import { setupTest, TestContext } from './utils';
+
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { OracleJob } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('Lease Tests', () => {
   let ctx: TestContext;

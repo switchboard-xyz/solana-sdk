@@ -1,4 +1,11 @@
-import _ from 'lodash';
+import { isBrowser } from './browser';
+import * as errors from './errors';
+import { fromTxError } from './generated';
+import {
+  AnchorWallet,
+  DEFAULT_SEND_TRANSACTION_OPTIONS,
+  SendTransactionOptions,
+} from './SwitchboardProgram';
 
 import { AnchorProvider } from '@coral-xyz/anchor';
 import {
@@ -14,15 +21,7 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { sleep } from '@switchboard-xyz/common';
-
-import { isBrowser } from './browser';
-import * as errors from './errors';
-import { fromTxError } from './generated';
-import {
-  AnchorWallet,
-  DEFAULT_SEND_TRANSACTION_OPTIONS,
-  SendTransactionOptions,
-} from './SwitchboardProgram';
+import _ from 'lodash';
 
 export interface ITransactionObject extends Required<TransactionObjectOptions> {
   /** The public key of the account that will pay the transaction fees */

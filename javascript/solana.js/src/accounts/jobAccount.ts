@@ -1,3 +1,13 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { Account } from './account';
+
 import * as anchor from '@coral-xyz/anchor';
 import {
   AccountInfo,
@@ -9,14 +19,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account } from './account';
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.

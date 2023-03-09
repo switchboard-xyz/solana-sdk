@@ -1,12 +1,14 @@
-import { Keypair } from '@solana/web3.js';
 import { QueueInitParams } from '../accounts';
 import { loadKeypair } from '../utils';
+
 import {
   keypairToString,
   parseBoolean,
   parseNumber,
   parseString,
 } from './utils';
+
+import { Keypair } from '@solana/web3.js';
 
 export type IQueueInitParams = Omit<QueueInitParams, 'authority'> & {
   authority?: Keypair;

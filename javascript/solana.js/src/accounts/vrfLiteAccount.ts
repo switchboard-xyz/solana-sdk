@@ -1,3 +1,19 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { vrfLiteInit } from '../generated';
+import { vrfLiteCloseAction } from '../generated/instructions/vrfLiteCloseAction';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { Account, OnAccountChangeCallback } from './account';
+import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { QueueAccount } from './queueAccount';
+import { Callback } from './vrfAccount';
+
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
@@ -13,20 +29,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { vrfLiteInit } from '../generated';
-import { vrfLiteCloseAction } from '../generated/instructions/vrfLiteCloseAction';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account, OnAccountChangeCallback } from './account';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
-import { Callback } from './vrfAccount';
 
 export interface VrfLiteInitParams {
   callback?: Callback;

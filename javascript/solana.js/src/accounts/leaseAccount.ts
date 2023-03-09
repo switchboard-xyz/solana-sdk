@@ -1,3 +1,13 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
+
+import { Account } from './account';
+import { AggregatorAccount } from './aggregatorAccount';
+import { JobAccount } from './jobAccount';
+import { QueueAccount } from './queueAccount';
+
 import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
 import {
@@ -10,14 +20,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { BN, OracleJob } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
-import { Account } from './account';
-import { AggregatorAccount } from './aggregatorAccount';
-import { JobAccount } from './jobAccount';
-import { QueueAccount } from './queueAccount';
 
 /**
  * Account type representing an {@linkcode AggregatorAccount}'s pre-funded escrow used to reward {@linkcode OracleAccount}'s for responding to open round requests.

@@ -1,3 +1,11 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { Mint } from '../mint';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import { TransactionObject } from '../TransactionObject';
+
+import { Account } from './account';
+
 import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
 import {
@@ -9,12 +17,6 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { Mint } from '../mint';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
-import { Account } from './account';
 
 /**
  * Account type representing Switchboard global program state.

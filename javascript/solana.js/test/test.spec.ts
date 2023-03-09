@@ -1,19 +1,21 @@
 import 'mocha';
-import assert from 'assert';
 
-import { DEFAULT_KEYPAIR_PATH } from './utils';
 import {
   camelToUpperCaseWithUnderscores,
   SwitchboardTestContext,
 } from '../src/test';
-import fs from 'fs';
-import path from 'path';
+
+import { DEFAULT_KEYPAIR_PATH } from './utils';
+
 import {
   clusterApiUrl,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
+import assert from 'assert';
+import fs from 'fs';
+import path from 'path';
 
 describe('SwitchboardTestContext Tests', () => {
   let payerKeypair: Keypair;

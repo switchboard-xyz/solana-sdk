@@ -1,3 +1,17 @@
+import * as errors from '../errors';
+import * as types from '../generated';
+import { vrfCloseAction } from '../generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { Account, OnAccountChangeCallback } from './account';
+import { OracleAccount } from './oracleAccount';
+import { PermissionAccount } from './permissionAccount';
+import { QueueAccount } from './queueAccount';
+
 import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
@@ -12,18 +26,6 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { promiseWithTimeout } from '@switchboard-xyz/common';
-import * as errors from '../errors';
-import * as types from '../generated';
-import { vrfCloseAction } from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account, OnAccountChangeCallback } from './account';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
 
 /**
  * Account holding a Verifiable Random Function result with a callback instruction for consuming on-chain pseudo-randomness.

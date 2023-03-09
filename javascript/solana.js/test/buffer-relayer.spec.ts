@@ -1,15 +1,17 @@
 import 'mocha';
-import assert from 'assert';
 
-import { setupTest, TestContext } from './utils';
-import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   BufferRelayerAccount,
   OracleAccount,
   QueueAccount,
   types,
 } from '../src';
+
+import { setupTest, TestContext } from './utils';
+
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { OracleJob } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('BufferRelayer Tests', () => {
   let ctx: TestContext;
