@@ -17,7 +17,7 @@ wallet = "~/.config/solana/id.json"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 ./tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 ./tests/*.test.ts --exit"
 
 [test.validator]
 url = "https://api.devnet.solana.com"

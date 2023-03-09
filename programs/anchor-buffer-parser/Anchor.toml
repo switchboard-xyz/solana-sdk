@@ -17,7 +17,7 @@ anchor_buffer_parser = "96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 ./tests/*.test.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 ./tests/*.test.ts --exit"
 
 [test.validator]
 url = "https://api.devnet.solana.com"
