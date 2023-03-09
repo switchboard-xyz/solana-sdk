@@ -105,7 +105,9 @@ runs:
         --force
     - name: Set Anchor Version
       shell: bash
-      run: avm use ${{ inputs.anchor-version }}
+      run: |
+        avm install ${{ inputs.anchor-version }}
+        avm use ${{ inputs.anchor-version }}
     - name: Verify Anchor install
       shell: bash
       run: anchor --version
