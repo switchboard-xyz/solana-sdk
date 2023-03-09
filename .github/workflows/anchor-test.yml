@@ -17,6 +17,9 @@ jobs:
     defaults:
       run:
         shell: bash
+    strategy:
+      matrix:
+        node-version: [16, 18, 19]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
@@ -24,6 +27,7 @@ jobs:
         with:
           solana-version: "v1.14.10"
           anchor-version: "0.26.0"
+          node-version: ${{ matrix.node-version }}
 
       - name: Cache Build
         id: cache-anchor-vrf-build
@@ -56,6 +60,9 @@ jobs:
     defaults:
       run:
         shell: bash
+    strategy:
+      matrix:
+        node-version: [16, 18, 19]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
@@ -63,6 +70,7 @@ jobs:
         with:
           solana-version: "v1.14.10"
           anchor-version: "0.26.0"
+          node-version: ${{ matrix.node-version }}
 
       - name: Cache Build
         id: cache-anchor-feed-build
