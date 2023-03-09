@@ -20,6 +20,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
+        with:
+          solana-version: "v1.14.10"
+          anchor-version: "0.26.0"
 
       - name: Cache Build
         id: cache-anchor-vrf-build
@@ -55,6 +58,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
+        with:
+          solana-version: "v1.14.10"
+          anchor-version: "0.26.0"
 
       - name: Cache Build
         id: cache-anchor-feed-build

@@ -1,3 +1,14 @@
+import {
+  CreateQueueOracleParams,
+  LoadedSwitchboardNetwork,
+  loadKeypair,
+  NetworkInitParams,
+  OracleAccount,
+  QueueAccount,
+  SwitchboardNetwork,
+  SwitchboardProgram,
+} from '..';
+
 import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import {
@@ -10,16 +21,6 @@ import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
 import path from 'path';
-import {
-  CreateQueueOracleParams,
-  LoadedSwitchboardNetwork,
-  loadKeypair,
-  NetworkInitParams,
-  OracleAccount,
-  QueueAccount,
-  SwitchboardNetwork,
-  SwitchboardProgram,
-} from '..';
 
 export type NodeConfig = IOracleConfig & Partial<ReleaseChannelVersion>;
 
@@ -304,7 +305,7 @@ export class SwitchboardTestContextV2 {
       if (!stopped) {
         console.error(`Failed to stop docker oracle`);
 
-        // TODO: We can force kill it
+        this._oracle.kill();
       }
     }
   }

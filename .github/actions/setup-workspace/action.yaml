@@ -16,7 +16,7 @@ inputs:
   anchor-version:
     description: "the Anchor version to install"
     required: false
-    default: "v0.26.0"
+    default: "0.26.0"
   node-version:
     description: "the NodeJS version to install"
     required: false
@@ -70,7 +70,6 @@ runs:
         path: |
           ~/.cache/solana/
           ~/.local/share/solana/
-        # TODO: Should update this cache key so stable doesnt mask
         key: ${{ runner.os }}-Solana-${{ inputs.solana-version  }}
     - name: Install Solana
       shell: bash
@@ -88,29 +87,29 @@ runs:
         solana --version
 
     # Install Anchor
-    - name: Setup Anchor Cache
+    - name: Setup AVM Cache
       uses: actions/cache@v3
-      id: cache-anchor-cli
-      if: inputs.anchor-version != ''
+      id: cache-avm-cli
       with:
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
-          ./target/
-        key: anchor-cli-${{ runner.os }}-${{ inputs.anchor-version }}
-    - name: Install Anchor
+        key: ${{ runner.os }}-avm
+    - name: Install AVM
+      if: steps.cache-avm-cli.outputs.cache-hit != 'true'
       shell: bash
-      if:
-        inputs.anchor-version != '' && steps.cache-anchor-cli.outputs.cache-hit
-        != 'true'
       run:
-        cargo install --git https://github.com/coral-xyz/anchor --tag
-        "${{inputs.anchor-version }}" anchor-cli --locked
+        cargo install --git https://github.com/project-serum/anchor avm --locked
+        --force
+    - name: Set Anchor Version
+      shell: bash
+      run: |
+        avm install ${{ inputs.anchor-version }}
+        avm use ${{ inputs.anchor-version }}
     - name: Verify Anchor install
       shell: bash
-      if: inputs.anchor-version != ''
       run: anchor --version
 
     # Setup Keypair

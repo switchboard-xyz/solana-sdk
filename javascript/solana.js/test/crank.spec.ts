@@ -1,8 +1,5 @@
-import assert from 'assert';
 import 'mocha';
 
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { BN, promiseWithTimeout, sleep } from '@switchboard-xyz/common';
 import {
   AggregatorAccount,
   AggregatorPdaAccounts,
@@ -11,7 +8,12 @@ import {
   SolanaClock,
   types,
 } from '../src';
+
 import { createFeed, createFeeds, setupTest, TestContext } from './utils';
+
+import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { BN, promiseWithTimeout, sleep } from '@switchboard-xyz/common';
+import assert from 'assert';
 
 describe('Crank Tests', () => {
   const CRANK_SIZE = 50;
@@ -269,15 +271,19 @@ describe('Crank Tests', () => {
 
     console.log(`Popped ${numPopped}/${readyRows.length} rows`);
 
-    const finalTokenBalance = Number.parseFloat(
-      (await ctx.program.mint.fetchBalance(userTokenAddress))!.toFixed(4)
+    const finalTokenBalance = ctx.round(
+      (await ctx.program.mint.fetchBalance(userTokenAddress)) ?? 0,
+      3
     );
+
     const queueReward =
       (await queueAccount.loadData()).reward.toNumber() / LAMPORTS_PER_SOL;
 
-    const expectedTokenBalance = Number.parseFloat(
-      (startingTokenBalance + numPopped * queueReward).toFixed(4)
+    const expectedTokenBalance = ctx.round(
+      startingTokenBalance + numPopped * queueReward,
+      3
     );
+
     assert(
       finalTokenBalance === expectedTokenBalance,
       `Crank turner was not rewarded sufficiently, expected ${expectedTokenBalance}, received ${finalTokenBalance}`
