@@ -8,8 +8,12 @@
   <p>A collection of libraries and examples for interacting with Switchboard V2 on Solana.</p>
 
   <p>
-    <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
-    <img alt="Anchor Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg" />
+    <a href="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml">
+      <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
+    </a>
+      <a href="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml">
+       <img alt="Anchor Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg" />
+    </a>
 	  <a href="https://crates.io/crates/switchboard-v2">
       <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
     </a>
