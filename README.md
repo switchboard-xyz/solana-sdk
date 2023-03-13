@@ -50,6 +50,7 @@ Then install the dependencies
 ```bash
 cd sbv2-solana
 pnpm install
+pnpm build
 ```
 
 ## Program IDs

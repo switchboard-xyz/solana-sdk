@@ -59,7 +59,7 @@ importers:
       '@solana/web3.js': ^1.73.0
       '@switchboard-xyz/common': ^2.1.33
       '@switchboard-xyz/eslint-config': latest
-      '@switchboard-xyz/oracle': ^2.1.12
+      '@switchboard-xyz/oracle': ^2.1.13
       '@types/chai': ^4.3.4
       '@types/lodash': ^4.14.191
       '@types/mocha': ^10.0.0
@@ -84,7 +84,7 @@ importers:
       '@solana/spl-token': 0.3.6_@solana+web3.js@1.73.0
       '@solana/web3.js': 1.73.0
       '@switchboard-xyz/common': 2.1.33
-      '@switchboard-xyz/oracle': 2.1.12
+      '@switchboard-xyz/oracle': 2.1.13
       dotenv: 16.0.3
       lodash: 4.17.21
     devDependencies:
@@ -911,8 +911,8 @@ packages:
       - supports-color
     dev: false
 
-  /@switchboard-xyz/oracle/2.1.12:
-    resolution: {integrity: sha512-YYB9eigzwJhBcZvtcK+x/NVk9amyYEeGmlPjPOTBjtamKSAc8FgdMmoW7sQh+FoHc1cxjYUJDqTE20TeujdjMw==}
+  /@switchboard-xyz/oracle/2.1.13:
+    resolution: {integrity: sha512-ehuoC6PLNnIaU9a52/ZSsqioK9So6AraJZO1gxPn8V4PXGDi03i3n8N1d+/r/oESXQ6DKwNp2JXLcyGlmzk3Qg==}
     dependencies:
       '@terascope/fetch-github-release': 0.8.7
       detect-port: 1.5.1

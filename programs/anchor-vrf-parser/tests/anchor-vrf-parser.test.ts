@@ -13,6 +13,8 @@ import {
   AnchorWallet,
   Callback,
   PermissionAccount,
+  QueueAccount,
+  SwitchboardProgram,
   SwitchboardTestContextV2,
   types,
 } from "@switchboard-xyz/solana.js";
@@ -53,43 +55,53 @@ describe("anchor-vrf-parser test", () => {
   };
 
   let switchboard: SwitchboardTestContextV2;
+  let queueAccount: QueueAccount;
+  let queue: types.OracleQueueAccountData;
 
   before(async () => {
-    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
-      // You can provide a keypair to so the PDA schemes dont change between test runs
-      name: "Test Queue",
-      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
-      queueSize: 10,
-      reward: 0,
-      minStake: 0,
-      oracleTimeout: 900,
-      unpermissionedFeeds: true,
-      unpermissionedVrf: true,
-      enableBufferRelayers: true,
-      oracle: {
-        name: "Test Oracle",
-        enable: true,
-        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
-          "~/.keypairs/oracleWallet.json"
-        ),
-      },
-    });
-    await switchboard.start();
-  });
-
-  after(async () => {
-    if (switchboard) {
-      switchboard.stop();
+    if (process.env.USE_SWITCHBOARD_DEVNET_QUEUE) {
+      const switchboardProgram = await SwitchboardProgram.fromProvider(
+        vrfClientProgram.provider as anchor.AnchorProvider
+      );
+      [queueAccount, queue] = await QueueAccount.load(
+        switchboardProgram,
+        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+      );
+    } else {
+      switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+        // You can provide a keypair to so the PDA schemes dont change between test runs
+        name: "Test Queue",
+        keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
+        queueSize: 10,
+        reward: 0,
+        minStake: 0,
+        oracleTimeout: 900,
+        unpermissionedFeeds: true,
+        unpermissionedVrf: true,
+        enableBufferRelayers: true,
+        oracle: {
+          name: "Test Oracle",
+          enable: true,
+          stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+            "~/.keypairs/oracleWallet.json"
+          ),
+        },
+      });
+      queueAccount = switchboard.queue;
+      queue = await queueAccount.loadData();
+      await switchboard.start();
     }
   });
 
+  after(() => {
+    switchboard?.stop();
+  });
+
   it("Creates a vrfClient account", async () => {
-    const queue = switchboard.queue;
-    const { unpermissionedVrfEnabled, authority, dataBuffer } =
-      await queue.loadData();
+    const { unpermissionedVrfEnabled, authority, dataBuffer } = queue;
 
     // Create Switchboard VRF and Permission account
-    const [vrfAccount] = await queue.createVrf({
+    const [vrfAccount] = await queueAccount.createVrf({
       callback: vrfClientCallback,
       authority: vrfClientKey, // vrf authority
       vrfKeypair: vrfSecret,
@@ -99,9 +111,9 @@ describe("anchor-vrf-parser test", () => {
     console.log(`Created VRF Account: ${vrfAccount.publicKey}`);
 
     const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
-      queue.program,
+      queueAccount.program,
       authority,
-      queue.publicKey,
+      queueAccount.publicKey,
       vrfAccount.publicKey
     );
 
@@ -128,7 +140,7 @@ describe("anchor-vrf-parser test", () => {
       .initState({
         maxResult: new anchor.BN(1337000),
         permissionBump: permissionBump,
-        switchboardStateBump: switchboard.program.programState.bump,
+        switchboardStateBump: queueAccount.program.programState.bump,
       })
       .accounts({
         state: vrfClientKey,
@@ -141,8 +153,8 @@ describe("anchor-vrf-parser test", () => {
     console.log(`Created VrfClient Account: ${vrfClientKey}`);
 
     const [payerTokenWallet] =
-      await switchboard.program.mint.getOrCreateWrappedUser(
-        switchboard.program.walletPubkey,
+      await queueAccount.program.mint.getOrCreateWrappedUser(
+        queueAccount.program.walletPubkey,
         { fundUpTo: 0.002 }
       );
 
@@ -157,9 +169,9 @@ describe("anchor-vrf-parser test", () => {
         .accounts({
           state: vrfClientKey,
           authority: payer.publicKey,
-          switchboardProgram: switchboard.program.programId,
+          switchboardProgram: queueAccount.program.programId,
           vrf: vrfAccount.publicKey,
-          oracleQueue: queue.publicKey,
+          oracleQueue: queueAccount.publicKey,
           queueAuthority: authority,
           dataBuffer,
           permission: permissionAccount.publicKey,
@@ -167,7 +179,7 @@ describe("anchor-vrf-parser test", () => {
           payerWallet: payerTokenWallet,
           payerAuthority: payer.publicKey,
           recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
-          programState: switchboard.program.programState.publicKey,
+          programState: queueAccount.program.programState.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
@@ -186,7 +198,13 @@ describe("anchor-vrf-parser test", () => {
 
       console.log(`VrfClient Result: ${vrfClient.result}`);
     } catch (error) {
-      console.log(await vrfAccount.getCallbackTransactions());
+      const callbackTxn = await vrfAccount.getCallbackTransactions();
+      if (callbackTxn.length && callbackTxn[0].meta?.logMessages?.length) {
+        console.log(
+          JSON.stringify(callbackTxn[0].meta.logMessages, undefined, 2)
+        );
+      }
+
       throw error;
     }
   });
