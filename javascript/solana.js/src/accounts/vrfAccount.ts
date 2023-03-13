@@ -643,10 +643,10 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         )
       );
     } finally {
-      closeWebsocket();
+      await closeWebsocket();
     }
 
-    closeWebsocket();
+    await closeWebsocket();
 
     return result;
   }
