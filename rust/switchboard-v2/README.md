@@ -32,14 +32,20 @@
 
 ## Install
 
-Add the following to your Cargo.toml
+Run the following Cargo command in your project directory:
+
+```bash
+cargo add switchboard-v2
+```
+
+Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-v2 = "0.1.20"
+switchboard-v2 = "0.1.22"
 ```
 
-## Features
+## Featuresc
 
 | Feature | Description                                                                                           |
 | ------- | ----------------------------------------------------------------------------------------------------- |
@@ -49,7 +55,7 @@ Enable it in your Cargo.toml
 
 ```toml
 [dependencies]
-switchboard-v2 = { version = "0.1.17", features = ["devnet"] }
+switchboard-v2 = { version = "0.1.22", features = ["devnet"] }
 ```
 
 ### Define Your Own Devnet Feature
