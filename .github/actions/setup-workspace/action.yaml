@@ -143,7 +143,7 @@ runs:
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        nodeVersion: ${{inputs.nodeVersion }}
+        node-version: ${{inputs.nodeVersion }}
         cache: "pnpm"
     - name: Install pnpm
       uses: pnpm/action-setup@v2
