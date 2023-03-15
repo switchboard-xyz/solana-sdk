@@ -1,3 +1,4 @@
+import assert from "assert";
 import "mocha";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -207,5 +208,140 @@ describe("anchor-vrf-parser test", () => {
 
       throw error;
     }
+  });
+
+  it("Creates and closes a vrfClient account", async () => {
+    // we create a new client & VRF because a VRF must wait at least 1500 slots
+    // after a request before it can be closed
+    const newVrfSecret = anchor.web3.Keypair.generate();
+
+    const [newVrfClientKey, newVrfClientBump] =
+      anchor.utils.publicKey.findProgramAddressSync(
+        [
+          Buffer.from("STATE"),
+          newVrfSecret.publicKey.toBytes(),
+          payer.publicKey.toBytes(),
+        ],
+        vrfClientProgram.programId
+      );
+
+    const vrfIxCoder = new anchor.BorshInstructionCoder(vrfClientProgram.idl);
+    const vrfClientCallback: Callback = {
+      programId: vrfClientProgram.programId,
+      accounts: [
+        // ensure all accounts in updateResult are populated
+        { pubkey: newVrfClientKey, isSigner: false, isWritable: true },
+        { pubkey: newVrfSecret.publicKey, isSigner: false, isWritable: false },
+      ],
+      ixData: vrfIxCoder.encode("updateResult", ""), // pass any params for instruction here
+    };
+
+    const { unpermissionedVrfEnabled, authority, dataBuffer } = queue;
+
+    // Create Switchboard VRF and Permission account
+    const [newVrfAccount] = await queueAccount.createVrf({
+      callback: vrfClientCallback,
+      authority: newVrfClientKey, // vrf authority
+      vrfKeypair: newVrfSecret,
+      enable: false,
+    });
+
+    console.log(`Created New VRF Account: ${newVrfAccount.publicKey}`);
+
+    const [permissionAccount, permissionBump] = PermissionAccount.fromSeed(
+      queueAccount.program,
+      authority,
+      queueAccount.publicKey,
+      newVrfAccount.publicKey
+    );
+
+    console.log(
+      `Created New Permission Account: ${permissionAccount.publicKey}`
+    );
+
+    // If queue requires permissions to use VRF, check the correct authority was provided
+    if (!unpermissionedVrfEnabled) {
+      if (!payer.publicKey.equals(authority)) {
+        throw new Error(
+          `queue requires PERMIT_VRF_REQUESTS and wrong queue authority provided`
+        );
+      }
+
+      await permissionAccount.set({
+        queueAuthority: payer,
+        permission: new types.SwitchboardPermission.PermitVrfRequests(),
+        enable: true,
+      });
+      console.log(`Set New VRF Permissions`);
+    }
+
+    // Create VRF Client account
+    await vrfClientProgram.methods
+      .initState({
+        maxResult: new anchor.BN(1337000),
+        permissionBump: permissionBump,
+        switchboardStateBump: queueAccount.program.programState.bump,
+      })
+      .accounts({
+        state: newVrfClientKey,
+        vrf: newVrfAccount.publicKey,
+        payer: payer.publicKey,
+        authority: payer.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+    console.log(`Created New VrfClient Account: ${newVrfClientKey}`);
+
+    await sleep(5000);
+
+    const newVrfClientState = await vrfClientProgram.account.vrfClient.fetch(
+      newVrfClientKey
+    );
+    assert(
+      newVrfClientState.vrf.equals(newVrfAccount.publicKey),
+      `Vrf Client VRF account mismatch, expected ${newVrfAccount.publicKey}, received ${newVrfClientState.vrf}`
+    );
+
+    const newVrfInitialState = await newVrfAccount.loadData();
+
+    // send any wrapped SOL to the payers associated wSOL wallet
+    const [payerTokenAccount] =
+      await queueAccount.program.mint.getOrCreateWrappedUser(payer.publicKey, {
+        fundUpTo: 0,
+      });
+
+    // close the client and VRF account
+    await vrfClientProgram.methods
+      .closeState({})
+      .accounts({
+        state: newVrfClientKey,
+        authority: payer.publicKey,
+        payer: payer.publicKey,
+        vrf: newVrfAccount.publicKey,
+        escrow: newVrfInitialState.escrow,
+        permission: permissionAccount.publicKey,
+        oracleQueue: queueAccount.publicKey,
+        queueAuthority: queue.authority,
+        programState: queueAccount.program.programState.publicKey,
+        solDest: payer.publicKey,
+        escrowDest: payerTokenAccount,
+        switchboardProgram: queueAccount.program.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    const vrfClientAccountInfo =
+      await vrfClientProgram.provider.connection.getAccountInfo(
+        newVrfClientKey,
+        "processed"
+      );
+    assert(vrfClientAccountInfo === null, "VrfClientNotClosed");
+
+    const vrfAccountInfo =
+      await vrfClientProgram.provider.connection.getAccountInfo(
+        newVrfAccount.publicKey,
+        "processed"
+      );
+    assert(vrfAccountInfo === null, "VrfAccountNotClosed");
   });
 });

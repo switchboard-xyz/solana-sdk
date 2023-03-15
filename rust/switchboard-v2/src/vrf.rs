@@ -404,7 +404,6 @@ pub struct VrfClose<'info> {
     #[account(mut, constraint = escrow.mint == escrow_dest.mint )]
     pub escrow_dest: Account<'info, TokenAccount>,
 
-    pub recent_blockhashes: AccountInfo<'info>,
     // #[account(seeds = [b"STATE"], bump = params.state_bump)]
     pub token_program: AccountInfo<'info>,
 }

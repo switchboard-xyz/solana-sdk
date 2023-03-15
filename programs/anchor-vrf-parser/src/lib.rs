@@ -32,6 +32,11 @@ pub mod anchor_vrf_parser {
     pub fn request_result(ctx: Context<RequestResult>, params: RequestResultParams) -> Result<()> {
         RequestResult::actuate(&ctx, &params)
     }
+
+    #[access_control(ctx.accounts.validate(&ctx, &params))]
+    pub fn close_state(ctx: Context<CloseState>, params: CloseStateParams) -> Result<()> {
+        CloseState::actuate(&ctx, &params)
+    }
 }
 
 #[repr(packed)]
@@ -87,4 +92,8 @@ pub enum VrfErrorCode {
     InvalidAuthorityError,
     #[msg("Invalid VRF account provided.")]
     InvalidVrfAccount,
+    #[msg("VRF client is not ready to be closed.")]
+    VrfClientCloseNotReady,
+    #[msg("VRF account is not ready to be closed.")]
+    VrfCloseNotReady,
 }
