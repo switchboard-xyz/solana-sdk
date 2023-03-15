@@ -140,15 +140,15 @@ runs:
         find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase
         echo "DEFAULT_SOLANA_PUBLIC_KEY=$(solana-keygen pubkey ~/.config/solana/id.json)" >> $GITHUB_ENV
 
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{inputs.pnpmVersion }}
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{inputs.nodeVersion }}
         cache: "pnpm"
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: ${{inputs.pnpmVersion }}
     - name: Get pnpm store directory
       id: pnpm-cache
       shell: bash
