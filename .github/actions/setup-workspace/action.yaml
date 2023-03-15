@@ -5,23 +5,23 @@ description:
   Anchor, NodeJS, and pnpm"
 
 inputs:
-  rust-version:
+  rustVersion:
     description: ""
     required: false
     default: "stable"
-  solana-version:
+  solanaVersion:
     description: "the Solana version to install"
     required: false
     default: "stable"
-  anchor-version:
+  anchorVersion:
     description: "the Anchor version to install"
     required: false
     default: "0.26.0"
-  node-version:
+  nodeVersion:
     description: "the NodeJS version to install"
     required: false
     default: "18"
-  pnpm-version:
+  pnpmVersion:
     description: "the pnpm version to install"
     required: false
     default: "7.28.0"
@@ -41,7 +41,7 @@ runs:
       id: rust_toolchain
       uses: actions-rs/toolchain@v1
       with:
-        toolchain: ${{ inputs.rust-version }}
+        toolchain: ${{ inputs.rustVersion }}
         override: true
         profile: minimal
         components: rustfmt, clippy
@@ -70,13 +70,13 @@ runs:
         path: |
           ~/.cache/solana/
           ~/.local/share/solana/
-        key: ${{ runner.os }}-Solana-${{ inputs.solana-version  }}
+        key: ${{ runner.os }}-Solana-${{ inputs.solanaVersion  }}
     - name: Install Solana
       shell: bash
       if: steps.cache-solana-install.outputs.cache-hit != 'true'
       run:
         sh -c "$(curl -sSfL https://release.solana.com/${{
-        inputs.solana-version}}/install)"
+        inputs.solanaVersion}}/install)"
     - name: Add Solana bin to Path
       shell: bash
       run: |
@@ -90,20 +90,20 @@ runs:
     - name: Setup Anchor Cache
       uses: actions/cache@v3
       id: cache-anchor-cli
-      if: inputs.anchor-version != ''
+      if: inputs.anchorVersion != ''
       with:
         path: |
           ~/.cargo/bin/
           ~/.cargo/registry/index/
           ~/.cargo/registry/cache/
           ~/.cargo/git/db/
-        key: anchor-cli-${{ runner.os }}-${{ inputs.anchor-version }}
+        key: anchor-cli-${{ runner.os }}-${{ inputs.anchorVersion }}
     - name: Install Anchor
       shell: bash
       if: steps.cache-anchor-cli.outputs.cache-hit != 'true'
       run:
         cargo install --git https://github.com/coral-xyz/anchor --tag
-        v"${{inputs.anchor-version }}" anchor-cli --locked
+        v"${{inputs.anchorVersion }}" anchor-cli --locked
     - name: Verify Anchor install
       shell: bash
       run: anchor --version
@@ -127,8 +127,8 @@ runs:
     # - name: Set Anchor Version
     #   shell: bash
     #   run: |
-    #     avm install ${{ inputs.anchor-version }}
-    #     avm use ${{ inputs.anchor-version }}
+    #     avm install ${{ inputs.anchorVersion }}
+    #     avm use ${{ inputs.anchorVersion }}
     # - name: Verify Anchor install
     #   shell: bash
     #   run: anchor --version
@@ -140,15 +140,15 @@ runs:
         find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase
         echo "DEFAULT_SOLANA_PUBLIC_KEY=$(solana-keygen pubkey ~/.config/solana/id.json)" >> $GITHUB_ENV
 
-    - name: Install pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: ${{inputs.pnpm-version }}
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{inputs.node-version }}
+        nodeVersion: ${{inputs.nodeVersion }}
         cache: "pnpm"
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: ${{inputs.pnpmVersion }}
     - name: Get pnpm store directory
       id: pnpm-cache
       shell: bash

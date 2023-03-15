@@ -19,15 +19,15 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        node-version: [16, 18, 19]
+        nodeVersion: [16, 18, 19]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solana-version: "v1.14.10"
-          anchor-version: "0.26.0"
-          node-version: ${{ matrix.node-version }}
+          solanaVersion: "v1.14.10"
+          anchorVersion: "0.26.0"
+          nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
         id: cache-anchor-vrf-build
@@ -62,15 +62,15 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        node-version: [16, 18, 19]
+        nodeVersion: [16, 18, 19]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solana-version: "v1.14.10"
-          anchor-version: "0.26.0"
-          node-version: ${{ matrix.node-version }}
+          solanaVersion: "v1.14.10"
+          anchorVersion: "0.26.0"
+          nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
         id: cache-anchor-feed-build
