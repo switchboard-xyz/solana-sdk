@@ -19,7 +19,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        nodeVersion: [16, 18, 19]
+        nodeVersion: [16, 18, 19.7]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
@@ -62,7 +62,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        nodeVersion: [16, 18, 19]
+        nodeVersion: [16, 18, 19.7]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Workspace
