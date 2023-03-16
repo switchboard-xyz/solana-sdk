@@ -141,7 +141,7 @@ mod tests {
             false,
             &mut lamports,
             &mut history_data,
-            &SWITCHBOARD_V2_DEVNET,
+            &SWITCHBOARD_PROGRAM_ID,
             false,
             0,
         );

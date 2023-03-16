@@ -42,7 +42,7 @@ Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-v2 = "0.1.22"
+switchboard-v2 = "0.1.23"
 ```
 
 ## Usage

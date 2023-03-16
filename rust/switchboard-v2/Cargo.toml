@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-v2"
-version = "0.1.22"
+version = "0.1.23"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
@@ -19,8 +19,6 @@ doctest = false
 default = ["cpi"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
-## The devnet feature enables using the Switchboard Devnet Program ID instead of the Mainnet Program ID.
-devnet = []
 
 [dependencies]
 anchor-lang = "~0.27.0"
