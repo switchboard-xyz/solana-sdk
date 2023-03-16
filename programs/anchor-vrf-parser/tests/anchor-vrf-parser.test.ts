@@ -4,6 +4,7 @@ import "mocha";
 import * as anchor from "@coral-xyz/anchor";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import {
+  PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
 } from "@solana/web3.js";
@@ -17,6 +18,7 @@ import {
   QueueAccount,
   SwitchboardProgram,
   SwitchboardTestContextV2,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
   types,
 } from "@switchboard-xyz/solana.js";
 
@@ -34,15 +36,14 @@ describe("anchor-vrf-parser test", () => {
   const vrfSecret = anchor.web3.Keypair.generate();
   console.log(`VRF Account: ${vrfSecret.publicKey}`);
 
-  const [vrfClientKey, vrfClientBump] =
-    anchor.utils.publicKey.findProgramAddressSync(
-      [
-        Buffer.from("STATE"),
-        vrfSecret.publicKey.toBytes(),
-        payer.publicKey.toBytes(),
-      ],
-      vrfClientProgram.programId
-    );
+  const [vrfClientKey, vrfClientBump] = PublicKey.findProgramAddressSync(
+    [
+      Buffer.from("STATE"),
+      vrfSecret.publicKey.toBytes(),
+      payer.publicKey.toBytes(),
+    ],
+    vrfClientProgram.programId
+  );
 
   const vrfIxCoder = new anchor.BorshInstructionCoder(vrfClientProgram.idl);
   const vrfClientCallback: Callback = {
@@ -66,7 +67,7 @@ describe("anchor-vrf-parser test", () => {
       );
       [queueAccount, queue] = await QueueAccount.load(
         switchboardProgram,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+        SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
       );
     } else {
       switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
@@ -216,7 +217,7 @@ describe("anchor-vrf-parser test", () => {
     const newVrfSecret = anchor.web3.Keypair.generate();
 
     const [newVrfClientKey, newVrfClientBump] =
-      anchor.utils.publicKey.findProgramAddressSync(
+      PublicKey.findProgramAddressSync(
         [
           Buffer.from("STATE"),
           newVrfSecret.publicKey.toBytes(),

@@ -2,7 +2,7 @@
 use anchor_lang::prelude::*;
 use bytemuck::{Pod, Zeroable};
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct AccountMetaZC {
     pub pubkey: Pubkey,
@@ -10,7 +10,7 @@ pub struct AccountMetaZC {
     pub is_writable: bool,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct AccountMetaBorsh {
@@ -19,7 +19,7 @@ pub struct AccountMetaBorsh {
     pub is_writable: bool,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct CallbackZC {
     /// The program ID of the callback program being invoked.
@@ -49,7 +49,7 @@ pub struct Callback {
     pub ix_data: Vec<u8>,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct VrfRound {
     /// The alpha bytes used to calculate the VRF proof.
@@ -101,7 +101,7 @@ impl std::fmt::Display for VrfStatus {
     }
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct EcvrfProofZC {
     pub Gamma: EdwardsPointZC, // RistrettoPoint
@@ -117,7 +117,7 @@ impl Default for EcvrfProofZC {
 /// The `Scalar` struct holds an integer \\(s < 2\^{255} \\) which
 /// represents an element of \\(\mathbb Z / \ell\\).
 #[allow(dead_code)]
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct Scalar {
     /// `bytes` is a little-endian byte encoding of an integer representing a scalar modulo the
@@ -158,7 +158,7 @@ pub struct FieldElement51(pub(crate) [u64; 5]);
 unsafe impl Pod for FieldElement51 {}
 unsafe impl Zeroable for FieldElement51 {}
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct FieldElementZC {
     pub(crate) bytes: [u64; 5],
@@ -197,7 +197,7 @@ pub struct CompletedPoint {
     pub Z: FieldElement51,
     pub T: FieldElement51,
 }
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct CompletedPointZC {
     pub X: FieldElementZC,
@@ -243,7 +243,7 @@ pub struct EdwardsPoint {
     pub(crate) T: FieldElement51,
 }
 #[allow(dead_code)]
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct EdwardsPointZC {
     pub(crate) X: FieldElementZC,
@@ -271,7 +271,7 @@ pub struct ProjectivePoint {
     pub Y: FieldElement51,
     pub Z: FieldElement51,
 }
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct ProjectivePointZC {
     pub(crate) X: FieldElementZC,
@@ -304,7 +304,7 @@ impl Into<ProjectivePoint> for ProjectivePointZC {
     }
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct EcvrfIntermediate {
     pub r: FieldElementZC,
@@ -317,7 +317,7 @@ unsafe impl Pod for EcvrfIntermediate {}
 unsafe impl Zeroable for EcvrfIntermediate {}
 
 #[allow(non_snake_case)]
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct VrfBuilder {
     /// The OracleAccountData that is producing the randomness.

@@ -63,14 +63,14 @@ import { QueueDataBuffer } from './queueDataBuffer';
 import { VrfAccount } from './vrfAccount';
 
 export const BUFFER_DISCRIMINATOR = Buffer.from([
-  42,
-  55,
-  46,
-  46,
-  45,
-  52,
-  78,
-  78, // BUFFERxx
+  66,
+  85,
+  70,
+  70,
+  69,
+  82,
+  120,
+  120, // BUFFERxx
 ]);
 
 export type SwitchboardAccountType =

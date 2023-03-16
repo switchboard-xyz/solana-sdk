@@ -8,7 +8,6 @@ import { AggregatorAccount } from './aggregatorAccount';
 import { JobAccount } from './jobAccount';
 import { QueueAccount } from './queueAccount';
 
-import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
 import {
   AccountInfo,
@@ -103,7 +102,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     queue: PublicKey,
     aggregator: PublicKey
   ): [LeaseAccount, number] {
-    const [publicKey, bump] = anchor.utils.publicKey.findProgramAddressSync(
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from('LeaseAccountData'), queue.toBytes(), aggregator.toBytes()],
       program.programId
     );
@@ -589,7 +588,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       if (!jobAuthority || PublicKey.default.equals(jobAuthority)) {
         continue;
       }
-      const [jobWallet, bump] = anchor.utils.publicKey.findProgramAddressSync(
+      const [jobWallet, bump] = PublicKey.findProgramAddressSync(
         [
           jobAuthority.toBuffer(),
           spl.TOKEN_PROGRAM_ID.toBuffer(),

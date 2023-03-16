@@ -55,7 +55,7 @@ describe("Feed tests", () => {
       // await devnetConnection.confirmTransaction(airdropSignature);
       switchboard = await SwitchboardTestContext.loadDevnetQueue(
         provider,
-        "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+        "uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX"
       );
       console.log("devnet detected");
       return;

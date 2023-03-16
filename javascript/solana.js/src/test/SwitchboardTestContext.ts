@@ -23,7 +23,7 @@ export const LATEST_DOCKER_VERSION = 'dev-v2-RC_01_05_23_03_24';
  * @return the publicKey of the address holding the upgradeable program buffer
  */
 export const getProgramDataAddress = (programId: PublicKey): PublicKey => {
-  return anchor.utils.publicKey.findProgramAddressSync(
+  return PublicKey.findProgramAddressSync(
     [programId.toBytes()],
     new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
   )[0];

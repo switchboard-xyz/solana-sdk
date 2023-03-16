@@ -7,7 +7,7 @@ pub enum OracleResponseType {
     TypeDisagreement,
     TypeNoResponse,
 }
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[derive(Default)]
 #[repr(packed)]
 pub struct OracleMetrics {
@@ -31,7 +31,7 @@ pub struct OracleMetrics {
     pub total_late_response: u128,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct OracleAccountData {
     /// Name of the oracle to store on-chain.
@@ -51,8 +51,10 @@ pub struct OracleAccountData {
     pub queue_pubkey: Pubkey,
     /// Oracle track record.
     pub metrics: OracleMetrics,
+    /// The PDA bump to derive the pubkey.
+    pub bump: u8,
     /// Reserved for future info.
-    pub _ebuf: [u8; 256],
+    pub _ebuf: [u8; 255],
 }
 
 impl OracleAccountData {}

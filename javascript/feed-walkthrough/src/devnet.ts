@@ -29,7 +29,7 @@ import path from "path";
 dotenv.config();
 
 const DEVNET_PERMISSIONLESS_QUEUE = new PublicKey(
-  "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
+  "uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX"
 );
 
 const DEVNET_PERMISSIONLESS_CRANK = new PublicKey(

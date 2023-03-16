@@ -31,10 +31,10 @@ export class AnchorWallet implements anchor.Wallet {
 export default class SwitchboardProgram {
   /**
    * Switchboard Devnet Program ID
-   * 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG
+   * SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
    */
   public static devnetPid = new anchor.web3.PublicKey(
-    "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
+    "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
   );
 
   /**

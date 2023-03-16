@@ -17,7 +17,7 @@ pub enum SwitchboardPermission {
     PermitVrfRequests = 1 << 2,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct PermissionAccountData {
     /// The authority that is allowed to set permissions for this account.
@@ -32,8 +32,10 @@ pub struct PermissionAccountData {
     /// unique expiration periods, BUT currently only one permission
     /// per account makes sense for the infra. Dont over engineer.
     pub expiration: i64,
+    /// The PDA bump to derive the pubkey.
+    pub bump: u8,
     /// Reserved for future info.
-    pub _ebuf: [u8; 256],
+    pub _ebuf: [u8; 255],
 }
 
 impl PermissionAccountData {}

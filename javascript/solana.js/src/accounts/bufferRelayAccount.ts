@@ -464,8 +464,8 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       },
       permission: {
         publicKey: permission.publicKey,
-        bump: permission.bump,
         ...permission.data.toJSON(),
+        bump: permission.bump,
       },
     };
   }

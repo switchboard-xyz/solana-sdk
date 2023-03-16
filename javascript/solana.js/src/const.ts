@@ -20,20 +20,20 @@ export const SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK = new PublicKey(
 
 // devnet permissioned queue
 export const SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE = new PublicKey(
-  'GhYg3R1V6DmJbwuc57qZeoYG6gUuvCotUF1zU3WCj98U'
+  'PeRMnAqNqHQYHUuCBEjhm1XPeVTh4BxjY4t4TPan1pG'
 );
 // devnet permissioned crank
 export const SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK = new PublicKey(
-  '85L2cFUvXaeGQ4HrzP8RJEVCL7WvRrXM2msvEmQ82AVr'
+  'crnKsPsuP6f7uiDbAYYw66h2RNBrqoazmtZHwazkC6V'
 );
 
 // devnet permissionless queue
 export const SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE = new PublicKey(
-  'F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy'
+  'uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX'
 );
 // devnet permissionless crank
 export const SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK = new PublicKey(
-  'GN9jjCy2THzZxhYqZETmPM3my8vg4R5JyNkgULddUMa5'
+  'UcrnK4w2HXCEjY8z6TcQ9tysYr3c9VcFLdYAU9YQP5e'
 );
 
 export const DEVNET_GENESIS_HASH =

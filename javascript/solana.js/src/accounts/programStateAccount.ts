@@ -239,7 +239,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
   public static fromSeed(
     program: SwitchboardProgram
   ): [ProgramStateAccount, number] {
-    const [publicKey, bump] = anchor.utils.publicKey.findProgramAddressSync(
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from('STATE')],
       program.programId
     );
