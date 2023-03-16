@@ -484,44 +484,6 @@
       ]
     },
     {
-      "name": "crankInit",
-      "accounts": [
-        {
-          "name": "crank",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "queue",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "buffer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "CrankInitParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "bufferRelayerInit",
       "accounts": [
         {
@@ -701,6 +663,44 @@
           "name": "params",
           "type": {
             "defined": "BufferRelayerSaveResultParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "crankInit",
+      "accounts": [
+        {
+          "name": "crank",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "buffer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "CrankInitParams"
           }
         }
       ]
@@ -1601,6 +1601,528 @@
           "name": "params",
           "type": {
             "defined": "VrfInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfCloseAction",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vrf",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "oracleQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfCloseParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfLiteCloseAction",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vrfLite",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfLiteCloseParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfLiteInit",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vrf",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfLiteInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfLiteProveAndVerify",
+      "accounts": [
+        {
+          "name": "vrfLite",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "callbackPid",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "oracle",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "oracleAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "oracleWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "instructionsSysvar",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfLiteProveAndVerifyParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfLiteRequestRandomness",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vrfLite",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "dataBuffer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "recentBlockhashes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfLiteRequestRandomnessParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfPoolInit",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vrfPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfPoolInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfPoolRemove",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vrfPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfPoolRemoveParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfPoolAdd",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "vrfPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "vrfLite",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfPoolAddParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vrfPoolRequest",
+      "accounts": [
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "vrfPool",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "dataBuffer",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "recentBlockhashes",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "programState",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VrfPoolRequestParams"
           }
         }
       ]
@@ -2513,6 +3035,152 @@
               "array": [
                 "u8",
                 1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfLiteAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "permissionBump",
+            "type": "u8"
+          },
+          {
+            "name": "vrfPool",
+            "type": "publicKey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": "VrfStatus"
+            }
+          },
+          {
+            "name": "result",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "counter",
+            "type": "u128"
+          },
+          {
+            "name": "alpha",
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "alphaLen",
+            "type": "u32"
+          },
+          {
+            "name": "requestSlot",
+            "type": "u64"
+          },
+          {
+            "name": "requestTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "queue",
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "type": "publicKey"
+          },
+          {
+            "name": "callback",
+            "type": {
+              "defined": "CallbackZC"
+            }
+          },
+          {
+            "name": "builder",
+            "type": {
+              "defined": "VrfBuilder"
+            }
+          },
+          {
+            "name": "expiration",
+            "type": "i64"
+          },
+          {
+            "name": "ebuf",
+            "type": {
+              "array": [
+                "u8",
+                1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfPoolAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "queue",
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "type": "publicKey"
+          },
+          {
+            "name": "minInterval",
+            "type": "u32"
+          },
+          {
+            "name": "maxRows",
+            "type": "u32"
+          },
+          {
+            "name": "size",
+            "type": "u32"
+          },
+          {
+            "name": "idx",
+            "type": "u32"
+          },
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "type": {
+              "array": [
+                "u8",
+                135
               ]
             }
           }
@@ -3661,6 +4329,22 @@
       }
     },
     {
+      "name": "VrfCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "permissionBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
       "name": "VrfInitParams",
       "type": {
         "kind": "struct",
@@ -3674,6 +4358,131 @@
           {
             "name": "stateBump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfLiteCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VrfLiteInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "callback",
+            "type": {
+              "option": {
+                "defined": "Callback"
+              }
+            }
+          },
+          {
+            "name": "stateBump",
+            "type": "u8"
+          },
+          {
+            "name": "expiration",
+            "type": {
+              "option": "i64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfLiteProveAndVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "nonce",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "proof",
+            "type": "bytes"
+          },
+          {
+            "name": "proofEncoded",
+            "type": "string"
+          },
+          {
+            "name": "counter",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfLiteRequestRandomnessParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "callback",
+            "type": {
+              "option": {
+                "defined": "Callback"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfPoolAddParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VrfPoolInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "maxRows",
+            "type": "u32"
+          },
+          {
+            "name": "minInterval",
+            "type": "u32"
+          },
+          {
+            "name": "stateBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfPoolRemoveParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VrfPoolRequestParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "callback",
+            "type": {
+              "option": {
+                "defined": "Callback"
+              }
+            }
           }
         ]
       }
@@ -4597,6 +5406,22 @@
                 256
               ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VrfPoolRow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "pubkey",
+            "type": "publicKey"
           }
         ]
       }
@@ -5546,6 +6371,71 @@
           "index": false
         }
       ]
+    },
+    {
+      "name": "VrfPoolUpdateEvent",
+      "fields": [
+        {
+          "name": "queuePubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "vrfPoolPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "vrfPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "newSize",
+          "type": "u32",
+          "index": false
+        },
+        {
+          "name": "minInterval",
+          "type": "u32",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VrfPoolRequestEvent",
+      "fields": [
+        {
+          "name": "queuePubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "vrfPoolPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "vrfPubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "oraclePubkey",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -6003,6 +6893,51 @@
       "code": 6090,
       "name": "InvalidSliderAccount",
       "msg": "Invalid slider account."
+    },
+    {
+      "code": 6091,
+      "name": "VrfLiteHasExistingPool",
+      "msg": "VRF lite account belongs to an existing pool."
+    },
+    {
+      "code": 6092,
+      "name": "VrfPoolFull",
+      "msg": "VRF pool is at max capacity."
+    },
+    {
+      "code": 6093,
+      "name": "VrfPoolEmpty",
+      "msg": "VRF pool is empty."
+    },
+    {
+      "code": 6094,
+      "name": "VrfAccountNotFound",
+      "msg": "Failed to find VRF account in remaining accounts array."
+    },
+    {
+      "code": 6095,
+      "name": "AccountCloseNotReady",
+      "msg": "Account is not ready to be closed."
+    },
+    {
+      "code": 6096,
+      "name": "VrfPoolRequestTooSoon",
+      "msg": "VRF requested too soon."
+    },
+    {
+      "code": 6097,
+      "name": "VrfPoolMiss",
+      "msg": "VRF pool miss."
+    },
+    {
+      "code": 6098,
+      "name": "VrfLiteOwnedByPool",
+      "msg": "VRF lite belongs to a pool."
+    },
+    {
+      "code": 6099,
+      "name": "InsufficientTokenBalance",
+      "msg": "Escrow has insufficient funds to perform this action."
     }
   ]
 }

@@ -38,7 +38,7 @@ const program = await loadSwitchboardProgram(
 const queueAccount = new OracleQueueAccount({
   program: program,
   // devnet permissionless queue
-  publicKey: new PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"),
+  publicKey: new PublicKey("uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX"),
 });
 
 const aggregatorAccount = await AggregatorAccount.create(program, {

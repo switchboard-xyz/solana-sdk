@@ -65,7 +65,7 @@ async function main() {
     'anchor idl fetch -o ./src/idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet'
   );
   execSync(
-    'anchor idl fetch -o ./src/idl/devnet.json 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --provider.cluster devnet'
+    'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet'
   );
 
   execSync(
@@ -98,36 +98,40 @@ async function main() {
     );
 
     console.log(file);
+
     // replace BN import
-    execSync(
-      `sed -i '' 's/import BN from \\"bn.js\\"/import { BN } from \\"@switchboard-xyz\\/common\\"/g' ${file}`
+    shell.sed(
+      '-i',
+      'import BN from "bn.js"',
+      'import { BN } from "@switchboard-xyz/common"',
+      file
     );
     // replace borsh import
-    execSync(`sed -i '' 's/@project-serum/@coral-xyz/g' ${file}`);
+    shell.sed('-i', '@project-serum', '@coral-xyz', file);
     // remove PROGRAM_ID import, we will use SwitchboardProgram instead
-    execSync(
-      `sed -i '' 's/import { PROGRAM_ID } from "..\\/programId"/ /g' ${file}`
-    );
+    shell.sed('-i', 'import { PROGRAM_ID } from "../programId"', '', file);
     // replace PROGRAM_ID with program.programId
-    execSync(`sed -i '' 's/PROGRAM_ID/program.programId/g' ${file}`);
+    shell.sed('-i', 'PROGRAM_ID', 'program.programId', file);
     // replace Connection with SwitchboardProgram
-    execSync(
-      `sed -i '' 's/c: Connection,/program: SwitchboardProgram,/g' ${file}`
-    );
+    shell.sed('-i', 'c: Connection,', 'program: SwitchboardProgram,', file);
     // replace c.getAccountInfo with the SwitchboardProgram connection
-    execSync(
-      `sed -i '' 's/c.getAccountInfo/program.connection.getAccountInfo/g' ${file}`
+    shell.sed(
+      '-i',
+      'c.getAccountInfo',
+      'program.connection.getAccountInfo',
+      file
     );
     // replace c.getMultipleAccountsInfo with the SwitchboardProgram connection
-    execSync(
-      `sed -i '' 's/c.getMultipleAccountsInfo/program.connection.getMultipleAccountsInfo/g' ${file}`
+    shell.sed(
+      '-i',
+      'c.getMultipleAccountsInfo',
+      'program.connection.getMultipleAccountsInfo',
+      file
     );
 
     // add program as first arguement to instructions
     if (file.includes('/instructions/')) {
-      execSync(
-        `sed -i '' 's/args:/program: SwitchboardProgram, args:/g' ${file}`
-      );
+      shell.sed('-i', 'args:', 'program: SwitchboardProgram, args:', file);
     }
   }
 

@@ -19,6 +19,8 @@ export interface PermissionAccountDataFields {
    * per account makes sense for the infra. Dont over engineer.
    */
   expiration: BN;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -38,6 +40,8 @@ export interface PermissionAccountDataJSON {
    * per account makes sense for the infra. Dont over engineer.
    */
   expiration: string;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -57,6 +61,8 @@ export class PermissionAccountData {
    * per account makes sense for the infra. Dont over engineer.
    */
   readonly expiration: BN;
+  /** The PDA bump to derive the pubkey. */
+  readonly bump: number;
   /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
@@ -70,7 +76,8 @@ export class PermissionAccountData {
     borsh.publicKey('granter'),
     borsh.publicKey('grantee'),
     borsh.i64('expiration'),
-    borsh.array(borsh.u8(), 256, 'ebuf'),
+    borsh.u8('bump'),
+    borsh.array(borsh.u8(), 255, 'ebuf'),
   ]);
 
   constructor(fields: PermissionAccountDataFields) {
@@ -79,6 +86,7 @@ export class PermissionAccountData {
     this.granter = fields.granter;
     this.grantee = fields.grantee;
     this.expiration = fields.expiration;
+    this.bump = fields.bump;
     this.ebuf = fields.ebuf;
   }
 
@@ -129,6 +137,7 @@ export class PermissionAccountData {
       granter: dec.granter,
       grantee: dec.grantee,
       expiration: dec.expiration,
+      bump: dec.bump,
       ebuf: dec.ebuf,
     });
   }
@@ -140,6 +149,7 @@ export class PermissionAccountData {
       granter: this.granter.toString(),
       grantee: this.grantee.toString(),
       expiration: this.expiration.toString(),
+      bump: this.bump,
       ebuf: this.ebuf,
     };
   }
@@ -151,6 +161,7 @@ export class PermissionAccountData {
       granter: new PublicKey(obj.granter),
       grantee: new PublicKey(obj.grantee),
       expiration: new BN(obj.expiration),
+      bump: obj.bump,
       ebuf: obj.ebuf,
     });
   }

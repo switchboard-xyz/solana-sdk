@@ -1,3 +1,10 @@
+export { aggregatorClose } from './aggregatorClose';
+export type {
+  AggregatorCloseArgs,
+  AggregatorCloseAccounts,
+} from './aggregatorClose';
+export { setBumps } from './setBumps';
+export type { SetBumpsArgs, SetBumpsAccounts } from './setBumps';
 export { aggregatorAddJob } from './aggregatorAddJob';
 export type {
   AggregatorAddJobArgs,

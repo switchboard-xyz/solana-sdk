@@ -16,7 +16,7 @@ from solana.rpc.async_api import AsyncClient
 from anchorpy import Program, Provider, Wallet
 from switchboardpy.program import ProgramStateAccount 
 
-ORACLE_QUEUE_STANDARD_DEVNET = 'F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy' # <-- new key | old key - 'B4yBQ3hYcjnrNLxUnauJqwpFJnjtm7s8gHybgkAdgXhQ';
+ORACLE_QUEUE_STANDARD_DEVNET = 'uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX' # <-- new key | old key - 'B4yBQ3hYcjnrNLxUnauJqwpFJnjtm7s8gHybgkAdgXhQ';
 
 
 class SwitchboardProgram(object):

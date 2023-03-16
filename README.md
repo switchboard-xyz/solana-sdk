@@ -55,10 +55,10 @@ pnpm build
 
 ## Program IDs
 
-| **Network**  | **Program ID**                                 |
-| ------------ | ---------------------------------------------- |
-| Mainnet-Beta | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
-| Devnet       | `2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG` |
+| **Network**  | **Program ID**                                |
+| ------------ | --------------------------------------------- |
+| Mainnet-Beta | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f` |
+| Devnet       | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f` |
 
 See [switchboard.xyz/explorer](https://switchboard.xyz/explorer) for a list of
 feeds deployed on Solana.

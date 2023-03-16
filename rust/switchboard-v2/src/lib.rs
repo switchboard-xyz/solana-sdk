@@ -9,6 +9,7 @@ pub mod ecvrf;
 pub mod error;
 pub mod history_buffer;
 pub mod job;
+pub mod lease;
 pub mod oracle;
 pub mod permission;
 pub mod queue;
@@ -25,6 +26,7 @@ pub use ecvrf::*;
 pub use error::SwitchboardError;
 pub use history_buffer::*;
 pub use job::*;
+pub use lease::*;
 pub use oracle::*;
 pub use permission::*;
 pub use queue::*;
@@ -47,20 +49,7 @@ pub const BUFFER_DISCRIMINATOR: &[u8] = b"BUFFERxx";
 /// Seed used to derive the SlidingWindow PDA.
 // const SLIDING_RESULT_SEED: &[u8] = b"SlidingResultAccountData";
 
-/// Mainnet program id for Switchboard v2
-pub const SWITCHBOARD_V2_MAINNET: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
+/// Program id for Switchboard v2
+pub const SWITCHBOARD_PROGRAM_ID: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
 
-/// Devnet program id for Switchboard v2
-pub const SWITCHBOARD_V2_DEVNET: Pubkey = pubkey!("2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG");
-
-#[cfg(feature = "devnet")]
-/// Switchboard Program ID.
-pub const SWITCHBOARD_PROGRAM_ID: Pubkey = SWITCHBOARD_V2_DEVNET;
-#[cfg(not(feature = "devnet"))]
-/// Switchboard Program ID.
-pub const SWITCHBOARD_PROGRAM_ID: Pubkey = SWITCHBOARD_V2_MAINNET;
-
-#[cfg(feature = "devnet")]
-declare_id!(SWITCHBOARD_V2_DEVNET);
-#[cfg(not(feature = "devnet"))]
-declare_id!(SWITCHBOARD_V2_MAINNET);
+declare_id!(SWITCHBOARD_PROGRAM_ID);

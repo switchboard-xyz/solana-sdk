@@ -164,7 +164,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     queue: PublicKey,
     wallet: PublicKey
   ): [OracleAccount, number] {
-    const [publicKey, bump] = anchor.utils.publicKey.findProgramAddressSync(
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from('OracleAccountData'), queue.toBuffer(), wallet.toBuffer()],
       program.programId
     );

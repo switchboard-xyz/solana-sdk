@@ -83,7 +83,7 @@ async def test_create():
                 queue_account=OracleQueueAccount(
                     AccountParams(
                         program=program, 
-                        public_key=PublicKey("F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy")
+                        public_key=PublicKey("uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX")
                     )
                 ),
             )

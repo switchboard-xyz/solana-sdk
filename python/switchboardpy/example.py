@@ -8,7 +8,7 @@ from switchboardpy import AggregatorAccount, AccountParams
 
 # Devnet Program ID.
 SBV2_DEVNET_PID = PublicKey(
-    '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+    'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 )
 
 async def main():

@@ -51,6 +51,7 @@ import {
   SendOptions,
   Transaction,
   TransactionSignature,
+  VersionedTransaction,
 } from '@solana/web3.js';
 import { OracleJob } from '@switchboard-xyz/common';
 
@@ -67,7 +68,7 @@ export const DEFAULT_SEND_TRANSACTION_OPTIONS: SendTransactionOptions = {
  * Switchboard Devnet Program ID
  */
 export const SBV2_DEVNET_PID = new PublicKey(
-  '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+  'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 );
 
 /**
@@ -88,11 +89,10 @@ export const getSwitchboardProgramId = (
   cluster: Cluster | 'localnet'
 ): PublicKey => {
   switch (cluster) {
-    case 'mainnet-beta':
-      return SBV2_MAINNET_PID;
     case 'localnet':
     case 'devnet':
-      return SBV2_DEVNET_PID;
+    case 'mainnet-beta':
+      return SBV2_MAINNET_PID;
     case 'testnet':
     default:
       throw new Error(`Switchboard PID not found for cluster (${cluster})`);
@@ -291,15 +291,7 @@ export class SwitchboardProgram {
         ? 'devnet'
         : 'localnet';
 
-    let pid = programId;
-    if (!pid) {
-      pid =
-        programId ?? cluster === 'mainnet-beta'
-          ? SBV2_MAINNET_PID
-          : cluster === 'devnet'
-          ? SBV2_DEVNET_PID
-          : SBV2_DEVNET_PID;
-    }
+    const pid = programId ?? SBV2_MAINNET_PID;
 
     const programAccountInfo = await connection.getAccountInfo(pid);
     if (programAccountInfo === null) {
@@ -731,22 +723,46 @@ export class SwitchboardProgram {
   }
 }
 
+/**
+ * Check if a transaction object is a VersionedTransaction or not
+ *
+ * @param tx
+ * @returns bool
+ */
+export const isVersionedTransaction = (tx): tx is VersionedTransaction => {
+  return 'version' in tx;
+};
+
 export class AnchorWallet implements anchor.Wallet {
-  constructor(readonly payer: Keypair) {
-    this.payer = payer;
-  }
+  constructor(readonly payer: Keypair) {}
+
   get publicKey(): PublicKey {
     return this.payer.publicKey;
   }
-  private sign = (txn: Transaction): Transaction => {
-    txn.partialSign(this.payer);
-    return txn;
-  };
-  async signTransaction(txn: Transaction) {
-    return this.sign(txn);
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(
+    tx: T
+  ): Promise<T> {
+    if (isVersionedTransaction(tx)) {
+      tx.sign([this.payer]);
+    } else {
+      tx.partialSign(this.payer);
+    }
+
+    return tx;
   }
-  async signAllTransactions(txns: Transaction[]) {
-    return txns.map(this.sign);
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(
+    txs: T[]
+  ): Promise<T[]> {
+    return txs.map(t => {
+      if (isVersionedTransaction(t)) {
+        t.sign([this.payer]);
+      } else {
+        t.partialSign(this.payer);
+      }
+      return t;
+    });
   }
 }
 

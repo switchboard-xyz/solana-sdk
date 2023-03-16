@@ -13,7 +13,11 @@ export interface SbStateFields {
   tokenVault: PublicKey;
   /** The token mint used by the DAO. */
   daoMint: PublicKey;
-  /** Reserved for future info. */
+  /**
+   * Reserved for future info.
+   * The PDA bump to derive the pubkey.
+   */
+  bump: number;
   ebuf: Array<number>;
 }
 
@@ -26,7 +30,11 @@ export interface SbStateJSON {
   tokenVault: string;
   /** The token mint used by the DAO. */
   daoMint: string;
-  /** Reserved for future info. */
+  /**
+   * Reserved for future info.
+   * The PDA bump to derive the pubkey.
+   */
+  bump: number;
   ebuf: Array<number>;
 }
 
@@ -39,7 +47,11 @@ export class SbState {
   readonly tokenVault: PublicKey;
   /** The token mint used by the DAO. */
   readonly daoMint: PublicKey;
-  /** Reserved for future info. */
+  /**
+   * Reserved for future info.
+   * The PDA bump to derive the pubkey.
+   */
+  readonly bump: number;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -51,7 +63,8 @@ export class SbState {
     borsh.publicKey('tokenMint'),
     borsh.publicKey('tokenVault'),
     borsh.publicKey('daoMint'),
-    borsh.array(borsh.u8(), 992, 'ebuf'),
+    borsh.u8('bump'),
+    borsh.array(borsh.u8(), 991, 'ebuf'),
   ]);
 
   constructor(fields: SbStateFields) {
@@ -59,6 +72,7 @@ export class SbState {
     this.tokenMint = fields.tokenMint;
     this.tokenVault = fields.tokenVault;
     this.daoMint = fields.daoMint;
+    this.bump = fields.bump;
     this.ebuf = fields.ebuf;
   }
 
@@ -108,6 +122,7 @@ export class SbState {
       tokenMint: dec.tokenMint,
       tokenVault: dec.tokenVault,
       daoMint: dec.daoMint,
+      bump: dec.bump,
       ebuf: dec.ebuf,
     });
   }
@@ -118,6 +133,7 @@ export class SbState {
       tokenMint: this.tokenMint.toString(),
       tokenVault: this.tokenVault.toString(),
       daoMint: this.daoMint.toString(),
+      bump: this.bump,
       ebuf: this.ebuf,
     };
   }
@@ -128,6 +144,7 @@ export class SbState {
       tokenMint: new PublicKey(obj.tokenMint),
       tokenVault: new PublicKey(obj.tokenVault),
       daoMint: new PublicKey(obj.daoMint),
+      bump: obj.bump,
       ebuf: obj.ebuf,
     });
   }

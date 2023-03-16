@@ -101,7 +101,7 @@ Then run the following command to create your own feed using the devnet
 permissionless queue and crank
 
 ```bash
-export QUEUE_KEY=F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy
+export QUEUE_KEY=uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX
 export CRANK_KEY=GN9jjCy2THzZxhYqZETmPM3my8vg4R5JyNkgULddUMa5
 sbv2 solana aggregator create "$QUEUE_KEY" \
     --keypair ~/.config/solana/id.json \

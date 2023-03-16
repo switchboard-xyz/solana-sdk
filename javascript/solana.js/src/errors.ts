@@ -92,3 +92,11 @@ export class AggregatorConfigError extends Error {
     Object.setPrototypeOf(this, AggregatorConfigError.prototype);
   }
 }
+export class IncorrectOwner extends Error {
+  constructor(expectedOwner: PublicKey, receivedOwner: PublicKey) {
+    super(
+      `incorrect account owner, expected ${expectedOwner}, received ${receivedOwner}`
+    );
+    Object.setPrototypeOf(this, IncorrectOwner.prototype);
+  }
+}

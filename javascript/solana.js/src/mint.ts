@@ -117,7 +117,7 @@ export class Mint {
     owner: PublicKey,
     mint: PublicKey
   ): PublicKey {
-    const [associatedToken] = anchor.utils.publicKey.findProgramAddressSync(
+    const [associatedToken] = PublicKey.findProgramAddressSync(
       [owner.toBuffer(), spl.TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
       spl.ASSOCIATED_TOKEN_PROGRAM_ID
     );

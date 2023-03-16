@@ -7,25 +7,15 @@
     "url": "https://github.com/switchboard-xyz/sbv2-solana",
     "directory": "programs/anchor-vrf-parser"
   },
-  "bin": {
-    "sbv2-vrf-example": "./sbv2-vrf-example.sh"
-  },
   "scripts": {
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
-    "pubkey": "solana-keygen pubkey target/deploy/anchor_vrf_parser-keypair.json",
-    "localnet": "npm run localnet:down || exit 0; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899 --clone 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG `# programId` --clone J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 `# programDataAddress` --clone CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp `# idlAddress` --clone BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt `# programState` --clone FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy `# switchboardVault` & npm run localnet:wait",
-    "localnet:wait": "for attempt in {1..30}; do sleep 1; if curl -sS http://localhost:8899 -X POST -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"id\":1, \"method\":\"getBlockHeight\"}'; then echo ready; break; fi; done",
-    "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
-    "network:create": "sbv2 solana network create --keypair ~/.config/solana/id.json --configFile .switchboard/networks/default.config.json --schemaFile .switchboard/networks/default.json --cluster localnet --force",
-    "network:start": "sbv2 solana network start --keypair ~/.config/solana/id.json --schemaFile .switchboard/networks/default.json --cluster localnet --nodeImage dev-v2-RC_01_05_23_20_01-beta",
-    "network:start:dev": "VERBOSE=1 DEBUG=1 CHAIN=solana CLUSTER=localnet TASK_RUNNER_SOLANA_RPC=https://api.mainnet-beta.solana.com FS_PAYER_SECRET_PATH=~/.config/solana/id.json RPC_URL=http://localhost:8899 ORACLE_KEY=Ei4HcqRQtf6TfwbuRXKRwCtt8PDXhmq9NhYLWpoh23xp ts-node ../../../switchboard-oracle-v2/node/src/apps/oracle",
     "build": "node ../build.js anchor-vrf-parser 4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN",
     "test": "npm run localnet && npm run network:create && npm run network:start & sleep 60 && anchor test --skip-local-validator",
     "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.26.0",
-    "@coral-xyz/borsh": "^0.26.0",
+    "@coral-xyz/anchor": "^0.27.0",
+    "@coral-xyz/borsh": "^0.27.0",
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.3",

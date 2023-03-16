@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct SbState {
     /// The account authority permitted to make account changes.
@@ -11,8 +11,10 @@ pub struct SbState {
     pub token_vault: Pubkey,
     /// The token mint used by the DAO.
     pub dao_mint: Pubkey,
+    /// The PDA bump to derive the pubkey.
+    pub bump: u8,
     /// Reserved for future info.
-    pub _ebuf: [u8; 992],
+    pub _ebuf: [u8; 991],
 }
 
 impl SbState {}

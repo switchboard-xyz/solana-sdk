@@ -163,7 +163,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   public get slidingWindowKey(): PublicKey {
-    return anchor.utils.publicKey.findProgramAddressSync(
+    return PublicKey.findProgramAddressSync(
       [Buffer.from('SlidingResultAccountData'), this.publicKey.toBytes()],
       this.program.programId
     )[0];
@@ -848,6 +848,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         if (!j?.account) {
           throw new Error(
             `Failed to fetch account data for job ${j?.publicKey}`
+          );
+        }
+        if (!j.account.owner.equals(this.program.programId)) {
+          throw new errors.IncorrectOwner(
+            this.program.programId,
+            j.account.owner
           );
         }
         const jobAccount = new JobAccount(this.program, j.publicKey);
@@ -1661,14 +1667,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       },
       permission: {
         publicKey: accounts.permission.publicKey,
-        bump: accounts.permission.bump,
         ...accounts.permission.data.toJSON(),
+        bump: accounts.permission.bump,
       },
       lease: {
         publicKey: accounts.lease.publicKey,
+        ...accounts.lease.data.toJSON(),
         bump: accounts.lease.bump,
         balance: accounts.lease.balance,
-        ...accounts.lease.data.toJSON(),
       },
       jobs: accounts.jobs.map(j => {
         return {
@@ -2042,6 +2048,132 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
     const txnSignatures = await program.signAndSendAll(txns);
     return txnSignatures;
+  }
+
+  public async closeInstructions(
+    payer: PublicKey,
+    params?: {
+      authority?: Keypair;
+      tokenWallet?: PublicKey;
+    },
+    opts?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    if (this.program.cluster === 'mainnet-beta') {
+      throw new Error(
+        `Aggregators can only be closed with the devnet version of Switchboard`
+      );
+    }
+    const [tokenWallet, tokenWalletInit] = params?.tokenWallet
+      ? [params.tokenWallet, undefined]
+      : await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+          fundUpTo: 0,
+        });
+
+    const aggregator = await this.loadData();
+    const [queueAccount, queue] = await QueueAccount.load(
+      this.program,
+      aggregator.queuePubkey
+    );
+
+    const {
+      permissionAccount,
+      permissionBump,
+      leaseAccount,
+      leaseBump,
+      leaseEscrow,
+    } = this.getAccounts(queueAccount, queue.authority);
+
+    const crankPubkey: PublicKey | null = aggregator.crankPubkey.equals(
+      PublicKey.default
+    )
+      ? null
+      : aggregator.crankPubkey;
+    let dataBuffer: PublicKey | null = null;
+    if (crankPubkey !== null) {
+      const [crankAccount, crank] = await CrankAccount.load(
+        this.program,
+        crankPubkey
+      );
+      dataBuffer = crank.dataBuffer;
+    }
+
+    const closeIxn = await (
+      (this.program as any)._program as anchor.Program
+    ).methods
+      .aggregatorClose({
+        stateBump: this.program.programState.bump,
+        permissionBump: permissionBump,
+        leaseBump: leaseBump,
+      })
+      .accounts(
+        crankPubkey !== null && dataBuffer !== null
+          ? {
+              authority: aggregator.authority,
+              aggregator: this.publicKey,
+              permission: permissionAccount.publicKey,
+              lease: leaseAccount.publicKey,
+              escrow: leaseEscrow,
+              oracleQueue: queueAccount.publicKey,
+              queueAuthority: queue.authority,
+              programState: queueAccount.program.programState.publicKey,
+              solDest: payer,
+              escrowDest: tokenWallet,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              crank: crankPubkey,
+              dataBuffer: dataBuffer,
+            }
+          : ({
+              authority: aggregator.authority,
+              aggregator: this.publicKey,
+              permission: permissionAccount.publicKey,
+              lease: leaseAccount.publicKey,
+              escrow: leaseEscrow,
+              oracleQueue: queueAccount.publicKey,
+              queueAuthority: queue.authority,
+              programState: queueAccount.program.programState.publicKey,
+              solDest: payer,
+              escrowDest: tokenWallet,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              crank: null,
+              dataBuffer: null,
+            } as any) // compiler expects all types to be pubkeys
+      )
+      .instruction();
+
+    const closeTxn = tokenWalletInit
+      ? tokenWalletInit.add(
+          closeIxn,
+          params?.authority ? [params.authority] : undefined
+        )
+      : new TransactionObject(
+          payer,
+          [closeIxn],
+          params?.authority ? [params.authority] : []
+        );
+
+    // add txn options
+    return new TransactionObject(
+      closeTxn.payer,
+      closeTxn.ixns,
+      closeTxn.signers,
+      opts
+    );
+  }
+
+  public async close(
+    params?: {
+      authority?: Keypair;
+      tokenWallet?: PublicKey;
+    },
+    opts?: TransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const closeTxn = await this.closeInstructions(
+      this.program.walletPubkey,
+      params,
+      opts
+    );
+    const txnSignature = await this.program.signAndSend(closeTxn);
+    return txnSignature;
   }
 }
 

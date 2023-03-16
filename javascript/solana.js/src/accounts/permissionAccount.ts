@@ -11,7 +11,6 @@ import { TransactionObject } from '../TransactionObject';
 
 import { Account } from './account';
 
-import * as anchor from '@coral-xyz/anchor';
 import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
 import {
   AccountInfo,
@@ -158,7 +157,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     granter: PublicKey,
     grantee: PublicKey
   ): [PermissionAccount, number] {
-    const [publicKey, bump] = anchor.utils.publicKey.findProgramAddressSync(
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [
         Buffer.from('PermissionAccountData'),
         authority.toBytes(),

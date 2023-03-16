@@ -20,6 +20,7 @@ pub struct JobAccountData {
     pub total_spent: u64,
     /// Unix timestamp when the job was created on-chain.
     pub created_at: i64,
+    pub is_initializing: u8,
 }
 
 impl JobAccountData {}

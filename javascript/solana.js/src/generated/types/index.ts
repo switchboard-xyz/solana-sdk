@@ -18,6 +18,11 @@ export type {
   AggregatorAddJobParamsFields,
   AggregatorAddJobParamsJSON,
 } from './AggregatorAddJobParams';
+export { AggregatorCloseParams } from './AggregatorCloseParams';
+export type {
+  AggregatorCloseParamsFields,
+  AggregatorCloseParamsJSON,
+} from './AggregatorCloseParams';
 export { AggregatorHistoryRow } from './AggregatorHistoryRow';
 export type {
   AggregatorHistoryRowFields,
@@ -271,6 +276,11 @@ export type {
 } from './ProjectivePointZC';
 export { Scalar } from './Scalar';
 export type { ScalarFields, ScalarJSON } from './Scalar';
+export { SetBumpsParams } from './SetBumpsParams';
+export type {
+  SetBumpsParamsFields,
+  SetBumpsParamsJSON,
+} from './SetBumpsParams';
 export { SlidingWindowElement } from './SlidingWindowElement';
 export type {
   SlidingWindowElementFields,

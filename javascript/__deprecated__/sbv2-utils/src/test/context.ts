@@ -100,7 +100,7 @@ export class SwitchboardTestContext implements ISwitchboardTestContext {
    */
   static async loadDevnetQueue(
     provider: anchor.AnchorProvider,
-    queueKey = "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy",
+    queueKey = "uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX",
     tokenAmount = 0
   ) {
     const payerKeypair = (provider.wallet as sbv2.AnchorWallet).payer;

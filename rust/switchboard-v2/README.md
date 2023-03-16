@@ -45,39 +45,6 @@ Or add the following line to your Cargo.toml:
 switchboard-v2 = "0.1.22"
 ```
 
-## Featuresc
-
-| Feature | Description                                                                                           |
-| ------- | ----------------------------------------------------------------------------------------------------- |
-| devnet  | The devnet feature enables using the Switchboard Devnet Program ID instead of the Mainnet Program ID. |
-
-Enable it in your Cargo.toml
-
-```toml
-[dependencies]
-switchboard-v2 = { version = "0.1.22", features = ["devnet"] }
-```
-
-### Define Your Own Devnet Feature
-
-You can also define your own devnet feature to dynamically swap the program IDs.
-
-```toml
-[features]
-default = []
-devnet = ["switchboard-v2/devnet"]
-```
-
-This allows you to build your program with a feature flag to automate devnet and
-mainnet builds.
-
-```bash
-# Build with Mainnet Switchboard Program ID
-cargo build-bpf
-# Build with Devnet Switchboard Program ID
-cargo build-bpf --features devnet
-```
-
 ## Usage
 
 ### Aggregator
@@ -111,8 +78,8 @@ feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
 **Example(s)**:
-[anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-feed-parser/src/lib.rs),
-[native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/native-feed-parser/src/lib.rs)
+[anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs),
+[native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
 
 #### Read Aggregator History
 
@@ -146,7 +113,7 @@ let result = value[0] % 256000 as u128;
 ```
 
 **Example**:
-[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-vrf-parser/src/actions/update_result.rs)
+[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/update_result.rs)
 
 #### RequestRandomness CPI
 
@@ -190,7 +157,7 @@ vrf_request_randomness.invoke_signed(
 ```
 
 **Example**:
-[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-vrf-parser/src/actions/request_result.rs)
+[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/request_result.rs)
 
 ### Buffer Relayer Account
 
@@ -223,7 +190,7 @@ msg!("Buffer string {:?}!", result_string);
 ```
 
 **Example**:
-[anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/examples/programs/anchor-buffer-parser/src/lib.rs)
+[anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-buffer-parser/src/lib.rs)
 
 ## Supported CPI Calls
 

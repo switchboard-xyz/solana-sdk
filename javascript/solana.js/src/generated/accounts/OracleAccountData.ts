@@ -21,6 +21,8 @@ export interface OracleAccountDataFields {
   queuePubkey: PublicKey;
   /** Oracle track record. */
   metrics: types.OracleMetricsFields;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -42,6 +44,8 @@ export interface OracleAccountDataJSON {
   queuePubkey: string;
   /** Oracle track record. */
   metrics: types.OracleMetricsJSON;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -63,6 +67,8 @@ export class OracleAccountData {
   readonly queuePubkey: PublicKey;
   /** Oracle track record. */
   readonly metrics: types.OracleMetrics;
+  /** The PDA bump to derive the pubkey. */
+  readonly bump: number;
   /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
@@ -79,7 +85,8 @@ export class OracleAccountData {
     borsh.publicKey('tokenAccount'),
     borsh.publicKey('queuePubkey'),
     types.OracleMetrics.layout('metrics'),
-    borsh.array(borsh.u8(), 256, 'ebuf'),
+    borsh.u8('bump'),
+    borsh.array(borsh.u8(), 255, 'ebuf'),
   ]);
 
   constructor(fields: OracleAccountDataFields) {
@@ -91,6 +98,7 @@ export class OracleAccountData {
     this.tokenAccount = fields.tokenAccount;
     this.queuePubkey = fields.queuePubkey;
     this.metrics = new types.OracleMetrics({ ...fields.metrics });
+    this.bump = fields.bump;
     this.ebuf = fields.ebuf;
   }
 
@@ -144,6 +152,7 @@ export class OracleAccountData {
       tokenAccount: dec.tokenAccount,
       queuePubkey: dec.queuePubkey,
       metrics: types.OracleMetrics.fromDecoded(dec.metrics),
+      bump: dec.bump,
       ebuf: dec.ebuf,
     });
   }
@@ -158,6 +167,7 @@ export class OracleAccountData {
       tokenAccount: this.tokenAccount.toString(),
       queuePubkey: this.queuePubkey.toString(),
       metrics: this.metrics.toJSON(),
+      bump: this.bump,
       ebuf: this.ebuf,
     };
   }
@@ -172,6 +182,7 @@ export class OracleAccountData {
       tokenAccount: new PublicKey(obj.tokenAccount),
       queuePubkey: new PublicKey(obj.queuePubkey),
       metrics: types.OracleMetrics.fromJSON(obj.metrics),
+      bump: obj.bump,
       ebuf: obj.ebuf,
     });
   }

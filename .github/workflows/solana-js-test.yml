@@ -106,11 +106,11 @@ jobs:
           cluster: devnet
           args:
             "--url ${{ secrets.DEVNET_RPC_URL }} --clone
-            2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG --clone
-            J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 --clone
-            CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp --clone
-            BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt --clone
-            FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy"
+            SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
+            7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
+            Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone
+            CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone
+            7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
       - name: Run Tests
         working-directory: javascript/solana.js
         env:

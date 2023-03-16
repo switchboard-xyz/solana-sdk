@@ -30,10 +30,10 @@ export { SwitchboardDecimal } from "@switchboard-xyz/common";
 
 /**
  * Switchboard Devnet Program ID
- * 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG
+ * SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
  */
 export const SBV2_DEVNET_PID = new PublicKey(
-  "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
+  "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 );
 /**
  * Switchboard Mainnet Program ID

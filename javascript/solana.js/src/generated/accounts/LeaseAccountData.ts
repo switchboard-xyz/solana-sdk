@@ -23,6 +23,8 @@ export interface LeaseAccountDataFields {
   updateCount: BN;
   /** Public key of keypair that may withdraw funds from the lease at any time */
   withdrawAuthority: PublicKey;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   ebuf: Array<number>;
 }
 
@@ -45,6 +47,8 @@ export interface LeaseAccountDataJSON {
   updateCount: string;
   /** Public key of keypair that may withdraw funds from the lease at any time */
   withdrawAuthority: string;
+  /** The PDA bump to derive the pubkey. */
+  bump: number;
   ebuf: Array<number>;
 }
 
@@ -68,6 +72,8 @@ export class LeaseAccountData {
   readonly updateCount: BN;
   /** Public key of keypair that may withdraw funds from the lease at any time */
   readonly withdrawAuthority: PublicKey;
+  /** The PDA bump to derive the pubkey. */
+  readonly bump: number;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -84,7 +90,8 @@ export class LeaseAccountData {
     borsh.i64('createdAt'),
     borsh.u128('updateCount'),
     borsh.publicKey('withdrawAuthority'),
-    borsh.array(borsh.u8(), 256, 'ebuf'),
+    borsh.u8('bump'),
+    borsh.array(borsh.u8(), 255, 'ebuf'),
   ]);
 
   constructor(fields: LeaseAccountDataFields) {
@@ -97,6 +104,7 @@ export class LeaseAccountData {
     this.createdAt = fields.createdAt;
     this.updateCount = fields.updateCount;
     this.withdrawAuthority = fields.withdrawAuthority;
+    this.bump = fields.bump;
     this.ebuf = fields.ebuf;
   }
 
@@ -151,6 +159,7 @@ export class LeaseAccountData {
       createdAt: dec.createdAt,
       updateCount: dec.updateCount,
       withdrawAuthority: dec.withdrawAuthority,
+      bump: dec.bump,
       ebuf: dec.ebuf,
     });
   }
@@ -166,6 +175,7 @@ export class LeaseAccountData {
       createdAt: this.createdAt.toString(),
       updateCount: this.updateCount.toString(),
       withdrawAuthority: this.withdrawAuthority.toString(),
+      bump: this.bump,
       ebuf: this.ebuf,
     };
   }
@@ -181,6 +191,7 @@ export class LeaseAccountData {
       createdAt: new BN(obj.createdAt),
       updateCount: new BN(obj.updateCount),
       withdrawAuthority: new PublicKey(obj.withdrawAuthority),
+      bump: obj.bump,
       ebuf: obj.ebuf,
     });
   }

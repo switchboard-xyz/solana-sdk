@@ -29,7 +29,7 @@
     "localnet:up": "npm run local:validator & sleep 20 && npm run test:localnet",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "localnet": "npm run localnet:up; npm run localnet:down",
-    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone 2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG `# programId` --clone J4CArpsbrZqu1axqQ4AnrqREs3jwoyA1M5LMiQQmAzB9 `# programDataAddress` --clone CKwZcshn4XDvhaWVH9EXnk3iu19t6t5xP2Sy2pD6TRDp `# idlAddress` --clone BYM81n8HvTJuqZU1PmTVcwZ9G8uoji7FKM6EaPkwphPt `# programState` --clone FVLfR6C2ckZhbSwBzZY4CX7YBcddUSge5BNeGQv5eKhy `# switchboardVault`",
+    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
     "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
     "generate": "node generate-client.js",
     "build": "shx rm -rf lib || true; tsc -p tsconfig.cjs.json && tsc",
@@ -43,8 +43,8 @@
     "fix": "gts fix ./src ./test"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.26.0",
-    "@coral-xyz/borsh": "^0.26.0",
+    "@coral-xyz/anchor": "^0.27.0",
+    "@coral-xyz/borsh": "^0.27.0",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
     "@switchboard-xyz/common": "^2.1.33",
@@ -62,6 +62,7 @@
     "chai": "^4.3.7",
     "chalk": "^4.1.2",
     "eslint": "^8.35.0",
+    "exponential-backoff": "^3.1.1",
     "gts": "^3.1.1",
     "mocha": "^10.1.0",
     "shelljs": "^0.8.5",
