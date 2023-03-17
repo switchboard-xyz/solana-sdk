@@ -26,9 +26,7 @@
   "types": "lib/cjs/index.d.ts",
   "scripts": {
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
-    "localnet:up": "npm run local:validator & sleep 20 && npm run test:localnet",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
-    "localnet": "npm run localnet:up; npm run localnet:down",
     "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
     "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
     "generate": "node generate-client.js",

@@ -90,6 +90,9 @@ export function getProgramId(cluster: SolanaCluster): PublicKey {
 }
 
 export function getRpcUrl(cluster: SolanaCluster): string {
+  if (isLocalnet()) {
+    return 'http://0.0.0.0:8899';
+  }
   if (process.env.SOLANA_RPC_URL) {
     return String(process.env.SOLANA_RPC_URL);
   }
