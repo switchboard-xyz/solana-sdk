@@ -179,10 +179,12 @@ jobs:
       - name: Run Tests
         working-directory: javascript/solana.js
         env:
+          SOLANA_CLUSTER: mainnet-beta
           SOLANA_LOCALNET: 1
           SWITCHBOARD_PROGRAM_ID: SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
           CI: true
         run: |
+          export SOLANA_CLUSTER='mainnet-beta'
           export SOLANA_LOCALNET=1
           export SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
           pnpm test:localnet:mainnet

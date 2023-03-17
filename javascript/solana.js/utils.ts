@@ -2,8 +2,16 @@ import * as sbv2 from './src';
 
 import { PublicKey } from '@solana/web3.js';
 import { Big, BN, IOracleJob, toUtf8 } from '@switchboard-xyz/common';
+import chalk from 'chalk';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
+
+export const CHECK_ICON = chalk.green('\u2714');
+
+export const FAILED_ICON = chalk.red('\u2717');
+
+export const PLUS_ICON = chalk.blue('\u002B');
 
 const ignoreFields = [
   'program',
@@ -14,7 +22,7 @@ const ignoreFields = [
 ];
 
 export function setupOutputDir(programId: string) {
-  const dirPath = path.join(__dirname, programId);
+  const dirPath = path.join(os.homedir(), 'devnet-migration', programId);
   const feedDirPath = path.join(dirPath, 'feeds');
   if (!fs.existsSync(feedDirPath)) {
     fs.mkdirSync(feedDirPath, { recursive: true });
@@ -23,14 +31,6 @@ export function setupOutputDir(programId: string) {
   if (!fs.existsSync(jobDirPath)) {
     fs.mkdirSync(jobDirPath, { recursive: true });
   }
-  // const jobCsv = path.join(__dirname, 'jobs.csv');
-  // if (!fs.existsSync(jobCsv)) {
-  //   fs.writeFileSync(jobCsv, `oldPubkey, newPubkey\n`);
-  // }
-  // const aggregatorCsv = path.join(__dirname, 'aggregator.csv');
-  // if (!fs.existsSync(aggregatorCsv)) {
-  //   fs.writeFileSync(aggregatorCsv, `oldPubkey, newPubkey\n`);
-  // }
 
   return [dirPath, feedDirPath, jobDirPath];
 }

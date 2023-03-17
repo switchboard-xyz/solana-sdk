@@ -172,6 +172,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
 
     const escrow = program.mint.getAssociatedAddress(leaseAccount.publicKey);
+    const escrowBalance = await program.mint.getAssociatedBalance(
+      leaseAccount.publicKey
+    );
 
     // load jobPubkeys and authorities ONLY if undefined
     // we need to allow empty arrays for initial job creation or else loading aggregator will fail
@@ -235,7 +238,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     txns.push(
       new TransactionObject(
         payer,
-        [createTokenAccountIxn, leaseInitIxn],
+        escrowBalance === null // lease might already exist if account was closed and re-opened
+          ? [createTokenAccountIxn, leaseInitIxn]
+          : [leaseInitIxn],
         params.funderAuthority ? [params.funderAuthority] : []
       )
     );

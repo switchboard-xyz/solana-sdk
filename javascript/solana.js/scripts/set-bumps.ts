@@ -1,5 +1,6 @@
 import * as sbv2 from './src';
 import { TransactionObject } from './src';
+import { CHECK_ICON, FAILED_ICON } from './utils';
 
 import {
   AccountMeta,
@@ -8,12 +9,7 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 // import { backOff } from 'exponential-backoff';
-import chalk from 'chalk';
 import _ from 'lodash';
-
-export const CHECK_ICON = chalk.green('\u2714 ');
-
-export const FAILED_ICON = chalk.red('\u2717 ');
 
 const VERBOSE = process.env.VERBOSE || false;
 

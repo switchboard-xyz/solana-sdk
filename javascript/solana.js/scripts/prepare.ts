@@ -44,6 +44,11 @@ type AggregatorDefinitionWithLeaseBalance = AggregatorDefinition & {
 };
 
 async function main() {
+  const queuePubkey = new PublicKey(
+    process.argv.length > 2
+      ? process.argv[2]
+      : 'F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy'
+  );
   const [dirPath, feedDirPath, jobDirPath] = setupOutputDir(
     '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
   );
@@ -68,34 +73,22 @@ async function main() {
 
   const [queueAccount, queue] = await sbv2.QueueAccount.load(
     oldProgram,
-    sbv2.SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
+    queuePubkey
   );
-
-  //   const newProgram = await sbv2.SwitchboardProgram.load(
-  //     'devnet',
-  //     devnetConnection,
-  //     payer,
-  //     sbv2.SBV2_MAINNET_PID
-  //   );
-  //   const newProgramAccounts = await newProgram.getProgramAccounts();
 
   // load all devnet permissionless aggregators
   const allAggregators = Array.from(oldProgramAccounts.aggregators.entries());
   console.log(`Found ${allAggregators.length} aggregators on old programId`);
 
-  const permissionlessAggregators = allAggregators.filter(
+  const filteredAggregators = allAggregators.filter(
     ([aggregatorKey, aggregator]) =>
-      aggregator.queuePubkey.equals(
-        sbv2.SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
-      )
+      aggregator.queuePubkey.equals(queueAccount.publicKey)
   );
-  console.log(
-    `Found ${permissionlessAggregators.length} aggregators on permissionless queue`
-  );
+  console.log(`Found ${filteredAggregators.length} aggregators on queue`);
 
   const aggregators = new Map<string, AggregatorDefinition>();
 
-  for (const [aggregatorKey, aggregator] of permissionlessAggregators) {
+  for (const [aggregatorKey, aggregator] of filteredAggregators) {
     // check permission account exists
     const [permissionAccount] = sbv2.PermissionAccount.fromSeed(
       oldProgram,

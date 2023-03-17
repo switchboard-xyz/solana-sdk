@@ -13,11 +13,9 @@ export interface SbStateFields {
   tokenVault: PublicKey;
   /** The token mint used by the DAO. */
   daoMint: PublicKey;
-  /**
-   * Reserved for future info.
-   * The PDA bump to derive the pubkey.
-   */
+  /** The PDA bump to derive the pubkey. */
   bump: number;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
@@ -30,11 +28,9 @@ export interface SbStateJSON {
   tokenVault: string;
   /** The token mint used by the DAO. */
   daoMint: string;
-  /**
-   * Reserved for future info.
-   * The PDA bump to derive the pubkey.
-   */
+  /** The PDA bump to derive the pubkey. */
   bump: number;
+  /** Reserved for future info. */
   ebuf: Array<number>;
 }
 
@@ -47,11 +43,9 @@ export class SbState {
   readonly tokenVault: PublicKey;
   /** The token mint used by the DAO. */
   readonly daoMint: PublicKey;
-  /**
-   * Reserved for future info.
-   * The PDA bump to derive the pubkey.
-   */
+  /** The PDA bump to derive the pubkey. */
   readonly bump: number;
+  /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
