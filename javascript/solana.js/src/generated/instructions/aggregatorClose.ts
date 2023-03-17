@@ -27,6 +27,7 @@ export interface AggregatorCloseAccounts {
   /** Optional accounts */
   crank: PublicKey;
   dataBuffer: PublicKey;
+  slidingWindow: PublicKey;
 }
 
 export const layout = borsh.struct([
@@ -52,6 +53,7 @@ export function aggregatorClose(
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.crank, isSigner: false, isWritable: true },
     { pubkey: accounts.dataBuffer, isSigner: false, isWritable: true },
+    { pubkey: accounts.slidingWindow, isSigner: false, isWritable: true },
   ];
   const identifier = Buffer.from([77, 29, 85, 88, 224, 181, 157, 69]);
   const buffer = Buffer.alloc(1000);

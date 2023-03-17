@@ -1,15 +1,17 @@
 import * as sbv2 from './src';
-import { Job, setupOutputDir } from './utils';
+import { FAILED_ICON, Job, setupOutputDir } from './utils';
 
 import { clusterApiUrl, Connection } from '@solana/web3.js';
 // import { backOff } from 'exponential-backoff';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 const VERBOSE = process.env.VERBOSE || false;
 
 const jobMapPath = path.join(
-  __dirname,
+  os.homedir(),
+  'devnet-migration',
   sbv2.SBV2_MAINNET_PID.toBase58(),
   'job_map.csv'
 );
@@ -21,11 +23,6 @@ async function main() {
   const [newDirPath, newFeedDirPath, newJobDirPath] = setupOutputDir(
     sbv2.SBV2_MAINNET_PID.toBase58()
   );
-  // if (process.argv.length < 3) {
-  //   throw new Error(
-  //     `Usage: ts-node migrate [job|aggregator] [jobPubkey|aggregatorPubkey]`
-  //   );
-  // }
 
   const devnetConnection = new Connection(
     process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
@@ -92,13 +89,11 @@ async function main() {
       jobMap.set(jobKey, jobAccount.publicKey.toBase58());
       writeJobMap(jobMap);
     } catch (error) {
-      console.error(`${jobKey} failed, ${error}`);
+      console.error(`${FAILED_ICON} ${jobKey} failed`);
+      console.error(error);
+      console.error(error);
     }
   }
-
-  // for (const [jobKey, job] of jobs.entries()) {
-  //   const jobAccount = new sbv2.JobAccount()
-  // }
 }
 
 main().catch(error => {

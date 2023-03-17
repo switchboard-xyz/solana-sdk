@@ -1546,7 +1546,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   public async fetchAccounts(
     _aggregator?: types.AggregatorAccountData,
     _queueAccount?: QueueAccount,
-    _queue?: types.OracleQueueAccountData
+    _queue?: types.OracleQueueAccountData,
+    commitment: Commitment = 'confirmed'
   ): Promise<AggregatorAccounts> {
     const aggregator = _aggregator ?? (await this.loadData());
     const queueAccount =
@@ -1573,7 +1574,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         leaseAccount.publicKey,
         leaseEscrow,
         ...jobPubkeys,
-      ]
+      ],
+      commitment
     );
 
     const permissionAccountInfo = accountInfos.shift();
@@ -2075,6 +2077,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       aggregator.queuePubkey
     );
 
+    const slidingWindowKey = this.slidingWindowKey;
+    const slidingWindowAccountInfo =
+      await this.program.connection.getAccountInfo(slidingWindowKey);
+
     const {
       permissionAccount,
       permissionBump,
@@ -2097,6 +2103,34 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       dataBuffer = crank.dataBuffer;
     }
 
+    const accounts = {
+      authority: aggregator.authority,
+      aggregator: this.publicKey,
+      permission: permissionAccount.publicKey,
+      lease: leaseAccount.publicKey,
+      escrow: leaseEscrow,
+      oracleQueue: queueAccount.publicKey,
+      queueAuthority: queue.authority,
+      programState: queueAccount.program.programState.publicKey,
+      solDest: payer,
+      escrowDest: tokenWallet,
+      tokenProgram: TOKEN_PROGRAM_ID,
+    };
+
+    if (crankPubkey !== null && dataBuffer !== null) {
+      accounts['crank'] = crankPubkey;
+      accounts['dataBuffer'] = dataBuffer;
+    } else {
+      accounts['crank'] = null;
+      accounts['dataBuffer'] = null;
+    }
+
+    if (slidingWindowAccountInfo !== null) {
+      accounts['slidingWindow'] = slidingWindowKey;
+    } else {
+      accounts['slidingWindow'] = null;
+    }
+
     const closeIxn = await (
       (this.program as any)._program as anchor.Program
     ).methods
@@ -2106,37 +2140,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         leaseBump: leaseBump,
       })
       .accounts(
-        crankPubkey !== null && dataBuffer !== null
-          ? {
-              authority: aggregator.authority,
-              aggregator: this.publicKey,
-              permission: permissionAccount.publicKey,
-              lease: leaseAccount.publicKey,
-              escrow: leaseEscrow,
-              oracleQueue: queueAccount.publicKey,
-              queueAuthority: queue.authority,
-              programState: queueAccount.program.programState.publicKey,
-              solDest: payer,
-              escrowDest: tokenWallet,
-              tokenProgram: TOKEN_PROGRAM_ID,
-              crank: crankPubkey,
-              dataBuffer: dataBuffer,
-            }
-          : ({
-              authority: aggregator.authority,
-              aggregator: this.publicKey,
-              permission: permissionAccount.publicKey,
-              lease: leaseAccount.publicKey,
-              escrow: leaseEscrow,
-              oracleQueue: queueAccount.publicKey,
-              queueAuthority: queue.authority,
-              programState: queueAccount.program.programState.publicKey,
-              solDest: payer,
-              escrowDest: tokenWallet,
-              tokenProgram: TOKEN_PROGRAM_ID,
-              crank: null,
-              dataBuffer: null,
-            } as any) // compiler expects all types to be pubkeys
+        accounts as any // compiler expects all types to be pubkeys
       )
       .instruction();
 
