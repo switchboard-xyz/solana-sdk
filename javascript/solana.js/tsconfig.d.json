@@ -2,7 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "emitDeclarationOnly": true,
-    "stripInternal": true
+    "stripInternal": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false
   },
   "include": ["src"]
 }

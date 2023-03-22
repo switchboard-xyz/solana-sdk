@@ -9,7 +9,8 @@
     "outDir": "lib",
     "resolveJsonModule": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "skipLibCheck": true
   },
   "extends": "./tsconfig.base.json",
   "include": ["src", "test"],

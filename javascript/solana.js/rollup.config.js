@@ -54,19 +54,24 @@ function generateConfig(configType, format) {
         ],
       }),
 
+      json(),
+
       commonjs(),
+
       nodeResolve({
         browser,
         dedupe: ['bn.js', 'buffer'],
         extensions,
         preferBuiltins: !browser,
       }),
+
       babel({
         exclude: '**/node_modules/**',
         extensions,
         babelHelpers: bundle ? 'bundled' : 'runtime',
         plugins: bundle ? [] : ['@babel/plugin-transform-runtime'],
       }),
+
       replace({
         preventAssignment: true,
         values: {
@@ -77,16 +82,11 @@ function generateConfig(configType, format) {
           ),
         },
       }),
-      json(),
     ],
     onwarn: function (warning, rollupWarn) {
       rollupWarn(warning);
       if (warning.code === 'CIRCULAR_DEPENDENCY') {
         if (!warning.toString().includes('/node_modules/')) {
-          console.error(
-            'Please eliminate the circular dependencies listed ' +
-              'above and retry the build'
-          );
           // throw new Error(
           //   'Please eliminate the circular dependencies listed ' +
           //     'above and retry the build'
@@ -125,6 +125,8 @@ function generateConfig(configType, format) {
       'rpc-websockets/dist/lib/client/websocket.browser',
       'superstruct',
     ];
+  } else {
+    config.external = ['@switchboard-xyz/oracle'];
   }
 
   switch (configType) {
