@@ -21,10 +21,22 @@
       "require": "./lib/cjs/test/index.js"
     }
   },
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
-  "types": "lib/cjs/index.d.ts",
+  "browser": {
+    "./lib/index.cjs.js": "./lib/index.browser.cjs.js",
+    "./lib/index.esm.js": "./lib/index.browser.esm.js"
+  },
+  "react-native": "lib/index.native.js",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.esm.js",
+  "types": "lib/index.d.ts",
+  "browserslist": [
+    "defaults",
+    "not IE 11",
+    "maintained node versions"
+  ],
   "scripts": {
+    "compile:js": "rimraf lib; cross-env NODE_ENV=production rollup -c",
+    "compile:typedefs": "./scripts/typegen.sh",
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
@@ -51,6 +63,18 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@babel/core": "^7.12.13",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/preset-typescript": "^7.12.16",
+    "@rollup/plugin-alias": "^4.0.3",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-multi-entry": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-replace": "^5.0.2",
     "@switchboard-xyz/eslint-config": "latest",
     "@types/chai": "^4.3.4",
     "@types/lodash": "^4.14.191",
@@ -59,14 +83,22 @@
     "anchor-client-gen": "^0.25.0",
     "chai": "^4.3.7",
     "chalk": "^4.1.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.35.0",
+    "esm": "^3.2.25",
     "exponential-backoff": "^3.1.1",
     "gts": "^3.1.1",
     "mocha": "^10.1.0",
+    "rimraf": "^4.4.0",
+    "rollup": "2.79.1",
+    "rollup-plugin-dts": "^4.0.0",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-terser": "^7.0.2",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
+    "tsup": "^6.7.0",
     "typedoc": "^0.23.23",
     "typescript": "^4.9.4"
   },
