@@ -7,22 +7,22 @@ import {
   QueueAccount,
   SwitchboardNetwork,
   SwitchboardProgram,
-} from '..';
+} from '.';
 
 import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import {
-  IOracleConfig,
-  NodeOracle,
-  ReleaseChannel,
-  ReleaseChannelVersion,
-} from '@switchboard-xyz/oracle';
+// import {
+//   IOracleConfig,
+//   NodeOracle,
+//   ReleaseChannel,
+//   ReleaseChannelVersion,
+// } from '@switchboard-xyz/oracle';
 import fs from 'fs';
 import _ from 'lodash';
 import os from 'os';
 import path from 'path';
 
-export type NodeConfig = IOracleConfig & Partial<ReleaseChannelVersion>;
+// export type NodeConfig = IOracleConfig & Partial<ReleaseChannelVersion>;
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
@@ -58,7 +58,7 @@ export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   throw new Error(`Failed to find wallet path in Anchor.toml`);
 }
 
-export type SwitchboardTestContextV2Init = Omit<
+export type SwitchboardTestContextInit = Omit<
   Omit<NetworkInitParams, 'authority'>,
   'oracles'
 > & {
@@ -69,7 +69,7 @@ export type SwitchboardTestContextV2Init = Omit<
 // oraclePubkey: Ei4HcqRQtf6TfwbuRXKRwCtt8PDXhmq9NhYLWpoh23xp
 
 // TIP: Do NOT define an authority and defaul to Anchor.toml wallet
-export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextV2Init = {
+export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextInit = {
   name: 'Localnet Queue',
   metadata: 'Localnet Metadata',
   keypair: Keypair.fromSecretKey(
@@ -112,8 +112,8 @@ export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextV2Init = {
   },
 };
 
-export class SwitchboardTestContextV2 {
-  _oracle?: NodeOracle;
+export class SwitchboardTestContext {
+  // _oracle?: NodeOracle;
 
   constructor(
     readonly network: LoadedSwitchboardNetwork,
@@ -134,10 +134,10 @@ export class SwitchboardTestContextV2 {
 
   static async load(
     connection: Connection,
-    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
+    networkInitParams?: Partial<SwitchboardTestContextInit>,
     walletPath?: string,
     programId?: PublicKey
-  ): Promise<SwitchboardTestContextV2> {
+  ): Promise<SwitchboardTestContext> {
     const walletFsPath = walletPath ?? findAnchorTomlWallet();
     const wallet = Keypair.fromSecretKey(
       new Uint8Array(JSON.parse(fs.readFileSync(walletFsPath, 'utf-8')))
@@ -187,7 +187,7 @@ export class SwitchboardTestContextV2 {
         }
 
         const network = await SwitchboardNetwork.fromQueue(queueAccount);
-        return new SwitchboardTestContextV2(network, walletFsPath);
+        return new SwitchboardTestContext(network, walletFsPath);
       }
       // eslint-disable-next-line no-empty
     } catch {}
@@ -204,15 +204,15 @@ export class SwitchboardTestContextV2 {
         throw new Error(`Anchor wallet pubkey mismatch`);
       }
     }
-    return new SwitchboardTestContextV2(loadedNetwork, walletFsPath);
+    return new SwitchboardTestContext(loadedNetwork, walletFsPath);
   }
 
   static async loadFromProvider(
     provider: AnchorProvider,
-    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
+    networkInitParams?: Partial<SwitchboardTestContextInit>,
     programId?: PublicKey
-  ): Promise<SwitchboardTestContextV2> {
-    const switchboard = await SwitchboardTestContextV2.load(
+  ): Promise<SwitchboardTestContext> {
+    const switchboard = await SwitchboardTestContext.load(
       provider.connection,
       networkInitParams,
       undefined,
@@ -223,92 +223,92 @@ export class SwitchboardTestContextV2 {
 
   static async initFromProvider(
     provider: AnchorProvider,
-    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
-    oracleParams?: Partial<IOracleConfig>,
+    networkInitParams?: Partial<SwitchboardTestContextInit>,
+    // oracleParams?: Partial<IOracleConfig>,
     programId?: PublicKey
-  ): Promise<SwitchboardTestContextV2> {
-    const switchboard = await SwitchboardTestContextV2.loadFromProvider(
+  ): Promise<SwitchboardTestContext> {
+    const switchboard = await SwitchboardTestContext.loadFromProvider(
       provider,
       networkInitParams,
       programId
     );
-    await switchboard.start(oracleParams);
+    // await switchboard.start(oracleParams);
     return switchboard;
   }
 
   static async init(
     connection: Connection,
-    networkInitParams?: Partial<SwitchboardTestContextV2Init>,
-    oracleParams?: Partial<IOracleConfig>,
+    networkInitParams?: Partial<SwitchboardTestContextInit>,
+    // oracleParams?: Partial<IOracleConfig>,
     walletPath?: string,
     programId?: PublicKey
-  ): Promise<SwitchboardTestContextV2> {
-    const switchboard = await SwitchboardTestContextV2.load(
+  ): Promise<SwitchboardTestContext> {
+    const switchboard = await SwitchboardTestContext.load(
       connection,
       networkInitParams,
       walletPath,
       programId
     );
-    await switchboard.start(oracleParams);
+    // await switchboard.start(oracleParams);
     return switchboard;
   }
 
-  async start(
-    oracleParams?: Partial<NodeConfig> | ReleaseChannel,
-    timeout = 60
-  ) {
-    const releaseChannel: ReleaseChannel =
-      typeof oracleParams === 'string' &&
-      (oracleParams === 'testnet' ||
-        oracleParams === 'mainnet' ||
-        oracleParams === 'latest')
-        ? oracleParams
-        : 'testnet';
+  // async start(
+  //   oracleParams?: Partial<NodeConfig> | ReleaseChannel,
+  //   timeout = 60
+  // ) {
+  //   const releaseChannel: ReleaseChannel =
+  //     typeof oracleParams === 'string' &&
+  //     (oracleParams === 'testnet' ||
+  //       oracleParams === 'mainnet' ||
+  //       oracleParams === 'latest')
+  //       ? oracleParams
+  //       : 'testnet';
 
-    const baseConfig: NodeConfig = {
-      chain: 'solana',
-      releaseChannel: releaseChannel,
-      network:
-        this.program.cluster === 'mainnet-beta'
-          ? 'mainnet'
-          : this.program.cluster,
-      rpcUrl: this.program.connection.rpcEndpoint,
-      oracleKey: this.oracle.publicKey.toBase58(),
-      secretPath: this.walletPath,
-      envVariables: {
-        VERBOSE: '1',
-        DEBUG: '1',
-        DISABLE_NONE_QUEUE: '1',
-        DISABLE_METRICS: '1',
-      },
-    };
+  //   const baseConfig: NodeConfig = {
+  //     chain: 'solana',
+  //     releaseChannel: releaseChannel,
+  //     network:
+  //       this.program.cluster === 'mainnet-beta'
+  //         ? 'mainnet'
+  //         : this.program.cluster,
+  //     rpcUrl: this.program.connection.rpcEndpoint,
+  //     oracleKey: this.oracle.publicKey.toBase58(),
+  //     secretPath: this.walletPath,
+  //     envVariables: {
+  //       VERBOSE: '1',
+  //       DEBUG: '1',
+  //       DISABLE_NONE_QUEUE: '1',
+  //       DISABLE_METRICS: '1',
+  //     },
+  //   };
 
-    const config: NodeConfig =
-      typeof oracleParams === 'string'
-        ? baseConfig
-        : _.merge(baseConfig, oracleParams);
+  //   const config: NodeConfig =
+  //     typeof oracleParams === 'string'
+  //       ? baseConfig
+  //       : _.merge(baseConfig, oracleParams);
 
-    this._oracle = await NodeOracle.fromReleaseChannel({
-      ...config,
-      releaseChannel: releaseChannel,
-      chain: 'solana',
-    });
+  //   this._oracle = await NodeOracle.fromReleaseChannel({
+  //     ...config,
+  //     releaseChannel: releaseChannel,
+  //     chain: 'solana',
+  //   });
 
-    console.log(`Starting Switchboard oracle ...`);
+  //   console.log(`Starting Switchboard oracle ...`);
 
-    await this._oracle.startAndAwait(timeout);
-  }
+  //   await this._oracle.startAndAwait(timeout);
+  // }
 
-  stop() {
-    if (this._oracle) {
-      const stopped = this._oracle.stop();
-      if (!stopped) {
-        console.error(`Failed to stop docker oracle`);
+  // stop() {
+  //   if (this._oracle) {
+  //     const stopped = this._oracle.stop();
+  //     if (!stopped) {
+  //       console.error(`Failed to stop docker oracle`);
 
-        this._oracle.kill();
-      }
-    }
-  }
+  //       this._oracle.kill();
+  //     }
+  //   }
+  // }
 
   public static findAnchorTomlWallet(workingDir = process.cwd()): string {
     try {
@@ -326,3 +326,5 @@ export class SwitchboardTestContextV2 {
     return loadKeypair(keypairPath);
   }
 }
+
+export { SwitchboardTestContext as SwitchboardTestContextV2 };

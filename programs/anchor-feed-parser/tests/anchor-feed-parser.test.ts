@@ -2,12 +2,11 @@ import * as anchor from "@coral-xyz/anchor";
 import { OracleJob, sleep } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
-  SwitchboardTestContextV2,
+  SwitchboardTestContext,
 } from "@switchboard-xyz/solana.js";
 import assert from "assert";
-import chai from "chai";
 import { AnchorFeedParser } from "../target/types/anchor_feed_parser";
-const expect = chai.expect;
+import { NodeOracle } from "@switchboard-xyz/oracle";
 
 describe("anchor-feed-parser test", () => {
   const provider = anchor.AnchorProvider.env();
@@ -16,14 +15,16 @@ describe("anchor-feed-parser test", () => {
   const feedParserProgram: anchor.Program<AnchorFeedParser> =
     anchor.workspace.AnchorFeedParser;
 
-  let switchboard: SwitchboardTestContextV2;
+  let switchboard: SwitchboardTestContext;
+  let oracle: NodeOracle;
+
   let aggregatorAccount: AggregatorAccount;
 
   before(async () => {
-    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+    switchboard = await SwitchboardTestContext.loadFromProvider(provider, {
       // You can provide a keypair to so the PDA schemes dont change between test runs
       name: "Test Queue",
-      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
+      keypair: SwitchboardTestContext.loadKeypair("~/.keypairs/queue.json"),
       queueSize: 10,
       reward: 0,
       minStake: 0,
@@ -34,18 +35,33 @@ describe("anchor-feed-parser test", () => {
       oracle: {
         name: "Test Oracle",
         enable: true,
-        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+        stakingWalletKeypair: SwitchboardTestContext.loadKeypair(
           "~/.keypairs/oracleWallet.json"
         ),
       },
     });
-    await switchboard.start();
+
+    oracle = await NodeOracle.fromReleaseChannel({
+      chain: "solana",
+      releaseChannel: "testnet",
+      network: "localnet", // disables production capabilities like monitoring and alerts
+      rpcUrl: switchboard.program.connection.rpcEndpoint,
+      oracleKey: switchboard.oracle.publicKey.toBase58(),
+      secretPath: switchboard.walletPath,
+      silent: false, // set to true to suppress oracle logs in the console
+      envVariables: {
+        VERBOSE: "1",
+        DEBUG: "1",
+        DISABLE_NONCE_QUEUE: "1",
+        DISABLE_METRICS: "1",
+      },
+    });
+
+    await oracle.startAndAwait();
   });
 
-  after(async () => {
-    if (switchboard) {
-      switchboard.stop();
-    }
+  after(() => {
+    oracle?.stop();
   });
 
   it("Creates a static feed that resolves to 100", async () => {

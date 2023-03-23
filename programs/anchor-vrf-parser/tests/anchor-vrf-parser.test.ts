@@ -17,12 +17,13 @@ import {
   PermissionAccount,
   QueueAccount,
   SwitchboardProgram,
-  SwitchboardTestContextV2,
+  SwitchboardTestContext,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
   types,
 } from "@switchboard-xyz/solana.js";
 
 import { AnchorVrfParser } from "../target/types/anchor_vrf_parser";
+import { NodeOracle } from "@switchboard-xyz/oracle";
 
 describe("anchor-vrf-parser test", () => {
   const provider = AnchorProvider.env();
@@ -56,7 +57,9 @@ describe("anchor-vrf-parser test", () => {
     ixData: vrfIxCoder.encode("updateResult", ""), // pass any params for instruction here
   };
 
-  let switchboard: SwitchboardTestContextV2;
+  let switchboard: SwitchboardTestContext;
+  let oracle: NodeOracle;
+
   let queueAccount: QueueAccount;
   let queue: types.OracleQueueAccountData;
 
@@ -70,10 +73,10 @@ describe("anchor-vrf-parser test", () => {
         SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
       );
     } else {
-      switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+      switchboard = await SwitchboardTestContext.loadFromProvider(provider, {
         // You can provide a keypair to so the PDA schemes dont change between test runs
         name: "Test Queue",
-        keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
+        keypair: SwitchboardTestContext.loadKeypair("~/.keypairs/queue.json"),
         queueSize: 10,
         reward: 0,
         minStake: 0,
@@ -84,19 +87,36 @@ describe("anchor-vrf-parser test", () => {
         oracle: {
           name: "Test Oracle",
           enable: true,
-          stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+          stakingWalletKeypair: SwitchboardTestContext.loadKeypair(
             "~/.keypairs/oracleWallet.json"
           ),
         },
       });
       queueAccount = switchboard.queue;
       queue = await queueAccount.loadData();
-      await switchboard.start();
+
+      oracle = await NodeOracle.fromReleaseChannel({
+        chain: "solana",
+        releaseChannel: "testnet",
+        network: "localnet", // disables production capabilities like monitoring and alerts
+        rpcUrl: switchboard.program.connection.rpcEndpoint,
+        oracleKey: switchboard.oracle.publicKey.toBase58(),
+        secretPath: switchboard.walletPath,
+        silent: false, // set to true to suppress oracle logs in the console
+        envVariables: {
+          VERBOSE: "1",
+          DEBUG: "1",
+          DISABLE_NONCE_QUEUE: "1",
+          DISABLE_METRICS: "1",
+        },
+      });
+
+      await oracle.startAndAwait();
     }
   });
 
   after(() => {
-    switchboard?.stop();
+    oracle?.stop();
   });
 
   it("Creates a vrfClient account", async () => {

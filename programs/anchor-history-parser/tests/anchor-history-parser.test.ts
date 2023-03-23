@@ -4,15 +4,16 @@ import { Program } from "@coral-xyz/anchor";
 import { OracleJob } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
-  SwitchboardTestContextV2,
+  SwitchboardTestContext,
 } from "@switchboard-xyz/solana.js";
 import { AnchorHistoryParser } from "../target/types/anchor_history_parser";
+import { NodeOracle } from "@switchboard-xyz/oracle";
 
 export const AGGREGATOR_PUBKEY: anchor.web3.PublicKey =
   new anchor.web3.PublicKey("GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR");
 
 export const HISTORY_BUFFER_PUBKEY: anchor.web3.PublicKey =
-  new anchor.web3.PublicKey("7LLvRhMs73FqcLkA8jvEE1AM2mYZXTmqfUv8GAEurymx");
+  new anchor.web3.PublicKey("9GPTMZmtNU61ULAZoGxDZmnZoWeF8zvBmKp4WZY6Ln6j");
 
 export const sleep = (ms: number): Promise<any> =>
   new Promise((s) => setTimeout(s, ms));
@@ -28,13 +29,14 @@ describe("anchor-history-parser", () => {
   let aggregatorAccount: AggregatorAccount;
   let historyBuffer: anchor.web3.PublicKey;
 
-  let switchboard: SwitchboardTestContextV2;
+  let switchboard: SwitchboardTestContext;
+  let oracle: NodeOracle;
 
   before(async () => {
-    switchboard = await SwitchboardTestContextV2.loadFromProvider(provider, {
+    switchboard = await SwitchboardTestContext.loadFromProvider(provider, {
       // You can provide a keypair to so the PDA schemes dont change between test runs
       name: "Test Queue",
-      keypair: SwitchboardTestContextV2.loadKeypair("~/.keypairs/queue.json"),
+      keypair: SwitchboardTestContext.loadKeypair("~/.keypairs/queue.json"),
       queueSize: 10,
       reward: 0,
       minStake: 0,
@@ -45,18 +47,33 @@ describe("anchor-history-parser", () => {
       oracle: {
         name: "Test Oracle",
         enable: true,
-        stakingWalletKeypair: SwitchboardTestContextV2.loadKeypair(
+        stakingWalletKeypair: SwitchboardTestContext.loadKeypair(
           "~/.keypairs/oracleWallet.json"
         ),
       },
     });
-    await switchboard.start();
+
+    oracle = await NodeOracle.fromReleaseChannel({
+      chain: "solana",
+      releaseChannel: "testnet",
+      network: "localnet", // disables production capabilities like monitoring and alerts
+      rpcUrl: switchboard.program.connection.rpcEndpoint,
+      oracleKey: switchboard.oracle.publicKey.toBase58(),
+      secretPath: switchboard.walletPath,
+      silent: false, // set to true to suppress oracle logs in the console
+      envVariables: {
+        VERBOSE: "1",
+        DEBUG: "1",
+        DISABLE_NONCE_QUEUE: "1",
+        DISABLE_METRICS: "1",
+      },
+    });
+
+    await oracle.startAndAwait();
   });
 
-  after(async () => {
-    if (switchboard) {
-      switchboard.stop();
-    }
+  after(() => {
+    oracle?.stop();
   });
 
   /** Example showing how to create a new data feed with a history buffer storing 200k samples.
