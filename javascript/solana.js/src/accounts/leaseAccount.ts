@@ -122,6 +122,39 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return data;
   }
 
+  /**
+   * Creates instructions to initialize a LeaseAccount and optionally funds it with wrapped tokens.
+   *
+   * @param program The SwitchboardProgram instance.
+   * @param payer The PublicKey of the account that will pay for the transaction fees.
+   * @param params Lease initialization parameters including:
+   *   - aggregatorAccount (required): The AggregatorAccount to be used.
+   *   - queueAccount (required): The QueueAccount to be used.
+   *   - jobAuthorities (optional): Array of PublicKey for job authorities.
+   *   - jobPubkeys (optional): Array of PublicKey for job pubkeys.
+   *   - withdrawAuthority (optional): The PublicKey for the account that has permission to withdraw funds.
+   *
+   * @return A Promise that resolves to a tuple containing the LeaseAccount and the corresponding TransactionObject.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import { LeaseAccount } from '@switchboard-xyz/solana.js';
+   * const [leaseAccount, leaseInitTxn] = await LeaseAccount.createInstructions(program, payer, {
+   *   queueAccount,
+   *   aggregatorAccount,
+   *   fundAmount: 1,
+   *   funderAuthority: null,
+   *   funderTokenWallet: null,
+   *   disableWrap: false,
+   *   withdrawAuthority: null,
+   *   jobPubkeys: null,
+   *   jobAuthorities: null,
+   * });
+   * const leaseInitSignature = await program.signAndSend(leaseInitTxn);
+   * const lease = await leaseAccount.loadData();
+   * ```
+   */
   static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
@@ -253,6 +286,38 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return [leaseAccount, packed[0]];
   }
 
+  /**
+   * Creates a LeaseAccount and optionally funds it with wrapped tokens.
+   *
+   * @param program The SwitchboardProgram instance.
+   * @param payer The PublicKey of the account that will pay for the transaction fees.
+   * @param params Lease initialization parameters including:
+   *   - aggregatorAccount (required): The AggregatorAccount to be used.
+   *   - queueAccount (required): The QueueAccount to be used.
+   *   - jobAuthorities (optional): Array of PublicKey for job authorities.
+   *   - jobPubkeys (optional): Array of PublicKey for job pubkeys.
+   *   - withdrawAuthority (optional): The PublicKey for the account that has permission to withdraw funds.
+   *
+   * @return A Promise that resolves to a tuple containing the LeaseAccount and the corresponding TransactionObject.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import { LeaseAccount } from '@switchboard-xyz/solana.js';
+   * const [leaseAccount, leaseInitSignature] = await LeaseAccount.create(program, {
+   *   queueAccount,
+   *   aggregatorAccount,
+   *   fundAmount: 1,
+   *   funderAuthority: null,
+   *   funderTokenWallet: null,
+   *   disableWrap: false,
+   *   withdrawAuthority: null,
+   *   jobPubkeys: null,
+   *   jobAuthorities: null,
+   * });
+   * const lease = await leaseAccount.loadData();
+   * ```
+   */
   public static async create(
     program: SwitchboardProgram,
     params: LeaseInitParams
@@ -267,6 +332,22 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return [leaseAccount, signature];
   }
 
+  /**
+   * Fetches the balance of a Lease escrow in decimal format.
+   *
+   * @param escrow (optional) The PublicKey of the escrow account. If not provided, the associated escrow account for the current LeaseAccount will be used.
+   *
+   * @return A Promise that resolves to the escrow balance as a number in decimal format.
+   *
+   * @throws AccountNotFoundError If the Lease escrow account is not found.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const leaseEscrowBalance = await leaseAccount.fetchBalance();
+   * console.log("Lease escrow balance:", leaseEscrowBalance);
+   * ```
+   */
   public async fetchBalance(escrow?: PublicKey): Promise<number> {
     const escrowPubkey =
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
@@ -277,6 +358,22 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return escrowBalance;
   }
 
+  /**
+   * Fetches the balance of a Lease escrow in the raw token amount using the bn.js format.
+   *
+   * @param escrow (optional) The PublicKey of the escrow account. If not provided, the associated escrow account for the current LeaseAccount will be used.
+   *
+   * @return A Promise that resolves to the escrow balance as a BN instance.
+   *
+   * @throws AccountNotFoundError If the Lease escrow account is not found.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const leaseEscrowBalanceBN = await leaseAccount.fetchBalanceBN();
+   * console.log("Lease escrow balance:", leaseEscrowBalanceBN.toString());
+   * ```
+   */
   public async fetchBalanceBN(escrow?: PublicKey): Promise<BN> {
     const escrowPubkey =
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);

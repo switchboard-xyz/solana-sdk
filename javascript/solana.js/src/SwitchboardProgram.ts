@@ -102,6 +102,10 @@ export const getSwitchboardProgramId = (
 /**
  * Wrapper class for the Switchboard anchor Program.
  *
+ * This class provides an interface to interact with the Switchboard program on the Solana network.
+ * It allows you to load the program, create and initialize connection objects, and interact with
+ * Switchboard accounts.
+ *
  * Basic usage example:
  *
  * ```ts
@@ -119,22 +123,30 @@ export const getSwitchboardProgramId = (
  * ```
  */
 export class SwitchboardProgram {
+  // The read-only keypair for the Switchboard program.
   private static readonly _readOnlyKeypair = READ_ONLY_KEYPAIR;
 
+  // The anchor program instance.
   private readonly _program: anchor.Program;
 
-  /** The solana cluster to load the Switchboard program for. */
+  /** The Solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | 'localnet';
 
+  // The pubkey and bump of the Switchboard program state account.
   readonly programState: {
     publicKey: PublicKey;
     bump: number;
   };
 
+  // The native mint for the Switchboard program.
   readonly mint: NativeMint;
 
   /**
-   * Constructor.
+   * Constructor for the SwitchboardProgram class.
+   *
+   * @param program - The anchor program instance.
+   * @param cluster - The Solana cluster to load the Switchboard program for.
+   * @param mint - The native mint for the Switchboard program.
    */
   constructor(
     program: anchor.Program,
@@ -144,6 +156,7 @@ export class SwitchboardProgram {
     this._program = program;
     this.cluster = cluster;
 
+    // Derive the state account from the seed.
     const stateAccount = ProgramStateAccount.fromSeed(this);
     this.programState = {
       publicKey: stateAccount[0].publicKey,
@@ -152,6 +165,19 @@ export class SwitchboardProgram {
     this.mint = mint;
   }
 
+  /**
+   * Load the anchor program for the Switchboard.
+   *
+   * This method fetches the IDL for the Switchboard program, and initializes an anchor program
+   * instance using the fetched IDL, provided program ID, and provider.
+   *
+   * @param cluster - The Solana cluster to load the Switchboard program for.
+   * @param connection - The Solana connection object used to connect to an RPC node.
+   * @param payerKeypair - Optional payer keypair used to pay for on-chain transactions.
+   * @param programId - Optional program ID to override the cluster's default programId.
+   *
+   * @returns The initialized anchor program instance for the Switchboard.
+   */
   static async loadAnchorProgram(
     cluster: Cluster | 'localnet',
     connection: Connection,
@@ -224,9 +250,9 @@ export class SwitchboardProgram {
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
    *
-   * @param provider - the anchor provider containing the rpc and wallet connection.
+   * @param provider - The anchor provider containing the RPC and wallet connection.
    *
-   * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
+   * @return The {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
    *
    * Basic usage example:
    *
@@ -263,9 +289,11 @@ export class SwitchboardProgram {
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
    *
-   * @param provider - the anchor provider containing the rpc and wallet connection.
+   * @param connection - The Solana connection object used to connect to an RPC node.
+   * @param payer - Optional, payer keypair used to pay for on-chain transactions (defaults to READ_ONLY_KEYPAIR).
+   * @param programId - Optional, override the cluster's default programId.
    *
-   * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
+   * @return The {@linkcode SwitchboardProgram} instance used to create and interact with Switchboard accounts.
    *
    * Basic usage example:
    *
@@ -310,48 +338,64 @@ export class SwitchboardProgram {
   };
 
   /**
-   * The Switchboard Program ID for the currently connected cluster.
+   * Retrieves the Switchboard Program ID for the currently connected cluster.
+   * @return The PublicKey of the Switchboard Program ID.
    */
   public get programId(): PublicKey {
     return this._program.programId;
   }
+
   /**
-   * The Switchboard Program IDL.
+   * Retrieves the Switchboard Program IDL.
+   * @return The IDL of the Switchboard Program.
    */
   public get idl(): anchor.Idl {
     return this._program.idl;
   }
+
   /**
-   * The Switchboard Program ID for the currently connected cluster.
+   * Retrieves the Switchboard Borsh Accounts Coder.
+   * @return The BorshAccountsCoder for the Switchboard Program.
    */
   public get coder(): anchor.BorshAccountsCoder {
     return new anchor.BorshAccountsCoder(this._program.idl);
   }
+
   /**
-   * The anchor Provider used by this program to connect with Solana cluster.
+   * Retrieves the anchor Provider used by this program to connect with the Solana cluster.
+   * @return The AnchorProvider instance for the Switchboard Program.
    */
   public get provider(): anchor.AnchorProvider {
     return this._program.provider as anchor.AnchorProvider;
   }
+
   /**
-   * The Connection used by this program to connect with Solana cluster.
+   * Retrieves the Connection used by this program to connect with the Solana cluster.
+   * @return The Connection instance for the Switchboard Program.
    */
   public get connection(): Connection {
     return this._program.provider.connection;
   }
+
   /**
-   * The Connection used by this program to connect with Solana cluster.
+   * Retrieves the Wallet used by this program.
+   * @return The AnchorWallet instance for the Switchboard Program.
    */
   public get wallet(): AnchorWallet {
     return this.provider.wallet as AnchorWallet;
   }
 
+  /**
+   * Retrieves the wallet's PublicKey.
+   * @return The PublicKey of the wallet.
+   */
   public get walletPubkey(): PublicKey {
     return this.wallet.payer.publicKey;
   }
+
   /**
-   * Some actions exposed by this SDK require that a payer Keypair has been
-   * provided to {@linkcode SwitchboardProgram} in order to send transactions.
+   * Checks if the program is read-only.
+   * @return A boolean indicating if the SwitchboardProgram instance is read-only.
    */
   public get isReadOnly(): boolean {
     return (
@@ -360,7 +404,10 @@ export class SwitchboardProgram {
     );
   }
 
-  /** Verify a payer keypair was supplied. */
+  /**
+   * Verifies that a payer keypair has been supplied to the {@linkcode SwitchboardProgram}.
+   * Throws an error if the program is read-only.
+   */
   public verifyPayer(): void {
     if (this.isReadOnly) {
       throw new errors.SwitchboardProgramReadOnlyError();
@@ -368,9 +415,13 @@ export class SwitchboardProgram {
   }
 
   /**
-   * Verify a fresh keypair was provided.
+   * Verifies that a new keypair has been provided and the corresponding account does not already exist.
    *
-   * **NOTE:** Creating new accounts without this check will prevent the ability to remove any existing funds. */
+   * **NOTE:** Creating new accounts without this check may prevent the ability to withdraw any existing funds.
+   *
+   * @param keypair - The Keypair to be verified.
+   * @throws Will throw an error if the account for the keypair already exists.
+   */
   public async verifyNewKeypair(keypair: Keypair): Promise<void> {
     const accountInfo = await this.connection.getAccountInfo(keypair.publicKey);
     if (accountInfo) {
@@ -378,6 +429,10 @@ export class SwitchboardProgram {
     }
   }
 
+  /**
+   * Retrieves the account namespace for the Switchboard Program.
+   * @return The AccountNamespace instance for the Switchboard Program.
+   */
   public get account(): anchor.AccountNamespace {
     return this._program.account;
   }
@@ -473,6 +528,14 @@ export class SwitchboardProgram {
     return { queueAccount, queue, crankAccount, crank };
   }
 
+  /**
+   * Adds an event listener for the specified AnchorEvent, allowing consumers to monitor the chain for events
+   * such as AggregatorOpenRound, VrfRequestRandomness, and AggregatorSaveResult.
+   *
+   * @param eventName - The name of the event to listen for.
+   * @param callback - A callback function to handle the event data, slot, and signature.
+   * @return A unique listener ID that can be used to remove the event listener.
+   */
   public addEventListener<EventName extends keyof SwitchboardEvents>(
     eventName: EventName,
     callback: (
@@ -484,6 +547,11 @@ export class SwitchboardProgram {
     return this._program.addEventListener(eventName as string, callback);
   }
 
+  /**
+   * Removes the event listener with the specified listener ID.
+   *
+   * @param listenerId - The unique ID of the event listener to be removed.
+   */
   public async removeEventListener(listenerId: number) {
     return await this._program.removeEventListener(listenerId);
   }

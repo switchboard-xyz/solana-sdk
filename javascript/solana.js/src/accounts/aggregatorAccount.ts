@@ -688,6 +688,26 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return [leaseAccount, leaseEscrow, leaseBump];
   }
 
+  /**
+   * Derives the Program Derived Accounts (PDAs) for the Aggregator, based on its currently assigned oracle queue.
+   *
+   * @param queueAccount The QueueAccount associated with the Aggregator.
+   * @param queueAuthority The PublicKey of the oracle queue authority.
+   *
+   * @return An object containing the Aggregator PDA accounts, including:
+   *   - permissionAccount: The permission account.
+   *   - permissionBump: The nonce value used to generate the permission account.
+   *   - leaseAccount: The lease account.
+   *   - leaseBump: The nonce value used to generate the lease account.
+   *   - leaseEscrow: The lease escrow account.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const aggregatorPdaAccounts = aggregator.getAccounts(queueAccount, queueAuthority);
+   * console.log("Aggregator PDA accounts:", aggregatorPdaAccounts);
+   * ```
+   */
   public getAccounts(
     queueAccount: QueueAccount,
     queueAuthority: PublicKey
@@ -711,10 +731,18 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Get the latest confirmed value stored in the aggregator account.
-   * @param aggregator Optional parameter representing the already loaded
-   * aggregator info.
-   * @return latest feed value
+   * Retrieves the latest confirmed value stored in the aggregator account from a pre-fetched account state.
+   *
+   * @param aggregator The pre-fetched aggregator account data.
+   *
+   * @return The latest feed value as a Big instance, or null if no successful rounds have been confirmed yet.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const latestValue = AggregatorAccount.decodeLatestValue(aggregatorAccountData);
+   * console.log("Latest confirmed value:", latestValue?.toString() ?? "No successful rounds yet");
+   * ```
    */
   public static decodeLatestValue(
     aggregator: types.AggregatorAccountData
@@ -727,8 +755,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Get the latest confirmed value stored in the aggregator account.
-   * @return latest feed value or null if not populated
+   * Retrieves the latest confirmed value stored in the aggregator account.
+   *
+   * @return A Promise that resolves to the latest feed value as a Big instance, or null if the value is not populated or no successful rounds have been confirmed yet.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const latestValue = await aggregatorAccount.fetchLatestValue();
+   * console.log("Latest confirmed value:", latestValue?.toString() ?? "No successful rounds yet");
+   * ```
    */
   public async fetchLatestValue(): Promise<Big | null> {
     const aggregator = await this.loadData();
@@ -736,10 +772,20 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Get the timestamp latest confirmed round stored in the aggregator account.
-   * @param aggregator Optional parameter representing the already loaded
-   * aggregator info.
-   * @return latest feed timestamp
+   * Retrieves the timestamp of the latest confirmed round stored in the aggregator account from a pre-fetched account state.
+   *
+   * @param aggregator The pre-fetched aggregator account data.
+   *
+   * @return The latest feed timestamp as an anchor.BN instance.
+   *
+   * @throws Error if the aggregator currently holds no value or no successful rounds have been confirmed yet.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const latestTimestamp = AggregatorAccount.decodeLatestTimestamp(aggregatorAccountData);
+   * console.log("Latest confirmed round timestamp:", latestTimestamp.toString());
+   * ```
    */
   public static decodeLatestTimestamp(
     aggregator: types.AggregatorAccountData
@@ -750,6 +796,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return aggregator.latestConfirmedRound.roundOpenTimestamp;
   }
 
+  /**
+   * Decodes the confirmed round results of the aggregator account from a pre-fetched account state.
+   *
+   * @param aggregator The pre-fetched aggregator account data.
+   *
+   * @return An array of objects containing the oracle public keys and their respective reported values as Big instances.
+   *
+   * @throws Error if the aggregator currently holds no value or no successful rounds have been confirmed yet.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const confirmedRoundResults = AggregatorAccount.decodeConfirmedRoundResults(aggregatorAccountData);
+   * console.log("Confirmed round results:", confirmedRoundResults);
+   * ```
+   */
   public static decodeConfirmedRoundResults(
     aggregator: types.AggregatorAccountData
   ): Array<{ oraclePubkeys: PublicKey; value: Big }> {
@@ -769,10 +831,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Get the individual oracle results of the latest confirmed round.
-   * @param aggregator Optional parameter representing the already loaded
-   * aggregator info.
-   * @return latest results by oracle pubkey
+   * Retrieves the individual oracle results of the latest confirmed round from a pre-fetched account state.
+   *
+   * @param aggregator The pre-fetched aggregator account data.
+   *
+   * @return An array of objects containing the oracle account instances and their respective reported values as Big instances.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const aggregatorAccountData = await aggregatorAccount.loadData();
+   * const confirmedRoundResults = aggregatorAccount.getConfirmedRoundResults(aggregatorAccountData);
+   * console.log("Confirmed round results by oracle account:", confirmedRoundResults);
+   * ```
    */
   public getConfirmedRoundResults(
     aggregator: types.AggregatorAccountData
@@ -786,8 +857,19 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Produces a hash of all the jobs currently in the aggregator
-   * @return hash of all the feed jobs.
+   * Generates a SHA-256 hash of all the oracle jobs currently in the aggregator.
+   *
+   * @param jobs An array of OracleJob instances representing the jobs in the aggregator.
+   *
+   * @return A crypto.Hash object representing the hash of all the feed jobs.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const jobs = [job1, job2, job3];
+   * const jobsHash = aggregatorAccount.produceJobsHash(jobs);
+   * console.log("Hash of all the feed jobs:", jobsHash);
+   * ```
    */
   public produceJobsHash(jobs: Array<OracleJob>): crypto.Hash {
     const hash = crypto.createHash('sha256');
@@ -888,9 +970,32 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
-   * Validate an aggregators config
+   * Validates an aggregator's configuration.
    *
-   * @throws {AggregatorConfigError} if minUpdateDelaySeconds < 5, if batchSize > queueSize, if minOracleResults > batchSize, if minJobResults > aggregator.jobPubkeysSize
+   * @param aggregator An object containing the aggregator's account data or a partial configuration.
+   * @param queue An object containing the OracleQueueAccountData.
+   * @param target An object containing the target configuration values to be verified.
+   *
+   * @throws {AggregatorConfigError} If any of the following conditions are met:
+   * - minUpdateDelaySeconds is less than 5 seconds
+   * - batchSize is greater than the queue size
+   * - minOracleResults is greater than batchSize
+   * - minJobResults is greater than the aggregator's jobPubkeysSize
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * aggregatorAccount.verifyConfig(
+   *   aggregatorData,
+   *   queueData,
+   *   {
+   *     batchSize: 10,
+   *     minOracleResults: 5,
+   *     minJobResults: 4,
+   *     minUpdateDelaySeconds: 10,
+   *   }
+   * );
+   * ```
    */
   public verifyConfig(
     aggregator:
@@ -949,6 +1054,38 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     }
   }
 
+  /**
+   * Creates a transaction object to set aggregator configuration parameters.
+   *
+   * @param payer The public key of the payer account.
+   * @param params An object containing partial configuration parameters to be set.
+   * @param options Optional transaction object options.
+   *
+   * @return A promise that resolves to a transaction object containing the setConfig instruction.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const transactionObject = await aggregatorAccount.setConfigInstruction(
+   *   payerPublicKey,
+   *   {
+   *     name: 'New Aggregator Name',
+   *     metadata: 'New Aggregator Metadata',
+   *     batchSize: 10,
+   *     minOracleResults: 5,
+   *     minJobResults: 4,
+   *     minUpdateDelaySeconds: 10,
+   *     forceReportPeriod: 20,
+   *     varianceThreshold: 0.01,
+   *     basePriorityFee: 1,
+   *     priorityFeeBump: 0.1,
+   *     priorityFeeBumpPeriod: 60,
+   *     maxPriorityFeeMultiplier: 5,
+   *     force: false,
+   *   }
+   * );
+   * ```
+   */
   public async setConfigInstruction(
     payer: PublicKey,
     params: Partial<{
@@ -1030,6 +1167,36 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
   }
 
+  /**
+   * Sets an aggregator configuration parameters.
+   *
+   * @param params An object containing partial configuration parameters to be set.
+   * @param options Optional transaction object options.
+   *
+   * @return A promise that resolves to a transaction object containing the setConfig instruction.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * const transactionObject = await aggregatorAccount.setConfig(
+   *   {
+   *     name: 'New Aggregator Name',
+   *     metadata: 'New Aggregator Metadata',
+   *     batchSize: 10,
+   *     minOracleResults: 5,
+   *     minJobResults: 4,
+   *     minUpdateDelaySeconds: 10,
+   *     forceReportPeriod: 20,
+   *     varianceThreshold: 0.01,
+   *     basePriorityFee: 1,
+   *     priorityFeeBump: 0.1,
+   *     priorityFeeBumpPeriod: 60,
+   *     maxPriorityFeeMultiplier: 5,
+   *     force: false,
+   *   }
+   * );
+   * ```
+   */
   public async setConfig(
     params: Partial<{
       name: string;
