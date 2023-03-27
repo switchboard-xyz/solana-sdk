@@ -27,6 +27,8 @@
     "*scripts*",
     "docker*",
     "Cargo.lock",
-    "poetry.lock"
+    "poetry.lock",
+    "tsconfig*.json",
+    "javascript/solana.js/generate-client.js"
   ]
 }
