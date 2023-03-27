@@ -1,5 +1,6 @@
-import * as sbv2 from './src';
-import { AggregatorAccount, TransactionObject } from './src';
+import * as sbv2 from '../src';
+import { AggregatorAccount, TransactionObject } from '../src';
+
 import { setupOutputDir } from './utils';
 
 import * as anchor from '@coral-xyz/anchor';

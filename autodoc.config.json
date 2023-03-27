@@ -1,0 +1,32 @@
+{
+  "name": "sbv2-solana",
+  "repositoryUrl": "https://github.com/switchboard-xyz/sbv2-solana",
+  "root": ".",
+  "output": "./.autodoc",
+  "llms": ["gpt-3.5-turbo"],
+  "ignore": [
+    ".*",
+    ".vscode",
+    ".github",
+    ".switchboard",
+    "*package-lock.json",
+    "*package.json",
+    "pnpm-*.yaml",
+    "node_modules",
+    "*dist*",
+    "*build*",
+    "*lib/*",
+    "*target*",
+    "*__deprecated__*",
+    "*test-ledger*",
+    "*.svg",
+    "*.md",
+    "*.mdx",
+    "*.toml",
+    "*autodoc*",
+    "*scripts*",
+    "docker*",
+    "Cargo.lock",
+    "poetry.lock"
+  ]
+}

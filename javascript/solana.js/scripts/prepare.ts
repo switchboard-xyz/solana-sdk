@@ -1,4 +1,5 @@
-import * as sbv2 from './src';
+import * as sbv2 from '../src';
+
 import { jsonReplacers, setupOutputDir } from './utils';
 
 import * as anchor from '@coral-xyz/anchor';

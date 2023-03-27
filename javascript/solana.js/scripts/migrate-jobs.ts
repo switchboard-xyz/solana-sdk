@@ -1,4 +1,5 @@
-import * as sbv2 from './src';
+import * as sbv2 from '../src';
+
 import { FAILED_ICON, Job, setupOutputDir } from './utils';
 
 import { clusterApiUrl, Connection } from '@solana/web3.js';

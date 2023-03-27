@@ -1,10 +1,11 @@
-import * as sbv2 from './src';
 import {
   CrankAccount,
   QueueAccount,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
-} from './src';
+} from '../src';
+import * as sbv2 from '../src';
+
 import {
   Aggregator,
   CHECK_ICON,

@@ -1,5 +1,6 @@
-import * as sbv2 from './src';
-import { TransactionObject } from './src';
+import * as sbv2 from '../src';
+import { TransactionObject } from '../src';
+
 import { CHECK_ICON, FAILED_ICON } from './utils';
 
 import {
