@@ -5,6 +5,7 @@ lib
 build
 tsconfig.tsbuildinfo
 **/docs
+!.autodoc/docs
 *.env
 
 # Yarn
