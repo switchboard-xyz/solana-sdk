@@ -5,7 +5,6 @@ lib
 build
 tsconfig.tsbuildinfo
 **/docs
-!.autodoc/docs
 *.env
 
 # Yarn
@@ -36,3 +35,5 @@ secrets
 !**/.switchboard/networks/
 **/.switchboard/networks/*
 !**/.switchboard/networks/*.config.json
+
+!.autodoc
