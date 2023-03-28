@@ -1,0 +1,24 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/accounts/vrfAccount.ts)
+
+The `VrfAccount` class in this code represents an account holding a Verifiable Random Function (VRF) result with a callback instruction for consuming on-chain pseudo-randomness. The class provides methods for creating, loading, and updating VRF accounts, as well as requesting randomness and verifying the result.
+
+The `createInstructions` and `create` methods are used to create a new VRF account with the specified parameters. The `load` method is used to load an existing VRF account with its current on-chain state. The `onChange` method allows invoking a callback each time a VRF account's data has changed on-chain.
+
+The `requestRandomnessInstruction` and `requestRandomness` methods are used to request randomness from the VRF account. The `proveAndVerifyInstructions` and `proveAndVerify` methods are used to prove and verify the VRF result.
+
+The `setCallbackInstruction` and `setCallback` methods are used to set a callback function that is invoked when a new randomness value is produced. The `getCallbackTransactions` method retrieves parsed transactions for a VRF request.
+
+The `nextResult` method is used to await the next VRF result. The `closeAccountInstruction` and `closeAccount` methods are used to close a VRF account.
+
+The `VrfAccount` class also provides utility methods for fetching and converting account data to JSON format, as well as requesting and awaiting VRF results.
+
+This code is part of the larger sbv2-solana project, which uses the Solana blockchain to provide secure and verifiable random numbers. The `VrfAccount` class plays a crucial role in managing VRF accounts and interacting with the on-chain randomness generation process.
+## Questions: 
+ 1. **Question**: What is the purpose of the `VrfAccount` class and its methods?
+   **Answer**: The `VrfAccount` class represents an account holding a Verifiable Random Function (VRF) result with a callback instruction for consuming on-chain pseudo-randomness. It provides methods to create, load, and manipulate VRF accounts, request randomness, set callbacks, and interact with related accounts such as oracle queues and permission accounts.
+
+2. **Question**: How does the `requestRandomness` method work and what are its parameters?
+   **Answer**: The `requestRandomness` method creates a transaction object with instructions to request randomness from the VRF account. It takes a `VrfRequestRandomnessParams` object as a parameter, which includes optional authority, payer token wallet, payer authority, queue, queue account, and VRF account data. The method returns a transaction signature after signing and sending the transaction.
+
+3. **Question**: How does the `nextResult` method work and what does it return?
+   **Answer**: The `nextResult` method waits for the next VRF result by monitoring changes in the VRF account's data. It takes an optional round ID and a timeout value as parameters. The method returns a `VrfResult` object containing the success status, result as a Uint8Array, and the VRF status.

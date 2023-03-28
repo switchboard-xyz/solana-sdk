@@ -1,0 +1,25 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/rust/switchboard-v2/src/queue.rs)
+
+The `OracleQueueAccountData` struct represents an on-chain oracle queue in the sbv2-solana project. It stores various configurations and metadata related to the oracle queue, such as the name, metadata, authority, and reward settings. The struct also contains information about the queue's state, such as the current index of the oracle rotation, the number of oracles in the queue, and the garbage collection index.
+
+The struct has several methods to interact with the data:
+
+- `size()`: Returns the size of the `OracleQueueAccountData` struct in bytes.
+- `convert_buffer(buf: &mut [u8]) -> &mut [Pubkey]`: Converts a byte buffer into a mutable slice of `Pubkey` values.
+- `len(&self) -> u32`: Returns the current number of oracles in the queue.
+- `is_empty(&self) -> bool`: Checks if the queue is empty.
+- `get_mint(&self) -> Pubkey`: Returns the token mint used for the oracle queue rewards and slashing. If the mint is not set, it returns the native mint.
+- `max_round_rewards(&self, batch_size: u32) -> u64`: Calculates the maximum rewards for a round based on the batch size.
+
+The `OracleQueueAccountData` struct also implements the `Default` trait, which allows creating a new instance with default values (all fields set to zero).
+
+This struct is used in the larger project to manage and interact with oracle queues, which are responsible for aggregating data from multiple oracles and providing a reliable data source for smart contracts. The various configurations and settings in the struct allow for fine-grained control over the behavior of the oracle queue, such as enabling or disabling slashing, setting reward amounts, and managing oracle rotation.
+## Questions: 
+ 1. **Question:** What is the purpose of the `OracleQueueAccountData` struct and its fields?
+   **Answer:** The `OracleQueueAccountData` struct represents the on-chain data for an oracle queue, including information such as the queue's name, metadata, authority, reward settings, and various configurations related to oracles, feeds, and slashing.
+
+2. **Question:** How does the `convert_buffer` function work and what is its purpose?
+   **Answer:** The `convert_buffer` function takes a mutable byte slice as input and attempts to cast it into a mutable slice of `Pubkey` values. This is useful for converting the raw byte data of the OracleQueueBuffer account into a more usable format.
+
+3. **Question:** What is the purpose of the `max_round_rewards` function and how is it calculated?
+   **Answer:** The `max_round_rewards` function calculates the maximum rewards that can be distributed in a single round for a given batch size. It is calculated by multiplying the reward value by the sum of the batch size and 1, ensuring that the total rewards are distributed evenly among the oracles and the round opener.

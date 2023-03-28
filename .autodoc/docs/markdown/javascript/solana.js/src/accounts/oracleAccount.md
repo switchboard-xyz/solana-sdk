@@ -1,0 +1,22 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/accounts/oracleAccount.ts)
+
+The `OracleAccount` class in this code represents an oracle account in the sbv2-solana project. An oracle is a server that facilitates the flow of information between the internet and a blockchain, and is rewarded for responding with the honest majority. The `OracleAccount` class holds an oracle's configuration, including the authority, reward/slashing wallet, and a set of metrics tracking its reliability.
+
+The class provides several methods to interact with the oracle account, such as creating a new oracle account, loading an existing oracle account, staking tokens, withdrawing tokens, and sending heartbeat transactions. It also provides utility methods to fetch the oracle's balance, decode the account data, and subscribe to account changes.
+
+For example, to create a new oracle account, you can use the `OracleAccount.create()` method, which takes a set of parameters like the queue account, name, metadata, authority, and staking wallet keypair. This method returns a new `OracleAccount` instance and an array of transaction signatures.
+
+To stake tokens in an oracle account, you can use the `stake()` method, which takes a set of parameters like the stake amount, funder token wallet, and funder authority. This method returns a transaction signature.
+
+To send a heartbeat transaction, you can use the `heartbeat()` method, which takes optional parameters like the queue account, token wallet, queue authority, and permission. This method returns a transaction signature.
+
+The `OracleAccount` class also provides methods to fetch multiple oracle accounts and convert the account data to JSON format for easier consumption. Overall, this class plays a crucial role in managing oracle accounts within the sbv2-solana project.
+## Questions: 
+ 1. **Question**: How does the `OracleAccount` class handle the creation of mock accounts for testing purposes?
+   **Answer**: The `OracleAccount` class provides a static method `createMock` that takes a `programId`, a partial `data` object of type `types.OracleAccountData`, and an optional `options` object. It creates a mock account by merging the default values with the provided data and returns an `AccountInfo<Buffer>` object with the necessary fields for testing purposes.
+
+2. **Question**: How does the `OracleAccount` class handle staking and unstaking of tokens for an oracle?
+   **Answer**: The `OracleAccount` class provides methods `stakeInstructions` and `withdrawInstruction` to handle staking and unstaking of tokens. The `stakeInstructions` method creates a `TransactionObject` for transferring the specified stake amount from the funder's token wallet to the oracle's staking wallet. The `withdrawInstruction` method creates a `TransactionObject` for withdrawing the specified amount from the oracle's staking wallet to the specified withdraw account or unwrapping the funds directly to the oracle authority.
+
+3. **Question**: How does the `OracleAccount` class handle the heartbeat functionality for an oracle?
+   **Answer**: The `OracleAccount` class provides a method `heartbeat` that takes an optional `params` object and a `TransactionObjectOptions` object. It first loads the necessary data, such as the oracle, queue, and permission accounts, and then creates a `TransactionObject` with the `heartbeatInstruction` method. The `heartbeatInstruction` method creates a transaction instruction for the oracle heartbeat using the provided parameters. Finally, the `heartbeat` method sends the transaction using the `signAndSend` method of the `SwitchboardProgram` instance.

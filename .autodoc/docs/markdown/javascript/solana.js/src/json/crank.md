@@ -1,0 +1,20 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/json/crank.ts)
+
+The `CrankJson` class in this code is responsible for handling the creation and management of "crank" objects in the `sbv2-solana` project. A crank object is defined by its name, metadata, and maximum number of rows (maxRows). Additionally, each crank object is associated with two keypairs: one for the crank itself (keypair) and another for its data buffer (dataBufferKeypair).
+
+The constructor of the `CrankJson` class takes an object as input and initializes the crank object's properties using utility functions `parseString` and `parseNumber`. If the input object does not provide a keypair or dataBufferKeypair, the constructor generates new keypairs using the `Keypair.generate()` method from the `@solana/web3.js` library.
+
+The `CrankJson` class also provides a static method `loadMultiple`, which takes an object as input and returns an array of `CrankJson` objects. This method is useful for creating multiple crank objects at once. It checks if the input object contains an array of cranks and iterates through them, creating a new `CrankJson` object for each crank with a defined `maxRows` property.
+
+Finally, the `toJSON` method of the `CrankJson` class returns a JSON representation of the crank object, including its name, metadata, maxRows, and keypairs (converted to strings using the `keypairToString` utility function).
+
+In the larger project, the `CrankJson` class can be used to create and manage crank objects, which may be part of a queue or other data structures. The keypairs associated with each crank object can be used for authentication and authorization purposes when interacting with the Solana blockchain.
+## Questions: 
+ 1. **Question**: What is the purpose of the `CrankJson` class and how does it relate to the `CreateQueueCrankParams` interface?
+   **Answer**: The `CrankJson` class is used to represent and manage the parameters required for creating a queue crank. It implements the `CreateQueueCrankParams` interface, ensuring that the class has the necessary properties and methods to work with queue cranks.
+
+2. **Question**: How does the `loadMultiple` static method work and when should it be used?
+   **Answer**: The `loadMultiple` static method takes an object as input and returns an array of `CrankJson` instances. It is used to load multiple crank configurations from the input object, specifically when the input object has a 'cranks' property containing an array of crank configurations.
+
+3. **Question**: How are the `keypair` and `dataBufferKeypair` properties generated or loaded in the constructor of the `CrankJson` class?
+   **Answer**: The `keypair` and `dataBufferKeypair` properties are generated or loaded based on the input object's properties. If the input object has a 'keypair' or 'dataBufferKeypair' property, the respective keypair is loaded using the `loadKeypair` function. If not, a new keypair is generated using the `Keypair.generate()` method.

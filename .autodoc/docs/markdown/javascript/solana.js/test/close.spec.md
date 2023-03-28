@@ -1,0 +1,30 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/test/close.spec.ts)
+
+This code is a part of a test suite for the sbv2-solana project, specifically focusing on testing the functionality of closing aggregator accounts. The tests are written using the Mocha testing framework and assert library.
+
+The test suite sets up a test context and initializes necessary accounts, such as a queue account, crank account, and oracle account, before running the tests. The queue account is created with various configurations, such as queue size, reward, and oracle timeout. The crank account is created with a maximum number of rows and a name. The oracle account is created with a name and enabled status.
+
+There are two main test cases in this suite:
+
+1. **Creates and closes an aggregator not on a crank**: This test case creates an aggregator account with a specific configuration, such as batchSize, minRequiredOracleResults, minRequiredJobResults, and minUpdateDelaySeconds. It then checks if the sliding window account is initialized. After that, it attempts to close the aggregator account and checks if the aggregator account, permission account, lease account, and sliding window account are closed successfully.
+
+```javascript
+const [aggregatorAccount] = await queueAccount.createFeed({ ... });
+```
+
+2. **Creates and closes an aggregator with a crank**: This test case is similar to the first one, but it also associates the created aggregator account with a crank account. After closing the aggregator account, it checks if the aggregator is removed from the crank account.
+
+```javascript
+const [aggregatorAccount] = await queueAccount.createFeed({ ... });
+```
+
+These tests ensure that the aggregator accounts can be created and closed correctly, and that the associated accounts are also closed and removed from the crank account as expected. This helps maintain the integrity of the sbv2-solana project and ensures that the implemented features work as intended.
+## Questions: 
+ 1. **Question:** What is the purpose of the `queueAuthority` and how is it used in the code?
+   **Answer:** The `queueAuthority` is a Keypair generated to act as the authority for the `QueueAccount`. It is used to authorize various actions, such as creating oracles and feeds, within the context of the `QueueAccount`.
+
+2. **Question:** How does the `OracleJob` work and what is its role in the aggregator creation process?
+   **Answer:** `OracleJob` is used to define tasks that need to be performed by oracles. In the code, it is used to create a job with a single task that returns a constant value of 1. This job is then added to the aggregator during its creation process.
+
+3. **Question:** What is the purpose of the `closeInstructions` function and how is it used in the tests?
+   **Answer:** The `closeInstructions` function is used to generate instructions for closing an aggregator account and its associated accounts (e.g., permission, lease, and sliding window accounts). In the tests, this function is called to create a transaction that closes the aggregator and its associated accounts, and the transaction is then signed and sent to the network.

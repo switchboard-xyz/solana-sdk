@@ -1,0 +1,30 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/test/aggregator.spec.ts)
+
+This code is a test suite for the Aggregator functionality in the `sbv2-solana` project. The Aggregator is responsible for managing and processing data from multiple Oracle Jobs and maintaining a queue of tasks. The tests cover various aspects of the Aggregator, such as creating and funding an aggregator, adding and removing jobs, updating job weights, and managing aggregator leases.
+
+The test suite begins by setting up a test context and creating a `QueueAccount` with a single oracle. It then proceeds to test the following scenarios:
+
+1. **Adding, updating, and removing jobs**: The test creates an `AggregatorAccount` and adds a job to it. It then updates the job's weight and removes the job from the aggregator, asserting that the operations were successful.
+
+2. **Creating and funding an aggregator**: The test creates an aggregator with two jobs and funds it with a specified amount. It checks that the aggregator has the correct number of jobs and job weights, and that the lease account has the expected balance.
+
+3. **Extending an aggregator lease**: The test extends the lease of an aggregator by a specified amount and checks that the lease account balance is updated correctly.
+
+4. **Withdrawing funds from an aggregator lease**: The test withdraws a specified amount from the lease account and checks that the lease account balance and user token balance are updated correctly.
+
+5. **Terminating a lease and closing the user's wrapped SOL wallet**: The test withdraws all funds from the lease account, closes the user's wrapped SOL wallet, and checks that the lease account balance and user token balance are updated correctly.
+
+6. **Adding, updating, and removing jobs with aggregator configuration**: The test creates an aggregator, adds a job, updates the aggregator's configuration, and removes the job, asserting that the operations were successful.
+
+7. **Setting priority fees during feed creation**: The test creates an aggregator with specified priority fee parameters and checks that the aggregator's priority fee settings are set correctly.
+
+These tests ensure that the Aggregator functionality works as expected and helps maintain the integrity of the `sbv2-solana` project.
+## Questions: 
+ 1. **Question:** What is the purpose of the `queueAuthority` and how is it used in the code?
+   **Answer:** The `queueAuthority` is a keypair generated for the authority of the queue account. It is used to authorize various actions on the queue account, such as creating a feed, adding oracles, and managing aggregator accounts.
+
+2. **Question:** How does the `extend` function work in the `LeaseAccount` and what is its purpose?
+   **Answer:** The `extend` function is used to extend the lease of an aggregator by adding more funds to the lease account. It takes a `fundAmount` and a `funderTokenWallet` as input, and transfers the specified amount from the funder's wallet to the lease account, effectively extending the lease duration.
+
+3. **Question:** How does the priority fee system work in the `createFeed` function and what are its implications?
+   **Answer:** The priority fee system is implemented using a sliding window mechanism. During feed creation, parameters like `basePriorityFee`, `priorityFeeBump`, `priorityFeeBumpPeriod`, and `maxPriorityFeeMultiplier` are set. These parameters determine how the priority fee increases over time within the sliding window. This system allows for prioritizing certain oracle requests and ensuring faster response times for high-priority requests.

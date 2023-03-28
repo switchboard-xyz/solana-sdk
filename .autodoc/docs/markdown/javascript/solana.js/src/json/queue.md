@@ -1,0 +1,44 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/json/queue.ts)
+
+The `QueueJson` class in this code is responsible for managing the initialization parameters of a queue in the `sbv2-solana` project. It takes an object with various properties and parses them to set the corresponding attributes of the class. The class also provides a `toJSON` method to convert the instance back to a JSON object.
+
+The queue parameters include properties such as `name`, `metadata`, `reward`, `minStake`, and various other settings related to the queue's behavior, such as `feedProbationPeriod`, `oracleTimeout`, and `slashingEnabled`. Additionally, the class handles the management of keypairs for the `authority`, `keypair`, and `dataBufferKeypair` accounts.
+
+The constructor of the `QueueJson` class takes an object with these properties and uses utility functions like `parseString`, `parseNumber`, and `parseBoolean` to parse and set the corresponding attributes. If a keypair path is provided for any of the accounts, the `loadKeypair` function is used to load the keypair from the given path. Otherwise, a new keypair is generated using the `Keypair.generate()` method from the `@solana/web3.js` library.
+
+Here's an example of how to create a new `QueueJson` instance:
+
+```javascript
+const queueParams = {
+  name: 'Example Queue',
+  metadata: 'Some metadata',
+  reward: 10,
+  minStake: 5,
+  queueSize: 100,
+  unpermissionedVrf: true,
+  keypair: 'path/to/keypair.json',
+  authorityKeypair: 'path/to/authority_keypair.json',
+  dataBufferKeypair: 'path/to/data_buffer_keypair.json',
+};
+
+const queue = new QueueJson(queueParams);
+```
+
+The `toJSON` method can be used to convert the `QueueJson` instance back to a JSON object, which can be useful for serialization or debugging purposes:
+
+```javascript
+const json = queue.toJSON();
+console.log(json);
+```
+## Questions: 
+ 1. **What is the purpose of the `QueueJson` class and how is it related to the `IQueueInitParams` interface?**
+
+   The `QueueJson` class is used to represent and manipulate the initialization parameters for a queue in the sbv2-solana project. It implements the `IQueueInitParams` interface, which is a modified version of the `QueueInitParams` type, with the `authority` field being optional and of type `Keypair` instead of a public key.
+
+2. **How are the keypairs for `authority`, `keypair`, and `dataBufferKeypair` loaded or generated in the `QueueJson` constructor?**
+
+   The `QueueJson` constructor takes an object with optional keypair paths for `authority`, `keypair`, and `dataBufferKeypair`. If a path is provided, the corresponding keypair is loaded using the `loadKeypair` function. If no path is provided, a new keypair is generated using the `Keypair.generate()` method.
+
+3. **What is the purpose of the `toJSON` method in the `QueueJson` class?**
+
+   The `toJSON` method is used to convert the `QueueJson` instance into a plain JavaScript object with the same properties. This is useful for serialization purposes, such as when storing the object in a file or sending it over a network. The method also converts the keypairs to strings using the `keypairToString` function.

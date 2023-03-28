@@ -1,0 +1,26 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/programs/anchor-vrf-parser/src/actions/request_result.rs)
+
+The `RequestResult` code in the `sbv2-solana` project is responsible for requesting a random number from the Switchboard V2 oracle network. It defines the necessary account structures, validation, and actions to interact with the Switchboard V2 program.
+
+The `RequestResult` struct contains various account information required for the operation, such as the VRF client state, authority, VRF account, oracle queue, data buffer, permission account, escrow, program state, and payer accounts. It also includes system accounts like recent blockhashes and the token program.
+
+The `RequestResultParams` struct is an empty structure used as a placeholder for future parameters.
+
+The `validate` function is a stub that currently returns `Ok(())`. It can be used to add validation logic in the future.
+
+The `actuate` function performs the main logic of requesting randomness. It first retrieves the client state and seeds for the program derived address (PDA). Then, it sets the callback function using the `VrfSetCallback` struct and `invoke_signed` method. The callback function will be called when the random number is generated.
+
+Next, it creates a `VrfRequestRandomness` struct and populates it with the necessary account information. It then calls the `invoke_signed` method to request randomness from the Switchboard V2 program.
+
+Finally, it updates the client state with the result and emits an event `RequestingRandomness` with relevant information such as the VRF client, max result, and timestamp.
+
+This code is essential for any application that requires random numbers from the Switchboard V2 oracle network. It provides a way to interact with the oracle network and request randomness securely and efficiently.
+## Questions: 
+ 1. **Question**: What is the purpose of the `RequestResult` struct and its associated accounts?
+   **Answer**: The `RequestResult` struct is used to define the accounts and their constraints required for requesting a result from the VRF (Verifiable Random Function) in the Switchboard v2 Solana program. It includes accounts related to the VRF, Switchboard, payer, and system, as well as the necessary constraints for each account.
+
+2. **Question**: How does the `actuate` function work in the `RequestResult` implementation?
+   **Answer**: The `actuate` function is responsible for setting the callback and requesting randomness from the VRF. It first sets the callback using the `VrfSetCallback` struct and then requests randomness using the `VrfRequestRandomness` struct. Both actions are performed using the `invoke_signed` method with the appropriate accounts and seeds.
+
+3. **Question**: What is the purpose of the `validate` function in the `RequestResult` implementation?
+   **Answer**: The `validate` function is used to perform any additional validation checks on the accounts and parameters before executing the `actuate` function. In this case, the function is empty and simply returns `Ok(())`, indicating that no additional validation is required.

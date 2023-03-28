@@ -1,0 +1,27 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/const.ts)
+
+This code is responsible for defining and exporting public key constants related to the Switchboard Labs project on the Solana blockchain. These constants are used to interact with different components of the project, such as permissioned and permissionless queues and cranks on both the mainnet-beta and devnet environments.
+
+There are four sets of public keys defined in this code:
+
+1. Mainnet-beta permissioned queue and crank
+2. Mainnet-beta permissionless queue and crank
+3. Devnet permissioned queue and crank
+4. Devnet permissionless queue and crank
+
+Each set contains a public key for the queue and a public key for the crank. Queues are used to store and manage tasks, while cranks are responsible for processing tasks in the queue. Permissioned queues and cranks require specific access rights to interact with, while permissionless ones can be accessed by any user.
+
+Additionally, the code exports two genesis hash constants for the devnet and mainnet-beta environments. These hashes are used to identify the specific blockchain network when interacting with the Solana API.
+
+Lastly, the code exports a constant `VRF_POOL_REQUEST_AMOUNT`, which represents the amount of tokens required to make a request to the Verifiable Random Function (VRF) pool. This pool is used to generate random numbers in a secure and verifiable manner.
+
+These constants can be imported and used in other parts of the sbv2-solana project to interact with the Solana blockchain. For example, to access the mainnet-beta permissionless queue, one would import and use the `SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE` constant.
+## Questions: 
+ 1. **Question:** What is the purpose of the different PublicKey constants defined in this code?
+   **Answer:** The PublicKey constants represent different permissioned and permissionless queues and cranks for both mainnet-beta and devnet environments in the Solana blockchain. They are used to interact with specific on-chain programs or contracts for the sbv2-solana project.
+
+2. **Question:** What is the significance of the `DEVNET_GENESIS_HASH` and `MAINNET_GENESIS_HASH` constants?
+   **Answer:** These constants represent the genesis hash values for the devnet and mainnet-beta environments in the Solana blockchain. They are used to identify and connect to the correct network when interacting with the blockchain.
+
+3. **Question:** What does the `VRF_POOL_REQUEST_AMOUNT` constant represent and how is it used in the project?
+   **Answer:** The `VRF_POOL_REQUEST_AMOUNT` constant represents the amount of tokens required to make a request to the Verifiable Random Function (VRF) pool. It is used to determine the cost of making a request to the VRF pool within the sbv2-solana project.

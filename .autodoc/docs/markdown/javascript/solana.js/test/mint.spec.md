@@ -1,0 +1,38 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/test/mint.spec.ts)
+
+This code is a set of tests for the mint functionality in the `sbv2-solana` project. The tests are written using the Mocha testing framework and the Anchor framework for Solana smart contracts. The tests are organized into a `describe` block called "Mint Tests" and consist of four test cases.
+
+1. **Creates a user token account**: This test case checks if a user token account is created successfully. It first requests an airdrop of 1 SOL to the user's public key. Then, it creates an associated user token account and checks if the initial balance is 0.
+
+   ```javascript
+   await ctx.program.mint.createAssocatedUser(ctx.payer.publicKey, user.publicKey);
+   ```
+
+2. **Wraps SOL**: This test case checks if the user can wrap SOL into wSOL (wrapped SOL) tokens. It first asserts that the user token address exists, then wraps 0.25 SOL into wSOL tokens. Finally, it checks if the user's token balance is updated correctly.
+
+   ```javascript
+   await ctx.program.mint.wrap(ctx.payer.publicKey, { amount: WRAP_AMOUNT }, user);
+   ```
+
+3. **Unwraps SOL**: This test case checks if the user can unwrap wSOL tokens back into SOL. It first asserts that the user token address exists, then unwraps 0.1 wSOL tokens back into SOL. It checks if the user's token balance is updated correctly after unwrapping.
+
+   ```javascript
+   await ctx.program.mint.unwrap(ctx.payer.publicKey, UNWRAP_AMOUNT, user);
+   ```
+
+4. **Closes associated token account**: This test case checks if the associated token account can be closed successfully. It first asserts that the user token address exists, then unwraps all wSOL tokens back into SOL. Finally, it checks if the associated token account is closed.
+
+   ```javascript
+   await ctx.program.mint.unwrap(ctx.payer.publicKey, undefined, user);
+   ```
+
+These tests ensure that the mint functionality in the `sbv2-solana` project works as expected, allowing users to create token accounts, wrap and unwrap SOL, and close associated token accounts.
+## Questions: 
+ 1. **Question:** What is the purpose of the `setupTest()` function in the `before` hook?
+   **Answer:** The `setupTest()` function is used to set up the test environment and initialize the necessary variables and objects required for the test suite. It is called in the `before` hook to ensure that the setup is done before any of the tests are executed.
+
+2. **Question:** How does the `wrap` function work in the 'Wraps SOL' test case?
+   **Answer:** The `wrap` function is used to convert a specified amount of native SOL tokens into wrapped SOL tokens (wSOL) in the user's associated token account. In the 'Wraps SOL' test case, the `wrap` function is called with the `WRAP_AMOUNT` of 0.25 SOL, which converts 0.25 SOL into wSOL for the user.
+
+3. **Question:** What is the purpose of the `unwrap` function in the 'Unwraps SOL' and 'Closes associated token account' test cases?
+   **Answer:** The `unwrap` function is used to convert wrapped SOL tokens (wSOL) back into native SOL tokens. In the 'Unwraps SOL' test case, it is called with the `UNWRAP_AMOUNT` of 0.1 to convert 0.1 wSOL back into SOL. In the 'Closes associated token account' test case, it is called with an `undefined` amount, which means it will convert all the wSOL back into SOL and close the associated token account.

@@ -1,0 +1,31 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/mint.ts)
+
+The `Mint` class in this code is designed to handle operations related to token mints on the Solana blockchain. It provides methods for loading a mint, converting token amounts, fetching balances, and managing associated token accounts. The `NativeMint` class extends the `Mint` class and provides additional functionality specific to the native Solana token (SOL).
+
+The `Mint` class constructor takes an `anchor.AnchorProvider` and an `spl.Mint` as arguments. The `load` method allows loading a mint by its public key. The `toTokenAmount` and `fromTokenAmount` methods convert between token amounts and their base unit representation. The `getAssociatedAccount` and `getAssociatedBalance` methods fetch the associated token account and balance for a given owner's public key.
+
+The `Mint` class also provides methods for creating and managing associated token accounts, such as `getOrCreateAssociatedUser`, `createAssocatedUser`, and `createUser`. These methods handle the creation of associated token accounts for users and return the public key of the created account along with the transaction signature.
+
+The `NativeMint` class provides methods for wrapping and unwrapping native SOL tokens. The `wrap` method transfers SOL from a user's account to an associated token account, while the `unwrap` method transfers SOL from an associated token account back to the user's account. The `getOrCreateWrappedUser` method ensures that a wrapped SOL account exists for a user and optionally funds it up to a specified amount.
+
+Example usage:
+
+```javascript
+const provider = new anchor.Provider(...);
+const mint = await Mint.load(provider, mintPublicKey);
+const balance = await mint.getAssociatedBalance(ownerPublicKey);
+```
+
+In the larger project, the `Mint` and `NativeMint` classes can be used to manage token mints and associated token accounts, enabling developers to easily interact with the Solana blockchain and perform various token-related operations.
+## Questions: 
+ 1. **Question**: What is the purpose of the `Mint` class and how does it interact with the `NativeMint` class?
+
+   **Answer**: The `Mint` class represents a token mint on the Solana blockchain and provides methods for interacting with the mint, such as loading a mint, converting token amounts, and managing associated accounts. The `NativeMint` class extends the `Mint` class and provides additional functionality specific to the native SOL token, such as wrapping and unwrapping SOL tokens.
+
+2. **Question**: How does the `getOrCreateAssociatedUser` method work and when should it be used?
+
+   **Answer**: The `getOrCreateAssociatedUser` method retrieves the associated token address for a given user and creates a new associated token account if it doesn't exist. This method should be used when you want to ensure that a user has an associated token account for a specific mint.
+
+3. **Question**: What is the purpose of the `wrap` and `unwrap` methods in the `NativeMint` class?
+
+   **Answer**: The `wrap` method is used to convert native SOL tokens into wrapped SOL tokens (WSOL), which can be used in the same way as other SPL tokens. The `unwrap` method is used to convert wrapped SOL tokens back into native SOL tokens. These methods are useful when interacting with DeFi protocols or other applications that require SPL tokens instead of native SOL tokens.

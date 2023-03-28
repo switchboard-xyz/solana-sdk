@@ -1,0 +1,23 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/rust/switchboard-v2/src/permission.rs)
+
+This code defines the permission system for the `sbv2-solana` project, which allows different entities to interact with the system based on their granted permissions. The `SwitchboardPermission` enum lists the possible permissions that can be granted, such as permitting an Oracle Account to heartbeat on a queue, allowing an Aggregator Account to request updates from oracles, and permitting a VRF Account to request randomness from oracles.
+
+The `PermissionAccountData` struct represents the permission account data, which includes the authority that can set permissions, the granted permissions, the granter and grantee public keys, expiration, bump, and a reserved buffer for future use.
+
+The `PermissionSet` struct is used to set permissions for an account. It takes an `AccountLoader` for the permission account data and an `AccountInfo` for the authority. The `PermissionSetParams` struct holds the permission and a boolean flag to enable or disable the permission.
+
+The `PermissionSet` struct also provides methods to create and invoke instructions for setting permissions. The `get_instruction` method creates an `Instruction` with the given program ID and parameters. The `invoke` and `invoke_signed` methods execute the instruction with the provided account information and signer seeds, respectively.
+
+In the larger project, this permission system can be used to control access to various resources and functionalities. For example, an Oracle Account may need permission to join a queue and provide updates, while an Aggregator Account may need permission to request updates from oracles. By using this permission system, the project can ensure that only authorized entities can interact with the system and perform specific actions.
+## Questions: 
+ 1. **Question:** What is the purpose of the `SwitchboardPermission` enum and its variants?
+
+   **Answer:** The `SwitchboardPermission` enum represents different types of permissions that can be granted to various accounts in the system. The variants include `PermitOracleHeartbeat`, `PermitOracleQueueUsage`, and `PermitVrfRequests`, each representing a specific permission related to oracles, queues, and VRF requests, respectively.
+
+2. **Question:** How is the `PermissionAccountData` struct used and what is the purpose of the `_ebuf` field?
+
+   **Answer:** The `PermissionAccountData` struct is used to store information about permissions granted to an account, including the authority, permissions, granter, grantee, expiration, bump, and a reserved field `_ebuf`. The `_ebuf` field is reserved for future use and can store additional information if needed in the future.
+
+3. **Question:** What is the purpose of the `invoke` and `invoke_signed` methods in the `PermissionSet` implementation?
+
+   **Answer:** The `invoke` and `invoke_signed` methods are used to execute the `PermissionSet` instruction on the Solana blockchain. The `invoke` method is used when the instruction does not require a signed seed, while the `invoke_signed` method is used when the instruction requires a signed seed for additional security.

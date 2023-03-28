@@ -1,0 +1,28 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/rust/switchboard-v2/src/aggregator.rs)
+
+The code defines the data structures and methods for managing an on-chain aggregator in the `sbv2-solana` project. The primary data structure is `AggregatorAccountData`, which stores the configuration, state, and results of an aggregator. It also defines `AggregatorRound`, which represents a single round of data collection from oracles, and `SlidingWindowElement`, which is used for sliding window resolution mode.
+
+`AggregatorAccountData` provides methods for interacting with the aggregator, such as `new` and `new_from_bytes` for creating an instance from an `AccountInfo` or a byte slice, respectively. It also provides methods for retrieving the latest result (`get_result`), checking the confidence interval (`check_confidence_interval`), checking the variance (`check_variace`), and checking the staleness of the feed (`check_staleness`).
+
+The `AggregatorResolutionMode` enum is used to specify the resolution mode for the aggregator, either round-based or sliding window-based. The `SlidingResultAccountData` structure is used to store sliding window elements.
+
+Here's an example of how to create an `AggregatorAccountData` instance and retrieve the latest result:
+
+```ignore
+use switchboard_v2::AggregatorAccountData;
+use std::convert::TryInto;
+
+let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
+let decimal: f64 = feed_result.try_into()?;
+```
+
+The code also includes tests to ensure the correct behavior of the aggregator, such as accepting or rejecting results based on the number of successful oracle responses.
+## Questions: 
+ 1. **Question**: What is the purpose of the `AggregatorResolutionMode` enum and how is it used in the `AggregatorAccountData` struct?
+   **Answer**: The `AggregatorResolutionMode` enum is used to define the resolution mode for the aggregator, with two possible values: `ModeRoundResolution` and `ModeSlidingResolution`. It is used in the `AggregatorAccountData` struct as a field named `resolution_mode`. This field determines how the aggregator's result is calculated, either based on a round-based resolution or a sliding window resolution.
+
+2. **Question**: How does the `get_result` function work in the `AggregatorAccountData` struct, and what is its purpose?
+   **Answer**: The `get_result` function in the `AggregatorAccountData` struct is used to get the latest on-chain result in `SwitchboardDecimal` format. It checks if the `resolution_mode` is set to `ModeSlidingResolution` and returns the `latest_confirmed_round.result` if true. Otherwise, it checks if the `min_oracle_results` is greater than the `latest_confirmed_round.num_success` and returns an error if true. If the conditions are met, it returns the `latest_confirmed_round.result`.
+
+3. **Question**: What is the purpose of the `check_staleness` function in the `AggregatorAccountData` struct, and how does it work?
+   **Answer**: The `check_staleness` function in the `AggregatorAccountData` struct is used to check whether the feed has been updated within the specified `max_staleness` seconds. It calculates the staleness by subtracting the `latest_confirmed_round.round_open_timestamp` from the provided `unix_timestamp`. If the staleness is greater than the `max_staleness`, it returns an error indicating that the feed is stale. Otherwise, it returns `Ok(())`.

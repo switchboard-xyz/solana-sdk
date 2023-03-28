@@ -1,0 +1,32 @@
+[View code on GitHub](https://github.com/switchboard-xyz/sbv2-solana/blob/master/javascript/solana.js/src/SwitchboardEvents.ts)
+
+This code defines a set of custom event types for the `sbv2-solana` project, which is built on the Solana blockchain using the Anchor framework. These events are emitted by various smart contracts in the project to notify clients about important state changes or actions performed by the contracts. Clients can listen for these events and react accordingly, such as updating their UI or triggering other actions.
+
+The events are grouped into several categories, such as `Aggregator`, `BufferRelayer`, `Crank`, `Feed`, `Lease`, `Oracle`, `Permission`, `PriorityFee`, `Probation`, and `Vrf`. Each category represents a specific functionality or component in the project.
+
+For example, the `Aggregator` events are related to the management of data aggregation jobs, such as adding or removing jobs, setting configurations, and updating values. The `Oracle` events, on the other hand, are related to the management of oracles, which are entities responsible for providing data to the system. These events include rewarding or slashing oracles, withdrawing funds, and booting oracles from the system.
+
+Here's an example of an event type:
+
+```typescript
+export type AggregatorAddJobEvent = {
+  feedPubkey: anchor.web3.PublicKey;
+  jobPubkey: anchor.web3.PublicKey;
+};
+```
+
+This event is emitted when a new job is added to an aggregator. It contains the public keys of the feed and the job, which can be used by clients to identify the specific feed and job involved in the event.
+
+By defining these custom event types, the `sbv2-solana` project provides a clear and structured way for clients to interact with its smart contracts and react to important changes in the system.
+## Questions: 
+ 1. **What is the purpose of the `SwitchboardEvents` type?**
+
+   The `SwitchboardEvents` type is an object that groups all the event types defined in the code. It provides a convenient way to access and reference these event types in other parts of the codebase.
+
+2. **What is the significance of the `reason` field in the `AggregatorCrankEvictionEvent` type?**
+
+   The `reason` field in the `AggregatorCrankEvictionEvent` type is an optional number that represents the reason for the eviction event. It can be used to provide more context or information about why the eviction occurred.
+
+3. **How are the `types.BorshDecimal` and `types.SwitchboardDecimalFields` used in the event types?**
+
+   The `types.BorshDecimal` and `types.SwitchboardDecimalFields` are custom data types imported from the `./generated` module. They are used to represent decimal values in some of the event types, such as `AggregatorSaveResultEvent` and `AggregatorValueUpdateEvent`.

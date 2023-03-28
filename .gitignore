@@ -36,4 +36,4 @@ secrets
 **/.switchboard/networks/*
 !**/.switchboard/networks/*.config.json
 
-!.autodoc
+!.autodoc/**
