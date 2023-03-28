@@ -12,11 +12,11 @@
     "*package-lock.json",
     "*package.json",
     "pnpm-*.yaml",
-    "node_modules",
+    "*node_modules",
     "*dist*",
     "*build*",
     "*lib/*",
-    "*target*",
+    "*target",
     "*__deprecated__*",
     "*test-ledger*",
     "*.svg",
@@ -29,6 +29,9 @@
     "Cargo.lock",
     "poetry.lock",
     "tsconfig*.json",
-    "javascript/solana.js/generate-client.js"
+    "javascript/solana.js/generate-client.js",
+    "*typedoc.json",
+    "*.env",
+    "programs/build.js"
   ]
 }
