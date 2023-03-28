@@ -64,7 +64,9 @@ export class AggregatorHistoryBuffer extends Account<
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
    */
   public static decode(
-    historyBuffer: Buffer
+    historyBuffer: Buffer,
+    startTimestamp?: number,
+    endTimestamp?: number
   ): Array<types.AggregatorHistoryRow> {
     const ROW_SIZE = 28;
 
@@ -90,6 +92,14 @@ export class AggregatorHistoryBuffer extends Account<
 
       if (row.timestamp.eq(new anchor.BN(0))) {
         break;
+      }
+
+      if (startTimestamp && startTimestamp > row.timestamp.toNumber()) {
+        continue;
+      }
+
+      if (endTimestamp && endTimestamp < row.timestamp.toNumber()) {
+        continue;
       }
 
       if (i <= insertIdx) {
@@ -121,8 +131,16 @@ export class AggregatorHistoryBuffer extends Account<
    * @params historyBuffer the historyBuffer AccountInfo stored on-chain
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
    */
-  public decode(historyBuffer: Buffer): Array<types.AggregatorHistoryRow> {
-    return AggregatorHistoryBuffer.decode(historyBuffer);
+  public decode(
+    historyBuffer: Buffer,
+    startTimestamp?: number,
+    endTimestamp?: number
+  ): Array<types.AggregatorHistoryRow> {
+    return AggregatorHistoryBuffer.decode(
+      historyBuffer,
+      startTimestamp,
+      endTimestamp
+    );
   }
 
   /**
@@ -130,7 +148,10 @@ export class AggregatorHistoryBuffer extends Account<
    * @params aggregator the pre-loaded aggregator state
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
    */
-  public async loadData(): Promise<Array<types.AggregatorHistoryRow>> {
+  public async loadData(
+    startTimestamp?: number,
+    endTimestamp?: number
+  ): Promise<Array<types.AggregatorHistoryRow>> {
     if (PublicKey.default.equals(this.publicKey)) {
       return [];
     }
@@ -143,7 +164,11 @@ export class AggregatorHistoryBuffer extends Account<
         this.publicKey
       );
     }
-    return AggregatorHistoryBuffer.decode(bufferAccountInfo.data);
+    return AggregatorHistoryBuffer.decode(
+      bufferAccountInfo.data,
+      startTimestamp,
+      endTimestamp
+    );
   }
 
   /**

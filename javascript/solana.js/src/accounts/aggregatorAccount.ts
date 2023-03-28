@@ -2003,7 +2003,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * Load an aggregators {@linkcode AggregatorHistoryBuffer}.
    * @return the list of historical samples attached to the aggregator.
    */
-  async loadHistory(): Promise<Array<types.AggregatorHistoryRow>> {
+  async loadHistory(
+    startTimestamp?: number,
+    endTimestamp?: number
+  ): Promise<Array<types.AggregatorHistoryRow>> {
     if (!this.history) {
       this.history = new AggregatorHistoryBuffer(
         this.program,
@@ -2011,7 +2014,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       );
     }
 
-    const history = await this.history.loadData();
+    const history = await this.history.loadData(startTimestamp, endTimestamp);
 
     return history;
   }
