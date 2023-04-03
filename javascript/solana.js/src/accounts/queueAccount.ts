@@ -7,7 +7,11 @@ import {
 } from '../generated/types/SwitchboardPermission';
 import { SolanaClock } from '../SolanaClock';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  SendTransactionObjectOptions,
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 
 import { Account, OnAccountChangeCallback } from './account';
 import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
@@ -198,7 +202,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: QueueInitParams
+    params: QueueInitParams,
+    options?: TransactionObjectOptions
   ): Promise<[QueueAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
@@ -272,7 +277,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           }
         ),
       ],
-      [dataBuffer, keypair]
+      [dataBuffer, keypair],
+      options
     );
 
     return [queueAccount, txn];
@@ -308,14 +314,16 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public static async create(
     program: SwitchboardProgram,
-    params: QueueInitParams
+    params: QueueInitParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[QueueAccount, string]> {
     const [account, txnObject] = await this.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await program.signAndSend(txnObject);
+    const txnSignature = await program.signAndSend(txnObject, options);
     return [account, txnSignature];
   }
 
@@ -344,43 +352,58 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: CreateQueueOracleParams
+    params: CreateQueueOracleParams,
+    options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
       : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
     const [oracleAccount, createOracleTxnObject] =
-      await OracleAccount.createInstructions(this.program, payer, {
-        ...params,
-        queueAccount: this,
-      });
+      await OracleAccount.createInstructions(
+        this.program,
+        payer,
+        {
+          ...params,
+          queueAccount: this,
+        },
+        options
+      );
 
     const [permissionAccount, createPermissionTxnObject] =
-      PermissionAccount.createInstruction(this.program, payer, {
-        granter: this.publicKey,
-        grantee: oracleAccount.publicKey,
-        authority: queueAuthorityPubkey,
-      });
+      PermissionAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          granter: this.publicKey,
+          grantee: oracleAccount.publicKey,
+          authority: queueAuthorityPubkey,
+        },
+        options
+      );
 
     if (
       params.enable &&
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
     ) {
-      const permissionSetTxn = permissionAccount.setInstruction(payer, {
-        permission: new PermitOracleHeartbeat(),
-        enable: true,
-        queueAuthority: params.queueAuthority,
-      });
+      const permissionSetTxn = permissionAccount.setInstruction(
+        payer,
+        {
+          permission: new PermitOracleHeartbeat(),
+          enable: true,
+          queueAuthority: params.queueAuthority,
+        },
+        options
+      );
       createPermissionTxnObject.combine(permissionSetTxn);
     }
 
     return [
       oracleAccount,
-      TransactionObject.pack([
-        ...createOracleTxnObject,
-        createPermissionTxnObject,
-      ]),
+      TransactionObject.pack(
+        [...createOracleTxnObject, createPermissionTxnObject],
+        options
+      ),
     ];
   }
 
@@ -404,7 +427,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: CreateQueueOracleParams
+    params: CreateQueueOracleParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -419,7 +443,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     const [oracleAccount, txn] = await this.createOracleInstructions(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
 
     const signatures = await this.program.signAndSendAll(txn);
@@ -473,7 +498,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createFeedInstructions(
     payer: PublicKey,
-    params: CreateQueueFeedParams
+    params: CreateQueueFeedParams,
+    options?: TransactionObjectOptions
   ): Promise<[AggregatorAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
@@ -510,7 +536,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               expiration: job.expiration,
               variables: job.variables,
               keypair: job.keypair,
-            }
+            },
+            options
           );
           pre.push(...jobInit);
           jobs.push({ job: jobAccount, weight: job.weight ?? 1 });
@@ -525,13 +552,18 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     }
 
     const [aggregatorAccount, aggregatorInit] =
-      await AggregatorAccount.createInstruction(this.program, payer, {
-        ...params,
-        queueAccount: this,
-        queueAuthority: queueAuthorityPubkey,
-        keypair: params.keypair,
-        authority: params.authority ? params.authority.publicKey : undefined,
-      });
+      await AggregatorAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          ...params,
+          queueAccount: this,
+          queueAuthority: queueAuthorityPubkey,
+          keypair: params.keypair,
+          authority: payer,
+        },
+        options
+      );
 
     txns.push(aggregatorInit);
 
@@ -547,28 +579,38 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         jobAuthorities: [], // create lease before adding jobs to skip this step
         jobPubkeys: [],
         disableWrap: params.disableWrap,
-      }
+      },
+      options
     );
     txns.push(leaseInit);
 
     // create permission account
     const [permissionAccount, permissionInit] =
-      PermissionAccount.createInstruction(this.program, payer, {
-        granter: this.publicKey,
-        authority: queueAuthorityPubkey,
-        grantee: aggregatorAccount.publicKey,
-      });
+      PermissionAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          granter: this.publicKey,
+          authority: queueAuthorityPubkey,
+          grantee: aggregatorAccount.publicKey,
+        },
+        options
+      );
 
     // set permissions
     if (
       params.enable &&
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
     ) {
-      const permissionSetTxn = permissionAccount.setInstruction(payer, {
-        permission: new PermitOracleQueueUsage(),
-        enable: true,
-        queueAuthority: params.queueAuthority,
-      });
+      const permissionSetTxn = permissionAccount.setInstruction(
+        payer,
+        {
+          permission: new PermitOracleQueueUsage(),
+          enable: true,
+          queueAuthority: params.queueAuthority,
+        },
+        options
+      );
       permissionInit.combine(permissionSetTxn);
     }
 
@@ -579,9 +621,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       const setResolutionMode = aggregatorAccount.setSlidingWindowInstruction(
         payer,
         {
-          authority: params.authority,
+          authority: undefined,
           mode: new types.AggregatorResolutionMode.ModeSlidingResolution(),
-        }
+        },
+        options
       );
       post.push(setResolutionMode);
     }
@@ -597,23 +640,28 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         payer,
         {
           force: true,
-          authority: params.authority,
+          authority: undefined,
           basePriorityFee: params.basePriorityFee,
           priorityFeeBump: params.priorityFeeBump,
           priorityFeeBumpPeriod: params.priorityFeeBumpPeriod,
           maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier,
-        }
+        },
+        options
       );
 
       post.push(setAggregatorConfig);
     }
 
     for await (const { job, weight } of jobs) {
-      const addJobTxn = aggregatorAccount.addJobInstruction(payer, {
-        job: job,
-        weight: weight,
-        authority: params.authority,
-      });
+      const addJobTxn = aggregatorAccount.addJobInstruction(
+        payer,
+        {
+          job: job,
+          weight: weight,
+          authority: undefined,
+        },
+        options
+      );
       post.push(addJobTxn);
     }
 
@@ -662,7 +710,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               }
             ),
           ],
-          []
+          [],
+          options
         )
       );
     }
@@ -677,11 +726,26 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       post.push(historyBufferInit);
     }
 
-    const packed = TransactionObject.pack([
-      ...(pre.length ? TransactionObject.pack(pre) : []),
-      ...(txns.length ? TransactionObject.pack(txns) : []),
-      ...(post.length ? TransactionObject.pack(post) : []),
-    ]);
+    if (params.authority && !params.authority.equals(payer)) {
+      post.push(
+        aggregatorAccount.setAuthorityInstruction(
+          payer,
+          {
+            newAuthority: params.authority,
+          },
+          options
+        )
+      );
+    }
+
+    const packed = TransactionObject.pack(
+      [
+        ...(pre.length ? TransactionObject.pack(pre) : []),
+        ...(txns.length ? TransactionObject.pack(txns) : []),
+        ...(post.length ? TransactionObject.pack(post) : []),
+      ],
+      options
+    );
 
     return [aggregatorAccount, packed];
   }
@@ -726,7 +790,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createFeed(
-    params: CreateQueueFeedParams
+    params: CreateQueueFeedParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[AggregatorAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
 
@@ -741,10 +806,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     const [aggregatorAccount, txns] = await this.createFeedInstructions(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
 
     const signatures = await this.program.signAndSendAll(txns, {
+      ...options,
       skipPreflight: true,
     });
 
@@ -776,12 +843,18 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createCrankInstructions(
     payer: PublicKey,
-    params: CreateQueueCrankParams
+    params: CreateQueueCrankParams,
+    options?: TransactionObjectOptions
   ): Promise<[CrankAccount, TransactionObject]> {
-    return await CrankAccount.createInstructions(this.program, payer, {
-      ...params,
-      queueAccount: this,
-    });
+    return await CrankAccount.createInstructions(
+      this.program,
+      payer,
+      {
+        ...params,
+        queueAccount: this,
+      },
+      options
+    );
   }
 
   /**
@@ -805,13 +878,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createCrank(
-    params: CreateQueueCrankParams
+    params: CreateQueueCrankParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[CrankAccount, TransactionSignature]> {
     const [crankAccount, txn] = await this.createCrankInstructions(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(txn);
+    const txnSignature = await this.program.signAndSend(txn, options);
     return [crankAccount, txnSignature];
   }
 
@@ -844,7 +919,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public async createVrfInstructions(
     payer: PublicKey,
-    params: CreateQueueVrfParams
+    params: CreateQueueVrfParams,
+    options?: TransactionObjectOptions
   ): Promise<[VrfAccount, TransactionObject]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
@@ -858,26 +934,36 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         queueAccount: this,
         callback: params.callback,
         authority: params.authority,
-      }
+      },
+      options
     );
 
     // eslint-disable-next-line prefer-const
     let [permissionAccount, permissionInit] =
-      PermissionAccount.createInstruction(this.program, payer, {
-        granter: this.publicKey,
-        grantee: vrfAccount.publicKey,
-        authority: queueAuthorityPubkey,
-      });
+      PermissionAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          granter: this.publicKey,
+          grantee: vrfAccount.publicKey,
+          authority: queueAuthorityPubkey,
+        },
+        options
+      );
 
     if (
       params.enable &&
       (params.queueAuthority || queueAuthorityPubkey.equals(payer))
     ) {
-      const permissionSet = permissionAccount.setInstruction(payer, {
-        permission: new PermitVrfRequests(),
-        enable: true,
-        queueAuthority: params.queueAuthority,
-      });
+      const permissionSet = permissionAccount.setInstruction(
+        payer,
+        {
+          permission: new PermitVrfRequests(),
+          enable: true,
+          queueAuthority: params.queueAuthority,
+        },
+        options
+      );
       permissionInit = permissionInit.combine(permissionSet);
     }
 
@@ -909,13 +995,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createVrf(
-    params: CreateQueueVrfParams
+    params: CreateQueueVrfParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[VrfAccount, TransactionSignature]> {
     const [vrfAccount, txn] = await this.createVrfInstructions(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(txn);
+    const txnSignature = await this.program.signAndSend(txn, options);
     return [vrfAccount, txnSignature];
   }
 
@@ -1468,7 +1556,7 @@ export type CreateQueueFeedParams = Omit<
   Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
   'authority'
 > & {
-  authority?: Keypair;
+  authority?: PublicKey;
   crankPubkey?: PublicKey;
   crankDataBuffer?: PublicKey;
   historyLimit?: number;

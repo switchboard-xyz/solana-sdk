@@ -3,6 +3,7 @@ import * as types from '../generated';
 import { vrfCloseAction } from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
+  SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
@@ -99,7 +100,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: VrfInitParams
+    params: VrfInitParams,
+    options?: TransactionObjectOptions
   ): Promise<[VrfAccount, TransactionObject]> {
     program.verifyNewKeypair(params.vrfKeypair);
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
@@ -150,7 +152,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
     return [
       vrfAccount,
-      new TransactionObject(payer, ixns, [params.vrfKeypair]),
+      new TransactionObject(payer, ixns, [params.vrfKeypair], options),
     ];
   }
 
@@ -161,14 +163,16 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   public static async create(
     program: SwitchboardProgram,
-    params: VrfInitParams
+    params: VrfInitParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[VrfAccount, string]> {
     const [vrfAccount, vrfInitTxn] = await VrfAccount.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await program.signAndSend(vrfInitTxn);
+    const txnSignature = await program.signAndSend(vrfInitTxn, options);
     return [vrfAccount, txnSignature];
   }
 
@@ -225,14 +229,17 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   public async requestRandomness(
     params: VrfRequestRandomnessParams,
-    options?: TransactionObjectOptions
+    options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const requestRandomness = await this.requestRandomnessInstruction(
       this.program.walletPubkey,
       params,
       options
     );
-    const txnSignature = await this.program.signAndSend(requestRandomness);
+    const txnSignature = await this.program.signAndSend(
+      requestRandomness,
+      options
+    );
     return txnSignature;
   }
 
@@ -293,7 +300,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   public async proveAndVerify(
     params: Partial<VrfProveAndVerifyParams> & { skipPreflight?: boolean },
-    options?: TransactionObjectOptions,
+    options?: SendTransactionObjectOptions,
     numTxns = 40
   ): Promise<Array<TransactionSignature>> {
     const vrf = params.vrf ?? (await this.loadData());
@@ -321,6 +328,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     );
 
     const txnSignatures = await this.program.signAndSendAll(txns, {
+      ...options,
       skipPreflight: params.skipPreflight ?? true,
     });
 
@@ -332,7 +340,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     params: {
       authority: Keypair | PublicKey;
       callback: Callback;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     const authorityPubkey =
       params.authority instanceof PublicKey
@@ -355,19 +364,27 @@ export class VrfAccount extends Account<types.VrfAccountData> {
           }
         ),
       ],
-      params.authority instanceof Keypair ? [params.authority] : []
+      params.authority instanceof Keypair ? [params.authority] : [],
+      options
     );
   }
 
-  public async setCallback(params: {
-    authority: Keypair | PublicKey;
-    callback: Callback;
-  }): Promise<TransactionSignature> {
+  public async setCallback(
+    params: {
+      authority: Keypair | PublicKey;
+      callback: Callback;
+    },
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const setCallbackTxn = this.setCallbackInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(setCallbackTxn);
+    const txnSignature = await this.program.signAndSend(
+      setCallbackTxn,
+      options
+    );
     return txnSignature;
   }
 

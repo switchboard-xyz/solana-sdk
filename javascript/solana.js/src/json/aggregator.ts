@@ -9,7 +9,7 @@ import {
   parseString,
 } from './utils';
 
-import { Keypair } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 
 export class AggregatorJson implements CreateQueueFeedParams {
   // aggregator params
@@ -42,7 +42,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
 
   // accounts
   keypair: Keypair;
-  authority?: Keypair;
+  authority?: PublicKey;
 
   // resources
   jobs: Array<JobJson>;
@@ -109,7 +109,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
     this.keypair = keypairPath ? loadKeypair(keypairPath) : Keypair.generate();
 
     const authorityPath = parseString(object, 'authority');
-    this.authority = authorityPath ? loadKeypair(authorityPath) : undefined;
+    this.authority = undefined;
 
     // resources
     this.jobs = JobJson.loadMultiple(object);
@@ -147,7 +147,7 @@ export class AggregatorJson implements CreateQueueFeedParams {
       maxPriorityFeeMultiplier: this.maxPriorityFeeMultiplier,
       fundAmount: this.fundAmount,
       keypair: keypairToString(this.keypair),
-      authority: this.authority ? keypairToString(this.authority) : undefined,
+      authority: this.authority ?? undefined,
       jobs: this.jobs.map(job => job.toJSON()),
     };
   }

@@ -1,7 +1,11 @@
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  SendTransactionObjectOptions,
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 
 import {
   Account,
@@ -214,7 +218,8 @@ export class AggregatorHistoryBuffer extends Account<
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: AggregatorHistoryInit
+    params: AggregatorHistoryInit,
+    options?: TransactionObjectOptions
   ): Promise<[AggregatorHistoryBuffer, TransactionObject]> {
     const buffer = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(buffer);
@@ -251,7 +256,7 @@ export class AggregatorHistoryBuffer extends Account<
 
     return [
       new AggregatorHistoryBuffer(program, buffer.publicKey),
-      new TransactionObject(payer, ixns, signers),
+      new TransactionObject(payer, ixns, signers, options),
     ];
   }
 
@@ -277,15 +282,17 @@ export class AggregatorHistoryBuffer extends Account<
    */
   public static async create(
     program: SwitchboardProgram,
-    params: AggregatorHistoryInit
+    params: AggregatorHistoryInit,
+    options?: SendTransactionObjectOptions
   ): Promise<[AggregatorHistoryBuffer, TransactionSignature]> {
     const [account, transaction] =
       await AggregatorHistoryBuffer.createInstructions(
         program,
         program.walletPubkey,
-        params
+        params,
+        options
       );
-    const txnSignature = await program.signAndSend(transaction);
+    const txnSignature = await program.signAndSend(transaction, options);
     return [account, txnSignature];
   }
 

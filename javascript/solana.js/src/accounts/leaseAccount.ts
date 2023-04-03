@@ -1,7 +1,11 @@
 import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  SendTransactionObjectOptions,
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 
 import { Account } from './account';
 import { AggregatorAccount } from './aggregatorAccount';
@@ -158,7 +162,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: LeaseInitParams
+    params: LeaseInitParams,
+    options?: TransactionObjectOptions
   ): Promise<[LeaseAccount, TransactionObject]> {
     const txns: Array<TransactionObject> = [];
     const loadAmount = params.fundAmount ?? 0;
@@ -274,11 +279,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         escrowBalance === null // lease might already exist if account was closed and re-opened
           ? [createTokenAccountIxn, leaseInitIxn]
           : [leaseInitIxn],
-        params.funderAuthority ? [params.funderAuthority] : []
+        params.funderAuthority ? [params.funderAuthority] : [],
+        options
       )
     );
 
-    const packed = TransactionObject.pack(txns);
+    const packed = TransactionObject.pack(txns, options);
     if (packed.length > 1) {
       throw new Error(`Failed to pack transactions into a single transactions`);
     }
@@ -320,15 +326,17 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
    */
   public static async create(
     program: SwitchboardProgram,
-    params: LeaseInitParams
+    params: LeaseInitParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[LeaseAccount, TransactionSignature]> {
     const [leaseAccount, transaction] = await LeaseAccount.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
 
-    const signature = await program.signAndSend(transaction);
+    const signature = await program.signAndSend(transaction, options);
     return [leaseAccount, signature];
   }
 
@@ -386,7 +394,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
   public async extendInstruction(
     payer: PublicKey,
-    params: LeaseExtendParams
+    params: LeaseExtendParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const owner = params.funderAuthority
       ? params.funderAuthority.publicKey
@@ -440,24 +449,28 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     return new TransactionObject(
       payer,
       [leaseExtend],
-      params.funderAuthority ? [params.funderAuthority] : []
+      params.funderAuthority ? [params.funderAuthority] : [],
+      options
     );
   }
 
   public async extend(
-    params: LeaseExtendParams
+    params: LeaseExtendParams,
+    options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const leaseExtend = await this.extendInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(leaseExtend);
+    const txnSignature = await this.program.signAndSend(leaseExtend, options);
     return txnSignature;
   }
 
   public async withdrawInstruction(
     payer: PublicKey,
-    params: LeaseWithdrawParams
+    params: LeaseWithdrawParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const { lease, queue, aggregatorAccount, aggregator, balance } =
       await this.fetchAccounts();
@@ -537,7 +550,12 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         ),
       ];
 
-      const txn = new TransactionObject(payer, ixns, [ephemeralWallet]);
+      const txn = new TransactionObject(
+        payer,
+        ixns,
+        [ephemeralWallet],
+        options
+      );
       return txn;
     }
 
@@ -571,32 +589,42 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           }
         ),
       ],
-      params.withdrawAuthority ? [params.withdrawAuthority] : []
+      params.withdrawAuthority ? [params.withdrawAuthority] : [],
+      options
     );
 
     return txn;
   }
 
   public async withdraw(
-    params: LeaseWithdrawParams
+    params: LeaseWithdrawParams,
+    options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(withdrawTxn);
+    const txnSignature = await this.program.signAndSend(withdrawTxn, options);
     return txnSignature;
   }
 
-  public async setAuthority(params: {
-    newAuthority: PublicKey;
-    withdrawAuthority: Keypair;
-  }): Promise<TransactionSignature> {
+  public async setAuthority(
+    params: {
+      newAuthority: PublicKey;
+      withdrawAuthority: Keypair;
+    },
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const setAuthorityTxn = this.setAuthorityInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(setAuthorityTxn);
+    const txnSignature = await this.program.signAndSend(
+      setAuthorityTxn,
+      options
+    );
     return txnSignature;
   }
 
@@ -605,7 +633,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     params: {
       newAuthority: PublicKey;
       withdrawAuthority?: Keypair;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -624,7 +653,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           }
         ),
       ],
-      params.withdrawAuthority ? [params.withdrawAuthority] : []
+      params.withdrawAuthority ? [params.withdrawAuthority] : [],
+      options
     );
   }
   public static minimumLeaseAmount(

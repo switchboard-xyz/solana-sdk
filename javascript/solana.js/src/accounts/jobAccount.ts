@@ -2,6 +2,7 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
+  SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
@@ -250,7 +251,7 @@ export class JobAccount extends Account<types.JobAccountData> {
   public static async create(
     program: SwitchboardProgram,
     params: JobInitParams,
-    options?: TransactionObjectOptions
+    options?: SendTransactionObjectOptions
   ): Promise<[JobAccount, Array<TransactionSignature>]> {
     const [account, transactions] = JobAccount.createInstructions(
       program,
@@ -258,7 +259,7 @@ export class JobAccount extends Account<types.JobAccountData> {
       params,
       options
     );
-    const txSignature = await program.signAndSendAll(transactions);
+    const txSignature = await program.signAndSendAll(transactions, options);
     return [account, txSignature];
   }
 

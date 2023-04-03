@@ -38,6 +38,9 @@ export interface TransactionObjectOptions {
   computeUnitLimit?: number;
 }
 
+export type SendTransactionObjectOptions = TransactionObjectOptions &
+  SendTransactionOptions;
+
 export type TransactionPackOptions = TransactionObjectOptions & {
   // instructions to be added first in all txns
   preIxns?: Array<TransactionInstruction>;

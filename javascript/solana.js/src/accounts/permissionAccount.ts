@@ -7,7 +7,11 @@ import {
   PermitVrfRequests,
 } from '../generated/types/SwitchboardPermission';
 import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import {
+  SendTransactionObjectOptions,
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
 
 import { Account } from './account';
 
@@ -172,7 +176,8 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   public static createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: PermissionAccountInitParams
+    params: PermissionAccountInitParams,
+    options?: TransactionObjectOptions
   ): [PermissionAccount, TransactionObject] {
     const [account] = PermissionAccount.fromSeed(
       program,
@@ -192,19 +197,21 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
         payer,
       }
     );
-    return [account, new TransactionObject(payer, [instruction], [])];
+    return [account, new TransactionObject(payer, [instruction], [], options)];
   }
 
   public static async create(
     program: SwitchboardProgram,
-    params: PermissionAccountInitParams
+    params: PermissionAccountInitParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[PermissionAccount, TransactionSignature]> {
     const [account, txnObject] = this.createInstruction(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txSignature = await program.signAndSend(txnObject);
+    const txSignature = await program.signAndSend(txnObject, options);
     return [account, txSignature];
   }
 
@@ -224,7 +231,8 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     params: PermissionSetParams & {
       /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
       permission: types.SwitchboardPermissionKind;
-    }
+    },
+    options?: TransactionObjectOptions
   ): TransactionObject {
     return new TransactionObject(
       payer,
@@ -245,7 +253,8 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
           }
         ),
       ],
-      params.queueAuthority ? [params.queueAuthority] : []
+      params.queueAuthority ? [params.queueAuthority] : [],
+      options
     );
   }
 
@@ -256,10 +265,15 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     params: PermissionSetParams & {
       /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
       permission: types.SwitchboardPermissionKind;
-    }
+    },
+    options?: SendTransactionObjectOptions
   ): Promise<string> {
-    const setTxn = this.setInstruction(this.program.walletPubkey, params);
-    const txnSignature = await this.program.signAndSend(setTxn);
+    const setTxn = this.setInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignature = await this.program.signAndSend(setTxn, options);
     return txnSignature;
   }
 

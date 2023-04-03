@@ -99,7 +99,7 @@ describe('Transfer Tests', () => {
   it('Creates an aggregator on the orig queue and crank', async () => {
     [aggregatorAccount] = await origQueueAccount.createFeed({
       name: 'Aggregator-1',
-      authority: aggregatorAuthority,
+      authority: aggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,
       minRequiredJobResults: 1,
@@ -198,7 +198,7 @@ describe('Transfer Tests', () => {
   it('Transfers an aggregator to a new queue in sequence', async () => {
     const [aggregatorAccount] = await origQueueAccount.createFeed({
       name: 'Aggregator-2',
-      authority: aggregatorAuthority,
+      authority: aggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,
       minRequiredJobResults: 1,
@@ -272,7 +272,7 @@ describe('Transfer Tests', () => {
     const myAggregatorAuthority = Keypair.generate();
     const [myAggregatorAccount] = await origQueueAccount.createFeed({
       name: 'Aggregator-2',
-      authority: myAggregatorAuthority,
+      authority: myAggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,
       minRequiredJobResults: 1,

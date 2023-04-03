@@ -446,4 +446,50 @@ describe('Aggregator Tests', () => {
       `maxPriorityFeeMultiplier mismatch, expected ${maxPriorityFeeMultiplier}, received ${myAggregator.maxPriorityFeeMultiplier}`
     );
   });
+
+  it('Initializes an aggregator and sets the authority', async () => {
+    const myAuth = Keypair.generate();
+    const myAgg = Keypair.generate();
+
+    const [aggregatorAccount1] = await queueAccount.createFeed(
+      {
+        queueAccount,
+        queueAuthority: queueAuthority,
+        batchSize: 1,
+        minRequiredOracleResults: 1,
+        minRequiredJobResults: 1,
+        minUpdateDelaySeconds: 60,
+        authority: myAuth.publicKey,
+        keypair: myAgg,
+        enable: true,
+        fundAmount: 0.25,
+        historyLimit: 25,
+        jobs: [
+          { pubkey: jobAccount.publicKey },
+          {
+            weight: 2,
+            data: OracleJob.encodeDelimited(
+              OracleJob.fromObject({
+                tasks: [
+                  {
+                    valueTask: {
+                      value: 1,
+                    },
+                  },
+                ],
+              })
+            ).finish(),
+          },
+        ],
+      },
+      { skipPreflight: true }
+    );
+
+    const agg1 = await aggregatorAccount1.loadData();
+
+    assert(
+      agg1.authority.equals(myAuth.publicKey),
+      `AggregatorAuthorityMismatch, expected ${myAuth.publicKey}, received ${agg1.authority}`
+    );
+  });
 });

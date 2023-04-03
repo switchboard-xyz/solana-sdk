@@ -2,6 +2,7 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
+  SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
@@ -194,7 +195,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams &
-      Partial<OracleStakeParams>
+      Partial<OracleStakeParams>,
+    options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const txns: Array<TransactionObject> = [];
 
@@ -256,21 +258,26 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           }
         ),
       ],
-      params.authority ? [params.authority, tokenWallet] : [tokenWallet]
+      params.authority ? [params.authority, tokenWallet] : [tokenWallet],
+      options
     );
 
     txns.push(oracleInit);
 
     if (params.stakeAmount && params.stakeAmount > 0) {
-      const depositTxn = await oracleAccount.stakeInstructions(payer, {
-        ...params,
-        tokenAccount: tokenWallet.publicKey,
-        stakeAmount: params.stakeAmount ?? 0,
-      });
+      const depositTxn = await oracleAccount.stakeInstructions(
+        payer,
+        {
+          ...params,
+          tokenAccount: tokenWallet.publicKey,
+          stakeAmount: params.stakeAmount ?? 0,
+        },
+        options
+      );
       txns.push(depositTxn);
     }
 
-    return [oracleAccount, TransactionObject.pack(txns)];
+    return [oracleAccount, TransactionObject.pack(txns, options)];
   }
 
   public static async create(
@@ -278,15 +285,17 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     params: {
       queueAccount: QueueAccount;
     } & OracleInitParams &
-      Partial<OracleStakeParams>
+      Partial<OracleStakeParams>,
+    options?: SendTransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const [oracleAccount, txns] = await OracleAccount.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
 
-    const signatures = await program.signAndSendAll(txns);
+    const signatures = await program.signAndSendAll(txns, options);
 
     return [oracleAccount, signatures];
   }
@@ -310,7 +319,8 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
   async stakeInstructions(
     payer: PublicKey,
-    params: OracleStakeParams & { tokenAccount?: PublicKey }
+    params: OracleStakeParams & { tokenAccount?: PublicKey },
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const txns: Array<TransactionObject> = [];
 
@@ -366,11 +376,12 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           this.program.mint.toTokenAmount(params.stakeAmount)
         ),
       ],
-      params.funderAuthority ? [params.funderAuthority] : []
+      params.funderAuthority ? [params.funderAuthority] : [],
+      options
     );
     txns.push(transferTxn);
 
-    const packed = TransactionObject.pack(txns);
+    const packed = TransactionObject.pack(txns, options);
     if (packed.length > 1) {
       throw new Error(`Failed to pack transactions into a single transactions`);
     }
@@ -379,13 +390,15 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   }
 
   async stake(
-    params: OracleStakeParams & { tokenAccount?: PublicKey }
+    params: OracleStakeParams & { tokenAccount?: PublicKey },
+    options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const stakeTxn = await this.stakeInstructions(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(stakeTxn);
+    const txnSignature = await this.program.signAndSend(stakeTxn, options);
     return txnSignature;
   }
 
@@ -426,7 +439,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       permission?: [PermissionAccount, number];
       authority?: Keypair;
     },
-    opts?: TransactionObjectOptions
+    opts?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const oracle = await this.loadData();
     const tokenWallet = params?.tokenWallet ?? oracle.tokenAccount;
@@ -481,7 +494,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       opts
     );
 
-    const txnSignature = await this.program.signAndSend(heartbeatTxn);
+    const txnSignature = await this.program.signAndSend(heartbeatTxn, opts);
     return txnSignature;
   }
 
@@ -600,14 +613,14 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
   async withdraw(
     params: OracleWithdrawParams,
-    opts?: TransactionObjectOptions
+    opts?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const withdrawTxn = await this.withdrawInstruction(
       this.program.walletPubkey,
       params,
       opts
     );
-    const txnSignature = await this.program.signAndSend(withdrawTxn);
+    const txnSignature = await this.program.signAndSend(withdrawTxn, opts);
     return txnSignature;
   }
 

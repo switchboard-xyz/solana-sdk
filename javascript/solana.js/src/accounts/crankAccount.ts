@@ -2,6 +2,7 @@ import * as errors from '../errors';
 import * as types from '../generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
+  SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
@@ -99,7 +100,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: CrankInitParams
+    params: CrankInitParams,
+    options?: TransactionObjectOptions
   ): Promise<[CrankAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
@@ -140,7 +142,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           }
         ),
       ],
-      [keypair, buffer]
+      [keypair, buffer],
+      options
     );
 
     const crankAccount = new CrankAccount(program, keypair.publicKey);
@@ -151,14 +154,16 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
   public static async create(
     program: SwitchboardProgram,
-    params: CrankInitParams
+    params: CrankInitParams,
+    options?: SendTransactionObjectOptions
   ): Promise<[CrankAccount, TransactionSignature]> {
     const [crankAccount, crankInit] = await CrankAccount.createInstructions(
       program,
       program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await program.signAndSend(crankInit);
+    const txnSignature = await program.signAndSend(crankInit, options);
     return [crankAccount, txnSignature];
   }
 
@@ -169,7 +174,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   async pushInstruction(
     payer: PublicKey,
-    params: CrankPushParams
+    params: CrankPushParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const crankData = await this.loadData();
     const queueAccount = new QueueAccount(this.program, crankData.queuePubkey);
@@ -204,13 +210,15 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           }
         ),
       ],
-      []
+      [],
+      options
     );
   }
 
   pushInstructionSync(
     payer: PublicKey,
-    params: CrankPushSyncParams
+    params: CrankPushSyncParams,
+    options?: TransactionObjectOptions
   ): TransactionObject {
     const queueAccount = new QueueAccount(
       this.program,
@@ -247,7 +255,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           }
         ),
       ],
-      []
+      [],
+      options
     );
   }
 
@@ -256,18 +265,23 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    * @param params The crank push parameters.
    * @return TransactionSignature
    */
-  async push(params: CrankPushParams): Promise<TransactionSignature> {
+  async push(
+    params: CrankPushParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
     const pushTxn = await this.pushInstruction(
       this.program.walletPubkey,
-      params
+      params,
+      options
     );
-    const txnSignature = await this.program.signAndSend(pushTxn);
+    const txnSignature = await this.program.signAndSend(pushTxn, options);
     return txnSignature;
   }
 
   public async popInstruction(
     payer: PublicKey,
-    params: CrankPopParams
+    params: CrankPopParams,
+    options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const next =
       params.readyPubkeys ??
@@ -343,14 +357,22 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const txnObject: TransactionObject = new TransactionObject(
       payer,
       [crankPopIxn],
-      []
+      [],
+      options
     );
     return txnObject;
   }
 
-  public async pop(params: CrankPopParams): Promise<TransactionSignature> {
-    const popTxn = await this.popInstruction(this.program.walletPubkey, params);
-    const txnSignature = await this.program.signAndSend(popTxn);
+  public async pop(
+    params: CrankPopParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const popTxn = await this.popInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignature = await this.program.signAndSend(popTxn, options);
     return txnSignature;
   }
 
@@ -598,6 +620,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const txnSignatures = await this.program.signAndSendAll(
       popTxns,
       {
+        ...options,
         skipPreflight: true,
         skipConfrimation: true,
       },
