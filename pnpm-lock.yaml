@@ -57,7 +57,7 @@ importers:
       '@coral-xyz/borsh': ^0.27.0
       '@solana/spl-token': ^0.3.6
       '@solana/web3.js': ^1.73.0
-      '@switchboard-xyz/common': ^2.1.33
+      '@switchboard-xyz/common': ^2.1.34
       '@switchboard-xyz/eslint-config': latest
       '@switchboard-xyz/oracle': ^2.1.13
       '@types/chai': ^4.3.4
@@ -82,7 +82,7 @@ importers:
       '@coral-xyz/borsh': 0.27.0_@solana+web3.js@1.73.0
       '@solana/spl-token': 0.3.6_@solana+web3.js@1.73.0
       '@solana/web3.js': 1.73.0
-      '@switchboard-xyz/common': 2.1.33
+      '@switchboard-xyz/common': 2.1.34
       dotenv: 16.0.3
       lodash: 4.17.21
     devDependencies:
@@ -491,32 +491,6 @@ packages:
       chalk: 4.1.2
     dev: true
 
-  /@coral-xyz/anchor/0.26.0:
-    resolution: {integrity: sha512-PxRl+wu5YyptWiR9F2MBHOLLibm87Z4IMUBPreX+DYBtPM+xggvcPi0KAN7+kIL4IrIhXI8ma5V0MCXxSN1pHg==}
-    engines: {node: '>=11'}
-    dependencies:
-      '@coral-xyz/borsh': 0.26.0_@solana+web3.js@1.73.3
-      '@solana/web3.js': 1.73.3
-      base64-js: 1.5.1
-      bn.js: 5.2.1
-      bs58: 4.0.1
-      buffer-layout: 1.2.2
-      camelcase: 6.3.0
-      cross-fetch: 3.1.5
-      crypto-hash: 1.3.0
-      eventemitter3: 4.0.7
-      js-sha256: 0.9.0
-      pako: 2.0.4
-      snake-case: 3.0.4
-      superstruct: 0.15.5
-      toml: 3.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /@coral-xyz/anchor/0.27.0:
     resolution: {integrity: sha512-+P/vPdORawvg3A9Wj02iquxb4T0C5m4P6aZBVYysKl4Amk+r6aMPZkUhilBkD6E4Nuxnoajv3CFykUfkGE0n5g==}
     engines: {node: '>=11'}
@@ -541,17 +515,6 @@ packages:
       - encoding
       - supports-color
       - utf-8-validate
-    dev: false
-
-  /@coral-xyz/borsh/0.26.0_@solana+web3.js@1.73.3:
-    resolution: {integrity: sha512-uCZ0xus0CszQPHYfWAqKS5swS1UxvePu83oOF+TWpUkedsNlg6p2p4azxZNSSqwXb9uXMFgxhuMBX9r3Xoi0vQ==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@solana/web3.js': ^1.68.0
-    dependencies:
-      '@solana/web3.js': 1.73.3
-      bn.js: 5.2.1
-      buffer-layout: 1.2.2
     dev: false
 
   /@coral-xyz/borsh/0.27.0_@solana+web3.js@1.73.0:
@@ -888,6 +851,24 @@ packages:
 
   /@switchboard-xyz/common/2.1.33:
     resolution: {integrity: sha512-cZ+OPxYdD4Z3qBWlhWWgemXQDQoNiPh6mgd2bcF8mIGvdlJ1WzE5rD7UqfpuBM8Sq9bHe9c2oNDzGRGuNUtG0w==}
+    dependencies:
+      '@solana/web3.js': 1.73.3
+      '@types/big.js': 6.1.6
+      '@types/bn.js': 5.1.1
+      big.js: 6.2.1
+      bn.js: 5.2.1
+      decimal.js: 10.4.3
+      protobufjs: 7.1.2
+      yaml: 2.2.1
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /@switchboard-xyz/common/2.1.34:
+    resolution: {integrity: sha512-RsVvod9wHZtcEblld2CclcFvlD1gh9/1B4cBif82gvc8zr8Zo0tdGQEzqoA0FZfgpWmKoLXa6M5E7PfkB+oaCg==}
     dependencies:
       '@solana/web3.js': 1.73.3
       '@types/big.js': 6.1.6
@@ -5325,14 +5306,14 @@ packages:
   file:javascript/solana.js:
     resolution: {directory: javascript/solana.js, type: directory}
     name: '@switchboard-xyz/solana.js'
-    version: 2.0.138
+    version: 2.1.6
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
-      '@coral-xyz/anchor': 0.26.0
-      '@coral-xyz/borsh': 0.26.0_@solana+web3.js@1.73.3
+      '@coral-xyz/anchor': 0.27.0
+      '@coral-xyz/borsh': 0.27.0_@solana+web3.js@1.73.3
       '@solana/spl-token': 0.3.6_@solana+web3.js@1.73.3
       '@solana/web3.js': 1.73.3
-      '@switchboard-xyz/common': 2.1.33
+      '@switchboard-xyz/common': 2.1.34
       '@switchboard-xyz/oracle': 2.1.11
       dotenv: 16.0.3
       lodash: 4.17.21
