@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.1.33",
-    "@switchboard-xyz/oracle": "^2.1.6",
+    "@switchboard-xyz/common": "^2.1.46",
+    "@switchboard-xyz/oracle": "^2.1.13",
     "@switchboard-xyz/solana.js": "file:../solana.js",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",

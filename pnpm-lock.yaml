@@ -26,11 +26,11 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
-        specifier: ^2.1.6
-        version: 2.1.11
+        specifier: ^2.1.13
+        version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: file:../solana.js
         version: file:javascript/solana.js
@@ -84,8 +84,8 @@ importers:
         specifier: ^1.73.0
         version: 1.73.0
       '@switchboard-xyz/common':
-        specifier: ^2.1.45
-        version: 2.1.45
+        specifier: ^2.1.46
+        version: 2.1.46
       dotenv:
         specifier: ^16.0.3
         version: 16.0.3
@@ -154,8 +154,8 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -203,8 +203,8 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -243,8 +243,8 @@ importers:
         specifier: ^0.27.0
         version: 0.27.0
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -295,8 +295,8 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -368,8 +368,8 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.1.33
-        version: 2.1.33
+        specifier: ^2.1.46
+        version: 2.1.46
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -964,26 +964,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/common@2.1.33:
-    resolution: {integrity: sha512-cZ+OPxYdD4Z3qBWlhWWgemXQDQoNiPh6mgd2bcF8mIGvdlJ1WzE5rD7UqfpuBM8Sq9bHe9c2oNDzGRGuNUtG0w==}
-    dependencies:
-      '@solana/web3.js': 1.73.3
-      '@types/big.js': 6.1.6
-      '@types/bn.js': 5.1.1
-      big.js: 6.2.1
-      bn.js: 5.2.1
-      decimal.js: 10.4.3
-      protobufjs: 7.1.2
-      yaml: 2.2.1
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
-  /@switchboard-xyz/common@2.1.45:
-    resolution: {integrity: sha512-hsxZR/0MwXxJSQWSYK06/nbwABXDPHyFHEb+3+MGAl161wSzB/RDNbF0uDil9b+I7UTZggLsB+/FOBzZyG8TAg==}
+  /@switchboard-xyz/common@2.1.46:
+    resolution: {integrity: sha512-3YMNwDPbOlVpfTbVXhCW+14CNPXhkGgthE/xcjf4n/nEVbghbTbYPGSW39bMbuYWuBzPLt5MXRuJ7twWNlZpMw==}
     engines: {node: '>=12'}
     dependencies:
       '@solana/web3.js': 1.73.3
@@ -5409,14 +5391,14 @@ packages:
   file:javascript/solana.js:
     resolution: {directory: javascript/solana.js, type: directory}
     name: '@switchboard-xyz/solana.js'
-    version: 2.1.8
+    version: 2.1.9
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@coral-xyz/anchor': 0.27.0
       '@coral-xyz/borsh': 0.27.0(@solana/web3.js@1.73.3)
       '@solana/spl-token': 0.3.6(@solana/web3.js@1.73.3)
       '@solana/web3.js': 1.73.3
-      '@switchboard-xyz/common': 2.1.45
+      '@switchboard-xyz/common': 2.1.46
       '@switchboard-xyz/oracle': 2.1.11
       dotenv: 16.0.3
       lodash: 4.17.21

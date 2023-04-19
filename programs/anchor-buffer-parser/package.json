@@ -14,7 +14,7 @@
   "dependencies": {
     "@coral-xyz/anchor": "^0.27.0",
     "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.1.33",
+    "@switchboard-xyz/common": "^2.1.46",
     "@switchboard-xyz/oracle": "^2.1.13",
     "@switchboard-xyz/solana.js": "workspace:*",
     "node-fetch": "^2.6"
