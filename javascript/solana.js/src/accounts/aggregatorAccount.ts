@@ -211,6 +211,20 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     params: AggregatorInitParams,
     options?: TransactionObjectOptions
   ): Promise<[AggregatorAccount, TransactionObject]> {
+    if (params.batchSize > 8) {
+      throw new errors.AggregatorConfigError(
+        'oracleRequestBatchSize',
+        'must be less than or equal to 8'
+      );
+    }
+
+    if (params.minUpdateDelaySeconds < 5) {
+      throw new errors.AggregatorConfigError(
+        'minUpdateDelaySeconds',
+        'must be greater than 5 seconds'
+      );
+    }
+
     const keypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(keypair);
 
@@ -982,6 +996,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * @throws {AggregatorConfigError} If any of the following conditions are met:
    * - minUpdateDelaySeconds is less than 5 seconds
+   * - batchSize is greater than 8
    * - batchSize is greater than the queue size
    * - minOracleResults is greater than batchSize
    * - minJobResults is greater than the aggregator's jobPubkeysSize
@@ -989,11 +1004,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * Basic usage example:
    *
    * ```ts
-   * aggregatorAccount.verifyConfig(
+   * AggregatorAccount.verifyConfig(
    *   aggregatorData,
    *   queueData,
    *   {
-   *     batchSize: 10,
+   *     batchSize: 8,
    *     minOracleResults: 5,
    *     minJobResults: 4,
    *     minUpdateDelaySeconds: 10,
@@ -1001,7 +1016,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * );
    * ```
    */
-  public verifyConfig(
+  public static verifyConfig(
     aggregator:
       | types.AggregatorAccountData
       | {
@@ -1028,6 +1043,13 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       minUpdateDelaySeconds:
         target.minUpdateDelaySeconds ?? aggregator.minUpdateDelaySeconds,
     };
+
+    if (endState.batchSize > 8) {
+      throw new errors.AggregatorConfigError(
+        'oracleRequestBatchSize',
+        'must be less than or equal to 8'
+      );
+    }
 
     if (endState.minUpdateDelaySeconds < 5) {
       throw new errors.AggregatorConfigError(
@@ -1059,6 +1081,56 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   /**
+   * Validates an aggregator's configuration.
+   *
+   * @param aggregator An object containing the aggregator's account data or a partial configuration.
+   * @param queue An object containing the OracleQueueAccountData.
+   * @param target An object containing the target configuration values to be verified.
+   *
+   * @throws {AggregatorConfigError} If any of the following conditions are met:
+   * - minUpdateDelaySeconds is less than 5 seconds
+   * - batchSize is greater than 8
+   * - batchSize is greater than the queue size
+   * - minOracleResults is greater than batchSize
+   * - minJobResults is greater than the aggregator's jobPubkeysSize
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * aggregatorAccount.verifyConfig(
+   *   aggregatorData,
+   *   queueData,
+   *   {
+   *     batchSize: 8,
+   *     minOracleResults: 5,
+   *     minJobResults: 4,
+   *     minUpdateDelaySeconds: 10,
+   *   }
+   * );
+   * ```
+   */
+  public verifyConfig(
+    aggregator:
+      | types.AggregatorAccountData
+      | {
+          oracleRequestBatchSize: number;
+          minOracleResults: number;
+          minJobResults: number;
+          minUpdateDelaySeconds: number;
+          jobPubkeysSize: number;
+        },
+    queue: types.OracleQueueAccountData,
+    target: {
+      batchSize?: number;
+      minOracleResults?: number;
+      minJobResults?: number;
+      minUpdateDelaySeconds?: number;
+    }
+  ): void {
+    AggregatorAccount.verifyConfig(aggregator, queue, target);
+  }
+
+  /**
    * Creates a transaction object to set aggregator configuration parameters.
    *
    * @param payer The public key of the payer account.
@@ -1075,7 +1147,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *   {
    *     name: 'New Aggregator Name',
    *     metadata: 'New Aggregator Metadata',
-   *     batchSize: 10,
+   *     batchSize: 8,
    *     minOracleResults: 5,
    *     minJobResults: 4,
    *     minUpdateDelaySeconds: 10,
@@ -1186,7 +1258,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *   {
    *     name: 'New Aggregator Name',
    *     metadata: 'New Aggregator Metadata',
-   *     batchSize: 10,
+   *     batchSize: 8,
    *     minOracleResults: 5,
    *     minJobResults: 4,
    *     minUpdateDelaySeconds: 10,
