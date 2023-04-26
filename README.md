@@ -15,7 +15,7 @@
        <img alt="Anchor Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg" />
     </a>
 	  <a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
     </a>
 	  <a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">
       <img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm" />
@@ -24,7 +24,7 @@
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
     </a>
     <a href="https://twitter.com/switchboardxyz">
       <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />

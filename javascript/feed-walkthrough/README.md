@@ -9,7 +9,7 @@
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
     </a>
     <a href="https://twitter.com/switchboardxyz">
       <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />

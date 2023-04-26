@@ -9,13 +9,13 @@
 
   <p>
 	<a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
     </a>
   </p>
 
   <p>
     <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white">
+      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
     </a>
     <a href="https://twitter.com/switchboardxyz">
       <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
