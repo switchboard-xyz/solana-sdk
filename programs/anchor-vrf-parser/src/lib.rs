@@ -96,4 +96,6 @@ pub enum VrfErrorCode {
     VrfClientCloseNotReady,
     #[msg("VRF account is not ready to be closed.")]
     VrfCloseNotReady,
+    #[msg("payer_authority has not signed.")]
+    InvalidSigner,
 }

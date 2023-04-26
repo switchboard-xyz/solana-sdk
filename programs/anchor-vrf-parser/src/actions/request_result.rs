@@ -83,7 +83,7 @@ pub struct RequestResult<'info> {
     )]
     pub payer_wallet: Account<'info, TokenAccount>,
     /// CHECK:
-    #[account(signer)]
+    #[account(mut)]
     pub payer_authority: AccountInfo<'info>,
 
     // SYSTEM ACCOUNTS
@@ -140,6 +140,11 @@ impl RequestResult<'_> {
             callback,
             state_seeds,
         )?;
+
+        // if payer_authority isnt the state, make sure it has signed
+        if ctx.accounts.state.key() != ctx.accounts.payer_authority.key() && !ctx.accounts.payer_authority.is_signer {
+            return Err(error!(VrfErrorCode::InvalidSigner));
+        }
 
         // then request randomness
         let vrf_request_randomness = VrfRequestRandomness {

@@ -7,9 +7,14 @@ import {
   PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+  SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  transfer,
+} from "@solana/spl-token";
 import { sleep } from "@switchboard-xyz/common";
 import {
   AnchorWallet,
@@ -157,19 +162,29 @@ describe("anchor-vrf-parser test", () => {
       console.log(`Set VRF Permissions`);
     }
 
+    const vrfClientEscrow =
+      switchboard.program.mint.getAssociatedAddress(vrfClientKey);
+
+    console.log(`User Escrow: ${vrfClientEscrow}`);
+
     // Create VRF Client account
     await vrfClientProgram.methods
       .initState({
         maxResult: new anchor.BN(1337000),
         permissionBump: permissionBump,
-        switchboardStateBump: queueAccount.program.programState.bump,
+        switchboardStateBump: switchboard.program.programState.bump,
       })
       .accounts({
         state: vrfClientKey,
-        vrf: vrfAccount.publicKey,
-        payer: payer.publicKey,
         authority: payer.publicKey,
+        vrf: vrfAccount.publicKey,
+        stateEscrow: vrfClientEscrow,
+        mint: switchboard.program.mint.address,
+        payer: payer.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
     console.log(`Created VrfClient Account: ${vrfClientKey}`);
@@ -177,10 +192,20 @@ describe("anchor-vrf-parser test", () => {
     const [payerTokenWallet] =
       await queueAccount.program.mint.getOrCreateWrappedUser(
         queueAccount.program.walletPubkey,
-        { fundUpTo: 0.002 }
+        { fundUpTo: 0.003 }
       );
 
     const vrf = await vrfAccount.loadData();
+
+    // transfer funds to vrf escrow
+    await transfer(
+      switchboard.program.connection,
+      payer,
+      payerTokenWallet,
+      vrf.escrow,
+      payer,
+      2500000 // 0.0025 SOL
+    );
 
     // give account time to propagate to oracle RPCs
     await sleep(2000);
@@ -191,17 +216,19 @@ describe("anchor-vrf-parser test", () => {
         .accounts({
           state: vrfClientKey,
           authority: payer.publicKey,
-          switchboardProgram: queueAccount.program.programId,
           vrf: vrfAccount.publicKey,
           oracleQueue: queueAccount.publicKey,
           queueAuthority: authority,
           dataBuffer,
           permission: permissionAccount.publicKey,
           escrow: vrf.escrow,
-          payerWallet: payerTokenWallet,
-          payerAuthority: payer.publicKey,
-          recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
           programState: queueAccount.program.programState.publicKey,
+          switchboardProgram: queueAccount.program.programId,
+          payerWallet: vrfClientEscrow,
+          payerAuthority: vrfClientKey,
+
+          recentBlockhashes: SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
+
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .rpc();
@@ -296,6 +323,9 @@ describe("anchor-vrf-parser test", () => {
       console.log(`Set New VRF Permissions`);
     }
 
+    const newVrfClientEscrow =
+      switchboard.program.mint.getAssociatedAddress(newVrfClientKey);
+
     // Create VRF Client account
     await vrfClientProgram.methods
       .initState({
@@ -305,10 +335,15 @@ describe("anchor-vrf-parser test", () => {
       })
       .accounts({
         state: newVrfClientKey,
-        vrf: newVrfAccount.publicKey,
-        payer: payer.publicKey,
         authority: payer.publicKey,
+        vrf: newVrfAccount.publicKey,
+        stateEscrow: newVrfClientEscrow,
+        mint: switchboard.program.mint.address,
+        payer: payer.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
       })
       .rpc();
     console.log(`Created New VrfClient Account: ${newVrfClientKey}`);
