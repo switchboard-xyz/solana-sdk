@@ -1,6 +1,6 @@
 <div align="center">
   <a href="#">
-    <img height="170" src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.svg" />
+    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
   </a>
 
   <h1>Switchboard V2</h1>
