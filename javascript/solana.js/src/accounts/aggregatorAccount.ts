@@ -1179,6 +1179,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBumpPeriod: number;
       maxPriorityFeeMultiplier: number;
       force: boolean;
+      disableCrank: boolean;
     }>,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
@@ -1227,6 +1228,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           priorityFeeBump: params.priorityFeeBump ?? null,
           priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? null,
           maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? null,
+          disableCrank: params.disableCrank ?? null,
         },
       },
       {
@@ -1289,6 +1291,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       priorityFeeBumpPeriod?: number;
       maxPriorityFeeMultiplier?: number;
       force: boolean;
+      disableCrank: boolean;
     }>,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {

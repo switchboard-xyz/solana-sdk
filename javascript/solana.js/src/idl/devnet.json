@@ -74,6 +74,12 @@
           "isMut": true,
           "isSigner": false,
           "isOptional": true
+        },
+        {
+          "name": "slidingWindow",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
         }
       ],
       "args": [
@@ -2420,13 +2426,15 @@
           {
             "name": "bump",
             "docs": [
-              "Reserved for future info.",
               "The PDA bump to derive the pubkey."
             ],
             "type": "u8"
           },
           {
             "name": "ebuf",
+            "docs": [
+              "Reserved for future info."
+            ],
             "type": {
               "array": [
                 "u8",
@@ -4185,6 +4193,12 @@
             "name": "maxPriorityFeeMultiplier",
             "type": {
               "option": "u32"
+            }
+          },
+          {
+            "name": "disableCrank",
+            "type": {
+              "option": "bool"
             }
           }
         ]
