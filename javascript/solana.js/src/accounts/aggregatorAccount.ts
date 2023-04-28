@@ -999,7 +999,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * - batchSize is greater than 8
    * - batchSize is greater than the queue size
    * - minOracleResults is greater than batchSize
-   * - minJobResults is greater than the aggregator's jobPubkeysSize
+   * - minJobResults is equal to 0
    *
    * Basic usage example:
    *
@@ -1058,10 +1058,16 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       );
     }
 
-    if (endState.minJobResults > aggregator.jobPubkeysSize) {
+    if (endState.minJobResults === 0 || endState.minJobResults > 16) {
       throw new errors.AggregatorConfigError(
         'minJobResults',
-        `must be less than the number of jobs (${aggregator.jobPubkeysSize})`
+        'must be a value between 1 and 16'
+      );
+    }
+
+    if (endState.minJobResults > aggregator.jobPubkeysSize) {
+      console.warn(
+        `The aggregator's minJobResults (${endState.minJobResults}) is less than the current number of jobs (${aggregator.jobPubkeysSize})`
       );
     }
 
