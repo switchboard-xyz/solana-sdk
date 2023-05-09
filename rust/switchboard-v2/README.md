@@ -47,7 +47,7 @@ switchboard-v2 = "0.1.23"
 
 ## Usage
 
-**Table Of Contents**
+**Directory**
 
 - [Read Latest Result](#read-latest-result)
 

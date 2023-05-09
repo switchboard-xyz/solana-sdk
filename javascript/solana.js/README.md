@@ -42,7 +42,7 @@ npm i --save @switchboard-xyz/solana.js
 
 ## Usage
 
-**Table Of Contents**
+**Directory**
 
 - [Load Switchboard Program](#load-switchboard-program)
 - [Create a Queue](#create-a-queue)
