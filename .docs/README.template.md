@@ -55,27 +55,9 @@ pnpm build
 
 ## Program IDs
 
-The following addresses can be used with the Switchboard deployment on Solana
+<!-- addresses -->
 
-#### Mainnet
-
-| Account              | Address                                        |
-| -------------------- | ---------------------------------------------- |
-| Program ID           | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
-| Program Authority    | `2NvGRFswVx3GXxURNSfjbsWY4iP1ufj8LvAKJWGXSm4D` |
-| IdlAddress           | `Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk` |
-| Permissioned Queue   | `3HBb2DQqDfuMdzWxNk1Eo9RTMkFYmuEAd32RiLKn9pAn` |
-| Permissionless Queue | `5JYwqvKkqp35w8Nq3ba4z1WYUeJQ1rB36V8XvaGp6zn1` |
-
-#### Devnet
-
-| Account              | Address                                        |
-| -------------------- | ---------------------------------------------- |
-| Program ID           | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
-| Program Authority    | `2KgowxogBrGqRcgXQEmqFvC3PGtCu66qERNJevYW8Ajh` |
-| IdlAddress           | `Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk` |
-| Permissioned Queue   | `PeRMnAqNqHQYHUuCBEjhm1XPeVTh4BxjY4t4TPan1pG`  |
-| Permissionless Queue | `uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX`  |
+<!-- addressesstop -->
 
 ## Libraries
 
