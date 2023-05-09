@@ -49,8 +49,6 @@ npm i --save @switchboard-xyz/solana.js
 
 ### Load Switchboard Program
 
-
-
 ```ts
 import { Connection } from '@solana/web3.js';
 import {
@@ -65,12 +63,7 @@ const program = await SwitchboardProgram.load(
 );
 ```
 
-
-
-
 ### Create a Queue
-
-
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -89,7 +82,3 @@ const [queueAccount, txnSignature] = await QueueAccount.create(program, {
 });
 const queue = await queueAccount.loadData();
 ```
-
-
-
-

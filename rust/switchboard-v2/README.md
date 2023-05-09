@@ -53,8 +53,6 @@ switchboard-v2 = "0.1.23"
 
 ### Read Latest Result
 
-
-
 ```rust
 use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
@@ -63,7 +61,7 @@ use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROG
 // check feed owner
 let owner = *aggregator.owner;
 if owner != SWITCHBOARD_PROGRAM_ID {
-    return Err(error!(ErrorCode::InvalidSwitchboardAccount));
+  return Err(error!(ErrorCode::InvalidSwitchboardAccount));
 }
 
 // deserialize account info
@@ -82,4 +80,3 @@ feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
 ',
-
