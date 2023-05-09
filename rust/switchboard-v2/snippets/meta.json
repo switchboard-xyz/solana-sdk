@@ -1,0 +1,12 @@
+{
+  "snippets": [
+    {
+      "name": "Read Latest Result",
+      "description": {
+        "pre": "",
+        "post": "',"
+      },
+      "filename": "read-result.rs"
+    }
+  ]
+}
