@@ -49,7 +49,7 @@ switchboard-v2 = "0.1.23"
 
 **Directory**
 
-1. [Read Latest Result](#read-latest-result)
+- [Read Latest Result](#read-latest-result)
 
 ### Read Latest Result
 
