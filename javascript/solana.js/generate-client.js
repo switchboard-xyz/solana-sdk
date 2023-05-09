@@ -68,19 +68,23 @@ async function main() {
   }
 
   execSync(
-    'anchor idl fetch -o ./src/idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet'
+    'anchor idl fetch -o ./src/idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet',
+    { encoding: 'utf-8' }
   );
   execSync(
-    'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet'
+    'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet',
+    { encoding: 'utf-8' }
   );
 
   if (devMode) {
     execSync(
-      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated'
+      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated',
+      { encoding: 'utf-8' }
     );
   } else {
     execSync(
-      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ./src/idl/devnet.json ./src/generated'
+      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ./src/idl/devnet.json ./src/generated',
+      { encoding: 'utf-8' }
     );
   }
 
@@ -148,12 +152,15 @@ async function main() {
     }
   }
 
-  execSync('npx prettier ./src/generated --write');
+  execSync('npx prettier ./src/generated --write', { encoding: 'utf-8' });
 
   // reset files
   for (const file of ignoreFiles) {
-    execSync(`git restore ${file}`);
+    execSync(`git restore ${file}`, { encoding: 'utf-8' });
   }
+
+  // run auto fix for import ordering
+  execSync(`pnpm fix`, { encoding: 'utf-8' });
 }
 
 main()

@@ -1,8 +1,9 @@
 import { SwitchboardProgram } from '../../SwitchboardProgram';
+import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from '@coral-xyz/borsh';
 import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
 
 export interface AggregatorSetConfigParamsFields {
   name: Array<number> | null;
@@ -17,7 +18,6 @@ export interface AggregatorSetConfigParamsFields {
   priorityFeeBump: number | null;
   priorityFeeBumpPeriod: number | null;
   maxPriorityFeeMultiplier: number | null;
-  disableCrank: boolean | null;
 }
 
 export interface AggregatorSetConfigParamsJSON {
@@ -33,7 +33,6 @@ export interface AggregatorSetConfigParamsJSON {
   priorityFeeBump: number | null;
   priorityFeeBumpPeriod: number | null;
   maxPriorityFeeMultiplier: number | null;
-  disableCrank: boolean | null;
 }
 
 export class AggregatorSetConfigParams {
@@ -49,7 +48,6 @@ export class AggregatorSetConfigParams {
   readonly priorityFeeBump: number | null;
   readonly priorityFeeBumpPeriod: number | null;
   readonly maxPriorityFeeMultiplier: number | null;
-  readonly disableCrank: boolean | null;
 
   constructor(fields: AggregatorSetConfigParamsFields) {
     this.name = fields.name;
@@ -67,7 +65,6 @@ export class AggregatorSetConfigParams {
     this.priorityFeeBump = fields.priorityFeeBump;
     this.priorityFeeBumpPeriod = fields.priorityFeeBumpPeriod;
     this.maxPriorityFeeMultiplier = fields.maxPriorityFeeMultiplier;
-    this.disableCrank = fields.disableCrank;
   }
 
   static layout(property?: string) {
@@ -85,7 +82,6 @@ export class AggregatorSetConfigParams {
         borsh.option(borsh.u32(), 'priorityFeeBump'),
         borsh.option(borsh.u32(), 'priorityFeeBumpPeriod'),
         borsh.option(borsh.u32(), 'maxPriorityFeeMultiplier'),
-        borsh.option(borsh.bool(), 'disableCrank'),
       ],
       property
     );
@@ -109,7 +105,6 @@ export class AggregatorSetConfigParams {
       priorityFeeBump: obj.priorityFeeBump,
       priorityFeeBumpPeriod: obj.priorityFeeBumpPeriod,
       maxPriorityFeeMultiplier: obj.maxPriorityFeeMultiplier,
-      disableCrank: obj.disableCrank,
     });
   }
 
@@ -130,7 +125,6 @@ export class AggregatorSetConfigParams {
       priorityFeeBump: fields.priorityFeeBump,
       priorityFeeBumpPeriod: fields.priorityFeeBumpPeriod,
       maxPriorityFeeMultiplier: fields.maxPriorityFeeMultiplier,
-      disableCrank: fields.disableCrank,
     };
   }
 
@@ -149,7 +143,6 @@ export class AggregatorSetConfigParams {
       priorityFeeBump: this.priorityFeeBump,
       priorityFeeBumpPeriod: this.priorityFeeBumpPeriod,
       maxPriorityFeeMultiplier: this.maxPriorityFeeMultiplier,
-      disableCrank: this.disableCrank,
     };
   }
 
@@ -172,7 +165,6 @@ export class AggregatorSetConfigParams {
       priorityFeeBump: obj.priorityFeeBump,
       priorityFeeBumpPeriod: obj.priorityFeeBumpPeriod,
       maxPriorityFeeMultiplier: obj.maxPriorityFeeMultiplier,
-      disableCrank: obj.disableCrank,
     });
   }
 
