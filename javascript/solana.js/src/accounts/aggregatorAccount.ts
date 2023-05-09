@@ -39,7 +39,7 @@ import {
   toUtf8,
 } from '@switchboard-xyz/common';
 import assert from 'assert';
-import crypto from 'crypto';
+import crypto, { createHash } from 'crypto';
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -1234,7 +1234,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           priorityFeeBump: params.priorityFeeBump ?? null,
           priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? null,
           maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? null,
-          disableCrank: params.disableCrank ?? null,
+          // disableCrank: params.disableCrank ?? null,
         },
       },
       {
@@ -1647,24 +1647,34 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
+  public quoteKeypairFromSeed(seed: PublicKey): Keypair {
+    const hash = createHash('sha256');
+    hash.update(Buffer.from('QuoteAccountData'));
+    hash.update(seed.toBuffer());
+    const kp = Keypair.fromSeed(hash.digest());
+    return kp;
+  }
+
   public teeSaveResultInstructionSync(
     payer: PublicKey,
-    params: AggregatorSaveResultSyncParams,
+    params: AggregatorSaveResultSyncParams & { quotePubkey?: PublicKey },
     options?: TransactionObjectOptions
   ): TransactionObject {
     const [oraclePermissionAccount, oraclePermissionBump] =
       params.oraclePermission;
 
-    if (params.oracleIdx < 0 || params.oracleIdx > params.oracles.length - 1) {
-      throw new Error('Failed to find oracle in current round');
-    }
+    const quote =
+      params.quotePubkey ??
+      this.quoteKeypairFromSeed(
+        params.oracles[params.oracleIdx].state.oracleAuthority
+      ).publicKey;
 
     const saveResultIxn = types.aggregatorTeeSaveResult(
       this.program,
       {
         params: {
-          oracleIdx: params.oracleIdx,
-          error: params.error ?? false,
+          // oracleIdx: params.oracleIdx,
+          // error: params.error ?? false,
           value: types.SwitchboardDecimal.fromBig(params.value).borsh,
           jobsChecksum: [...this.produceJobsHash(params.jobs).digest()],
           minResponse: types.SwitchboardDecimal.fromBig(params.minResponse)
@@ -1691,6 +1701,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         programState: this.program.programState.publicKey,
         historyBuffer: params.historyBuffer ?? this.publicKey,
         mint: this.program.mint.address,
+        slider: this.slidingWindowKey,
+        quote: quote,
+        rewardWallet: this.program.mint.getAssociatedAddress(payer),
+        payer: payer,
+        systemProgram: SystemProgram.programId,
       }
     );
 
