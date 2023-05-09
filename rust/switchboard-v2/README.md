@@ -53,8 +53,7 @@ switchboard-v2 = "0.1.23"
 
 ### Read Latest Result
 
-This is the pre-description.
-It can have multiple lines.
+Read an aggregator result on-chain
 
 ```rust
 use anchor_lang::solana_program::clock;
@@ -82,5 +81,6 @@ feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
 feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
-This is the post-description.
-It can also have multiple lines.
+**Example(s)**:
+[anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs),
+[native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)

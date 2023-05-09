@@ -2,10 +2,11 @@ snippets:
   - name: "Read Latest Result"
     description:
       pre: |
-        This is the pre-description.
-        It can have multiple lines.
+        Read an aggregator result on-chain
 
       post: |
-        This is the post-description.
-        It can also have multiple lines.
+        **Example(s)**:
+        [anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs),
+        [native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
+
     filename: "read-result.rs"
