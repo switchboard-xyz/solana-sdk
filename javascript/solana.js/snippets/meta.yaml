@@ -1,0 +1,7 @@
+snippets:
+  - name: "Load Switchboard Program"
+    description: ""
+    filename: "load-program.ts"
+  - name: "Create a Queue"
+    description: ""
+    filename: "create-queue.ts"

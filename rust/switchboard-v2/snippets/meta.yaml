@@ -1,0 +1,11 @@
+snippets:
+  - name: "Read Latest Result"
+    description:
+      pre: |
+        This is the pre-description.
+        It can have multiple lines.
+
+      post: |
+        This is the post-description.
+        It can also have multiple lines.
+    filename: "read-result.rs"
