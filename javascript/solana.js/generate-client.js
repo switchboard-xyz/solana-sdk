@@ -54,6 +54,12 @@ const getAllFiles = (dirPath, arrayOfFiles, extensions) => {
 async function main() {
   shell.cd(projectRoot);
 
+  // generate IDL types from local directory
+  let devMode = false;
+  if (process.argv.slice(2).includes('--dev')) {
+    devMode = true;
+  }
+
   if (!shell.which('anchor')) {
     shell.echo(
       "Sorry, this script requires 'anchor' to be installed in your $PATH"
@@ -68,9 +74,16 @@ async function main() {
     'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet'
   );
 
-  execSync(
-    'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated'
-  );
+  if (devMode) {
+    execSync(
+      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated'
+    );
+  } else {
+    execSync(
+      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ./src/idl/devnet.json ./src/generated'
+    );
+  }
+
   fs.writeFileSync(
     './src/generated/index.ts',
     [

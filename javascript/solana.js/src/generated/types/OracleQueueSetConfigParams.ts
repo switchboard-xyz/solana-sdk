@@ -17,6 +17,7 @@ export interface OracleQueueSetConfigParamsFields {
   oracleTimeout: number | null;
   consecutiveFeedFailureLimit: BN | null;
   consecutiveOracleFailureLimit: BN | null;
+  enableTeeOnly: boolean | null;
 }
 
 export interface OracleQueueSetConfigParamsJSON {
@@ -32,6 +33,7 @@ export interface OracleQueueSetConfigParamsJSON {
   oracleTimeout: number | null;
   consecutiveFeedFailureLimit: string | null;
   consecutiveOracleFailureLimit: string | null;
+  enableTeeOnly: boolean | null;
 }
 
 export class OracleQueueSetConfigParams {
@@ -47,6 +49,7 @@ export class OracleQueueSetConfigParams {
   readonly oracleTimeout: number | null;
   readonly consecutiveFeedFailureLimit: BN | null;
   readonly consecutiveOracleFailureLimit: BN | null;
+  readonly enableTeeOnly: boolean | null;
 
   constructor(fields: OracleQueueSetConfigParamsFields) {
     this.name = fields.name;
@@ -64,6 +67,7 @@ export class OracleQueueSetConfigParams {
     this.oracleTimeout = fields.oracleTimeout;
     this.consecutiveFeedFailureLimit = fields.consecutiveFeedFailureLimit;
     this.consecutiveOracleFailureLimit = fields.consecutiveOracleFailureLimit;
+    this.enableTeeOnly = fields.enableTeeOnly;
   }
 
   static layout(property?: string) {
@@ -84,6 +88,7 @@ export class OracleQueueSetConfigParams {
         borsh.option(borsh.u32(), 'oracleTimeout'),
         borsh.option(borsh.u64(), 'consecutiveFeedFailureLimit'),
         borsh.option(borsh.u64(), 'consecutiveOracleFailureLimit'),
+        borsh.option(borsh.bool(), 'enableTeeOnly'),
       ],
       property
     );
@@ -107,6 +112,7 @@ export class OracleQueueSetConfigParams {
       oracleTimeout: obj.oracleTimeout,
       consecutiveFeedFailureLimit: obj.consecutiveFeedFailureLimit,
       consecutiveOracleFailureLimit: obj.consecutiveOracleFailureLimit,
+      enableTeeOnly: obj.enableTeeOnly,
     });
   }
 
@@ -127,6 +133,7 @@ export class OracleQueueSetConfigParams {
       oracleTimeout: fields.oracleTimeout,
       consecutiveFeedFailureLimit: fields.consecutiveFeedFailureLimit,
       consecutiveOracleFailureLimit: fields.consecutiveOracleFailureLimit,
+      enableTeeOnly: fields.enableTeeOnly,
     };
   }
 
@@ -153,6 +160,7 @@ export class OracleQueueSetConfigParams {
         (this.consecutiveOracleFailureLimit &&
           this.consecutiveOracleFailureLimit.toString()) ||
         null,
+      enableTeeOnly: this.enableTeeOnly,
     };
   }
 
@@ -181,6 +189,7 @@ export class OracleQueueSetConfigParams {
         (obj.consecutiveOracleFailureLimit &&
           new BN(obj.consecutiveOracleFailureLimit)) ||
         null,
+      enableTeeOnly: obj.enableTeeOnly,
     });
   }
 

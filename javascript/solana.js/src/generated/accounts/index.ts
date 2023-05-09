@@ -1,3 +1,8 @@
+export { QuoteAccountData } from './QuoteAccountData';
+export type {
+  QuoteAccountDataFields,
+  QuoteAccountDataJSON,
+} from './QuoteAccountData';
 export { SbState } from './SbState';
 export type { SbStateFields, SbStateJSON } from './SbState';
 export { TaskSpecRecord } from './TaskSpecRecord';

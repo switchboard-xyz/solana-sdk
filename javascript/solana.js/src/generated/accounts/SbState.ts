@@ -15,6 +15,8 @@ export interface SbStateFields {
   daoMint: PublicKey;
   /** The PDA bump to derive the pubkey. */
   bump: number;
+  /** Permitted enclave measurements */
+  mrEnclaves: Array<Array<number>>;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -30,6 +32,8 @@ export interface SbStateJSON {
   daoMint: string;
   /** The PDA bump to derive the pubkey. */
   bump: number;
+  /** Permitted enclave measurements */
+  mrEnclaves: Array<Array<number>>;
   /** Reserved for future info. */
   ebuf: Array<number>;
 }
@@ -45,6 +49,8 @@ export class SbState {
   readonly daoMint: PublicKey;
   /** The PDA bump to derive the pubkey. */
   readonly bump: number;
+  /** Permitted enclave measurements */
+  readonly mrEnclaves: Array<Array<number>>;
   /** Reserved for future info. */
   readonly ebuf: Array<number>;
 
@@ -58,7 +64,8 @@ export class SbState {
     borsh.publicKey('tokenVault'),
     borsh.publicKey('daoMint'),
     borsh.u8('bump'),
-    borsh.array(borsh.u8(), 991, 'ebuf'),
+    borsh.array(borsh.array(borsh.u8(), 32), 6, 'mrEnclaves'),
+    borsh.array(borsh.u8(), 799, 'ebuf'),
   ]);
 
   constructor(fields: SbStateFields) {
@@ -67,6 +74,7 @@ export class SbState {
     this.tokenVault = fields.tokenVault;
     this.daoMint = fields.daoMint;
     this.bump = fields.bump;
+    this.mrEnclaves = fields.mrEnclaves;
     this.ebuf = fields.ebuf;
   }
 
@@ -117,6 +125,7 @@ export class SbState {
       tokenVault: dec.tokenVault,
       daoMint: dec.daoMint,
       bump: dec.bump,
+      mrEnclaves: dec.mrEnclaves,
       ebuf: dec.ebuf,
     });
   }
@@ -128,6 +137,7 @@ export class SbState {
       tokenVault: this.tokenVault.toString(),
       daoMint: this.daoMint.toString(),
       bump: this.bump,
+      mrEnclaves: this.mrEnclaves,
       ebuf: this.ebuf,
     };
   }
@@ -139,6 +149,7 @@ export class SbState {
       tokenVault: new PublicKey(obj.tokenVault),
       daoMint: new PublicKey(obj.daoMint),
       bump: obj.bump,
+      mrEnclaves: obj.mrEnclaves,
       ebuf: obj.ebuf,
     });
   }

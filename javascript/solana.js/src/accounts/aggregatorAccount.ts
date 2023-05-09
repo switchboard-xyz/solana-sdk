@@ -1647,6 +1647,71 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     return txnSignature;
   }
 
+  public teeSaveResultInstructionSync(
+    payer: PublicKey,
+    params: AggregatorSaveResultSyncParams,
+    options?: TransactionObjectOptions
+  ): TransactionObject {
+    const [oraclePermissionAccount, oraclePermissionBump] =
+      params.oraclePermission;
+
+    if (params.oracleIdx < 0 || params.oracleIdx > params.oracles.length - 1) {
+      throw new Error('Failed to find oracle in current round');
+    }
+
+    const saveResultIxn = types.aggregatorTeeS(
+      this.program,
+      {
+        params: {
+          oracleIdx: params.oracleIdx,
+          error: params.error ?? false,
+          value: types.SwitchboardDecimal.fromBig(params.value).borsh,
+          jobsChecksum: [...this.produceJobsHash(params.jobs).digest()],
+          minResponse: types.SwitchboardDecimal.fromBig(params.minResponse)
+            .borsh,
+          maxResponse: types.SwitchboardDecimal.fromBig(params.maxResponse)
+            .borsh,
+          feedPermissionBump: params.permissionBump,
+          oraclePermissionBump: oraclePermissionBump,
+          leaseBump: params.leaseBump,
+          stateBump: this.program.programState.bump,
+        },
+      },
+      {
+        aggregator: this.publicKey,
+        oracle: params.oracles[params.oracleIdx].account.publicKey,
+        oracleAuthority: params.oracles[params.oracleIdx].state.oracleAuthority,
+        oracleQueue: params.queueAccount.publicKey,
+        queueAuthority: params.queueAuthority,
+        feedPermission: params.permissionAccount.publicKey,
+        oraclePermission: oraclePermissionAccount.publicKey,
+        lease: params.leaseAccount.publicKey,
+        escrow: params.leaseEscrow,
+        tokenProgram: spl.TOKEN_PROGRAM_ID,
+        programState: this.program.programState.publicKey,
+        historyBuffer: params.historyBuffer ?? this.publicKey,
+        mint: this.program.mint.address,
+      }
+    );
+
+    const remainingAccounts: Array<PublicKey> = [];
+    params.oracles.forEach(oracle =>
+      remainingAccounts.push(oracle.account.publicKey)
+    );
+    params.oracles.forEach(oracle =>
+      remainingAccounts.push(oracle.state.tokenAccount)
+    );
+    remainingAccounts.push(this.slidingWindowKey);
+
+    saveResultIxn.keys.push(
+      ...remainingAccounts.map((pubkey): AccountMeta => {
+        return { isSigner: false, isWritable: true, pubkey };
+      })
+    );
+
+    return new TransactionObject(payer, [saveResultIxn], [], options);
+  }
+
   public saveResultInstructionSync(
     payer: PublicKey,
     params: AggregatorSaveResultSyncParams,
