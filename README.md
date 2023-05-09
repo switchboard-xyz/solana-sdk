@@ -79,9 +79,10 @@ The following addresses can be used with the Switchboard deployment on Solana
 
 ## Libraries
 
-<!-- libraries -->
-
-<!-- librariesstop -->
+| **Lang**   | **Name**                                           | **Description**                                                    |
+| ---------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| Rust       | [switchboard-v2](rust/switchboard-v2)              | A Rust library to interact with Switchboard V2 accounts on Solana. |
+| Javascript | [@switchboard-xyz/solana.js](javascript/solana.js) | A Typescript client to interact with Switchboard on Solana.        |
 
 | **Lang** | **Name**                                                                                                                                                                                                | **Description**                                                          |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
