@@ -42,54 +42,7 @@ npm i --save @switchboard-xyz/solana.js
 
 ## Usage
 
-**Table Of Contents**
+<!-- usage -->
 
-- [Load Switchboard Program](#load-switchboard-program)
-- [Create a Queue](#create-a-queue)
-
-### Load Switchboard Program
-
-
-
-```ts
-import { Connection } from '@solana/web3.js';
-import {
-  SwitchboardProgram,
-  TransactionObject,
-} from '@switchboard-xyz/solana.js';
-
-const program = await SwitchboardProgram.load(
-  'mainnet-beta',
-  new Connection('https://api.mainnet-beta.solana.com'),
-  payerKeypair /** Optional, READ-ONLY if not provided */
-);
-```
-
-
-
-
-### Create a Queue
-
-
-
-```ts
-import { QueueAccount } from '@switchboard-xyz/solana.js';
-
-const [queueAccount, txnSignature] = await QueueAccount.create(program, {
-  name: 'My Queue',
-  metadata: 'Top Secret',
-  queueSize: 100,
-  reward: 0.00001337,
-  minStake: 10,
-  oracleTimeout: 60,
-  slashingEnabled: false,
-  unpermissionedFeeds: true,
-  unpermissionedVrf: true,
-  enableBufferRelayers: false,
-});
-const queue = await queueAccount.loadData();
-```
-
-
-
+<!-- usagestop -->
 
