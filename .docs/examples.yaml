@@ -1,0 +1,19 @@
+libraries:
+  - name: "native-feed-parser"
+    description: Read a Switchboard feed using Solana's native program library"
+    language: "rust"
+    path: "programs/native-feed-parser"
+  - name: "anchor-feed-parser"
+    description: "Read a Switchboard feed using Anchor"
+    language: "anchor"
+    path: "programs/anchor-feed-parser"
+  - name: "anchor-vrf-parser"
+    description:
+      "Read a Switchboard VRF account and make a Cross Program Invocation (CPI)
+      to request a new randomness value"
+    language: "anchor"
+    path: "programs/anchor-vrf-parser"
+  - name: "anchor-buffer-parser"
+    description: "Read a Switchboard buffer relayer using Anchor"
+    language: "anchor"
+    path: "programs/anchor-buffer-parser"
