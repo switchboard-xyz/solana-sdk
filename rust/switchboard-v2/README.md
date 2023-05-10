@@ -65,7 +65,7 @@ feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
 feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
-**Example(s)**:
+**Example Program(s)**:
 
 - [anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs)
 - [native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
@@ -99,9 +99,10 @@ let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
 let result = value[0] % 256000 as u128;
 ```
 
-**Example**:
+**Example Program(s)**:
 
 - [anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/update_result.rs)
+- [vrf-flip](https://github.com/switchboard-xyz/vrf-flip)
 
 ### Request Randomness CPI
 
@@ -143,9 +144,10 @@ vrf_request_randomness.invoke_signed(
 )?;
 ```
 
-**Example**:
+**Example Program(s)**:
 
 - [anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/request_result.rs)
+- [vrf-flip](https://github.com/switchboard-xyz/vrf-flip)
 
 ### Read Buffer Relayer
 
@@ -175,6 +177,6 @@ let result_string = String::from_utf8(buffer.result)
 msg!("Buffer string {:?}!", result_string);
 ```
 
-**Example**:
+**Example Program(s)**:
 
 - [anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-buffer-parser/src/lib.rs)
