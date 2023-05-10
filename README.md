@@ -22,18 +22,6 @@
     </a>
   </p>
 
-  <p>
-    <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
-    </a>
-    <a href="https://twitter.com/switchboardxyz">
-      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
-    </a>
-  </p>
-
-  <h4>
-    <strong>Documentation: </strong><a href="https://docs.switchboard.xyz">docs.switchboard.xyz</a>
-  </h4>
 </div>
 
 ## Getting Started
@@ -57,7 +45,7 @@ pnpm build
 
 The following addresses can be used with the Switchboard deployment on Solana
 
-#### Mainnet
+### Mainnet
 
 | Account              | Address                                        |
 | -------------------- | ---------------------------------------------- |
@@ -67,7 +55,7 @@ The following addresses can be used with the Switchboard deployment on Solana
 | Permissioned Queue   | `3HBb2DQqDfuMdzWxNk1Eo9RTMkFYmuEAd32RiLKn9pAn` |
 | Permissionless Queue | `5JYwqvKkqp35w8Nq3ba4z1WYUeJQ1rB36V8XvaGp6zn1` |
 
-#### Devnet
+### Devnet
 
 | Account              | Address                                        |
 | -------------------- | ---------------------------------------------- |
@@ -77,7 +65,7 @@ The following addresses can be used with the Switchboard deployment on Solana
 | Permissioned Queue   | `PeRMnAqNqHQYHUuCBEjhm1XPeVTh4BxjY4t4TPan1pG`  |
 | Permissionless Queue | `uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX`  |
 
-## Libraries
+## Clients
 
 | **Lang**   | **Name**                                           | **Description**                                                    |
 | ---------- | -------------------------------------------------- | ------------------------------------------------------------------ |
@@ -85,6 +73,10 @@ The following addresses can be used with the Switchboard deployment on Solana
 | Javascript | [@switchboard-xyz/solana.js](javascript/solana.js) | A Typescript client to interact with Switchboard on Solana.        |
 
 ## Example Programs
+
+<!-- examples -->
+
+<!-- examplesstop -->
 
 - [native-feed-parser](/programs/native-feed-parser/): Read a Switchboard feed
   using Solana's native program library
