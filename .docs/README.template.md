@@ -41,7 +41,7 @@ pnpm install
 pnpm build
 ```
 
-## Program IDs
+## Addresses
 
 <!-- addresses -->
 
@@ -58,18 +58,6 @@ pnpm build
 <!-- examples -->
 
 <!-- examplesstop -->
-
-- [native-feed-parser](/programs/native-feed-parser/): Read a Switchboard feed
-  using Solana's native program library
-- [anchor-feed-parser](/programs/anchor-feed-parser/): Read a Switchboard feed
-  using Anchor
-- [anchor-history-parser](/programs/anchor-history-parser/): Read a Switchboard
-  history buffer using Anchor
-- [anchor-vrf-parser](/programs/anchor-vrf-parser/): Read a Switchboard VRF
-  account and make a Cross Program Invocation (CPI) to request a new randomness
-  value
-- [anchor-buffer-parser](/programs/anchor-buffer-parser/): Read a Switchboard
-  buffer relayer using Anchor
 
 ## Troubleshooting
 

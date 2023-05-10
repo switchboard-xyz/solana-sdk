@@ -1,4 +1,4 @@
-libraries:
+examples:
   - name: "native-feed-parser"
     description: Read a Switchboard feed using Solana's native program library"
     language: "rust"
@@ -7,6 +7,10 @@ libraries:
     description: "Read a Switchboard feed using Anchor"
     language: "anchor"
     path: "programs/anchor-feed-parser"
+  - name: "anchor-history-parser"
+    description: "Read a data feeds history buffer and get the closest historical sample to a given timestamp"
+    language: "anchor"
+    path: "programs/anchor-history-parser"
   - name: "anchor-vrf-parser"
     description:
       "Read a Switchboard VRF account and make a Cross Program Invocation (CPI)
