@@ -1,26 +1,17 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>Switchboard V2</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>A collection of libraries and examples for interacting with Switchboard V2 on Solana.</p>
+# Switchboard V2
 
-  <p>
-    <a href="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml">
-      <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
-    </a>
-      <a href="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml">
-       <img alt="Anchor Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg" />
-    </a>
-	  <a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
-    </a>
-	  <a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">
-      <img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm" />
-    </a>
-  </p>
+A collection of libraries and examples for interacting with Switchboard V2 on
+Solana.
+
+[![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
+[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
+
+[![Crates.io](https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust)](https://crates.io/crates/switchboard-v2)
+[![NPM Badge](https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm)](https://www.npmjs.com/package/@switchboard-xyz/solana.js)
 
 </div>
 

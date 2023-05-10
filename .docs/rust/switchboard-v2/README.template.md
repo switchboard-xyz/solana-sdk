@@ -1,17 +1,15 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>switchboard-v2</h1>
+<!-- commonheader -->
 
-  <p>A Rust library to interact with Switchboard accounts on Solana.</p>
+<!-- commonheaderstop -->
 
-  <p>
-	  <a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
-    </a>
-  </p>
+# switchboard-v2
+
+> A Rust library to interact with Switchboard accounts on Solana.
+
+[![Crates.io](https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust)](https://crates.io/crates/switchboard-v2)
+
 </div>
 
 ## Install

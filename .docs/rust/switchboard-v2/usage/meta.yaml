@@ -1,12 +1,33 @@
 snippets:
   - name: "Read Latest Result"
+    filename: "read-result.rs"
     description:
       pre: |
         Read an aggregator result on-chain
-
       post: |
         **Example(s)**:
-        [anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs),
-        [native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
-
-    filename: "read-result.rs"
+          - [anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs)
+          - [native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
+  - name: "Read History Buffer"
+    filename: "read-history.rs"
+    description:
+      pre: |
+        **_Note: The Aggregator must have a history buffer initialized before using_**
+  - name: "Read VRF"
+    filename: "read-vrf.rs"
+    description:
+      post: |
+        **Example**:
+          - [anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/update_result.rs)
+  - name: "Request Randomness CPI"
+    filename: "request-randomness.rs"
+    description:
+      post: |
+        **Example**:
+          - [anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/request_result.rs)
+  - name: "Read Buffer Relayer"
+    filename: "read-buffer.rs"
+    description:
+      post: |
+        **Example**:
+          - [anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-buffer-parser/src/lib.rs)
