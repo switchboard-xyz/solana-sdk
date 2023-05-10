@@ -52,10 +52,10 @@ export class JobAccount extends Account<types.JobAccountData> {
    *
    * @params byteLength - the length of the serialized job
    */
-  public static default(byteLength: number): types.LeaseAccountData {
+  public static default(byteLength: number): types.JobAccountData {
     const buffer = Buffer.alloc(JobAccount.getAccountSize(byteLength), 0);
-    types.LeaseAccountData.discriminator.copy(buffer, 0);
-    return types.LeaseAccountData.decode(buffer);
+    types.JobAccountData.discriminator.copy(buffer, 0);
+    return types.JobAccountData.decode(buffer);
   }
 
   /**
@@ -85,19 +85,19 @@ export class JobAccount extends Account<types.JobAccountData> {
       throw new Error(`No job data found to create mock`);
     }
 
-    const fields: types.LeaseAccountDataFields = {
+    const fields: types.JobAccountDataFields = {
       ...JobAccount.default(jobData.byteLength),
       ...data,
       // any cleanup actions here
     };
-    const state = new types.LeaseAccountData(fields);
+    const state = new types.JobAccountData(fields);
 
     const buffer = Buffer.alloc(
       JobAccount.getAccountSize(jobData.byteLength),
       0
     );
-    types.LeaseAccountData.discriminator.copy(buffer, 0);
-    types.LeaseAccountData.layout.encode(state, buffer, 8);
+    types.JobAccountData.discriminator.copy(buffer, 0);
+    types.JobAccountData.layout.encode(state, buffer, 8);
     jobData.copy(buffer, 181);
 
     return {
