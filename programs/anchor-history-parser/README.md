@@ -1,11 +1,13 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>anchor-history-parser</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>An example program written in Anchor demonstrating how to deserialize and read a Switchboard data feed's history buffer on Solana.</p>
+# anchor-history-parser
+
+> An example program written in Anchor demonstrating how to deserialize and read
+> a Switchboard data feed's history buffer on Solana.
+
+[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
 
 </div>
 

@@ -2,10 +2,10 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# Switchboard V2
+# Switchboard x Solana
 
-A collection of libraries and examples for interacting with Switchboard V2 on
-Solana.
+> A collection of libraries and examples for interacting with Switchboard V2 on
+> Solana.
 
 [![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
 [![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
@@ -67,7 +67,7 @@ The following addresses can be used with the Switchboard deployment on Solana
 
 | **Lang** | **Name**                                                | **Description**                                                                                            |
 | -------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Rust     | [native-feed-parser](programs/native-feed-parser)       | Read a Switchboard feed using Solana's native program library"                                             |
+| Rust     | [native-feed-parser](programs/native-feed-parser)       | Read a Switchboard feed using Solana's native program library                                              |
 | Anchor   | [anchor-feed-parser](programs/anchor-feed-parser)       | Read a Switchboard feed using Anchor                                                                       |
 | Anchor   | [anchor-history-parser](programs/anchor-history-parser) | Read a data feeds history buffer and get the closest historical sample to a given timestamp                |
 | Anchor   | [anchor-vrf-parser](programs/anchor-vrf-parser)         | Read a Switchboard VRF account and make a Cross Program Invocation (CPI) to request a new randomness value |

@@ -1,6 +1,6 @@
 examples:
   - name: "native-feed-parser"
-    description: Read a Switchboard feed using Solana's native program library"
+    description: "Read a Switchboard feed using Solana's native program library"
     language: "rust"
     path: "programs/native-feed-parser"
   - name: "anchor-feed-parser"

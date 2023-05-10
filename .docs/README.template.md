@@ -4,10 +4,10 @@
 
 <!-- commonheaderstop -->
 
-# Switchboard V2
+# Switchboard x Solana
 
-A collection of libraries and examples for interacting with Switchboard V2 on
-Solana.
+> A collection of libraries and examples for interacting with Switchboard V2 on
+> Solana.
 
 [![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
 [![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)

@@ -1,11 +1,11 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>native-feed-parser</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>An example program written in native Rust demonstrating how to deserialize and read a Switchboard data feed on Solana.</p>
+# native-feed-parser
+
+> An example program written in native Rust demonstrating how to deserialize and
+> read a Switchboard data feed on Solana.
 
 </div>
 

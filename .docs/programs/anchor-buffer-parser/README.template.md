@@ -1,11 +1,15 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>anchor-buffer-parser</h1>
+<!-- commonheader -->
 
-  <p>An example program written in Anchor demonstrating how to deserialize and read a Switchboard buffer relayer on Solana.</p>
+<!-- commonheaderstop -->
+
+# anchor-buffer-parser
+
+> An example program written in Anchor demonstrating how to deserialize and read
+> a Switchboard buffer relayer on Solana.
+
+[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
 
 </div>
 
