@@ -1321,6 +1321,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                   ? new anchor.BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
+              enableTeeOnly: false, // TODO: Update
             },
           },
           {
