@@ -6,13 +6,20 @@ const { execSync } = require('child_process');
 const projectRoot = __dirname;
 // const shx = path.join(projectRoot, 'node_modules', '.bin', 'shx');
 
+const v2DevnetIdlPath = './src/idl/devnet.json';
+const v2MainnetIdlPath = './src/idl/mainnet.json';
+const v2GeneratedPath = './src/generated';
+
+const sgxDevnetIdlPath = './src/idl/sgx-devnet.json';
+const sgxGeneratedPath = './src/sgx-generated';
+
 // Super hacky. Some files need to be reset to the previous git state and will be manually managed
 const ignoreFiles = [
-  './src/generated/types/SwitchboardPermission.ts', // we manually added NONE enumeration
-  './src/generated/types/SwitchboardDecimal.ts', // added toBig methods
-  './src/generated/types/Lanes.ts', // anchor-client-gen struggles with dual exports
-  './src/generated/types/index.ts', // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
-  './src/generated/errors/index.ts', // need to revert the program ID check
+  `${v2GeneratedPath}/types/SwitchboardPermission.ts`, // we manually added NONE enumeration
+  `${v2GeneratedPath}/types/SwitchboardDecimal.ts`, // added toBig methods
+  `${v2GeneratedPath}/types/Lanes.ts`, // anchor-client-gen struggles with dual exports
+  `${v2GeneratedPath}/types/index.ts`, // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
+  `${v2GeneratedPath}/errors/index.ts`, // need to revert the program ID check
 ];
 
 /**
@@ -68,28 +75,50 @@ async function main() {
   }
 
   execSync(
-    'anchor idl fetch -o ./src/idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet',
+    `anchor idl fetch -o ${v2MainnetIdlPath} SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet`,
     { encoding: 'utf-8' }
   );
   execSync(
-    'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet',
+    `anchor idl fetch -o ${v2DevnetIdlPath} SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet`,
+    { encoding: 'utf-8' }
+  );
+
+  execSync(
+    `anchor idl fetch -o ${sgxDevnetIdlPath} 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 --provider.cluster devnet`,
     { encoding: 'utf-8' }
   );
 
   if (devMode) {
     execSync(
-      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ./src/generated',
+      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ../../../switchboard-core/switchboard_v2/target/idl/switchboard_v2.json ${v2GeneratedPath}`,
+      { encoding: 'utf-8' }
+    );
+    execSync(
+      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_quote_verifier.json ${sgxGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   } else {
     execSync(
-      'rm -rf ./src/generated && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ./src/idl/devnet.json ./src/generated',
+      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ${v2DevnetIdlPath} ${v2GeneratedPath}`,
+      { encoding: 'utf-8' }
+    );
+    execSync(
+      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 ${sgxDevnetIdlPath} ${v2GeneratedPath}`,
       { encoding: 'utf-8' }
     );
   }
 
   fs.writeFileSync(
-    './src/generated/index.ts',
+    `${v2GeneratedPath}/index.ts`,
+    [
+      "export * from './accounts';",
+      "export * from './errors';",
+      "export * from './instructions';",
+      "export * from './types';",
+    ].join('\n')
+  );
+  fs.writeFileSync(
+    `${sgxGeneratedPath}/index.ts`,
     [
       "export * from './accounts';",
       "export * from './errors';",
@@ -100,10 +129,14 @@ async function main() {
 
   // loop through directory and run regex replaces
   for await (const file of [
-    ...getAllFiles('./src/generated/accounts'),
-    ...getAllFiles('./src/generated/errors'),
-    ...getAllFiles('./src/generated/instructions'),
-    ...getAllFiles('./src/generated/types'),
+    ...getAllFiles(`${v2GeneratedPath}/accounts`),
+    ...getAllFiles(`${v2GeneratedPath}/errors`),
+    ...getAllFiles(`${v2GeneratedPath}/instructions`),
+    ...getAllFiles(`${v2GeneratedPath}/types`),
+    ...getAllFiles(`${sgxGeneratedPath}/accounts`),
+    ...getAllFiles(`${sgxGeneratedPath}/errors`),
+    ...getAllFiles(`${sgxGeneratedPath}/instructions`),
+    ...getAllFiles(`${sgxGeneratedPath}/types`),
   ]) {
     if (file.includes('index.ts')) {
       continue;
@@ -152,7 +185,8 @@ async function main() {
     }
   }
 
-  execSync('npx prettier ./src/generated --write', { encoding: 'utf-8' });
+  execSync(`npx prettier ${v2GeneratedPath} --write`, { encoding: 'utf-8' });
+  execSync(`npx prettier ${sgxGeneratedPath} --write`, { encoding: 'utf-8' });
 
   // reset files
   for (const file of ignoreFiles) {
