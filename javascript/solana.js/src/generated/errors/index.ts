@@ -1,4 +1,4 @@
-import { SBV2_DEVNET_PID, SBV2_MAINNET_PID } from '../../SwitchboardProgram';
+import { SB_V2_PID } from '../../SwitchboardProgram';
 import { PROGRAM_ID } from '../programId';
 
 import * as anchor from './anchor';
@@ -47,10 +47,7 @@ export function fromTxError(
   }
 
   const [programIdRaw, codeRaw] = firstMatch.slice(1);
-  if (
-    programIdRaw !== SBV2_DEVNET_PID.toString() &&
-    programIdRaw !== SBV2_MAINNET_PID.toString()
-  ) {
+  if (programIdRaw !== SB_V2_PID.toString()) {
     return null;
   }
 

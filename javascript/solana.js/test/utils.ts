@@ -3,8 +3,7 @@ import {
   AggregatorAccount,
   CreateQueueFeedParams,
   QueueAccount,
-  SBV2_DEVNET_PID,
-  SBV2_MAINNET_PID,
+  SB_V2_PID,
   TransactionObject,
 } from '../src';
 
@@ -81,12 +80,7 @@ export function getProgramId(cluster: SolanaCluster): PublicKey {
   if (process.env.SWITCHBOARD_PROGRAM_ID) {
     return new PublicKey(process.env.SWITCHBOARD_PROGRAM_ID);
   }
-
-  if (cluster === 'mainnet-beta') {
-    return SBV2_MAINNET_PID;
-  }
-
-  return SBV2_DEVNET_PID;
+  return SB_V2_PID;
 }
 
 export function getRpcUrl(cluster: SolanaCluster): string {

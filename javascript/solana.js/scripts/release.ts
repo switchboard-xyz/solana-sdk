@@ -14,7 +14,7 @@ import path from 'path';
 const aggregatorMapPath = path.join(
   os.homedir(),
   'devnet-migration',
-  sbv2.SBV2_MAINNET_PID.toBase58(),
+  sbv2.SB_V2_PID.toBase58(),
   'aggregator_map.csv'
 );
 
@@ -23,7 +23,7 @@ async function main() {
     '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
   );
   const [newDirPath, newFeedDirPath, newJobDirPath] = setupOutputDir(
-    sbv2.SBV2_MAINNET_PID.toBase58()
+    sbv2.SB_V2_PID.toBase58()
   );
 
   const devnetConnection = new Connection(
@@ -40,7 +40,7 @@ async function main() {
     'devnet',
     devnetConnection,
     payer,
-    sbv2.SBV2_MAINNET_PID
+    sbv2.SB_V2_PID
   );
 
   const aggregatorMap = loadAggregatorMap();
@@ -71,7 +71,7 @@ async function main() {
   const aggregators = await fetchAggregators(
     devnetConnection,
     newAggregatorKeys,
-    sbv2.SBV2_MAINNET_PID,
+    sbv2.SB_V2_PID,
     payer.publicKey
   );
 

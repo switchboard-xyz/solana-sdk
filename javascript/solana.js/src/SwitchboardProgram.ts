@@ -65,17 +65,17 @@ export const DEFAULT_SEND_TRANSACTION_OPTIONS: SendTransactionOptions = {
 };
 
 /**
- * Switchboard Devnet Program ID
+ * Switchboard's V2 Program ID
  */
-export const SBV2_DEVNET_PID = new PublicKey(
+export const SB_V2_PID = new PublicKey(
   'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
 );
 
 /**
- * Switchboard Mainnet Program ID
+ * Switchboard's SGX Program ID
  */
-export const SBV2_MAINNET_PID = new PublicKey(
-  'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+export const SB_SGX_PID = new PublicKey(
+  'Hxfwq7cxss4Ef9iDvaLb617dhageGyNWbDLLrg2sdQgT'
 );
 
 /**
@@ -92,10 +92,26 @@ export const getSwitchboardProgramId = (
     case 'localnet':
     case 'devnet':
     case 'mainnet-beta':
-      return SBV2_MAINNET_PID;
+      return SB_V2_PID;
     case 'testnet':
     default:
       throw new Error(`Switchboard PID not found for cluster (${cluster})`);
+  }
+};
+/**
+ * Returns the Switchboard Program ID for the specified Cluster.
+ */
+export const getSwitchboardSgxProgramId = (
+  cluster: Cluster | 'localnet'
+): PublicKey => {
+  switch (cluster) {
+    case 'localnet':
+    case 'devnet':
+    case 'mainnet-beta':
+      return SB_SGX_PID;
+    case 'testnet':
+    default:
+      throw new Error(`Switchboard SGX PID not found for cluster (${cluster})`);
   }
 };
 
@@ -129,6 +145,9 @@ export class SwitchboardProgram {
   // The anchor program instance.
   private readonly _program: anchor.Program;
 
+  // The anchor program instance for Switchboard's SGX program.
+  private readonly _sgxProgram: anchor.Program;
+
   /** The Solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | 'localnet';
 
@@ -150,10 +169,12 @@ export class SwitchboardProgram {
    */
   constructor(
     program: anchor.Program,
+    sgxProgram: anchor.Program,
     cluster: Cluster | 'localnet',
     mint: NativeMint
   ) {
     this._program = program;
+    this._sgxProgram = sgxProgram;
     this.cluster = cluster;
 
     // Derive the state account from the seed.
@@ -233,18 +254,27 @@ export class SwitchboardProgram {
     cluster: Cluster | 'localnet',
     connection: Connection,
     payerKeypair: Keypair = READ_ONLY_KEYPAIR,
-    programId: PublicKey = getSwitchboardProgramId(cluster)
+    programId: PublicKey = getSwitchboardProgramId(cluster),
+    sgxProgramId: PublicKey = getSwitchboardSgxProgramId(cluster)
   ): Promise<SwitchboardProgram> => {
-    const program = await SwitchboardProgram.loadAnchorProgram(
-      cluster,
-      connection,
-      payerKeypair,
-      programId
-    );
+    const [program, sgxProgram] = await Promise.all([
+      SwitchboardProgram.loadAnchorProgram(
+        cluster,
+        connection,
+        payerKeypair,
+        programId
+      ),
+      SwitchboardProgram.loadAnchorProgram(
+        cluster,
+        connection,
+        payerKeypair,
+        sgxProgramId
+      ),
+    ]);
     const mint = await NativeMint.load(
       program.provider as anchor.AnchorProvider
     );
-    return new SwitchboardProgram(program, cluster, mint);
+    return new SwitchboardProgram(program, sgxProgram, cluster, mint);
   };
 
   /**
@@ -275,13 +305,15 @@ export class SwitchboardProgram {
    */
   static fromProvider = async (
     provider: anchor.AnchorProvider,
-    programId?: PublicKey
+    programId?: PublicKey,
+    sgxProgramId?: PublicKey
   ): Promise<SwitchboardProgram> => {
     const payer = (provider.wallet as AnchorWallet).payer;
     const program = await SwitchboardProgram.fromConnection(
       provider.connection,
       payer,
-      programId
+      programId,
+      sgxProgramId
     );
     return program;
   };
@@ -309,7 +341,8 @@ export class SwitchboardProgram {
   static fromConnection = async (
     connection: Connection,
     payer = READ_ONLY_KEYPAIR,
-    programId?: PublicKey
+    programId?: PublicKey,
+    sgxProgramId?: PublicKey
   ): Promise<SwitchboardProgram> => {
     const genesisHash = await connection.getGenesisHash();
     const cluster =
@@ -319,12 +352,19 @@ export class SwitchboardProgram {
         ? 'devnet'
         : 'localnet';
 
-    const pid = programId ?? SBV2_MAINNET_PID;
-
+    const pid = programId ?? SB_V2_PID;
     const programAccountInfo = await connection.getAccountInfo(pid);
     if (programAccountInfo === null) {
       throw new Error(
-        `Failed to load Switchboard at ${pid}, try manually providing a programId`
+        `Failed to load Switchboard V2 program at ${pid}, try manually providing a programId`
+      );
+    }
+
+    const sgxPid = sgxProgramId ?? SB_SGX_PID;
+    const sgxProgramAccountInfo = await connection.getAccountInfo(sgxPid);
+    if (sgxProgramAccountInfo === null) {
+      throw new Error(
+        `Failed to load Switchboard SGX program at ${sgxPid}, try manually providing a programId`
       );
     }
 
@@ -332,33 +372,58 @@ export class SwitchboardProgram {
       cluster,
       connection,
       payer,
-      pid
+      pid,
+      sgxPid
     );
     return program;
   };
 
   /**
-   * Retrieves the Switchboard Program ID for the currently connected cluster.
-   * @return The PublicKey of the Switchboard Program ID.
+   * Retrieves the Switchboard V2 Program ID for the currently connected cluster.
+   * @return The PublicKey of the Switchboard V2 Program ID.
    */
   public get programId(): PublicKey {
     return this._program.programId;
   }
 
   /**
-   * Retrieves the Switchboard Program IDL.
-   * @return The IDL of the Switchboard Program.
+   * Retrieves the Switchboard SGX Program ID for the currently connected cluster.
+   * @return The PublicKey of the Switchboard SGX Program ID.
+   */
+  public get sgxProgramId(): PublicKey {
+    return this._program.programId;
+  }
+
+  /**
+   * Retrieves the Switchboard V2 Program IDL.
+   * @return The IDL of the Switchboard V2 Program.
    */
   public get idl(): anchor.Idl {
     return this._program.idl;
   }
 
   /**
-   * Retrieves the Switchboard Borsh Accounts Coder.
-   * @return The BorshAccountsCoder for the Switchboard Program.
+   * Retrieves the Switchboard SGX Program IDL.
+   * @return The IDL of the Switchboard SGX Program.
+   */
+  public get sgxIdl(): anchor.Idl {
+    return this._program.idl;
+  }
+
+  /**
+   * Retrieves the Switchboard V2 Borsh Accounts Coder.
+   * @return The BorshAccountsCoder for the Switchboard V2 Program.
    */
   public get coder(): anchor.BorshAccountsCoder {
     return new anchor.BorshAccountsCoder(this._program.idl);
+  }
+
+  /**
+   * Retrieves the Switchboard SGX Borsh Accounts Coder.
+   * @return The BorshAccountsCoder for the Switchboard SGX Program.
+   */
+  public get sgxCoder(): anchor.BorshAccountsCoder {
+    return new anchor.BorshAccountsCoder(this._sgxProgram.idl);
   }
 
   /**
@@ -374,7 +439,7 @@ export class SwitchboardProgram {
    * @return The Connection instance for the Switchboard Program.
    */
   public get connection(): Connection {
-    return this._program.provider.connection;
+    return this.provider.connection;
   }
 
   /**
@@ -430,11 +495,19 @@ export class SwitchboardProgram {
   }
 
   /**
-   * Retrieves the account namespace for the Switchboard Program.
-   * @return The AccountNamespace instance for the Switchboard Program.
+   * Retrieves the account namespace for the Switchboard V2 Program.
+   * @return The AccountNamespace instance for the Switchboard V2 Program.
    */
   public get account(): anchor.AccountNamespace {
     return this._program.account;
+  }
+
+  /**
+   * Retrieves the account namespace for the Switchboard SGX Program.
+   * @return The AccountNamespace instance for the Switchboard SGX Program.
+   */
+  public get sgxAccount(): anchor.AccountNamespace {
+    return this._sgxProgram.account;
   }
 
   /**
@@ -554,6 +627,34 @@ export class SwitchboardProgram {
    */
   public async removeEventListener(listenerId: number) {
     return await this._program.removeEventListener(listenerId);
+  }
+
+  /**
+   * Adds an event listener for the specified AnchorEvent, allowing consumers to monitor the chain for events
+   * emitted from Switchboard's SGX Program.
+   *
+   * @param eventName - The name of the event to listen for.
+   * @param callback - A callback function to handle the event data, slot, and signature.
+   * @return A unique listener ID that can be used to remove the event listener.
+   */
+  public addSgxEventListener<EventName extends keyof SwitchboardEvents>(
+    eventName: EventName,
+    callback: (
+      data: SwitchboardEvents[EventName],
+      slot: number,
+      signature: string
+    ) => void | Promise<void>
+  ): number {
+    return this._sgxProgram.addEventListener(eventName as string, callback);
+  }
+
+  /**
+   * Removes the event listener with the specified listener ID.
+   *
+   * @param listenerId - The unique ID of the event listener to be removed.
+   */
+  public async removeSgxEventListener(listenerId: number) {
+    return await this._sgxProgram.removeEventListener(listenerId);
   }
 
   public async signAndSendAll(
