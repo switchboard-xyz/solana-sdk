@@ -1234,7 +1234,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
           priorityFeeBump: params.priorityFeeBump ?? null,
           priorityFeeBumpPeriod: params.priorityFeeBumpPeriod ?? null,
           maxPriorityFeeMultiplier: params.maxPriorityFeeMultiplier ?? null,
-          // disableCrank: params.disableCrank ?? null,
+          disableCrank: params.disableCrank ?? null,
         },
       },
       {
