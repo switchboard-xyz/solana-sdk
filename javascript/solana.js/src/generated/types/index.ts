@@ -468,10 +468,12 @@ export type AggregatorResolutionModeJSON =
 export { SwitchboardPermission };
 
 export type SwitchboardPermissionKind =
+  | SwitchboardPermission.PermitNone
   | SwitchboardPermission.PermitOracleHeartbeat
   | SwitchboardPermission.PermitOracleQueueUsage
   | SwitchboardPermission.PermitVrfRequests;
 export type SwitchboardPermissionJSON =
+  | SwitchboardPermission.PermitNoneJSON
   | SwitchboardPermission.PermitOracleHeartbeatJSON
   | SwitchboardPermission.PermitOracleQueueUsageJSON
   | SwitchboardPermission.PermitVrfRequestsJSON;
