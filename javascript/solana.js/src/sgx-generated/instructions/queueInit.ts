@@ -44,7 +44,7 @@ export function queueInit(
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
   const ix = new TransactionInstruction({
     keys,
-    programId: program.programId,
+    programId: program.sgxProgramId,
     data,
   });
   return ix;

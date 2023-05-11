@@ -108,7 +108,7 @@ export class ServiceQueueAccountData {
     if (info === null) {
       return null;
     }
-    if (!info.owner.equals(program.programId)) {
+    if (!info.owner.equals(program.sgxProgramId)) {
       throw new Error("account doesn't belong to this program");
     }
 
@@ -125,7 +125,7 @@ export class ServiceQueueAccountData {
       if (info === null) {
         return null;
       }
-      if (!info.owner.equals(program.programId)) {
+      if (!info.owner.equals(program.sgxProgramId)) {
         throw new Error("account doesn't belong to this program");
       }
 
