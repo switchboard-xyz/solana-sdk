@@ -9,11 +9,8 @@ import {
 
 import { Account } from '../accounts/account';
 
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
 import {
-  AccountInfo,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
@@ -51,21 +48,9 @@ export interface PermissionSetParams {
 export class PermissionAccount extends Account<types.PermissionAccountData> {
   static accountName = 'PermissionAccountData';
 
-  static getPermissions(
-    permission: types.PermissionAccountData
-  ): types.SwitchboardPermissionKind {
-    switch (permission.permissions) {
-      case types.SwitchboardPermission.PermitNodeheartbeat.discriminator:
-        return new types.SwitchboardPermission.PermitNodeheartbeat();
-      case types.SwitchboardPermission.PermitQueueUsage.discriminator:
-        return new types.SwitchboardPermission.PermitQueueUsage();
-    }
-    throw new Error(
-      `Failed to find the assigned permissions, expected [${types.SwitchboardPermission.PermitNodeheartbeat.discriminator} or ${types.SwitchboardPermission.PermitQueueUsage.discriminator}], received ${permission.permissions}`
-    );
-  }
-
-  /** Load an existing PermissionAccount with its current on-chain state */
+  /**
+   *  Load an existing PermissionAccount with its current on-chain state
+   */
   public static async load(
     program: SwitchboardProgram,
     authority: PublicKey | string,
@@ -83,12 +68,14 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   }
 
   /**
-   * Loads a PermissionAccount from the expected PDA seed format.
-   * @param program The Switchboard program for the current connection.
-   * @param authority The authority pubkey to be incorporated into the account seed.
-   * @param granter The granter pubkey to be incorporated into the account seed.
-   * @param grantee The grantee pubkey to be incorporated into the account seed.
-   * @return PermissionAccount and PDA bump.
+   *  Loads a PermissionAccount from the expected PDA seed format.
+   *
+   *  @param program The Switchboard program for the current connection.
+   *  @param authority The authority pubkey to be incorporated into the account seed.
+   *  @param granter The granter pubkey to be incorporated into the account seed.
+   *  @param grantee The grantee pubkey to be incorporated into the account seed.
+   *
+   *  @return PermissionAccount and PDA bump.
    */
   public static fromSeed(
     program: SwitchboardProgram,
@@ -152,25 +139,24 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   }
 
   /**
-   * Returns the size of an on-chain {@linkcode PermissionAccount}.
+   *  Returns the size of an on-chain {@linkcode PermissionAccount}.
    */
   public readonly size = this.program.account.permissionAccountData.size;
 
   /**
-   * Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
    */
   public async loadData(): Promise<types.PermissionAccountData> {
     const data = await types.PermissionAccountData.fetch(
       this.program,
       this.publicKey
     );
-    if (data === null)
-      throw new errors.AccountNotFoundError('Permissions', this.publicKey);
-    return data;
+    if (data) return data;
+    throw new errors.AccountNotFoundError('Permissions', this.publicKey);
   }
 
   /**
-   * Produces the instruction to set the permission in the PermissionAccount
+   *  Produces the instruction to set the permission in the PermissionAccount
    */
   public async setInstruction(
     payer: PublicKey,
@@ -203,13 +189,10 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   }
 
   /**
-   * Sets the permission in the PermissionAccount
+   *  Sets the permission in the PermissionAccount
    */
   public async set(
-    params: PermissionSetParams & {
-      /** The {@linkcode types.SwitchboardPermission} to set for the grantee. */
-      permission: types.SwitchboardPermissionKind;
-    },
+    params: PermissionSetParams,
     options?: SendTransactionObjectOptions
   ): Promise<string> {
     const setTxn = await this.setInstruction(
