@@ -27,7 +27,7 @@ npm i --save @switchboard-xyz/solana.js
 - [Load Switchboard Program](#load-switchboard-program)
 - [Create a Queue](#create-a-queue)
 - [Add an Oracle](#add-an-oracle)
-- [Add a Data Feed](#add-a-data-feed)
+- [Create a Data Feed](#create-a-data-feed)
 - [Request a New Value](#request-a-new-value)
 - [Read a Data Feed](#read-a-data-feed)
 - [Add a History Buffer](#add-a-history-buffer)
@@ -86,7 +86,7 @@ const oracle = await oracleAccount.loadData();
 await oracleAccount.heartbeat();
 ```
 
-### Add a Data Feed
+### Create a Data Feed
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';

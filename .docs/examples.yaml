@@ -8,7 +8,9 @@ examples:
     language: "anchor"
     path: "programs/anchor-feed-parser"
   - name: "anchor-history-parser"
-    description: "Read a data feeds history buffer and get the closest historical sample to a given timestamp"
+    description:
+      "Read a data feeds history buffer and get the closest historical sample to
+      a given timestamp"
     language: "anchor"
     path: "programs/anchor-history-parser"
   - name: "anchor-vrf-parser"
@@ -21,3 +23,9 @@ examples:
     description: "Read a Switchboard buffer relayer using Anchor"
     language: "anchor"
     path: "programs/anchor-buffer-parser"
+  - name: "javascript-feed-walkthrough"
+    description:
+      "Create a private Switchboard queue and oracle and fulfill your own oracle
+      updates"
+    language: "javascript"
+    path: "javascript/feed-walkthrough"

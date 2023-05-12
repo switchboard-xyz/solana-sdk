@@ -46,7 +46,7 @@ pnpm build
 
 <!-- clientsstop -->
 
-## Example Programs
+## Examples
 
 <!-- examples -->
 
