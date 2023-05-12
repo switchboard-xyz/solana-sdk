@@ -1,18 +1,19 @@
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  TransactionSignature,
-} from '@solana/web3.js';
+import { Account } from '../accounts/account';
+import * as errors from '../errors';
+import * as types from '../sgx-generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-import { Account } from '../accounts/account';
-import * as errors from '../errors';
-import * as types from '../sgx-generated';
+
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  TransactionSignature,
+} from '@solana/web3.js';
 
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}

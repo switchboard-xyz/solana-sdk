@@ -1,3 +1,15 @@
+import { Account } from '../accounts/account';
+import * as errors from '../errors';
+import * as types from '../sgx-generated';
+import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  SendTransactionObjectOptions,
+  TransactionObject,
+  TransactionObjectOptions,
+} from '../TransactionObject';
+
+import { QueueAccount } from './index';
+
 import * as anchor from '@coral-xyz/anchor';
 import {
   Keypair,
@@ -5,16 +17,6 @@ import {
   SystemProgram,
   TransactionSignature,
 } from '@solana/web3.js';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import {
-  SendTransactionObjectOptions,
-  TransactionObject,
-  TransactionObjectOptions,
-} from '../TransactionObject';
-import { Account } from '../accounts/account';
-import * as errors from '../errors';
-import * as types from '../sgx-generated';
-import { QueueAccount } from './index';
 
 /**
  *  Parameters for initializing an {@linkcode QuoteAccount}

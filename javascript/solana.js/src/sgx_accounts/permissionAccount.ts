@@ -1,3 +1,4 @@
+import { Account } from '../accounts/account';
 import * as errors from '../errors';
 import * as types from '../sgx-generated';
 import { SwitchboardProgram } from '../SwitchboardProgram';
@@ -6,8 +7,6 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-
-import { Account } from '../accounts/account';
 
 import {
   Keypair,
@@ -152,7 +151,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError('Permissions', this.publicKey);
+    throw new errors.AccountNotFoundError('Permissions (SGX)', this.publicKey);
   }
 
   /**

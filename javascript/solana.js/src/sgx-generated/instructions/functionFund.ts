@@ -10,27 +10,20 @@ import {
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionFundArgs {
-  params: types.FunctionVerifyParamsFields;
+  params: types.FunctionFundParamsFields;
 }
 
 export interface FunctionFundAccounts {
   function: PublicKey;
-  fnSigner: PublicKey;
-  fnQuote: PublicKey;
-  verifierQuote: PublicKey;
   verifierQueue: PublicKey;
   escrow: PublicKey;
-  receiver: PublicKey;
-  permission: PublicKey;
-  state: PublicKey;
+  funder: PublicKey;
+  funderAuthority: PublicKey;
   tokenProgram: PublicKey;
-  payer: PublicKey;
-  systemProgram: PublicKey;
+  associatedTokenProgram: PublicKey;
 }
 
-export const layout = borsh.struct([
-  types.FunctionVerifyParams.layout('params'),
-]);
+export const layout = borsh.struct([types.FunctionFundParams.layout('params')]);
 
 export function functionFund(
   program: SwitchboardProgram,
@@ -39,23 +32,22 @@ export function functionFund(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.fnSigner, isSigner: true, isWritable: false },
-    { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
-    { pubkey: accounts.verifierQuote, isSigner: true, isWritable: false },
     { pubkey: accounts.verifierQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
-    { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.permission, isSigner: false, isWritable: false },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.funder, isSigner: false, isWritable: true },
+    { pubkey: accounts.funderAuthority, isSigner: true, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
+    {
+      pubkey: accounts.associatedTokenProgram,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
   const identifier = Buffer.from([216, 39, 120, 216, 124, 169, 163, 62]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionVerifyParams.toEncodable(args.params),
+      params: types.FunctionFundParams.toEncodable(args.params),
     },
     buffer
   );
