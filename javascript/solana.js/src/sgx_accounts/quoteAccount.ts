@@ -13,7 +13,7 @@ import {
 import { Account } from '../accounts/account';
 import * as errors from '../errors';
 import * as types from '../sgx-generated';
-import { QueueAccount } from '..';
+import { QueueAccount } from './index';
 
 /**
  *  Parameters for initializing an {@linkcode QuoteAccount}
