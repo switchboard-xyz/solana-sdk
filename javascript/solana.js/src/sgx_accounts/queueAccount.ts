@@ -62,6 +62,18 @@ export interface QueueAccountInitParams {
   authority?: Keypair;
 }
 /**
+ *  Parameters for an {@linkcode types.queueAddMrEnclave} instruction.
+ */
+export interface QueueAddMrEnclaveParams {
+  mrEnclave: Uint8Array;
+}
+/**
+ *  Parameters for an {@linkcode types.queueRemoveMrEnclave} instruction.
+ */
+export interface QueueRemoveMrEnclaveParams {
+  mrEnclave: Uint8Array;
+}
+/**
  * Account type representing an oracle queue's configuration along with a buffer account holding a
  * list of oracles that are actively heartbeating.
  *
@@ -151,5 +163,55 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     );
     if (data) return data;
     throw new errors.AccountNotFoundError('Queue (SGX)', this.publicKey);
+  }
+
+  public async addMrEnclaveInstruction(
+    payer: PublicKey,
+    params: QueueAddMrEnclaveParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const queueData = await this.loadData();
+    const instruction = types.queueAddMrEnclave(
+      this.program,
+      { params: { mrEnclave: Array.from(params.mrEnclave) } },
+      { queue: this.publicKey, authority: queueData.authority }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async addMrEnclave(
+    params: QueueAddMrEnclaveParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.addMrEnclaveInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
+  }
+
+  public async removeMrEnclaveInstruction(
+    payer: PublicKey,
+    params: QueueRemoveMrEnclaveParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const queueData = await this.loadData();
+    const instruction = types.queueRemoveMrEnclave(
+      this.program,
+      { params: { mrEnclave: Array.from(params.mrEnclave) } },
+      { queue: this.publicKey, authority: queueData.authority }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async removeMrEnclave(
+    params: QueueRemoveMrEnclaveParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.removeMrEnclaveInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
   }
 }
