@@ -87,7 +87,7 @@ ts-node src/private-queue
 First install the sbv2 cli
 
 ```bash
-npm install -g @switchboard-xyz/cli^2
+npm install -g @switchboard-xyz
 ```
 
 Then run the following command to create your own feed using the devnet
@@ -114,10 +114,6 @@ Then request an update for your new feed
 sbv2 solana aggregator update $AGGREGATOR_KEY \
     --keypair ~/.config/solana/id.json
 ```
-
-See
-[docs.switchboard.xyz/solana/program/devnet](https://docs.switchboard.xyz/solana/program/devnet)
-for a list of devnet accounts to use
 
 **_NOTE:_** You can provide multiple `--job` flags to add additional oracle jobs
 to your data feed
