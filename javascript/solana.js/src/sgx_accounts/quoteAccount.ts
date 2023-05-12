@@ -1,3 +1,4 @@
+import * as anchor from '@coral-xyz/anchor';
 import {
   Keypair,
   PublicKey,
@@ -36,6 +37,23 @@ export interface QuoteAccountInitParams {
    *  @default payer
    */
   authority?: Keypair;
+}
+/**
+ *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
+ */
+export interface QuoteHeartbeatParams {}
+/**
+ *  Parameters for an {@linkcode types.quoteVerify} instruction.
+ */
+export interface QuoteVerifyParams {
+  /**
+   *  @TODO: Docs for timestamp
+   */
+  timestamp: anchor.BN;
+  /**
+   *  @TODO: Docs for mrEnclave
+   */
+  mrEnclave: Uint8Array;
 }
 /**
  * @TODO: Documentation
@@ -108,7 +126,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   public readonly size = this.program.account.quoteAccountData.size;
 
   /**
-   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.QuoteAccountData} stored in this account.
    */
   public async loadData(): Promise<types.QuoteAccountData> {
     const data = await types.QuoteAccountData.fetch(
@@ -117,5 +135,74 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     );
     if (data) return data;
     throw new errors.AccountNotFoundError('Quote (SGX)', this.publicKey);
+  }
+
+  public async heartbeatInstruction(
+    payer: PublicKey,
+    params: QuoteHeartbeatParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const quoteData = await this.loadData();
+    const [queueAccount, queueData] = await QueueAccount.load(
+      this.program,
+      quoteData.verifierQueue
+    );
+    const instruction = types.quoteHeartbeat(
+      this.program,
+      { params },
+      {
+        quote: this.publicKey,
+        verifierQueue: queueAccount.publicKey,
+        queueAuthority: queueData.authority,
+        gcNode: PublicKey.default, // @TODO: gcNode publicKey
+        permission: PublicKey.default, // @TODO: permission publicKey
+      }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async heartbeat(
+    params: QuoteHeartbeatParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.heartbeatInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
+  }
+
+  public async verifyInstruction(
+    payer: PublicKey,
+    params: QuoteVerifyParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const quoteData = await this.loadData();
+    const instruction = types.quoteVerify(
+      this.program,
+      {
+        params: {
+          timestamp: params.timestamp,
+          mrEnclave: Array.from(params.mrEnclave),
+        },
+      },
+      {
+        quote: this.publicKey,
+        verifier: PublicKey.default, // @TODO: verifier publicKey
+        verifierQueue: quoteData.verifierQueue,
+      }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async verify(
+    params: QuoteVerifyParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.verifyInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
   }
 }
