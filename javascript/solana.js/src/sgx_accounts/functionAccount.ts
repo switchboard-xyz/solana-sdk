@@ -7,6 +7,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import * as anchor from '@coral-xyz/anchor';
 
 import { PermissionAccount, QueueAccount, QuoteAccount } from './index';
 import * as spl from '@solana/spl-token';
@@ -85,6 +86,15 @@ export interface FunctionWithdrawWalletParams
 export type FunctionWithdrawParams =
   | FunctionWithdrawUnwrapParams
   | FunctionWithdrawWalletParams;
+/**
+ *  Parameters for an {@linkcode types.functionVerify} instruction.
+ */
+export interface FunctionVerifyParams {
+  observedTime: anchor.BN;
+  nextAllowedTimestamp: anchor.BN;
+  isFailure: boolean;
+  mrEnclave: Uint8Array;
+}
 /**
  * Account type representing a Switchboard Function.
  *
@@ -333,6 +343,57 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.withdrawInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
+  }
+
+  public async verifyInstruction(
+    payer: PublicKey,
+    params: FunctionVerifyParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const functionData = await this.loadData();
+    const permissionAccount = PermissionAccount.fromSeed(
+      /* program= */ this.program,
+      /* authority= */ functionData.authority,
+      /* granter= */ functionData.verifierQueue,
+      /* grantee= */ this.publicKey
+    )[0];
+    const instruction = types.functionVerify(
+      this.program,
+      {
+        params: {
+          observedTime: params.observedTime,
+          nextAllowedTimestamp: params.nextAllowedTimestamp,
+          isFailure: params.isFailure,
+          mrEnclave: Array.from(params.mrEnclave),
+        },
+      },
+      {
+        function: this.publicKey,
+        fnSigner: PublicKey.default, // @TODO: find fn signer pubkey
+        fnQuote: PublicKey.default, // @TODO: find fn quote pubkey
+        verifierQuote: PublicKey.default, // @TODO: find verifier quote pubkey
+        verifierQueue: functionData.verifierQueue,
+        escrow: this.getEscrow(),
+        receiver: PublicKey.default, // @TODO: find receiver pubkey
+        permission: permissionAccount.publicKey,
+        state: PublicKey.default, // @TODO: find state account pubkey
+        tokenProgram: TOKEN_PROGRAM_ID,
+        payer,
+        systemProgram: SystemProgram.programId,
+      }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async verify(
+    params: FunctionVerifyParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.verifyInstruction(
       this.program.walletPubkey,
       params,
       options
