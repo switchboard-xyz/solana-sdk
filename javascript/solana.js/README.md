@@ -1,37 +1,17 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>@switchboard-xyz/solana.js</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>A Typescript client to interact with Switchboard V2 on Solana.</p>
+# @switchboard-xyz/solana.js
 
-  <p>
-    <img alt="Test Status" src="https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg" />
-	  <a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">
-      <img alt="NPM Badge" src="https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm" />
-    </a>
-  </p>
+> A Typescript client to interact with Switchboard V2 on Solana.
 
-  <p>
-    <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
-    </a>
-    <a href="https://twitter.com/switchboardxyz">
-      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
-    </a>
-  </p>
+[![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
+[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
 
-  <h4>
-    <strong>Npm: </strong><a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">npmjs.com/package/@switchboard-xyz/solana.js</a>
-  </h4>
-  <h4>
-    <strong>Typedocs: </strong><a href="https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js">docs.switchboard.xyz/api/@switchboard-xyz/solana.js</a>
-  </h4>
-  <h4>
-    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
-  </h4>
+[![NPM Badge](https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm)](https://www.npmjs.com/package/@switchboard-xyz/solana.js)
+[![Types Badge](https://img.shields.io/badge/types-docs.switchboard.xyz-blue)](https://docs.switchboard.xyz/api/solana.js)
+
 </div>
 
 ## Install
@@ -42,7 +22,18 @@ npm i --save @switchboard-xyz/solana.js
 
 ## Usage
 
-### Load the Switchboard Program
+**Directory**
+
+- [Load Switchboard Program](#load-switchboard-program)
+- [Create a Queue](#create-a-queue)
+- [Add an Oracle](#add-an-oracle)
+- [Create a Data Feed](#create-a-data-feed)
+- [Request a New Value](#request-a-new-value)
+- [Read a Data Feed](#read-a-data-feed)
+- [Add a History Buffer](#add-a-history-buffer)
+- [Watch Data Feed](#watch-data-feed)
+
+### Load Switchboard Program
 
 ```ts
 import { Connection } from '@solana/web3.js';
@@ -58,7 +49,7 @@ const program = await SwitchboardProgram.load(
 );
 ```
 
-### Create a queue
+### Create a Queue
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -78,7 +69,7 @@ const [queueAccount, txnSignature] = await QueueAccount.create(program, {
 const queue = await queueAccount.loadData();
 ```
 
-### Add an oracle
+### Add an Oracle
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
@@ -95,10 +86,11 @@ const oracle = await oracleAccount.loadData();
 await oracleAccount.heartbeat();
 ```
 
-### Add a data feed
+### Create a Data Feed
 
 ```ts
 import { QueueAccount } from '@switchboard-xyz/solana.js';
+import { OracleJob } from '@switchboard-xyz/common';
 
 const queueAccount = new QueueAccount(program, queuePubkey);
 
@@ -130,7 +122,7 @@ const [aggregatorAccount, aggregatorInitSignatures] =
 const aggregator = await aggregatorAccount.loadData();
 ```
 
-### Request a new value
+### Request a New Value
 
 ```ts
 import { AggregatorAccount } from '@switchboard-xyz/solana.js';
@@ -157,7 +149,7 @@ if (result === null) {
 console.log(result.toString());
 ```
 
-### History Buffer
+### Add a History Buffer
 
 Optionally, add a history buffer to your feed to store the last N historical samples
 
@@ -178,7 +170,7 @@ const [historyBuffer, addHistorySignature] =
 const history = await historyBuffer.loadData();
 ```
 
-### Watch a Data Feed
+### Watch Data Feed
 
 Setup a websocket listener to invoke a callback whenever an aggregator is updated
 

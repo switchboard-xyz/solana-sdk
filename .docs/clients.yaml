@@ -1,0 +1,11 @@
+clients:
+  - name: "switchboard-v2"
+    slug: "./"
+    description: "A Rust library to interact with Switchboard V2 accounts on Solana."
+    language: "rust"
+    path: "rust/switchboard-v2"
+  - name: "@switchboard-xyz/solana.js"
+    slug: "./"
+    description: "A Typescript client to interact with Switchboard on Solana."
+    language: "javascript"
+    path: "javascript/solana.js"
