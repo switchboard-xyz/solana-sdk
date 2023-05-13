@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*", "./src/idl/mainnet.json", "./src/idl/devnet.json"],
+  "include": ["./src/**/*", "./src/idl/*.json"],
   "exclude": ["tests/**/*", "lib", "node_modules"],
   "files": ["src/index.ts"],
   "compilerOptions": {
