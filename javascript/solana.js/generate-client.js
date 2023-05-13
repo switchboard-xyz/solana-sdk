@@ -84,7 +84,7 @@ async function main() {
   );
 
   execSync(
-    `anchor idl fetch -o ${sgxDevnetIdlPath} 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 --provider.cluster devnet`,
+    `anchor idl fetch -o ${sgxDevnetIdlPath} 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --provider.cluster devnet`,
     { encoding: 'utf-8' }
   );
 
@@ -94,7 +94,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_quote_verifier.json ${sgxGeneratedPath}`,
+      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_quote_verifier.json ${sgxGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   } else {
@@ -103,7 +103,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id 9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 ${sgxDevnetIdlPath} ${v2GeneratedPath}`,
+      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${sgxDevnetIdlPath} ${v2GeneratedPath}`,
       { encoding: 'utf-8' }
     );
   }

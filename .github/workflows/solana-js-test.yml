@@ -104,9 +104,9 @@ jobs:
             SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
             7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
             Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone
-            9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 --clone
-            ACBWUjTk3CRBxG89FmsuhShY2yptgJvYRtKept2LskTF --clone
-            2ZChUgzeXY2BmNXBWDoN3CV1edd9J3T6S5HVtqFahuJt --clone
+            2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --clone
+            BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj --clone
+            th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4 --clone
             CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
       - name: Run Tests
         working-directory: javascript/solana.js
@@ -168,9 +168,9 @@ jobs:
             SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
             7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
             Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone
-            9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5 --clone
-            ACBWUjTk3CRBxG89FmsuhShY2yptgJvYRtKept2LskTF --clone
-            2ZChUgzeXY2BmNXBWDoN3CV1edd9J3T6S5HVtqFahuJt --clone
+            2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --clone
+            BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj --clone
+            th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4 --clone
             CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
       - name: Run Tests
         working-directory: javascript/solana.js
