@@ -7,11 +7,11 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
-import * as anchor from '@coral-xyz/anchor';
 
 import { PermissionAccount, QueueAccount, QuoteAccount } from './index';
-import * as spl from '@solana/spl-token';
 
+import * as anchor from '@coral-xyz/anchor';
+import * as spl from '@solana/spl-token';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -23,12 +23,16 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+import { toUtf8 } from '@switchboard-xyz/common';
 
 /**
  *  Parameters for initializing an {@linkcode FunctionAccount}
  */
 export interface FunctionAccountInitParams {
+  name: Uint8Array;
+  metadata: Uint8Array;
   container: Uint8Array;
+  containerRegistry: Uint8Array;
   version: Uint8Array;
   schedule: Uint8Array;
 
@@ -102,7 +106,16 @@ export interface FunctionVerifyParams {
  */
 export class FunctionAccount extends Account<types.FunctionAccountData> {
   static accountName = 'FunctionAccountData';
-
+  /**
+   *  Returns the functions's name buffer in a stringified format.
+   */
+  public static getName = (functionData: types.FunctionAccountData) =>
+    toUtf8(functionData.name);
+  /**
+   *  Returns the functions's metadata buffer in a stringified format.
+   */
+  public static getMetadata = (functionData: types.FunctionAccountData) =>
+    toUtf8(functionData.metadata);
   /**
    *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
    */
@@ -141,9 +154,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       {
         params: {
-          container: Array.from(params.container),
-          version: Array.from(params.version),
-          schedule: Array.from(params.schedule),
+          name: params.name,
+          metadata: params.metadata,
+          container: params.container,
+          containerRegistry: params.containerRegistry,
+          version: params.version,
+          schedule: params.schedule,
         },
       },
       {
@@ -182,7 +198,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   /**
    * Get the size of an {@linkcode FunctionAccount} on-chain.
    */
-  public readonly size = this.program.account.functionAccountData.size;
+  public readonly size = this.program.sgxAccount.functionAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.FunctionAccountData} stored in this account.

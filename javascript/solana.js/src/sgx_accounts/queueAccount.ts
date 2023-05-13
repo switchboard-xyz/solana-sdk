@@ -109,8 +109,6 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     const queueKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(queueKeypair);
 
-    const authority = params.authority ? params.authority.publicKey : payer;
-    const account = new QueueAccount(program, queueKeypair.publicKey);
     const instruction = types.queueInit(
       program,
       {
@@ -125,13 +123,16 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
         },
       },
       {
-        queue: account.publicKey,
-        authority,
-        payer,
+        queue: queueKeypair.publicKey,
+        authority: params.authority ? params.authority.publicKey : payer,
+        payer: payer,
         systemProgram: SystemProgram.programId,
       }
     );
-    return [account, new TransactionObject(payer, [instruction], [], options)];
+    return [
+      new QueueAccount(program, queueKeypair.publicKey),
+      new TransactionObject(payer, [instruction], [queueKeypair], options),
+    ];
   }
 
   public static async create(
@@ -145,14 +146,14 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
       params,
       options
     );
-    const txSignature = await program.signAndSend(txnObject, options);
-    return [account, txSignature];
+    console.log(txnObject);
+    return [account, await program.signAndSend(txnObject, options)];
   }
 
   /**
    * Get the size of an {@linkcode QueueAccount} on-chain.
    */
-  public readonly size = this.program.account.serviceQueueAccountData.size;
+  public readonly size = this.program.sgxAccount.serviceQueueAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.

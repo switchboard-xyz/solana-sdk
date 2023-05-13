@@ -140,7 +140,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   /**
    *  Returns the size of an on-chain {@linkcode PermissionAccount}.
    */
-  public readonly size = this.program.account.permissionAccountData.size;
+  public readonly size = this.program.sgxAccount.permissionAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.

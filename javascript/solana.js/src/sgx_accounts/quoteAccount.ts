@@ -125,7 +125,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   /**
    * Get the size of an {@linkcode QuoteAccount} on-chain.
    */
-  public readonly size = this.program.account.quoteAccountData.size;
+  public readonly size = this.program.sgxAccount.quoteAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.QuoteAccountData} stored in this account.
