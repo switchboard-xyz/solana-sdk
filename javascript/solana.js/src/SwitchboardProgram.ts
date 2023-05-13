@@ -75,7 +75,7 @@ export const SB_V2_PID = new PublicKey(
  * Switchboard's SGX Program ID
  */
 export const SB_SGX_PID = new PublicKey(
-  '9x1FRtphkEPigGzxPAFfRshaBuxQX6s1qwSr37iLrkX5'
+  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
 );
 
 /**

@@ -498,6 +498,43 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return txnSignature;
   }
 
+  teeHeartbeatInstructionSync(
+    payer: PublicKey,
+    params: OracleTeeHeartbeatParams,
+    options?: SendTransactionObjectOptions
+  ): TransactionObject {
+    const [permissionAccount, permissionBump] = params.permission;
+    const instruction = types.oracleTeeHeartbeat(
+      this.program,
+      { params: { permissionBump } },
+      {
+        oracle: this.publicKey,
+        oracleAuthority: params.authority ?? payer,
+        tokenAccount: params.tokenWallet,
+        gcOracle: params.gcOracle,
+        oracleQueue: params.oracleQueue,
+        permission: permissionAccount.publicKey,
+        dataBuffer: params.dataBuffer,
+        quote: params.quote,
+        programState: this.program.programState.publicKey,
+      }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  async teeHeartbeat(
+    params: OracleTeeHeartbeatParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const txnObject = this.teeHeartbeatInstructionSync(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txnSignature = await this.program.signAndSend(txnObject, options);
+    return txnSignature;
+  }
+
   async withdrawInstruction(
     payer: PublicKey,
     params: OracleWithdrawParams,
@@ -767,3 +804,13 @@ export interface OracleWithdrawWalletParams extends OracleWithdrawBaseParams {
 export type OracleWithdrawParams =
   | OracleWithdrawUnwrapParams
   | OracleWithdrawWalletParams;
+
+export interface OracleTeeHeartbeatParams {
+  authority?: PublicKey;
+  gcOracle: PublicKey;
+  tokenWallet: PublicKey;
+  oracleQueue: PublicKey;
+  dataBuffer: PublicKey;
+  quote: PublicKey;
+  permission: [PermissionAccount, number];
+}

@@ -444,21 +444,6 @@
           "isSigner": false
         },
         {
-          "name": "fnSigner",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "fnQuote",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "verifierQuote",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
           "name": "verifierQueue",
           "isMut": false,
           "isSigner": false
@@ -469,19 +454,14 @@
           "isSigner": false
         },
         {
-          "name": "receiver",
+          "name": "funder",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "permission",
+          "name": "funderAuthority",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": true,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "tokenProgram",
@@ -489,12 +469,7 @@
           "isSigner": false
         },
         {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -503,7 +478,7 @@
         {
           "name": "params",
           "type": {
-            "defined": "FunctionVerifyParams"
+            "defined": "FunctionFundParams"
           }
         }
       ]
@@ -513,27 +488,22 @@
       "accounts": [
         {
           "name": "function",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "fnSigner",
           "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "fnQuote",
-          "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "verifierQuote",
-          "isMut": false,
-          "isSigner": true
         },
         {
           "name": "verifierQueue",
           "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -547,27 +517,7 @@
           "isSigner": false
         },
         {
-          "name": "permission",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -576,7 +526,7 @@
         {
           "name": "params",
           "type": {
-            "defined": "FunctionVerifyParams"
+            "defined": "FunctionWithdrawParams"
           }
         }
       ]
@@ -614,7 +564,7 @@
             "type": {
               "array": [
                 "u8",
-                32
+                64
               ]
             }
           },
@@ -648,7 +598,7 @@
             "type": {
               "array": [
                 "u8",
-                32
+                64
               ]
             }
           },
@@ -936,31 +886,28 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "metadata",
+            "type": "bytes"
+          },
+          {
             "name": "container",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
+            "type": "bytes"
+          },
+          {
+            "name": "containerRegistry",
+            "type": "bytes"
           },
           {
             "name": "version",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
+            "type": "bytes"
           },
           {
             "name": "schedule",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
+            "type": "bytes"
           }
         ]
       }

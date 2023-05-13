@@ -66,11 +66,11 @@ export class FunctionAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
+    borsh.array(borsh.u8(), 64, 'name'),
     borsh.array(borsh.u8(), 256, 'metadata'),
     borsh.publicKey('authority'),
     borsh.array(borsh.u8(), 64, 'containerRegistry'),
-    borsh.array(borsh.u8(), 32, 'container'),
+    borsh.array(borsh.u8(), 64, 'container'),
     borsh.array(borsh.u8(), 32, 'version'),
     borsh.publicKey('verifierQueue'),
     borsh.u32('queueIdx'),
