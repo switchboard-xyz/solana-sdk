@@ -112,7 +112,7 @@ async function main() {
 
   await awaitValidator();
 
-  await Promise.all(
+  await Promise.all([
     programDeploy(
       devSwitchboard,
       defaultPubkeyPath,
@@ -124,8 +124,8 @@ async function main() {
       defaultPubkeyPath,
       'switchboard_quote_verifier',
       '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
-    )
-  );
+    ),
+  ]);
 
   // await programDeploy(
   //   devSwitchboard,
