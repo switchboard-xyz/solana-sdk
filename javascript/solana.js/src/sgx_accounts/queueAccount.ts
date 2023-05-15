@@ -1,3 +1,4 @@
+import { OracleAccount } from '../accounts';
 import { Account } from '../accounts/account';
 import * as errors from '../errors';
 import * as types from '../sgx-generated';
@@ -67,12 +68,14 @@ export interface QueueAccountInitParams {
  */
 export interface QueueAddMrEnclaveParams {
   mrEnclave: Uint8Array;
+  authority?: Keypair;
 }
 /**
  *  Parameters for an {@linkcode types.queueRemoveMrEnclave} instruction.
  */
 export interface QueueRemoveMrEnclaveParams {
   mrEnclave: Uint8Array;
+  authority?: Keypair;
 }
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a
@@ -146,7 +149,6 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
       params,
       options
     );
-    console.log(txnObject);
     return [account, await program.signAndSend(txnObject, options)];
   }
 
@@ -172,13 +174,17 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     params: QueueAddMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    const queueData = await this.loadData();
+    const authority = params.authority?.publicKey ?? payer;
+    const signers = params.authority ? [params.authority] : [];
+    const mrEnclave = Array.from(params.mrEnclave)
+      .concat(Array(32).fill(0))
+      .slice(0, 32);
     const instruction = types.queueAddMrEnclave(
       this.program,
-      { params: { mrEnclave: Array.from(params.mrEnclave) } },
-      { queue: this.publicKey, authority: queueData.authority }
+      { params: { mrEnclave } },
+      { authority, queue: this.publicKey }
     );
-    return new TransactionObject(payer, [instruction], [], options);
+    return new TransactionObject(payer, [instruction], signers, options);
   }
 
   public async addMrEnclave(
@@ -197,13 +203,17 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     params: QueueRemoveMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    const queueData = await this.loadData();
+    const authority = params.authority?.publicKey ?? payer;
+    const signers = params.authority ? [params.authority] : [];
+    const mrEnclave = Array.from(params.mrEnclave)
+      .concat(Array(32).fill(0))
+      .slice(0, 32);
     const instruction = types.queueRemoveMrEnclave(
       this.program,
-      { params: { mrEnclave: Array.from(params.mrEnclave) } },
-      { queue: this.publicKey, authority: queueData.authority }
+      { params: { mrEnclave } },
+      { authority, queue: this.publicKey }
     );
-    return new TransactionObject(payer, [instruction], [], options);
+    return new TransactionObject(payer, [instruction], signers, options);
   }
 
   public async removeMrEnclave(
