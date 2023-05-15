@@ -103,7 +103,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${v2GeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${sgxDevnetIdlPath} ${v2GeneratedPath}`,
+      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${sgxDevnetIdlPath} ${sgxGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   }

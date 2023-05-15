@@ -4434,6 +4434,12 @@
             "type": {
               "option": "u32"
             }
+          },
+          {
+            "name": "disableCrank",
+            "type": {
+              "option": "bool"
+            }
           }
         ]
       }
