@@ -112,20 +112,22 @@ async function main() {
 
   await awaitValidator();
 
-  await Promise.all([
-    programDeploy(
-      devSwitchboard,
-      defaultPubkeyPath,
-      'switchboard_v2',
-      'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
-    ),
-    programDeploy(
-      devSwitchboard,
-      defaultPubkeyPath,
-      'switchboard_quote_verifier',
-      '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
-    ),
-  ]);
+  if (isDev) {
+    await Promise.all([
+      programDeploy(
+        devSwitchboard,
+        defaultPubkeyPath,
+        'switchboard_v2',
+        'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+      ),
+      programDeploy(
+        devSwitchboard,
+        defaultPubkeyPath,
+        'switchboard_quote_verifier',
+        '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
+      ),
+    ]);
+  }
 
   console.log(`\n\nLocal solana validator started ... `);
 }
