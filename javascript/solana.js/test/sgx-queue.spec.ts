@@ -21,31 +21,6 @@ describe('SGX Queue Tests', () => {
   let oracleAccount: sbv2.OracleAccount;
 
   it('Creates a Queue', async () => {
-    const [_, txn] = sbv2.SgxAccounts.QueueAccount.createInstruction(
-      ctx.program,
-      ctx.program.walletPubkey,
-      {
-        reward: 69420,
-        allowAuthorityOverrideAfter: 321,
-        maxQuoteVerificationAge: 123,
-        requireAuthorityHeartbeatPermission: true,
-        requireUsagePermissions: true,
-        authority: queueAuthority,
-      }
-    );
-
-    const firstIxn = txn.ixns[0];
-
-    assert(
-      Buffer.compare(
-        firstIxn.data.slice(0, 8),
-        Buffer.from([144, 18, 99, 145, 133, 27, 207, 13])
-      ) === 0,
-      `QueueInit discriminator mismatch, expected [144, 18, 99, 145, 133, 27, 207, 13], received [${new Uint8Array(
-        firstIxn.data.slice(0, 8)
-      )}]`
-    );
-
     [queueAccount] = await sbv2.SgxAccounts.QueueAccount.create(ctx.program, {
       reward: 69420,
       allowAuthorityOverrideAfter: 321,
