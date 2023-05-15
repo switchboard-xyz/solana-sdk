@@ -391,7 +391,7 @@ export class SwitchboardProgram {
    * @return The PublicKey of the Switchboard SGX Program ID.
    */
   public get sgxProgramId(): PublicKey {
-    return this._program.programId;
+    return this._sgxProgram.programId;
   }
 
   /**

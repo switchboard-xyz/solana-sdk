@@ -446,109 +446,6 @@
       ]
     },
     {
-      "name": "aggregatorTeeSaveResult",
-      "accounts": [
-        {
-          "name": "aggregator",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "oracle",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "oracleAuthority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "oracleQueue",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "queueAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "feedPermission",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "oraclePermission",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "lease",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "escrow",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "programState",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "historyBuffer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "slider",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quote",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "rewardWallet",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "AggregatorTeeSaveResultParams"
-          }
-        }
-      ]
-    },
-    {
       "name": "aggregatorSetAuthority",
       "accounts": [
         {
@@ -1406,64 +1303,6 @@
           "name": "params",
           "type": {
             "defined": "OracleHeartbeatParams"
-          }
-        }
-      ]
-    },
-    {
-      "name": "oracleTeeHeartbeat",
-      "accounts": [
-        {
-          "name": "oracle",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "oracleAuthority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "tokenAccount",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "gcOracle",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "oracleQueue",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "permission",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "dataBuffer",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quote",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "programState",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "OracleTeeHeartbeatParams"
           }
         }
       ]
@@ -2552,64 +2391,6 @@
   ],
   "accounts": [
     {
-      "name": "QuoteAccountData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "node",
-            "type": "publicKey"
-          },
-          {
-            "name": "nodeAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "queue",
-            "type": "publicKey"
-          },
-          {
-            "name": "quoteBuffer",
-            "type": {
-              "array": [
-                "u8",
-                8192
-              ]
-            }
-          },
-          {
-            "name": "quoteLen",
-            "type": "u32"
-          },
-          {
-            "name": "isReady",
-            "type": "bool"
-          },
-          {
-            "name": "verificationStatus",
-            "type": "u8"
-          },
-          {
-            "name": "verificationTimestamp",
-            "type": "i64"
-          },
-          {
-            "name": "validUntil",
-            "type": "i64"
-          },
-          {
-            "name": "ebuf",
-            "type": {
-              "array": [
-                "u8",
-                1024
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "SbState",
       "type": {
         "kind": "struct",
@@ -2650,23 +2431,6 @@
             "type": "u8"
           },
           {
-            "name": "mrEnclaves",
-            "docs": [
-              "Permitted enclave measurements"
-            ],
-            "type": {
-              "array": [
-                {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                6
-              ]
-            }
-          },
-          {
             "name": "ebuf",
             "docs": [
               "Reserved for future info."
@@ -2674,7 +2438,7 @@
             "type": {
               "array": [
                 "u8",
-                799
+                991
               ]
             }
           }
@@ -3356,10 +3120,6 @@
             "type": "bool"
           },
           {
-            "name": "enableTeeOnly",
-            "type": "bool"
-          },
-          {
             "name": "ebuf",
             "docs": [
               "Reserved for future info."
@@ -3367,7 +3127,7 @@
             "type": {
               "array": [
                 "u8",
-                967
+                968
               ]
             }
           },
@@ -4533,57 +4293,6 @@
       }
     },
     {
-      "name": "AggregatorTeeSaveResultParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "value",
-            "type": {
-              "defined": "BorshDecimal"
-            }
-          },
-          {
-            "name": "jobsChecksum",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "minResponse",
-            "type": {
-              "defined": "BorshDecimal"
-            }
-          },
-          {
-            "name": "maxResponse",
-            "type": {
-              "defined": "BorshDecimal"
-            }
-          },
-          {
-            "name": "feedPermissionBump",
-            "type": "u8"
-          },
-          {
-            "name": "oraclePermissionBump",
-            "type": "u8"
-          },
-          {
-            "name": "leaseBump",
-            "type": "u8"
-          },
-          {
-            "name": "stateBump",
-            "type": "u8"
-          }
-        ]
-      }
-    },
-    {
       "name": "BufferRelayerInitParams",
       "type": {
         "kind": "struct",
@@ -5095,12 +4804,6 @@
             "type": {
               "option": "u64"
             }
-          },
-          {
-            "name": "enableTeeOnly",
-            "type": {
-              "option": "bool"
-            }
           }
         ]
       }
@@ -5113,18 +4816,6 @@
           {
             "name": "rewards",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "OracleTeeHeartbeatParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "permissionBump",
-            "type": "u8"
           }
         ]
       }
@@ -5190,28 +4881,6 @@
           {
             "name": "daoMint",
             "type": "publicKey"
-          },
-          {
-            "name": "addEnclaves",
-            "type": {
-              "vec": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
-          },
-          {
-            "name": "rmEnclaves",
-            "type": {
-              "vec": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
           }
         ]
       }
@@ -6728,26 +6397,6 @@
       }
     },
     {
-      "name": "VerificationStatus",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "VerificationPending"
-          },
-          {
-            "name": "VerificationFailure"
-          },
-          {
-            "name": "VerificationSuccess"
-          },
-          {
-            "name": "VerificationOverride"
-          }
-        ]
-      }
-    },
-    {
       "name": "AggregatorResolutionMode",
       "type": {
         "kind": "enum",
@@ -7018,38 +6667,6 @@
               }
             }
           },
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "AggregatorTeeSaveResultEvent",
-      "fields": [
-        {
-          "name": "feedPubkey",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "value",
-          "type": {
-            "defined": "BorshDecimal"
-          },
-          "index": false
-        },
-        {
-          "name": "slot",
-          "type": "u64",
-          "index": false
-        },
-        {
-          "name": "timestamp",
-          "type": "i64",
-          "index": false
-        },
-        {
-          "name": "oraclePubkey",
-          "type": "publicKey",
           "index": false
         }
       ]
@@ -7607,16 +7224,6 @@
           "index": false
         }
       ]
-    },
-    {
-      "name": "QuoteVerifyRequestEvent",
-      "fields": [
-        {
-          "name": "quotePubkey",
-          "type": "publicKey",
-          "index": false
-        }
-      ]
     }
   ],
   "errors": [
@@ -8119,21 +7726,6 @@
       "code": 6099,
       "name": "InsufficientTokenBalance",
       "msg": "Escrow has insufficient funds to perform this action."
-    },
-    {
-      "code": 6100,
-      "name": "InvalidQuoteError",
-      "msg": "Invalid SAS quote account"
-    },
-    {
-      "code": 6101,
-      "name": "InvalidHistoryAccountError",
-      "msg": ""
-    },
-    {
-      "code": 6102,
-      "name": "GenericError",
-      "msg": ""
     }
   ]
 }

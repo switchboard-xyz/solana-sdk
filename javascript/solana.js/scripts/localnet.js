@@ -73,94 +73,7 @@ async function main() {
 
   const switchboardAccounts = [...SWITCHBOARD_BASE_ACCOUNTS];
 
-  const switchboardPrograms = [];
-  const idls = new Map();
-
-  if (isDev) {
-    if (
-      fs.existsSync(
-        path.join(devSwitchboard, 'target', 'deploy', 'switchboard_v2.so')
-      )
-    ) {
-      switchboardPrograms.push(
-        ...[
-          '--bpf-program',
-          'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f',
-          path.join(devSwitchboard, 'target', 'deploy', 'switchboard_v2.so'),
-        ]
-      );
-
-      if (
-        fs.existsSync(
-          path.join(devSwitchboard, 'target', 'idl', 'switchboard_v2.json')
-        )
-      ) {
-        idls.set(
-          'Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk',
-          path.join(devSwitchboard, 'target', 'idl', 'switchboard_v2.json')
-        );
-      } else {
-        console.log(`Failed to find IDL for switchboard_v2`);
-        switchboardAccounts.push(
-          'Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk'
-        );
-      }
-    } else {
-      console.log(`Did not find the switchboard_v2.so program`);
-      switchboardAccounts.push(...SWITCHBOARD_PROGRAM_ACCOUNTS);
-    }
-
-    if (
-      fs.existsSync(
-        path.join(
-          devSwitchboard,
-          'target',
-          'deploy',
-          'switchboard_quote_verifier.so'
-        )
-      )
-    ) {
-      switchboardPrograms.push(
-        ...[
-          '--bpf-program',
-          '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7',
-          path.join(
-            devSwitchboard,
-            'target',
-            'deploy',
-            'switchboard_quote_verifier.so'
-          ),
-        ]
-      );
-
-      if (
-        fs.existsSync(
-          path.join(
-            devSwitchboard,
-            'target',
-            'idl',
-            'switchboard_quote_verifier.json'
-          )
-        )
-      ) {
-        idls.set(
-          'th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4',
-          path.join(
-            devSwitchboard,
-            'target',
-            'idl',
-            'switchboard_quote_verifier.json'
-          )
-        );
-      } else {
-        console.log(`Failed to find IDL for switchboard_quote_verifier`);
-        switchboardAccounts.push('th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4');
-      }
-    } else {
-      console.log(`Did not find the switchboard_quote_verifier.so program`);
-      switchboardAccounts.push(...SWITCHBOARD_SGX_PROGRAM_ACCOUNTS);
-    }
-  } else {
+  if (!isDev) {
     switchboardAccounts.push(
       ...SWITCHBOARD_PROGRAM_ACCOUNTS,
       ...SWITCHBOARD_SGX_PROGRAM_ACCOUNTS
@@ -174,52 +87,61 @@ async function main() {
 
   fs.mkdirSync('.anchor/test-ledger', { recursive: true });
 
-  const rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
+  let rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
+  if (isMainnet && process.env.SOLANA_MAINNET_RPC_URL) {
+    rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
+  } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
+    rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
+  }
 
   spawn(
     'solana-test-validator',
     [
       '-q',
       '-r',
-      '--ledger',
-      '.anchor/test-ledger',
       '--mint',
       payerPubkey.toBase58(),
-      '--bind-address',
-      '0.0.0.0',
       '--url',
       rpcUrl,
-      '--rpc-port',
-      '8899',
-      ...switchboardPrograms,
       ...cloneAccounts,
+      '--ledger',
+      '.anchor/test-ledger',
     ],
     { cwd: jsSdkRoot, encoding: 'utf-8' }
   );
 
   await awaitValidator();
-  console.log(`Local solana validator started. `);
 
-  // TODO: Fix this
-  // Publish the IDLs
-  for (const idl of idls) {
-    const args = [
-      '--provider.cluster',
-      'localnet',
-      '--provider.wallet',
+  await Promise.all(
+    programDeploy(
+      devSwitchboard,
       defaultPubkeyPath,
-      'idl',
-      'init',
-      '--filepath',
-      idl[1],
-      idl[0],
-    ];
-    execSync(`anchor`, args, {
-      encoding: 'utf-8',
-      cwd: devSwitchboard,
-      stdio: 'pipe',
-    });
-  }
+      'switchboard_v2',
+      'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+    ),
+    programDeploy(
+      devSwitchboard,
+      defaultPubkeyPath,
+      'switchboard_quote_verifier',
+      '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
+    )
+  );
+
+  // await programDeploy(
+  //   devSwitchboard,
+  //   defaultPubkeyPath,
+  //   'switchboard_v2',
+  //   'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+  // );
+
+  // await programDeploy(
+  //   devSwitchboard,
+  //   defaultPubkeyPath,
+  //   'switchboard_quote_verifier',
+  //   '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
+  // );
+
+  console.log(`\n\nLocal solana validator started ... `);
 }
 
 main()
@@ -253,4 +175,91 @@ async function awaitValidator(timeout = 60) {
       myError ? ': ' + myError : undefined
     }`
   );
+}
+
+async function programDeploy(
+  switchboardDir,
+  defaultPubkeyPath,
+  programName,
+  programId
+) {
+  const sbProgramPath = path.join(
+    switchboardDir,
+    'target',
+    'deploy',
+    `${programName}.so`
+  );
+  if (!fs.existsSync(sbProgramPath)) {
+    throw new Error(
+      `Failed to find BPF program ${programName}.so in ${switchboardDir}`
+    );
+  }
+
+  const programKeypairPath = path.join(
+    switchboardDir,
+    'target',
+    'deploy',
+    `${programName}-keypair.json`
+  );
+  if (!fs.existsSync(programKeypairPath)) {
+    throw new Error(
+      `Failed to find program keypair for ${programName} in ${switchboardDir}`
+    );
+  }
+  const programKeypair = Keypair.fromSecretKey(
+    new Uint8Array(JSON.parse(fs.readFileSync(programKeypairPath, 'utf-8')))
+  );
+  if (programKeypair.publicKey.toBase58() !== programId) {
+    throw new Error(
+      `Program ID mismatch for program ${programName}, expected ${programId}, received ${programKeypair.publicKey.toBase58()}`
+    );
+  }
+
+  const idlPath = path.join(
+    switchboardDir,
+    'target',
+    'idl',
+    `${programName}.json`
+  );
+  if (!fs.existsSync(idlPath)) {
+    throw new Error(
+      `Failed to find IDL ${programName}.json in ${switchboardDir}`
+    );
+  }
+
+  const solanaDeployArgs = [
+    'program',
+    'deploy',
+    '-u',
+    'l',
+    '--program-id',
+    programKeypairPath,
+    '--upgrade-authority',
+    defaultPubkeyPath,
+    sbProgramPath,
+  ];
+  execSync(`solana ${solanaDeployArgs.join(' ')}`, {
+    cwd: switchboardDir,
+    encoding: 'utf8',
+    stdio: 'inherit',
+    shell: '/bin/zsh',
+  });
+
+  const idlInitArgs = [
+    'idl',
+    'init',
+    '--provider.cluster',
+    'localnet',
+    '--provider.wallet',
+    defaultPubkeyPath,
+    '-f',
+    idlPath,
+    programId,
+  ];
+  execSync(`anchor ${idlInitArgs.join(' ')}`, {
+    cwd: switchboardDir,
+    encoding: 'utf-8',
+    stdio: 'inherit',
+    shell: '/bin/zsh',
+  });
 }

@@ -179,14 +179,14 @@ async function main() {
       file
     );
 
-    if (file.includes('/sgx-generated/')) {
-      // sgx-generated files use the sgxProgramId instead of programId
-      shell.sed('-i', 'program.programId', 'program.sgxProgramId', file);
-    }
-
     if (file.includes('/instructions/')) {
       // add program as first arguement to instructions
       shell.sed('-i', 'args:', 'program: SwitchboardProgram, args:', file);
+    }
+
+    if (file.includes('/sgx-generated/')) {
+      // sgx-generated files use the sgxProgramId instead of programId
+      shell.sed('-i', 'program.programId', 'program.sgxProgramId', file);
     }
   }
 
