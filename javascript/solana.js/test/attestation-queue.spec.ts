@@ -1,29 +1,34 @@
 import 'mocha';
 
 import * as sbv2 from '../src';
+import { PermissionAccount, TransactionMissingSignerError } from '../src';
+import * as sgxTypes from '../src/sgx-generated';
 
 import { setupTest, TestContext } from './utils';
 
 import { Keypair } from '@solana/web3.js';
 import assert from 'assert';
 
-describe('AttesationQueue Tests', () => {
+describe('SGX Queue Tests', () => {
   let ctx: TestContext;
 
   before(async () => (ctx = await setupTest()));
 
   const queueAuthority = Keypair.generate();
-  let queueAccount: sbv2.AttestationQueueAccount;
+  let queueAccount: sbv2.SgxAccounts.AttestationQueueAccount;
 
   it('Creates a Queue', async () => {
-    [queueAccount] = await sbv2.AttestationQueueAccount.create(ctx.program, {
-      reward: 69420,
-      allowAuthorityOverrideAfter: 321,
-      maxQuoteVerificationAge: 123,
-      requireAuthorityHeartbeatPermission: true,
-      requireUsagePermissions: true,
-      authority: queueAuthority,
-    });
+    [queueAccount] = await sbv2.SgxAccounts.AttestationQueueAccount.create(
+      ctx.program,
+      {
+        reward: 69420,
+        allowAuthorityOverrideAfter: 321,
+        maxQuoteVerificationAge: 123,
+        requireAuthorityHeartbeatPermission: true,
+        requireUsagePermissions: true,
+        authority: queueAuthority,
+      }
+    );
 
     const data = await queueAccount.loadData();
     assert(data.reward === 69420);

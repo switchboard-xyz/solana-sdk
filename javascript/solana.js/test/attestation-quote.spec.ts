@@ -1,6 +1,9 @@
 import 'mocha';
 
 import * as sbv2 from '../src';
+import { PermissionAccount, TransactionMissingSignerError } from '../src';
+import { AttestationQueueAccount } from '../src/sgx_accounts';
+import * as sgxTypes from '../src/sgx-generated';
 
 import { setupTest, TestContext } from './utils';
 
@@ -11,21 +14,24 @@ describe('SGX Quote Tests', () => {
   let ctx: TestContext;
 
   let oldQueueAccount: sbv2.QueueAccount;
-  let queueAccount: sbv2.AttestationQueueAccount;
-  let quoteAccount: sbv2.QuoteAccount;
+  let queueAccount: sbv2.SgxAccounts.AttestationQueueAccount;
+  let quoteAccount: sbv2.SgxAccounts.QuoteAccount;
 
   before(async () => {
     ctx = await setupTest();
 
     const queueAuthority = Keypair.generate();
-    [queueAccount] = await sbv2.AttestationQueueAccount.create(ctx.program, {
-      reward: 69420,
-      allowAuthorityOverrideAfter: 321,
-      maxQuoteVerificationAge: 123,
-      requireAuthorityHeartbeatPermission: false,
-      requireUsagePermissions: false,
-      authority: queueAuthority,
-    });
+    [queueAccount] = await sbv2.SgxAccounts.AttestationQueueAccount.create(
+      ctx.program,
+      {
+        reward: 69420,
+        allowAuthorityOverrideAfter: 321,
+        maxQuoteVerificationAge: 123,
+        requireAuthorityHeartbeatPermission: false,
+        requireUsagePermissions: false,
+        authority: queueAuthority,
+      }
+    );
 
     [oldQueueAccount] = await sbv2.QueueAccount.create(ctx.program, {
       reward: 0,
@@ -36,7 +42,7 @@ describe('SGX Quote Tests', () => {
 
   it('Creates a Quote', async () => {
     const cid = new Uint8Array([1, 2, 3]);
-    [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
+    [quoteAccount] = await sbv2.SgxAccounts.QuoteAccount.create(ctx.program, {
       queueAccount,
       cid,
     });

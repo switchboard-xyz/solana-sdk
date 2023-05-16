@@ -6,6 +6,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { SgxAccounts } from '..';
 
 import { Account, OnAccountChangeCallback } from './account';
 import { PermissionAccount } from './permissionAccount';
