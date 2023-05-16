@@ -6,6 +6,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { SgxAccounts } from '..';
 
 import { Account, OnAccountChangeCallback } from './account';
 import { PermissionAccount } from './permissionAccount';
@@ -193,7 +194,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     program: SwitchboardProgram,
     payer: PublicKey,
     params: {
-      queueAccount: QueueAccount;
+      queueAccount: QueueAccount | SgxAccounts.QueueAccount;
     } & OracleInitParams &
       Partial<OracleStakeParams>,
     options?: TransactionObjectOptions

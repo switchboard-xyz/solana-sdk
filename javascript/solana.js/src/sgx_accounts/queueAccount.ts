@@ -1,4 +1,8 @@
-import { OracleAccount } from '../accounts';
+import {
+  OracleAccount,
+  OracleInitParams,
+  OracleStakeParams,
+} from '../accounts';
 import { Account } from '../accounts/account';
 import * as errors from '../errors';
 import * as types from '../sgx-generated';
@@ -8,6 +12,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { SgxAccounts } from '..';
 
 import {
   Keypair,
@@ -63,6 +68,11 @@ export interface QueueAccountInitParams {
    */
   authority?: Keypair;
 }
+export type CreateQueueOracleParams = OracleInitParams &
+  Partial<OracleStakeParams> &
+  SgxAccounts.PermissionSetParams & {
+    queueAuthorityPubkey?: PublicKey;
+  };
 /**
  *  Parameters for an {@linkcode types.queueAddMrEnclave} instruction.
  */
@@ -167,6 +177,114 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     );
     if (data) return data;
     throw new errors.AccountNotFoundError('Queue (SGX)', this.publicKey);
+  }
+
+  /**
+   *  Creates a transaction object with oracleInit instructions for the given QueueAccount.
+   *
+   *  @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
+   *
+   *  @param params - the oracle configuration parameters.
+   *
+   *  @return Transaction signature and the newly created OracleAccount.
+   *
+   *  Basic usage example:
+   *
+   *  ```ts
+   *  import { QueueAccount } from '@switchboard-xyz/solana.js';
+   *  const queueAccount = new QueueAccount(program, queuePubkey);
+   *  const [oracleAccount, oracleInitTxn] = await queueAccount.createOracleInstructions(payer, {
+   *    name: "My Oracle",
+   *    metadata: "Oracle #1"
+   *  });
+   *  const oracleInitSignature = await program.signAndSend(oracleInitTxn);
+   *  const oracle = await oracleAccount.loadData();
+   *  ```
+   */
+  public async createOracleInstructions(
+    /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
+    payer: PublicKey,
+    params: CreateQueueOracleParams,
+    options?: TransactionObjectOptions
+  ): Promise<[OracleAccount, Array<TransactionObject>]> {
+    const queueData = await this.loadData();
+    const queueAuthorityPubkey = params.authority
+      ? params.authority.publicKey
+      : params.queueAuthorityPubkey ?? queueData.authority;
+
+    const [oracleAccount, createOracleTxnObject] =
+      await OracleAccount.createInstructions(
+        this.program,
+        payer,
+        { ...params, queueAccount: this },
+        options
+      );
+    const [permissionAccount, createPermissionTxnObject] =
+      SgxAccounts.PermissionAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          granter: this.publicKey,
+          grantee: oracleAccount.publicKey,
+          authority: queueAuthorityPubkey,
+        },
+        options
+      );
+
+    if (
+      params.enable &&
+      (params.authority || queueAuthorityPubkey.equals(payer))
+    ) {
+      const permissionSetTxn = await permissionAccount.setInstruction(
+        payer,
+        {
+          permission: params.permission,
+          enable: true,
+          authority: params.authority,
+        },
+        options
+      );
+      createPermissionTxnObject.combine(permissionSetTxn);
+    }
+
+    return [
+      oracleAccount,
+      TransactionObject.pack(
+        [...createOracleTxnObject, createPermissionTxnObject],
+        options
+      ),
+    ];
+  }
+
+  /**
+   *  Creates a new {@linkcode OracleAccount}.
+   *
+   *  @param params - the oracle configuration parameters.
+   *
+   *  @return Transaction signature and the newly created OracleAccount.
+   *
+   *  Basic usage example:
+   *
+   *  ```ts
+   *  import { QueueAccount } from '@switchboard-xyz/solana.js';
+   *  const queueAccount = new QueueAccount(program, queuePubkey);
+   *  const [oracleAccount, oracleInitSignature] = await queueAccount.createOracle({
+   *    name: "My Oracle",
+   *    metadata: "Oracle #1"
+   *  });
+   *  const oracle = await oracleAccount.loadData();
+   *  ```
+   */
+  public async createOracle(
+    params: CreateQueueOracleParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[OracleAccount, Array<TransactionSignature>]> {
+    const [oracleAccount, txn] = await this.createOracleInstructions(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    return [oracleAccount, await this.program.signAndSendAll(txn)];
   }
 
   public async addMrEnclaveInstruction(

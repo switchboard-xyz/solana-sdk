@@ -21,7 +21,7 @@ import {
 export interface PermissionAccountInitParams {
   granter: PublicKey;
   grantee: PublicKey;
-  authority?: Keypair;
+  authority?: PublicKey;
 }
 /**
  *  Parameters for setting the permissions of a {@linkcode PermissionAccount}
@@ -100,7 +100,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
     params: PermissionAccountInitParams,
     options?: TransactionObjectOptions
   ): [PermissionAccount, TransactionObject] {
-    const authority = params.authority ? params.authority.publicKey : payer;
+    const authority = params.authority ?? payer;
     const [account] = PermissionAccount.fromSeed(
       program,
       authority,
