@@ -10,11 +10,12 @@ import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
 import assert from 'assert';
 
-describe('SGX Quote Tests', () => {
+describe('SGX Function Tests', () => {
   let ctx: TestContext;
 
   let queueAccount: sbv2.SgxAccounts.QueueAccount;
   let quoteAccount: sbv2.SgxAccounts.QuoteAccount;
+  let functionAccount: sbv2.SgxAccounts.FunctionAccount;
 
   before(async () => {
     ctx = await setupTest();
@@ -27,16 +28,28 @@ describe('SGX Quote Tests', () => {
       requireUsagePermissions: false,
       authority: Keypair.generate(),
     });
+    [quoteAccount] = await sbv2.SgxAccounts.QuoteAccount.create(ctx.program, {
+      cid: new Uint8Array([1, 2, 3]),
+      queueAccount,
+    });
   });
 
-  it('Creates a Quote', async () => {
-    const cid = new Uint8Array([1, 2, 3]);
-    [quoteAccount] = await sbv2.SgxAccounts.QuoteAccount.create(ctx.program, {
-      queueAccount,
-      cid,
-    });
-
-    const expected = Array.from(cid).concat(Array(64).fill(0)).slice(0, 64);
+  it('Creates a Function', async () => {
+    const container = new Uint8Array([1, 2, 3]);
+    const containerRegistry = new Uint8Array([3, 2, 1]);
+    const version = new Uint8Array([1, 2, 3, 2, 1]);
+    [functionAccount] = await sbv2.SgxAccounts.FunctionAccount.create(
+      ctx.program,
+      {
+        name: 'FUNCTION_NAME',
+        metadata: 'FUNCTION_METADATA',
+        schedule: '* * * * *',
+        container,
+        containerRegistry,
+        version,
+        quoteAccount,
+      }
+    );
 
     const data = await quoteAccount.loadData();
     assert(data.isOnQueue === true);

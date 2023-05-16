@@ -29,12 +29,12 @@ import { toUtf8 } from '@switchboard-xyz/common';
  *  Parameters for initializing an {@linkcode FunctionAccount}
  */
 export interface FunctionAccountInitParams {
-  name: Uint8Array;
-  metadata: Uint8Array;
+  name?: string;
+  metadata?: string;
   container: Uint8Array;
   containerRegistry: Uint8Array;
   version: Uint8Array;
-  schedule: Uint8Array;
+  schedule: string;
 
   /**
    *  The quote account to which this function account will be linked
@@ -154,12 +154,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       {
         params: {
-          name: params.name,
-          metadata: params.metadata,
+          name: new Uint8Array(Buffer.from(params.name ?? '', 'utf8')),
+          metadata: new Uint8Array(Buffer.from(params.metadata ?? '', 'utf8')),
+          schedule: new Uint8Array(Buffer.from(params.schedule ?? '', 'utf8')),
           container: params.container,
           containerRegistry: params.containerRegistry,
           version: params.version,
-          schedule: params.schedule,
         },
       },
       {
