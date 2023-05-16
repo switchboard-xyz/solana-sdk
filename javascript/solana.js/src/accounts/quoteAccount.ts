@@ -56,6 +56,8 @@ export interface QuoteVerifyParams {
    *  @TODO: Docs for mrEnclave
    */
   mrEnclave: Uint8Array;
+
+  verifierKeypair: Keypair;
 }
 /**
  * @TODO: Documentation
@@ -141,7 +143,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
 
   public async heartbeatInstruction(
     payer: PublicKey,
-    params: QuoteHeartbeatParams,
+    params?: QuoteHeartbeatParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const quoteData = await this.loadData();
@@ -151,7 +153,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     );
     const instruction = types.quoteHeartbeat(
       this.program,
-      { params },
+      { params: params ?? {} },
       {
         quote: this.publicKey,
         attestationQueue: queueAccount.publicKey,
@@ -164,7 +166,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   }
 
   public async heartbeat(
-    params: QuoteHeartbeatParams,
+    params?: QuoteHeartbeatParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.heartbeatInstruction(
@@ -190,11 +192,16 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       },
       {
         quote: this.publicKey,
-        verifier: PublicKey.default, // @TODO: verifier publicKey
+        verifier: params.verifierKeypair.publicKey,
         attestationQueue: quoteData.attestationQueue,
       }
     );
-    return new TransactionObject(payer, [instruction], [], options);
+    return new TransactionObject(
+      payer,
+      [instruction],
+      [params.verifierKeypair],
+      options
+    );
   }
 
   public async verify(

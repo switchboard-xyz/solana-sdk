@@ -6,46 +6,64 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface QuoteAccountDataFields {
+  /** TODO: Add description */
   delegatedSecuredSigner: PublicKey;
   bump: number;
+  /** TODO: Add description */
   quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   bufferKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
   attestationQueue: PublicKey;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
   mrEnclave: Array<number>;
   verificationStatus: number;
   verificationTimestamp: BN;
   validUntil: BN;
   isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
   lastHeartbeat: BN;
   ebuf: Array<number>;
 }
 
 export interface QuoteAccountDataJSON {
+  /** TODO: Add description */
   delegatedSecuredSigner: string;
   bump: number;
+  /** TODO: Add description */
   quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   bufferKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
   attestationQueue: string;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
   mrEnclave: Array<number>;
   verificationStatus: number;
   verificationTimestamp: string;
   validUntil: string;
   isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
   lastHeartbeat: string;
   ebuf: Array<number>;
 }
 
 export class QuoteAccountData {
+  /** TODO: Add description */
   readonly delegatedSecuredSigner: PublicKey;
   readonly bump: number;
+  /** TODO: Add description */
   readonly quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   readonly bufferKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
   readonly attestationQueue: PublicKey;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
   readonly mrEnclave: Array<number>;
   readonly verificationStatus: number;
   readonly verificationTimestamp: BN;
   readonly validUntil: BN;
   readonly isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
   readonly lastHeartbeat: BN;
   readonly ebuf: Array<number>;
 

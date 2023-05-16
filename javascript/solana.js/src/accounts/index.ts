@@ -2,6 +2,7 @@ export * from './account';
 export * from './aggregatorAccount';
 export * from './aggregatorHistoryBuffer';
 export * from './attestationPermissionAccount';
+export * from './attestationProgramStateAccount';
 export * from './attestationQueueAccount';
 export * from './bufferRelayAccount';
 export * from './crankAccount';

@@ -509,7 +509,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         oracle: this.publicKey,
         oracleAuthority: params.authority ?? payer,
         tokenAccount: params.tokenWallet,
-        gcOracle: params.gcOracle,
+        gcOracle: params.gcOracle ?? PublicKey.default,
         oracleQueue: params.oracleQueue,
         permission: permissionAccount.publicKey,
         dataBuffer: params.dataBuffer,

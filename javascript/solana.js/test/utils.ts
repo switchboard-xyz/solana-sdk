@@ -140,6 +140,18 @@ export async function setupTest(): Promise<TestContext> {
     console.error(e);
   }
 
+  // Check if attestationProgramStateAccount exists
+  try {
+    const attestationProgramState = await program.connection.getAccountInfo(
+      program.attestationProgramState.publicKey
+    );
+    if (!attestationProgramState || attestationProgramState.data === null) {
+      await sbv2.AttestationProgramStateAccount.getOrCreate(program);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+
   await program.mint.getOrCreateAssociatedUser(program.walletPubkey);
 
   return {

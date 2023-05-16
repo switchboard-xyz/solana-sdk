@@ -15,10 +15,26 @@ describe('Quote Tests', () => {
 
   let queueAccount: sbv2.QueueAccount;
   let oracleAccount: sbv2.OracleAccount;
+  let oraclePermissionAccount: sbv2.PermissionAccount;
+  let oraclePermissionBump: number;
+  let oracleQuoteAccount: sbv2.QuoteAccount;
+  const oracleQuoteKeypair = Keypair.generate();
 
-  const mrEnclave = Array.from(Buffer.from('Mr. Enclave'))
-    .concat(Array(64).fill(0))
-    .slice(0, 64);
+  let attestationQueueAccount: sbv2.AttestationQueueAccount;
+  const quoteKeypair = Keypair.generate();
+  let attestationQuoteAccount: sbv2.QuoteAccount;
+
+  const quoteVerifierMrEnclave = Array.from(
+    Buffer.from('This is the quote verifier MrEnclave')
+  )
+    .concat(Array(32).fill(0))
+    .slice(0, 32);
+
+  const mrEnclave = Array.from(
+    Buffer.from('This is the NodeJS oracle MrEnclave')
+  )
+    .concat(Array(32).fill(0))
+    .slice(0, 32);
 
   before(async () => {
     ctx = await setupTest();
@@ -59,39 +75,74 @@ describe('Quote Tests', () => {
         []
       )
     );
+
+    [oraclePermissionAccount, oraclePermissionBump] =
+      oracleAccount.getPermissionAccount(
+        queueAccount.publicKey,
+        ctx.program.walletPubkey
+      );
   });
 
-  it('Creates a TEE oracle', async () => {
-    // Create attestation queue for the quote.
-    const [attestationQueueAccount] = await sbv2.AttestationQueueAccount.create(
+  it('Creates an Attestation Queue', async () => {
+    [attestationQueueAccount] = await sbv2.AttestationQueueAccount.create(
       ctx.program,
       {
         reward: 0,
-        allowAuthorityOverrideAfter: 0,
-        maxQuoteVerificationAge: 0,
+        allowAuthorityOverrideAfter: 60, // should increase this
+        maxQuoteVerificationAge: 604800,
         requireAuthorityHeartbeatPermission: false,
         requireUsagePermissions: false,
+        nodeTimeout: 604800,
       }
     );
-    // Create a quote.
-    const [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      cid: undefined, // @TODO: Replace with proper cid.
+
+    attestationQueueAccount.addMrEnclave({
+      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
+    });
+
+    [attestationQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
+      cid: new Uint8Array(Array(64).fill(1)),
       queueAccount: attestationQueueAccount,
+      keypair: quoteKeypair,
     });
-    // Verify the quote.
-    await quoteAccount.verify({
-      timestamp: new BN(Date.now()),
-      mrEnclave: new Uint8Array(mrEnclave),
+
+    console.log(await attestationQuoteAccount.loadData());
+
+    await attestationQuoteAccount.verify({
+      timestamp: new BN(Math.floor(Date.now() / 1000)),
+      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
+      verifierKeypair: quoteKeypair,
     });
+
+    // add itself since requireAuthorityHeartbeatPermission is false
+    await attestationQuoteAccount.heartbeat();
+  });
+
+  it('Creates a TEE oracle', async () => {
     const queueData = await queueAccount.loadData();
-    // Perform tee heartbeat.
-    await oracleAccount.teeHeartbeat({
-      gcOracle: PublicKey.default, // @TODO: Replace with proper pubkey.
-      tokenWallet: PublicKey.default, // @TODO: Replace with proper pubkey.
-      oracleQueue: queueAccount.publicKey,
-      dataBuffer: queueData.dataBuffer,
-      quote: quoteAccount.publicKey,
-      permission: [], // @TODO: Replace with proper permission account and bump.
+
+    const oracleData = await oracleAccount.loadData();
+
+    [oracleQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
+      cid: new Uint8Array(Array(64).fill(1)),
+      queueAccount: attestationQueueAccount,
+      keypair: quoteKeypair,
     });
+
+    await oracleQuoteAccount.verify({
+      timestamp: new BN(Math.floor(Date.now() / 1000)),
+      mrEnclave: new Uint8Array(mrEnclave),
+      verifierKeypair: quoteKeypair,
+    });
+
+    // // Perform tee heartbeat.
+    // await oracleAccount.teeHeartbeat({
+    //   gcOracle: PublicKey.default, // @TODO: Replace with proper pubkey.
+    //   tokenWallet: oracleData.tokenAccount,
+    //   oracleQueue: queueAccount.publicKey,
+    //   dataBuffer: queueData.dataBuffer,
+    //   quote: quoteAccount.publicKey,
+    //   permission: [oraclePermissionAccount, oraclePermissionBump],
+    // });
   });
 });

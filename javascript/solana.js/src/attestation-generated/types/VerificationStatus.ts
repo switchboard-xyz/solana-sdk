@@ -79,9 +79,9 @@ export interface VerificationSuccessJSON {
 }
 
 export class VerificationSuccess {
-  static readonly discriminator = 3;
+  static readonly discriminator = 4;
   static readonly kind = 'VerificationSuccess';
-  readonly discriminator = 3;
+  readonly discriminator = 4;
   readonly kind = 'VerificationSuccess';
 
   toJSON(): VerificationSuccessJSON {
@@ -102,9 +102,9 @@ export interface VerificationOverrideJSON {
 }
 
 export class VerificationOverride {
-  static readonly discriminator = 4;
+  static readonly discriminator = 8;
   static readonly kind = 'VerificationOverride';
-  readonly discriminator = 4;
+  readonly discriminator = 8;
   readonly kind = 'VerificationOverride';
 
   toJSON(): VerificationOverrideJSON {

@@ -1,4 +1,5 @@
 import {
+  AttestationProgramStateAccount,
   BUFFER_DISCRIMINATOR,
   CrankAccount,
   DISCRIMINATOR_MAP,
@@ -192,11 +193,17 @@ export class SwitchboardProgram {
       bump: stateAccount[1],
     };
 
-    // TODO: produce the attestation state account from the seed.
-    const attestationStateAccount = null;
-    this.attestationProgramState = {
+    this.programState = {
       publicKey: stateAccount[0].publicKey,
       bump: stateAccount[1],
+    };
+
+    // TODO: produce the attestation state account from the seed.
+    const attestationStateAccount =
+      AttestationProgramStateAccount.fromSeed(this);
+    this.attestationProgramState = {
+      publicKey: attestationStateAccount[0].publicKey,
+      bump: attestationStateAccount[1],
     };
 
     this.mint = mint;
