@@ -1,11 +1,10 @@
 export * from './accounts';
+export * as attestation_types from './attestation-generated';
 export * from './const';
 export * from './errors';
 export * as types from './generated';
 export * from './json';
 export * from './mint';
-export * as SgxAccounts from './sgx_accounts';
-export * as sgx_types from './sgx-generated';
 export * from './SolanaClock';
 export * from './SwitchboardError';
 export * from './SwitchboardEvents';
