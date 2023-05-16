@@ -94,7 +94,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${attestationGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_quote_verifier.json ${attestationGeneratedPath}`,
+      `rm -rf ${attestationGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_attestation_program.json ${attestationGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   } else {

@@ -1,10 +1,11 @@
 #!/usr/bin/node
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs/promises');
+const fsSync = require('fs');
 const os = require('os');
 const { execSync, spawn } = require('child_process');
-const { Keypair, clusterApiUrl, Connection } = require('@solana/web3.js');
+const { Keypair, Connection } = require('@solana/web3.js');
 const { sleep } = require('@switchboard-xyz/common');
 
 const SWITCHBOARD_PROGRAM_ACCOUNTS = [
@@ -53,7 +54,7 @@ async function main() {
     console.log(`Using local switchboard programs`);
   }
 
-  const isMainnet = process.argv.slice(2).includes('--mainnet');
+  // const isMainnet = process.argv.slice(2).includes('--mainnet');
 
   try {
     killPort(8899);
@@ -63,36 +64,36 @@ async function main() {
     console.error(error);
   }
 
-  if (!fs.existsSync(defaultPubkeyPath)) {
-    fs.writeFileSync(defaultPubkeyPath, `[${Keypair.generate().secretKey}]`);
+  if (!fsSync.existsSync(defaultPubkeyPath)) {
+    await fs.writeFile(defaultPubkeyPath, `[${Keypair.generate().secretKey}]`);
   }
 
   const payerPubkey = Keypair.fromSecretKey(
-    new Uint8Array(JSON.parse(fs.readFileSync(defaultPubkeyPath, 'utf-8')))
+    new Uint8Array(JSON.parse(await fs.readFile(defaultPubkeyPath, 'utf-8')))
   ).publicKey;
 
-  const switchboardAccounts = [...SWITCHBOARD_BASE_ACCOUNTS];
+  // const switchboardAccounts = [...SWITCHBOARD_BASE_ACCOUNTS];
 
-  if (!isDev) {
-    switchboardAccounts.push(
-      ...SWITCHBOARD_PROGRAM_ACCOUNTS,
-      ...SWITCHBOARD_SGX_PROGRAM_ACCOUNTS
-    );
-  }
+  // if (!isDev) {
+  //   switchboardAccounts.push(
+  //     ...SWITCHBOARD_PROGRAM_ACCOUNTS,
+  //     ...SWITCHBOARD_SGX_PROGRAM_ACCOUNTS
+  //   );
+  // }
 
-  const cloneAccounts = switchboardAccounts
-    .map(a => `--clone ${a}`)
-    .join(' ')
-    .split(' ');
+  // const cloneAccounts = switchboardAccounts
+  //   .map(a => `--clone ${a}`)
+  //   .join(' ')
+  //   .split(' ');
 
-  fs.mkdirSync('.anchor/test-ledger', { recursive: true });
+  await fs.mkdir('.anchor/test-ledger', { recursive: true });
 
-  let rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
-  if (isMainnet && process.env.SOLANA_MAINNET_RPC_URL) {
-    rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
-  } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
-    rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
-  }
+  // let rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
+  // if (isMainnet && process.env.SOLANA_MAINNET_RPC_URL) {
+  //   rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
+  // } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
+  //   rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
+  // }
 
   spawn(
     'solana-test-validator',
@@ -101,13 +102,13 @@ async function main() {
       '-r',
       '--mint',
       payerPubkey.toBase58(),
-      '--url',
-      rpcUrl,
-      ...cloneAccounts,
+      // '--url',
+      // rpcUrl,
+      // ...cloneAccounts,
       '--ledger',
       '.anchor/test-ledger',
     ],
-    { cwd: jsSdkRoot, encoding: 'utf-8' }
+    { cwd: jsSdkRoot, encoding: 'utf-8', stdio: 'pipe', shell: '/bin/zsh' }
   );
 
   await awaitValidator();
@@ -123,7 +124,7 @@ async function main() {
       programDeploy(
         devSwitchboard,
         defaultPubkeyPath,
-        'switchboard_quote_verifier',
+        'switchboard_attestation_program',
         '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
       ),
     ]);
@@ -177,7 +178,7 @@ async function programDeploy(
     'deploy',
     `${programName}.so`
   );
-  if (!fs.existsSync(sbProgramPath)) {
+  if (!fsSync.existsSync(sbProgramPath)) {
     throw new Error(
       `Failed to find BPF program ${programName}.so in ${switchboardDir}`
     );
@@ -189,13 +190,13 @@ async function programDeploy(
     'deploy',
     `${programName}-keypair.json`
   );
-  if (!fs.existsSync(programKeypairPath)) {
+  if (!fsSync.existsSync(programKeypairPath)) {
     throw new Error(
       `Failed to find program keypair for ${programName} in ${switchboardDir}`
     );
   }
   const programKeypair = Keypair.fromSecretKey(
-    new Uint8Array(JSON.parse(fs.readFileSync(programKeypairPath, 'utf-8')))
+    new Uint8Array(JSON.parse(await fs.readFile(programKeypairPath, 'utf-8')))
   );
   if (programKeypair.publicKey.toBase58() !== programId) {
     throw new Error(
@@ -209,45 +210,77 @@ async function programDeploy(
     'idl',
     `${programName}.json`
   );
-  if (!fs.existsSync(idlPath)) {
+  if (!fsSync.existsSync(idlPath)) {
     throw new Error(
       `Failed to find IDL ${programName}.json in ${switchboardDir}`
     );
   }
 
-  const solanaDeployArgs = [
-    'program',
-    'deploy',
-    '-u',
-    'l',
-    '--program-id',
-    programKeypairPath,
-    '--upgrade-authority',
-    defaultPubkeyPath,
-    sbProgramPath,
-  ];
-  execSync(`solana ${solanaDeployArgs.join(' ')}`, {
-    cwd: switchboardDir,
-    encoding: 'utf8',
-    stdio: 'inherit',
-    shell: '/bin/zsh',
-  });
+  console.log(`Starting program deploy for ${programName} ...`);
+  await runCommandAsync(
+    `solana ${[
+      'program',
+      'deploy',
+      '-u',
+      'l',
+      '--program-id',
+      programKeypairPath,
+      '--upgrade-authority',
+      defaultPubkeyPath,
+      sbProgramPath,
+    ].join(' ')}`,
+    {
+      cwd: switchboardDir,
+      encoding: 'utf8',
+      // stdio: 'pipe',
+      shell: '/bin/zsh',
+    }
+  );
 
-  const idlInitArgs = [
-    'idl',
-    'init',
-    '--provider.cluster',
-    'localnet',
-    '--provider.wallet',
-    defaultPubkeyPath,
-    '-f',
-    idlPath,
-    programId,
-  ];
-  execSync(`anchor ${idlInitArgs.join(' ')}`, {
-    cwd: switchboardDir,
-    encoding: 'utf-8',
-    stdio: 'inherit',
-    shell: '/bin/zsh',
+  console.log(`Starting IDL deploy for ${programName} ...`);
+  await runCommandAsync(
+    `anchor ${[
+      'idl',
+      'init',
+      '--provider.cluster',
+      'localnet',
+      '--provider.wallet',
+      defaultPubkeyPath,
+      '-f',
+      idlPath,
+      programId,
+    ].join(' ')}`,
+    {
+      cwd: switchboardDir,
+      encoding: 'utf8',
+      // stdio: 'pipe',
+      shell: '/bin/zsh',
+    }
+  );
+}
+
+async function runCommandAsync(command, options) {
+  return new Promise((resolve, reject) => {
+    const cmd = spawn(command, options);
+
+    cmd.stdout.on('data', data => {
+      console.log(data.toString());
+    });
+
+    cmd.stderr.on('data', data => {
+      console.error(data.toString());
+    });
+
+    cmd.on('error', error => {
+      reject(error);
+    });
+
+    cmd.on('close', code => {
+      if (code !== 0) {
+        reject(new Error(`Command exited with code ${code}`));
+      } else {
+        resolve();
+      }
+    });
   });
 }
