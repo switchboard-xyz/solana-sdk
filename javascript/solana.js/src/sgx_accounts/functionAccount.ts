@@ -28,6 +28,7 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import { toUtf8 } from '@switchboard-xyz/common';
+import { isValidCron } from 'cron-validator';
 
 /**
  *  Parameters for initializing an {@linkcode FunctionAccount}
@@ -39,7 +40,6 @@ export interface FunctionAccountInitParams {
   version: string;
   containerRegistry?: string;
   schedule: string;
-
   /**
    *  The quote account to which this function account will be linked
    */
@@ -140,6 +140,10 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   ): Promise<[FunctionAccount, TransactionObject]> {
     const functionKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(functionKeypair);
+
+    if (!isValidCron(params.schedule, { seconds: true })) {
+      throw new errors.InvalidCronSchedule(params.schedule);
+    }
 
     const quoteData = await params.quoteAccount.loadData();
     const [queueAccount, queueData] = await AttestationQueueAccount.load(

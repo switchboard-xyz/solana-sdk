@@ -100,3 +100,11 @@ export class IncorrectOwner extends Error {
     Object.setPrototypeOf(this, IncorrectOwner.prototype);
   }
 }
+export class InvalidCronSchedule extends Error {
+  constructor(schedule: string) {
+    super(
+      `invalid cron schedule, expected format: '* * * * * *', received: ${schedule}`
+    );
+    Object.setPrototypeOf(this, IncorrectOwner.prototype);
+  }
+}
