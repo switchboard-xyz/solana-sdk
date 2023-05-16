@@ -6,6 +6,7 @@ import { programConfig } from '../src/generated';
 
 import { setupTest, TestContext } from './utils';
 
+import { BN } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import assert from 'assert';
 
@@ -61,33 +62,36 @@ describe('Quote Tests', () => {
   });
 
   it('Creates a TEE oracle', async () => {
-    const cid = new Uint8Array([1, 2, 3]);
-    [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      queueAccount,
-      cid,
+    // Create attestation queue for the quote.
+    const [attestationQueueAccount] = await sbv2.AttestationQueueAccount.create(
+      ctx.program,
+      {
+        reward: 0,
+        allowAuthorityOverrideAfter: 0,
+        maxQuoteVerificationAge: 0,
+        requireAuthorityHeartbeatPermission: false,
+        requireUsagePermissions: false,
+      }
+    );
+    // Create a quote.
+    const [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
+      cid: undefined, // @TODO: Replace with proper cid.
+      queueAccount: attestationQueueAccount,
     });
-    const expected = Array.from(cid).concat(Array(64).fill(0)).slice(0, 64);
-    const data = await quoteAccount.loadData();
-    assert(data.isOnQueue === true);
-    console.log(data);
+    // Verify the quote.
+    await quoteAccount.verify({
+      timestamp: new BN(Date.now()),
+      mrEnclave: new Uint8Array(mrEnclave),
+    });
+    const queueData = await queueAccount.loadData();
+    // Perform tee heartbeat.
+    await oracleAccount.teeHeartbeat({
+      gcOracle: PublicKey.default, // @TODO: Replace with proper pubkey.
+      tokenWallet: PublicKey.default, // @TODO: Replace with proper pubkey.
+      oracleQueue: queueAccount.publicKey,
+      dataBuffer: queueData.dataBuffer,
+      quote: quoteAccount.publicKey,
+      permission: [], // @TODO: Replace with proper permission account and bump.
+    });
   });
-
-  // it('addMrEnclave', async () => {
-  //   const mrEnclave = new Uint8Array([1, 2, 3]);
-  //   await queueAccount.addMrEnclave({ mrEnclave, authority: queueAuthority });
-
-  //   const expected = Array.from(mrEnclave)
-  //     .concat(Array(32).fill(0))
-  //     .slice(0, 32);
-  //   const data = await queueAccount.loadData();
-  //   assert(data.mrEnclavesLen === 1);
-  //   assert(JSON.stringify(data.mrEnclaves[0]) === JSON.stringify(expected));
-
-  //   await queueAccount.removeMrEnclave({
-  //     mrEnclave,
-  //     authority: queueAuthority,
-  //   });
-  //   const data2 = await queueAccount.loadData();
-  //   assert(data2.mrEnclavesLen === 0);
-  // });
 });
