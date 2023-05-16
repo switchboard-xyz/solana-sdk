@@ -140,7 +140,7 @@ main()
   });
 
 async function awaitValidator(timeout = 60) {
-  const connection = new Connection('http://localhost:8899');
+  const connection = new Connection('http://127.0.0.1:8899');
   let myError;
   let numRetries = timeout * 2;
   while (numRetries) {

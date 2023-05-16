@@ -15,17 +15,20 @@ describe('SGX Queue Tests', () => {
   before(async () => (ctx = await setupTest()));
 
   const queueAuthority = Keypair.generate();
-  let queueAccount: sbv2.SgxAccounts.QueueAccount;
+  let queueAccount: sbv2.SgxAccounts.AttestationQueueAccount;
 
   it('Creates a Queue', async () => {
-    [queueAccount] = await sbv2.SgxAccounts.QueueAccount.create(ctx.program, {
-      reward: 69420,
-      allowAuthorityOverrideAfter: 321,
-      maxQuoteVerificationAge: 123,
-      requireAuthorityHeartbeatPermission: true,
-      requireUsagePermissions: true,
-      authority: queueAuthority,
-    });
+    [queueAccount] = await sbv2.SgxAccounts.AttestationQueueAccount.create(
+      ctx.program,
+      {
+        reward: 69420,
+        allowAuthorityOverrideAfter: 321,
+        maxQuoteVerificationAge: 123,
+        requireAuthorityHeartbeatPermission: true,
+        requireUsagePermissions: true,
+        authority: queueAuthority,
+      }
+    );
 
     const data = await queueAccount.loadData();
     assert(data.reward === 69420);
@@ -37,6 +40,8 @@ describe('SGX Queue Tests', () => {
   });
 
   it('Add and remove an MrEnclave', async () => {
+    if (!queueAccount) throw new Error('OracleQueue does not exist');
+
     const mrEnclave = new Uint8Array([1, 2, 3]);
     await queueAccount.addMrEnclave({ mrEnclave, authority: queueAuthority });
 

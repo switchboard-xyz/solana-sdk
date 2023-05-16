@@ -193,9 +193,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: {
-      queueAccount: QueueAccount | SgxAccounts.QueueAccount;
-    } & OracleInitParams &
+    params: { queueAccount: QueueAccount } & OracleInitParams &
       Partial<OracleStakeParams>,
     options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {

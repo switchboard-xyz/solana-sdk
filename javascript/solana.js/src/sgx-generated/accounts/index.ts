@@ -1,4 +1,9 @@
 export type {
+  AttestationQueueAccountDataFields,
+  AttestationQueueAccountDataJSON,
+} from './AttestationQueueAccountData';
+export { AttestationQueueAccountData } from './AttestationQueueAccountData';
+export type {
   FunctionAccountDataFields,
   FunctionAccountDataJSON,
 } from './FunctionAccountData';
@@ -13,10 +18,5 @@ export type {
   QuoteAccountDataJSON,
 } from './QuoteAccountData';
 export { QuoteAccountData } from './QuoteAccountData';
-export type {
-  ServiceQueueAccountDataFields,
-  ServiceQueueAccountDataJSON,
-} from './ServiceQueueAccountData';
-export { ServiceQueueAccountData } from './ServiceQueueAccountData';
 export type { StateFields, StateJSON } from './State';
 export { State } from './State';

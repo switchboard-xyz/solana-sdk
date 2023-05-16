@@ -24,7 +24,7 @@ import {
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
  */
-export interface QueueAccountInitParams {
+export interface AttestationQueueAccountInitParams {
   /**
    *  Rewards to provide oracles and round openers on this queue.
    */
@@ -68,22 +68,17 @@ export interface QueueAccountInitParams {
    */
   authority?: Keypair;
 }
-export type CreateQueueOracleParams = OracleInitParams &
-  Partial<OracleStakeParams> &
-  SgxAccounts.PermissionSetParams & {
-    queueAuthorityPubkey?: PublicKey;
-  };
 /**
  *  Parameters for an {@linkcode types.queueAddMrEnclave} instruction.
  */
-export interface QueueAddMrEnclaveParams {
+export interface AttestationQueueAddMrEnclaveParams {
   mrEnclave: Uint8Array;
   authority?: Keypair;
 }
 /**
  *  Parameters for an {@linkcode types.queueRemoveMrEnclave} instruction.
  */
-export interface QueueRemoveMrEnclaveParams {
+export interface AttestationQueueRemoveMrEnclaveParams {
   mrEnclave: Uint8Array;
   authority?: Keypair;
 }
@@ -94,21 +89,21 @@ export interface QueueRemoveMrEnclaveParams {
  * A QueueAccount is responsible for allocating update requests to it's round robin queue of
  * {@linkcode OracleAccount}'s.
  *
- * Data: {@linkcode types.ServiceQueueAccountData}
+ * Data: {@linkcode types.AttestationQueueAccountData}
  *
  * Buffer: {@linkcode QueueDataBuffer}
  */
-export class QueueAccount extends Account<types.ServiceQueueAccountData> {
-  static accountName = 'ServiceQueueAccountData';
+export class AttestationQueueAccount extends Account<types.AttestationQueueAccountData> {
+  static accountName = 'AttestationQueueAccountData';
 
   /**
-   *  Load an existing {@linkcode QueueAccount} with its current on-chain state
+   *  Load an existing {@linkcode AttestationQueueAccount} with its current on-chain state
    */
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
-  ): Promise<[QueueAccount, types.ServiceQueueAccountData]> {
-    const queueAccount = new QueueAccount(program, address);
+  ): Promise<[AttestationQueueAccount, types.AttestationQueueAccountData]> {
+    const queueAccount = new AttestationQueueAccount(program, address);
     const state = await queueAccount.loadData();
     return [queueAccount, state];
   }
@@ -116,13 +111,13 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
   public static createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: QueueAccountInitParams,
+    params: AttestationQueueAccountInitParams,
     options?: TransactionObjectOptions
-  ): [QueueAccount, TransactionObject] {
+  ): [AttestationQueueAccount, TransactionObject] {
     const queueKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(queueKeypair);
 
-    const instruction = types.queueInit(
+    const instruction = types.attestationQueueInit(
       program,
       {
         params: {
@@ -143,16 +138,16 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
       }
     );
     return [
-      new QueueAccount(program, queueKeypair.publicKey),
+      new AttestationQueueAccount(program, queueKeypair.publicKey),
       new TransactionObject(payer, [instruction], [queueKeypair], options),
     ];
   }
 
   public static async create(
     program: SwitchboardProgram,
-    params: QueueAccountInitParams,
+    params: AttestationQueueAccountInitParams,
     options?: SendTransactionObjectOptions
-  ): Promise<[QueueAccount, TransactionSignature]> {
+  ): Promise<[AttestationQueueAccount, TransactionSignature]> {
     const [account, txnObject] = this.createInstruction(
       program,
       program.walletPubkey,
@@ -165,13 +160,14 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
   /**
    * Get the size of an {@linkcode QueueAccount} on-chain.
    */
-  public readonly size = this.program.sgxAccount.serviceQueueAccountData.size;
+  public readonly size =
+    this.program.sgxAccount.attestationQueueAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
    */
-  public async loadData(): Promise<types.ServiceQueueAccountData> {
-    const data = await types.ServiceQueueAccountData.fetch(
+  public async loadData(): Promise<types.AttestationQueueAccountData> {
+    const data = await types.AttestationQueueAccountData.fetch(
       this.program,
       this.publicKey
     );
@@ -179,117 +175,9 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     throw new errors.AccountNotFoundError('Queue (SGX)', this.publicKey);
   }
 
-  /**
-   *  Creates a transaction object with oracleInit instructions for the given QueueAccount.
-   *
-   *  @param payer - the publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided.
-   *
-   *  @param params - the oracle configuration parameters.
-   *
-   *  @return Transaction signature and the newly created OracleAccount.
-   *
-   *  Basic usage example:
-   *
-   *  ```ts
-   *  import { QueueAccount } from '@switchboard-xyz/solana.js';
-   *  const queueAccount = new QueueAccount(program, queuePubkey);
-   *  const [oracleAccount, oracleInitTxn] = await queueAccount.createOracleInstructions(payer, {
-   *    name: "My Oracle",
-   *    metadata: "Oracle #1"
-   *  });
-   *  const oracleInitSignature = await program.signAndSend(oracleInitTxn);
-   *  const oracle = await oracleAccount.loadData();
-   *  ```
-   */
-  public async createOracleInstructions(
-    /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
-    payer: PublicKey,
-    params: CreateQueueOracleParams,
-    options?: TransactionObjectOptions
-  ): Promise<[OracleAccount, Array<TransactionObject>]> {
-    const queueData = await this.loadData();
-    const queueAuthorityPubkey = params.authority
-      ? params.authority.publicKey
-      : params.queueAuthorityPubkey ?? queueData.authority;
-
-    const [oracleAccount, createOracleTxnObject] =
-      await OracleAccount.createInstructions(
-        this.program,
-        payer,
-        { ...params, queueAccount: this },
-        options
-      );
-    const [permissionAccount, createPermissionTxnObject] =
-      SgxAccounts.PermissionAccount.createInstruction(
-        this.program,
-        payer,
-        {
-          granter: this.publicKey,
-          grantee: oracleAccount.publicKey,
-          authority: queueAuthorityPubkey,
-        },
-        options
-      );
-
-    if (
-      params.enable &&
-      (params.authority || queueAuthorityPubkey.equals(payer))
-    ) {
-      const permissionSetTxn = await permissionAccount.setInstruction(
-        payer,
-        {
-          permission: params.permission,
-          enable: true,
-          authority: params.authority,
-        },
-        options
-      );
-      createPermissionTxnObject.combine(permissionSetTxn);
-    }
-
-    return [
-      oracleAccount,
-      TransactionObject.pack(
-        [...createOracleTxnObject, createPermissionTxnObject],
-        options
-      ),
-    ];
-  }
-
-  /**
-   *  Creates a new {@linkcode OracleAccount}.
-   *
-   *  @param params - the oracle configuration parameters.
-   *
-   *  @return Transaction signature and the newly created OracleAccount.
-   *
-   *  Basic usage example:
-   *
-   *  ```ts
-   *  import { QueueAccount } from '@switchboard-xyz/solana.js';
-   *  const queueAccount = new QueueAccount(program, queuePubkey);
-   *  const [oracleAccount, oracleInitSignature] = await queueAccount.createOracle({
-   *    name: "My Oracle",
-   *    metadata: "Oracle #1"
-   *  });
-   *  const oracle = await oracleAccount.loadData();
-   *  ```
-   */
-  public async createOracle(
-    params: CreateQueueOracleParams,
-    options?: SendTransactionObjectOptions
-  ): Promise<[OracleAccount, Array<TransactionSignature>]> {
-    const [oracleAccount, txn] = await this.createOracleInstructions(
-      this.program.walletPubkey,
-      params,
-      options
-    );
-    return [oracleAccount, await this.program.signAndSendAll(txn)];
-  }
-
   public async addMrEnclaveInstruction(
     payer: PublicKey,
-    params: QueueAddMrEnclaveParams,
+    params: AttestationQueueAddMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const authority = params.authority?.publicKey ?? payer;
@@ -297,7 +185,7 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     const mrEnclave = Array.from(params.mrEnclave)
       .concat(Array(32).fill(0))
       .slice(0, 32);
-    const instruction = types.queueAddMrEnclave(
+    const instruction = types.attestationQueueAddMrEnclave(
       this.program,
       { params: { mrEnclave } },
       { authority, queue: this.publicKey }
@@ -306,7 +194,7 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
   }
 
   public async addMrEnclave(
-    params: QueueAddMrEnclaveParams,
+    params: AttestationQueueAddMrEnclaveParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.addMrEnclaveInstruction(
@@ -318,7 +206,7 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
 
   public async removeMrEnclaveInstruction(
     payer: PublicKey,
-    params: QueueRemoveMrEnclaveParams,
+    params: AttestationQueueRemoveMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const authority = params.authority?.publicKey ?? payer;
@@ -326,7 +214,7 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
     const mrEnclave = Array.from(params.mrEnclave)
       .concat(Array(32).fill(0))
       .slice(0, 32);
-    const instruction = types.queueRemoveMrEnclave(
+    const instruction = types.attestationQueueRemoveMrEnclave(
       this.program,
       { params: { mrEnclave } },
       { authority, queue: this.publicKey }
@@ -335,7 +223,7 @@ export class QueueAccount extends Account<types.ServiceQueueAccountData> {
   }
 
   public async removeMrEnclave(
-    params: QueueRemoveMrEnclaveParams,
+    params: AttestationQueueRemoveMrEnclaveParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.removeMrEnclaveInstruction(

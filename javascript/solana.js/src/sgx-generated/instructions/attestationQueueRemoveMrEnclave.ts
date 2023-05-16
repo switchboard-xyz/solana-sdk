@@ -9,35 +9,35 @@ import {
 } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QueueInitArgs {
-  params: types.QueueInitParamsFields;
+export interface AttestationQueueRemoveMrEnclaveArgs {
+  params: types.AttestationQueueRemoveMrEnclaveParamsFields;
 }
 
-export interface QueueInitAccounts {
+export interface AttestationQueueRemoveMrEnclaveAccounts {
   queue: PublicKey;
   authority: PublicKey;
-  payer: PublicKey;
-  systemProgram: PublicKey;
 }
 
-export const layout = borsh.struct([types.QueueInitParams.layout('params')]);
+export const layout = borsh.struct([
+  types.AttestationQueueRemoveMrEnclaveParams.layout('params'),
+]);
 
-export function queueInit(
+export function attestationQueueRemoveMrEnclave(
   program: SwitchboardProgram,
-  args: QueueInitArgs,
-  accounts: QueueInitAccounts
+  args: AttestationQueueRemoveMrEnclaveArgs,
+  accounts: AttestationQueueRemoveMrEnclaveAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.queue, isSigner: true, isWritable: true },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
+    { pubkey: accounts.queue, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: true, isWritable: false },
   ];
-  const identifier = Buffer.from([144, 18, 99, 145, 133, 27, 207, 13]);
+  const identifier = Buffer.from([202, 141, 93, 179, 212, 230, 34, 238]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.QueueInitParams.toEncodable(args.params),
+      params: types.AttestationQueueRemoveMrEnclaveParams.toEncodable(
+        args.params
+      ),
     },
     buffer
   );

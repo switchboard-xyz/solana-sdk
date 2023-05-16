@@ -5,7 +5,7 @@ import * as borsh from '@coral-xyz/borsh';
 import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QueueInitParamsFields {
+export interface AttestationQueueInitParamsFields {
   allowAuthorityOverrideAfter: number;
   requireAuthorityHeartbeatPermission: boolean;
   requireUsagePermissions: boolean;
@@ -14,7 +14,7 @@ export interface QueueInitParamsFields {
   nodeTimeout: number;
 }
 
-export interface QueueInitParamsJSON {
+export interface AttestationQueueInitParamsJSON {
   allowAuthorityOverrideAfter: number;
   requireAuthorityHeartbeatPermission: boolean;
   requireUsagePermissions: boolean;
@@ -23,7 +23,7 @@ export interface QueueInitParamsJSON {
   nodeTimeout: number;
 }
 
-export class QueueInitParams {
+export class AttestationQueueInitParams {
   readonly allowAuthorityOverrideAfter: number;
   readonly requireAuthorityHeartbeatPermission: boolean;
   readonly requireUsagePermissions: boolean;
@@ -31,7 +31,7 @@ export class QueueInitParams {
   readonly reward: number;
   readonly nodeTimeout: number;
 
-  constructor(fields: QueueInitParamsFields) {
+  constructor(fields: AttestationQueueInitParamsFields) {
     this.allowAuthorityOverrideAfter = fields.allowAuthorityOverrideAfter;
     this.requireAuthorityHeartbeatPermission =
       fields.requireAuthorityHeartbeatPermission;
@@ -57,7 +57,7 @@ export class QueueInitParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QueueInitParams({
+    return new AttestationQueueInitParams({
       allowAuthorityOverrideAfter: obj.allowAuthorityOverrideAfter,
       requireAuthorityHeartbeatPermission:
         obj.requireAuthorityHeartbeatPermission,
@@ -68,7 +68,7 @@ export class QueueInitParams {
     });
   }
 
-  static toEncodable(fields: QueueInitParamsFields) {
+  static toEncodable(fields: AttestationQueueInitParamsFields) {
     return {
       allowAuthorityOverrideAfter: fields.allowAuthorityOverrideAfter,
       requireAuthorityHeartbeatPermission:
@@ -80,7 +80,7 @@ export class QueueInitParams {
     };
   }
 
-  toJSON(): QueueInitParamsJSON {
+  toJSON(): AttestationQueueInitParamsJSON {
     return {
       allowAuthorityOverrideAfter: this.allowAuthorityOverrideAfter,
       requireAuthorityHeartbeatPermission:
@@ -92,8 +92,10 @@ export class QueueInitParams {
     };
   }
 
-  static fromJSON(obj: QueueInitParamsJSON): QueueInitParams {
-    return new QueueInitParams({
+  static fromJSON(
+    obj: AttestationQueueInitParamsJSON
+  ): AttestationQueueInitParams {
+    return new AttestationQueueInitParams({
       allowAuthorityOverrideAfter: obj.allowAuthorityOverrideAfter,
       requireAuthorityHeartbeatPermission:
         obj.requireAuthorityHeartbeatPermission,
@@ -105,6 +107,6 @@ export class QueueInitParams {
   }
 
   toEncodable() {
-    return QueueInitParams.toEncodable(this);
+    return AttestationQueueInitParams.toEncodable(this);
   }
 }

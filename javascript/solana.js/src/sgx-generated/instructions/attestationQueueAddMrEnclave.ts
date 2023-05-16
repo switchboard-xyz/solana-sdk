@@ -9,33 +9,33 @@ import {
 } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QueueAddMrEnclaveArgs {
-  params: types.QueueAddMrEnclaveParamsFields;
+export interface AttestationQueueAddMrEnclaveArgs {
+  params: types.AttestationQueueAddMrEnclaveParamsFields;
 }
 
-export interface QueueAddMrEnclaveAccounts {
+export interface AttestationQueueAddMrEnclaveAccounts {
   queue: PublicKey;
   authority: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.QueueAddMrEnclaveParams.layout('params'),
+  types.AttestationQueueAddMrEnclaveParams.layout('params'),
 ]);
 
-export function queueAddMrEnclave(
+export function attestationQueueAddMrEnclave(
   program: SwitchboardProgram,
-  args: QueueAddMrEnclaveArgs,
-  accounts: QueueAddMrEnclaveAccounts
+  args: AttestationQueueAddMrEnclaveArgs,
+  accounts: AttestationQueueAddMrEnclaveAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.queue, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
   ];
-  const identifier = Buffer.from([199, 255, 81, 50, 60, 133, 171, 138]);
+  const identifier = Buffer.from([62, 27, 24, 221, 30, 240, 63, 167]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.QueueAddMrEnclaveParams.toEncodable(args.params),
+      params: types.AttestationQueueAddMrEnclaveParams.toEncodable(args.params),
     },
     buffer
   );

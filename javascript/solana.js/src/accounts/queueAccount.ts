@@ -265,6 +265,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               unpermissionedFeeds: params.unpermissionedFeeds ?? false,
               unpermissionedVrf: params.unpermissionedVrf ?? false,
               enableBufferRelayers: params.enableBufferRelayers ?? false,
+              enableTeeOnly: params.enableTeeOnly ?? false,
             },
           },
           {
@@ -1309,6 +1310,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                 params.unpermissionedFeedsEnabled ?? null,
               unpermissionedVrfEnabled: params.unpermissionedVrfEnabled ?? null,
               enableBufferRelayers: params.enableBufferRelayers ?? null,
+              enableTeeOnly: params.enableTeeOnly ?? null,
               slashingEnabled: params.slashingEnabled ?? null,
               reward: reward,
               minStake: minStake,
@@ -1321,7 +1323,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                   ? new anchor.BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
-              enableTeeOnly: false, // TODO: Update
             },
           },
           {
@@ -1452,6 +1453,10 @@ export interface QueueInitParams {
    */
   enableBufferRelayers?: boolean;
   /**
+   *  Only allow TEE oracles to heartbeat on this queue.
+   */
+  enableTeeOnly?: boolean;
+  /**
    *  The account to delegate authority to for creating permissions targeted at the queue.
    *
    *  Defaults to the payer.
@@ -1463,7 +1468,10 @@ export interface QueueInitParams {
 }
 
 export interface QueueSetConfigParams {
-  /** Alternative keypair that is the queue authority and is permitted to make account changes. Defaults to the payer if not provided. */
+  /**
+   *  Alternative keypair that is the queue authority and is permitted to make account changes.
+   *  Defaults to the payer if not provided.
+   */
   authority?: anchor.web3.Keypair;
   /**
    *  A name to assign to this {@linkcode QueueAccount}
@@ -1478,14 +1486,18 @@ export interface QueueSetConfigParams {
    */
   unpermissionedFeedsEnabled?: boolean;
   /**
-   *  Enabling this setting means data feeds do not need explicit permission
-   *  to request VRF proofs and verifications from this queue.
+   *  Enabling this setting means data feeds do not need explicit permission to request VRF proofs
+   *  and verifications from this queue.
    */
   unpermissionedVrfEnabled?: boolean;
   /**
    *  Enabling this setting will allow buffer relayer accounts to call openRound.
    */
   enableBufferRelayers?: boolean;
+  /**
+   *  Only allow TEE oracles to heartbeat on this queue.
+   */
+  enableTeeOnly?: boolean;
   /**
    *  Whether slashing is enabled on this queue.
    */

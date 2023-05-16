@@ -8,7 +8,11 @@ import {
   TransactionObjectOptions,
 } from '../TransactionObject';
 
-import { PermissionAccount, QueueAccount, QuoteAccount } from './index';
+import {
+  AttestationQueueAccount,
+  PermissionAccount,
+  QuoteAccount,
+} from './index';
 
 import * as anchor from '@coral-xyz/anchor';
 import * as spl from '@solana/spl-token';
@@ -138,7 +142,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     program.verifyNewKeypair(functionKeypair);
 
     const quoteData = await params.quoteAccount.loadData();
-    const [queueAccount, queueData] = await QueueAccount.load(
+    const [queueAccount, queueData] = await AttestationQueueAccount.load(
       program,
       quoteData.verifierQueue
     );
@@ -264,7 +268,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const functionData = await this.loadData();
-    const [queueAccount, queueData] = await QueueAccount.load(
+    const [queueAccount, queueData] = await AttestationQueueAccount.load(
       this.program,
       functionData.verifierQueue
     );

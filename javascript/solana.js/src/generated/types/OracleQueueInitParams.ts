@@ -20,6 +20,7 @@ export interface OracleQueueInitParamsFields {
   unpermissionedFeeds: boolean;
   unpermissionedVrf: boolean;
   enableBufferRelayers: boolean;
+  enableTeeOnly: boolean;
 }
 
 export interface OracleQueueInitParamsJSON {
@@ -37,6 +38,7 @@ export interface OracleQueueInitParamsJSON {
   unpermissionedFeeds: boolean;
   unpermissionedVrf: boolean;
   enableBufferRelayers: boolean;
+  enableTeeOnly: boolean;
 }
 
 export class OracleQueueInitParams {
@@ -54,6 +56,7 @@ export class OracleQueueInitParams {
   readonly unpermissionedFeeds: boolean;
   readonly unpermissionedVrf: boolean;
   readonly enableBufferRelayers: boolean;
+  readonly enableTeeOnly: boolean;
 
   constructor(fields: OracleQueueInitParamsFields) {
     this.name = fields.name;
@@ -72,6 +75,7 @@ export class OracleQueueInitParams {
     this.unpermissionedFeeds = fields.unpermissionedFeeds;
     this.unpermissionedVrf = fields.unpermissionedVrf;
     this.enableBufferRelayers = fields.enableBufferRelayers;
+    this.enableTeeOnly = fields.enableTeeOnly;
   }
 
   static layout(property?: string) {
@@ -91,6 +95,7 @@ export class OracleQueueInitParams {
         borsh.bool('unpermissionedFeeds'),
         borsh.bool('unpermissionedVrf'),
         borsh.bool('enableBufferRelayers'),
+        borsh.bool('enableTeeOnly'),
       ],
       property
     );
@@ -115,6 +120,7 @@ export class OracleQueueInitParams {
       unpermissionedFeeds: obj.unpermissionedFeeds,
       unpermissionedVrf: obj.unpermissionedVrf,
       enableBufferRelayers: obj.enableBufferRelayers,
+      enableTeeOnly: obj.enableTeeOnly,
     });
   }
 
@@ -136,6 +142,7 @@ export class OracleQueueInitParams {
       unpermissionedFeeds: fields.unpermissionedFeeds,
       unpermissionedVrf: fields.unpermissionedVrf,
       enableBufferRelayers: fields.enableBufferRelayers,
+      enableTeeOnly: fields.enableTeeOnly,
     };
   }
 
@@ -156,6 +163,7 @@ export class OracleQueueInitParams {
       unpermissionedFeeds: this.unpermissionedFeeds,
       unpermissionedVrf: this.unpermissionedVrf,
       enableBufferRelayers: this.enableBufferRelayers,
+      enableTeeOnly: this.enableTeeOnly,
     };
   }
 
@@ -177,6 +185,7 @@ export class OracleQueueInitParams {
       unpermissionedFeeds: obj.unpermissionedFeeds,
       unpermissionedVrf: obj.unpermissionedVrf,
       enableBufferRelayers: obj.enableBufferRelayers,
+      enableTeeOnly: obj.enableTeeOnly,
     });
   }
 

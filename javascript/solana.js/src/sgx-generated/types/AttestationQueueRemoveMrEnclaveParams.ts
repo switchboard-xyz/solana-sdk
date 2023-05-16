@@ -5,18 +5,18 @@ import * as borsh from '@coral-xyz/borsh';
 import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QueueAddMrEnclaveParamsFields {
+export interface AttestationQueueRemoveMrEnclaveParamsFields {
   mrEnclave: Array<number>;
 }
 
-export interface QueueAddMrEnclaveParamsJSON {
+export interface AttestationQueueRemoveMrEnclaveParamsJSON {
   mrEnclave: Array<number>;
 }
 
-export class QueueAddMrEnclaveParams {
+export class AttestationQueueRemoveMrEnclaveParams {
   readonly mrEnclave: Array<number>;
 
-  constructor(fields: QueueAddMrEnclaveParamsFields) {
+  constructor(fields: AttestationQueueRemoveMrEnclaveParamsFields) {
     this.mrEnclave = fields.mrEnclave;
   }
 
@@ -26,30 +26,32 @@ export class QueueAddMrEnclaveParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QueueAddMrEnclaveParams({
+    return new AttestationQueueRemoveMrEnclaveParams({
       mrEnclave: obj.mrEnclave,
     });
   }
 
-  static toEncodable(fields: QueueAddMrEnclaveParamsFields) {
+  static toEncodable(fields: AttestationQueueRemoveMrEnclaveParamsFields) {
     return {
       mrEnclave: fields.mrEnclave,
     };
   }
 
-  toJSON(): QueueAddMrEnclaveParamsJSON {
+  toJSON(): AttestationQueueRemoveMrEnclaveParamsJSON {
     return {
       mrEnclave: this.mrEnclave,
     };
   }
 
-  static fromJSON(obj: QueueAddMrEnclaveParamsJSON): QueueAddMrEnclaveParams {
-    return new QueueAddMrEnclaveParams({
+  static fromJSON(
+    obj: AttestationQueueRemoveMrEnclaveParamsJSON
+  ): AttestationQueueRemoveMrEnclaveParams {
+    return new AttestationQueueRemoveMrEnclaveParams({
       mrEnclave: obj.mrEnclave,
     });
   }
 
   toEncodable() {
-    return QueueAddMrEnclaveParams.toEncodable(this);
+    return AttestationQueueRemoveMrEnclaveParams.toEncodable(this);
   }
 }

@@ -1,3 +1,18 @@
+export type {
+  AttestationQueueAddMrEnclaveAccounts,
+  AttestationQueueAddMrEnclaveArgs,
+} from './attestationQueueAddMrEnclave';
+export { attestationQueueAddMrEnclave } from './attestationQueueAddMrEnclave';
+export type {
+  AttestationQueueInitAccounts,
+  AttestationQueueInitArgs,
+} from './attestationQueueInit';
+export { attestationQueueInit } from './attestationQueueInit';
+export type {
+  AttestationQueueRemoveMrEnclaveAccounts,
+  AttestationQueueRemoveMrEnclaveArgs,
+} from './attestationQueueRemoveMrEnclave';
+export { attestationQueueRemoveMrEnclave } from './attestationQueueRemoveMrEnclave';
 export type { FunctionFundAccounts, FunctionFundArgs } from './functionFund';
 export { functionFund } from './functionFund';
 export type { FunctionInitAccounts, FunctionInitArgs } from './functionInit';
@@ -19,18 +34,6 @@ export type {
 export { permissionInit } from './permissionInit';
 export type { PermissionSetAccounts, PermissionSetArgs } from './permissionSet';
 export { permissionSet } from './permissionSet';
-export type {
-  QueueAddMrEnclaveAccounts,
-  QueueAddMrEnclaveArgs,
-} from './queueAddMrEnclave';
-export { queueAddMrEnclave } from './queueAddMrEnclave';
-export type { QueueInitAccounts, QueueInitArgs } from './queueInit';
-export { queueInit } from './queueInit';
-export type {
-  QueueRemoveMrEnclaveAccounts,
-  QueueRemoveMrEnclaveArgs,
-} from './queueRemoveMrEnclave';
-export { queueRemoveMrEnclave } from './queueRemoveMrEnclave';
 export type {
   QuoteHeartbeatAccounts,
   QuoteHeartbeatArgs,

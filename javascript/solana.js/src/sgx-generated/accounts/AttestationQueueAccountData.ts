@@ -5,7 +5,7 @@ import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-es
 import { Connection, PublicKey } from '@solana/web3.js';
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface ServiceQueueAccountDataFields {
+export interface AttestationQueueAccountDataFields {
   authority: PublicKey;
   mrEnclaves: Array<Array<number>>;
   mrEnclavesLen: number;
@@ -23,7 +23,7 @@ export interface ServiceQueueAccountDataFields {
   ebuf: Array<number>;
 }
 
-export interface ServiceQueueAccountDataJSON {
+export interface AttestationQueueAccountDataJSON {
   authority: string;
   mrEnclaves: Array<Array<number>>;
   mrEnclavesLen: number;
@@ -41,7 +41,7 @@ export interface ServiceQueueAccountDataJSON {
   ebuf: Array<number>;
 }
 
-export class ServiceQueueAccountData {
+export class AttestationQueueAccountData {
   readonly authority: PublicKey;
   readonly mrEnclaves: Array<Array<number>>;
   readonly mrEnclavesLen: number;
@@ -59,7 +59,7 @@ export class ServiceQueueAccountData {
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
-    91, 214, 219, 103, 28, 187, 80, 194,
+    192, 53, 130, 67, 234, 207, 39, 171,
   ]);
 
   static readonly layout = borsh.struct([
@@ -80,7 +80,7 @@ export class ServiceQueueAccountData {
     borsh.array(borsh.u8(), 1024, 'ebuf'),
   ]);
 
-  constructor(fields: ServiceQueueAccountDataFields) {
+  constructor(fields: AttestationQueueAccountDataFields) {
     this.authority = fields.authority;
     this.mrEnclaves = fields.mrEnclaves;
     this.mrEnclavesLen = fields.mrEnclavesLen;
@@ -102,7 +102,7 @@ export class ServiceQueueAccountData {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey
-  ): Promise<ServiceQueueAccountData | null> {
+  ): Promise<AttestationQueueAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
     if (info === null) {
@@ -118,7 +118,7 @@ export class ServiceQueueAccountData {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[]
-  ): Promise<Array<ServiceQueueAccountData | null>> {
+  ): Promise<Array<AttestationQueueAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
     return infos.map(info => {
@@ -133,14 +133,14 @@ export class ServiceQueueAccountData {
     });
   }
 
-  static decode(data: Buffer): ServiceQueueAccountData {
-    if (!data.slice(0, 8).equals(ServiceQueueAccountData.discriminator)) {
+  static decode(data: Buffer): AttestationQueueAccountData {
+    if (!data.slice(0, 8).equals(AttestationQueueAccountData.discriminator)) {
       throw new Error('invalid account discriminator');
     }
 
-    const dec = ServiceQueueAccountData.layout.decode(data.slice(8));
+    const dec = AttestationQueueAccountData.layout.decode(data.slice(8));
 
-    return new ServiceQueueAccountData({
+    return new AttestationQueueAccountData({
       authority: dec.authority,
       mrEnclaves: dec.mrEnclaves,
       mrEnclavesLen: dec.mrEnclavesLen,
@@ -160,7 +160,7 @@ export class ServiceQueueAccountData {
     });
   }
 
-  toJSON(): ServiceQueueAccountDataJSON {
+  toJSON(): AttestationQueueAccountDataJSON {
     return {
       authority: this.authority.toString(),
       mrEnclaves: this.mrEnclaves,
@@ -181,8 +181,10 @@ export class ServiceQueueAccountData {
     };
   }
 
-  static fromJSON(obj: ServiceQueueAccountDataJSON): ServiceQueueAccountData {
-    return new ServiceQueueAccountData({
+  static fromJSON(
+    obj: AttestationQueueAccountDataJSON
+  ): AttestationQueueAccountData {
+    return new AttestationQueueAccountData({
       authority: new PublicKey(obj.authority),
       mrEnclaves: obj.mrEnclaves,
       mrEnclavesLen: obj.mrEnclavesLen,

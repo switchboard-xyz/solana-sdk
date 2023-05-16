@@ -3,6 +3,21 @@ import * as SwitchboardPermission from './SwitchboardPermission';
 import * as VerificationStatus from './VerificationStatus';
 
 export type {
+  AttestationQueueAddMrEnclaveParamsFields,
+  AttestationQueueAddMrEnclaveParamsJSON,
+} from './AttestationQueueAddMrEnclaveParams';
+export { AttestationQueueAddMrEnclaveParams } from './AttestationQueueAddMrEnclaveParams';
+export type {
+  AttestationQueueInitParamsFields,
+  AttestationQueueInitParamsJSON,
+} from './AttestationQueueInitParams';
+export { AttestationQueueInitParams } from './AttestationQueueInitParams';
+export type {
+  AttestationQueueRemoveMrEnclaveParamsFields,
+  AttestationQueueRemoveMrEnclaveParamsJSON,
+} from './AttestationQueueRemoveMrEnclaveParams';
+export { AttestationQueueRemoveMrEnclaveParams } from './AttestationQueueRemoveMrEnclaveParams';
+export type {
   FunctionFundParamsFields,
   FunctionFundParamsJSON,
 } from './FunctionFundParams';
@@ -32,21 +47,6 @@ export type {
   PermissionSetParamsJSON,
 } from './PermissionSetParams';
 export { PermissionSetParams } from './PermissionSetParams';
-export type {
-  QueueAddMrEnclaveParamsFields,
-  QueueAddMrEnclaveParamsJSON,
-} from './QueueAddMrEnclaveParams';
-export { QueueAddMrEnclaveParams } from './QueueAddMrEnclaveParams';
-export type {
-  QueueInitParamsFields,
-  QueueInitParamsJSON,
-} from './QueueInitParams';
-export { QueueInitParams } from './QueueInitParams';
-export type {
-  QueueRemoveMrEnclaveParamsFields,
-  QueueRemoveMrEnclaveParamsJSON,
-} from './QueueRemoveMrEnclaveParams';
-export { QueueRemoveMrEnclaveParams } from './QueueRemoveMrEnclaveParams';
 export type {
   QuoteHeartbeatParamsFields,
   QuoteHeartbeatParamsJSON,

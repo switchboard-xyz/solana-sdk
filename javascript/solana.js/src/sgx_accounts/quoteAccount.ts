@@ -8,7 +8,7 @@ import {
   TransactionObjectOptions,
 } from '../TransactionObject';
 
-import { QueueAccount } from './index';
+import { AttestationQueueAccount } from './index';
 
 import * as anchor from '@coral-xyz/anchor';
 import {
@@ -26,7 +26,7 @@ export interface QuoteAccountInitParams {
   /**
    *  The queue to which this function account will be linked
    */
-  queueAccount: QueueAccount;
+  queueAccount: AttestationQueueAccount;
   /**
    *  A keypair to be used to address this account
    *
@@ -145,7 +145,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const quoteData = await this.loadData();
-    const [queueAccount, queueData] = await QueueAccount.load(
+    const [queueAccount, queueData] = await AttestationQueueAccount.load(
       this.program,
       quoteData.verifierQueue
     );
