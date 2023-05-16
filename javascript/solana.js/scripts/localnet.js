@@ -14,15 +14,15 @@ const SWITCHBOARD_PROGRAM_ACCOUNTS = [
   'Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk', // sb idl
 ];
 
-const SWITCHBOARD_SGX_PROGRAM_ACCOUNTS = [
-  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7', // sgx programId
-  'BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj', // sgx programData
-  'th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4', // sgx idl
+const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
+  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7', // attestation programId
+  'BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj', // attestation programData
+  'th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4', // attestation idl
 ];
 
 const SWITCHBOARD_BASE_ACCOUNTS = [
-  'CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd', // sb programState
-  '7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie', // sb tokenVault
+  // 'CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd', // sb programState
+  // '7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie', // sb tokenVault
 ];
 
 const jsSdkRoot = path.join(__dirname, '..');
