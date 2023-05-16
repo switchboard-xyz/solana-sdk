@@ -10,8 +10,8 @@ const v2DevnetIdlPath = './src/idl/devnet.json';
 const v2MainnetIdlPath = './src/idl/mainnet.json';
 const v2GeneratedPath = './src/generated';
 
-const sgxDevnetIdlPath = './src/idl/sgx-devnet.json';
-const sgxGeneratedPath = './src/sgx-generated';
+const attestationDevnetIdlPath = './src/idl/attestation-devnet.json';
+const attestationGeneratedPath = './src/attestation-generated';
 
 // Super hacky. Some files need to be reset to the previous git state and will be manually managed
 const ignoreFiles = [
@@ -84,7 +84,7 @@ async function main() {
   );
 
   execSync(
-    `anchor idl fetch -o ${sgxDevnetIdlPath} 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --provider.cluster devnet`,
+    `anchor idl fetch -o ${attestationDevnetIdlPath} 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --provider.cluster devnet`,
     { encoding: 'utf-8' }
   );
 
@@ -94,7 +94,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_attestation_program.json ${sgxGeneratedPath}`,
+      `rm -rf ${attestationGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ../../../switchboard-core/switchboard_v2/target/idl/switchboard_attestation_program.json ${attestationGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   } else {
@@ -103,7 +103,7 @@ async function main() {
       { encoding: 'utf-8' }
     );
     execSync(
-      `rm -rf ${sgxGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${sgxDevnetIdlPath} ${sgxGeneratedPath}`,
+      `rm -rf ${attestationGeneratedPath} && npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
       { encoding: 'utf-8' }
     );
   }
@@ -118,7 +118,7 @@ async function main() {
     ].join('\n')
   );
   fs.writeFileSync(
-    `${sgxGeneratedPath}/index.ts`,
+    `${attestationGeneratedPath}/index.ts`,
     [
       "export * from './accounts';",
       "export * from './errors';",
@@ -133,14 +133,13 @@ async function main() {
     ...getAllFiles(`${v2GeneratedPath}/errors`),
     ...getAllFiles(`${v2GeneratedPath}/instructions`),
     ...getAllFiles(`${v2GeneratedPath}/types`),
-    ...getAllFiles(`${sgxGeneratedPath}/accounts`),
-    ...getAllFiles(`${sgxGeneratedPath}/errors`),
-    ...getAllFiles(`${sgxGeneratedPath}/instructions`),
-    ...getAllFiles(`${sgxGeneratedPath}/types`),
+    ...getAllFiles(`${attestationGeneratedPath}/accounts`),
+    ...getAllFiles(`${attestationGeneratedPath}/errors`),
+    ...getAllFiles(`${attestationGeneratedPath}/instructions`),
+    ...getAllFiles(`${attestationGeneratedPath}/types`),
   ]) {
-    if (file.includes('index.ts')) {
-      continue;
-    }
+    if (file.includes('index.ts')) continue;
+
     const fileString = fs.readFileSync(file, 'utf-8');
     fs.writeFileSync(
       file,
@@ -184,14 +183,21 @@ async function main() {
       shell.sed('-i', 'args:', 'program: SwitchboardProgram, args:', file);
     }
 
-    if (file.includes('/sgx-generated/')) {
-      // sgx-generated files use the sgxProgramId instead of programId
-      shell.sed('-i', 'program.programId', 'program.sgxProgramId', file);
+    if (file.includes('/attestation-generated/')) {
+      // attestation-generated files use the attestationProgramId instead of programId
+      shell.sed(
+        '-i',
+        'program.programId',
+        'program.attestationProgramId',
+        file
+      );
     }
   }
 
   execSync(`npx prettier ${v2GeneratedPath} --write`, { encoding: 'utf-8' });
-  execSync(`npx prettier ${sgxGeneratedPath} --write`, { encoding: 'utf-8' });
+  execSync(`npx prettier ${attestationGeneratedPath} --write`, {
+    encoding: 'utf-8',
+  });
 
   // reset files
   for (const file of ignoreFiles) {
