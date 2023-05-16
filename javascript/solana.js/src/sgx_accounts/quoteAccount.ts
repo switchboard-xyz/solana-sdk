@@ -87,24 +87,24 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     program.verifyNewKeypair(quoteKeypair);
 
     const queueData = await params.queueAccount.loadData();
+    // @TODO: Does quote account need an authority? or can this be removed?
     const authority = params.authority ? params.authority.publicKey : payer;
-    const account = new QuoteAccount(program, quoteKeypair.publicKey);
+    const cid = Array.from(params.cid).concat(Array(64).fill(0)).slice(0, 64);
     const instruction = types.quoteInit(
       program,
+      { params: { cid } },
       {
-        params: {
-          cid: Array.from(params.cid),
-        },
-      },
-      {
-        quote: account.publicKey,
+        quote: quoteKeypair.publicKey,
         verifierQueue: params.queueAccount.publicKey,
         queueAuthority: queueData.authority,
         payer,
         systemProgram: SystemProgram.programId,
       }
     );
-    return [account, new TransactionObject(payer, [instruction], [], options)];
+    return [
+      new QuoteAccount(program, quoteKeypair.publicKey),
+      new TransactionObject(payer, [instruction], [quoteKeypair], options),
+    ];
   }
 
   public static async create(

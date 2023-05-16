@@ -36,7 +36,7 @@ describe('SGX Queue Tests', () => {
     assert(data.authority.equals(queueAuthority.publicKey));
   });
 
-  it('addMrEnclave', async () => {
+  it('Add and remove an MrEnclave', async () => {
     const mrEnclave = new Uint8Array([1, 2, 3]);
     await queueAccount.addMrEnclave({ mrEnclave, authority: queueAuthority });
 
