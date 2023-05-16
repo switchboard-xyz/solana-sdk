@@ -5,24 +5,37 @@ const fs = require('fs/promises');
 const fsSync = require('fs');
 const os = require('os');
 const { execSync, spawn } = require('child_process');
-const { Keypair, Connection } = require('@solana/web3.js');
+const { Keypair, Connection, PublicKey } = require('@solana/web3.js');
 const { sleep } = require('@switchboard-xyz/common');
 
+const getProgramDataAddress = programId => {
+  return PublicKey.findProgramAddressSync(
+    [new PublicKey(programId).toBytes()],
+    new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
+  )[0];
+};
+
+const getIdlAddress = programId => {
+  const base = PublicKey.findProgramAddressSync(
+    [],
+    new PublicKey(programId)
+  )[0];
+  return PublicKey.createWithSeed(base, 'anchor:idl', new PublicKey(programId));
+};
+
+const SWITCHBOARD_PROGRAM_ID = 'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f';
 const SWITCHBOARD_PROGRAM_ACCOUNTS = [
-  'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f', // sb programId
-  '7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF', // sb programData
-  'Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk', // sb idl
+  SWITCHBOARD_PROGRAM_ID,
+  getProgramDataAddress(SWITCHBOARD_PROGRAM_ID),
+  getIdlAddress(SWITCHBOARD_PROGRAM_ID),
 ];
 
-const SWITCHBOARD_SGX_PROGRAM_ACCOUNTS = [
-  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7', // sgx programId
-  'BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj', // sgx programData
-  'th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4', // sgx idl
-];
-
-const SWITCHBOARD_BASE_ACCOUNTS = [
-  'CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd', // sb programState
-  '7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie', // sb tokenVault
+const SWITCHBOARD_ATTESTATION_PROGRAM_ID =
+  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7';
+const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
+  SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+  getProgramDataAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+  getIdlAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
 ];
 
 const jsSdkRoot = path.join(__dirname, '..');
