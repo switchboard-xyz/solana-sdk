@@ -35,18 +35,14 @@ describe('SGX Function Tests', () => {
   });
 
   it('Creates a Function', async () => {
-    const container = new Uint8Array([1, 2, 3]);
-    const containerRegistry = new Uint8Array([3, 2, 1]);
-    const version = new Uint8Array([1, 2, 3, 2, 1]);
     [functionAccount] = await sbv2.SgxAccounts.FunctionAccount.create(
       ctx.program,
       {
         name: 'FUNCTION_NAME',
         metadata: 'FUNCTION_METADATA',
         schedule: '* * * * *',
-        container,
-        containerRegistry,
-        version,
+        container: 'containerId',
+        version: '1.0.0',
         quoteAccount,
       }
     );

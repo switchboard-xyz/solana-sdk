@@ -31,9 +31,9 @@ import { toUtf8 } from '@switchboard-xyz/common';
 export interface FunctionAccountInitParams {
   name?: string;
   metadata?: string;
-  container: Uint8Array;
-  containerRegistry: Uint8Array;
-  version: Uint8Array;
+  container: string;
+  version: string;
+  containerRegistry?: string;
   schedule: string;
 
   /**
@@ -156,10 +156,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         params: {
           name: new Uint8Array(Buffer.from(params.name ?? '', 'utf8')),
           metadata: new Uint8Array(Buffer.from(params.metadata ?? '', 'utf8')),
-          schedule: new Uint8Array(Buffer.from(params.schedule ?? '', 'utf8')),
-          container: params.container,
-          containerRegistry: params.containerRegistry,
-          version: params.version,
+          schedule: new Uint8Array(Buffer.from(params.schedule, 'utf8')),
+          container: new Uint8Array(Buffer.from(params.container, 'utf8')),
+          version: new Uint8Array(Buffer.from(params.version, 'utf8')),
+          containerRegistry: new Uint8Array(
+            Buffer.from(params.containerRegistry ?? '', 'utf8')
+          ),
         },
       },
       {
