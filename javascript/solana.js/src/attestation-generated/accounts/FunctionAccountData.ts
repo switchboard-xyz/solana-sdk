@@ -21,6 +21,7 @@ export interface FunctionAccountDataFields {
   schedule: Array<number>;
   escrow: PublicKey;
   status: types.FunctionStatusKind;
+  createdAt: BN;
   ebuf: Array<number>;
 }
 
@@ -40,6 +41,7 @@ export interface FunctionAccountDataJSON {
   schedule: Array<number>;
   escrow: string;
   status: types.FunctionStatusJSON;
+  createdAt: string;
   ebuf: Array<number>;
 }
 
@@ -59,6 +61,7 @@ export class FunctionAccountData {
   readonly schedule: Array<number>;
   readonly escrow: PublicKey;
   readonly status: types.FunctionStatusKind;
+  readonly createdAt: BN;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -79,6 +82,7 @@ export class FunctionAccountData {
     borsh.array(borsh.u8(), 64, 'schedule'),
     borsh.publicKey('escrow'),
     types.FunctionStatus.layout('status'),
+    borsh.i64('createdAt'),
     borsh.array(borsh.u8(), 1024, 'ebuf'),
   ]);
 
@@ -96,6 +100,7 @@ export class FunctionAccountData {
     this.schedule = fields.schedule;
     this.escrow = fields.escrow;
     this.status = fields.status;
+    this.createdAt = fields.createdAt;
     this.ebuf = fields.ebuf;
   }
 
@@ -154,6 +159,7 @@ export class FunctionAccountData {
       schedule: dec.schedule,
       escrow: dec.escrow,
       status: types.FunctionStatus.fromDecoded(dec.status),
+      createdAt: dec.createdAt,
       ebuf: dec.ebuf,
     });
   }
@@ -173,6 +179,7 @@ export class FunctionAccountData {
       schedule: this.schedule,
       escrow: this.escrow.toString(),
       status: this.status.toJSON(),
+      createdAt: this.createdAt.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -192,6 +199,7 @@ export class FunctionAccountData {
       schedule: obj.schedule,
       escrow: new PublicKey(obj.escrow),
       status: types.FunctionStatus.fromJSON(obj.status),
+      createdAt: new BN(obj.createdAt),
       ebuf: obj.ebuf,
     });
   }

@@ -16,7 +16,7 @@ export interface AttestationPermissionSetArgs {
 export interface AttestationPermissionSetAccounts {
   permission: PublicKey;
   authority: PublicKey;
-  queue: PublicKey;
+  attestationQueue: PublicKey;
   node: PublicKey;
 }
 
@@ -32,7 +32,7 @@ export function attestationPermissionSet(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.permission, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.queue, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.node, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([56, 253, 255, 201, 100, 153, 10, 76]);

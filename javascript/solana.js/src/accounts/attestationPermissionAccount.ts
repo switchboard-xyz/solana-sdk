@@ -111,24 +111,27 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     options?: TransactionObjectOptions
   ): [AttestationPermissionAccount, TransactionObject] {
     const authority = params.authority ?? payer;
+
     const [account] = AttestationPermissionAccount.fromSeed(
       program,
       authority,
       params.granter,
       params.grantee
     );
+
     const instruction = types.attestationPermissionInit(
       program,
       { params: {} },
       {
         permission: account.publicKey,
-        queue: params.granter,
+        attestationQueue: params.granter,
         node: params.grantee,
         authority,
         payer,
         systemProgram: SystemProgram.programId,
       }
     );
+
     return [account, new TransactionObject(payer, [instruction], [], options)];
   }
 
@@ -191,7 +194,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
           {
             permission: this.publicKey,
             authority: params.authority ? params.authority.publicKey : payer,
-            queue: params.queue,
+            attestationQueue: params.queue,
             node: params.node,
           }
         ),

@@ -196,7 +196,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         function: account.publicKey,
         authority,
         quote: params.quoteAccount.publicKey,
-        queue: queueAccount.publicKey,
+        attestationQueue: queueAccount.publicKey,
         permission: permissionAccount.publicKey,
         escrow: account.getEscrow(),
         state: PublicKey.default, // @TODO: find state account pubkey

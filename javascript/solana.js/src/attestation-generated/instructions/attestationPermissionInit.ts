@@ -16,7 +16,7 @@ export interface AttestationPermissionInitArgs {
 export interface AttestationPermissionInitAccounts {
   permission: PublicKey;
   authority: PublicKey;
-  queue: PublicKey;
+  attestationQueue: PublicKey;
   node: PublicKey;
   payer: PublicKey;
   systemProgram: PublicKey;
@@ -34,7 +34,7 @@ export function attestationPermissionInit(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.permission, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
-    { pubkey: accounts.queue, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.node, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },

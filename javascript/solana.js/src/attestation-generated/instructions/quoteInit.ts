@@ -17,6 +17,7 @@ export interface QuoteInitAccounts {
   quote: PublicKey;
   attestationQueue: PublicKey;
   queueAuthority: PublicKey;
+  owner: PublicKey;
   payer: PublicKey;
   systemProgram: PublicKey;
 }
@@ -32,6 +33,7 @@ export function quoteInit(
     { pubkey: accounts.quote, isSigner: true, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
+    { pubkey: accounts.owner, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];

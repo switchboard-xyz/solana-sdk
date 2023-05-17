@@ -42,7 +42,7 @@ export interface QuoteAccountInitParams {
    *
    *  @default payer
    */
-  authority?: Keypair;
+  owner?: PublicKey;
 }
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
@@ -112,11 +112,11 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     program.verifyNewKeypair(quoteKeypair);
 
     const queueData = await params.queueAccount.loadData();
-    // @TODO: Does quote account need an authority? or can this be removed?
-    const authority = params.authority ? params.authority.publicKey : payer;
+
     const registryKey = Array.from(params.registryKey)
       .concat(Array(64).fill(0))
       .slice(0, 64);
+
     const instruction = types.quoteInit(
       program,
       { params: { registryKey } },
@@ -126,6 +126,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         queueAuthority: queueData.authority,
         payer,
         systemProgram: SystemProgram.programId,
+        owner: params.owner ?? payer,
       }
     );
     return [
@@ -136,13 +137,14 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
 
   public getPermissionAccount(
     queuePubkey: PublicKey,
-    queueAuthority: PublicKey
+    queueAuthority: PublicKey,
+    owner: PublicKey
   ): [AttestationPermissionAccount, number] {
     return AttestationPermissionAccount.fromSeed(
       this.program,
       queueAuthority,
       queuePubkey,
-      this.publicKey
+      owner
     );
   }
 
@@ -238,11 +240,16 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     if (quotes.length !== 0 && quotes.length > queue.gcIdx) {
       lastPubkey = quotes[queue.gcIdx];
     }
+
     const heartbeatIxn = this.heartbeatInstruction({
       queueAuthority: queue.authority,
       permission:
         params.permission ??
-        this.getPermissionAccount(quote.attestationQueue, queue.authority),
+        this.getPermissionAccount(
+          quote.attestationQueue,
+          queue.authority,
+          quote.owner
+        ),
       gcOracle: lastPubkey,
       attestationQueue: quote.attestationQueue,
     });
@@ -253,6 +260,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       [params.keypair],
       options
     );
+
     const txnSignature = await this.program.signAndSend(heartbeatTxn, options);
     return txnSignature;
   }
@@ -263,12 +271,26 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const quoteData = await this.loadData();
+
+    const attestationQueueAccount = new AttestationQueueAccount(
+      this.program,
+      quoteData.attestationQueue
+    );
+    const attestationQueue = await attestationQueueAccount.loadData();
+    const verifierIdx = attestationQueue.data
+      .slice(0, attestationQueue.dataLen)
+      .findIndex(pubkey => pubkey.equals(params.verifierKeypair.publicKey));
+    if (verifierIdx === -1) {
+      throw new Error(`Verifier not found on the attestation queue`);
+    }
+
     const instruction = types.quoteVerify(
       this.program,
       {
         params: {
           timestamp: params.timestamp,
           mrEnclave: Array.from(params.mrEnclave),
+          idx: verifierIdx,
         },
       },
       {

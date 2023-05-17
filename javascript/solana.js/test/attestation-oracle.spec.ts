@@ -6,8 +6,13 @@ import { programConfig } from '../src/generated';
 import { setupTest, TestContext } from './utils';
 
 import { BN } from '@coral-xyz/anchor';
-import { NATIVE_MINT } from '@solana/spl-token';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { NATIVE_MINT, transfer } from '@solana/spl-token';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
 import assert from 'assert';
 
@@ -135,6 +140,25 @@ describe('Attestation Oracle Tests', () => {
       `Quote account has not been verified`
     );
 
+    // join the queue so we can verify other quotes
+    await attestationQuoteAccount.heartbeat({ keypair: quoteKeypair });
+
+    const payer2 = Keypair.generate();
+
+    await ctx.program.signAndSend(
+      new sbv2.TransactionObject(
+        ctx.payer.publicKey,
+        [
+          SystemProgram.transfer({
+            fromPubkey: ctx.payer.publicKey,
+            toPubkey: payer2.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ],
+        []
+      )
+    );
+
     const quoteKeypair2 = Keypair.generate();
     const [attestationQuoteAccount2] =
       await attestationQueueAccount.createQuote({
@@ -142,6 +166,7 @@ describe('Attestation Oracle Tests', () => {
         keypair: quoteKeypair2,
         enable: true,
         queueAuthorityPubkey: ctx.program.walletPubkey,
+        owner: payer2.publicKey,
       });
 
     await attestationQuoteAccount2.verify({
@@ -157,6 +182,9 @@ describe('Attestation Oracle Tests', () => {
       `Quote account has not been verified`
     );
 
+    // join the queue so we can verify the overrridden quote
+    await attestationQuoteAccount2.heartbeat({ keypair: quoteKeypair2 });
+
     await attestationQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
@@ -169,10 +197,6 @@ describe('Attestation Oracle Tests', () => {
       newVerificationStatus.kind === 'VerificationSuccess',
       `Quote account has not been verified`
     );
-
-    await attestationQuoteAccount.heartbeat({ keypair: quoteKeypair });
-
-    await attestationQuoteAccount2.heartbeat({ keypair: quoteKeypair2 });
 
     const newQueueState = await attestationQueueAccount.loadData();
     assert(newQueueState.dataLen === 2, 'AttestationQueue incorrect size');

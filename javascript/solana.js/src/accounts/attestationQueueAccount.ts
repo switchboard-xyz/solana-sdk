@@ -191,12 +191,15 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: CreateQueueQuoteParams,
     options?: TransactionObjectOptions
   ): Promise<[QuoteAccount, TransactionObject]> {
+    const owner = params.owner ?? payer;
+
     const queueAuthority =
       params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+
     const [quoteAccount, quoteInit] = await QuoteAccount.createInstruction(
       this.program,
       payer,
-      { ...params, queueAccount: this },
+      { ...params, queueAccount: this, owner },
       options
     );
 
@@ -210,11 +213,17 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         payer,
         {
           granter: this.publicKey,
-          grantee: quoteAccount.publicKey,
+          grantee: owner,
           authority: queueAuthority,
         },
         options
       );
+
+    try {
+      const permission = await permissionAccount.loadData();
+      // TODO: set permissions if we need to
+      return [quoteAccount, quoteInit];
+    } catch (error) {}
 
     if (params.enable) {
       const permissionSet = permissionAccount.setInstruction(payer, {
@@ -222,7 +231,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        node: quoteAccount.publicKey,
+        node: owner,
       });
       permissionInit.combine(permissionSet);
     }
