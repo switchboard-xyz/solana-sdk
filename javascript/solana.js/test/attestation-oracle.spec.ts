@@ -143,6 +143,25 @@ describe('Attestation Oracle Tests', () => {
 
     const oracleData = await oracleAccount.loadData();
 
+    await attestationQueueAccount.addMrEnclave({
+      mrEnclave: new Uint8Array(mrEnclave),
+    });
+
+    const attestationQueueState = await attestationQueueAccount.loadData();
+
+    assert(
+      Buffer.compare(
+        Buffer.from(
+          attestationQueueState.mrEnclaves.slice(
+            0,
+            attestationQueueState.mrEnclavesLen
+          )[1]
+        ),
+        Buffer.from(mrEnclave)
+      ) === 0,
+      `Attestation queue does not have the correct MRENCLAVE`
+    );
+
     [oracleQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
       cid: new Uint8Array(Array(64).fill(1)),
       queueAccount: attestationQueueAccount,
