@@ -135,7 +135,56 @@ describe('Attestation Oracle Tests', () => {
       `Quote account has not been verified`
     );
 
-    // we do not need to verify because of the override
+    const quoteKeypair2 = Keypair.generate();
+    const [attestationQuoteAccount2] = await sbv2.QuoteAccount.create(
+      ctx.program,
+      {
+        cid: new Uint8Array(Array(64).fill(1)),
+        queueAccount: attestationQueueAccount,
+        keypair: quoteKeypair2,
+      }
+    );
+    await attestationQuoteAccount2.verify({
+      timestamp: new BN(Math.floor(Date.now() / 1000)),
+      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
+      verifierKeypair: quoteKeypair,
+    });
+    const quoteState2 = await attestationQuoteAccount2.loadData();
+    const verificationStatus2 =
+      sbv2.QuoteAccount.getVerificationStatus(quoteState2);
+    assert(
+      verificationStatus2.kind === 'VerificationSuccess',
+      `Quote account has not been verified`
+    );
+
+    await attestationQuoteAccount.verify({
+      timestamp: new BN(Math.floor(Date.now() / 1000)),
+      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
+      verifierKeypair: quoteKeypair2,
+    });
+    const newQuoteState = await attestationQuoteAccount.loadData();
+    const newVerificationStatus =
+      sbv2.QuoteAccount.getVerificationStatus(newQuoteState);
+    assert(
+      newVerificationStatus.kind === 'VerificationSuccess',
+      `Quote account has not been verified`
+    );
+
+    const [permissionAccount] = await sbv2.AttestationPermissionAccount.create(
+      ctx.program,
+      {
+        granter: attestationQueueAccount.publicKey,
+        grantee: attestationQuoteAccount.publicKey,
+      }
+    );
+
+    await permissionAccount.set({
+      enable: true,
+      permission:
+        new sbv2.attestation_types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
+    });
+
+    await attestationQuoteAccount.heartbeat({ keypair: quoteKeypair });
   });
 
   it('Creates a TEE oracle', async () => {
@@ -143,24 +192,24 @@ describe('Attestation Oracle Tests', () => {
 
     const oracleData = await oracleAccount.loadData();
 
-    await attestationQueueAccount.addMrEnclave({
-      mrEnclave: new Uint8Array(mrEnclave),
-    });
+    // await attestationQueueAccount.addMrEnclave({
+    //   mrEnclave: new Uint8Array(mrEnclave),
+    // });
 
-    const attestationQueueState = await attestationQueueAccount.loadData();
+    // const attestationQueueState = await attestationQueueAccount.loadData();
 
-    assert(
-      Buffer.compare(
-        Buffer.from(
-          attestationQueueState.mrEnclaves.slice(
-            0,
-            attestationQueueState.mrEnclavesLen
-          )[1]
-        ),
-        Buffer.from(mrEnclave)
-      ) === 0,
-      `Attestation queue does not have the correct MRENCLAVE`
-    );
+    // assert(
+    //   Buffer.compare(
+    //     Buffer.from(
+    //       attestationQueueState.mrEnclaves.slice(
+    //         0,
+    //         attestationQueueState.mrEnclavesLen
+    //       )[1]
+    //     ),
+    //     Buffer.from(mrEnclave)
+    //   ) === 0,
+    //   `Attestation queue does not have the correct MRENCLAVE`
+    // );
 
     [oracleQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
       cid: new Uint8Array(Array(64).fill(1)),

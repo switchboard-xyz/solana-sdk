@@ -96,7 +96,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
         granter.toBytes(),
         grantee.toBytes(),
       ],
-      program.programId
+      program.attestationProgramId
     );
     return [new AttestationPermissionAccount(program, publicKey), bump];
   }

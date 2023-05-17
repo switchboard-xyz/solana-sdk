@@ -31,7 +31,7 @@ export function quoteHeartbeat(
   accounts: QuoteHeartbeatAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.quote, isSigner: true, isWritable: false },
+    { pubkey: accounts.quote, isSigner: true, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
     { pubkey: accounts.gcNode, isSigner: false, isWritable: false },

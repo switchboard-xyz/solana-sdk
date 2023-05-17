@@ -8,7 +8,7 @@ import {
   TransactionObjectOptions,
 } from '../TransactionObject';
 
-import { AttestationQueueAccount } from './index';
+import { AttestationPermissionAccount, AttestationQueueAccount } from './index';
 
 import * as anchor from '@coral-xyz/anchor';
 import {
@@ -43,7 +43,9 @@ export interface QuoteAccountInitParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export interface QuoteHeartbeatParams {}
+export interface QuoteHeartbeatParams {
+  keypair: Keypair;
+}
 /**
  *  Parameters for an {@linkcode types.quoteVerify} instruction.
  */
@@ -109,6 +111,18 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     ];
   }
 
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [AttestationPermissionAccount, number] {
+    return AttestationPermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
   static getVerificationStatus(
     state: types.QuoteAccountData
   ): types.VerificationStatusKind {
@@ -164,13 +178,17 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
 
   public async heartbeatInstruction(
     payer: PublicKey,
-    params?: QuoteHeartbeatParams,
+    params: QuoteHeartbeatParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const quoteData = await this.loadData();
     const [queueAccount, queueData] = await AttestationQueueAccount.load(
       this.program,
       quoteData.attestationQueue
+    );
+    const [permissionAccount, permissionBump] = this.getPermissionAccount(
+      queueAccount.publicKey,
+      queueData.authority
     );
     const instruction = types.quoteHeartbeat(
       this.program,
@@ -179,15 +197,20 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         quote: this.publicKey,
         attestationQueue: queueAccount.publicKey,
         queueAuthority: queueData.authority,
-        gcNode: PublicKey.default, // @TODO: gcNode publicKey
-        permission: PublicKey.default, // @TODO: permission publicKey
+        gcNode: this.publicKey, // @TODO: gcNode publicKey
+        permission: permissionAccount.publicKey,
       }
     );
-    return new TransactionObject(payer, [instruction], [], options);
+    return new TransactionObject(
+      payer,
+      [instruction],
+      [params.keypair],
+      options
+    );
   }
 
   public async heartbeat(
-    params?: QuoteHeartbeatParams,
+    params: QuoteHeartbeatParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.heartbeatInstruction(
