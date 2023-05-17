@@ -10,7 +10,7 @@ import { BN } from '@coral-xyz/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import assert from 'assert';
 
-describe('Quote Tests', () => {
+describe('Attestation Oracle Tests', () => {
   let ctx: TestContext;
 
   let queueAccount: sbv2.QueueAccount;
@@ -96,9 +96,17 @@ describe('Quote Tests', () => {
       }
     );
 
-    attestationQueueAccount.addMrEnclave({
+    await attestationQueueAccount.addMrEnclave({
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
     });
+
+    const attestationQueueState = await attestationQueueAccount.loadData();
+    console.log(
+      attestationQueueState.mrEnclaves.slice(
+        0,
+        attestationQueueState.mrEnclavesLen
+      )
+    );
 
     [attestationQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
       cid: new Uint8Array(Array(64).fill(1)),
@@ -106,7 +114,10 @@ describe('Quote Tests', () => {
       keypair: quoteKeypair,
     });
 
-    console.log(await attestationQuoteAccount.loadData());
+    const quoteState = await attestationQuoteAccount.loadData();
+    console.log(sbv2.QuoteAccount.getVerificationStatus(quoteState));
+
+    console.log(new Uint8Array(quoteVerifierMrEnclave));
 
     await attestationQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),

@@ -109,6 +109,27 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     ];
   }
 
+  static getVerificationStatus(
+    state: types.QuoteAccountData
+  ): types.VerificationStatusKind {
+    switch (state.verificationStatus) {
+      case types.VerificationStatus.None.discriminator:
+        return new types.VerificationStatus.None();
+      case types.VerificationStatus.VerificationPending.discriminator:
+        return new types.VerificationStatus.VerificationPending();
+      case types.VerificationStatus.VerificationFailure.discriminator:
+        return new types.VerificationStatus.VerificationFailure();
+      case types.VerificationStatus.VerificationSuccess.discriminator:
+        return new types.VerificationStatus.VerificationSuccess();
+      case types.VerificationStatus.VerificationOverride.discriminator:
+        return new types.VerificationStatus.VerificationOverride();
+    }
+
+    throw new Error(
+      `Failed to get the verification status, expected [${types.VerificationStatus.None.discriminator}, ${types.VerificationStatus.VerificationPending.discriminator}, ${types.VerificationStatus.VerificationFailure.discriminator}, ${types.VerificationStatus.VerificationSuccess.discriminator}], or ${types.VerificationStatus.VerificationOverride.discriminator}], received ${state.verificationStatus}`
+    );
+  }
+
   public static async create(
     program: SwitchboardProgram,
     params: QuoteAccountInitParams,
