@@ -630,11 +630,17 @@ export class TransactionObject implements ITransactionObject {
     } catch (error) {
       const err = fromTxError(error);
       if (err) {
+        if (err.logs) {
+          console.error(err.logs);
+        }
         throw err;
       }
 
       const attestationErr = attestationTypes.fromTxError(error);
       if (attestationErr) {
+        if (attestationErr.logs) {
+          console.error(attestationErr.logs);
+        }
         throw attestationErr;
       }
 
