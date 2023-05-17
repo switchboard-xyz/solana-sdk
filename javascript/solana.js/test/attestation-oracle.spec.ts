@@ -174,14 +174,14 @@ describe('Attestation Oracle Tests', () => {
       verifierKeypair: quoteKeypair,
     });
 
-    // // Perform tee heartbeat.
-    // await oracleAccount.teeHeartbeat({
-    //   gcOracle: PublicKey.default, // @TODO: Replace with proper pubkey.
-    //   tokenWallet: oracleData.tokenAccount,
-    //   oracleQueue: queueAccount.publicKey,
-    //   dataBuffer: queueData.dataBuffer,
-    //   quote: quoteAccount.publicKey,
-    //   permission: [oraclePermissionAccount, oraclePermissionBump],
-    // });
+    // Perform tee heartbeat.
+    await oracleAccount.teeHeartbeat({
+      gcOracle: oracleAccount.publicKey, // @TODO: Replace with proper pubkey.
+      tokenWallet: oracleData.tokenAccount,
+      oracleQueue: queueAccount.publicKey,
+      dataBuffer: queueData.dataBuffer,
+      quote: oracleQuoteAccount.publicKey,
+      permission: [oraclePermissionAccount, oraclePermissionBump],
+    });
   });
 });
