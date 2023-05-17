@@ -17,7 +17,9 @@ export type CustomError =
   | InvalidReportData
   | InsufficientLoadAmountError
   | IncorrectObservedTimeError
-  | InvalidQuoteMode;
+  | InvalidQuoteMode
+  | InvalidVerifierIdx
+  | InvalidSelfVerifyRequest;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -199,6 +201,26 @@ export class InvalidQuoteMode extends Error {
   }
 }
 
+export class InvalidVerifierIdx extends Error {
+  static readonly code = 6018;
+  readonly code = 6018;
+  readonly name = 'InvalidVerifierIdx';
+
+  constructor(readonly logs?: string[]) {
+    super('6018: ');
+  }
+}
+
+export class InvalidSelfVerifyRequest extends Error {
+  static readonly code = 6019;
+  readonly code = 6019;
+  readonly name = 'InvalidSelfVerifyRequest';
+
+  constructor(readonly logs?: string[]) {
+    super('6019: ');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -237,6 +259,10 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new IncorrectObservedTimeError(logs);
     case 6017:
       return new InvalidQuoteMode(logs);
+    case 6018:
+      return new InvalidVerifierIdx(logs);
+    case 6019:
+      return new InvalidSelfVerifyRequest(logs);
   }
 
   return null;

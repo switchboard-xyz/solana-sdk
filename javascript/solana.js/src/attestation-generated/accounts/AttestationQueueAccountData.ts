@@ -66,7 +66,7 @@ export class AttestationQueueAccountData {
     borsh.publicKey('authority'),
     borsh.array(borsh.array(borsh.u8(), 32), 32, 'mrEnclaves'),
     borsh.u32('mrEnclavesLen'),
-    borsh.array(borsh.publicKey(), 32, 'data'),
+    borsh.array(borsh.publicKey(), 128, 'data'),
     borsh.u32('dataLen'),
     borsh.i64('allowAuthorityOverrideAfter'),
     borsh.bool('requireAuthorityHeartbeatPermission'),

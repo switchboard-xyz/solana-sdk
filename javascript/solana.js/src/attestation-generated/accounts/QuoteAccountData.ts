@@ -23,6 +23,7 @@ export interface QuoteAccountDataFields {
   isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   lastHeartbeat: BN;
+  owner: PublicKey;
   ebuf: Array<number>;
 }
 
@@ -44,6 +45,7 @@ export interface QuoteAccountDataJSON {
   isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   lastHeartbeat: string;
+  owner: string;
   ebuf: Array<number>;
 }
 
@@ -65,6 +67,7 @@ export class QuoteAccountData {
   readonly isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   readonly lastHeartbeat: BN;
+  readonly owner: PublicKey;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -83,7 +86,8 @@ export class QuoteAccountData {
     borsh.i64('validUntil'),
     borsh.bool('isOnQueue'),
     borsh.i64('lastHeartbeat'),
-    borsh.array(borsh.u8(), 1024, 'ebuf'),
+    borsh.publicKey('owner'),
+    borsh.array(borsh.u8(), 992, 'ebuf'),
   ]);
 
   constructor(fields: QuoteAccountDataFields) {
@@ -98,6 +102,7 @@ export class QuoteAccountData {
     this.validUntil = fields.validUntil;
     this.isOnQueue = fields.isOnQueue;
     this.lastHeartbeat = fields.lastHeartbeat;
+    this.owner = fields.owner;
     this.ebuf = fields.ebuf;
   }
 
@@ -154,6 +159,7 @@ export class QuoteAccountData {
       validUntil: dec.validUntil,
       isOnQueue: dec.isOnQueue,
       lastHeartbeat: dec.lastHeartbeat,
+      owner: dec.owner,
       ebuf: dec.ebuf,
     });
   }
@@ -171,6 +177,7 @@ export class QuoteAccountData {
       validUntil: this.validUntil.toString(),
       isOnQueue: this.isOnQueue,
       lastHeartbeat: this.lastHeartbeat.toString(),
+      owner: this.owner.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -188,6 +195,7 @@ export class QuoteAccountData {
       validUntil: new BN(obj.validUntil),
       isOnQueue: obj.isOnQueue,
       lastHeartbeat: new BN(obj.lastHeartbeat),
+      owner: new PublicKey(obj.owner),
       ebuf: obj.ebuf,
     });
   }

@@ -8,25 +8,33 @@ import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript
 export interface QuoteVerifyParamsFields {
   timestamp: BN;
   mrEnclave: Array<number>;
+  idx: number;
 }
 
 export interface QuoteVerifyParamsJSON {
   timestamp: string;
   mrEnclave: Array<number>;
+  idx: number;
 }
 
 export class QuoteVerifyParams {
   readonly timestamp: BN;
   readonly mrEnclave: Array<number>;
+  readonly idx: number;
 
   constructor(fields: QuoteVerifyParamsFields) {
     this.timestamp = fields.timestamp;
     this.mrEnclave = fields.mrEnclave;
+    this.idx = fields.idx;
   }
 
   static layout(property?: string) {
     return borsh.struct(
-      [borsh.i64('timestamp'), borsh.array(borsh.u8(), 32, 'mrEnclave')],
+      [
+        borsh.i64('timestamp'),
+        borsh.array(borsh.u8(), 32, 'mrEnclave'),
+        borsh.u32('idx'),
+      ],
       property
     );
   }
@@ -36,6 +44,7 @@ export class QuoteVerifyParams {
     return new QuoteVerifyParams({
       timestamp: obj.timestamp,
       mrEnclave: obj.mrEnclave,
+      idx: obj.idx,
     });
   }
 
@@ -43,6 +52,7 @@ export class QuoteVerifyParams {
     return {
       timestamp: fields.timestamp,
       mrEnclave: fields.mrEnclave,
+      idx: fields.idx,
     };
   }
 
@@ -50,6 +60,7 @@ export class QuoteVerifyParams {
     return {
       timestamp: this.timestamp.toString(),
       mrEnclave: this.mrEnclave,
+      idx: this.idx,
     };
   }
 
@@ -57,6 +68,7 @@ export class QuoteVerifyParams {
     return new QuoteVerifyParams({
       timestamp: new BN(obj.timestamp),
       mrEnclave: obj.mrEnclave,
+      idx: obj.idx,
     });
   }
 
