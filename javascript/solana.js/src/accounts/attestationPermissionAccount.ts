@@ -39,6 +39,9 @@ export interface AttestationPermissionSetParams {
    *  @default payer
    */
   authority?: Keypair;
+
+  queue: PublicKey;
+  node: PublicKey;
 }
 /**
  *  Account type dictating the level of permissions between a granter and a grantee.
@@ -168,12 +171,12 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
   /**
    *  Produces the instruction to set the permission in the AttestationPermissionAccount
    */
-  public async setInstruction(
+  public setInstruction(
     payer: PublicKey,
     params: AttestationPermissionSetParams,
     options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
-    const data = await this.loadData();
+  ): TransactionObject {
+    // const data = await this.loadData();
     return new TransactionObject(
       payer,
       [
@@ -188,8 +191,8 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
           {
             permission: this.publicKey,
             authority: params.authority ? params.authority.publicKey : payer,
-            queue: data.granter,
-            node: data.grantee,
+            queue: params.queue,
+            node: params.node,
           }
         ),
       ],

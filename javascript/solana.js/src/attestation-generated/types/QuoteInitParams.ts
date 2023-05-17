@@ -6,46 +6,46 @@ import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface QuoteInitParamsFields {
-  cid: Array<number>;
+  registryKey: Array<number>;
 }
 
 export interface QuoteInitParamsJSON {
-  cid: Array<number>;
+  registryKey: Array<number>;
 }
 
 export class QuoteInitParams {
-  readonly cid: Array<number>;
+  readonly registryKey: Array<number>;
 
   constructor(fields: QuoteInitParamsFields) {
-    this.cid = fields.cid;
+    this.registryKey = fields.registryKey;
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.array(borsh.u8(), 64, 'cid')], property);
+    return borsh.struct([borsh.array(borsh.u8(), 64, 'registryKey')], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
     return new QuoteInitParams({
-      cid: obj.cid,
+      registryKey: obj.registryKey,
     });
   }
 
   static toEncodable(fields: QuoteInitParamsFields) {
     return {
-      cid: fields.cid,
+      registryKey: fields.registryKey,
     };
   }
 
   toJSON(): QuoteInitParamsJSON {
     return {
-      cid: this.cid,
+      registryKey: this.registryKey,
     };
   }
 
   static fromJSON(obj: QuoteInitParamsJSON): QuoteInitParams {
     return new QuoteInitParams({
-      cid: obj.cid,
+      registryKey: obj.registryKey,
     });
   }
 

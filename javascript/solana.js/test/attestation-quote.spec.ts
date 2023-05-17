@@ -35,12 +35,14 @@ describe('SGX Quote Tests', () => {
   });
 
   it('Creates a Quote', async () => {
-    const cid = new Uint8Array([1, 2, 3]);
+    const registryKey = new Uint8Array([1, 2, 3]);
     [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
       queueAccount,
-      cid,
+      registryKey,
     });
-    const expected = Array.from(cid).concat(Array(64).fill(0)).slice(0, 64);
+    const expected = Array.from(registryKey)
+      .concat(Array(64).fill(0))
+      .slice(0, 64);
     const data = await quoteAccount.loadData();
     assert(data.isOnQueue === true);
     console.log(data);

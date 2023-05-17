@@ -34,7 +34,7 @@ export function quoteHeartbeat(
     { pubkey: accounts.quote, isSigner: true, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
-    { pubkey: accounts.gcNode, isSigner: false, isWritable: false },
+    { pubkey: accounts.gcNode, isSigner: false, isWritable: true },
     { pubkey: accounts.permission, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([202, 24, 19, 240, 75, 39, 154, 110]);

@@ -26,7 +26,7 @@ describe('SGX Function Tests', () => {
       authority: Keypair.generate(),
     });
     [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      cid: new Uint8Array([1, 2, 3]),
+      registryKey: new Uint8Array([1, 2, 3]),
       queueAccount,
     });
   });

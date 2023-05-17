@@ -18,8 +18,6 @@ describe('Attestation Oracle Tests', () => {
   let oracleAccount: sbv2.OracleAccount;
   let oraclePermissionAccount: sbv2.PermissionAccount;
   let oraclePermissionBump: number;
-  let oracleQuoteAccount: sbv2.QuoteAccount;
-  const oracleQuoteKeypair = Keypair.generate();
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   const quoteKeypair = Keypair.generate();
@@ -120,30 +118,29 @@ describe('Attestation Oracle Tests', () => {
       `Attestation queue does not have the correct MRENCLAVE`
     );
 
-    [attestationQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      cid: new Uint8Array(Array(64).fill(1)),
-      queueAccount: attestationQueueAccount,
+    [attestationQuoteAccount] = await attestationQueueAccount.createQuote({
+      registryKey: new Uint8Array(Array(64).fill(1)),
       keypair: quoteKeypair,
+      enable: true,
+      queueAuthorityPubkey: ctx.program.walletPubkey,
     });
-
     const quoteState = await attestationQuoteAccount.loadData();
     const verificationStatus =
       sbv2.QuoteAccount.getVerificationStatus(quoteState);
-
     assert(
       verificationStatus.kind === 'VerificationOverride',
       `Quote account has not been verified`
     );
 
     const quoteKeypair2 = Keypair.generate();
-    const [attestationQuoteAccount2] = await sbv2.QuoteAccount.create(
-      ctx.program,
-      {
-        cid: new Uint8Array(Array(64).fill(1)),
-        queueAccount: attestationQueueAccount,
+    const [attestationQuoteAccount2] =
+      await attestationQueueAccount.createQuote({
+        registryKey: new Uint8Array(Array(64).fill(1)),
         keypair: quoteKeypair2,
-      }
-    );
+        enable: true,
+        queueAuthorityPubkey: ctx.program.walletPubkey,
+      });
+
     await attestationQuoteAccount2.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
@@ -170,50 +167,18 @@ describe('Attestation Oracle Tests', () => {
       `Quote account has not been verified`
     );
 
-    const [permissionAccount] = await sbv2.AttestationPermissionAccount.create(
-      ctx.program,
-      {
-        granter: attestationQueueAccount.publicKey,
-        grantee: attestationQuoteAccount.publicKey,
-      }
-    );
-
-    await permissionAccount.set({
-      enable: true,
-      permission:
-        new sbv2.attestation_types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
-    });
-
     await attestationQuoteAccount.heartbeat({ keypair: quoteKeypair });
+
+    await attestationQuoteAccount2.heartbeat({ keypair: quoteKeypair2 });
+
+    // TODO: assert AttestationQueue size
   });
 
   it('Creates a TEE oracle', async () => {
-    const queueData = await queueAccount.loadData();
+    const oracleQuoteKeypair = Keypair.generate();
 
-    const oracleData = await oracleAccount.loadData();
-
-    // await attestationQueueAccount.addMrEnclave({
-    //   mrEnclave: new Uint8Array(mrEnclave),
-    // });
-
-    // const attestationQueueState = await attestationQueueAccount.loadData();
-
-    // assert(
-    //   Buffer.compare(
-    //     Buffer.from(
-    //       attestationQueueState.mrEnclaves.slice(
-    //         0,
-    //         attestationQueueState.mrEnclavesLen
-    //       )[1]
-    //     ),
-    //     Buffer.from(mrEnclave)
-    //   ) === 0,
-    //   `Attestation queue does not have the correct MRENCLAVE`
-    // );
-
-    [oracleQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      cid: new Uint8Array(Array(64).fill(1)),
-      queueAccount: attestationQueueAccount,
+    const [oracleQuoteAccount] = await attestationQueueAccount.createQuote({
+      registryKey: new Uint8Array(Array(64).fill(1)),
       keypair: oracleQuoteKeypair,
     });
 
@@ -225,12 +190,14 @@ describe('Attestation Oracle Tests', () => {
 
     // Perform tee heartbeat.
     await oracleAccount.teeHeartbeat({
-      gcOracle: oracleAccount.publicKey, // @TODO: Replace with proper pubkey.
-      tokenWallet: oracleData.tokenAccount,
-      oracleQueue: queueAccount.publicKey,
-      dataBuffer: queueData.dataBuffer,
       quote: oracleQuoteAccount.publicKey,
-      permission: [oraclePermissionAccount, oraclePermissionBump],
     });
+  });
+
+  it('Calls TeeSaveResult', async () => {
+    // 1. Create basic aggregator with valueTask
+    // 2. Add to queueAccount and enable agg permissions
+    // 3. Call openRound
+    // 4. Send tee_save_result
   });
 });

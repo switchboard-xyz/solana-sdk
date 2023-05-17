@@ -12,7 +12,7 @@ export interface QuoteAccountDataFields {
   /** TODO: Add description */
   quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
-  bufferKey: Array<number>;
+  registryKey: Array<number>;
   /** Queue used for attestation to verify a MRENCLAVE measurement. */
   attestationQueue: PublicKey;
   /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
@@ -33,7 +33,7 @@ export interface QuoteAccountDataJSON {
   /** TODO: Add description */
   quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
-  bufferKey: Array<number>;
+  registryKey: Array<number>;
   /** Queue used for attestation to verify a MRENCLAVE measurement. */
   attestationQueue: string;
   /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
@@ -54,7 +54,7 @@ export class QuoteAccountData {
   /** TODO: Add description */
   readonly quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
-  readonly bufferKey: Array<number>;
+  readonly registryKey: Array<number>;
   /** Queue used for attestation to verify a MRENCLAVE measurement. */
   readonly attestationQueue: PublicKey;
   /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
@@ -75,7 +75,7 @@ export class QuoteAccountData {
     borsh.publicKey('delegatedSecuredSigner'),
     borsh.u8('bump'),
     borsh.array(borsh.u8(), 32, 'quoteRegistry'),
-    borsh.array(borsh.u8(), 64, 'bufferKey'),
+    borsh.array(borsh.u8(), 64, 'registryKey'),
     borsh.publicKey('attestationQueue'),
     borsh.array(borsh.u8(), 32, 'mrEnclave'),
     borsh.u8('verificationStatus'),
@@ -90,7 +90,7 @@ export class QuoteAccountData {
     this.delegatedSecuredSigner = fields.delegatedSecuredSigner;
     this.bump = fields.bump;
     this.quoteRegistry = fields.quoteRegistry;
-    this.bufferKey = fields.bufferKey;
+    this.registryKey = fields.registryKey;
     this.attestationQueue = fields.attestationQueue;
     this.mrEnclave = fields.mrEnclave;
     this.verificationStatus = fields.verificationStatus;
@@ -146,7 +146,7 @@ export class QuoteAccountData {
       delegatedSecuredSigner: dec.delegatedSecuredSigner,
       bump: dec.bump,
       quoteRegistry: dec.quoteRegistry,
-      bufferKey: dec.bufferKey,
+      registryKey: dec.registryKey,
       attestationQueue: dec.attestationQueue,
       mrEnclave: dec.mrEnclave,
       verificationStatus: dec.verificationStatus,
@@ -163,7 +163,7 @@ export class QuoteAccountData {
       delegatedSecuredSigner: this.delegatedSecuredSigner.toString(),
       bump: this.bump,
       quoteRegistry: this.quoteRegistry,
-      bufferKey: this.bufferKey,
+      registryKey: this.registryKey,
       attestationQueue: this.attestationQueue.toString(),
       mrEnclave: this.mrEnclave,
       verificationStatus: this.verificationStatus,
@@ -180,7 +180,7 @@ export class QuoteAccountData {
       delegatedSecuredSigner: new PublicKey(obj.delegatedSecuredSigner),
       bump: obj.bump,
       quoteRegistry: obj.quoteRegistry,
-      bufferKey: obj.bufferKey,
+      registryKey: obj.registryKey,
       attestationQueue: new PublicKey(obj.attestationQueue),
       mrEnclave: obj.mrEnclave,
       verificationStatus: obj.verificationStatus,

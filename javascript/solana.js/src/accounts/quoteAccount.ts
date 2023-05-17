@@ -15,6 +15,7 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
 
@@ -22,7 +23,10 @@ import {
  *  Parameters for initializing an {@linkcode QuoteAccount}
  */
 export interface QuoteAccountInitParams {
-  cid: Uint8Array;
+  /**
+   * Key to lookup the buffer data on IPFS or an alternative decentralized storage solution.
+   */
+  registryKey: Uint8Array;
   /**
    *  The queue to which this function account will be linked
    */
@@ -43,9 +47,23 @@ export interface QuoteAccountInitParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export interface QuoteHeartbeatParams {
-  keypair: Keypair;
+export interface QuoteHeartbeatSyncParams {
+  gcOracle: PublicKey;
+  attestationQueue: PublicKey;
+  permission: [AttestationPermissionAccount, number];
+  queueAuthority: PublicKey;
 }
+
+/**
+ *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
+ */
+export type QuoteHeartbeatParams = Partial<QuoteHeartbeatSyncParams> & {
+  keypair: Keypair;
+} & Partial<{
+    quote: types.QuoteAccountData;
+    queue: types.AttestationQueueAccountData;
+  }>;
+
 /**
  *  Parameters for an {@linkcode types.quoteVerify} instruction.
  */
@@ -93,10 +111,12 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     const queueData = await params.queueAccount.loadData();
     // @TODO: Does quote account need an authority? or can this be removed?
     const authority = params.authority ? params.authority.publicKey : payer;
-    const cid = Array.from(params.cid).concat(Array(64).fill(0)).slice(0, 64);
+    const registryKey = Array.from(params.registryKey)
+      .concat(Array(64).fill(0))
+      .slice(0, 64);
     const instruction = types.quoteInit(
       program,
-      { params: { cid } },
+      { params: { registryKey } },
       {
         quote: quoteKeypair.publicKey,
         attestationQueue: params.queueAccount.publicKey,
@@ -176,48 +196,62 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     throw new errors.AccountNotFoundError('Quote', this.publicKey);
   }
 
-  public async heartbeatInstruction(
-    payer: PublicKey,
-    params: QuoteHeartbeatParams,
-    options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
-    const quoteData = await this.loadData();
-    const [queueAccount, queueData] = await AttestationQueueAccount.load(
-      this.program,
-      quoteData.attestationQueue
-    );
-    const [permissionAccount, permissionBump] = this.getPermissionAccount(
-      queueAccount.publicKey,
-      queueData.authority
-    );
+  public heartbeatInstruction(params: {
+    gcOracle: PublicKey;
+    attestationQueue: PublicKey;
+    permission: [AttestationPermissionAccount, number];
+    queueAuthority: PublicKey;
+  }): TransactionInstruction {
+    const [permissionAccount, permissionBump] = params.permission;
     const instruction = types.quoteHeartbeat(
       this.program,
       { params: params ?? {} },
       {
         quote: this.publicKey,
-        attestationQueue: queueAccount.publicKey,
-        queueAuthority: queueData.authority,
-        gcNode: this.publicKey, // @TODO: gcNode publicKey
+        attestationQueue: params.attestationQueue,
+        queueAuthority: params.queueAuthority,
+        gcNode: params.gcOracle,
         permission: permissionAccount.publicKey,
       }
     );
-    return new TransactionObject(
-      payer,
-      [instruction],
-      [params.keypair],
-      options
-    );
+    return instruction;
   }
 
   public async heartbeat(
     params: QuoteHeartbeatParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
-    return await this.heartbeatInstruction(
+    const quote = params.quote ?? (await this.loadData());
+    const queue =
+      params.queue ??
+      (await new AttestationQueueAccount(
+        this.program,
+        quote.attestationQueue
+      ).loadData());
+
+    const quotes = queue.data.slice(0, queue.dataLen);
+
+    let lastPubkey = this.publicKey;
+    if (quotes.length !== 0 && quotes.length > queue.gcIdx) {
+      lastPubkey = quotes[queue.gcIdx];
+    }
+    const heartbeatIxn = this.heartbeatInstruction({
+      queueAuthority: queue.authority,
+      permission:
+        params.permission ??
+        this.getPermissionAccount(quote.attestationQueue, queue.authority),
+      gcOracle: lastPubkey,
+      attestationQueue: quote.attestationQueue,
+    });
+
+    const heartbeatTxn = new TransactionObject(
       this.program.walletPubkey,
-      params,
+      [heartbeatIxn],
+      [params.keypair],
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    );
+    const txnSignature = await this.program.signAndSend(heartbeatTxn, options);
+    return txnSignature;
   }
 
   public async verifyInstruction(

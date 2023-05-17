@@ -8,7 +8,13 @@ import {
 } from '../TransactionObject';
 
 import { Account } from './account';
-import { OracleAccount, OracleInitParams, OracleStakeParams } from '.';
+import {
+  AttestationPermissionAccount,
+  AttestationPermissionSetParams,
+  OracleAccount,
+  QuoteAccount,
+  QuoteAccountInitParams,
+} from '.';
 
 import {
   Keypair,
@@ -78,6 +84,15 @@ export interface AttestationQueueRemoveMrEnclaveParams {
   mrEnclave: Uint8Array;
   authority?: Keypair;
 }
+
+export type CreateQueueQuoteParams = Omit<
+  QuoteAccountInitParams,
+  'queueAccount'
+> &
+  Partial<AttestationPermissionSetParams> & {
+    queueAuthorityPubkey?: PublicKey;
+  } & { createPermissions?: boolean };
+
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a
  * list of oracles that are actively heartbeating.
@@ -91,6 +106,24 @@ export interface AttestationQueueRemoveMrEnclaveParams {
  */
 export class AttestationQueueAccount extends Account<types.AttestationQueueAccountData> {
   static accountName = 'AttestationQueueAccountData';
+
+  /**
+   * Get the size of an {@linkcode QueueAccount} on-chain.
+   */
+  public readonly size =
+    this.program.attestationAccount.attestationQueueAccountData.size;
+
+  /**
+   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   */
+  public async loadData(): Promise<types.AttestationQueueAccountData> {
+    const data = await types.AttestationQueueAccountData.fetch(
+      this.program,
+      this.publicKey
+    );
+    if (data) return data;
+    throw new errors.AccountNotFoundError('AttestationQueue', this.publicKey);
+  }
 
   /**
    *  Load an existing {@linkcode AttestationQueueAccount} with its current on-chain state
@@ -153,22 +186,75 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     return [account, await program.signAndSend(txnObject, options)];
   }
 
-  /**
-   * Get the size of an {@linkcode QueueAccount} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.attestationQueueAccountData.size;
+  public async createQuoteInstruction(
+    payer: PublicKey,
+    params: CreateQueueQuoteParams,
+    options?: TransactionObjectOptions
+  ): Promise<[QuoteAccount, TransactionObject]> {
+    const queueAuthority =
+      params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+    const [quoteAccount, quoteInit] = await QuoteAccount.createInstruction(
+      this.program,
+      payer,
+      { ...params, queueAccount: this },
+      options
+    );
+
+    if (!params.createPermissions && !params.enable) {
+      return [quoteAccount, quoteInit];
+    }
+
+    const [permissionAccount, permissionInit] =
+      AttestationPermissionAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          granter: this.publicKey,
+          grantee: quoteAccount.publicKey,
+          authority: queueAuthority,
+        },
+        options
+      );
+
+    if (params.enable) {
+      const permissionSet = permissionAccount.setInstruction(payer, {
+        enable: true,
+        permission:
+          new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
+        queue: this.publicKey,
+        node: quoteAccount.publicKey,
+      });
+      permissionInit.combine(permissionSet);
+    }
+
+    return [quoteAccount, quoteInit.combine(permissionInit)];
+  }
+
+  public async createQuote(
+    params: CreateQueueQuoteParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[QuoteAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createQuoteInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    return [account, await this.program.signAndSend(txnObject, options)];
+  }
 
   /**
-   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   * Find the index of an enclave in an array and return -1 if not found
    */
-  public async loadData(): Promise<types.AttestationQueueAccountData> {
-    const data = await types.AttestationQueueAccountData.fetch(
-      this.program,
-      this.publicKey
-    );
-    if (data) return data;
-    throw new errors.AccountNotFoundError('AttestationQueue', this.publicKey);
+  public static findEnclaveIdx(
+    enclaves: Array<Uint8Array>,
+    enclave: Uint8Array
+  ): number {
+    for (const [n, e] of enclaves.entries()) {
+      if (Buffer.compare(e, enclave) === 0) {
+        return n;
+      }
+    }
+    return -1;
   }
 
   public async addMrEnclaveInstruction(
