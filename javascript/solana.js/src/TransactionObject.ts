@@ -1,3 +1,4 @@
+import * as attestationTypes from './attestation-generated';
 import { isBrowser } from './browser';
 import * as errors from './errors';
 import { fromTxError } from './generated';
@@ -628,11 +629,16 @@ export class TransactionObject implements ITransactionObject {
       });
     } catch (error) {
       const err = fromTxError(error);
-      if (err === null) {
-        throw error;
+      if (err) {
+        throw err;
       }
 
-      throw err;
+      const attestationErr = attestationTypes.fromTxError(error);
+      if (attestationErr) {
+        throw attestationErr;
+      }
+
+      throw error;
     }
   }
 }

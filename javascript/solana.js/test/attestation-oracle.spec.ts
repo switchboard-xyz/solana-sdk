@@ -119,11 +119,16 @@ describe('Attestation Oracle Tests', () => {
 
     console.log(new Uint8Array(quoteVerifierMrEnclave));
 
-    await attestationQuoteAccount.verify({
-      timestamp: new BN(Math.floor(Date.now() / 1000)),
-      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
-      verifierKeypair: quoteKeypair,
-    });
+    try {
+      await attestationQuoteAccount.verify({
+        timestamp: new BN(Math.floor(Date.now() / 1000)),
+        mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
+        verifierKeypair: quoteKeypair,
+      });
+    } catch (verifyError) {
+      console.log((verifyError as any).logs);
+      throw verifyError;
+    }
 
     // add itself since requireAuthorityHeartbeatPermission is false
     await attestationQuoteAccount.heartbeat();
