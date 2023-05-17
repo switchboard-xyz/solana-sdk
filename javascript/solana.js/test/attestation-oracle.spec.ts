@@ -7,6 +7,7 @@ import { programConfig } from '../src/generated';
 import { setupTest, TestContext } from './utils';
 
 import { BN } from '@coral-xyz/anchor';
+import { NATIVE_MINT } from '@solana/spl-token';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import assert from 'assert';
 
@@ -50,6 +51,10 @@ describe('Attestation Oracle Tests', () => {
     });
     [oracleAccount] = await queueAccount.createOracle({});
 
+    const daoMint = programStateData.daoMint.equals(PublicKey.default)
+      ? NATIVE_MINT
+      : programStateData.daoMint;
+
     ctx.program.signAndSend(
       new sbv2.TransactionObject(
         ctx.program.walletPubkey,
@@ -58,9 +63,9 @@ describe('Attestation Oracle Tests', () => {
             ctx.program,
             {
               params: {
-                token: PublicKey.default,
+                token: programStateData.tokenMint,
                 bump: ctx.program.programState.bump,
-                daoMint: PublicKey.default,
+                daoMint: daoMint,
                 addEnclaves: [mrEnclave],
                 rmEnclaves: [],
               },
@@ -68,7 +73,7 @@ describe('Attestation Oracle Tests', () => {
             {
               authority: programStateData.authority,
               programState: ctx.program.programState.publicKey,
-              daoMint: PublicKey.default,
+              daoMint: daoMint,
             }
           ),
         ],
@@ -101,11 +106,18 @@ describe('Attestation Oracle Tests', () => {
     });
 
     const attestationQueueState = await attestationQueueAccount.loadData();
-    console.log(
-      attestationQueueState.mrEnclaves.slice(
-        0,
-        attestationQueueState.mrEnclavesLen
-      )
+
+    assert(
+      Buffer.compare(
+        Buffer.from(
+          attestationQueueState.mrEnclaves.slice(
+            0,
+            attestationQueueState.mrEnclavesLen
+          )[0]
+        ),
+        Buffer.from(quoteVerifierMrEnclave)
+      ) === 0,
+      `Attestation queue does not have the correct MRENCLAVE`
     );
 
     [attestationQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
@@ -115,23 +127,15 @@ describe('Attestation Oracle Tests', () => {
     });
 
     const quoteState = await attestationQuoteAccount.loadData();
-    console.log(sbv2.QuoteAccount.getVerificationStatus(quoteState));
+    const verificationStatus =
+      sbv2.QuoteAccount.getVerificationStatus(quoteState);
 
-    console.log(new Uint8Array(quoteVerifierMrEnclave));
+    assert(
+      verificationStatus.kind === 'VerificationOverride',
+      `Quote account has not been verified`
+    );
 
-    // try {
-    await attestationQuoteAccount.verify({
-      timestamp: new BN(Math.floor(Date.now() / 1000)),
-      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
-      verifierKeypair: quoteKeypair,
-    });
-    // } catch (verifyError) {
-    //   console.log((verifyError as any).logs);
-    //   throw verifyError;
-    // }
-
-    // add itself since requireAuthorityHeartbeatPermission is false
-    await attestationQuoteAccount.heartbeat();
+    // we do not need to verify because of the override
   });
 
   it('Creates a TEE oracle', async () => {
@@ -142,7 +146,7 @@ describe('Attestation Oracle Tests', () => {
     [oracleQuoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
       cid: new Uint8Array(Array(64).fill(1)),
       queueAccount: attestationQueueAccount,
-      keypair: quoteKeypair,
+      keypair: oracleQuoteKeypair,
     });
 
     await oracleQuoteAccount.verify({
