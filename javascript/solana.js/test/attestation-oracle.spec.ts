@@ -1,7 +1,6 @@
 import 'mocha';
 
 import * as sbv2 from '../src';
-import { PermissionAccount, TransactionMissingSignerError } from '../src';
 import { programConfig } from '../src/generated';
 
 import { setupTest, TestContext } from './utils';
@@ -9,6 +8,7 @@ import { setupTest, TestContext } from './utils';
 import { BN } from '@coral-xyz/anchor';
 import { NATIVE_MINT } from '@solana/spl-token';
 import { Keypair, PublicKey } from '@solana/web3.js';
+import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
 import assert from 'assert';
 
 describe('Attestation Oracle Tests', () => {
@@ -16,8 +16,7 @@ describe('Attestation Oracle Tests', () => {
 
   let queueAccount: sbv2.QueueAccount;
   let oracleAccount: sbv2.OracleAccount;
-  let oraclePermissionAccount: sbv2.PermissionAccount;
-  let oraclePermissionBump: number;
+  let oracleQuoteAccount: sbv2.QuoteAccount;
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   const quoteKeypair = Keypair.generate();
@@ -47,43 +46,47 @@ describe('Attestation Oracle Tests', () => {
       minStake: 0,
       enableTeeOnly: true,
     });
-    [oracleAccount] = await queueAccount.createOracle({});
+    [oracleAccount] = await queueAccount.createOracle({
+      enable: true,
+      queueAuthorityPubkey: ctx.program.walletPubkey,
+    });
 
-    const daoMint = programStateData.daoMint.equals(PublicKey.default)
-      ? NATIVE_MINT
-      : programStateData.daoMint;
+    if (
+      sbv2.ProgramStateAccount.findEnclaveIdx(
+        programStateData.mrEnclaves.map(e => new Uint8Array(e)),
+        new Uint8Array(mrEnclave)
+      ) === -1
+    ) {
+      const daoMint = programStateData.daoMint.equals(PublicKey.default)
+        ? NATIVE_MINT
+        : programStateData.daoMint;
 
-    ctx.program.signAndSend(
-      new sbv2.TransactionObject(
-        ctx.program.walletPubkey,
-        [
-          programConfig(
-            ctx.program,
-            {
-              params: {
-                token: programStateData.tokenMint,
-                bump: ctx.program.programState.bump,
-                daoMint: daoMint,
-                addEnclaves: [mrEnclave],
-                rmEnclaves: [],
+      ctx.program.signAndSend(
+        new sbv2.TransactionObject(
+          ctx.program.walletPubkey,
+          [
+            programConfig(
+              ctx.program,
+              {
+                params: {
+                  token: programStateData.tokenMint,
+                  bump: ctx.program.programState.bump,
+                  daoMint: daoMint,
+                  addEnclaves: [mrEnclave],
+                  rmEnclaves: [],
+                },
               },
-            },
-            {
-              authority: programStateData.authority,
-              programState: ctx.program.programState.publicKey,
-              daoMint: daoMint,
-            }
-          ),
-        ],
-        []
-      )
-    );
-
-    [oraclePermissionAccount, oraclePermissionBump] =
-      oracleAccount.getPermissionAccount(
-        queueAccount.publicKey,
-        ctx.program.walletPubkey
+              {
+                authority: programStateData.authority,
+                programState: ctx.program.programState.publicKey,
+                daoMint: daoMint,
+              }
+            ),
+          ],
+          []
+        )
       );
+    }
   });
 
   it('Creates an Attestation Queue', async () => {
@@ -171,13 +174,14 @@ describe('Attestation Oracle Tests', () => {
 
     await attestationQuoteAccount2.heartbeat({ keypair: quoteKeypair2 });
 
-    // TODO: assert AttestationQueue size
+    const newQueueState = await attestationQueueAccount.loadData();
+    assert(newQueueState.dataLen === 2, 'AttestationQueue incorrect size');
   });
 
   it('Creates a TEE oracle', async () => {
     const oracleQuoteKeypair = Keypair.generate();
 
-    const [oracleQuoteAccount] = await attestationQueueAccount.createQuote({
+    [oracleQuoteAccount] = await attestationQueueAccount.createQuote({
       registryKey: new Uint8Array(Array(64).fill(1)),
       keypair: oracleQuoteKeypair,
     });
@@ -188,6 +192,15 @@ describe('Attestation Oracle Tests', () => {
       verifierKeypair: quoteKeypair,
     });
 
+    const quoteData = await oracleQuoteAccount.loadData();
+    assert(
+      Buffer.compare(
+        new Uint8Array(mrEnclave),
+        new Uint8Array(quoteData.mrEnclave)
+      ) === 0,
+      'QuoteData MRECLAVE mismatch'
+    );
+
     // Perform tee heartbeat.
     await oracleAccount.teeHeartbeat({
       quote: oracleQuoteAccount.publicKey,
@@ -195,9 +208,97 @@ describe('Attestation Oracle Tests', () => {
   });
 
   it('Calls TeeSaveResult', async () => {
+    const programStateData = await new sbv2.ProgramStateAccount(
+      ctx.program,
+      ctx.program.programState.publicKey
+    ).loadData();
+    assert(
+      sbv2.ProgramStateAccount.findEnclaveIdx(
+        programStateData.mrEnclaves.map(e => new Uint8Array(e)),
+        new Uint8Array(mrEnclave)
+      ) !== -1,
+      'ProgramState does not have the NodeJS MRENCLAVE measurement'
+    );
     // 1. Create basic aggregator with valueTask
-    // 2. Add to queueAccount and enable agg permissions
-    // 3. Call openRound
-    // 4. Send tee_save_result
+    const [aggregatorAccount] = await queueAccount.createFeed({
+      queueAuthority: ctx.payer,
+      batchSize: 1,
+      minRequiredOracleResults: 1,
+      minRequiredJobResults: 1,
+      minUpdateDelaySeconds: 60,
+      fundAmount: 0.15,
+      enable: true,
+      historyLimit: 1000,
+      slidingWindow: true,
+      jobs: [
+        {
+          weight: 2,
+          data: OracleJob.encodeDelimited(
+            OracleJob.fromObject({
+              tasks: [
+                {
+                  valueTask: {
+                    value: 1,
+                  },
+                },
+              ],
+            })
+          ).finish(),
+        },
+      ],
+    });
+
+    const aggregator = await aggregatorAccount.loadData();
+    const jobs = await aggregatorAccount.loadJobs(aggregator);
+
+    assert(
+      aggregator.resolutionMode.kind === 'ModeSlidingResolution',
+      'Aggregator account needs to be sliding window mode'
+    );
+
+    // 2. Call openRound
+    await aggregatorAccount.openRound();
+
+    // 3. Send tee_save_result
+    const updatedAggregatorState = await aggregatorAccount.loadData();
+    const oracles = await aggregatorAccount.loadCurrentRoundOracles(
+      updatedAggregatorState
+    );
+    const saveResultTxn = aggregatorAccount.teeSaveResultInstructionSync(
+      ctx.payer.publicKey,
+      {
+        ...aggregatorAccount.getAccounts(
+          queueAccount,
+          ctx.program.walletPubkey
+        ),
+        oraclePermission: oracleAccount.getPermissionAccount(
+          queueAccount.publicKey,
+          ctx.payer.publicKey
+        ),
+        jobs: jobs.map(j => j.job),
+        value: new Big(1),
+        minResponse: new Big(1),
+        maxResponse: new Big(1),
+        queueAccount: queueAccount,
+        queueAuthority: ctx.program.walletPubkey,
+        oracles: oracles,
+        oracleIdx: 0,
+        aggregator: updatedAggregatorState,
+        quotePubkey: oracleQuoteAccount.publicKey,
+      }
+    );
+
+    await ctx.program.signAndSend(saveResultTxn, {
+      skipPreflight: true,
+    });
+
+    const finalAggregatorState = await aggregatorAccount.loadData();
+
+    const finalValue =
+      sbv2.AggregatorAccount.decodeLatestValue(finalAggregatorState);
+    assert(
+      finalValue !== null && finalValue.toNumber() === 1,
+      `AggregatorValue is incorrect, ${finalValue}`
+    );
   });
 });

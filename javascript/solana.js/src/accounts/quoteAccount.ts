@@ -77,6 +77,9 @@ export interface QuoteVerifyParams {
    */
   mrEnclave: Uint8Array;
 
+  /**
+   * Keypair of the verifier that has a valid MRENCLAVE quote
+   */
   verifierKeypair: Keypair;
 }
 /**

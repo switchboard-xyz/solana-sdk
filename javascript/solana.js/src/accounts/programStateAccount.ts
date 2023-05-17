@@ -34,6 +34,20 @@ export class ProgramStateAccount extends Account<types.SbState> {
   public readonly size = this.program.account.sbState.size;
 
   /**
+   * Finds the {@linkcode ProgramStateAccount} from the static seed from which it was generated.
+   * @return ProgramStateAccount and PDA bump tuple.
+   */
+  public static fromSeed(
+    program: SwitchboardProgram
+  ): [ProgramStateAccount, number] {
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
+      [Buffer.from('STATE')],
+      program.programId
+    );
+    return [new ProgramStateAccount(program, publicKey), bump];
+  }
+
+  /**
    * Return a program state account state initialized to the default values.
    */
   public static default(): types.SbState {
@@ -233,17 +247,18 @@ export class ProgramStateAccount extends Account<types.SbState> {
   }
 
   /**
-   * Finds the {@linkcode ProgramStateAccount} from the static seed from which it was generated.
-   * @return ProgramStateAccount and PDA bump tuple.
+   * Find the index of an enclave in an array and return -1 if not found
    */
-  public static fromSeed(
-    program: SwitchboardProgram
-  ): [ProgramStateAccount, number] {
-    const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('STATE')],
-      program.programId
-    );
-    return [new ProgramStateAccount(program, publicKey), bump];
+  public static findEnclaveIdx(
+    enclaves: Array<Uint8Array>,
+    enclave: Uint8Array
+  ): number {
+    for (const [n, e] of enclaves.entries()) {
+      if (Buffer.compare(e, enclave) === 0) {
+        return n;
+      }
+    }
+    return -1;
   }
 
   /**

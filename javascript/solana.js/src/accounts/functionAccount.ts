@@ -124,6 +124,25 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   /**
    *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
    */
+
+  /**
+   * Get the size of an {@linkcode FunctionAccount} on-chain.
+   */
+  public readonly size =
+    this.program.attestationAccount.functionAccountData.size;
+
+  /**
+   *  Retrieve and decode the {@linkcode types.FunctionAccountData} stored in this account.
+   */
+  public async loadData(): Promise<types.FunctionAccountData> {
+    const data = await types.FunctionAccountData.fetch(
+      this.program,
+      this.publicKey
+    );
+    if (data) return data;
+    throw new errors.AccountNotFoundError('Function', this.publicKey);
+  }
+
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
@@ -204,24 +223,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     );
     const txSignature = await program.signAndSend(txnObject, options);
     return [account, txSignature];
-  }
-
-  /**
-   * Get the size of an {@linkcode FunctionAccount} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.functionAccountData.size;
-
-  /**
-   *  Retrieve and decode the {@linkcode types.FunctionAccountData} stored in this account.
-   */
-  public async loadData(): Promise<types.FunctionAccountData> {
-    const data = await types.FunctionAccountData.fetch(
-      this.program,
-      this.publicKey
-    );
-    if (data) return data;
-    throw new errors.AccountNotFoundError('Function', this.publicKey);
   }
 
   public getEscrow(): PublicKey {

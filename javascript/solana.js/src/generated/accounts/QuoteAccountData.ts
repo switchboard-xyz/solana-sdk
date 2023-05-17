@@ -6,41 +6,62 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface QuoteAccountDataFields {
-  node: PublicKey;
-  nodeAuthority: PublicKey;
-  queue: PublicKey;
-  quoteBuffer: Array<number>;
-  quoteLen: number;
-  isReady: boolean;
+  delegatedSecuredSigner: PublicKey;
+  bump: number;
+  /** TODO: Add description */
+  quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
+  registryKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
+  attestationQueue: PublicKey;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
+  mrEnclave: Array<number>;
   verificationStatus: number;
   verificationTimestamp: BN;
   validUntil: BN;
+  isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
+  lastHeartbeat: BN;
   ebuf: Array<number>;
 }
 
 export interface QuoteAccountDataJSON {
-  node: string;
-  nodeAuthority: string;
-  queue: string;
-  quoteBuffer: Array<number>;
-  quoteLen: number;
-  isReady: boolean;
+  delegatedSecuredSigner: string;
+  bump: number;
+  /** TODO: Add description */
+  quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
+  registryKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
+  attestationQueue: string;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
+  mrEnclave: Array<number>;
   verificationStatus: number;
   verificationTimestamp: string;
   validUntil: string;
+  isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
+  lastHeartbeat: string;
   ebuf: Array<number>;
 }
 
 export class QuoteAccountData {
-  readonly node: PublicKey;
-  readonly nodeAuthority: PublicKey;
-  readonly queue: PublicKey;
-  readonly quoteBuffer: Array<number>;
-  readonly quoteLen: number;
-  readonly isReady: boolean;
+  readonly delegatedSecuredSigner: PublicKey;
+  readonly bump: number;
+  /** TODO: Add description */
+  readonly quoteRegistry: Array<number>;
+  /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
+  readonly registryKey: Array<number>;
+  /** Queue used for attestation to verify a MRENCLAVE measurement. */
+  readonly attestationQueue: PublicKey;
+  /** The quotes MRENCLAVE measurement dictating the contents of the secure enclave. */
+  readonly mrEnclave: Array<number>;
   readonly verificationStatus: number;
   readonly verificationTimestamp: BN;
   readonly validUntil: BN;
+  readonly isOnQueue: boolean;
+  /** The last time the quote heartbeated. */
+  readonly lastHeartbeat: BN;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -48,28 +69,32 @@ export class QuoteAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('node'),
-    borsh.publicKey('nodeAuthority'),
-    borsh.publicKey('queue'),
-    borsh.array(borsh.u8(), 8192, 'quoteBuffer'),
-    borsh.u32('quoteLen'),
-    borsh.bool('isReady'),
+    borsh.publicKey('delegatedSecuredSigner'),
+    borsh.u8('bump'),
+    borsh.array(borsh.u8(), 32, 'quoteRegistry'),
+    borsh.array(borsh.u8(), 64, 'registryKey'),
+    borsh.publicKey('attestationQueue'),
+    borsh.array(borsh.u8(), 32, 'mrEnclave'),
     borsh.u8('verificationStatus'),
     borsh.i64('verificationTimestamp'),
     borsh.i64('validUntil'),
+    borsh.bool('isOnQueue'),
+    borsh.i64('lastHeartbeat'),
     borsh.array(borsh.u8(), 1024, 'ebuf'),
   ]);
 
   constructor(fields: QuoteAccountDataFields) {
-    this.node = fields.node;
-    this.nodeAuthority = fields.nodeAuthority;
-    this.queue = fields.queue;
-    this.quoteBuffer = fields.quoteBuffer;
-    this.quoteLen = fields.quoteLen;
-    this.isReady = fields.isReady;
+    this.delegatedSecuredSigner = fields.delegatedSecuredSigner;
+    this.bump = fields.bump;
+    this.quoteRegistry = fields.quoteRegistry;
+    this.registryKey = fields.registryKey;
+    this.attestationQueue = fields.attestationQueue;
+    this.mrEnclave = fields.mrEnclave;
     this.verificationStatus = fields.verificationStatus;
     this.verificationTimestamp = fields.verificationTimestamp;
     this.validUntil = fields.validUntil;
+    this.isOnQueue = fields.isOnQueue;
+    this.lastHeartbeat = fields.lastHeartbeat;
     this.ebuf = fields.ebuf;
   }
 
@@ -115,45 +140,51 @@ export class QuoteAccountData {
     const dec = QuoteAccountData.layout.decode(data.slice(8));
 
     return new QuoteAccountData({
-      node: dec.node,
-      nodeAuthority: dec.nodeAuthority,
-      queue: dec.queue,
-      quoteBuffer: dec.quoteBuffer,
-      quoteLen: dec.quoteLen,
-      isReady: dec.isReady,
+      delegatedSecuredSigner: dec.delegatedSecuredSigner,
+      bump: dec.bump,
+      quoteRegistry: dec.quoteRegistry,
+      registryKey: dec.registryKey,
+      attestationQueue: dec.attestationQueue,
+      mrEnclave: dec.mrEnclave,
       verificationStatus: dec.verificationStatus,
       verificationTimestamp: dec.verificationTimestamp,
       validUntil: dec.validUntil,
+      isOnQueue: dec.isOnQueue,
+      lastHeartbeat: dec.lastHeartbeat,
       ebuf: dec.ebuf,
     });
   }
 
   toJSON(): QuoteAccountDataJSON {
     return {
-      node: this.node.toString(),
-      nodeAuthority: this.nodeAuthority.toString(),
-      queue: this.queue.toString(),
-      quoteBuffer: this.quoteBuffer,
-      quoteLen: this.quoteLen,
-      isReady: this.isReady,
+      delegatedSecuredSigner: this.delegatedSecuredSigner.toString(),
+      bump: this.bump,
+      quoteRegistry: this.quoteRegistry,
+      registryKey: this.registryKey,
+      attestationQueue: this.attestationQueue.toString(),
+      mrEnclave: this.mrEnclave,
       verificationStatus: this.verificationStatus,
       verificationTimestamp: this.verificationTimestamp.toString(),
       validUntil: this.validUntil.toString(),
+      isOnQueue: this.isOnQueue,
+      lastHeartbeat: this.lastHeartbeat.toString(),
       ebuf: this.ebuf,
     };
   }
 
   static fromJSON(obj: QuoteAccountDataJSON): QuoteAccountData {
     return new QuoteAccountData({
-      node: new PublicKey(obj.node),
-      nodeAuthority: new PublicKey(obj.nodeAuthority),
-      queue: new PublicKey(obj.queue),
-      quoteBuffer: obj.quoteBuffer,
-      quoteLen: obj.quoteLen,
-      isReady: obj.isReady,
+      delegatedSecuredSigner: new PublicKey(obj.delegatedSecuredSigner),
+      bump: obj.bump,
+      quoteRegistry: obj.quoteRegistry,
+      registryKey: obj.registryKey,
+      attestationQueue: new PublicKey(obj.attestationQueue),
+      mrEnclave: obj.mrEnclave,
       verificationStatus: obj.verificationStatus,
       verificationTimestamp: new BN(obj.verificationTimestamp),
       validUntil: new BN(obj.validUntil),
+      isOnQueue: obj.isOnQueue,
+      lastHeartbeat: new BN(obj.lastHeartbeat),
       ebuf: obj.ebuf,
     });
   }
