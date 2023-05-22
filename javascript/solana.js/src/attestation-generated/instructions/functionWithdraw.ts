@@ -17,9 +17,9 @@ export interface FunctionWithdrawAccounts {
   function: PublicKey;
   attestationQueue: PublicKey;
   authority: PublicKey;
-  state: PublicKey;
   escrow: PublicKey;
   receiver: PublicKey;
+  state: PublicKey;
   tokenProgram: PublicKey;
 }
 
@@ -33,12 +33,12 @@ export function functionWithdraw(
   accounts: FunctionWithdrawAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.function, isSigner: false, isWritable: false },
+    { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.authority, isSigner: true, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([6, 182, 241, 39, 40, 111, 65, 195]);

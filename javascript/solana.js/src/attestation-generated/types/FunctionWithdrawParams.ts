@@ -6,22 +6,22 @@ import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionWithdrawParamsFields {
-  amount: number;
+  amount: BN;
 }
 
 export interface FunctionWithdrawParamsJSON {
-  amount: number;
+  amount: string;
 }
 
 export class FunctionWithdrawParams {
-  readonly amount: number;
+  readonly amount: BN;
 
   constructor(fields: FunctionWithdrawParamsFields) {
     this.amount = fields.amount;
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.u32('amount')], property);
+    return borsh.struct([borsh.u64('amount')], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,13 +39,13 @@ export class FunctionWithdrawParams {
 
   toJSON(): FunctionWithdrawParamsJSON {
     return {
-      amount: this.amount,
+      amount: this.amount.toString(),
     };
   }
 
   static fromJSON(obj: FunctionWithdrawParamsJSON): FunctionWithdrawParams {
     return new FunctionWithdrawParams({
-      amount: obj.amount,
+      amount: new BN(obj.amount),
     });
   }
 

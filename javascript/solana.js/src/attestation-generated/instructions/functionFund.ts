@@ -19,6 +19,7 @@ export interface FunctionFundAccounts {
   escrow: PublicKey;
   funder: PublicKey;
   funderAuthority: PublicKey;
+  state: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
 }
@@ -36,6 +37,7 @@ export function functionFund(
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.funder, isSigner: false, isWritable: true },
     { pubkey: accounts.funderAuthority, isSigner: true, isWritable: false },
+    { pubkey: accounts.state, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
       pubkey: accounts.associatedTokenProgram,

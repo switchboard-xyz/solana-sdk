@@ -6,22 +6,22 @@ import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionFundParamsFields {
-  amount: number;
+  amount: BN;
 }
 
 export interface FunctionFundParamsJSON {
-  amount: number;
+  amount: string;
 }
 
 export class FunctionFundParams {
-  readonly amount: number;
+  readonly amount: BN;
 
   constructor(fields: FunctionFundParamsFields) {
     this.amount = fields.amount;
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.u32('amount')], property);
+    return borsh.struct([borsh.u64('amount')], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,13 +39,13 @@ export class FunctionFundParams {
 
   toJSON(): FunctionFundParamsJSON {
     return {
-      amount: this.amount,
+      amount: this.amount.toString(),
     };
   }
 
   static fromJSON(obj: FunctionFundParamsJSON): FunctionFundParams {
     return new FunctionFundParams({
-      amount: obj.amount,
+      amount: new BN(obj.amount),
     });
   }
 

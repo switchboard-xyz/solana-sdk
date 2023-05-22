@@ -28,7 +28,7 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { toUtf8 } from '@switchboard-xyz/common';
+import { BN, toUtf8 } from '@switchboard-xyz/common';
 import { isValidCron } from 'cron-validator';
 
 /**
@@ -262,6 +262,11 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    const fundTokenAmountBN = this.program.mint.toTokenAmountBN(
+      params.fundAmount
+    );
+
+    // TODO: Create funder token wallet if it doesnt exist
     const funderAuthority = params.funderAuthority
       ? params.funderAuthority.publicKey
       : payer;
@@ -272,13 +277,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const functionData = await this.loadData();
     const instruction = types.functionFund(
       this.program,
-      { params: { amount: params.fundAmount } },
+      { params: { amount: fundTokenAmountBN } },
       {
         function: this.publicKey,
         attestationQueue: functionData.attestationQueue,
         escrow: this.getEscrow(),
         funder: funderTokenWallet,
         funderAuthority: funderAuthority,
+        state: this.program.attestationProgramState.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       }
@@ -344,14 +350,18 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         // perform withdraw
         types.functionWithdraw(
           this.program,
-          { params: { amount: withdrawAmount } },
+          {
+            params: {
+              amount: this.program.mint.toTokenAmountBN(withdrawAmount),
+            },
+          },
           {
             function: this.publicKey,
             attestationQueue: queueAccount.publicKey,
             escrow: this.getEscrow(),
             authority: payer,
             receiver: ephemeralWallet.publicKey,
-            state: PublicKey.default, // @TODO: find state account pubkey
+            state: this.program.attestationProgramState.publicKey, // @TODO: find state account pubkey
             tokenProgram: TOKEN_PROGRAM_ID,
           }
         ),
@@ -375,7 +385,11 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         [
           types.functionWithdraw(
             this.program,
-            { params: { amount: withdrawAmount } },
+            {
+              params: {
+                amount: this.program.mint.toTokenAmountBN(withdrawAmount),
+              },
+            },
             {
               function: this.publicKey,
               attestationQueue: queueAccount.publicKey,
@@ -384,7 +398,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
                 ? params.withdrawAuthority.publicKey
                 : payer,
               receiver: params.withdrawWallet,
-              state: PublicKey.default, // @TODO: find state account pubkey
+              state: this.program.attestationProgramState.publicKey, // @TODO: find state account pubkey
               tokenProgram: TOKEN_PROGRAM_ID,
             }
           ),
@@ -455,5 +469,23 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       params,
       options
     ).then(txn => this.program.signAndSend(txn, options));
+  }
+
+  public async getBalance(): Promise<number> {
+    const balance = await this.program.mint.getAssociatedBalance(
+      this.publicKey
+    );
+    if (balance === null) {
+      throw new errors.AccountNotFoundError(
+        `Function escrow`,
+        this.getEscrow()
+      );
+    }
+    return balance;
+  }
+
+  public async getBalanceBN(): Promise<BN> {
+    const balance = await this.getBalance();
+    return this.program.mint.toTokenAmountBN(balance);
   }
 }
