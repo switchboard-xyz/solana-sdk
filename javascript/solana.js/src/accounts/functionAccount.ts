@@ -7,6 +7,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { parseMrEnclave } from '../utils';
 
 import {
   AttestationPermissionAccount,
@@ -41,10 +42,9 @@ export interface FunctionAccountInitParams {
   containerRegistry?: string;
   schedule: string;
 
-  /**
-   *  The quote account to which this function account will be linked
-   */
-  quoteAccount: QuoteAccount;
+  mrEnclave: Buffer | Uint8Array | number[];
+  attestationQueue: AttestationQueueAccount;
+
   /**
    *  A keypair to be used to address this account.
    *
@@ -165,19 +165,21 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       throw new errors.InvalidCronSchedule(params.schedule);
     }
 
-    const quoteData = await params.quoteAccount.loadData();
-    const [queueAccount, queueData] = await AttestationQueueAccount.load(
+    const attestationQueueAccount = params.attestationQueue;
+    const attestationQueue = await attestationQueueAccount.loadData();
+
+    // get PDA accounts
+    const functionAccount = new FunctionAccount(
       program,
-      quoteData.attestationQueue
+      functionKeypair.publicKey
     );
-    const authority = params.authority ? params.authority.publicKey : payer;
-    const account = new FunctionAccount(program, functionKeypair.publicKey);
-    const permissionAccount = AttestationPermissionAccount.fromSeed(
-      program,
-      authority,
-      queueAccount.publicKey,
-      account.publicKey
-    )[0];
+    const [permissionAccount] = functionAccount.getPermissionAccount(
+      attestationQueueAccount.publicKey,
+      attestationQueue.authority
+    );
+    const [quoteAccount] = functionAccount.getQuoteAccount();
+    const escrow = functionAccount.getEscrow();
+
     const instruction = types.functionInit(
       program,
       {
@@ -193,13 +195,13 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         },
       },
       {
-        function: account.publicKey,
-        authority,
-        quote: params.quoteAccount.publicKey,
-        attestationQueue: queueAccount.publicKey,
+        function: functionAccount.publicKey,
+        authority: params.authority ? params.authority.publicKey : payer,
+        quote: quoteAccount.publicKey,
+        attestationQueue: attestationQueueAccount.publicKey,
         permission: permissionAccount.publicKey,
-        escrow: account.getEscrow(),
-        state: PublicKey.default, // @TODO: find state account pubkey
+        escrow,
+        state: program.attestationProgramState.publicKey, // @TODO: find state account pubkey
         mint: program.mint.address,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -207,7 +209,17 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         systemProgram: SystemProgram.programId,
       }
     );
-    return [account, new TransactionObject(payer, [instruction], [], options)];
+    return [
+      functionAccount,
+      new TransactionObject(
+        payer,
+        [instruction],
+        params.authority
+          ? [params.authority, functionKeypair]
+          : [functionKeypair],
+        options
+      ),
+    ];
   }
 
   public static async create(
@@ -223,6 +235,22 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     );
     const txSignature = await program.signAndSend(txnObject, options);
     return [account, txSignature];
+  }
+
+  public getPermissionAccount(
+    queuePubkey: PublicKey,
+    queueAuthority: PublicKey
+  ): [AttestationPermissionAccount, number] {
+    return AttestationPermissionAccount.fromSeed(
+      this.program,
+      queueAuthority,
+      queuePubkey,
+      this.publicKey
+    );
+  }
+
+  public getQuoteAccount(): [QuoteAccount, number] {
+    return QuoteAccount.fromSeed(this.program, this.publicKey);
   }
 
   public getEscrow(): PublicKey {

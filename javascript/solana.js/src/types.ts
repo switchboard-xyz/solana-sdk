@@ -27,6 +27,8 @@ import {
 
 import { OracleJob } from '@switchboard-xyz/common';
 
+export type RawMrEnclave = string | Buffer | Uint8Array | number[];
+
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;
 }
@@ -121,3 +123,14 @@ export type LoadedJobDefinition = LoadedAccountDefinition<
 > & {
   job: OracleJob;
 };
+
+export class MrEnclave {
+  public readonly mrEnclave: Uint8Array;
+
+  public constructor(mrEnclave: string | Buffer | Uint8Array | number[]) {
+    this.mrEnclave =
+      typeof mrEnclave === 'string'
+        ? new Uint8Array(Buffer.from(mrEnclave))
+        : new Uint8Array(mrEnclave);
+  }
+}

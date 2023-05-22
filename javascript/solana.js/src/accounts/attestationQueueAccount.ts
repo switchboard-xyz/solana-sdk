@@ -6,6 +6,8 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { RawMrEnclave } from '../types';
+import { parseMrEnclave } from '../utils';
 
 import { Account } from './account';
 import {
@@ -74,14 +76,14 @@ export interface AttestationQueueAccountInitParams {
  *  Parameters for an {@linkcode types.queueAddMrEnclave} instruction.
  */
 export interface AttestationQueueAddMrEnclaveParams {
-  mrEnclave: Uint8Array;
+  mrEnclave: RawMrEnclave;
   authority?: Keypair;
 }
 /**
  *  Parameters for an {@linkcode types.queueRemoveMrEnclave} instruction.
  */
 export interface AttestationQueueRemoveMrEnclaveParams {
-  mrEnclave: Uint8Array;
+  mrEnclave: RawMrEnclave;
   authority?: Keypair;
 }
 
@@ -273,12 +275,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   ): Promise<TransactionObject> {
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
-    const mrEnclave = Array.from(params.mrEnclave)
-      .concat(Array(32).fill(0))
-      .slice(0, 32);
     const instruction = types.attestationQueueAddMrEnclave(
       this.program,
-      { params: { mrEnclave } },
+      { params: { mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)) } },
       { authority, queue: this.publicKey }
     );
     return new TransactionObject(payer, [instruction], signers, options);
@@ -302,12 +301,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   ): Promise<TransactionObject> {
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
-    const mrEnclave = Array.from(params.mrEnclave)
-      .concat(Array(32).fill(0))
-      .slice(0, 32);
     const instruction = types.attestationQueueRemoveMrEnclave(
       this.program,
-      { params: { mrEnclave } },
+      { params: { mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)) } },
       { authority, queue: this.publicKey }
     );
     return new TransactionObject(payer, [instruction], signers, options);

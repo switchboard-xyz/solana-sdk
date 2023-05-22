@@ -7,43 +7,79 @@ import { setupTest, TestContext } from './utils';
 import { Keypair } from '@solana/web3.js';
 import assert from 'assert';
 
-describe('SGX Function Tests', () => {
+describe('Function Tests', () => {
   let ctx: TestContext;
 
-  let queueAccount: sbv2.AttestationQueueAccount;
-  let quoteAccount: sbv2.QuoteAccount;
+  let attestationQueueAccount: sbv2.AttestationQueueAccount;
+  let attestationQuoteVerifierAccount: sbv2.QuoteAccount;
+  const quoteVerifierKeypair = Keypair.generate();
+
+  const quoteVerifierMrEnclave = Array.from(
+    Buffer.from('This is the quote verifier MrEnclave')
+  )
+    .concat(Array(32).fill(0))
+    .slice(0, 32);
+
   let functionAccount: sbv2.FunctionAccount;
+
+  const mrEnclave = Array.from(
+    Buffer.from('This is the custom function MrEnclave')
+  )
+    .concat(Array(32).fill(0))
+    .slice(0, 32);
 
   before(async () => {
     ctx = await setupTest();
 
-    [queueAccount] = await sbv2.AttestationQueueAccount.create(ctx.program, {
-      reward: 69420,
-      allowAuthorityOverrideAfter: 321,
-      maxQuoteVerificationAge: 123,
-      requireAuthorityHeartbeatPermission: false,
-      requireUsagePermissions: false,
-      authority: Keypair.generate(),
+    [attestationQueueAccount] = await sbv2.AttestationQueueAccount.create(
+      ctx.program,
+      {
+        reward: 0,
+        allowAuthorityOverrideAfter: 60, // should increase this
+        maxQuoteVerificationAge: 604800,
+        requireAuthorityHeartbeatPermission: false,
+        requireUsagePermissions: false,
+        nodeTimeout: 604800,
+      }
+    );
+
+    await attestationQueueAccount.addMrEnclave({
+      mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
     });
-    [quoteAccount] = await sbv2.QuoteAccount.create(ctx.program, {
-      registryKey: new Uint8Array([1, 2, 3]),
-      queueAccount,
+
+    [attestationQuoteVerifierAccount] =
+      await attestationQueueAccount.createQuote({
+        registryKey: new Uint8Array(Array(64).fill(1)),
+        keypair: quoteVerifierKeypair,
+        enable: true,
+        queueAuthorityPubkey: ctx.program.walletPubkey,
+      });
+
+    // join the queue so we can verify other quotes
+    await attestationQuoteVerifierAccount.heartbeat({
+      keypair: quoteVerifierKeypair,
     });
   });
 
   it('Creates a Function', async () => {
-    [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-      name: 'FUNCTION_NAME',
-      metadata: 'FUNCTION_METADATA',
-      schedule: '* * * * *',
-      container: 'containerId',
-      version: '1.0.0',
-      quoteAccount,
-    });
+    const functionKeypair = Keypair.generate();
 
-    const data = await quoteAccount.loadData();
-    assert(data.isOnQueue === true);
-    console.log(data);
+    [functionAccount] = await sbv2.FunctionAccount.create(
+      ctx.program,
+      {
+        name: 'FUNCTION_NAME',
+        metadata: 'FUNCTION_METADATA',
+        schedule: '* * * * *',
+        container: 'containerId',
+        version: '1.0.0',
+        mrEnclave,
+        attestationQueue: attestationQueueAccount,
+        keypair: functionKeypair,
+      },
+      { skipPreflight: true }
+    );
+
+    const myFunction = await functionAccount.loadData();
   });
 
   it('Fund the function', async () => {});

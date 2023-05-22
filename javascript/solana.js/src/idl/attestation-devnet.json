@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "name": "switchboard_quote_verifier",
+  "name": "switchboard_attestation_program",
   "instructions": [
     {
       "name": "stateInit",
@@ -39,7 +39,7 @@
           "isSigner": true
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": true,
           "isSigner": false
         },
@@ -82,7 +82,7 @@
           "isSigner": true
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         }
@@ -101,11 +101,11 @@
       "accounts": [
         {
           "name": "quote",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": true,
           "isSigner": false
         },
@@ -116,7 +116,7 @@
         },
         {
           "name": "gcNode",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "name": "queueInit",
+      "name": "attestationQueueInit",
       "accounts": [
         {
           "name": "queue",
@@ -162,13 +162,13 @@
         {
           "name": "params",
           "type": {
-            "defined": "QueueInitParams"
+            "defined": "AttestationQueueInitParams"
           }
         }
       ]
     },
     {
-      "name": "queueAddMrEnclave",
+      "name": "attestationQueueAddMrEnclave",
       "accounts": [
         {
           "name": "queue",
@@ -185,13 +185,13 @@
         {
           "name": "params",
           "type": {
-            "defined": "QueueAddMrEnclaveParams"
+            "defined": "AttestationQueueAddMrEnclaveParams"
           }
         }
       ]
     },
     {
-      "name": "queueRemoveMrEnclave",
+      "name": "attestationQueueRemoveMrEnclave",
       "accounts": [
         {
           "name": "queue",
@@ -208,13 +208,13 @@
         {
           "name": "params",
           "type": {
-            "defined": "QueueRemoveMrEnclaveParams"
+            "defined": "AttestationQueueRemoveMrEnclaveParams"
           }
         }
       ]
     },
     {
-      "name": "permissionInit",
+      "name": "attestationPermissionInit",
       "accounts": [
         {
           "name": "permission",
@@ -251,13 +251,13 @@
         {
           "name": "params",
           "type": {
-            "defined": "PermissionInitParams"
+            "defined": "AttestationPermissionInitParams"
           }
         }
       ]
     },
     {
-      "name": "permissionSet",
+      "name": "attestationPermissionSet",
       "accounts": [
         {
           "name": "permission",
@@ -284,7 +284,7 @@
         {
           "name": "params",
           "type": {
-            "defined": "PermissionSetParams"
+            "defined": "AttestationPermissionSetParams"
           }
         }
       ]
@@ -386,7 +386,7 @@
           "isSigner": true
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -444,7 +444,7 @@
           "isSigner": false
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -492,7 +492,7 @@
           "isSigner": false
         },
         {
-          "name": "verifierQueue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -612,7 +612,7 @@
             }
           },
           {
-            "name": "verifierQueue",
+            "name": "attestationQueue",
             "docs": [
               ""
             ],
@@ -668,6 +668,9 @@
         "fields": [
           {
             "name": "delegatedSecuredSigner",
+            "docs": [
+              "TODO: Add description"
+            ],
             "type": "publicKey"
           },
           {
@@ -676,6 +679,9 @@
           },
           {
             "name": "quoteRegistry",
+            "docs": [
+              "TODO: Add description"
+            ],
             "type": {
               "array": [
                 "u8",
@@ -684,7 +690,10 @@
             }
           },
           {
-            "name": "bufferKey",
+            "name": "registryKey",
+            "docs": [
+              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
+            ],
             "type": {
               "array": [
                 "u8",
@@ -693,11 +702,17 @@
             }
           },
           {
-            "name": "verifierQueue",
+            "name": "attestationQueue",
+            "docs": [
+              "Queue used for attestation to verify a MRENCLAVE measurement."
+            ],
             "type": "publicKey"
           },
           {
             "name": "mrEnclave",
+            "docs": [
+              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
+            ],
             "type": {
               "array": [
                 "u8",
@@ -723,14 +738,21 @@
           },
           {
             "name": "lastHeartbeat",
+            "docs": [
+              "The last time the quote heartbeated."
+            ],
             "type": "i64"
+          },
+          {
+            "name": "owner",
+            "type": "publicKey"
           },
           {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                1024
+                992
               ]
             }
           }
@@ -738,7 +760,7 @@
       }
     },
     {
-      "name": "ServiceQueueAccountData",
+      "name": "AttestationQueueAccountData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -769,7 +791,7 @@
             "type": {
               "array": [
                 "publicKey",
-                32
+                128
               ]
             }
           },
@@ -826,7 +848,7 @@
       }
     },
     {
-      "name": "PermissionAccountData",
+      "name": "AttestationPermissionAccountData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -954,14 +976,14 @@
       }
     },
     {
-      "name": "PermissionInitParams",
+      "name": "AttestationPermissionInitParams",
       "type": {
         "kind": "struct",
         "fields": []
       }
     },
     {
-      "name": "PermissionSetParams",
+      "name": "AttestationPermissionSetParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -977,7 +999,7 @@
       }
     },
     {
-      "name": "QueueAddMrEnclaveParams",
+      "name": "AttestationQueueAddMrEnclaveParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -994,7 +1016,7 @@
       }
     },
     {
-      "name": "QueueInitParams",
+      "name": "AttestationQueueInitParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1026,7 +1048,7 @@
       }
     },
     {
-      "name": "QueueRemoveMrEnclaveParams",
+      "name": "AttestationQueueRemoveMrEnclaveParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1055,7 +1077,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "cid",
+            "name": "registryKey",
             "type": {
               "array": [
                 "u8",
@@ -1083,6 +1105,10 @@
                 32
               ]
             }
+          },
+          {
+            "name": "idx",
+            "type": "u32"
           }
         ]
       }
@@ -1144,7 +1170,7 @@
       }
     },
     {
-      "name": "SwitchboardPermission",
+      "name": "SwitchboardAttestationPermission",
       "type": {
         "kind": "enum",
         "variants": [
@@ -1304,6 +1330,16 @@
     {
       "code": 6017,
       "name": "InvalidQuoteMode",
+      "msg": ""
+    },
+    {
+      "code": 6018,
+      "name": "InvalidVerifierIdx",
+      "msg": ""
+    },
+    {
+      "code": 6019,
+      "name": "InvalidSelfVerifyRequest",
       "msg": ""
     }
   ]

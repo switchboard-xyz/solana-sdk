@@ -7,6 +7,8 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from '../TransactionObject';
+import { RawMrEnclave } from '../types';
+import { parseMrEnclave } from '../utils';
 
 import { AttestationPermissionAccount, AttestationQueueAccount } from './index';
 
@@ -18,6 +20,8 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from '@solana/web3.js';
+
+export const QUOTE_SEED: string = 'QuoteAccountData';
 
 /**
  *  Parameters for initializing an {@linkcode QuoteAccount}
@@ -75,7 +79,7 @@ export interface QuoteVerifyParams {
   /**
    *  @TODO: Docs for mrEnclave
    */
-  mrEnclave: Uint8Array;
+  mrEnclave: RawMrEnclave;
 
   /**
    * Keypair of the verifier that has a valid MRENCLAVE quote
@@ -100,6 +104,24 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     const quoteAccount = new QuoteAccount(program, address);
     const state = await quoteAccount.loadData();
     return [quoteAccount, state];
+  }
+
+  /**
+   * Finds the {@linkcode QuoteAccount} from the seed from which it was generated.
+   *
+   * Only applicable for QuoteAccounts tied to a {@linkcode FunctionAccount}. Quotes can also be generated from a keypair.
+   *
+   * @return QuoteAccount and PDA bump tuple.
+   */
+  public static fromSeed(
+    program: SwitchboardProgram,
+    functionPubkey: PublicKey
+  ): [QuoteAccount, number] {
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
+      [Buffer.from(QUOTE_SEED), functionPubkey.toBytes()],
+      program.attestationProgramId
+    );
+    return [new QuoteAccount(program, publicKey), bump];
   }
 
   public static async createInstruction(
@@ -289,7 +311,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       {
         params: {
           timestamp: params.timestamp,
-          mrEnclave: Array.from(params.mrEnclave),
+          mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
           idx: verifierIdx,
         },
       },
