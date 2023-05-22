@@ -420,57 +420,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     ).then(txn => this.program.signAndSend(txn, options));
   }
 
-  public async verifyInstruction(
-    payer: PublicKey,
-    params: FunctionVerifyParams,
-    options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
-    const functionData = await this.loadData();
-    const permissionAccount = AttestationPermissionAccount.fromSeed(
-      /* program= */ this.program,
-      /* authority= */ functionData.authority,
-      /* granter= */ functionData.attestationQueue,
-      /* grantee= */ this.publicKey
-    )[0];
-    const instruction = types.functionVerify(
-      this.program,
-      {
-        params: {
-          observedTime: params.observedTime,
-          nextAllowedTimestamp: params.nextAllowedTimestamp,
-          isFailure: params.isFailure,
-          mrEnclave: Array.from(params.mrEnclave),
-        },
-      },
-      {
-        function: this.publicKey,
-        fnSigner: PublicKey.default, // @TODO: find fn signer pubkey
-        fnQuote: PublicKey.default, // @TODO: find fn quote pubkey
-        verifierQuote: PublicKey.default, // @TODO: find verifier quote pubkey
-        attestationQueue: functionData.attestationQueue,
-        escrow: this.getEscrow(),
-        receiver: PublicKey.default, // @TODO: find receiver pubkey
-        permission: permissionAccount.publicKey,
-        state: PublicKey.default, // @TODO: find state account pubkey
-        tokenProgram: TOKEN_PROGRAM_ID,
-        payer,
-        systemProgram: SystemProgram.programId,
-      }
-    );
-    return new TransactionObject(payer, [instruction], [], options);
-  }
-
-  public async verify(
-    params: FunctionVerifyParams,
-    options?: SendTransactionObjectOptions
-  ): Promise<TransactionSignature> {
-    return await this.verifyInstruction(
-      this.program.walletPubkey,
-      params,
-      options
-    ).then(txn => this.program.signAndSend(txn, options));
-  }
-
   public async getBalance(): Promise<number> {
     const balance = await this.program.mint.getAssociatedBalance(
       this.publicKey
@@ -488,4 +437,55 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const balance = await this.getBalance();
     return this.program.mint.toTokenAmountBN(balance);
   }
+
+  // public async verifyInstruction(
+  //   payer: PublicKey,
+  //   params: FunctionVerifyParams,
+  //   options?: TransactionObjectOptions
+  // ): Promise<TransactionObject> {
+  //   const functionData = await this.loadData();
+  //   const permissionAccount = AttestationPermissionAccount.fromSeed(
+  //     /* program= */ this.program,
+  //     /* authority= */ functionData.authority,
+  //     /* granter= */ functionData.attestationQueue,
+  //     /* grantee= */ this.publicKey
+  //   )[0];
+  //   const instruction = types.functionVerify(
+  //     this.program,
+  //     {
+  //       params: {
+  //         observedTime: params.observedTime,
+  //         nextAllowedTimestamp: params.nextAllowedTimestamp,
+  //         isFailure: params.isFailure,
+  //         mrEnclave: Array.from(params.mrEnclave),
+  //       },
+  //     },
+  //     {
+  //       function: this.publicKey,
+  //       fnSigner: PublicKey.default, // @TODO: find fn signer pubkey
+  //       fnQuote: PublicKey.default, // @TODO: find fn quote pubkey
+  //       verifierQuote: PublicKey.default, // @TODO: find verifier quote pubkey
+  //       attestationQueue: functionData.attestationQueue,
+  //       escrow: this.getEscrow(),
+  //       receiver: PublicKey.default, // @TODO: find receiver pubkey
+  //       permission: permissionAccount.publicKey,
+  //       state: PublicKey.default, // @TODO: find state account pubkey
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       payer,
+  //       systemProgram: SystemProgram.programId,
+  //     }
+  //   );
+  //   return new TransactionObject(payer, [instruction], [], options);
+  // }
+
+  // public async verify(
+  //   params: FunctionVerifyParams,
+  //   options?: SendTransactionObjectOptions
+  // ): Promise<TransactionSignature> {
+  //   return await this.verifyInstruction(
+  //     this.program.walletPubkey,
+  //     params,
+  //     options
+  //   ).then(txn => this.program.signAndSend(txn, options));
+  // }
 }
