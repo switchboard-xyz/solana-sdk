@@ -65,14 +65,15 @@ The following addresses can be used with the Switchboard deployment on Solana
 
 ## Examples
 
-| **Lang**   | **Name**                                                   | **Description**                                                                                            |
-| ---------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Rust       | [native-feed-parser](programs/native-feed-parser)          | Read a Switchboard feed using Solana's native program library                                              |
-| Anchor     | [anchor-feed-parser](programs/anchor-feed-parser)          | Read a Switchboard feed using Anchor                                                                       |
-| Anchor     | [anchor-history-parser](programs/anchor-history-parser)    | Read a data feeds history buffer and get the closest historical sample to a given timestamp                |
-| Anchor     | [anchor-vrf-parser](programs/anchor-vrf-parser)            | Read a Switchboard VRF account and make a Cross Program Invocation (CPI) to request a new randomness value |
-| Anchor     | [anchor-buffer-parser](programs/anchor-buffer-parser)      | Read a Switchboard buffer relayer using Anchor                                                             |
-| Javascript | [javascript-feed-walkthrough](javascript/feed-walkthrough) | Create a private Switchboard queue and oracle and fulfill your own oracle updates                          |
+| **Lang**   | **Name**                                                   | **Description**                                                                                                 |
+| ---------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Rust       | [native-feed-parser](programs/native-feed-parser)          | Read a Switchboard feed using Solana's native program library                                                   |
+| Anchor     | [anchor-feed-parser](programs/anchor-feed-parser)          | Read a Switchboard feed using Anchor                                                                            |
+| Anchor     | [anchor-history-parser](programs/anchor-history-parser)    | Read a data feeds history buffer and get the closest historical sample to a given timestamp                     |
+| Anchor     | [anchor-vrf-parser](programs/anchor-vrf-parser)            | Read a Switchboard VRF account and make a Cross Program Invocation (CPI) to request a new randomness value      |
+| Anchor     | [anchor-vrf-lite-parser](programs/anchor-vrf-lite-parser)  | Read a Switchboard VRF Lite account and make a Cross Program Invocation (CPI) to request a new randomness value |
+| Anchor     | [anchor-buffer-parser](programs/anchor-buffer-parser)      | Read a Switchboard buffer relayer using Anchor                                                                  |
+| Javascript | [javascript-feed-walkthrough](javascript/feed-walkthrough) | Create a private Switchboard queue and oracle and fulfill your own oracle updates                               |
 
 ## Troubleshooting
 

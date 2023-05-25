@@ -19,6 +19,12 @@ examples:
       to request a new randomness value"
     language: "anchor"
     path: "programs/anchor-vrf-parser"
+  - name: "anchor-vrf-lite-parser"
+    description:
+      "Read a Switchboard VRF Lite account and make a Cross Program Invocation
+      (CPI) to request a new randomness value"
+    language: "anchor"
+    path: "programs/anchor-vrf-lite-parser"
   - name: "anchor-buffer-parser"
     description: "Read a Switchboard buffer relayer using Anchor"
     language: "anchor"
