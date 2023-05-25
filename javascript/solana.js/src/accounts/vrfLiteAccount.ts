@@ -198,6 +198,24 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
     return txnSignature;
   }
 
+  async fetchBalance(escrow?: PublicKey): Promise<number> {
+    const tokenAccount = escrow ?? (await this.loadData()).escrow;
+    const amount = await this.program.mint.fetchBalance(tokenAccount);
+    if (amount === null) {
+      throw new Error(`Failed to fetch oracle staking wallet balance`);
+    }
+    return amount;
+  }
+
+  async fetchBalanceBN(escrow?: PublicKey): Promise<BN> {
+    const tokenAccount = escrow ?? (await this.loadData()).escrow;
+    const amount = await this.program.mint.fetchBalanceBN(tokenAccount);
+    if (amount === null) {
+      throw new Error(`Failed to fetch oracle staking wallet balance`);
+    }
+    return amount;
+  }
+
   public proveAndVerifyInstructions(
     params: VrfLiteProveAndVerifyParams,
     options?: TransactionObjectOptions,

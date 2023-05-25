@@ -122,8 +122,6 @@ describe("anchor-vrf-lite-parser test", () => {
   it("Creates a vrfClient account", async () => {
     const { unpermissionedVrfEnabled, authority, dataBuffer } = queue;
 
-    console.log("creating vrfLite");
-
     // Create Switchboard VRF and Permission account
     const [vrfAccount] = await queueAccount.createVrfLite({
       callback: vrfClientCallback,
@@ -179,8 +177,18 @@ describe("anchor-vrf-lite-parser test", () => {
     const [payerTokenWallet] =
       await queueAccount.program.mint.getOrCreateWrappedUser(
         queueAccount.program.walletPubkey,
-        { fundUpTo: 0.002 }
+        { fundUpTo: 0.5 }
       );
+
+    await vrfAccount.deposit({
+      amount: 0.25,
+      tokenWallet: payerTokenWallet,
+      tokenAuthority: payer,
+    });
+
+    console.log(
+      `Funded VrfLite escrow, ${await vrfAccount.fetchBalance()} wSOL`
+    );
 
     const vrf = await vrfAccount.loadData();
 
@@ -260,10 +268,10 @@ describe("anchor-vrf-lite-parser test", () => {
     const { unpermissionedVrfEnabled, authority, dataBuffer } = queue;
 
     // Create Switchboard VRF and Permission account
-    const [newVrfAccount] = await queueAccount.createVrf({
+    const [newVrfAccount] = await queueAccount.createVrfLite({
       callback: vrfClientCallback,
       authority: newVrfClientKey, // vrf authority
-      vrfKeypair: newVrfSecret,
+      keypair: newVrfSecret,
       enable: false,
     });
 
