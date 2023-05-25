@@ -26,7 +26,7 @@ jobs:
         uses: ./.github/actions/setup-workspace
         with:
           solanaVersion: "v1.14.10"
-          anchorVersion: "0.26.0"
+          anchorVersion: "0.27.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
@@ -69,7 +69,7 @@ jobs:
         uses: ./.github/actions/setup-workspace
         with:
           solanaVersion: "v1.14.10"
-          anchorVersion: "0.26.0"
+          anchorVersion: "0.27.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
