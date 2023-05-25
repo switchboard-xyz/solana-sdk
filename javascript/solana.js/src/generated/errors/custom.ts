@@ -99,7 +99,10 @@ export type CustomError =
   | VrfPoolRequestTooSoon
   | VrfPoolMiss
   | VrfLiteOwnedByPool
-  | InsufficientTokenBalance;
+  | InsufficientTokenBalance
+  | InvalidQuoteError
+  | InvalidHistoryAccountError
+  | GenericError;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1235,6 +1238,37 @@ export class InsufficientTokenBalance extends Error {
   }
 }
 
+export class InvalidQuoteError extends Error {
+  static readonly code = 6100;
+  readonly code = 6100;
+  readonly name = 'InvalidQuoteError';
+  readonly msg = 'Invalid SAS quote account';
+
+  constructor(readonly logs?: string[]) {
+    super('6100: Invalid SAS quote account');
+  }
+}
+
+export class InvalidHistoryAccountError extends Error {
+  static readonly code = 6101;
+  readonly code = 6101;
+  readonly name = 'InvalidHistoryAccountError';
+
+  constructor(readonly logs?: string[]) {
+    super('6101: ');
+  }
+}
+
+export class GenericError extends Error {
+  static readonly code = 6102;
+  readonly code = 6102;
+  readonly name = 'GenericError';
+
+  constructor(readonly logs?: string[]) {
+    super('6102: ');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1437,6 +1471,12 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new VrfLiteOwnedByPool(logs);
     case 6099:
       return new InsufficientTokenBalance(logs);
+    case 6100:
+      return new InvalidQuoteError(logs);
+    case 6101:
+      return new InvalidHistoryAccountError(logs);
+    case 6102:
+      return new GenericError(logs);
   }
 
   return null;
