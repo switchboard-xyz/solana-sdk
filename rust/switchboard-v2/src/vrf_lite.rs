@@ -304,6 +304,8 @@ pub struct VrfLiteClose<'info> {
     #[account(mut)]
     pub queue: AccountInfo<'info>,
     pub queue_authority: AccountInfo<'info>,
+
+    // #[account(seeds = [b"STATE"], bump = params.state_bump)]
     /// CHECK:
     pub program_state: AccountInfo<'info>,
 
@@ -314,8 +316,6 @@ pub struct VrfLiteClose<'info> {
     #[account(mut, constraint = escrow.mint == escrow_dest.mint )]
     pub escrow_dest: Account<'info, TokenAccount>,
 
-    pub recent_blockhashes: AccountInfo<'info>,
-    // #[account(seeds = [b"STATE"], bump = params.state_bump)]
     pub token_program: AccountInfo<'info>,
 }
 

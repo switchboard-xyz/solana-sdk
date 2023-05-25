@@ -1,5 +1,6 @@
-import * as borsh from '@coral-xyz/borsh';
 import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from '@coral-xyz/borsh';
 
 export interface DJSON {
   kind: 'D';

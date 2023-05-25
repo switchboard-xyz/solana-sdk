@@ -265,6 +265,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               unpermissionedFeeds: params.unpermissionedFeeds ?? false,
               unpermissionedVrf: params.unpermissionedVrf ?? false,
               enableBufferRelayers: params.enableBufferRelayers ?? false,
+              enableTeeOnly: params.enableTeeOnly ?? false,
             },
           },
           {
@@ -1321,6 +1322,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                   ? new anchor.BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
+              enableTeeOnly: params.enableTeeOnly ?? false,
             },
           },
           {
@@ -1459,6 +1461,7 @@ export interface QueueInitParams {
 
   keypair?: Keypair;
   dataBufferKeypair?: Keypair;
+  enableTeeOnly?: boolean;
 }
 
 export interface QueueSetConfigParams {
@@ -1515,6 +1518,7 @@ export interface QueueSetConfigParams {
    *  Consecutive failure limit for an oracle before oracle permission is revoked.
    */
   consecutiveOracleFailureLimit?: number;
+  enableTeeOnly?: boolean;
 }
 
 export type QueueAccountsJSON = Omit<

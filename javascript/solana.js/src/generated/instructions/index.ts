@@ -40,6 +40,11 @@ export type {
   AggregatorSaveResultV2Args,
   AggregatorSaveResultV2Accounts,
 } from './aggregatorSaveResultV2';
+export { aggregatorTeeSaveResult } from './aggregatorTeeSaveResult';
+export type {
+  AggregatorTeeSaveResultArgs,
+  AggregatorTeeSaveResultAccounts,
+} from './aggregatorTeeSaveResult';
 export { aggregatorSetAuthority } from './aggregatorSetAuthority';
 export type {
   AggregatorSetAuthorityArgs,
@@ -108,6 +113,11 @@ export type {
   OracleHeartbeatArgs,
   OracleHeartbeatAccounts,
 } from './oracleHeartbeat';
+export { oracleTeeHeartbeat } from './oracleTeeHeartbeat';
+export type {
+  OracleTeeHeartbeatArgs,
+  OracleTeeHeartbeatAccounts,
+} from './oracleTeeHeartbeat';
 export { oracleInit } from './oracleInit';
 export type { OracleInitArgs, OracleInitAccounts } from './oracleInit';
 export { oracleQueueInit } from './oracleQueueInit';

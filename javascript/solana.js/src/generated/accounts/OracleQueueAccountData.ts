@@ -54,6 +54,7 @@ export interface OracleQueueAccountDataFields {
   mint: PublicKey;
   /** Whether oracles are permitted to fulfill buffer relayer update request. */
   enableBufferRelayers: boolean;
+  enableTeeOnly: boolean;
   /** Reserved for future info. */
   ebuf: Array<number>;
   /** Maximum number of oracles a queue can support. */
@@ -112,6 +113,7 @@ export interface OracleQueueAccountDataJSON {
   mint: string;
   /** Whether oracles are permitted to fulfill buffer relayer update request. */
   enableBufferRelayers: boolean;
+  enableTeeOnly: boolean;
   /** Reserved for future info. */
   ebuf: Array<number>;
   /** Maximum number of oracles a queue can support. */
@@ -170,6 +172,7 @@ export class OracleQueueAccountData {
   readonly mint: PublicKey;
   /** Whether oracles are permitted to fulfill buffer relayer update request. */
   readonly enableBufferRelayers: boolean;
+  readonly enableTeeOnly: boolean;
   /** Reserved for future info. */
   readonly ebuf: Array<number>;
   /** Maximum number of oracles a queue can support. */
@@ -202,7 +205,8 @@ export class OracleQueueAccountData {
     borsh.bool('lockLeaseFunding'),
     borsh.publicKey('mint'),
     borsh.bool('enableBufferRelayers'),
-    borsh.array(borsh.u8(), 968, 'ebuf'),
+    borsh.bool('enableTeeOnly'),
+    borsh.array(borsh.u8(), 967, 'ebuf'),
     borsh.u32('maxSize'),
     borsh.publicKey('dataBuffer'),
   ]);
@@ -232,6 +236,7 @@ export class OracleQueueAccountData {
     this.lockLeaseFunding = fields.lockLeaseFunding;
     this.mint = fields.mint;
     this.enableBufferRelayers = fields.enableBufferRelayers;
+    this.enableTeeOnly = fields.enableTeeOnly;
     this.ebuf = fields.ebuf;
     this.maxSize = fields.maxSize;
     this.dataBuffer = fields.dataBuffer;
@@ -303,6 +308,7 @@ export class OracleQueueAccountData {
       lockLeaseFunding: dec.lockLeaseFunding,
       mint: dec.mint,
       enableBufferRelayers: dec.enableBufferRelayers,
+      enableTeeOnly: dec.enableTeeOnly,
       ebuf: dec.ebuf,
       maxSize: dec.maxSize,
       dataBuffer: dec.dataBuffer,
@@ -332,6 +338,7 @@ export class OracleQueueAccountData {
       lockLeaseFunding: this.lockLeaseFunding,
       mint: this.mint.toString(),
       enableBufferRelayers: this.enableBufferRelayers,
+      enableTeeOnly: this.enableTeeOnly,
       ebuf: this.ebuf,
       maxSize: this.maxSize,
       dataBuffer: this.dataBuffer.toString(),
@@ -362,6 +369,7 @@ export class OracleQueueAccountData {
       lockLeaseFunding: obj.lockLeaseFunding,
       mint: new PublicKey(obj.mint),
       enableBufferRelayers: obj.enableBufferRelayers,
+      enableTeeOnly: obj.enableTeeOnly,
       ebuf: obj.ebuf,
       maxSize: obj.maxSize,
       dataBuffer: new PublicKey(obj.dataBuffer),

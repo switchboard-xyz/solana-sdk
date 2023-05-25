@@ -12,7 +12,7 @@ import { Account, OnAccountChangeCallback } from './account';
 import { OracleAccount } from './oracleAccount';
 import { PermissionAccount } from './permissionAccount';
 import { QueueAccount } from './queueAccount';
-import { Callback } from './vrfAccount';
+import { Callback, VrfResult } from './vrfAccount';
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -22,6 +22,7 @@ import {
 import {
   Commitment,
   Keypair,
+  ParsedTransactionWithMeta,
   PublicKey,
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
@@ -416,5 +417,116 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
 
   public getEscrow(): PublicKey {
     return this.program.mint.getAssociatedAddress(this.publicKey);
+  }
+
+  /**
+   * Await for the next vrf result
+   *
+   * @param roundId - optional, the id associated with the VRF round to watch. If not provided the current round Id will be used.
+   * @param timeout - the number of milliseconds to wait for the round to close
+   *
+   * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
+   */
+  public async nextResult(roundId?: BN, timeout = 30000): Promise<VrfResult> {
+    let id: BN;
+    if (roundId) {
+      id = roundId;
+    } else {
+      const vrf = await this.loadData();
+      if (vrf.status.kind === 'StatusVerifying') {
+        id = vrf.counter;
+      } else {
+        // wait for the next round
+        id = vrf.counter.add(new BN(1));
+      }
+    }
+    let ws: number | undefined;
+
+    const closeWebsocket = async () => {
+      if (ws !== undefined) {
+        await this.program.connection.removeAccountChangeListener(ws);
+        ws = undefined;
+      }
+    };
+
+    let result: VrfResult;
+    try {
+      result = await promiseWithTimeout(
+        timeout,
+        new Promise(
+          (
+            resolve: (result: VrfResult) => void,
+            reject: (reason: string) => void
+          ) => {
+            ws = this.onChange(vrf => {
+              if (vrf.counter.gt(id)) {
+                reject(`Current counter is higher than requested roundId`);
+              }
+              if (vrf.counter.eq(id)) {
+                switch (vrf.status.kind) {
+                  case 'StatusCallbackSuccess': {
+                    resolve({
+                      success: true,
+                      result: new Uint8Array(vrf.result),
+                      status: vrf.status,
+                    });
+                    break;
+                  }
+                  case 'StatusVerifyFailure': {
+                    resolve({
+                      success: false,
+                      result: new Uint8Array(),
+                      status: vrf.status,
+                    });
+                    break;
+                  }
+                }
+              }
+            });
+          }
+        )
+      );
+    } finally {
+      await closeWebsocket();
+    }
+
+    await closeWebsocket();
+
+    return result;
+  }
+
+  /** Return parsed transactions for a VRF request */
+  public async getCallbackTransactions(
+    requestSlot?: BN,
+    txnLimit = 50
+  ): Promise<Array<ParsedTransactionWithMeta>> {
+    const slot = requestSlot ?? (await this.loadData()).requestSlot;
+    // TODO: Add options and allow getting signatures by slot
+    const transactions = await this.program.connection.getSignaturesForAddress(
+      this.publicKey,
+      { limit: txnLimit, minContextSlot: slot.toNumber() },
+      'confirmed'
+    );
+    const signatures = transactions.map(txn => txn.signature);
+    const parsedTransactions =
+      await this.program.connection.getParsedTransactions(
+        signatures,
+        'confirmed'
+      );
+
+    const callbackTransactions: ParsedTransactionWithMeta[] = [];
+
+    for (const txn of parsedTransactions) {
+      if (txn === null) {
+        continue;
+      }
+
+      const logs = txn.meta?.logMessages?.join('\n') ?? '';
+      if (logs.includes('Invoking callback')) {
+        callbackTransactions.push(txn);
+      }
+    }
+
+    return callbackTransactions;
   }
 }
