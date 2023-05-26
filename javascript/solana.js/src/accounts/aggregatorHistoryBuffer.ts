@@ -161,29 +161,17 @@ export class AggregatorHistoryBuffer extends Account<
     historyBufferPubkey: PublicKey
   ): Promise<{ maxSize: number; history: Array<types.AggregatorHistoryRow> }> {
     if (historyBufferPubkey.equals(PublicKey.default)) {
-      return {
-        history: [],
-        maxSize: 0,
-      };
+      return { history: [], maxSize: 0 };
     }
 
     const accountInfo = await program.connection.getAccountInfo(
       historyBufferPubkey
     );
-    if (
-      !accountInfo ||
-      !accountInfo.data ||
-      accountInfo.data.byteLength === 0
-    ) {
-      return {
-        history: [],
-        maxSize: 0,
-      };
+    if (!accountInfo?.data.byteLength) {
+      return { history: [], maxSize: 0 };
     }
-
-    const maxSize = Math.floor((accountInfo.data.byteLength - 12) % 28);
+    const maxSize = Math.floor((accountInfo.data.byteLength - 12) / 28);
     const history = AggregatorHistoryBuffer.decode(accountInfo.data);
-
     return { history, maxSize };
   }
 
