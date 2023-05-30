@@ -1773,6 +1773,9 @@ dependencies = [
  "rust_decimal",
  "solana-program",
  "superslice",
+ "toml_datetime",
+ "toml_edit",
+ "winnow",
 ]
 
 [[package]]
