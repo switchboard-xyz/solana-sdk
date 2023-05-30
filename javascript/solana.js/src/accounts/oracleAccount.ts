@@ -570,11 +570,13 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           dataBuffer: queue.dataBuffer,
           permission: [permissionAccount, permissionBump],
           authority: oracle.oracleAuthority,
-          quote: params.quote,
+          quote: params.quoteKeypair.publicKey,
           queueAuthority: params.queueAuthority ?? queue.authority,
         }),
       ],
-      params?.authority ? [params.authority] : [],
+      params?.authority
+        ? [params.authority, params.quoteKeypair]
+        : [params.quoteKeypair],
       options
     );
 
@@ -865,7 +867,7 @@ export type OracleTeeHeartbeatSyncParams = {
 };
 
 export type OracleTeeHeartbeatParams = {
-  quote: PublicKey;
+  quoteKeypair: Keypair;
   queueAccount?: QueueAccount;
   tokenWallet?: PublicKey;
   queueAuthority?: PublicKey;

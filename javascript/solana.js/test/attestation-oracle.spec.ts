@@ -209,6 +209,10 @@ describe('Attestation Oracle Tests', () => {
       registryKey: new Uint8Array(Array(64).fill(1)),
       keypair: oracleQuoteKeypair,
     });
+    assert(
+      oracleQuoteKeypair.publicKey.equals(oracleQuoteAccount.publicKey),
+      'QuotePubkeyMismatch'
+    );
 
     await oracleQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
@@ -227,7 +231,7 @@ describe('Attestation Oracle Tests', () => {
 
     // Perform tee heartbeat.
     await oracleAccount.teeHeartbeat({
-      quote: oracleQuoteAccount.publicKey,
+      quoteKeypair: oracleQuoteKeypair,
     });
   });
 
