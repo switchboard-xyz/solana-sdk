@@ -103,6 +103,8 @@ export interface FunctionVerifyParams {
   nextAllowedTimestamp: anchor.BN;
   isFailure: boolean;
   mrEnclave: Uint8Array;
+  verifier: QuoteAccount;
+  fnSigner: PublicKey;
 }
 /**
  * Account type representing a Switchboard Function.
@@ -192,6 +194,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           containerRegistry: new Uint8Array(
             Buffer.from(params.containerRegistry ?? '', 'utf8')
           ),
+          mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
         },
       },
       {
@@ -438,54 +441,78 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return this.program.mint.toTokenAmountBN(balance);
   }
 
-  // public async verifyInstruction(
-  //   payer: PublicKey,
-  //   params: FunctionVerifyParams,
-  //   options?: TransactionObjectOptions
-  // ): Promise<TransactionObject> {
-  //   const functionData = await this.loadData();
-  //   const permissionAccount = AttestationPermissionAccount.fromSeed(
-  //     /* program= */ this.program,
-  //     /* authority= */ functionData.authority,
-  //     /* granter= */ functionData.attestationQueue,
-  //     /* grantee= */ this.publicKey
-  //   )[0];
-  //   const instruction = types.functionVerify(
-  //     this.program,
-  //     {
-  //       params: {
-  //         observedTime: params.observedTime,
-  //         nextAllowedTimestamp: params.nextAllowedTimestamp,
-  //         isFailure: params.isFailure,
-  //         mrEnclave: Array.from(params.mrEnclave),
-  //       },
-  //     },
-  //     {
-  //       function: this.publicKey,
-  //       fnSigner: PublicKey.default, // @TODO: find fn signer pubkey
-  //       fnQuote: PublicKey.default, // @TODO: find fn quote pubkey
-  //       verifierQuote: PublicKey.default, // @TODO: find verifier quote pubkey
-  //       attestationQueue: functionData.attestationQueue,
-  //       escrow: this.getEscrow(),
-  //       receiver: PublicKey.default, // @TODO: find receiver pubkey
-  //       permission: permissionAccount.publicKey,
-  //       state: PublicKey.default, // @TODO: find state account pubkey
-  //       tokenProgram: TOKEN_PROGRAM_ID,
-  //       payer,
-  //       systemProgram: SystemProgram.programId,
-  //     }
-  //   );
-  //   return new TransactionObject(payer, [instruction], [], options);
-  // }
+  public async verifyInstruction(
+    payer: PublicKey,
+    params: FunctionVerifyParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const functionData = await this.loadData();
+    const attestationQueueAccount = new AttestationQueueAccount(
+      this.program,
+      functionData.attestationQueue
+    );
+    const attestationQueue = await attestationQueueAccount.loadData();
 
-  // public async verify(
-  //   params: FunctionVerifyParams,
-  //   options?: SendTransactionObjectOptions
-  // ): Promise<TransactionSignature> {
-  //   return await this.verifyInstruction(
-  //     this.program.walletPubkey,
-  //     params,
-  //     options
-  //   ).then(txn => this.program.signAndSend(txn, options));
-  // }
+    const fnPermissionAccount = this.getPermissionAccount(
+      attestationQueueAccount.publicKey,
+      attestationQueue.authority
+    )[0];
+
+    const fnQuoteAccount = this.getQuoteAccount()[0];
+
+    const verifierPermissionAccount = AttestationPermissionAccount.fromSeed(
+      this.program,
+      attestationQueue.authority,
+      attestationQueueAccount.publicKey,
+      payer
+    )[0];
+
+    const quoteVerifier = await params.verifier.loadData();
+    if (!quoteVerifier.owner.equals(payer)) {
+      throw new Error(
+        `The verifier owner must be the payer of this transaction, expected ${quoteVerifier.owner}, received ${payer}`
+      );
+    }
+
+    const receiver = await this.program.mint.getOrCreateAssociatedUser(payer);
+
+    const instruction = types.functionVerify(
+      this.program,
+      {
+        params: {
+          observedTime: params.observedTime,
+          nextAllowedTimestamp: params.nextAllowedTimestamp,
+          isFailure: params.isFailure,
+          mrEnclave: Array.from(params.mrEnclave),
+        },
+      },
+      {
+        function: this.publicKey,
+        fnSigner: params.fnSigner,
+        fnQuote: fnQuoteAccount.publicKey,
+        verifierQuote: params.verifier.publicKey,
+        attestationQueue: functionData.attestationQueue,
+        escrow: this.getEscrow(),
+        receiver: receiver,
+        verifierPermission: verifierPermissionAccount.publicKey,
+        fnPermission: fnPermissionAccount.publicKey,
+        state: this.program.attestationProgramState.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        payer,
+        systemProgram: SystemProgram.programId,
+      }
+    );
+    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async verify(
+    params: FunctionVerifyParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.verifyInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then(txn => this.program.signAndSend(txn, options));
+  }
 }

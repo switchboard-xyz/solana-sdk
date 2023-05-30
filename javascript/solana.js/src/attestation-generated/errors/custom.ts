@@ -20,7 +20,8 @@ export type CustomError =
   | InvalidQuoteMode
   | InvalidVerifierIdx
   | InvalidSelfVerifyRequest
-  | IncorrectMrEnclave;
+  | IncorrectMrEnclave
+  | InvalidResponder;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -232,6 +233,16 @@ export class IncorrectMrEnclave extends Error {
   }
 }
 
+export class InvalidResponder extends Error {
+  static readonly code = 6021;
+  readonly code = 6021;
+  readonly name = 'InvalidResponder';
+
+  constructor(readonly logs?: string[]) {
+    super('6021: ');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -276,6 +287,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new InvalidSelfVerifyRequest(logs);
     case 6020:
       return new IncorrectMrEnclave(logs);
+    case 6021:
+      return new InvalidResponder(logs);
   }
 
   return null;

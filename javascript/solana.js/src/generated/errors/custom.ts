@@ -102,7 +102,8 @@ export type CustomError =
   | InsufficientTokenBalance
   | InvalidQuoteError
   | InvalidHistoryAccountError
-  | GenericError;
+  | GenericError
+  | InvalidAuthorityState;
 
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
@@ -1269,6 +1270,16 @@ export class GenericError extends Error {
   }
 }
 
+export class InvalidAuthorityState extends Error {
+  static readonly code = 6103;
+  readonly code = 6103;
+  readonly name = 'InvalidAuthorityState';
+
+  constructor(readonly logs?: string[]) {
+    super('6103: ');
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -1477,6 +1488,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new InvalidHistoryAccountError(logs);
     case 6102:
       return new GenericError(logs);
+    case 6103:
+      return new InvalidAuthorityState(logs);
   }
 
   return null;
