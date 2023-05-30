@@ -42,7 +42,7 @@ export function oracleTeeHeartbeat(
     { pubkey: accounts.oracleQueue, isSigner: false, isWritable: true },
     { pubkey: accounts.permission, isSigner: false, isWritable: false },
     { pubkey: accounts.dataBuffer, isSigner: false, isWritable: true },
-    { pubkey: accounts.quote, isSigner: false, isWritable: false },
+    { pubkey: accounts.quote, isSigner: true, isWritable: false },
     { pubkey: accounts.programState, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([92, 64, 133, 138, 16, 62, 245, 251]);

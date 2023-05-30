@@ -58,7 +58,7 @@ export function aggregatorTeeSaveResult(
     { pubkey: accounts.historyBuffer, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.slider, isSigner: false, isWritable: true },
-    { pubkey: accounts.quote, isSigner: false, isWritable: false },
+    { pubkey: accounts.quote, isSigner: true, isWritable: false },
     { pubkey: accounts.rewardWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },

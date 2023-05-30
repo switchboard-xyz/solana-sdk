@@ -446,11 +446,13 @@ export type ErrorJSON =
 export { VerificationStatus };
 
 export type VerificationStatusKind =
+  | VerificationStatus.None
   | VerificationStatus.VerificationPending
   | VerificationStatus.VerificationFailure
   | VerificationStatus.VerificationSuccess
   | VerificationStatus.VerificationOverride;
 export type VerificationStatusJSON =
+  | VerificationStatus.NoneJSON
   | VerificationStatus.VerificationPendingJSON
   | VerificationStatus.VerificationFailureJSON
   | VerificationStatus.VerificationSuccessJSON

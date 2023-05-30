@@ -5,14 +5,37 @@ import * as borsh from '@coral-xyz/borsh';
 import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
 
+export interface NoneJSON {
+  kind: 'None';
+}
+
+export class None {
+  static readonly discriminator = 0;
+  static readonly kind = 'None';
+  readonly discriminator = 0;
+  readonly kind = 'None';
+
+  toJSON(): NoneJSON {
+    return {
+      kind: 'None',
+    };
+  }
+
+  toEncodable() {
+    return {
+      None: {},
+    };
+  }
+}
+
 export interface VerificationPendingJSON {
   kind: 'VerificationPending';
 }
 
 export class VerificationPending {
-  static readonly discriminator = 0;
+  static readonly discriminator = 1;
   static readonly kind = 'VerificationPending';
-  readonly discriminator = 0;
+  readonly discriminator = 1;
   readonly kind = 'VerificationPending';
 
   toJSON(): VerificationPendingJSON {
@@ -33,9 +56,9 @@ export interface VerificationFailureJSON {
 }
 
 export class VerificationFailure {
-  static readonly discriminator = 1;
+  static readonly discriminator = 2;
   static readonly kind = 'VerificationFailure';
-  readonly discriminator = 1;
+  readonly discriminator = 2;
   readonly kind = 'VerificationFailure';
 
   toJSON(): VerificationFailureJSON {
@@ -56,9 +79,9 @@ export interface VerificationSuccessJSON {
 }
 
 export class VerificationSuccess {
-  static readonly discriminator = 2;
+  static readonly discriminator = 4;
   static readonly kind = 'VerificationSuccess';
-  readonly discriminator = 2;
+  readonly discriminator = 4;
   readonly kind = 'VerificationSuccess';
 
   toJSON(): VerificationSuccessJSON {
@@ -79,9 +102,9 @@ export interface VerificationOverrideJSON {
 }
 
 export class VerificationOverride {
-  static readonly discriminator = 3;
+  static readonly discriminator = 8;
   static readonly kind = 'VerificationOverride';
-  readonly discriminator = 3;
+  readonly discriminator = 8;
   readonly kind = 'VerificationOverride';
 
   toJSON(): VerificationOverrideJSON {
@@ -103,6 +126,9 @@ export function fromDecoded(obj: any): types.VerificationStatusKind {
     throw new Error('Invalid enum object');
   }
 
+  if ('None' in obj) {
+    return new None();
+  }
   if ('VerificationPending' in obj) {
     return new VerificationPending();
   }
@@ -123,6 +149,9 @@ export function fromJSON(
   obj: types.VerificationStatusJSON
 ): types.VerificationStatusKind {
   switch (obj.kind) {
+    case 'None': {
+      return new None();
+    }
     case 'VerificationPending': {
       return new VerificationPending();
     }
@@ -140,6 +169,7 @@ export function fromJSON(
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
+    borsh.struct([], 'None'),
     borsh.struct([], 'VerificationPending'),
     borsh.struct([], 'VerificationFailure'),
     borsh.struct([], 'VerificationSuccess'),
