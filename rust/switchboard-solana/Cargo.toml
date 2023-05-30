@@ -1,18 +1,18 @@
 [package]
 name = "switchboard-solana"
-version = "0.2.0"
+version = "0.1.0"
 edition = "2021"
-description = "A Rust library to interact with Switchboard V2 accounts."
+description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
 keywords = ["switchboard", "oracle", "solana"]
 homepage = "https://docs.switchboard.xyz"
-repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-v2"
+repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-solana"
 license = "MIT"
-documentation = "https://docs.rs/switchboard-v2/"
+documentation = "https://docs.rs/switchboard-solana/"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "switchboard_v2"
+name = "switchboard_solana"
 doctest = false
 
 [features]
@@ -21,14 +21,9 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-switchboard-common = "0.1.0"
 rust_decimal = "=1.26.1"
 bytemuck = "1.13.1"
 superslice = "1"
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
-# https://github.com/coral-xyz/anchor/issues/2502
-# anchor-lang = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
-# anchor-spl = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
-solana-program = ">= 1.13.5, < 1.15"
-solana-sdk = ">= 1.13.5, < 1.15"
+solana-program = ">= 1.13.5, < 1.15.0"

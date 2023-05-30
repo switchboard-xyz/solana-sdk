@@ -1,7 +1,6 @@
 use crate::*;
 use anchor_lang::Discriminator;
 use rust_decimal::Decimal;
-use solana_sdk::pubkey::Pubkey;
 use std::cell::Ref;
 
 #[zero_copy]
@@ -52,22 +51,6 @@ pub struct AggregatorRound {
 pub enum AggregatorResolutionMode {
     ModeRoundResolution = 0,
     ModeSlidingResolution = 1,
-}
-#[account(zero_copy)]
-#[repr(packed)]
-pub struct SlidingResultAccountData {
-    pub data: [SlidingWindowElement; 16],
-    pub bump: u8,
-    pub _ebuf: [u8; 512],
-}
-#[zero_copy]
-#[derive(Default)]
-#[repr(packed)]
-pub struct SlidingWindowElement {
-    pub oracle_key: Pubkey,
-    pub value: SwitchboardDecimal,
-    pub slot: u64,
-    pub timestamp: i64,
 }
 
 // #[zero_copy]
@@ -153,7 +136,7 @@ impl AggregatorAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AggregatorAccountData;
+    /// use switchboard_solana::AggregatorAccountData;
     ///
     /// let data_feed = AggregatorAccountData::new(feed_account_info)?;
     /// ```
@@ -185,7 +168,7 @@ impl AggregatorAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AggregatorAccountData;
+    /// use switchboard_solana::AggregatorAccountData;
     ///
     /// let data_feed = AggregatorAccountData::new(feed_account_info.try_borrow_data()?)?;
     /// ```
@@ -210,7 +193,7 @@ impl AggregatorAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AggregatorAccountData;
+    /// use switchboard_solana::AggregatorAccountData;
     /// use std::convert::TryInto;
     ///
     /// let feed_result = AggregatorAccountData::new(feed_account_info)?.get_result()?;
@@ -233,7 +216,7 @@ impl AggregatorAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal};
+    /// use switchboard_solana::{AggregatorAccountData, SwitchboardDecimal};
     ///
     /// let feed = AggregatorAccountData::new(feed_account_info)?;
     /// feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
@@ -271,7 +254,7 @@ impl AggregatorAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AggregatorAccountData;
+    /// use switchboard_solana::AggregatorAccountData;
     ///
     /// let feed = AggregatorAccountData::new(feed_account_info)?;
     /// feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;

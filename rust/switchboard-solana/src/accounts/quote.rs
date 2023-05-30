@@ -69,7 +69,7 @@ impl QuoteAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::QuoteAccountData;
+    /// use switchboard_solana::QuoteAccountData;
     ///
     /// let quote_account = QuoteAccountData::new(quote_account_info)?;
     /// ```
@@ -101,7 +101,7 @@ impl QuoteAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::QuoteAccountData;
+    /// use switchboard_solana::QuoteAccountData;
     ///
     /// let quote_account = QuoteAccountData::new(quote_account_info.try_borrow_data()?)?;
     /// ```

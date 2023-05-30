@@ -38,7 +38,7 @@ impl AttestationPermissionAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AttestationPermissionAccountData;
+    /// use switchboard_solana::AttestationPermissionAccountData;
     ///
     /// let permissions = AttestationPermissionAccountData::new(permission_account_info)?;
     /// ```
@@ -72,7 +72,7 @@ impl AttestationPermissionAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AttestationPermissionAccountData;
+    /// use switchboard_solana::AttestationPermissionAccountData;
     ///
     /// let permissions = AttestationPermissionAccountData::new(permission_account_info.try_borrow_data()?)?;
     /// ```

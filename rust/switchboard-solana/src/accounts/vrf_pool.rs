@@ -44,7 +44,7 @@ impl VrfPoolAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::VrfPoolAccountData;
+    /// use switchboard_solana::VrfPoolAccountData;
     ///
     /// let vrf = VrfPoolAccountData::new(vrf_pool_account_info)?;
     /// ```
@@ -76,7 +76,7 @@ impl VrfPoolAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::VrfPoolAccountData;
+    /// use switchboard_solana::VrfPoolAccountData;
     ///
     /// let vrf = VrfPoolAccountData::new(vrf_pool_account_info.try_borrow_data()?)?;
     /// ```

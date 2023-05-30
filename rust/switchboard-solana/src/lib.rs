@@ -2,9 +2,6 @@
 
 use anchor_lang::prelude::*;
 use solana_program::pubkey;
-use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
-use std::sync::Arc;
-use switchboard_common::Gramine;
 
 pub mod accounts;
 pub use accounts::*;
@@ -44,9 +41,3 @@ pub const SWITCHBOARD_ATTESTATION_PROGRAM_ID: Pubkey =
     pubkey!("2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7");
 
 declare_id!(SWITCHBOARD_PROGRAM_ID);
-
-pub fn generate_sgx_signer() -> Arc<Keypair> {
-    let mut randomness = [0; 32];
-    Gramine::read_rand(&mut randomness).unwrap();
-    Arc::new(keypair_from_seed(&randomness).unwrap())
-}

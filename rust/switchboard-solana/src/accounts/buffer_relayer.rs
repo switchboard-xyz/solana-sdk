@@ -52,7 +52,7 @@ impl BufferRelayerAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::BufferRelayerAccountData;
+    /// use switchboard_solana::BufferRelayerAccountData;
     ///
     /// let buffer_account = BufferRelayerAccountData::new(buffer_account_info)?;
     /// ```
@@ -80,7 +80,7 @@ impl BufferRelayerAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::BufferRelayerAccountData;
+    /// use switchboard_solana::BufferRelayerAccountData;
     ///
     /// let buffer = BufferRelayerAccountData::new(buffer_account_info)?;
     /// buffer.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;

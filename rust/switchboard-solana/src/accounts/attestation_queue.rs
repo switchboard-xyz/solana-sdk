@@ -51,7 +51,7 @@ impl AttestationQueueAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AttestationQueueAccountData;
+    /// use switchboard_solana::AttestationQueueAccountData;
     ///
     /// let attestation_queue = AttestationQueueAccountData::new(attestation_queue_account_info)?;
     /// ```
@@ -83,7 +83,7 @@ impl AttestationQueueAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::AttestationQueueAccountData;
+    /// use switchboard_solana::AttestationQueueAccountData;
     ///
     /// let attestation_queue = AttestationQueueAccountData::new(attestation_queue_account_info.try_borrow_data()?)?;
     /// ```

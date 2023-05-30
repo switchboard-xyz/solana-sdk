@@ -61,7 +61,7 @@ impl VrfLiteAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::VrfLiteAccountData;
+    /// use switchboard_solana::VrfLiteAccountData;
     ///
     /// let vrf_lite = VrfLiteAccountData::new(vrf_account_info)?;
     /// ```
@@ -93,7 +93,7 @@ impl VrfLiteAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::VrfLiteAccountData;
+    /// use switchboard_solana::VrfLiteAccountData;
     ///
     /// let vrf_lite = VrfLiteAccountData::new(vrf_account_info.try_borrow_data()?)?;
     /// ```
@@ -123,7 +123,7 @@ impl VrfLiteAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::VrfLiteAccountData;
+    /// use switchboard_solana::VrfLiteAccountData;
     ///
     /// ```
     pub fn get_result(&self) -> anchor_lang::Result<[u8; 32]> {

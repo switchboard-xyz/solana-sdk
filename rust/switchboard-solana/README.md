@@ -3,13 +3,13 @@
     <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
   </a>
 
-  <h1>switchboard-v2</h1>
+  <h1>switchboard-solana</h1>
 
-  <p>A Rust library to interact with Switchboard V2 accounts on Solana.</p>
+  <p>A Rust library to interact with Switchboard accounts on Solana.</p>
 
   <p>
-	  <a href="https://crates.io/crates/switchboard-v2">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust" />
+	  <a href="https://crates.io/crates/switchboard-solana">
+      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-solana?label=switchboard-solana&logo=rust" />
     </a>
   </p>
 
@@ -23,7 +23,7 @@
   </p>
 
   <h4>
-    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-v2/latest/switchboard-v2/">docs.rs/switchboard-v2</a>
+    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana/latest/switchboard-solana/">docs.rs/switchboard-solana</a>
   </h4>
   <h4>
     <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
@@ -35,14 +35,14 @@
 Run the following Cargo command in your project directory:
 
 ```bash
-cargo add switchboard-v2
+cargo add switchboard-solana
 ```
 
 Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-v2 = "0.1.23"
+switchboard-solana = "0.1.23"
 ```
 
 ## Usage
@@ -54,7 +54,7 @@ switchboard-v2 = "0.1.23"
 ```rust
 use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
-use switchboard_v2::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID};
+use switchboard_solana::{AggregatorAccountData, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID};
 
 // check feed owner
 let owner = *aggregator.owner;
@@ -86,7 +86,7 @@ feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 **_Note: The Aggregator must have a history buffer initialized before using_**
 
 ```rust
-use switchboard_v2::AggregatorHistoryBuffer;
+use switchboard_solana::AggregatorHistoryBuffer;
 use std::convert::TryInto;
 
 let history_buffer = AggregatorHistoryBuffer::new(history_account_info)?;
@@ -99,7 +99,7 @@ let one_hour_ago: f64 = history_buffer.lower_bound(current_timestamp - 3600).unw
 #### Read Latest Result
 
 ```rust
-use switchboard_v2::VrfAccountData;
+use switchboard_solana::VrfAccountData;
 
 // deserialize the account info
 let vrf = ctx.accounts.vrf.load()?;
@@ -118,7 +118,7 @@ let result = value[0] % 256000 as u128;
 #### RequestRandomness CPI
 
 ```rust
-pub use switchboard_v2::{VrfAccountData, VrfRequestRandomness};
+pub use switchboard_solana::{VrfAccountData, VrfRequestRandomness};
 
 let switchboard_program = ctx.accounts.switchboard_program.to_account_info();
 
@@ -166,7 +166,7 @@ vrf_request_randomness.invoke_signed(
 ```rust
 use anchor_lang::solana_program::clock;
 use std::convert::TryInto;
-use switchboard_v2::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
+use switchboard_solana::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
 
 // check feed owner
 let owner = *aggregator.owner;

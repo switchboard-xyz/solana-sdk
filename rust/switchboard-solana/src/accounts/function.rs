@@ -59,7 +59,7 @@ impl FunctionAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::FunctionAccountData;
+    /// use switchboard_solana::FunctionAccountData;
     ///
     /// let function_account = FunctionAccountData::new(function_account_info)?;
     /// ```
@@ -91,7 +91,7 @@ impl FunctionAccountData {
     /// # Examples
     ///
     /// ```ignore
-    /// use switchboard_v2::FunctionAccountData;
+    /// use switchboard_solana::FunctionAccountData;
     ///
     /// let function_account = FunctionAccountData::new(function_account_info.try_borrow_data()?)?;
     /// ```
@@ -123,7 +123,8 @@ impl FunctionAccountData {
         quote_account_info: &'a AccountInfo<'a>,
         signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        let function = FunctionAccountData::new(function_account_info)?;
+        // deserialize accounts and verify the owner
+        FunctionAccountData::new(function_account_info)?;
         let quote = QuoteAccountData::new(quote_account_info)?;
 
         // validate function PDA matches the expected derivation
