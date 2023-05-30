@@ -1,6 +1,6 @@
 [package]
-name = "switchboard-v2"
-version = "0.1.23"
+name = "switchboard-solana"
+version = "0.2.0"
 edition = "2021"
 description = "A Rust library to interact with Switchboard V2 accounts."
 readme = "README.md"
@@ -21,14 +21,14 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
+switchboard-common = "0.1.0"
 rust_decimal = "=1.26.1"
-solana-program = "^1.13.5"
-bytemuck = "1.7.2"
+bytemuck = "1.13.1"
 superslice = "1"
-spl-token = "3.5"
 # anchor-lang= "0.27.0"
 # anchor-spl = "0.27.0"
 # https://github.com/coral-xyz/anchor/issues/2502
 anchor-lang = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
 anchor-spl = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
-toml_datetime = "=0.6.1"
+solana-program = "1.14"
+solana-sdk = "1.14"
