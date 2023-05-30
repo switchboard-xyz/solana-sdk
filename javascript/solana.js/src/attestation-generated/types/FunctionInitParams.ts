@@ -12,6 +12,7 @@ export interface FunctionInitParamsFields {
   containerRegistry: Uint8Array;
   version: Uint8Array;
   schedule: Uint8Array;
+  mrEnclave: Array<number>;
 }
 
 export interface FunctionInitParamsJSON {
@@ -21,6 +22,7 @@ export interface FunctionInitParamsJSON {
   containerRegistry: Array<number>;
   version: Array<number>;
   schedule: Array<number>;
+  mrEnclave: Array<number>;
 }
 
 export class FunctionInitParams {
@@ -30,6 +32,7 @@ export class FunctionInitParams {
   readonly containerRegistry: Uint8Array;
   readonly version: Uint8Array;
   readonly schedule: Uint8Array;
+  readonly mrEnclave: Array<number>;
 
   constructor(fields: FunctionInitParamsFields) {
     this.name = fields.name;
@@ -38,6 +41,7 @@ export class FunctionInitParams {
     this.containerRegistry = fields.containerRegistry;
     this.version = fields.version;
     this.schedule = fields.schedule;
+    this.mrEnclave = fields.mrEnclave;
   }
 
   static layout(property?: string) {
@@ -49,6 +53,7 @@ export class FunctionInitParams {
         borsh.vecU8('containerRegistry'),
         borsh.vecU8('version'),
         borsh.vecU8('schedule'),
+        borsh.array(borsh.u8(), 32, 'mrEnclave'),
       ],
       property
     );
@@ -87,6 +92,7 @@ export class FunctionInitParams {
         obj.schedule.byteOffset,
         obj.schedule.length
       ),
+      mrEnclave: obj.mrEnclave,
     });
   }
 
@@ -122,6 +128,7 @@ export class FunctionInitParams {
         fields.schedule.byteOffset,
         fields.schedule.length
       ),
+      mrEnclave: fields.mrEnclave,
     };
   }
 
@@ -133,6 +140,7 @@ export class FunctionInitParams {
       containerRegistry: Array.from(this.containerRegistry.values()),
       version: Array.from(this.version.values()),
       schedule: Array.from(this.schedule.values()),
+      mrEnclave: this.mrEnclave,
     };
   }
 
@@ -144,6 +152,7 @@ export class FunctionInitParams {
       containerRegistry: Uint8Array.from(obj.containerRegistry),
       version: Uint8Array.from(obj.version),
       schedule: Uint8Array.from(obj.schedule),
+      mrEnclave: obj.mrEnclave,
     });
   }
 

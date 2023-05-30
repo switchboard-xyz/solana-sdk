@@ -49,6 +49,11 @@
           "isSigner": false
         },
         {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "payer",
           "isMut": true,
           "isSigner": true
@@ -227,7 +232,7 @@
           "isSigner": false
         },
         {
-          "name": "queue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -270,7 +275,7 @@
           "isSigner": true
         },
         {
-          "name": "queue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -308,7 +313,7 @@
           "isSigner": false
         },
         {
-          "name": "queue",
+          "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
         },
@@ -377,7 +382,7 @@
         },
         {
           "name": "fnQuote",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -401,7 +406,12 @@
           "isSigner": false
         },
         {
-          "name": "permission",
+          "name": "verifierPermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "fnPermission",
           "isMut": false,
           "isSigner": false
         },
@@ -464,6 +474,11 @@
           "isSigner": true
         },
         {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -488,7 +503,7 @@
       "accounts": [
         {
           "name": "function",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -502,17 +517,17 @@
           "isSigner": true
         },
         {
-          "name": "state",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "escrow",
           "isMut": true,
           "isSigner": false
         },
         {
           "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
           "isMut": true,
           "isSigner": false
         },
@@ -650,6 +665,10 @@
             }
           },
           {
+            "name": "createdAt",
+            "type": "i64"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
@@ -746,6 +765,10 @@
           {
             "name": "owner",
             "type": "publicKey"
+          },
+          {
+            "name": "createdAt",
+            "type": "i64"
           },
           {
             "name": "ebuf",
@@ -897,7 +920,7 @@
         "fields": [
           {
             "name": "amount",
-            "type": "u32"
+            "type": "u64"
           }
         ]
       }
@@ -930,6 +953,15 @@
           {
             "name": "schedule",
             "type": "bytes"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           }
         ]
       }
@@ -970,7 +1002,7 @@
         "fields": [
           {
             "name": "amount",
-            "type": "u32"
+            "type": "u64"
           }
         ]
       }
@@ -1197,46 +1229,6 @@
           "name": "verifier",
           "type": "publicKey",
           "index": false
-        },
-        {
-          "name": "verifiee",
-          "type": "publicKey",
-          "index": false
-        }
-      ]
-    },
-    {
-      "name": "QueueSendRequestEvent",
-      "fields": [
-        {
-          "name": "queue",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "requster",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "receiver",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "x25519EncryptedData",
-          "type": "bytes",
-          "index": false
-        },
-        {
-          "name": "decryptHash",
-          "type": {
-            "array": [
-              "u8",
-              32
-            ]
-          },
-          "index": false
         }
       ]
     }
@@ -1340,6 +1332,11 @@
     {
       "code": 6019,
       "name": "InvalidSelfVerifyRequest",
+      "msg": ""
+    },
+    {
+      "code": 6020,
+      "name": "IncorrectMrEnclave",
       "msg": ""
     }
   ]

@@ -117,8 +117,12 @@ async function main() {
         encoding: 'utf-8',
       }
     ),
-    fs.rm(v2GeneratedPath, { recursive: true }),
-    fs.rm(attestationGeneratedPath, { recursive: true }),
+    fsSync.existsSync(v2GeneratedPath)
+      ? fs.rm(v2GeneratedPath, { recursive: true })
+      : Promise.resolve(),
+    fsSync.existsSync(attestationGeneratedPath)
+      ? fs.rm(attestationGeneratedPath, { recursive: true })
+      : Promise.resolve(),
   ]);
 
   console.log(`Running anchor-client-gen ...`);

@@ -21,7 +21,8 @@ export interface FunctionVerifyAccounts {
   attestationQueue: PublicKey;
   escrow: PublicKey;
   receiver: PublicKey;
-  permission: PublicKey;
+  verifierPermission: PublicKey;
+  fnPermission: PublicKey;
   state: PublicKey;
   tokenProgram: PublicKey;
   payer: PublicKey;
@@ -40,12 +41,13 @@ export function functionVerify(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.fnSigner, isSigner: true, isWritable: false },
-    { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
+    { pubkey: accounts.fnQuote, isSigner: false, isWritable: false },
     { pubkey: accounts.verifierQuote, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.permission, isSigner: false, isWritable: false },
+    { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
+    { pubkey: accounts.fnPermission, isSigner: false, isWritable: false },
     { pubkey: accounts.state, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
