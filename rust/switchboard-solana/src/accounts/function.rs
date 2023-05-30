@@ -15,7 +15,7 @@ pub enum FunctionStatus {
     InvalidPermissions = 1 << 4,
 }
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 pub struct FunctionAccountData {
     pub name: [u8; 64],

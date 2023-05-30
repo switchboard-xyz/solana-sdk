@@ -14,7 +14,7 @@ pub struct VrfPoolRow {
 }
 
 #[repr(packed)]
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 pub struct VrfPoolAccountData {
     /// ACCOUNTS
     pub authority: Pubkey, // authority can never be changed or else vrf accounts are useless

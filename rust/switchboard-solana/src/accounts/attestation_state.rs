@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct AttestationState {
     pub bump: u8,

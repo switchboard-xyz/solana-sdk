@@ -2,7 +2,7 @@ use super::decimal::SwitchboardDecimal;
 use anchor_lang::prelude::*;
 use bytemuck::try_cast_slice_mut;
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct OracleQueueAccountData {
     /// Name of the queue to store on-chain.
