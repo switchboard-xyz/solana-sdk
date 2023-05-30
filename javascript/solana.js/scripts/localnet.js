@@ -5,38 +5,52 @@ const fs = require('fs/promises');
 const fsSync = require('fs');
 const os = require('os');
 const { execSync, spawn } = require('child_process');
-const { Keypair, Connection, PublicKey } = require('@solana/web3.js');
+const {
+  Keypair,
+  Connection,
+  PublicKey,
+  clusterApiUrl,
+} = require('@solana/web3.js');
 const { sleep } = require('@switchboard-xyz/common');
 
 const getProgramDataAddress = programId => {
   return PublicKey.findProgramAddressSync(
-    [new PublicKey(programId).toBytes()],
+    [programId.toBytes()],
     new PublicKey('BPFLoaderUpgradeab1e11111111111111111111111')
   )[0];
 };
 
 const getIdlAddress = programId => {
-  const base = PublicKey.findProgramAddressSync(
-    [],
-    new PublicKey(programId)
-  )[0];
+  const base = PublicKey.findProgramAddressSync([], programId)[0];
+
+  // const buffer = Buffer.concat([
+  //   base.toBuffer(),
+  //   Buffer.from('anchor:idl'),
+  //   programId.toBuffer(),
+  // ]);
+  // const publicKeyBytes = sha256(buffer);
+  // return new PublicKey(publicKeyBytes);
+
   return PublicKey.createWithSeed(base, 'anchor:idl', new PublicKey(programId));
 };
 
-const SWITCHBOARD_PROGRAM_ID = 'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f';
-const SWITCHBOARD_PROGRAM_ACCOUNTS = [
-  SWITCHBOARD_PROGRAM_ID,
-  getProgramDataAddress(SWITCHBOARD_PROGRAM_ID),
-  getIdlAddress(SWITCHBOARD_PROGRAM_ID),
-];
+const SWITCHBOARD_PROGRAM_ID = new PublicKey(
+  'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+);
+// const SWITCHBOARD_PROGRAM_ACCOUNTS = [
+//   SWITCHBOARD_PROGRAM_ID,
+//   getProgramDataAddress(SWITCHBOARD_PROGRAM_ID),
+//   await getIdlAddress(SWITCHBOARD_PROGRAM_ID),
+// ];
 
-const SWITCHBOARD_ATTESTATION_PROGRAM_ID =
-  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7';
-const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
-  SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-  getProgramDataAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
-  getIdlAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
-];
+const SWITCHBOARD_ATTESTATION_PROGRAM_ID = new PublicKey(
+  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
+);
+// const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
+//   SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+//   getProgramDataAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+//   await getIdlAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+// ];
 
 const jsSdkRoot = path.join(__dirname, '..');
 const solanaSdkRoot = path.join(jsSdkRoot, '..', '..');
@@ -67,7 +81,7 @@ async function main() {
     console.log(`Using local switchboard programs`);
   }
 
-  // const isMainnet = process.argv.slice(2).includes('--mainnet');
+  const isMainnet = process.argv.slice(2).includes('--mainnet');
 
   try {
     killPort(8899);
@@ -85,48 +99,34 @@ async function main() {
     new Uint8Array(JSON.parse(await fs.readFile(defaultPubkeyPath, 'utf-8')))
   ).publicKey;
 
-  // const switchboardAccounts = [...SWITCHBOARD_BASE_ACCOUNTS];
-
-  // if (!isDev) {
-  //   switchboardAccounts.push(
-  //     ...SWITCHBOARD_PROGRAM_ACCOUNTS,
-  //     ...SWITCHBOARD_SGX_PROGRAM_ACCOUNTS
-  //   );
-  // }
-
-  // const cloneAccounts = switchboardAccounts
-  //   .map(a => `--clone ${a}`)
-  //   .join(' ')
-  //   .split(' ');
-
   await fs.mkdir('.anchor/test-ledger', { recursive: true });
 
-  // let rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
-  // if (isMainnet && process.env.SOLANA_MAINNET_RPC_URL) {
-  //   rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
-  // } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
-  //   rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
-  // }
-
-  spawn(
-    'solana-test-validator',
-    [
-      '-q',
-      '-r',
-      '--mint',
-      payerPubkey.toBase58(),
-      // '--url',
-      // rpcUrl,
-      // ...cloneAccounts,
-      '--ledger',
-      '.anchor/test-ledger',
-    ],
-    { cwd: jsSdkRoot, encoding: 'utf-8', stdio: 'pipe', shell: '/bin/zsh' }
-  );
-
-  await awaitValidator();
+  let rpcUrl = clusterApiUrl(isMainnet ? 'mainnet-beta' : 'devnet');
+  if (isMainnet && process.env.SOLANA_MAINNET_RPC_URL) {
+    rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
+  } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
+    rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
+  }
 
   if (isDev) {
+    spawn(
+      'solana-test-validator',
+      [
+        '-q',
+        '-r',
+        '--mint',
+        payerPubkey.toBase58(),
+        '--ledger',
+        '.anchor/test-ledger',
+        // '--url',
+        // rpcUrl,
+        // ...cloneAccounts,
+      ],
+      { cwd: jsSdkRoot, encoding: 'utf-8', stdio: 'pipe' }
+    );
+
+    await awaitValidator();
+
     await Promise.all([
       programDeploy(
         devSwitchboard,
@@ -141,6 +141,36 @@ async function main() {
         '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
       ),
     ]);
+  } else {
+    const cloneAccounts = [
+      SWITCHBOARD_PROGRAM_ID,
+      getProgramDataAddress(SWITCHBOARD_PROGRAM_ID),
+      await getIdlAddress(SWITCHBOARD_PROGRAM_ID),
+      SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+      getProgramDataAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+      await getIdlAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+    ]
+      .map(a => `--clone ${a.toBase58()}`)
+      .join(' ')
+      .split(' ');
+
+    spawn(
+      'solana-test-validator',
+      [
+        '-q',
+        '-r',
+        '--mint',
+        payerPubkey.toBase58(),
+        '--ledger',
+        '.anchor/test-ledger',
+        '--url',
+        rpcUrl,
+        ...cloneAccounts,
+      ],
+      { cwd: jsSdkRoot, encoding: 'utf-8' }
+    );
+
+    await awaitValidator();
   }
 
   console.log(`\n\nLocal solana validator started ... `);
