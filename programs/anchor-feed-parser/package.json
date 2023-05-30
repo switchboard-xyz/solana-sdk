@@ -8,7 +8,7 @@
     "directory": "programs/anchor-feed-parser"
   },
   "scripts": {
-    "build": "node ../build.js anchor-feed-parser Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb",
+    "build": "node ../build.js anchor-feed-parser EE4NqG3B1N54tTbJ8VTtebdE88j4qjfVsbDXUUVFHegk",
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix"
   },
   "dependencies": {

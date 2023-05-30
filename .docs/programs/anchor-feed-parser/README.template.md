@@ -29,8 +29,8 @@ Get your program ID and update `Anchor.toml` and `src/lib.rs` with your pubkey
 
 ```bash
 export ANCHOR_FEED_PARSER_PUBKEY=$(solana-keygen pubkey target/deploy/anchor_feed_parser-keypair.json)
-sed -i '' s/Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb/"$ANCHOR_FEED_PARSER_PUBKEY"/g Anchor.toml
-sed -i '' s/Fstf3oTcBxHMZFaoBzxk5oSkTh5HaAjxjh6zcgdZpNBb/"$ANCHOR_FEED_PARSER_PUBKEY"/g src/lib.rs
+sed -i '' s/EE4NqG3B1N54tTbJ8VTtebdE88j4qjfVsbDXUUVFHegk/"$ANCHOR_FEED_PARSER_PUBKEY"/g Anchor.toml
+sed -i '' s/EE4NqG3B1N54tTbJ8VTtebdE88j4qjfVsbDXUUVFHegk/"$ANCHOR_FEED_PARSER_PUBKEY"/g src/lib.rs
 ```
 
 Then run Anchor test
