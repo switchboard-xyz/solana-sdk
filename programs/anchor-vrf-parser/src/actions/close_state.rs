@@ -2,7 +2,7 @@ use crate::*;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 use anchor_spl::token::Token;
-pub use switchboard_v2::{VrfAccountData, VrfClose, VrfCloseParams, PERMISSION_SEED};
+pub use switchboard_solana::{VrfAccountData, VrfClose, VrfCloseParams, PERMISSION_SEED};
 
 #[derive(Accounts)]
 #[instruction(params: CloseStateParams)]

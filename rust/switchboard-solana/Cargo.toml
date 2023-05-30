@@ -27,3 +27,7 @@ superslice = "1"
 anchor-lang = "0.26.0"
 anchor-spl = "0.26.0"
 solana-program = ">= 1.13.5, < 1.15.0"
+# These may not be needed, anchor27 keeps complaining
+winnow = "=0.4.1"
+toml_edit = "=0.19.8"
+toml_datetime = "=0.6.1"

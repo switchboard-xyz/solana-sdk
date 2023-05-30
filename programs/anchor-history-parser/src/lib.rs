@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use std::convert::TryInto;
-pub use switchboard_v2::{
+pub use switchboard_solana::{
     AggregatorAccountData, AggregatorHistoryBuffer, SwitchboardDecimal, SWITCHBOARD_PROGRAM_ID,
 };
 

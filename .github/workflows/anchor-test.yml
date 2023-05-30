@@ -25,7 +25,7 @@ jobs:
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solanaVersion: "v1.14.10"
+          solanaVersion: "v1.14.18"
           anchorVersion: "0.26.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 
@@ -68,7 +68,7 @@ jobs:
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solanaVersion: "v1.14.10"
+          solanaVersion: "v1.14.18"
           anchorVersion: "0.26.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 

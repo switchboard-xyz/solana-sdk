@@ -4,9 +4,9 @@ pub use actions::*;
 pub use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
 
-pub use switchboard_v2::SWITCHBOARD_PROGRAM_ID;
+pub use switchboard_solana::SWITCHBOARD_PROGRAM_ID;
 
-pub use switchboard_v2::Callback;
+pub use switchboard_solana::Callback;
 
 declare_id!("4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN");
 
@@ -40,7 +40,7 @@ pub mod anchor_vrf_parser {
 }
 
 #[repr(packed)]
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 pub struct VrfClient {
     pub bump: u8,
     pub max_result: u64,

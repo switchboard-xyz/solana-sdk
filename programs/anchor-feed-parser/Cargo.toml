@@ -17,7 +17,7 @@ cpi = ["no-entrypoint"]
 
 [dependencies]
 switchboard-solana = { path = "../../rust/switchboard-solana" }
-# switchboard-v2 = { version = "0.1.23" }
+# switchboard-solana = { version = "^0.1" }
 anchor-lang = "=0.26.0"
 solana-program = "1.14.18"
 bytemuck = "1.13.1"

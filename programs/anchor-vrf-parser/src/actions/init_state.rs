@@ -1,6 +1,6 @@
 use crate::*;
 use anchor_lang::prelude::*;
-pub use switchboard_v2::VrfAccountData;
+pub use switchboard_solana::VrfAccountData;
 
 #[derive(Accounts)]
 #[instruction(params: InitStateParams)]
