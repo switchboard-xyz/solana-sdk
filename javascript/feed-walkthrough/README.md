@@ -1,30 +1,16 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>Sbv2 Feed Walkthrough</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>An example showing how to create your own feed using Switchboard.</p>
+# Javascript Feed Walkthrough
 
-  <p>
-    <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
-    </a>
-    <a href="https://twitter.com/switchboardxyz">
-      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
-    </a>
-  </p>
+> Create a private Switchboard queue and oracle and fulfill your own oracle
+> updates
 
-  <h4>
-    <strong>Npm: </strong><a href="https://www.npmjs.com/package/@switchboard-xyz/solana.js">npmjs.com/package/@switchboard-xyz/solana.js</a>
-  </h4>
-  <h4>
-    <strong>Typedocs: </strong><a href="https://docs.switchboard.xyz/api/@switchboard-xyz/solana.js">docs.switchboard.xyz/api/@switchboard-xyz/solana.js</a>
-  </h4>
-  <h4>
-    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
-  </h4>
+[![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
+
+[![Types Badge](https://img.shields.io/badge/types-docs.switchboard.xyz-blue)](https://docs.switchboard.xyz/api/solana.js)
+
 </div>
 
 ## Install
@@ -35,6 +21,13 @@ npm i
 
 ## Usage
 
+**Directory**
+
+- [Simulate an OracleJob](#simulate-an-oraclejob)
+- [Create a Devnet Feed](#create-a-devnet-feed)
+- [Create a Private Switchboard Network](#create-a-private-switchboard-network)
+- [Create a Feed with the CLI](#create-a-feed-with-the-cli)
+
 ### Simulate an OracleJob
 
 Edit the OracleJob file `src/oracle-job.json`, then run
@@ -43,7 +36,7 @@ Edit the OracleJob file `src/oracle-job.json`, then run
 ts-node src/simulate
 ```
 
-### Create a Feed on Devnet
+### Create a Devnet Feed
 
 You can create your own feeds using the devnet permissionless network. This
 network does _NOT_ require the queue authority to grant you permissions so you
@@ -65,7 +58,7 @@ PAYER_KEYPAIR=~/my_keypair.json \
 ts-node src/devnet
 ```
 
-### Create a Private Queue and Oracle
+### Create a Private Switchboard Network
 
 You can also create your own private Switchboard network and run your own
 oracles. This requires you to run your own oracles for this network.
@@ -94,7 +87,7 @@ ts-node src/private-queue
 First install the sbv2 cli
 
 ```bash
-npm install -g @switchboard-xyz/cli^2
+npm install -g @switchboard-xyz
 ```
 
 Then run the following command to create your own feed using the devnet
@@ -121,10 +114,6 @@ Then request an update for your new feed
 sbv2 solana aggregator update $AGGREGATOR_KEY \
     --keypair ~/.config/solana/id.json
 ```
-
-See
-[docs.switchboard.xyz/solana/program/devnet](https://docs.switchboard.xyz/solana/program/devnet)
-for a list of devnet accounts to use
 
 **_NOTE:_** You can provide multiple `--job` flags to add additional oracle jobs
 to your data feed

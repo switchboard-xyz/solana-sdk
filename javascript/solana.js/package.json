@@ -1,9 +1,9 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.1.11",
+  "version": "2.1.16",
   "author": "",
   "license": "MIT",
-  "description": "API wrapper for integrating with the Switchboard V2 program on Solana",
+  "description": "A Typescript client to interact with Switchboard on Solana.",
   "files": [
     "lib",
     "src",

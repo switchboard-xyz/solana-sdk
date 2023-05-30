@@ -19,7 +19,7 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.1.46",
+    "@switchboard-xyz/common": "^2.2.0",
     "@switchboard-xyz/oracle": "^2.1.13",
     "@switchboard-xyz/solana.js": "workspace:*",
     "chalk": "^4.1.2",

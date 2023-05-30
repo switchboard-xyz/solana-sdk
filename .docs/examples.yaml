@@ -1,0 +1,37 @@
+examples:
+  - name: "native-feed-parser"
+    description: "Read a Switchboard feed using Solana's native program library"
+    language: "rust"
+    path: "programs/native-feed-parser"
+  - name: "anchor-feed-parser"
+    description: "Read a Switchboard feed using Anchor"
+    language: "anchor"
+    path: "programs/anchor-feed-parser"
+  - name: "anchor-history-parser"
+    description:
+      "Read a data feeds history buffer and get the closest historical sample to
+      a given timestamp"
+    language: "anchor"
+    path: "programs/anchor-history-parser"
+  - name: "anchor-vrf-parser"
+    description:
+      "Read a Switchboard VRF account and make a Cross Program Invocation (CPI)
+      to request a new randomness value"
+    language: "anchor"
+    path: "programs/anchor-vrf-parser"
+  - name: "anchor-vrf-lite-parser"
+    description:
+      "Read a Switchboard VRF Lite account and make a Cross Program Invocation
+      (CPI) to request a new randomness value"
+    language: "anchor"
+    path: "programs/anchor-vrf-lite-parser"
+  - name: "anchor-buffer-parser"
+    description: "Read a Switchboard buffer relayer using Anchor"
+    language: "anchor"
+    path: "programs/anchor-buffer-parser"
+  - name: "javascript-feed-walkthrough"
+    description:
+      "Create a private Switchboard queue and oracle and fulfill your own oracle
+      updates"
+    language: "javascript"
+    path: "javascript/feed-walkthrough"

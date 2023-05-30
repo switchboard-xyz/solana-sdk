@@ -148,6 +148,34 @@ export class AggregatorHistoryBuffer extends Account<
   }
 
   /**
+   * Fetch an aggregator's history with the max size of the buffer.
+   *
+   * Does not throw, will return an empty array and a maxSize of 0 if a buffer is not set.
+   *
+   * @param program The SwitchboardProgram.
+   * @param historyBufferPubkey The pubkey of the history buffer
+   * @return an object containing the maxSize of the buffer and the array of {@linkcode types.AggregatorHistoryRow} samples
+   */
+  public static async loadHistoryWithSize(
+    program: SwitchboardProgram,
+    historyBufferPubkey: PublicKey
+  ): Promise<{ maxSize: number; history: Array<types.AggregatorHistoryRow> }> {
+    if (historyBufferPubkey.equals(PublicKey.default)) {
+      return { history: [], maxSize: 0 };
+    }
+
+    const accountInfo = await program.connection.getAccountInfo(
+      historyBufferPubkey
+    );
+    if (!accountInfo?.data.byteLength) {
+      return { history: [], maxSize: 0 };
+    }
+    const maxSize = Math.floor((accountInfo.data.byteLength - 12) / 28);
+    const history = AggregatorHistoryBuffer.decode(accountInfo.data);
+    return { history, maxSize };
+  }
+
+  /**
    * Fetch an aggregators history buffer and return an array of historical samples
    * @params aggregator the pre-loaded aggregator state
    * @return the array of {@linkcode types.AggregatorHistoryRow} samples
