@@ -2,7 +2,7 @@ use super::decimal::SwitchboardDecimal;
 use anchor_lang::prelude::*;
 use bytemuck::try_cast_slice_mut;
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct OracleQueueAccountData {
     /// Name of the queue to store on-chain.
@@ -76,7 +76,7 @@ impl OracleQueueAccountData {
 
     pub fn get_mint(&self) -> Pubkey {
         if self.mint == Pubkey::default() {
-            return spl_token::native_mint::ID;
+            return anchor_spl::token::ID;
         }
         self.mint
     }

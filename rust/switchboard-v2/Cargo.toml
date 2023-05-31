@@ -21,10 +21,15 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-anchor-lang = "~0.27.0"
-anchor-spl = "~0.27.0"
 rust_decimal = "=1.26.1"
-solana-program = "^1.13.5"
-bytemuck = "1.7.2"
+bytemuck = "1.13.1"
 superslice = "1"
-spl-token = "3.5"
+solana-program = ">= 1.13.5, < 1.15.0"
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+# https://github.com/coral-xyz/anchor/issues/2502
+# anchor-lang = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
+# anchor-spl = { git = "https://github.com/coral-xyz/anchor", version = "0.27.0" }
+toml_datetime = "=0.6.1"
+winnow = "=0.4.1"
+toml_edit = "=0.19.8"

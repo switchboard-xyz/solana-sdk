@@ -1,5 +1,10 @@
+import { AggregatorAccountData } from './generated';
 import {
+  AggregatorAccount,
+  CreateQueueFeedParams,
   CreateQueueOracleParams,
+  createStaticFeed,
+  JobAccount,
   LoadedSwitchboardNetwork,
   loadKeypair,
   NetworkInitParams,
@@ -7,10 +12,13 @@ import {
   QueueAccount,
   SwitchboardNetwork,
   SwitchboardProgram,
+  TransactionObject,
+  updateStaticFeed,
 } from '.';
 
 import { AnchorProvider } from '@coral-xyz/anchor';
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { OracleJob } from '@switchboard-xyz/common';
 // import {
 //   IOracleConfig,
 //   NodeOracle,
@@ -324,6 +332,70 @@ export class SwitchboardTestContext {
   /** Load a keypair from a file path. If one doesn't exist, it will be created */
   public static loadKeypair(keypairPath: string): Keypair {
     return loadKeypair(keypairPath);
+  }
+
+  /**
+   * Create a feed and wait for it to resolve to a static value
+   * @param params - the aggregator init params and the static value to resolve the feed to
+   * @param timeout - the number of milliseconds to wait before timing out
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * let switchboard: SwitchboardTestContext;
+   *
+   * const [staticFeedAccount] = await switchboard.createStaticFeed({
+   *    value: 10,
+   * })
+   * const staticFeedValue: Big = await staticFeedAccount.fetchLatestValue();
+   * assert(staticFeedValue.toNumber() === 10, "StaticFeedValueMismatch");
+   * ```
+   */
+  public async createStaticFeed(
+    params: Partial<CreateQueueFeedParams> & { value: number },
+    timeout = 30000
+  ): Promise<[AggregatorAccount, AggregatorAccountData]> {
+    const [aggregatorAccount, aggregatorState] = await createStaticFeed(
+      this.network.queue.account,
+      params,
+      timeout
+    );
+    return [aggregatorAccount, aggregatorState];
+  }
+
+  /**
+   * Update an existing aggregator that resolves to a new static value, then await the new result
+   * @param aggregatorAccount - the aggregator account to modify
+   * @param value - the static value the feed will resolve to
+   * @param timeout - the number of milliseconds to wait before timing out
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * let switchboard: SwitchboardTestContext;
+   * let staticFeedAccount: AggregatorAccount;
+   *
+   * [staticFeedAccount] = await switchboard.createStaticFeed({
+   *    value: 10,
+   * });
+   * const staticFeedValue: Big = await staticFeedAccount.fetchLatestValue();
+   * assert(staticFeedValue.toNumber() === 10, "StaticFeedValueMismatch");
+   *
+   * await switchboard.updateStaticFeed(
+   *    staticFeedAccount,
+   *    25
+   * );
+   * staticFeedValue = await staticFeedAccount.fetchLatestValue();
+   * assert(staticFeedValue.toNumber() === 25, "StaticFeedValueMismatch");
+   * ```
+   */
+  public async updateStaticFeed(
+    aggregatorAccount: AggregatorAccount,
+    value: number,
+    timeout = 30000
+  ): Promise<AggregatorAccountData> {
+    const state = await updateStaticFeed(aggregatorAccount, value, timeout);
+    return state;
   }
 }
 

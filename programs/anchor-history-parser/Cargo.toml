@@ -21,5 +21,5 @@ overflow-checks = true
 [dependencies]
 switchboard-v2 = { path = "../../rust/switchboard-v2" }
 # switchboard-v2 = { version = "^0.1.23" }
-anchor-lang = "^0.27.0"
-solana-program = "^1.13.6"
+anchor-lang = "^0.26.0"
+solana-program = "~1.14.0"

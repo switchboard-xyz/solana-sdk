@@ -10,7 +10,7 @@ use std::cell::Ref;
 // VrfLiteRequestRandomnessParams
 // VrfLiteCloseParams
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct VrfLiteAccountData {
     /// The bump used to derive the SbState account.

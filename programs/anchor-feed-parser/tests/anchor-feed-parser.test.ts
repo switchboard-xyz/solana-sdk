@@ -1,8 +1,9 @@
 import * as anchor from "@coral-xyz/anchor";
-import { OracleJob, sleep } from "@switchboard-xyz/common";
+import { Big, OracleJob, sleep } from "@switchboard-xyz/common";
 import {
   AggregatorAccount,
   SwitchboardTestContext,
+  types,
 } from "@switchboard-xyz/solana.js";
 import assert from "assert";
 import { AnchorFeedParser } from "../target/types/anchor_feed_parser";
@@ -115,5 +116,27 @@ describe("anchor-feed-parser test", () => {
     const feedResult = Number(match?.groups?.feed_result ?? null);
     console.log(`Feed Result: ${feedResult}`);
     assert(feedResult === 100, "FeedResultMismatch");
+  });
+
+  it("Creates a static feed then updates the value", async () => {
+    let staticFeedAccount: AggregatorAccount;
+    let staticFeedState: types.AggregatorAccountData;
+    let staticFeedValue: Big;
+    [staticFeedAccount, staticFeedState] = await switchboard.createStaticFeed({
+      value: 10,
+      minUpdateDelaySeconds: 5,
+    });
+
+    staticFeedValue = AggregatorAccount.decodeLatestValue(staticFeedState);
+
+    assert(staticFeedValue.toNumber() === 10, "StaticFeedValueMismatch");
+
+    await sleep(5000 * 2);
+
+    staticFeedState = await switchboard.updateStaticFeed(staticFeedAccount, 25);
+
+    staticFeedValue = AggregatorAccount.decodeLatestValue(staticFeedState);
+
+    assert(staticFeedValue.toNumber() === 25, "StaticFeedValueMismatch");
   });
 });

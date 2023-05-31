@@ -76,6 +76,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public static getMetadata = (queue: types.OracleQueueAccountData) =>
     toUtf8(queue.metadata);
+
   /** Load an existing QueueAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
@@ -87,46 +88,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     );
     const state = await account.loadData();
     return [account, state];
-  }
-
-  /**
-   * Return a oracle queue account state initialized to the default values.
-   */
-  public static default(): types.OracleQueueAccountData {
-    const buffer = Buffer.alloc(1269, 0);
-    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
-    return types.OracleQueueAccountData.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given oracle queue config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.OracleQueueAccountData>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.OracleQueueAccountDataFields = {
-      ...QueueAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.OracleQueueAccountData(fields);
-
-    const buffer = Buffer.alloc(QueueAccount.size, 0);
-    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
-    types.OracleQueueAccountData.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
   }
 
   /**

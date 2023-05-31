@@ -16,7 +16,6 @@ __pycache__
 
 # Rust
 programs/**/target
-Cargo.lock
 .anchor
 target
 .crates
