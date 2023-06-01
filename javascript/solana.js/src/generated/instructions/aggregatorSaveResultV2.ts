@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
 import {
   TransactionInstruction,
   PublicKey,
