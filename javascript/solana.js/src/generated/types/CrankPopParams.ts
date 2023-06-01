@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CrankPopParamsFields {
   stateBump: number;
@@ -39,11 +39,11 @@ export class CrankPopParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u8('stateBump'),
-        borsh.vecU8('leaseBumps'),
-        borsh.vecU8('permissionBumps'),
-        borsh.option(borsh.u32(), 'nonce'),
-        borsh.option(borsh.bool(), 'failOpenOnAccountMismatch'),
+        borsh.u8("stateBump"),
+        borsh.vecU8("leaseBumps"),
+        borsh.vecU8("permissionBumps"),
+        borsh.option(borsh.u32(), "nonce"),
+        borsh.option(borsh.bool(), "failOpenOnAccountMismatch"),
       ],
       property
     );

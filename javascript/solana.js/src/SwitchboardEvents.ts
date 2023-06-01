@@ -1,6 +1,7 @@
-import * as types from './generated';
+import * as types from "./generated/index.js";
 
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
+import { BN } from "@switchboard-xyz/common";
 
 export type AggregatorAddJobEvent = {
   feedPubkey: anchor.web3.PublicKey;
@@ -11,7 +12,7 @@ export type AggregatorCrankEvictionEvent = {
   crankPubkey: anchor.web3.PublicKey;
   aggregatorPubkey: anchor.web3.PublicKey;
   reason?: number;
-  timestamp: anchor.BN;
+  timestamp: BN;
 };
 
 export type AggregatorInitEvent = {
@@ -26,7 +27,7 @@ export type AggregatorOpenRoundEvent = {
   feedPubkey: anchor.web3.PublicKey;
   oraclePubkeys: anchor.web3.PublicKey[];
   jobPubkeys: anchor.web3.PublicKey[];
-  remainingFunds: anchor.BN;
+  remainingFunds: BN;
   queueAuthority: anchor.web3.PublicKey;
 };
 
@@ -38,8 +39,8 @@ export type AggregatorRemoveJobEvent = {
 export type AggregatorSaveResultEvent = {
   feedPubkey: anchor.web3.PublicKey;
   value: types.BorshDecimal;
-  slot: anchor.BN;
-  timestamp: anchor.BN;
+  slot: BN;
+  timestamp: BN;
   oraclePubkey: anchor.web3.PublicKey;
   jobValues: Array<types.BorshDecimal>;
 };
@@ -57,8 +58,8 @@ export type AggregatorSetConfigsEvent = {
 export type AggregatorValueUpdateEvent = {
   feedPubkey: anchor.web3.PublicKey;
   value: types.SwitchboardDecimalFields;
-  slot: anchor.BN;
-  timestamp: anchor.BN;
+  slot: BN;
+  timestamp: BN;
   oraclePubkeys: anchor.web3.PublicKey[];
   oracleValues: types.SwitchboardDecimalFields[];
 };
@@ -67,7 +68,7 @@ export type BufferRelayerOpenRoundEvent = {
   relayerPubkey: anchor.web3.PublicKey;
   jobPubkey: anchor.web3.PublicKey;
   oraclePubkeys: anchor.web3.PublicKey[];
-  remainingFunds: anchor.BN;
+  remainingFunds: BN;
   queue: anchor.web3.PublicKey;
 };
 
@@ -83,7 +84,7 @@ export type CrankPopExpectedFailureEvent = {
 
 export type FeedPermissionRevokedEvent = {
   feedPubkey: anchor.web3.PublicKey;
-  timestamp: anchor.BN;
+  timestamp: BN;
 };
 
 export type GarbageCollectFailureEvent = {
@@ -93,16 +94,16 @@ export type GarbageCollectFailureEvent = {
 export type LeaseFundEvent = {
   leasePubkey: anchor.web3.PublicKey;
   funder: anchor.web3.PublicKey;
-  amount: anchor.BN;
-  timestamp: anchor.BN;
+  amount: BN;
+  timestamp: BN;
 };
 
 export type LeaseWithdrawEvent = {
   leasePubkey: anchor.web3.PublicKey;
   walletPubkey: anchor.web3.PublicKey;
-  previousAmount: anchor.BN;
-  newAmount: anchor.BN;
-  timestamp: anchor.BN;
+  previousAmount: BN;
+  newAmount: BN;
+  timestamp: BN;
 };
 
 export type OracleBootedEvent = {
@@ -115,9 +116,9 @@ export type OracleRewardEvent = {
   leasePubkey: anchor.web3.PublicKey;
   oraclePubkey: anchor.web3.PublicKey;
   walletPubkey: anchor.web3.PublicKey;
-  amount: anchor.BN;
-  roundSlot: anchor.BN;
-  timestamp: anchor.BN;
+  amount: BN;
+  roundSlot: BN;
+  timestamp: BN;
 };
 
 export type OracleSlashEvent = {
@@ -125,18 +126,18 @@ export type OracleSlashEvent = {
   leasePubkey: anchor.web3.PublicKey;
   oraclePubkey: anchor.web3.PublicKey;
   walletPubkey: anchor.web3.PublicKey;
-  amount: anchor.BN;
-  roundSlot: anchor.BN;
-  timestamp: anchor.BN;
+  amount: BN;
+  roundSlot: BN;
+  timestamp: BN;
 };
 
 export type OracleWithdrawEvent = {
   oraclePubkey: anchor.web3.PublicKey;
   walletPubkey: anchor.web3.PublicKey;
   destinationWallet: anchor.web3.PublicKey;
-  previousAmount: anchor.BN;
-  newAmount: anchor.BN;
-  timestamp: anchor.BN;
+  previousAmount: BN;
+  newAmount: BN;
+  timestamp: BN;
 };
 
 export type PermissionSetEvent = {
@@ -147,21 +148,21 @@ export type PermissionSetEvent = {
 
 export type PriorityFeeReimburseEvent = {
   feedPubkey: anchor.web3.PublicKey;
-  slot: anchor.BN;
-  timestamp: anchor.BN;
-  fee: anchor.BN;
+  slot: BN;
+  timestamp: BN;
+  fee: BN;
 };
 
 export type ProbationBrokenEvent = {
   feedPubkey: anchor.web3.PublicKey;
   queuePubkey: anchor.web3.PublicKey;
-  timestamp: anchor.BN;
+  timestamp: BN;
 };
 
 export type VrfCallbackPerformedEvent = {
   vrfPubkey: anchor.web3.PublicKey;
   oraclePubkey: anchor.web3.PublicKey;
-  amount: anchor.BN;
+  amount: BN;
 };
 
 export type VrfProveEvent = {
@@ -178,17 +179,17 @@ export type VrfRequestEvent = {
 export type VrfRequestRandomnessEvent = {
   vrfPubkey: anchor.web3.PublicKey;
   oraclePubkeys: anchor.web3.PublicKey[];
-  loadAmount: anchor.BN;
-  existingAmount: anchor.BN;
+  loadAmount: BN;
+  existingAmount: BN;
   alpha: Buffer;
-  counter: anchor.BN;
+  counter: BN;
 };
 
 export type VrfVerifyEvent = {
   vrfPubkey: anchor.web3.PublicKey;
   oraclePubkey: anchor.web3.PublicKey;
   authorityPubkey: anchor.web3.PublicKey;
-  amount: anchor.BN;
+  amount: BN;
 };
 
 export type VrfPoolUpdateEvent = {
@@ -204,8 +205,8 @@ export type VrfPoolRequestEvent = {
   vrfPoolPubkey: anchor.web3.PublicKey;
   vrfPubkey: anchor.web3.PublicKey;
   oraclePubkey: anchor.web3.PublicKey;
-  slot: anchor.BN;
-  timestamp: anchor.BN;
+  slot: BN;
+  timestamp: BN;
 };
 
 export type SwitchboardEvents = {

@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface EdwardsPointZCFields {
   x: types.FieldElementZCFields;
@@ -35,10 +35,10 @@ export class EdwardsPointZC {
   static layout(property?: string) {
     return borsh.struct(
       [
-        types.FieldElementZC.layout('x'),
-        types.FieldElementZC.layout('y'),
-        types.FieldElementZC.layout('z'),
-        types.FieldElementZC.layout('t'),
+        types.FieldElementZC.layout("x"),
+        types.FieldElementZC.layout("y"),
+        types.FieldElementZC.layout("z"),
+        types.FieldElementZC.layout("t"),
       ],
       property
     );

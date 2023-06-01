@@ -1,22 +1,22 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
 import {
   AggregatorAccount,
   JobAccount,
   LeaseAccount,
   QueueAccount,
   types,
-} from '../src';
+} from "../src/index.js";
+import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { Keypair } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Aggregator Tests', () => {
+describe("Aggregator Tests", () => {
   let ctx: TestContext;
 
   const queueAuthority = Keypair.generate();
@@ -30,8 +30,8 @@ describe('Aggregator Tests', () => {
     ctx = await setupTest();
 
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'aggregator-queue',
-      metadata: '',
+      name: "aggregator-queue",
+      metadata: "",
       authority: queueAuthority.publicKey,
       queueSize: 1,
       reward: 0,
@@ -47,7 +47,7 @@ describe('Aggregator Tests', () => {
 
     // add a single oracle for open round calls
     await queueAccount.createOracle({
-      name: 'oracle-1',
+      name: "oracle-1",
     });
 
     [jobAccount] = await JobAccount.create(ctx.program, {
@@ -62,7 +62,7 @@ describe('Aggregator Tests', () => {
           ],
         })
       ).finish(),
-      name: 'Job1',
+      name: "Job1",
     });
   });
 
@@ -94,7 +94,7 @@ describe('Aggregator Tests', () => {
 
     const [jobAccount] = await JobAccount.create(ctx.program, {
       data: OracleJob.encodeDelimited(oracleJob).finish(),
-      name: 'Job1',
+      name: "Job1",
     });
 
     await aggregatorAccount1.addJob({
@@ -104,8 +104,8 @@ describe('Aggregator Tests', () => {
     });
 
     const postAddJobAggregatorState = await aggregatorAccount1.loadData();
-    const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(pubkey =>
-      pubkey.equals(jobAccount.publicKey)
+    const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(
+      (pubkey) => pubkey.equals(jobAccount.publicKey)
     );
     assert(jobIdx !== -1, `Failed to add job to aggregator`);
 
@@ -128,12 +128,12 @@ describe('Aggregator Tests', () => {
     });
     const postRemoveJobAggregatorState = await aggregatorAccount1.loadData();
     const jobIdx1 = postRemoveJobAggregatorState.jobPubkeysData.findIndex(
-      pubkey => pubkey.equals(jobAccount.publicKey)
+      (pubkey) => pubkey.equals(jobAccount.publicKey)
     );
     assert(jobIdx1 === -1, `Failed to remove job from aggregator`);
   });
 
-  it('Creates and funds aggregator', async () => {
+  it("Creates and funds aggregator", async () => {
     [aggregatorAccount] = await queueAccount.createFeed({
       queueAuthority: queueAuthority,
       batchSize: 1,
@@ -185,7 +185,7 @@ describe('Aggregator Tests', () => {
     );
   });
 
-  it('Extends an aggregator lease', async () => {
+  it("Extends an aggregator lease", async () => {
     if (!aggregatorAccount) {
       throw new Error(`Aggregator does not exist`);
     }
@@ -219,7 +219,7 @@ describe('Aggregator Tests', () => {
     );
   });
 
-  it('Withdraws funds from an aggregator lease', async () => {
+  it("Withdraws funds from an aggregator lease", async () => {
     if (!aggregatorAccount) {
       throw new Error(`Aggregator does not exist`);
     }
@@ -268,7 +268,7 @@ describe('Aggregator Tests', () => {
     );
   });
 
-  it('Terminates a lease and closes the users wrapped SOL wallet', async () => {
+  it("Terminates a lease and closes the users wrapped SOL wallet", async () => {
     if (!aggregatorAccount) {
       throw new Error(`Aggregator does not exist`);
     }
@@ -294,7 +294,7 @@ describe('Aggregator Tests', () => {
     );
 
     await leaseAccount.withdraw({
-      amount: 'all',
+      amount: "all",
       unwrap: true,
     });
 
@@ -341,7 +341,7 @@ describe('Aggregator Tests', () => {
 
     const [jobAccount] = await JobAccount.create(ctx.program, {
       data: OracleJob.encodeDelimited(oracleJob).finish(),
-      name: 'Job1',
+      name: "Job1",
     });
 
     await aggregatorAccount.addJob({
@@ -351,8 +351,8 @@ describe('Aggregator Tests', () => {
     });
 
     const postAddJobAggregatorState = await aggregatorAccount.loadData();
-    const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(pubkey =>
-      pubkey.equals(jobAccount.publicKey)
+    const jobIdx = postAddJobAggregatorState.jobPubkeysData.findIndex(
+      (pubkey) => pubkey.equals(jobAccount.publicKey)
     );
     if (jobIdx === -1) {
       throw new Error(`Failed to add job to aggregator`);
@@ -364,7 +364,7 @@ describe('Aggregator Tests', () => {
     // If badSetConfigSignature isn't undefined, a (bad) transaction was built and sent.
     assert(
       badSetConfigSignature === undefined,
-      'Aggregator should not let minJobResults increase above numJobs'
+      "Aggregator should not let minJobResults increase above numJobs"
     );
 
     await aggregatorAccount.setConfig({
@@ -384,7 +384,7 @@ describe('Aggregator Tests', () => {
     );
   });
 
-  it('Sets priority fees during feed creation', async () => {
+  it("Sets priority fees during feed creation", async () => {
     const basePriorityFee = 10000;
     const priorityFeeBump = 1000;
     const priorityFeeBumpPeriod = 60;
@@ -447,7 +447,7 @@ describe('Aggregator Tests', () => {
     );
   });
 
-  it('Initializes an aggregator and sets the authority', async () => {
+  it("Initializes an aggregator and sets the authority", async () => {
     const myAuth = Keypair.generate();
     const myAgg = Keypair.generate();
 

@@ -8,21 +8,22 @@
     "fix": "pnpm -r fix"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^17.0.2",
+    "@commitlint/config-conventional": "^17.4.4",
     "@switchboard-xyz/eslint-config": "latest",
-    "@types/node": "^20.1.1",
+    "@types/node": "^20.2.5",
     "commitlint": "^17.4.2",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
+    "tsx": "^3.12.7",
     "typescript": "^5.0.4"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/sbv2-solana.git"
   },
-  "packageManager": "pnpm@7.17.0"
+  "packageManager": "pnpm@8.6.0"
 }

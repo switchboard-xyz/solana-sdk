@@ -1,47 +1,51 @@
-import * as errors from '../errors';
-import * as types from '../generated';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from '../generated/types/SwitchboardPermission';
-import { SolanaClock } from '../SolanaClock';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+} from "../generated/types/SwitchboardPermission.js";
+import { SolanaClock } from "../SolanaClock.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { AggregatorAccount, AggregatorInitParams } from './aggregatorAccount';
-import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
-import { BufferRelayerAccount, BufferRelayerInit } from './bufferRelayAccount';
-import { CrankAccount, CrankInitParams } from './crankAccount';
-import { JobAccount, JobInitParams } from './jobAccount';
-import { LeaseAccount, LeaseInitParams } from './leaseAccount';
+import { Account, OnAccountChangeCallback } from "./account.js";
+import {
+  AggregatorAccount,
+  AggregatorInitParams,
+} from "./aggregatorAccount.js";
+import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
+import {
+  BufferRelayerAccount,
+  BufferRelayerInit,
+} from "./bufferRelayAccount.js";
+import { CrankAccount, CrankInitParams } from "./crankAccount.js";
+import { JobAccount, JobInitParams } from "./jobAccount.js";
+import { LeaseAccount, LeaseInitParams } from "./leaseAccount.js";
 import {
   OracleAccount,
   OracleInitParams,
   OracleStakeParams,
-} from './oracleAccount';
-import { PermissionAccount, PermissionSetParams } from './permissionAccount';
-import { QueueDataBuffer } from './queueDataBuffer';
-import { VrfAccount, VrfInitParams } from './vrfAccount';
-import { VrfLiteAccount, VrfLiteInitParams } from './vrfLiteAccount';
+} from "./oracleAccount.js";
+import { PermissionAccount, PermissionSetParams } from "./permissionAccount.js";
+import { QueueDataBuffer } from "./queueDataBuffer.js";
+import { VrfAccount, VrfInitParams } from "./vrfAccount.js";
+import { VrfLiteAccount, VrfLiteInitParams } from "./vrfLiteAccount.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Commitment,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
-import { Big, BN, SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { Big, BN, SwitchboardDecimal, toUtf8 } from "@switchboard-xyz/common";
 
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a list of oracles that are actively heartbeating.
@@ -53,7 +57,7 @@ import { Big, BN, SwitchboardDecimal, toUtf8 } from '@switchboard-xyz/common';
  * Buffer: {@linkcode QueueDataBuffer}
  */
 export class QueueAccount extends Account<types.OracleQueueAccountData> {
-  static accountName = 'OracleQueueAccountData';
+  static accountName = "OracleQueueAccountData";
 
   /** The {@linkcode QueueDataBuffer} storing a list of oracle's that are actively heartbeating */
   dataBuffer?: QueueDataBuffer;
@@ -76,6 +80,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   public static getMetadata = (queue: types.OracleQueueAccountData) =>
     toUtf8(queue.metadata);
+
   /** Load an existing QueueAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
@@ -83,50 +88,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   ): Promise<[QueueAccount, types.OracleQueueAccountData]> {
     const account = new QueueAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
-  }
-
-  /**
-   * Return a oracle queue account state initialized to the default values.
-   */
-  public static default(): types.OracleQueueAccountData {
-    const buffer = Buffer.alloc(1269, 0);
-    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
-    return types.OracleQueueAccountData.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given oracle queue config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.OracleQueueAccountData>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.OracleQueueAccountDataFields = {
-      ...QueueAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.OracleQueueAccountData(fields);
-
-    const buffer = Buffer.alloc(QueueAccount.size, 0);
-    types.OracleQueueAccountData.discriminator.copy(buffer, 0);
-    types.OracleQueueAccountData.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
   }
 
   /**
@@ -137,11 +102,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<types.OracleQueueAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo =>
+      (accountInfo) =>
         callback(types.OracleQueueAccountData.decode(accountInfo.data)),
       commitment
     );
@@ -156,7 +121,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Queue', this.publicKey);
+      throw new errors.AccountNotFoundError("Queue", this.publicKey);
     this.dataBuffer = new QueueDataBuffer(this.program, data.dataBuffer);
     return data;
   }
@@ -240,11 +205,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           {
             params: {
               name: Array.from(
-                new Uint8Array(Buffer.from(params.name ?? '').slice(0, 32))
+                new Uint8Array(Buffer.from(params.name ?? "").slice(0, 32))
               ),
               metadata: [
                 ...new Uint8Array(
-                  Buffer.from(params.metadata ?? '').slice(0, 64)
+                  Buffer.from(params.metadata ?? "").slice(0, 64)
                 ),
               ],
               reward: reward,
@@ -255,10 +220,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               varianceToleranceMultiplier: SwitchboardDecimal.fromBig(
                 new Big(params.varianceToleranceMultiplier ?? 2)
               ),
-              consecutiveFeedFailureLimit: new anchor.BN(
+              consecutiveFeedFailureLimit: new BN(
                 params.consecutiveFeedFailureLimit ?? 1000
               ),
-              consecutiveOracleFailureLimit: new anchor.BN(
+              consecutiveOracleFailureLimit: new BN(
                 params.consecutiveOracleFailureLimit ?? 1000
               ),
               queueSize: queueSize,
@@ -526,13 +491,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const jobs: { job: JobAccount; weight: number }[] = [];
     if (params.jobs && Array.isArray(params.jobs)) {
       for await (const job of params.jobs) {
-        if ('data' in job) {
+        if ("data" in job) {
           const [jobAccount, jobInit] = JobAccount.createInstructions(
             this.program,
             payer,
             {
               data: job.data,
-              name: job.name ?? '',
+              name: job.name ?? "",
               authority: job.authority,
               expiration: job.expiration,
               variables: job.variables,
@@ -542,7 +507,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           );
           pre.push(...jobInit);
           jobs.push({ job: jobAccount, weight: job.weight ?? 1 });
-        } else if ('pubkey' in job) {
+        } else if ("pubkey" in job) {
           const jobAccount = new JobAccount(this.program, job.pubkey);
           // should we verify its a valid job account?
           jobs.push({ job: jobAccount, weight: job.weight ?? 1 });
@@ -1042,13 +1007,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     const txns: Array<TransactionObject> = [];
 
     let job: JobAccount;
-    if ('data' in params.job) {
+    if ("data" in params.job) {
       const [jobAccount, jobInit] = JobAccount.createInstructions(
         this.program,
         payer,
         {
           data: params.job.data,
-          name: params.job.name ?? '',
+          name: params.job.name ?? "",
           authority: params.job.authority,
           expiration: params.job.expiration,
           variables: params.job.variables,
@@ -1241,7 +1206,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       .unixTimestamp;
     const timeout = unixTimestamp.sub(new BN(queue.oracleTimeout));
     const activeOracles = oracles.filter(
-      o => o.data && o.data.lastHeartbeat.gte(timeout)
+      (o) => o.data && o.data.lastHeartbeat.gte(timeout)
     );
     return activeOracles;
   }
@@ -1295,14 +1260,14 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               name: params.name
                 ? [
                     ...new Uint8Array(
-                      Buffer.from(params.name ?? '').slice(0, 32)
+                      Buffer.from(params.name ?? "").slice(0, 32)
                     ),
                   ]
                 : null,
               metadata: params.metadata
                 ? [
                     ...new Uint8Array(
-                      Buffer.from(params.metadata ?? '').slice(0, 64)
+                      Buffer.from(params.metadata ?? "").slice(0, 64)
                     ),
                   ]
                 : null,
@@ -1316,11 +1281,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               minStake: minStake,
               oracleTimeout: params.oracleTimeout ?? null,
               consecutiveFeedFailureLimit: params.consecutiveFeedFailureLimit
-                ? new anchor.BN(params.consecutiveFeedFailureLimit)
+                ? new BN(params.consecutiveFeedFailureLimit)
                 : null,
               consecutiveOracleFailureLimit:
                 params.consecutiveOracleFailureLimit
-                  ? new anchor.BN(params.consecutiveOracleFailureLimit)
+                  ? new BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
             },
@@ -1350,7 +1315,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         publicKey: queue.dataBuffer,
         data: oracles,
       },
-      oracles: oracleAccounts.map(o => {
+      oracles: oracleAccounts.map((o) => {
         return {
           publicKey: o.account.publicKey,
           data: o.data.toJSON(),
@@ -1377,7 +1342,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         publicKey: queue.dataBuffer,
         data: oracles,
       },
-      oracles: oracleAccounts.map(o => {
+      oracles: oracleAccounts.map((o) => {
         return {
           publicKey: o.account.publicKey,
           data: o.data,
@@ -1532,7 +1497,7 @@ export interface QueueSetConfigParams {
 
 export type QueueAccountsJSON = Omit<
   types.OracleQueueAccountDataJSON,
-  'dataBuffer'
+  "dataBuffer"
 > & {
   publicKey: PublicKey;
   dataBuffer: { publicKey: PublicKey; data: Array<PublicKey> };
@@ -1563,11 +1528,11 @@ export type CreateQueueOracleParams = OracleInitParams &
     queueAuthorityPubkey?: PublicKey;
   };
 
-export type CreateQueueCrankParams = Omit<CrankInitParams, 'queueAccount'>;
+export type CreateQueueCrankParams = Omit<CrankInitParams, "queueAccount">;
 
 export type CreateQueueFeedParams = Omit<
-  Omit<Omit<AggregatorInitParams, 'queueAccount'>, 'queueAuthority'>,
-  'authority'
+  Omit<Omit<AggregatorInitParams, "queueAccount">, "queueAuthority">,
+  "authority"
 > & {
   authority?: PublicKey;
   crankPubkey?: PublicKey;
@@ -1587,18 +1552,18 @@ export type CreateQueueFeedParams = Omit<
     queueAuthorityPubkey?: PublicKey;
   };
 
-export type CreateQueueVrfParams = Omit<VrfInitParams, 'queueAccount'> &
+export type CreateQueueVrfParams = Omit<VrfInitParams, "queueAccount"> &
   Partial<PermissionSetParams> & {
     queueAuthorityPubkey?: PublicKey;
   };
 
 export type CreateQueueBufferRelayerParams = Omit<
-  Omit<BufferRelayerInit, 'jobAccount'>,
-  'queueAccount'
+  Omit<BufferRelayerInit, "jobAccount">,
+  "queueAccount"
 > &
   Partial<PermissionSetParams> & {
     // job params
-    job: JobAccount | PublicKey | Omit<JobInitParams, 'weight'>;
+    job: JobAccount | PublicKey | Omit<JobInitParams, "weight">;
   } & {
     queueAuthorityPubkey?: PublicKey;
   };

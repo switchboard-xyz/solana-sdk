@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface RealmSpawnRecordAccountDataFields {
   ebuf: Array<number>;
@@ -20,7 +20,7 @@ export class RealmSpawnRecordAccountData {
     229, 116, 99, 2, 145, 96, 5, 95,
   ]);
 
-  static readonly layout = borsh.struct([borsh.array(borsh.u8(), 256, 'ebuf')]);
+  static readonly layout = borsh.struct([borsh.array(borsh.u8(), 256, "ebuf")]);
 
   constructor(fields: RealmSpawnRecordAccountDataFields) {
     this.ebuf = fields.ebuf;
@@ -48,7 +48,7 @@ export class RealmSpawnRecordAccountData {
   ): Promise<Array<RealmSpawnRecordAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -62,7 +62,7 @@ export class RealmSpawnRecordAccountData {
 
   static decode(data: Buffer): RealmSpawnRecordAccountData {
     if (!data.slice(0, 8).equals(RealmSpawnRecordAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = RealmSpawnRecordAccountData.layout.decode(data.slice(8));

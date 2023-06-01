@@ -1,21 +1,21 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
+import { SwitchboardPermission } from "../src/generated/index.js";
 import {
   OracleAccount,
   PermissionAccount,
   QueueAccount,
   TransactionObject,
   types,
-} from '../src';
-import { SwitchboardPermission } from '../src/generated';
+} from "../src/index.js";
+import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from '@solana/web3.js';
-import assert from 'assert';
+import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
+import assert from "assert";
 
-describe('OracleAccount Tests', () => {
+describe("OracleAccount Tests", () => {
   let ctx: TestContext;
 
   const queueAuthority = Keypair.generate();
@@ -33,8 +33,8 @@ describe('OracleAccount Tests', () => {
     ctx = await setupTest();
 
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'q1',
-      metadata: '',
+      name: "q1",
+      metadata: "",
       queueSize: 2,
       reward: 0.0025,
       minStake: 2,
@@ -48,7 +48,7 @@ describe('OracleAccount Tests', () => {
     queue = await queueAccount.loadData();
     assert(
       queue.authority.equals(queueAuthority.publicKey),
-      'Incorrect queue authority'
+      "Incorrect queue authority"
     );
 
     const transferToOracleAuthorityTxn = new TransactionObject(
@@ -65,10 +65,10 @@ describe('OracleAccount Tests', () => {
     await ctx.program.signAndSend(transferToOracleAuthorityTxn);
   });
 
-  it('Creates an oracle account without permissions enabled', async () => {
+  it("Creates an oracle account without permissions enabled", async () => {
     [oracleAccount] = await queueAccount.createOracle({
-      name: 'oracle-1',
-      metadata: 'oracle-1',
+      name: "oracle-1",
+      metadata: "oracle-1",
       queueAuthority,
       enable: false,
       authority: oracleAuthority,
@@ -76,7 +76,7 @@ describe('OracleAccount Tests', () => {
     oracle = await oracleAccount.loadData();
     assert(
       oracle.oracleAuthority.equals(oracleAuthority.publicKey),
-      'Incorrect oracle authority'
+      "Incorrect oracle authority"
     );
 
     [oraclePermissionAccount] = PermissionAccount.fromSeed(
@@ -93,7 +93,7 @@ describe('OracleAccount Tests', () => {
     );
   });
 
-  it('Oracle fails to heartbeat if permissions are not enabled', async () => {
+  it("Oracle fails to heartbeat if permissions are not enabled", async () => {
     await assert.rejects(async () => {
       await oracleAccount.heartbeat({
         queueAccount,
@@ -102,7 +102,7 @@ describe('OracleAccount Tests', () => {
     }, new RegExp(/PermissionDenied|6035|0x1793/g));
   });
 
-  it('Queue authority grants the oracle permissions', async () => {
+  it("Queue authority grants the oracle permissions", async () => {
     await oraclePermissionAccount.set({
       queueAuthority,
       enable: true,
@@ -119,7 +119,7 @@ describe('OracleAccount Tests', () => {
     );
   });
 
-  it('Oracle deposits funds to its staking wallet', async () => {
+  it("Oracle deposits funds to its staking wallet", async () => {
     const queueMinStake = ctx.program.mint.fromTokenAmountBN(queue.minStake);
     await oracleAccount.stake({
       stakeAmount: queueMinStake,
@@ -133,11 +133,11 @@ describe('OracleAccount Tests', () => {
     );
   });
 
-  it('Oracle heartbeats on-chain', async () => {
+  it("Oracle heartbeats on-chain", async () => {
     await oracleAccount.heartbeat({ queueAccount, authority: oracleAuthority });
   });
 
-  it('Oracle withdraws from staking wallet and unwraps funds', async () => {
+  it("Oracle withdraws from staking wallet and unwraps funds", async () => {
     const queueMinStake = ctx.program.mint.fromTokenAmountBN(queue.minStake);
     const withdrawAmount = queueMinStake / 10;
 

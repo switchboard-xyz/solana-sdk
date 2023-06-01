@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface VrfLiteAccountDataFields {
   /** The bump used to derive the SbState account. */
@@ -114,23 +114,23 @@ export class VrfLiteAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.u8('stateBump'),
-    borsh.u8('permissionBump'),
-    borsh.publicKey('vrfPool'),
-    types.VrfStatus.layout('status'),
-    borsh.array(borsh.u8(), 32, 'result'),
-    borsh.u128('counter'),
-    borsh.array(borsh.u8(), 256, 'alpha'),
-    borsh.u32('alphaLen'),
-    borsh.u64('requestSlot'),
-    borsh.i64('requestTimestamp'),
-    borsh.publicKey('authority'),
-    borsh.publicKey('queue'),
-    borsh.publicKey('escrow'),
-    types.CallbackZC.layout('callback'),
-    types.VrfBuilder.layout('builder'),
-    borsh.i64('expiration'),
-    borsh.array(borsh.u8(), 1024, 'ebuf'),
+    borsh.u8("stateBump"),
+    borsh.u8("permissionBump"),
+    borsh.publicKey("vrfPool"),
+    types.VrfStatus.layout("status"),
+    borsh.array(borsh.u8(), 32, "result"),
+    borsh.u128("counter"),
+    borsh.array(borsh.u8(), 256, "alpha"),
+    borsh.u32("alphaLen"),
+    borsh.u64("requestSlot"),
+    borsh.i64("requestTimestamp"),
+    borsh.publicKey("authority"),
+    borsh.publicKey("queue"),
+    borsh.publicKey("escrow"),
+    types.CallbackZC.layout("callback"),
+    types.VrfBuilder.layout("builder"),
+    borsh.i64("expiration"),
+    borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
 
   constructor(fields: VrfLiteAccountDataFields) {
@@ -175,7 +175,7 @@ export class VrfLiteAccountData {
   ): Promise<Array<VrfLiteAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -189,7 +189,7 @@ export class VrfLiteAccountData {
 
   static decode(data: Buffer): VrfLiteAccountData {
     if (!data.slice(0, 8).equals(VrfLiteAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = VrfLiteAccountData.layout.decode(data.slice(8));

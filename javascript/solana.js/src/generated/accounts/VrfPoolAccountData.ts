@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface VrfPoolAccountDataFields {
   /** ACCOUNTS */
@@ -48,15 +48,15 @@ export class VrfPoolAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('authority'),
-    borsh.publicKey('queue'),
-    borsh.publicKey('escrow'),
-    borsh.u32('minInterval'),
-    borsh.u32('maxRows'),
-    borsh.u32('size'),
-    borsh.u32('idx'),
-    borsh.u8('stateBump'),
-    borsh.array(borsh.u8(), 135, 'ebuf'),
+    borsh.publicKey("authority"),
+    borsh.publicKey("queue"),
+    borsh.publicKey("escrow"),
+    borsh.u32("minInterval"),
+    borsh.u32("maxRows"),
+    borsh.u32("size"),
+    borsh.u32("idx"),
+    borsh.u8("stateBump"),
+    borsh.array(borsh.u8(), 135, "ebuf"),
   ]);
 
   constructor(fields: VrfPoolAccountDataFields) {
@@ -93,7 +93,7 @@ export class VrfPoolAccountData {
   ): Promise<Array<VrfPoolAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -107,7 +107,7 @@ export class VrfPoolAccountData {
 
   static decode(data: Buffer): VrfPoolAccountData {
     if (!data.slice(0, 8).equals(VrfPoolAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = VrfPoolAccountData.layout.decode(data.slice(8));

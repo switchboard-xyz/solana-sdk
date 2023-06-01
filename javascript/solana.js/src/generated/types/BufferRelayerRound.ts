@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface BufferRelayerRoundFields {
   /** Number of successful responses. */
@@ -54,11 +54,11 @@ export class BufferRelayerRound {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u32('numSuccess'),
-        borsh.u32('numError'),
-        borsh.u64('roundOpenSlot'),
-        borsh.i64('roundOpenTimestamp'),
-        borsh.publicKey('oraclePubkey'),
+        borsh.u32("numSuccess"),
+        borsh.u32("numError"),
+        borsh.u64("roundOpenSlot"),
+        borsh.i64("roundOpenTimestamp"),
+        borsh.publicKey("oraclePubkey"),
       ],
       property
     );

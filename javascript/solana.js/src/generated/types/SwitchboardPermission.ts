@@ -1,20 +1,20 @@
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
+import * as borsh from "@coral-xyz/borsh";
 
 export interface PermitNoneJSON {
-  kind: 'PermitNone';
+  kind: "PermitNone";
 }
 
 export class PermitNone {
   static readonly discriminator = 0;
-  static readonly kind = 'NONE';
+  static readonly kind = "NONE";
   readonly discriminator = 0;
-  readonly kind = 'PermitNone';
+  readonly kind = "PermitNone";
 
   toJSON(): PermitNoneJSON {
     return {
-      kind: 'PermitNone',
+      kind: "PermitNone",
     };
   }
 
@@ -26,18 +26,18 @@ export class PermitNone {
 }
 
 export interface PermitOracleHeartbeatJSON {
-  kind: 'PermitOracleHeartbeat';
+  kind: "PermitOracleHeartbeat";
 }
 
 export class PermitOracleHeartbeat {
   static readonly discriminator = 1;
-  static readonly kind = 'PermitOracleHeartbeat';
+  static readonly kind = "PermitOracleHeartbeat";
   readonly discriminator = 1;
-  readonly kind = 'PermitOracleHeartbeat';
+  readonly kind = "PermitOracleHeartbeat";
 
   toJSON(): PermitOracleHeartbeatJSON {
     return {
-      kind: 'PermitOracleHeartbeat',
+      kind: "PermitOracleHeartbeat",
     };
   }
 
@@ -49,18 +49,18 @@ export class PermitOracleHeartbeat {
 }
 
 export interface PermitOracleQueueUsageJSON {
-  kind: 'PermitOracleQueueUsage';
+  kind: "PermitOracleQueueUsage";
 }
 
 export class PermitOracleQueueUsage {
   static readonly discriminator = 2;
-  static readonly kind = 'PermitOracleQueueUsage';
+  static readonly kind = "PermitOracleQueueUsage";
   readonly discriminator = 2;
-  readonly kind = 'PermitOracleQueueUsage';
+  readonly kind = "PermitOracleQueueUsage";
 
   toJSON(): PermitOracleQueueUsageJSON {
     return {
-      kind: 'PermitOracleQueueUsage',
+      kind: "PermitOracleQueueUsage",
     };
   }
 
@@ -72,18 +72,18 @@ export class PermitOracleQueueUsage {
 }
 
 export interface PermitVrfRequestsJSON {
-  kind: 'PermitVrfRequests';
+  kind: "PermitVrfRequests";
 }
 
 export class PermitVrfRequests {
   static readonly discriminator = 4;
-  static readonly kind = 'PermitVrfRequests';
+  static readonly kind = "PermitVrfRequests";
   readonly discriminator = 4;
-  readonly kind = 'PermitVrfRequests';
+  readonly kind = "PermitVrfRequests";
 
   toJSON(): PermitVrfRequestsJSON {
     return {
-      kind: 'PermitVrfRequests',
+      kind: "PermitVrfRequests",
     };
   }
 
@@ -96,40 +96,40 @@ export class PermitVrfRequests {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.SwitchboardPermissionKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('PermitNone' in obj) {
+  if ("PermitNone" in obj) {
     return new PermitNone();
   }
-  if ('PermitOracleHeartbeat' in obj) {
+  if ("PermitOracleHeartbeat" in obj) {
     return new PermitOracleHeartbeat();
   }
-  if ('PermitOracleQueueUsage' in obj) {
+  if ("PermitOracleQueueUsage" in obj) {
     return new PermitOracleQueueUsage();
   }
-  if ('PermitVrfRequests' in obj) {
+  if ("PermitVrfRequests" in obj) {
     return new PermitVrfRequests();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(
   obj: types.SwitchboardPermissionJSON
 ): types.SwitchboardPermissionKind {
   switch (obj.kind) {
-    case 'PermitNone': {
+    case "PermitNone": {
       return new PermitNone();
     }
-    case 'PermitOracleHeartbeat': {
+    case "PermitOracleHeartbeat": {
       return new PermitOracleHeartbeat();
     }
-    case 'PermitOracleQueueUsage': {
+    case "PermitOracleQueueUsage": {
       return new PermitOracleQueueUsage();
     }
-    case 'PermitVrfRequests': {
+    case "PermitVrfRequests": {
       return new PermitVrfRequests();
     }
   }
@@ -138,9 +138,9 @@ export function fromJSON(
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
     // borsh.struct([], 'PermitNone'),
-    borsh.struct([], 'PermitOracleHeartbeat'),
-    borsh.struct([], 'PermitOracleQueueUsage'),
-    borsh.struct([], 'PermitVrfRequests'),
+    borsh.struct([], "PermitOracleHeartbeat"),
+    borsh.struct([], "PermitOracleQueueUsage"),
+    borsh.struct([], "PermitVrfRequests"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

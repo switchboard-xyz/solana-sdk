@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface LeaseAccountDataFields {
   /** Public key of the token account holding the lease contract funds until rewarded to oracles for successfully processing updates */
@@ -82,17 +82,17 @@ export class LeaseAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('escrow'),
-    borsh.publicKey('queue'),
-    borsh.publicKey('aggregator'),
-    borsh.publicKey('tokenProgram'),
-    borsh.bool('isActive'),
-    borsh.u32('crankRowCount'),
-    borsh.i64('createdAt'),
-    borsh.u128('updateCount'),
-    borsh.publicKey('withdrawAuthority'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 255, 'ebuf'),
+    borsh.publicKey("escrow"),
+    borsh.publicKey("queue"),
+    borsh.publicKey("aggregator"),
+    borsh.publicKey("tokenProgram"),
+    borsh.bool("isActive"),
+    borsh.u32("crankRowCount"),
+    borsh.i64("createdAt"),
+    borsh.u128("updateCount"),
+    borsh.publicKey("withdrawAuthority"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 255, "ebuf"),
   ]);
 
   constructor(fields: LeaseAccountDataFields) {
@@ -131,7 +131,7 @@ export class LeaseAccountData {
   ): Promise<Array<LeaseAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -145,7 +145,7 @@ export class LeaseAccountData {
 
   static decode(data: Buffer): LeaseAccountData {
     if (!data.slice(0, 8).equals(LeaseAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = LeaseAccountData.layout.decode(data.slice(8));

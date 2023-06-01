@@ -1,23 +1,23 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface InvalidPublicKeyJSON {
-  kind: 'InvalidPublicKey';
+  kind: "InvalidPublicKey";
 }
 
 export class InvalidPublicKey {
   static readonly discriminator = 0;
-  static readonly kind = 'InvalidPublicKey';
+  static readonly kind = "InvalidPublicKey";
   readonly discriminator = 0;
-  readonly kind = 'InvalidPublicKey';
+  readonly kind = "InvalidPublicKey";
 
   toJSON(): InvalidPublicKeyJSON {
     return {
-      kind: 'InvalidPublicKey',
+      kind: "InvalidPublicKey",
     };
   }
 
@@ -29,18 +29,18 @@ export class InvalidPublicKey {
 }
 
 export interface SerializationErrorJSON {
-  kind: 'SerializationError';
+  kind: "SerializationError";
 }
 
 export class SerializationError {
   static readonly discriminator = 1;
-  static readonly kind = 'SerializationError';
+  static readonly kind = "SerializationError";
   readonly discriminator = 1;
-  readonly kind = 'SerializationError';
+  readonly kind = "SerializationError";
 
   toJSON(): SerializationErrorJSON {
     return {
-      kind: 'SerializationError',
+      kind: "SerializationError",
     };
   }
 
@@ -52,18 +52,18 @@ export class SerializationError {
 }
 
 export interface DeserializationErrorJSON {
-  kind: 'DeserializationError';
+  kind: "DeserializationError";
 }
 
 export class DeserializationError {
   static readonly discriminator = 2;
-  static readonly kind = 'DeserializationError';
+  static readonly kind = "DeserializationError";
   readonly discriminator = 2;
-  readonly kind = 'DeserializationError';
+  readonly kind = "DeserializationError";
 
   toJSON(): DeserializationErrorJSON {
     return {
-      kind: 'DeserializationError',
+      kind: "DeserializationError",
     };
   }
 
@@ -75,18 +75,18 @@ export class DeserializationError {
 }
 
 export interface InvalidDataErrorJSON {
-  kind: 'InvalidDataError';
+  kind: "InvalidDataError";
 }
 
 export class InvalidDataError {
   static readonly discriminator = 3;
-  static readonly kind = 'InvalidDataError';
+  static readonly kind = "InvalidDataError";
   readonly discriminator = 3;
-  readonly kind = 'InvalidDataError';
+  readonly kind = "InvalidDataError";
 
   toJSON(): InvalidDataErrorJSON {
     return {
-      kind: 'InvalidDataError',
+      kind: "InvalidDataError",
     };
   }
 
@@ -99,38 +99,38 @@ export class InvalidDataError {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.ErrorKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('InvalidPublicKey' in obj) {
+  if ("InvalidPublicKey" in obj) {
     return new InvalidPublicKey();
   }
-  if ('SerializationError' in obj) {
+  if ("SerializationError" in obj) {
     return new SerializationError();
   }
-  if ('DeserializationError' in obj) {
+  if ("DeserializationError" in obj) {
     return new DeserializationError();
   }
-  if ('InvalidDataError' in obj) {
+  if ("InvalidDataError" in obj) {
     return new InvalidDataError();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(obj: types.ErrorJSON): types.ErrorKind {
   switch (obj.kind) {
-    case 'InvalidPublicKey': {
+    case "InvalidPublicKey": {
       return new InvalidPublicKey();
     }
-    case 'SerializationError': {
+    case "SerializationError": {
       return new SerializationError();
     }
-    case 'DeserializationError': {
+    case "DeserializationError": {
       return new DeserializationError();
     }
-    case 'InvalidDataError': {
+    case "InvalidDataError": {
       return new InvalidDataError();
     }
   }
@@ -138,10 +138,10 @@ export function fromJSON(obj: types.ErrorJSON): types.ErrorKind {
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
-    borsh.struct([], 'InvalidPublicKey'),
-    borsh.struct([], 'SerializationError'),
-    borsh.struct([], 'DeserializationError'),
-    borsh.struct([], 'InvalidDataError'),
+    borsh.struct([], "InvalidPublicKey"),
+    borsh.struct([], "SerializationError"),
+    borsh.struct([], "DeserializationError"),
+    borsh.struct([], "InvalidDataError"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

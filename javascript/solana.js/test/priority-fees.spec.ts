@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
+import "mocha";
 
-import { AggregatorAccount, types } from '../src';
+import { AggregatorAccount, types } from "../src/index.js";
 
-import { BN } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { BN } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Priority Fees Tests', () => {
+describe("Priority Fees Tests", () => {
   const defaultState = AggregatorAccount.default();
 
   const startingTimestamp = 100;
@@ -28,7 +28,7 @@ describe('Priority Fees Tests', () => {
   };
   const aggregator = new types.AggregatorAccountData(aggregatorFields);
 
-  it('Calculates the priority fee with no staleness', async () => {
+  it("Calculates the priority fee with no staleness", async () => {
     // no staleness
     const noStalenessFee = AggregatorAccount.calculatePriorityFee(
       aggregator,
@@ -41,7 +41,7 @@ describe('Priority Fees Tests', () => {
     );
   });
 
-  it('Calculates the priority fee with staleness multiplier', async () => {
+  it("Calculates the priority fee with staleness multiplier", async () => {
     // with staleness
     const multipliers = [0.5, 1, 1.33333, 1.8323232, 2, 5, 10];
     for (const multiplier of multipliers) {
@@ -59,7 +59,7 @@ describe('Priority Fees Tests', () => {
     }
   });
 
-  it('Calculates the priority fee with max multiplier', async () => {
+  it("Calculates the priority fee with max multiplier", async () => {
     // with max multiplier
     const expectedPriorityFee = Math.round(
       basePriorityFee + maxPriorityFeeMultiplier * priorityFeeBump

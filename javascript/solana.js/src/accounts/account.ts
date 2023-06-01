@@ -1,6 +1,33 @@
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import {
+  AggregatorAccountData,
+  BufferRelayerAccountData,
+  CrankAccountData,
+  JobAccountData,
+  LeaseAccountData,
+  OracleAccountData,
+  OracleQueueAccountData,
+  PermissionAccountData,
+  SbState,
+  SlidingResultAccountData,
+  VrfAccountData,
+} from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 
-import * as anchor from '@coral-xyz/anchor';
+import { AggregatorAccount } from "./aggregatorAccount.js";
+import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
+import { BufferRelayerAccount } from "./bufferRelayAccount.js";
+import { CrankAccount } from "./crankAccount.js";
+import { CrankDataBuffer } from "./crankDataBuffer.js";
+import { JobAccount } from "./jobAccount.js";
+import { LeaseAccount } from "./leaseAccount.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { ProgramStateAccount } from "./programStateAccount.js";
+import { QueueAccount } from "./queueAccount.js";
+import { QueueDataBuffer } from "./queueDataBuffer.js";
+import { VrfAccount } from "./vrfAccount.js";
+
+import * as anchor from "@coral-xyz/anchor";
 
 export abstract class Account<T> {
   public readonly publicKey: anchor.web3.PublicKey;
@@ -15,7 +42,7 @@ export abstract class Account<T> {
     publicKey: anchor.web3.PublicKey | string
   ) {
     this.publicKey =
-      typeof publicKey === 'string'
+      typeof publicKey === "string"
         ? new anchor.web3.PublicKey(publicKey)
         : publicKey;
   }
@@ -34,34 +61,6 @@ export abstract class Account<T> {
 /** Callback to pass deserialized account data when updated on-chain */
 export type OnAccountChangeCallback<T> = (accountData: T) => void;
 
-import {
-  AggregatorAccountData,
-  BufferRelayerAccountData,
-  CrankAccountData,
-  JobAccountData,
-  LeaseAccountData,
-  OracleAccountData,
-  OracleQueueAccountData,
-  PermissionAccountData,
-  SbState,
-  SlidingResultAccountData,
-  VrfAccountData,
-} from '../generated';
-
-import { AggregatorAccount } from './aggregatorAccount';
-import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
-import { BufferRelayerAccount } from './bufferRelayAccount';
-import { CrankAccount } from './crankAccount';
-import { CrankDataBuffer } from './crankDataBuffer';
-import { JobAccount } from './jobAccount';
-import { LeaseAccount } from './leaseAccount';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { ProgramStateAccount } from './programStateAccount';
-import { QueueAccount } from './queueAccount';
-import { QueueDataBuffer } from './queueDataBuffer';
-import { VrfAccount } from './vrfAccount';
-
 export const BUFFER_DISCRIMINATOR = Buffer.from([
   66,
   85,
@@ -74,21 +73,21 @@ export const BUFFER_DISCRIMINATOR = Buffer.from([
 ]);
 
 export type SwitchboardAccountType =
-  | 'Aggregator'
-  | 'AggregatorHistory'
-  | 'BufferRelayer'
-  | 'Crank'
-  | 'CrankBuffer'
-  | 'Job'
-  | 'Lease'
-  | 'Oracle'
-  | 'Permission'
-  | 'ProgramState'
-  | 'Queue'
-  | 'QueueBuffer'
-  | 'SlidingWindow'
-  | 'Vrf'
-  | 'Buffer';
+  | "Aggregator"
+  | "AggregatorHistory"
+  | "BufferRelayer"
+  | "Crank"
+  | "CrankBuffer"
+  | "Job"
+  | "Lease"
+  | "Oracle"
+  | "Permission"
+  | "ProgramState"
+  | "Queue"
+  | "QueueBuffer"
+  | "SlidingWindow"
+  | "Vrf"
+  | "Buffer";
 
 export type SwitchboardAccount =
   | AggregatorAccount
@@ -119,16 +118,16 @@ export type SwitchboardAccountData =
   | VrfAccountData;
 
 export const DISCRIMINATOR_MAP: Map<string, SwitchboardAccountType> = new Map([
-  [AggregatorAccountData.discriminator.toString('utf-8'), 'Aggregator'],
-  [BufferRelayerAccountData.discriminator.toString('utf-8'), 'BufferRelayer'],
-  [CrankAccountData.discriminator.toString('utf-8'), 'Crank'],
-  [JobAccountData.discriminator.toString('utf-8'), 'Job'],
-  [LeaseAccountData.discriminator.toString('utf-8'), 'Lease'],
-  [OracleAccountData.discriminator.toString('utf-8'), 'Oracle'],
-  [PermissionAccountData.discriminator.toString('utf-8'), 'Permission'],
-  [SbState.discriminator.toString('utf-8'), 'ProgramState'],
-  [OracleQueueAccountData.discriminator.toString('utf-8'), 'Queue'],
-  [SlidingResultAccountData.discriminator.toString('utf-8'), 'SlidingWindow'],
-  [VrfAccountData.discriminator.toString('utf-8'), 'Vrf'],
-  [BUFFER_DISCRIMINATOR.toString('utf-8'), 'Buffer'],
+  [AggregatorAccountData.discriminator.toString("utf-8"), "Aggregator"],
+  [BufferRelayerAccountData.discriminator.toString("utf-8"), "BufferRelayer"],
+  [CrankAccountData.discriminator.toString("utf-8"), "Crank"],
+  [JobAccountData.discriminator.toString("utf-8"), "Job"],
+  [LeaseAccountData.discriminator.toString("utf-8"), "Lease"],
+  [OracleAccountData.discriminator.toString("utf-8"), "Oracle"],
+  [PermissionAccountData.discriminator.toString("utf-8"), "Permission"],
+  [SbState.discriminator.toString("utf-8"), "ProgramState"],
+  [OracleQueueAccountData.discriminator.toString("utf-8"), "Queue"],
+  [SlidingResultAccountData.discriminator.toString("utf-8"), "SlidingWindow"],
+  [VrfAccountData.discriminator.toString("utf-8"), "Vrf"],
+  [BUFFER_DISCRIMINATOR.toString("utf-8"), "Buffer"],
 ]);

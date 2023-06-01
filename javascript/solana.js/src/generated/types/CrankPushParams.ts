@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CrankPushParamsFields {
   stateBump: number;
@@ -31,9 +31,9 @@ export class CrankPushParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u8('stateBump'),
-        borsh.u8('permissionBump'),
-        borsh.option(borsh.array(borsh.u8(), 64), 'notifiRef'),
+        borsh.u8("stateBump"),
+        borsh.u8("permissionBump"),
+        borsh.option(borsh.array(borsh.u8(), 64), "notifiRef"),
       ],
       property
     );

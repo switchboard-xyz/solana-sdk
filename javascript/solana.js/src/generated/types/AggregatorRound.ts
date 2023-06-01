@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorRoundFields {
   /**
@@ -120,7 +120,7 @@ export class AggregatorRound {
     this.maxResponse = new types.SwitchboardDecimal({ ...fields.maxResponse });
     this.oraclePubkeysData = fields.oraclePubkeysData;
     this.mediansData = fields.mediansData.map(
-      item => new types.SwitchboardDecimal({ ...item })
+      (item) => new types.SwitchboardDecimal({ ...item })
     );
     this.currentPayout = fields.currentPayout;
     this.mediansFulfilled = fields.mediansFulfilled;
@@ -130,20 +130,20 @@ export class AggregatorRound {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u32('numSuccess'),
-        borsh.u32('numError'),
-        borsh.bool('isClosed'),
-        borsh.u64('roundOpenSlot'),
-        borsh.i64('roundOpenTimestamp'),
-        types.SwitchboardDecimal.layout('result'),
-        types.SwitchboardDecimal.layout('stdDeviation'),
-        types.SwitchboardDecimal.layout('minResponse'),
-        types.SwitchboardDecimal.layout('maxResponse'),
-        borsh.array(borsh.publicKey(), 16, 'oraclePubkeysData'),
-        borsh.array(types.SwitchboardDecimal.layout(), 16, 'mediansData'),
-        borsh.array(borsh.i64(), 16, 'currentPayout'),
-        borsh.array(borsh.bool(), 16, 'mediansFulfilled'),
-        borsh.array(borsh.bool(), 16, 'errorsFulfilled'),
+        borsh.u32("numSuccess"),
+        borsh.u32("numError"),
+        borsh.bool("isClosed"),
+        borsh.u64("roundOpenSlot"),
+        borsh.i64("roundOpenTimestamp"),
+        types.SwitchboardDecimal.layout("result"),
+        types.SwitchboardDecimal.layout("stdDeviation"),
+        types.SwitchboardDecimal.layout("minResponse"),
+        types.SwitchboardDecimal.layout("maxResponse"),
+        borsh.array(borsh.publicKey(), 16, "oraclePubkeysData"),
+        borsh.array(types.SwitchboardDecimal.layout(), 16, "mediansData"),
+        borsh.array(borsh.i64(), 16, "currentPayout"),
+        borsh.array(borsh.bool(), 16, "mediansFulfilled"),
+        borsh.array(borsh.bool(), 16, "errorsFulfilled"),
       ],
       property
     );
@@ -185,7 +185,7 @@ export class AggregatorRound {
       minResponse: types.SwitchboardDecimal.toEncodable(fields.minResponse),
       maxResponse: types.SwitchboardDecimal.toEncodable(fields.maxResponse),
       oraclePubkeysData: fields.oraclePubkeysData,
-      mediansData: fields.mediansData.map(item =>
+      mediansData: fields.mediansData.map((item) =>
         types.SwitchboardDecimal.toEncodable(item)
       ),
       currentPayout: fields.currentPayout,
@@ -205,9 +205,9 @@ export class AggregatorRound {
       stdDeviation: this.stdDeviation.toJSON(),
       minResponse: this.minResponse.toJSON(),
       maxResponse: this.maxResponse.toJSON(),
-      oraclePubkeysData: this.oraclePubkeysData.map(item => item.toString()),
-      mediansData: this.mediansData.map(item => item.toJSON()),
-      currentPayout: this.currentPayout.map(item => item.toString()),
+      oraclePubkeysData: this.oraclePubkeysData.map((item) => item.toString()),
+      mediansData: this.mediansData.map((item) => item.toJSON()),
+      currentPayout: this.currentPayout.map((item) => item.toString()),
       mediansFulfilled: this.mediansFulfilled,
       errorsFulfilled: this.errorsFulfilled,
     };
@@ -224,11 +224,13 @@ export class AggregatorRound {
       stdDeviation: types.SwitchboardDecimal.fromJSON(obj.stdDeviation),
       minResponse: types.SwitchboardDecimal.fromJSON(obj.minResponse),
       maxResponse: types.SwitchboardDecimal.fromJSON(obj.maxResponse),
-      oraclePubkeysData: obj.oraclePubkeysData.map(item => new PublicKey(item)),
-      mediansData: obj.mediansData.map(item =>
+      oraclePubkeysData: obj.oraclePubkeysData.map(
+        (item) => new PublicKey(item)
+      ),
+      mediansData: obj.mediansData.map((item) =>
         types.SwitchboardDecimal.fromJSON(item)
       ),
-      currentPayout: obj.currentPayout.map(item => new BN(item)),
+      currentPayout: obj.currentPayout.map((item) => new BN(item)),
       mediansFulfilled: obj.mediansFulfilled,
       errorsFulfilled: obj.errorsFulfilled,
     });

@@ -1,9 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface LeaseInitParamsFields {
   loadAmount: BN;
@@ -39,11 +38,11 @@ export class LeaseInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u64('loadAmount'),
-        borsh.publicKey('withdrawAuthority'),
-        borsh.u8('leaseBump'),
-        borsh.u8('stateBump'),
-        borsh.vecU8('walletBumps'),
+        borsh.u64("loadAmount"),
+        borsh.publicKey("withdrawAuthority"),
+        borsh.u8("leaseBump"),
+        borsh.u8("stateBump"),
+        borsh.vecU8("walletBumps"),
       ],
       property
     );

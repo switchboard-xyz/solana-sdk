@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use bytemuck::{Pod, Zeroable};
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[derive(Default)]
 #[repr(packed)]
 pub struct CrankRow {
@@ -13,7 +13,7 @@ pub struct CrankRow {
 unsafe impl Pod for CrankRow {}
 unsafe impl Zeroable for CrankRow {}
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct CrankAccountData {
     /// Name of the crank to store on-chain.

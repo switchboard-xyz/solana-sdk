@@ -1,20 +1,20 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 
 import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
-} from './account';
+} from "./account.js";
 
 import {
   AccountInfo,
   Commitment,
   LAMPORTS_PER_SOL,
   PublicKey,
-} from '@solana/web3.js';
-import assert from 'assert';
+} from "@solana/web3.js";
+import assert from "assert";
 
 /**
  * Account holding a list of oracles actively heartbeating on the queue
@@ -22,7 +22,7 @@ import assert from 'assert';
  * Data: Array<{@linkcode PublicKey}>
  */
 export class QueueDataBuffer extends Account<Array<PublicKey>> {
-  static accountName = 'QueueDataBuffer';
+  static accountName = "QueueDataBuffer";
 
   public size = 32;
 
@@ -84,7 +84,7 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
    */
   onChange(
     callback: OnAccountChangeCallback<Array<PublicKey>>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     if (this.publicKey.equals(PublicKey.default)) {
       throw new Error(
@@ -93,7 +93,7 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
     }
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(QueueDataBuffer.decode(accountInfo)),
+      (accountInfo) => callback(QueueDataBuffer.decode(accountInfo)),
       commitment
     );
   }
@@ -110,7 +110,7 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
     );
     if (accountInfo === null)
       throw new errors.AccountNotFoundError(
-        'Oracle Queue Buffer',
+        "Oracle Queue Buffer",
         this.publicKey
       );
     const data = QueueDataBuffer.decode(accountInfo);
@@ -120,7 +120,7 @@ export class QueueDataBuffer extends Account<Array<PublicKey>> {
   public static decode(
     bufferAccountInfo: AccountInfo<Buffer>
   ): Array<PublicKey> {
-    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from('');
+    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from("");
 
     const oracles: PublicKey[] = [];
 

@@ -19,7 +19,7 @@ cpi = ["no-entrypoint"]
 overflow-checks = true
 
 [dependencies]
-switchboard-solana = { path = "../../rust/switchboard-solana" }
-# switchboard-solana = { version = "^0.1" }
-anchor-lang = "=0.26.0"
-solana-program = "1.14.18"
+switchboard-v2 = { path = "../../rust/switchboard-v2" }
+# switchboard-v2 = { version = "^0.1.23" }
+anchor-lang = "^0.26.0"
+solana-program = "~1.14.0"

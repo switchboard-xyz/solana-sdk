@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface PermissionAccountDataFields {
   /** The authority that is allowed to set permissions for this account. */
@@ -72,13 +72,13 @@ export class PermissionAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('authority'),
-    borsh.u32('permissions'),
-    borsh.publicKey('granter'),
-    borsh.publicKey('grantee'),
-    borsh.i64('expiration'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 255, 'ebuf'),
+    borsh.publicKey("authority"),
+    borsh.u32("permissions"),
+    borsh.publicKey("granter"),
+    borsh.publicKey("grantee"),
+    borsh.i64("expiration"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 255, "ebuf"),
   ]);
 
   constructor(fields: PermissionAccountDataFields) {
@@ -113,7 +113,7 @@ export class PermissionAccountData {
   ): Promise<Array<PermissionAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -127,7 +127,7 @@ export class PermissionAccountData {
 
   static decode(data: Buffer): PermissionAccountData {
     if (!data.slice(0, 8).equals(PermissionAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = PermissionAccountData.layout.decode(data.slice(8));

@@ -8,20 +8,7 @@ import {
   QueueAccount,
   SwitchboardAccountData,
   SwitchboardAccountType,
-} from './accounts';
-import {
-  DEVNET_GENESIS_HASH,
-  MAINNET_GENESIS_HASH,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
-  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
-  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
-} from './const';
-import * as errors from './errors';
+} from "./accounts/index.js";
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -34,14 +21,27 @@ import {
   SbState,
   SlidingResultAccountData,
   VrfAccountData,
-} from './generated';
-import { NativeMint } from './mint';
-import { SwitchboardEvents } from './SwitchboardEvents';
-import { TransactionObject, TransactionOptions } from './TransactionObject';
-import { LoadedJobDefinition } from './types';
+} from "./generated/index.js";
+import {
+  DEVNET_GENESIS_HASH,
+  MAINNET_GENESIS_HASH,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK,
+  SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE,
+} from "./const.js";
+import * as errors from "./errors.js";
+import { NativeMint } from "./mint.js";
+import { SwitchboardEvents } from "./SwitchboardEvents.js";
+import { TransactionObject, TransactionOptions } from "./TransactionObject.js";
+import { LoadedJobDefinition } from "./types.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
+import { ACCOUNT_DISCRIMINATOR_SIZE } from "@coral-xyz/anchor";
 import {
   AccountInfo,
   Cluster,
@@ -53,8 +53,8 @@ import {
   Transaction,
   TransactionSignature,
   VersionedTransaction,
-} from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
   skipConfrimation?: boolean;
@@ -87,7 +87,7 @@ export const READ_ONLY_KEYPAIR = Keypair.generate();
  * Returns the Switchboard Program ID for the specified Cluster.
  */
 export const getSwitchboardProgramId = (
-  cluster: Cluster | 'localnet'
+  cluster: Cluster | "localnet"
 ): PublicKey => {
   switch (cluster) {
     case 'localnet':
@@ -152,7 +152,7 @@ export class SwitchboardProgram {
   private readonly _attestationProgram: anchor.Program;
 
   /** The Solana cluster to load the Switchboard program for. */
-  readonly cluster: Cluster | 'localnet';
+  readonly cluster: Cluster | "localnet";
 
   // The pubkey and bump of the Switchboard program state account.
   readonly programState: {
@@ -223,7 +223,7 @@ export class SwitchboardProgram {
    * @returns The initialized anchor program instance for the Switchboard.
    */
   static async loadAnchorProgram(
-    cluster: Cluster | 'localnet',
+    cluster: Cluster | "localnet",
     connection: Connection,
     payerKeypair: Keypair = READ_ONLY_KEYPAIR,
     programId?: PublicKey
@@ -233,7 +233,7 @@ export class SwitchboardProgram {
       connection,
       // If no keypair is provided, default to dummy keypair
       new AnchorWallet(payerKeypair ?? SwitchboardProgram._readOnlyKeypair),
-      { commitment: 'confirmed' }
+      { commitment: "confirmed" }
     );
     const anchorIdl = await anchor.Program.fetchIdl(pid, provider);
     if (!anchorIdl) {
@@ -274,7 +274,7 @@ export class SwitchboardProgram {
    * ```
    */
   static load = async (
-    cluster: Cluster | 'localnet',
+    cluster: Cluster | "localnet",
     connection: Connection,
     payerKeypair = READ_ONLY_KEYPAIR,
     programId = getSwitchboardProgramId(cluster),
@@ -370,10 +370,10 @@ export class SwitchboardProgram {
     const genesisHash = await connection.getGenesisHash();
     const cluster =
       genesisHash === MAINNET_GENESIS_HASH
-        ? 'mainnet-beta'
+        ? "mainnet-beta"
         : genesisHash === DEVNET_GENESIS_HASH
-        ? 'devnet'
-        : 'localnet';
+        ? "devnet"
+        : "localnet";
 
     const pid = programId ?? SB_V2_PID;
     const programAccountInfo = await connection.getAccountInfo(pid);
@@ -550,9 +550,9 @@ export class SwitchboardProgram {
     crank: CrankAccountData;
   }> {
     const queueKey =
-      this.cluster === 'mainnet-beta'
+      this.cluster === "mainnet-beta"
         ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE
-        : this.cluster === 'devnet'
+        : this.cluster === "devnet"
         ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
         : null;
     if (!queueKey) {
@@ -563,9 +563,9 @@ export class SwitchboardProgram {
     const [queueAccount, queue] = await QueueAccount.load(this, queueKey);
 
     const crankKey =
-      this.cluster === 'mainnet-beta'
+      this.cluster === "mainnet-beta"
         ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK
-        : this.cluster === 'devnet'
+        : this.cluster === "devnet"
         ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK
         : null;
     if (!crankKey) {
@@ -593,9 +593,9 @@ export class SwitchboardProgram {
     crank: CrankAccountData;
   }> {
     const queueKey =
-      this.cluster === 'mainnet-beta'
+      this.cluster === "mainnet-beta"
         ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
-        : this.cluster === 'devnet'
+        : this.cluster === "devnet"
         ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
         : null;
     if (!queueKey) {
@@ -605,15 +605,15 @@ export class SwitchboardProgram {
     }
     const [queueAccount, queue] = await QueueAccount.load(
       this,
-      this.cluster === 'mainnet-beta'
+      this.cluster === "mainnet-beta"
         ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
         : SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
     );
 
     const crankKey =
-      this.cluster === 'mainnet-beta'
+      this.cluster === "mainnet-beta"
         ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK
-        : this.cluster === 'devnet'
+        : this.cluster === "devnet"
         ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK
         : null;
     if (!crankKey) {
@@ -747,7 +747,7 @@ export class SwitchboardProgram {
       })
       .filter(Boolean) as Array<LoadedJobDefinition>;
 
-    return new Map(jobs.map(job => [job.state.data, job]));
+    return new Map(jobs.map((job) => [job.state.data, job]));
   }
 
   async getProgramAccounts(): Promise<{
@@ -786,7 +786,7 @@ export class SwitchboardProgram {
     > = accountInfos.reduce((map, account) => {
       const discriminator = account.account.data
         .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
-        .toString('utf-8');
+        .toString("utf-8");
 
       const accounts = map.get(discriminator) ?? [];
       accounts.push(account);
@@ -812,14 +812,14 @@ export class SwitchboardProgram {
 
     const aggregators: Map<string, AggregatorAccountData> = decodeAccounts(
       discriminatorMap.get(
-        AggregatorAccountData.discriminator.toString('utf-8')
+        AggregatorAccountData.discriminator.toString("utf-8")
       ) ?? [],
       AggregatorAccountData.decode
     );
 
     // TODO: Use aggregator.historyBuffer, crank.dataBuffer, queue.dataBuffer to filter these down and decode
     const buffers: Map<string, Buffer> = (
-      discriminatorMap.get(BUFFER_DISCRIMINATOR.toString('utf-8')) ?? []
+      discriminatorMap.get(BUFFER_DISCRIMINATOR.toString("utf-8")) ?? []
     ).reduce((map, buffer) => {
       map.set(buffer.pubkey.toBase58(), buffer.account.data);
       return map;
@@ -828,63 +828,63 @@ export class SwitchboardProgram {
     const bufferRelayers: Map<string, BufferRelayerAccountData> =
       decodeAccounts(
         discriminatorMap.get(
-          BufferRelayerAccountData.discriminator.toString('utf-8')
+          BufferRelayerAccountData.discriminator.toString("utf-8")
         ) ?? [],
         BufferRelayerAccountData.decode
       );
 
     const cranks: Map<string, CrankAccountData> = decodeAccounts(
-      discriminatorMap.get(CrankAccountData.discriminator.toString('utf-8')) ??
+      discriminatorMap.get(CrankAccountData.discriminator.toString("utf-8")) ??
         [],
       CrankAccountData.decode
     );
 
     const jobs: Map<string, JobAccountData> = decodeAccounts(
-      discriminatorMap.get(JobAccountData.discriminator.toString('utf-8')) ??
+      discriminatorMap.get(JobAccountData.discriminator.toString("utf-8")) ??
         [],
       JobAccountData.decode
     );
 
     const leases: Map<string, LeaseAccountData> = decodeAccounts(
-      discriminatorMap.get(LeaseAccountData.discriminator.toString('utf-8')) ??
+      discriminatorMap.get(LeaseAccountData.discriminator.toString("utf-8")) ??
         [],
       LeaseAccountData.decode
     );
 
     const oracles: Map<string, OracleAccountData> = decodeAccounts(
-      discriminatorMap.get(OracleAccountData.discriminator.toString('utf-8')) ??
+      discriminatorMap.get(OracleAccountData.discriminator.toString("utf-8")) ??
         [],
       OracleAccountData.decode
     );
 
     const permissions: Map<string, PermissionAccountData> = decodeAccounts(
       discriminatorMap.get(
-        PermissionAccountData.discriminator.toString('utf-8')
+        PermissionAccountData.discriminator.toString("utf-8")
       ) ?? [],
       PermissionAccountData.decode
     );
 
     const programState: Map<string, SbState> = decodeAccounts(
-      discriminatorMap.get(SbState.discriminator.toString('utf-8')) ?? [],
+      discriminatorMap.get(SbState.discriminator.toString("utf-8")) ?? [],
       SbState.decode
     );
 
     const queues: Map<string, OracleQueueAccountData> = decodeAccounts(
       discriminatorMap.get(
-        OracleQueueAccountData.discriminator.toString('utf-8')
+        OracleQueueAccountData.discriminator.toString("utf-8")
       ) ?? [],
       OracleQueueAccountData.decode
     );
 
     const slidingResult: Map<string, SlidingResultAccountData> = decodeAccounts(
       discriminatorMap.get(
-        SlidingResultAccountData.discriminator.toString('utf-8')
+        SlidingResultAccountData.discriminator.toString("utf-8")
       ) ?? [],
       SlidingResultAccountData.decode
     );
 
     const vrfs: Map<string, VrfAccountData> = decodeAccounts(
-      discriminatorMap.get(VrfAccountData.discriminator.toString('utf-8')) ??
+      discriminatorMap.get(VrfAccountData.discriminator.toString("utf-8")) ??
         [],
       VrfAccountData.decode
     );
@@ -910,7 +910,7 @@ export class SwitchboardProgram {
   ): SwitchboardAccountType | null {
     const discriminator = accountInfo.data
       .slice(0, ACCOUNT_DISCRIMINATOR_SIZE)
-      .toString('utf-8');
+      .toString("utf-8");
     const accountType = DISCRIMINATOR_MAP.get(discriminator);
     if (accountType) {
       return accountType;
@@ -927,7 +927,7 @@ export class SwitchboardProgram {
  * @returns bool
  */
 export const isVersionedTransaction = (tx): tx is VersionedTransaction => {
-  return 'version' in tx;
+  return "version" in tx;
 };
 
 export class AnchorWallet implements anchor.Wallet {
@@ -952,7 +952,7 @@ export class AnchorWallet implements anchor.Wallet {
   async signAllTransactions<T extends Transaction | VersionedTransaction>(
     txs: T[]
   ): Promise<T[]> {
-    return txs.map(t => {
+    return txs.map((t) => {
       if (isVersionedTransaction(t)) {
         t.sign([this.payer]);
       } else {

@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CallbackZCFields {
   /** The program ID of the callback program being invoked. */
@@ -46,7 +46,7 @@ export class CallbackZC {
   constructor(fields: CallbackZCFields) {
     this.programId = fields.programId;
     this.accounts = fields.accounts.map(
-      item => new types.AccountMetaZC({ ...item })
+      (item) => new types.AccountMetaZC({ ...item })
     );
     this.accountsLen = fields.accountsLen;
     this.ixData = fields.ixData;
@@ -56,11 +56,11 @@ export class CallbackZC {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.publicKey('programId'),
-        borsh.array(types.AccountMetaZC.layout(), 32, 'accounts'),
-        borsh.u32('accountsLen'),
-        borsh.array(borsh.u8(), 1024, 'ixData'),
-        borsh.u32('ixDataLen'),
+        borsh.publicKey("programId"),
+        borsh.array(types.AccountMetaZC.layout(), 32, "accounts"),
+        borsh.u32("accountsLen"),
+        borsh.array(borsh.u8(), 1024, "ixData"),
+        borsh.u32("ixDataLen"),
       ],
       property
     );
@@ -84,7 +84,7 @@ export class CallbackZC {
   static toEncodable(fields: CallbackZCFields) {
     return {
       programId: fields.programId,
-      accounts: fields.accounts.map(item =>
+      accounts: fields.accounts.map((item) =>
         types.AccountMetaZC.toEncodable(item)
       ),
       accountsLen: fields.accountsLen,
@@ -96,7 +96,7 @@ export class CallbackZC {
   toJSON(): CallbackZCJSON {
     return {
       programId: this.programId.toString(),
-      accounts: this.accounts.map(item => item.toJSON()),
+      accounts: this.accounts.map((item) => item.toJSON()),
       accountsLen: this.accountsLen,
       ixData: this.ixData,
       ixDataLen: this.ixDataLen,
@@ -106,7 +106,7 @@ export class CallbackZC {
   static fromJSON(obj: CallbackZCJSON): CallbackZC {
     return new CallbackZC({
       programId: new PublicKey(obj.programId),
-      accounts: obj.accounts.map(item => types.AccountMetaZC.fromJSON(item)),
+      accounts: obj.accounts.map((item) => types.AccountMetaZC.fromJSON(item)),
       accountsLen: obj.accountsLen,
       ixData: obj.ixData,
       ixDataLen: obj.ixDataLen,

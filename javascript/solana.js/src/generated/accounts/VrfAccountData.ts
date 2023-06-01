@@ -1,5 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey, Connection } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { Connection, PublicKey } from '@solana/web3.js';
@@ -87,18 +90,18 @@ export class VrfAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    types.VrfStatus.layout('status'),
-    borsh.u128('counter'),
-    borsh.publicKey('authority'),
-    borsh.publicKey('oracleQueue'),
-    borsh.publicKey('escrow'),
-    types.CallbackZC.layout('callback'),
-    borsh.u32('batchSize'),
-    borsh.array(types.VrfBuilder.layout(), 8, 'builders'),
-    borsh.u32('buildersLen'),
-    borsh.bool('testMode'),
-    types.VrfRound.layout('currentRound'),
-    borsh.array(borsh.u8(), 1024, 'ebuf'),
+    types.VrfStatus.layout("status"),
+    borsh.u128("counter"),
+    borsh.publicKey("authority"),
+    borsh.publicKey("oracleQueue"),
+    borsh.publicKey("escrow"),
+    types.CallbackZC.layout("callback"),
+    borsh.u32("batchSize"),
+    borsh.array(types.VrfBuilder.layout(), 8, "builders"),
+    borsh.u32("buildersLen"),
+    borsh.bool("testMode"),
+    types.VrfRound.layout("currentRound"),
+    borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
 
   constructor(fields: VrfAccountDataFields) {
@@ -110,7 +113,7 @@ export class VrfAccountData {
     this.callback = new types.CallbackZC({ ...fields.callback });
     this.batchSize = fields.batchSize;
     this.builders = fields.builders.map(
-      item => new types.VrfBuilder({ ...item })
+      (item) => new types.VrfBuilder({ ...item })
     );
     this.buildersLen = fields.buildersLen;
     this.testMode = fields.testMode;
@@ -140,7 +143,7 @@ export class VrfAccountData {
   ): Promise<Array<VrfAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -154,7 +157,7 @@ export class VrfAccountData {
 
   static decode(data: Buffer): VrfAccountData {
     if (!data.slice(0, 8).equals(VrfAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = VrfAccountData.layout.decode(data.slice(8));
@@ -188,7 +191,7 @@ export class VrfAccountData {
       escrow: this.escrow.toString(),
       callback: this.callback.toJSON(),
       batchSize: this.batchSize,
-      builders: this.builders.map(item => item.toJSON()),
+      builders: this.builders.map((item) => item.toJSON()),
       buildersLen: this.buildersLen,
       testMode: this.testMode,
       currentRound: this.currentRound.toJSON(),
@@ -205,7 +208,7 @@ export class VrfAccountData {
       escrow: new PublicKey(obj.escrow),
       callback: types.CallbackZC.fromJSON(obj.callback),
       batchSize: obj.batchSize,
-      builders: obj.builders.map(item => types.VrfBuilder.fromJSON(item)),
+      builders: obj.builders.map((item) => types.VrfBuilder.fromJSON(item)),
       buildersLen: obj.buildersLen,
       testMode: obj.testMode,
       currentRound: types.VrfRound.fromJSON(obj.currentRound),

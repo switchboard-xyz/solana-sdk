@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FieldElementZCFields {
   bytes: Array<BN>;
@@ -21,7 +21,7 @@ export class FieldElementZC {
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.array(borsh.u64(), 5, 'bytes')], property);
+    return borsh.struct([borsh.array(borsh.u64(), 5, "bytes")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,13 +39,13 @@ export class FieldElementZC {
 
   toJSON(): FieldElementZCJSON {
     return {
-      bytes: this.bytes.map(item => item.toString()),
+      bytes: this.bytes.map((item) => item.toString()),
     };
   }
 
   static fromJSON(obj: FieldElementZCJSON): FieldElementZC {
     return new FieldElementZC({
-      bytes: obj.bytes.map(item => new BN(item)),
+      bytes: obj.bytes.map((item) => new BN(item)),
     });
   }
 

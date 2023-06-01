@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SbStateFields {
   /** The account authority permitted to make account changes. */
@@ -60,13 +60,13 @@ export class SbState {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('authority'),
-    borsh.publicKey('tokenMint'),
-    borsh.publicKey('tokenVault'),
-    borsh.publicKey('daoMint'),
-    borsh.u8('bump'),
-    borsh.array(borsh.array(borsh.u8(), 32), 6, 'mrEnclaves'),
-    borsh.array(borsh.u8(), 799, 'ebuf'),
+    borsh.publicKey("authority"),
+    borsh.publicKey("tokenMint"),
+    borsh.publicKey("tokenVault"),
+    borsh.publicKey("daoMint"),
+    borsh.u8("bump"),
+    borsh.array(borsh.array(borsh.u8(), 32), 6, "mrEnclaves"),
+    borsh.array(borsh.u8(), 799, "ebuf"),
   ]);
 
   constructor(fields: SbStateFields) {
@@ -101,7 +101,7 @@ export class SbState {
   ): Promise<Array<SbState | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -115,7 +115,7 @@ export class SbState {
 
   static decode(data: Buffer): SbState {
     if (!data.slice(0, 8).equals(SbState.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = SbState.layout.decode(data.slice(8));

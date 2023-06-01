@@ -1,11 +1,11 @@
-import * as sbv2 from '../src';
 import {
   AggregatorAccount,
   CreateQueueFeedParams,
   QueueAccount,
   SB_V2_PID,
   TransactionObject,
-} from '../src';
+} from "../src/index.js";
+import * as sbv2 from "../src/index.js";
 
 import {
   clusterApiUrl,
@@ -13,23 +13,23 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
-} from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+} from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
+import dotenv from "dotenv";
+import fs from "fs";
+import os from "os";
+import path from "path";
 dotenv.config();
 
-type SolanaCluster = 'localnet' | 'devnet' | 'mainnet-beta';
+type SolanaCluster = "localnet" | "devnet" | "mainnet-beta";
 
 export const sleep = (ms: number): Promise<any> =>
-  new Promise(s => setTimeout(s, ms));
+  new Promise((s) => setTimeout(s, ms));
 
 export const DEFAULT_KEYPAIR_PATH = path.join(
   os.homedir(),
-  '.config/solana/id.json'
+  ".config/solana/id.json"
 );
 
 export interface TestContext {
@@ -43,9 +43,9 @@ export interface TestContext {
 export function isLocalnet(): boolean {
   if (process.env.SOLANA_LOCALNET) {
     switch (process.env.SOLANA_LOCALNET) {
-      case '1':
-      case 'true':
-      case 'localnet': {
+      case "1":
+      case "true":
+      case "localnet": {
         return true;
       }
     }
@@ -57,9 +57,9 @@ export function getCluster(): SolanaCluster {
   if (process.env.SOLANA_CLUSTER) {
     const cluster = String(process.env.SOLANA_CLUSTER);
     if (
-      cluster === 'localnet' ||
-      cluster === 'devnet' ||
-      cluster === 'mainnet-beta'
+      cluster === "localnet" ||
+      cluster === "devnet" ||
+      cluster === "mainnet-beta"
     ) {
       return cluster;
     } else {
@@ -70,10 +70,10 @@ export function getCluster(): SolanaCluster {
   }
 
   if (isLocalnet()) {
-    return 'localnet';
+    return "localnet";
   }
 
-  return 'devnet';
+  return "devnet";
 }
 
 export function getProgramId(cluster: SolanaCluster): PublicKey {
@@ -85,14 +85,14 @@ export function getProgramId(cluster: SolanaCluster): PublicKey {
 
 export function getRpcUrl(cluster: SolanaCluster): string {
   if (isLocalnet()) {
-    return 'http://0.0.0.0:8899';
+    return "http://0.0.0.0:8899";
   }
   if (process.env.SOLANA_RPC_URL) {
     return String(process.env.SOLANA_RPC_URL);
   }
 
-  if (cluster === 'localnet') {
-    return 'http://0.0.0.0:8899';
+  if (cluster === "localnet") {
+    return "http://0.0.0.0:8899";
   }
 
   return clusterApiUrl(cluster);
@@ -103,7 +103,7 @@ export async function setupTest(): Promise<TestContext> {
   const payer: Keypair = fs.existsSync(DEFAULT_KEYPAIR_PATH)
     ? Keypair.fromSecretKey(
         new Uint8Array(
-          JSON.parse(fs.readFileSync(DEFAULT_KEYPAIR_PATH, 'utf8'))
+          JSON.parse(fs.readFileSync(DEFAULT_KEYPAIR_PATH, "utf8"))
         )
       )
     : Keypair.generate();
@@ -112,7 +112,7 @@ export async function setupTest(): Promise<TestContext> {
 
   const program = await sbv2.SwitchboardProgram.load(
     cluster,
-    new Connection(getRpcUrl(cluster), { commitment: 'confirmed' }),
+    new Connection(getRpcUrl(cluster), { commitment: "confirmed" }),
     payer,
     programId
   );
@@ -158,11 +158,11 @@ export async function setupTest(): Promise<TestContext> {
     cluster,
     program,
     payer,
-    toUrl: signature =>
-      cluster === 'localnet'
+    toUrl: (signature) =>
+      cluster === "localnet"
         ? `https://explorer.solana.com/tx/${signature}?cluster=custom&customUrl=http%3A%2F%2Flocalhost%3A8899`
         : `https://explorer.solana.com/tx/${signature}${
-            cluster === 'devnet' ? '?cluster=devnet' : ''
+            cluster === "devnet" ? "?cluster=devnet" : ""
           }`,
     round: (num: number, decimalPlaces = 2): number => {
       assert(decimalPlaces > 0 && decimalPlaces < 16);

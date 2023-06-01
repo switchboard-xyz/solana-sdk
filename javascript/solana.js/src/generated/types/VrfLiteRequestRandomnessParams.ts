@@ -1,9 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface VrfLiteRequestRandomnessParamsFields {
   callback: types.CallbackFields | null;
@@ -23,7 +22,7 @@ export class VrfLiteRequestRandomnessParams {
 
   static layout(property?: string) {
     return borsh.struct(
-      [borsh.option(types.Callback.layout(), 'callback')],
+      [borsh.option(types.Callback.layout(), "callback")],
       property
     );
   }

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
-    "build": "node ../build.js anchor-vrf-parser 5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb",
+    "build": "node ../build.js anchor-vrf-lite-parser 5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb",
     "test": "npm run localnet && npm run network:create && npm run network:start & sleep 60 && anchor test --skip-local-validator",
     "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
   },

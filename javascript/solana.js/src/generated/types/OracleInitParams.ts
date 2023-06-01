@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface OracleInitParamsFields {
   name: Uint8Array;
@@ -35,10 +35,10 @@ export class OracleInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.vecU8('name'),
-        borsh.vecU8('metadata'),
-        borsh.u8('stateBump'),
-        borsh.u8('oracleBump'),
+        borsh.vecU8("name"),
+        borsh.vecU8("metadata"),
+        borsh.u8("stateBump"),
+        borsh.u8("oracleBump"),
       ],
       property
     );

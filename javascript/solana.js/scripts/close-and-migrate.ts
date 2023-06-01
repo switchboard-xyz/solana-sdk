@@ -8,7 +8,7 @@ import {
   jsonReplacers,
   PLUS_ICON,
   setupOutputDir,
-} from '../utils';
+} from './utils';
 
 import { clusterApiUrl, Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { OracleJob, sleep, toUtf8 } from '@switchboard-xyz/common';

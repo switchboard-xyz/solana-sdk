@@ -1,25 +1,25 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
   TransactionPackOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { AggregatorHistoryBuffer } from './aggregatorHistoryBuffer';
-import { CrankAccount } from './crankAccount';
-import { JobAccount } from './jobAccount';
-import { LeaseAccount, LeaseExtendParams } from './leaseAccount';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
+import { CrankAccount } from "./crankAccount.js";
+import { JobAccount } from "./jobAccount.js";
+import { LeaseAccount, LeaseExtendParams } from "./leaseAccount.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   AccountInfo,
   AccountMeta,
@@ -30,7 +30,7 @@ import {
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 import {
   Big,
   BN,
@@ -57,7 +57,7 @@ import crypto, { createHash } from 'crypto';
  * Optionally, an aggregator can add a history buffer to store the last N historical samples along with their update timestamp.
  */
 export class AggregatorAccount extends Account<types.AggregatorAccountData> {
-  static accountName = 'AggregatorAccountData';
+  static accountName = "AggregatorAccountData";
 
   public history?: AggregatorHistoryBuffer;
 
@@ -138,11 +138,11 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    */
   public onChange(
     callback: OnAccountChangeCallback<types.AggregatorAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => {
+      (accountInfo) => {
         callback(this.decode(accountInfo.data));
       },
       commitment
@@ -158,14 +158,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Aggregator', this.publicKey);
+      throw new errors.AccountNotFoundError("Aggregator", this.publicKey);
     this.history = AggregatorHistoryBuffer.fromAggregator(this.program, data);
     return data;
   }
 
   public get slidingWindowKey(): PublicKey {
     return PublicKey.findProgramAddressSync(
-      [Buffer.from('SlidingResultAccountData'), this.publicKey.toBytes()],
+      [Buffer.from("SlidingResultAccountData"), this.publicKey.toBytes()],
       this.program.programId
     )[0];
   }
@@ -177,7 +177,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   ): Promise<[AggregatorAccount, types.AggregatorAccountData]> {
     const account = new AggregatorAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -213,15 +213,15 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   ): Promise<[AggregatorAccount, TransactionObject]> {
     if (params.batchSize > 8) {
       throw new errors.AggregatorConfigError(
-        'oracleRequestBatchSize',
-        'must be less than or equal to 8'
+        "oracleRequestBatchSize",
+        "must be less than or equal to 8"
       );
     }
 
     if (params.minUpdateDelaySeconds < 5) {
       throw new errors.AggregatorConfigError(
-        'minUpdateDelaySeconds',
-        'must be greater than 5 seconds'
+        "minUpdateDelaySeconds",
+        "must be greater than 5 seconds"
       );
     }
 
@@ -248,20 +248,20 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         program,
         {
           params: {
-            name: [...Buffer.from(params.name ?? '', 'utf8').slice(0, 32)],
+            name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
             metadata: [
-              ...Buffer.from(params.metadata ?? '', 'utf8').slice(0, 128),
+              ...Buffer.from(params.metadata ?? "", "utf8").slice(0, 128),
             ],
             batchSize: params.batchSize,
             minOracleResults: params.minRequiredOracleResults,
             minJobResults: params.minRequiredJobResults,
             minUpdateDelaySeconds: params.minUpdateDelaySeconds,
-            startAfter: new anchor.BN(params.startAfter ?? 0),
+            startAfter: new BN(params.startAfter ?? 0),
             varianceThreshold: types.SwitchboardDecimal.fromBig(
               new Big(params.varianceThreshold ?? 0)
             ).borsh,
-            forceReportPeriod: new anchor.BN(params.forceReportPeriod ?? 0),
-            expiration: new anchor.BN(params.expiration ?? 0),
+            forceReportPeriod: new BN(params.forceReportPeriod ?? 0),
+            expiration: new BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             disableCrank: params.disableCrank ?? false,
           },
@@ -332,7 +332,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     const newQueue = await params.newQueue.loadData();
 
     const jobs = await this.loadJobs(aggregator);
-    const jobAuthorities = jobs.map(job => job.state.authority);
+    const jobAuthorities = jobs.map((job) => job.state.authority);
 
     const [newPermissionAccount] = this.getPermissionAccount(
       params.newQueue.publicKey,
@@ -523,7 +523,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         .catch(() => {
           throw new Error(`Expected permissionAccount to be created already`);
         })
-        .then(permission => {
+        .then((permission) => {
           if (
             !newQueue.unpermissionedFeedsEnabled &&
             permission.permissions !== 2
@@ -794,7 +794,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * @param aggregator The pre-fetched aggregator account data.
    *
-   * @return The latest feed timestamp as an anchor.BN instance.
+   * @return The latest feed timestamp as an BN instance.
    *
    * @throws Error if the aggregator currently holds no value or no successful rounds have been confirmed yet.
    *
@@ -807,9 +807,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    */
   public static decodeLatestTimestamp(
     aggregator: types.AggregatorAccountData
-  ): anchor.BN {
+  ): BN {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
-      throw new Error('Aggregator currently holds no value.');
+      throw new Error("Aggregator currently holds no value.");
     }
     return aggregator.latestConfirmedRound.roundOpenTimestamp;
   }
@@ -834,7 +834,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     aggregator: types.AggregatorAccountData
   ): Array<{ oraclePubkeys: PublicKey; value: Big }> {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
-      throw new Error('Aggregator currently holds no value.');
+      throw new Error("Aggregator currently holds no value.");
     }
     const results: Array<{ oraclePubkeys: PublicKey; value: Big }> = [];
     for (let i = 0; i < aggregator.oracleRequestBatchSize; ++i) {
@@ -866,12 +866,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   public getConfirmedRoundResults(
     aggregator: types.AggregatorAccountData
   ): Array<{ oracleAccount: OracleAccount; value: Big }> {
-    return AggregatorAccount.decodeConfirmedRoundResults(aggregator).map(o => {
-      return {
-        oracleAccount: new OracleAccount(this.program, o.oraclePubkeys),
-        value: o.value,
-      };
-    });
+    return AggregatorAccount.decodeConfirmedRoundResults(aggregator).map(
+      (o) => {
+        return {
+          oracleAccount: new OracleAccount(this.program, o.oraclePubkeys),
+          value: o.value,
+        };
+      }
+    );
   }
 
   /**
@@ -890,9 +892,9 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * ```
    */
   public produceJobsHash(jobs: Array<OracleJob>): crypto.Hash {
-    const hash = crypto.createHash('sha256');
+    const hash = crypto.createHash("sha256");
     for (const job of jobs) {
-      const jobHasher = crypto.createHash('sha256');
+      const jobHasher = crypto.createHash("sha256");
       jobHasher.update(OracleJob.encodeDelimited(job).finish());
       hash.update(jobHasher.digest());
     }
@@ -914,7 +916,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     Array<{ account: OracleAccount; state: types.OracleAccountData }>
   > {
     return await Promise.all(
-      AggregatorAccount.decodeCurrentRoundOracles(aggregator).map(async o => {
+      AggregatorAccount.decodeCurrentRoundOracles(aggregator).map(async (o) => {
         const oracleAccount = new OracleAccount(this.program, o);
         return {
           account: oracleAccount,
@@ -944,7 +946,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
 
     return await Promise.all(
-      jobAccountDatas.map(async j => {
+      jobAccountDatas.map(async (j) => {
         if (!j?.account) {
           throw new Error(
             `Failed to fetch account data for job ${j?.publicKey}`
@@ -958,7 +960,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         }
         const jobAccount = new JobAccount(this.program, j.publicKey);
         const jobState: types.JobAccountData = this.program.coder.decode(
-          'JobAccountData',
+          "JobAccountData",
           j.account.data
         );
         return {
@@ -984,7 +986,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       state: types.JobAccountData;
     }>
   ): Array<Buffer> {
-    return jobs.map(j => Buffer.from(new Uint8Array(j.state.hash)));
+    return jobs.map((j) => Buffer.from(new Uint8Array(j.state.hash)));
   }
 
   /**
@@ -1046,22 +1048,22 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     if (endState.batchSize > 8) {
       throw new errors.AggregatorConfigError(
-        'oracleRequestBatchSize',
-        'must be less than or equal to 8'
+        "oracleRequestBatchSize",
+        "must be less than or equal to 8"
       );
     }
 
     if (endState.minUpdateDelaySeconds < 5) {
       throw new errors.AggregatorConfigError(
-        'minUpdateDelaySeconds',
-        'must be greater than 5 seconds'
+        "minUpdateDelaySeconds",
+        "must be greater than 5 seconds"
       );
     }
 
     if (endState.minJobResults === 0 || endState.minJobResults > 16) {
       throw new errors.AggregatorConfigError(
-        'minJobResults',
-        'must be a value between 1 and 16'
+        "minJobResults",
+        "must be a value between 1 and 16"
       );
     }
 
@@ -1073,14 +1075,14 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     if (endState.batchSize > numberOfOracles) {
       throw new errors.AggregatorConfigError(
-        'oracleRequestBatchSize',
+        "oracleRequestBatchSize",
         `must be less than the number of oracles actively heartbeating on the queue (${numberOfOracles})`
       );
     }
 
     if (endState.minOracleResults > endState.batchSize) {
       throw new errors.AggregatorConfigError(
-        'minOracleResults',
+        "minOracleResults",
         `must be less than the oracleRequestBatchSize (${endState.batchSize})`
       );
     }
@@ -1211,12 +1213,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         params: {
           name: params.name
             ? ([
-                ...Buffer.from(params.name, 'utf-8').slice(0, 32),
+                ...Buffer.from(params.name, "utf-8").slice(0, 32),
               ] as Array<number>)
             : null,
           metadata: params.metadata
             ? ([
-                ...Buffer.from(params.metadata, 'utf-8').slice(0, 128),
+                ...Buffer.from(params.metadata, "utf-8").slice(0, 128),
               ] as Array<number>)
             : null,
           batchSize: params.batchSize ?? null,
@@ -1736,7 +1738,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       params.oraclePermission;
 
     if (params.oracleIdx < 0 || params.oracleIdx > params.oracles.length - 1) {
-      throw new Error('Failed to find oracle in current round');
+      throw new Error("Failed to find oracle in current round");
     }
 
     const saveResultIxn = types.aggregatorSaveResult(
@@ -1775,10 +1777,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
 
     const remainingAccounts: Array<PublicKey> = [];
-    params.oracles.forEach(oracle =>
+    params.oracles.forEach((oracle) =>
       remainingAccounts.push(oracle.account.publicKey)
     );
-    params.oracles.forEach(oracle =>
+    params.oracles.forEach((oracle) =>
       remainingAccounts.push(oracle.state.tokenAccount)
     );
     remainingAccounts.push(this.slidingWindowKey);
@@ -1804,12 +1806,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
     const oracleIdx =
       params.oracleIdx ??
-      oracles.findIndex(o =>
+      oracles.findIndex((o) =>
         o.account.publicKey.equals(params.oracleAccount.publicKey)
       );
 
     if (oracleIdx < 0 || oracleIdx > oracles.length - 1) {
-      throw new Error('Failed to find oracle in current round');
+      throw new Error("Failed to find oracle in current round");
     }
 
     const queueAccount =
@@ -1882,7 +1884,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     _aggregator?: types.AggregatorAccountData,
     _queueAccount?: QueueAccount,
     _queue?: types.OracleQueueAccountData,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): Promise<AggregatorAccounts> {
     const aggregator = _aggregator ?? (await this.loadData());
     const queueAccount =
@@ -1947,7 +1949,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       data: types.JobAccountData;
       tasks: Array<OracleJob.ITask>;
     }> = [];
-    accountInfos.map(accountInfo => {
+    accountInfos.map((accountInfo) => {
       if (!accountInfo || !accountInfo.account) {
         throw new Error(`Failed to fetch JobAccount`);
       }
@@ -2013,7 +2015,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         bump: accounts.lease.bump,
         balance: accounts.lease.balance,
       },
-      jobs: accounts.jobs.map(j => {
+      jobs: accounts.jobs.map((j) => {
         return {
           publicKey: j.publicKey,
           ...j.data.toJSON(),
@@ -2093,7 +2095,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         timeout,
         new Promise(
           (resolve: (result: types.AggregatorAccountData) => void) => {
-            ws = this.onChange(aggregator => {
+            ws = this.onChange((aggregator) => {
               // if confirmed round slot larger than last open slot
               // AND sliding window mode or sufficient oracle results
               if (
@@ -2115,7 +2117,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       });
 
     const openRoundSignature = await this.openRound(params, options).catch(
-      async error => {
+      async (error) => {
         await closeWebsocket();
         throw new Error(`Failed to call openRound, ${error}`);
       }
@@ -2137,7 +2139,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
    */
   async nextRound(
-    roundOpenSlot?: anchor.BN,
+    roundOpenSlot?: BN,
     timeout = 30000
   ): Promise<types.AggregatorAccountData> {
     const slot =
@@ -2150,7 +2152,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
         timeout,
         new Promise(
           (resolve: (result: types.AggregatorAccountData) => void) => {
-            ws = this.onChange(aggregator => {
+            ws = this.onChange((aggregator) => {
               if (aggregator.latestConfirmedRound.roundOpenSlot.eq(slot)) {
                 resolve(aggregator);
               }
@@ -2190,7 +2192,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   static async fetchMultiple(
     program: SwitchboardProgram,
     publicKeys: Array<PublicKey>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): Promise<
     Array<{
       account: AggregatorAccount;
@@ -2282,7 +2284,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       )[1];
     const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
     if (escrowBalance === null) {
-      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
+      throw new errors.AccountNotFoundError("Lease Escrow", escrowPubkey);
     }
     return escrowBalance;
   }
@@ -2398,7 +2400,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     },
     opts?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    if (this.program.cluster === 'mainnet-beta') {
+    if (this.program.cluster === "mainnet-beta") {
       throw new Error(
         `Aggregators can only be closed with the devnet version of Switchboard`
       );
@@ -2456,17 +2458,17 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     };
 
     if (crankPubkey !== null && dataBuffer !== null) {
-      accounts['crank'] = crankPubkey;
-      accounts['dataBuffer'] = dataBuffer;
+      accounts["crank"] = crankPubkey;
+      accounts["dataBuffer"] = dataBuffer;
     } else {
-      accounts['crank'] = null;
-      accounts['dataBuffer'] = null;
+      accounts["crank"] = null;
+      accounts["dataBuffer"] = null;
     }
 
     if (slidingWindowAccountInfo !== null) {
-      accounts['slidingWindow'] = slidingWindowKey;
+      accounts["slidingWindow"] = slidingWindowKey;
     } else {
-      accounts['slidingWindow'] = null;
+      accounts["slidingWindow"] = null;
     }
 
     const closeIxn = await (
