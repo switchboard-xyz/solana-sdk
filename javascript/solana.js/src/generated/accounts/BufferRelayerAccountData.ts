@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface BufferRelayerAccountDataFields {
   /** Name of the buffer account to store on-chain. */
@@ -83,17 +84,17 @@ export class BufferRelayerAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.publicKey('queuePubkey'),
-    borsh.publicKey('escrow'),
-    borsh.publicKey('authority'),
-    borsh.publicKey('jobPubkey'),
-    borsh.array(borsh.u8(), 32, 'jobHash'),
-    borsh.u32('minUpdateDelaySeconds'),
-    borsh.bool('isLocked'),
-    types.BufferRelayerRound.layout('currentRound'),
-    types.BufferRelayerRound.layout('latestConfirmedRound'),
-    borsh.vecU8('result'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.publicKey("queuePubkey"),
+    borsh.publicKey("escrow"),
+    borsh.publicKey("authority"),
+    borsh.publicKey("jobPubkey"),
+    borsh.array(borsh.u8(), 32, "jobHash"),
+    borsh.u32("minUpdateDelaySeconds"),
+    borsh.bool("isLocked"),
+    types.BufferRelayerRound.layout("currentRound"),
+    types.BufferRelayerRound.layout("latestConfirmedRound"),
+    borsh.vecU8("result"),
   ]);
 
   constructor(fields: BufferRelayerAccountDataFields) {
@@ -136,7 +137,7 @@ export class BufferRelayerAccountData {
   ): Promise<Array<BufferRelayerAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -150,7 +151,7 @@ export class BufferRelayerAccountData {
 
   static decode(data: Buffer): BufferRelayerAccountData {
     if (!data.slice(0, 8).equals(BufferRelayerAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = BufferRelayerAccountData.layout.decode(data.slice(8));

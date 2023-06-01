@@ -1,20 +1,20 @@
-import 'mocha';
+import "mocha";
 
-import { JobAccount } from '../src';
+import { JobAccount } from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Job Tests', () => {
+describe("Job Tests", () => {
   let ctx: TestContext;
 
   before(async () => {
     ctx = await setupTest();
   });
 
-  it('Creates a big job', async () => {
+  it("Creates a big job", async () => {
     const tasks: Array<OracleJob.Task> = Array(2000).fill(
       OracleJob.ValueTask.fromObject({ value: 1 })
     );
@@ -38,7 +38,7 @@ describe('Job Tests', () => {
     assert(job.isInitializing === 0);
   });
 
-  it('Fails creating a job over 6400 bytes', async () => {
+  it("Fails creating a job over 6400 bytes", async () => {
     const tasks: Array<OracleJob.Task> = Array(3200).fill(
       OracleJob.ValueTask.fromObject({ value: 1 })
     );

@@ -1,22 +1,22 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface TypeSuccessJSON {
-  kind: 'TypeSuccess';
+  kind: "TypeSuccess";
 }
 
 export class TypeSuccess {
   static readonly discriminator = 0;
-  static readonly kind = 'TypeSuccess';
+  static readonly kind = "TypeSuccess";
   readonly discriminator = 0;
-  readonly kind = 'TypeSuccess';
+  readonly kind = "TypeSuccess";
 
   toJSON(): TypeSuccessJSON {
     return {
-      kind: 'TypeSuccess',
+      kind: "TypeSuccess",
     };
   }
 
@@ -28,18 +28,18 @@ export class TypeSuccess {
 }
 
 export interface TypeErrorJSON {
-  kind: 'TypeError';
+  kind: "TypeError";
 }
 
 export class TypeError {
   static readonly discriminator = 1;
-  static readonly kind = 'TypeError';
+  static readonly kind = "TypeError";
   readonly discriminator = 1;
-  readonly kind = 'TypeError';
+  readonly kind = "TypeError";
 
   toJSON(): TypeErrorJSON {
     return {
-      kind: 'TypeError',
+      kind: "TypeError",
     };
   }
 
@@ -51,18 +51,18 @@ export class TypeError {
 }
 
 export interface TypeDisagreementJSON {
-  kind: 'TypeDisagreement';
+  kind: "TypeDisagreement";
 }
 
 export class TypeDisagreement {
   static readonly discriminator = 2;
-  static readonly kind = 'TypeDisagreement';
+  static readonly kind = "TypeDisagreement";
   readonly discriminator = 2;
-  readonly kind = 'TypeDisagreement';
+  readonly kind = "TypeDisagreement";
 
   toJSON(): TypeDisagreementJSON {
     return {
-      kind: 'TypeDisagreement',
+      kind: "TypeDisagreement",
     };
   }
 
@@ -74,18 +74,18 @@ export class TypeDisagreement {
 }
 
 export interface TypeNoResponseJSON {
-  kind: 'TypeNoResponse';
+  kind: "TypeNoResponse";
 }
 
 export class TypeNoResponse {
   static readonly discriminator = 3;
-  static readonly kind = 'TypeNoResponse';
+  static readonly kind = "TypeNoResponse";
   readonly discriminator = 3;
-  readonly kind = 'TypeNoResponse';
+  readonly kind = "TypeNoResponse";
 
   toJSON(): TypeNoResponseJSON {
     return {
-      kind: 'TypeNoResponse',
+      kind: "TypeNoResponse",
     };
   }
 
@@ -98,40 +98,40 @@ export class TypeNoResponse {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.OracleResponseTypeKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('TypeSuccess' in obj) {
+  if ("TypeSuccess" in obj) {
     return new TypeSuccess();
   }
-  if ('TypeError' in obj) {
+  if ("TypeError" in obj) {
     return new TypeError();
   }
-  if ('TypeDisagreement' in obj) {
+  if ("TypeDisagreement" in obj) {
     return new TypeDisagreement();
   }
-  if ('TypeNoResponse' in obj) {
+  if ("TypeNoResponse" in obj) {
     return new TypeNoResponse();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(
   obj: types.OracleResponseTypeJSON
 ): types.OracleResponseTypeKind {
   switch (obj.kind) {
-    case 'TypeSuccess': {
+    case "TypeSuccess": {
       return new TypeSuccess();
     }
-    case 'TypeError': {
+    case "TypeError": {
       return new TypeError();
     }
-    case 'TypeDisagreement': {
+    case "TypeDisagreement": {
       return new TypeDisagreement();
     }
-    case 'TypeNoResponse': {
+    case "TypeNoResponse": {
       return new TypeNoResponse();
     }
   }
@@ -139,10 +139,10 @@ export function fromJSON(
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
-    borsh.struct([], 'TypeSuccess'),
-    borsh.struct([], 'TypeError'),
-    borsh.struct([], 'TypeDisagreement'),
-    borsh.struct([], 'TypeNoResponse'),
+    borsh.struct([], "TypeSuccess"),
+    borsh.struct([], "TypeError"),
+    borsh.struct([], "TypeDisagreement"),
+    borsh.struct([], "TypeNoResponse"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

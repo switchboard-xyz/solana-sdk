@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface JobInitParamsFields {
   name: Array<number>;
@@ -38,11 +39,11 @@ export class JobInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.array(borsh.u8(), 32, 'name'),
-        borsh.i64('expiration'),
-        borsh.u8('stateBump'),
-        borsh.vecU8('data'),
-        borsh.option(borsh.u32(), 'size'),
+        borsh.array(borsh.u8(), 32, "name"),
+        borsh.i64("expiration"),
+        borsh.u8("stateBump"),
+        borsh.vecU8("data"),
+        borsh.option(borsh.u32(), "size"),
       ],
       property
     );

@@ -1,14 +1,14 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
+import "mocha";
 
 import {
   ixnsDeepEqual,
   ixnsEqual,
   TransactionObject,
   TransactionObjectOptions,
-} from '../src';
+} from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
 import {
   AccountMeta,
@@ -21,8 +21,8 @@ import {
   RpcResponseAndContext,
   SystemProgram,
   TransactionInstruction,
-} from '@solana/web3.js';
-import assert from 'assert';
+} from "@solana/web3.js";
+import assert from "assert";
 
 const getNonceAccount = async (
   connection: Connection,
@@ -74,11 +74,11 @@ const createDummyIxn = (
       };
     }),
     programId: PublicKey.default,
-    data: Buffer.from(new Array(dataLen + 1).join('X')),
+    data: Buffer.from(new Array(dataLen + 1).join("X")),
   });
 };
 
-describe('TransactionObject Tests', () => {
+describe("TransactionObject Tests", () => {
   let ctx: TestContext;
 
   const nonceAccountKeypair = Keypair.generate();
@@ -116,7 +116,7 @@ describe('TransactionObject Tests', () => {
     );
   });
 
-  it('Compares two instructions for equality', async () => {
+  it("Compares two instructions for equality", async () => {
     const setComputeIxn1 = TransactionObject.getComputeUnitLimitIxn(100000)!;
     const setComputeIxn2 = TransactionObject.getComputeUnitLimitIxn(100000)!;
     assert(
@@ -141,7 +141,7 @@ describe('TransactionObject Tests', () => {
     );
   });
 
-  it('Fails to add a duplicate nonce ixn', async () => {
+  it("Fails to add a duplicate nonce ixn", async () => {
     const advanceNonce = getNonceIxn(
       ctx.program.connection,
       ctx.payer.publicKey,
@@ -159,7 +159,7 @@ describe('TransactionObject Tests', () => {
     );
   });
 
-  it('Creates a txn object with options', async () => {
+  it("Creates a txn object with options", async () => {
     const ixns = [
       createDummyIxn(5),
       createDummyIxn(3, 64),
@@ -184,7 +184,7 @@ describe('TransactionObject Tests', () => {
   //   // const ixn =
   // });
 
-  it('Fails to create a txn object with options if too big', async () => {
+  it("Fails to create a txn object with options if too big", async () => {
     const ixns = [
       createDummyIxn(5),
       createDummyIxn(3, 64),
@@ -209,7 +209,7 @@ describe('TransactionObject Tests', () => {
     }, `Did not throw`);
   });
 
-  it('Packs transactions with options', async () => {
+  it("Packs transactions with options", async () => {
     const options: TransactionObjectOptions = {
       computeUnitLimit: 200000,
       computeUnitPrice: 10000,
@@ -338,7 +338,7 @@ describe('TransactionObject Tests', () => {
     }
   });
 
-  it('Packs transactions and adds a preIxn and postIxn to each new transaction', async () => {
+  it("Packs transactions and adds a preIxn and postIxn to each new transaction", async () => {
     const preIxn = createDummyIxn(6, 96);
     const postIxn1 = createDummyIxn(4, 48);
     const postIxn2 = createDummyIxn(3, 24);

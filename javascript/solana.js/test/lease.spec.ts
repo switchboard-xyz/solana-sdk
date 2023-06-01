@@ -1,20 +1,20 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
+import * as sbv2 from "../src/index.js";
 import {
   AggregatorAccount,
   JobAccount,
   LeaseAccount,
   QueueAccount,
-} from '../src';
+} from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Lease Tests', () => {
+describe("Lease Tests", () => {
   let ctx: TestContext;
 
   const jobData = OracleJob.encodeDelimited(
@@ -46,8 +46,8 @@ describe('Lease Tests', () => {
     ctx = await setupTest();
 
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'aggregator-queue',
-      metadata: '',
+      name: "aggregator-queue",
+      metadata: "",
       authority: queueAuthority.publicKey,
       queueSize: 1,
       reward: 0,
@@ -86,7 +86,7 @@ describe('Lease Tests', () => {
     );
   });
 
-  it('Creates a Lease', async () => {
+  it("Creates a Lease", async () => {
     const fundAmount = 0.025;
 
     const [leaseAccount] = await sbv2.LeaseAccount.create(ctx.program, {
@@ -106,7 +106,7 @@ describe('Lease Tests', () => {
     );
   });
 
-  it('Extends a Lease', async () => {
+  it("Extends a Lease", async () => {
     const [leaseAccount] = LeaseAccount.fromSeed(
       ctx.program,
       queueAccount.publicKey,

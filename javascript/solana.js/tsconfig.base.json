@@ -1,24 +1,32 @@
 {
-  "include": ["./src/**/*", "./src/idl/mainnet.json", "./src/idl/devnet.json"],
-  "exclude": ["tests/**/*", "lib", "node_modules"],
-  "files": ["src/index.ts"],
+  "include": ["./src/**/*"],
   "compilerOptions": {
-    "composite": true,
-    "sourceMap": true,
-    "inlineSources": true,
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "inlineSourceMap": false,
+    "inlineSources": false,
     "declaration": true,
     "declarationMap": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
     "resolveJsonModule": true,
+    "composite": true,
     "skipLibCheck": true,
-    "types": ["node", "mocha"],
-    "allowJs": true,
-    "checkJs": true,
+    // strict
     "strict": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
     "noImplicitAny": false,
-    "rootDir": "./src"
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@solana/spl-token": [
+        "./node_modules/@solana/spl-token",
+        "../node_modules/@solana/spl-token"
+      ]
+    }
   }
 }

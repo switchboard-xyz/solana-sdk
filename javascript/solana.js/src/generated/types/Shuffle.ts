@@ -1,22 +1,23 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AAAAJSON {
-  kind: 'AAAA';
+  kind: "AAAA";
 }
 
 export class AAAA {
   static readonly discriminator = 0;
-  static readonly kind = 'AAAA';
+  static readonly kind = "AAAA";
   readonly discriminator = 0;
-  readonly kind = 'AAAA';
+  readonly kind = "AAAA";
 
   toJSON(): AAAAJSON {
     return {
-      kind: 'AAAA',
+      kind: "AAAA",
     };
   }
 
@@ -28,18 +29,18 @@ export class AAAA {
 }
 
 export interface BBBBJSON {
-  kind: 'BBBB';
+  kind: "BBBB";
 }
 
 export class BBBB {
   static readonly discriminator = 1;
-  static readonly kind = 'BBBB';
+  static readonly kind = "BBBB";
   readonly discriminator = 1;
-  readonly kind = 'BBBB';
+  readonly kind = "BBBB";
 
   toJSON(): BBBBJSON {
     return {
-      kind: 'BBBB',
+      kind: "BBBB",
     };
   }
 
@@ -51,18 +52,18 @@ export class BBBB {
 }
 
 export interface BADCJSON {
-  kind: 'BADC';
+  kind: "BADC";
 }
 
 export class BADC {
   static readonly discriminator = 2;
-  static readonly kind = 'BADC';
+  static readonly kind = "BADC";
   readonly discriminator = 2;
-  readonly kind = 'BADC';
+  readonly kind = "BADC";
 
   toJSON(): BADCJSON {
     return {
-      kind: 'BADC',
+      kind: "BADC",
     };
   }
 
@@ -74,18 +75,18 @@ export class BADC {
 }
 
 export interface BACDJSON {
-  kind: 'BACD';
+  kind: "BACD";
 }
 
 export class BACD {
   static readonly discriminator = 3;
-  static readonly kind = 'BACD';
+  static readonly kind = "BACD";
   readonly discriminator = 3;
-  readonly kind = 'BACD';
+  readonly kind = "BACD";
 
   toJSON(): BACDJSON {
     return {
-      kind: 'BACD',
+      kind: "BACD",
     };
   }
 
@@ -97,18 +98,18 @@ export class BACD {
 }
 
 export interface ADDAJSON {
-  kind: 'ADDA';
+  kind: "ADDA";
 }
 
 export class ADDA {
   static readonly discriminator = 4;
-  static readonly kind = 'ADDA';
+  static readonly kind = "ADDA";
   readonly discriminator = 4;
-  readonly kind = 'ADDA';
+  readonly kind = "ADDA";
 
   toJSON(): ADDAJSON {
     return {
-      kind: 'ADDA',
+      kind: "ADDA",
     };
   }
 
@@ -120,18 +121,18 @@ export class ADDA {
 }
 
 export interface CBCBJSON {
-  kind: 'CBCB';
+  kind: "CBCB";
 }
 
 export class CBCB {
   static readonly discriminator = 5;
-  static readonly kind = 'CBCB';
+  static readonly kind = "CBCB";
   readonly discriminator = 5;
-  readonly kind = 'CBCB';
+  readonly kind = "CBCB";
 
   toJSON(): CBCBJSON {
     return {
-      kind: 'CBCB',
+      kind: "CBCB",
     };
   }
 
@@ -143,18 +144,18 @@ export class CBCB {
 }
 
 export interface ABDCJSON {
-  kind: 'ABDC';
+  kind: "ABDC";
 }
 
 export class ABDC {
   static readonly discriminator = 6;
-  static readonly kind = 'ABDC';
+  static readonly kind = "ABDC";
   readonly discriminator = 6;
-  readonly kind = 'ABDC';
+  readonly kind = "ABDC";
 
   toJSON(): ABDCJSON {
     return {
-      kind: 'ABDC',
+      kind: "ABDC",
     };
   }
 
@@ -166,18 +167,18 @@ export class ABDC {
 }
 
 export interface ABABJSON {
-  kind: 'ABAB';
+  kind: "ABAB";
 }
 
 export class ABAB {
   static readonly discriminator = 7;
-  static readonly kind = 'ABAB';
+  static readonly kind = "ABAB";
   readonly discriminator = 7;
-  readonly kind = 'ABAB';
+  readonly kind = "ABAB";
 
   toJSON(): ABABJSON {
     return {
-      kind: 'ABAB',
+      kind: "ABAB",
     };
   }
 
@@ -189,18 +190,18 @@ export class ABAB {
 }
 
 export interface DBBDJSON {
-  kind: 'DBBD';
+  kind: "DBBD";
 }
 
 export class DBBD {
   static readonly discriminator = 8;
-  static readonly kind = 'DBBD';
+  static readonly kind = "DBBD";
   readonly discriminator = 8;
-  readonly kind = 'DBBD';
+  readonly kind = "DBBD";
 
   toJSON(): DBBDJSON {
     return {
-      kind: 'DBBD',
+      kind: "DBBD",
     };
   }
 
@@ -212,18 +213,18 @@ export class DBBD {
 }
 
 export interface CACAJSON {
-  kind: 'CACA';
+  kind: "CACA";
 }
 
 export class CACA {
   static readonly discriminator = 9;
-  static readonly kind = 'CACA';
+  static readonly kind = "CACA";
   readonly discriminator = 9;
-  readonly kind = 'CACA';
+  readonly kind = "CACA";
 
   toJSON(): CACAJSON {
     return {
-      kind: 'CACA',
+      kind: "CACA",
     };
   }
 
@@ -236,74 +237,74 @@ export class CACA {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.ShuffleKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('AAAA' in obj) {
+  if ("AAAA" in obj) {
     return new AAAA();
   }
-  if ('BBBB' in obj) {
+  if ("BBBB" in obj) {
     return new BBBB();
   }
-  if ('BADC' in obj) {
+  if ("BADC" in obj) {
     return new BADC();
   }
-  if ('BACD' in obj) {
+  if ("BACD" in obj) {
     return new BACD();
   }
-  if ('ADDA' in obj) {
+  if ("ADDA" in obj) {
     return new ADDA();
   }
-  if ('CBCB' in obj) {
+  if ("CBCB" in obj) {
     return new CBCB();
   }
-  if ('ABDC' in obj) {
+  if ("ABDC" in obj) {
     return new ABDC();
   }
-  if ('ABAB' in obj) {
+  if ("ABAB" in obj) {
     return new ABAB();
   }
-  if ('DBBD' in obj) {
+  if ("DBBD" in obj) {
     return new DBBD();
   }
-  if ('CACA' in obj) {
+  if ("CACA" in obj) {
     return new CACA();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(obj: types.ShuffleJSON): types.ShuffleKind {
   switch (obj.kind) {
-    case 'AAAA': {
+    case "AAAA": {
       return new AAAA();
     }
-    case 'BBBB': {
+    case "BBBB": {
       return new BBBB();
     }
-    case 'BADC': {
+    case "BADC": {
       return new BADC();
     }
-    case 'BACD': {
+    case "BACD": {
       return new BACD();
     }
-    case 'ADDA': {
+    case "ADDA": {
       return new ADDA();
     }
-    case 'CBCB': {
+    case "CBCB": {
       return new CBCB();
     }
-    case 'ABDC': {
+    case "ABDC": {
       return new ABDC();
     }
-    case 'ABAB': {
+    case "ABAB": {
       return new ABAB();
     }
-    case 'DBBD': {
+    case "DBBD": {
       return new DBBD();
     }
-    case 'CACA': {
+    case "CACA": {
       return new CACA();
     }
   }
@@ -311,16 +312,16 @@ export function fromJSON(obj: types.ShuffleJSON): types.ShuffleKind {
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
-    borsh.struct([], 'AAAA'),
-    borsh.struct([], 'BBBB'),
-    borsh.struct([], 'BADC'),
-    borsh.struct([], 'BACD'),
-    borsh.struct([], 'ADDA'),
-    borsh.struct([], 'CBCB'),
-    borsh.struct([], 'ABDC'),
-    borsh.struct([], 'ABAB'),
-    borsh.struct([], 'DBBD'),
-    borsh.struct([], 'CACA'),
+    borsh.struct([], "AAAA"),
+    borsh.struct([], "BBBB"),
+    borsh.struct([], "BADC"),
+    borsh.struct([], "BACD"),
+    borsh.struct([], "ADDA"),
+    borsh.struct([], "CBCB"),
+    borsh.struct([], "ABDC"),
+    borsh.struct([], "ABAB"),
+    borsh.struct([], "DBBD"),
+    borsh.struct([], "CACA"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

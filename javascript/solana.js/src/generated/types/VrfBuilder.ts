@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface VrfBuilderFields {
   /** The OracleAccountData that is producing the randomness. */
@@ -158,7 +158,7 @@ export class VrfBuilder {
     this.hPoint = new types.EdwardsPointZC({ ...fields.hPoint });
     this.sReduced = new types.Scalar({ ...fields.sReduced });
     this.yPointBuilder = fields.yPointBuilder.map(
-      item => new types.FieldElementZC({ ...item })
+      (item) => new types.FieldElementZC({ ...item })
     );
     this.yRistrettoPoint = new types.EdwardsPointZC({
       ...fields.yRistrettoPoint,
@@ -192,44 +192,44 @@ export class VrfBuilder {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.publicKey('producer'),
-        types.VrfStatus.layout('status'),
-        borsh.array(borsh.u8(), 80, 'reprProof'),
-        types.EcvrfProofZC.layout('proof'),
-        borsh.publicKey('yPoint'),
-        borsh.u32('stage'),
-        types.EcvrfIntermediate.layout('stage1Out'),
-        types.EdwardsPointZC.layout('r1'),
-        types.EdwardsPointZC.layout('r2'),
-        types.EcvrfIntermediate.layout('stage3Out'),
-        types.EdwardsPointZC.layout('hPoint'),
-        types.Scalar.layout('sReduced'),
-        borsh.array(types.FieldElementZC.layout(), 3, 'yPointBuilder'),
-        types.EdwardsPointZC.layout('yRistrettoPoint'),
-        borsh.u8('mulRound'),
-        borsh.u8('hashPointsRound'),
-        types.CompletedPointZC.layout('mulTmp1'),
-        types.EdwardsPointZC.layout('uPoint1'),
-        types.EdwardsPointZC.layout('uPoint2'),
-        types.EdwardsPointZC.layout('vPoint1'),
-        types.EdwardsPointZC.layout('vPoint2'),
-        types.EdwardsPointZC.layout('uPoint'),
-        types.EdwardsPointZC.layout('vPoint'),
-        types.FieldElementZC.layout('u1'),
-        types.FieldElementZC.layout('u2'),
-        types.FieldElementZC.layout('invertee'),
-        types.FieldElementZC.layout('y'),
-        types.FieldElementZC.layout('z'),
-        borsh.array(borsh.u8(), 32, 'p1Bytes'),
-        borsh.array(borsh.u8(), 32, 'p2Bytes'),
-        borsh.array(borsh.u8(), 32, 'p3Bytes'),
-        borsh.array(borsh.u8(), 32, 'p4Bytes'),
-        borsh.array(borsh.u8(), 16, 'cPrimeHashbuf'),
-        types.FieldElementZC.layout('m1'),
-        types.FieldElementZC.layout('m2'),
-        borsh.u32('txRemaining'),
-        borsh.bool('verified'),
-        borsh.array(borsh.u8(), 32, 'result'),
+        borsh.publicKey("producer"),
+        types.VrfStatus.layout("status"),
+        borsh.array(borsh.u8(), 80, "reprProof"),
+        types.EcvrfProofZC.layout("proof"),
+        borsh.publicKey("yPoint"),
+        borsh.u32("stage"),
+        types.EcvrfIntermediate.layout("stage1Out"),
+        types.EdwardsPointZC.layout("r1"),
+        types.EdwardsPointZC.layout("r2"),
+        types.EcvrfIntermediate.layout("stage3Out"),
+        types.EdwardsPointZC.layout("hPoint"),
+        types.Scalar.layout("sReduced"),
+        borsh.array(types.FieldElementZC.layout(), 3, "yPointBuilder"),
+        types.EdwardsPointZC.layout("yRistrettoPoint"),
+        borsh.u8("mulRound"),
+        borsh.u8("hashPointsRound"),
+        types.CompletedPointZC.layout("mulTmp1"),
+        types.EdwardsPointZC.layout("uPoint1"),
+        types.EdwardsPointZC.layout("uPoint2"),
+        types.EdwardsPointZC.layout("vPoint1"),
+        types.EdwardsPointZC.layout("vPoint2"),
+        types.EdwardsPointZC.layout("uPoint"),
+        types.EdwardsPointZC.layout("vPoint"),
+        types.FieldElementZC.layout("u1"),
+        types.FieldElementZC.layout("u2"),
+        types.FieldElementZC.layout("invertee"),
+        types.FieldElementZC.layout("y"),
+        types.FieldElementZC.layout("z"),
+        borsh.array(borsh.u8(), 32, "p1Bytes"),
+        borsh.array(borsh.u8(), 32, "p2Bytes"),
+        borsh.array(borsh.u8(), 32, "p3Bytes"),
+        borsh.array(borsh.u8(), 32, "p4Bytes"),
+        borsh.array(borsh.u8(), 16, "cPrimeHashbuf"),
+        types.FieldElementZC.layout("m1"),
+        types.FieldElementZC.layout("m2"),
+        borsh.u32("txRemaining"),
+        borsh.bool("verified"),
+        borsh.array(borsh.u8(), 32, "result"),
       ],
       property
     );
@@ -297,7 +297,7 @@ export class VrfBuilder {
       stage3Out: types.EcvrfIntermediate.toEncodable(fields.stage3Out),
       hPoint: types.EdwardsPointZC.toEncodable(fields.hPoint),
       sReduced: types.Scalar.toEncodable(fields.sReduced),
-      yPointBuilder: fields.yPointBuilder.map(item =>
+      yPointBuilder: fields.yPointBuilder.map((item) =>
         types.FieldElementZC.toEncodable(item)
       ),
       yRistrettoPoint: types.EdwardsPointZC.toEncodable(fields.yRistrettoPoint),
@@ -342,7 +342,7 @@ export class VrfBuilder {
       stage3Out: this.stage3Out.toJSON(),
       hPoint: this.hPoint.toJSON(),
       sReduced: this.sReduced.toJSON(),
-      yPointBuilder: this.yPointBuilder.map(item => item.toJSON()),
+      yPointBuilder: this.yPointBuilder.map((item) => item.toJSON()),
       yRistrettoPoint: this.yRistrettoPoint.toJSON(),
       mulRound: this.mulRound,
       hashPointsRound: this.hashPointsRound,
@@ -385,7 +385,7 @@ export class VrfBuilder {
       stage3Out: types.EcvrfIntermediate.fromJSON(obj.stage3Out),
       hPoint: types.EdwardsPointZC.fromJSON(obj.hPoint),
       sReduced: types.Scalar.fromJSON(obj.sReduced),
-      yPointBuilder: obj.yPointBuilder.map(item =>
+      yPointBuilder: obj.yPointBuilder.map((item) =>
         types.FieldElementZC.fromJSON(item)
       ),
       yRistrettoPoint: types.EdwardsPointZC.fromJSON(obj.yRistrettoPoint),

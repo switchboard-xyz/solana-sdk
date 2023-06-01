@@ -1,28 +1,28 @@
-import * as anchor from '@coral-xyz/anchor';
-import * as borsh from '@coral-xyz/borsh';
-import { Connection, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
+import * as borsh from "@coral-xyz/borsh";
+import { Connection, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 export interface SolanaClockDataFields {
-  slot: anchor.BN;
-  epochStartTimestamp: anchor.BN;
-  epoch: anchor.BN;
-  leaderScheduleEpoch: anchor.BN;
-  unixTimestamp: anchor.BN;
+  slot: BN;
+  epochStartTimestamp: BN;
+  epoch: BN;
+  leaderScheduleEpoch: BN;
+  unixTimestamp: BN;
 }
 
 export class SolanaClock {
-  slot: anchor.BN;
-  epochStartTimestamp: anchor.BN;
-  epoch: anchor.BN;
-  leaderScheduleEpoch: anchor.BN;
-  unixTimestamp: anchor.BN;
+  slot: BN;
+  epochStartTimestamp: BN;
+  epoch: BN;
+  leaderScheduleEpoch: BN;
+  unixTimestamp: BN;
 
   static readonly layout = borsh.struct([
-    borsh.u64('slot'),
-    borsh.i64('epochStartTimestamp'),
-    borsh.u64('epoch'),
-    borsh.u64('leaderScheduleEpoch'),
-    borsh.i64('unixTimestamp'),
+    borsh.u64("slot"),
+    borsh.i64("epochStartTimestamp"),
+    borsh.u64("epoch"),
+    borsh.u64("leaderScheduleEpoch"),
+    borsh.i64("unixTimestamp"),
   ]);
 
   constructor(fields: SolanaClockDataFields) {
@@ -45,8 +45,8 @@ export class SolanaClock {
     });
   }
 
-  static decodeUnixTimestamp(data: Buffer): anchor.BN {
-    return borsh.u64('unixTimestamp').decode(data, data.byteLength - 8);
+  static decodeUnixTimestamp(data: Buffer): BN {
+    return borsh.u64("unixTimestamp").decode(data, data.byteLength - 8);
   }
 
   static async fetch(connection: Connection): Promise<SolanaClock> {

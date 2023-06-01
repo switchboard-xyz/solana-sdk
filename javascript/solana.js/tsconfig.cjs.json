@@ -1,9 +1,10 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "**/tests/**/*.ts", "dist"],
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2021",
-    "outDir": "lib/cjs/",
-    "rootDir": "./src"
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
   }
 }

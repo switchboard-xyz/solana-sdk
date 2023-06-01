@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorSaveResultParamsV2Fields {
   oracleIdx: number;
@@ -57,24 +58,24 @@ export class AggregatorSaveResultParamsV2 {
     this.leaseBump = fields.leaseBump;
     this.stateBump = fields.stateBump;
     this.jobValues = fields.jobValues.map(
-      item => (item && new types.BorshDecimal({ ...item })) || null
+      (item) => (item && new types.BorshDecimal({ ...item })) || null
     );
   }
 
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u32('oracleIdx'),
-        borsh.bool('error'),
-        types.BorshDecimal.layout('value'),
-        borsh.array(borsh.u8(), 32, 'jobsChecksum'),
-        types.BorshDecimal.layout('minResponse'),
-        types.BorshDecimal.layout('maxResponse'),
-        borsh.u8('feedPermissionBump'),
-        borsh.u8('oraclePermissionBump'),
-        borsh.u8('leaseBump'),
-        borsh.u8('stateBump'),
-        borsh.vec(borsh.option(types.BorshDecimal.layout()), 'jobValues'),
+        borsh.u32("oracleIdx"),
+        borsh.bool("error"),
+        types.BorshDecimal.layout("value"),
+        borsh.array(borsh.u8(), 32, "jobsChecksum"),
+        types.BorshDecimal.layout("minResponse"),
+        types.BorshDecimal.layout("maxResponse"),
+        borsh.u8("feedPermissionBump"),
+        borsh.u8("oraclePermissionBump"),
+        borsh.u8("leaseBump"),
+        borsh.u8("stateBump"),
+        borsh.vec(borsh.option(types.BorshDecimal.layout()), "jobValues"),
       ],
       property
     );
@@ -114,7 +115,7 @@ export class AggregatorSaveResultParamsV2 {
       leaseBump: fields.leaseBump,
       stateBump: fields.stateBump,
       jobValues: fields.jobValues.map(
-        item => (item && types.BorshDecimal.toEncodable(item)) || null
+        (item) => (item && types.BorshDecimal.toEncodable(item)) || null
       ),
     };
   }
@@ -131,7 +132,7 @@ export class AggregatorSaveResultParamsV2 {
       oraclePermissionBump: this.oraclePermissionBump,
       leaseBump: this.leaseBump,
       stateBump: this.stateBump,
-      jobValues: this.jobValues.map(item => (item && item.toJSON()) || null),
+      jobValues: this.jobValues.map((item) => (item && item.toJSON()) || null),
     };
   }
 
@@ -150,7 +151,7 @@ export class AggregatorSaveResultParamsV2 {
       leaseBump: obj.leaseBump,
       stateBump: obj.stateBump,
       jobValues: obj.jobValues.map(
-        item => (item && types.BorshDecimal.fromJSON(item)) || null
+        (item) => (item && types.BorshDecimal.fromJSON(item)) || null
       ),
     });
   }

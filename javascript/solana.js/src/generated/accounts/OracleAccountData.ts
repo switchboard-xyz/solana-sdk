@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface OracleAccountDataFields {
   /** Name of the oracle to store on-chain. */
@@ -77,16 +78,16 @@ export class OracleAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.array(borsh.u8(), 128, 'metadata'),
-    borsh.publicKey('oracleAuthority'),
-    borsh.i64('lastHeartbeat'),
-    borsh.u32('numInUse'),
-    borsh.publicKey('tokenAccount'),
-    borsh.publicKey('queuePubkey'),
-    types.OracleMetrics.layout('metrics'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 255, 'ebuf'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.array(borsh.u8(), 128, "metadata"),
+    borsh.publicKey("oracleAuthority"),
+    borsh.i64("lastHeartbeat"),
+    borsh.u32("numInUse"),
+    borsh.publicKey("tokenAccount"),
+    borsh.publicKey("queuePubkey"),
+    types.OracleMetrics.layout("metrics"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 255, "ebuf"),
   ]);
 
   constructor(fields: OracleAccountDataFields) {
@@ -124,7 +125,7 @@ export class OracleAccountData {
   ): Promise<Array<OracleAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -138,7 +139,7 @@ export class OracleAccountData {
 
   static decode(data: Buffer): OracleAccountData {
     if (!data.slice(0, 8).equals(OracleAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = OracleAccountData.layout.decode(data.slice(8));

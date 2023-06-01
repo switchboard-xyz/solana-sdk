@@ -1,13 +1,13 @@
-import { isBrowser } from './browser';
-import * as errors from './errors';
-import { fromTxError } from './generated';
+import { fromTxError } from "./generated/index.js";
+import { isBrowser } from "./browser.js";
+import * as errors from "./errors.js";
 import {
   AnchorWallet,
   DEFAULT_SEND_TRANSACTION_OPTIONS,
   SendTransactionOptions,
-} from './SwitchboardProgram';
+} from "./SwitchboardProgram.js";
 
-import { AnchorProvider } from '@coral-xyz/anchor';
+import { AnchorProvider } from "@coral-xyz/anchor";
 import {
   ComputeBudgetProgram,
   Keypair,
@@ -19,9 +19,9 @@ import {
   TransactionMessage,
   TransactionSignature,
   VersionedTransaction,
-} from '@solana/web3.js';
-import { sleep } from '@switchboard-xyz/common';
-import _ from 'lodash';
+} from "@solana/web3.js";
+import { sleep } from "@switchboard-xyz/common";
+import _ from "lodash";
 
 export interface ITransactionObject extends Required<TransactionObjectOptions> {
   /** The public key of the account that will pay the transaction fees */
@@ -118,7 +118,7 @@ export class TransactionObject implements ITransactionObject {
     );
     if (
       computeLimitIxn !== undefined &&
-      instructions.findIndex(ixn => ixnsEqual(ixn, computeLimitIxn)) === -1
+      instructions.findIndex((ixn) => ixnsEqual(ixn, computeLimitIxn)) === -1
     ) {
       instructions.unshift(computeLimitIxn);
     }
@@ -128,7 +128,7 @@ export class TransactionObject implements ITransactionObject {
     );
     if (
       priorityTxn !== undefined &&
-      instructions.findIndex(ixn => ixnsEqual(ixn, priorityTxn)) === -1
+      instructions.findIndex((ixn) => ixnsEqual(ixn, priorityTxn)) === -1
     ) {
       instructions.unshift(priorityTxn);
     }
@@ -201,9 +201,9 @@ export class TransactionObject implements ITransactionObject {
     }
     const newSigners = [...this.signers];
     if (signers) {
-      signers.forEach(s => {
+      signers.forEach((s) => {
         if (
-          newSigners.findIndex(signer =>
+          newSigners.findIndex((signer) =>
             signer.publicKey.equals(s.publicKey)
           ) === -1
         ) {
@@ -231,9 +231,9 @@ export class TransactionObject implements ITransactionObject {
     newIxns.splice(index, 0, ixn);
     const newSigners = [...this.signers];
     if (signers) {
-      signers.forEach(s => {
+      signers.forEach((s) => {
         if (
-          newSigners.findIndex(signer =>
+          newSigners.findIndex((signer) =>
             signer.publicKey.equals(s.publicKey)
           ) === -1
         ) {
@@ -267,9 +267,9 @@ export class TransactionObject implements ITransactionObject {
     }
     const newSigners = [...this.signers];
     if (signers) {
-      signers.forEach(s => {
+      signers.forEach((s) => {
         if (
-          newSigners.findIndex(signer =>
+          newSigners.findIndex((signer) =>
             signer.publicKey.equals(s.publicKey)
           ) === -1
         ) {
@@ -315,7 +315,7 @@ export class TransactionObject implements ITransactionObject {
     }
 
     const uniqueAccounts = ixns.reduce((accounts, ixn) => {
-      ixn.keys.forEach(a => accounts.add(a.pubkey.toBase58()));
+      ixn.keys.forEach((a) => accounts.add(a.pubkey.toBase58()));
       return accounts;
     }, new Set<string>());
     if (uniqueAccounts.size > 32) {
@@ -356,7 +356,7 @@ export class TransactionObject implements ITransactionObject {
     };
 
     const reqSigners = ixns.reduce((signers, ixn) => {
-      ixn.keys.map(a => {
+      ixn.keys.map((a) => {
         if (a.isSigner) {
           signers.add(a.pubkey.toBase58());
         }
@@ -371,7 +371,7 @@ export class TransactionObject implements ITransactionObject {
 
     const txn = new Transaction({
       feePayer: PublicKey.default,
-      blockhash: '1'.repeat(32),
+      blockhash: "1".repeat(32),
       lastValidBlockHeight: 200000000,
     }).add(...ixns);
 
@@ -405,7 +405,7 @@ export class TransactionObject implements ITransactionObject {
   ) {
     // get all required signers
     const reqSigners = ixns.reduce((signers, ixn) => {
-      ixn.keys.map(a => {
+      ixn.keys.map((a) => {
         if (a.isSigner) {
           signers.add(a.pubkey.toBase58());
         }
@@ -417,7 +417,7 @@ export class TransactionObject implements ITransactionObject {
       reqSigners.delete(payer.toBase58());
     }
 
-    signers.forEach(s => {
+    signers.forEach((s) => {
       if (reqSigners.has(s.publicKey.toBase58())) {
         reqSigners.delete(s.publicKey.toBase58());
       }
@@ -432,7 +432,7 @@ export class TransactionObject implements ITransactionObject {
    * Convert the TransactionObject into a Solana Transaction
    */
   public toTxn(options: TransactionOptions): Transaction {
-    if ('nonceInfo' in options) {
+    if ("nonceInfo" in options) {
       const txn = new Transaction({
         feePayer: this.payer,
         nonceInfo: options.nonceInfo,
@@ -450,7 +450,7 @@ export class TransactionObject implements ITransactionObject {
   }
 
   public toVersionedTxn(options: TransactionOptions): VersionedTransaction {
-    if ('nonceInfo' in options) {
+    if ("nonceInfo" in options) {
       const messageV0 = new TransactionMessage({
         payerKey: this.payer,
         recentBlockhash: options.nonceInfo.nonce,
@@ -516,9 +516,9 @@ export class TransactionObject implements ITransactionObject {
     }
     const payer = new PublicKey(payers.shift()!);
 
-    const signers: Array<Keypair> = _.flatten(txns.map(t => t.signers));
+    const signers: Array<Keypair> = _.flatten(txns.map((t) => t.signers));
     const ixns: Array<TransactionInstruction> = _.flatten(
-      txns.map(t => t.ixns)
+      txns.map((t) => t.ixns)
     );
 
     return TransactionObject.packIxns(payer, ixns, signers, options);
@@ -576,7 +576,7 @@ export class TransactionObject implements ITransactionObject {
       if (
         i !== txns.length - 1 &&
         delay &&
-        typeof delay === 'number' &&
+        typeof delay === "number" &&
         delay > 0
       ) {
         await sleep(delay);
@@ -605,7 +605,7 @@ export class TransactionObject implements ITransactionObject {
       // skip confirmation
       if (
         opts &&
-        typeof opts.skipConfrimation === 'boolean' &&
+        typeof opts.skipConfrimation === "boolean" &&
         opts.skipConfrimation
       ) {
         const transaction = this.toTxn(
@@ -644,7 +644,7 @@ function filterSigners(
 ): Array<Keypair> {
   const allSigners = [...signers];
   const reqSigners = ixns.reduce((signers, ixn) => {
-    ixn.keys.map(a => {
+    ixn.keys.map((a) => {
       if (a.isSigner) {
         signers.add(a.pubkey.toBase58());
       }
@@ -653,7 +653,7 @@ function filterSigners(
   }, new Set<string>());
 
   const filteredSigners = allSigners.filter(
-    s => !s.publicKey.equals(payer) && reqSigners.has(s.publicKey.toBase58())
+    (s) => !s.publicKey.equals(payer) && reqSigners.has(s.publicKey.toBase58())
   );
 
   return filteredSigners;

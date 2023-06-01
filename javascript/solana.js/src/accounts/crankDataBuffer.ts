@@ -1,15 +1,15 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 
 import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
-} from './account';
+} from "./account.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
+import { AccountInfo, Commitment, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 /**
  * Account holding a priority queue of aggregators and their next available update time.
@@ -17,7 +17,7 @@ import { AccountInfo, Commitment, PublicKey } from '@solana/web3.js';
  * Data: Array<{@linkcode types.CrankRow}>
  */
 export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
-  static accountName = 'CrankDataBuffer';
+  static accountName = "CrankDataBuffer";
 
   public size = 40;
 
@@ -29,7 +29,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
    */
   onChange(
     callback: OnAccountChangeCallback<Array<types.CrankRow>>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     if (this.publicKey.equals(PublicKey.default)) {
       throw new Error(
@@ -38,7 +38,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
     }
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(CrankDataBuffer.decode(accountInfo)),
+      (accountInfo) => callback(CrankDataBuffer.decode(accountInfo)),
       commitment
     );
   }
@@ -55,7 +55,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
     );
     if (accountInfo === null)
       throw new errors.AccountNotFoundError(
-        'Crank Data Buffer',
+        "Crank Data Buffer",
         this.publicKey
       );
     const data = CrankDataBuffer.decode(accountInfo);
@@ -65,7 +65,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
   public static decode(
     bufferAccountInfo: AccountInfo<Buffer>
   ): Array<types.CrankRow> {
-    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from('');
+    const buffer = bufferAccountInfo.data.slice(8) ?? Buffer.from("");
     const maxRows = Math.floor(buffer.byteLength / 40);
 
     const pqData: Array<types.CrankRow> = [];
@@ -81,7 +81,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
         break;
       }
 
-      const nextTimestamp = new anchor.BN(rowBuf.slice(32, 40), 'le');
+      const nextTimestamp = new BN(rowBuf.slice(32, 40), "le");
       pqData.push(new types.CrankRow({ pubkey, nextTimestamp }));
     }
 

@@ -1,21 +1,21 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { vrfCloseAction } from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { vrfCloseAction } from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   Commitment,
   Keypair,
@@ -25,8 +25,8 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   TransactionSignature,
-} from '@solana/web3.js';
-import { promiseWithTimeout } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 
 /**
  * Account holding a Verifiable Random Function result with a callback instruction for consuming on-chain pseudo-randomness.
@@ -35,7 +35,7 @@ import { promiseWithTimeout } from '@switchboard-xyz/common';
  * Result: [u8;32]
  */
 export class VrfAccount extends Account<types.VrfAccountData> {
-  static accountName = 'VrfAccountData';
+  static accountName = "VrfAccountData";
 
   /**
    * Returns the size of an on-chain {@linkcode VrfAccount}.
@@ -58,7 +58,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   ): Promise<[VrfAccount, types.VrfAccountData]> {
     const account = new VrfAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -72,11 +72,11 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<types.VrfAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(types.VrfAccountData.decode(accountInfo.data)),
+      (accountInfo) => callback(types.VrfAccountData.decode(accountInfo.data)),
       commitment
     );
   }
@@ -87,7 +87,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   async loadData(): Promise<types.VrfAccountData> {
     const data = await types.VrfAccountData.fetch(this.program, this.publicKey);
     if (data === null)
-      throw new errors.AccountNotFoundError('Vrf', this.publicKey);
+      throw new errors.AccountNotFoundError("Vrf", this.publicKey);
     return data;
   }
 
@@ -250,11 +250,11 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   ): Array<TransactionObject> {
     const idx =
       params.idx ??
-      params.vrf.builders.findIndex(builder =>
+      params.vrf.builders.findIndex((builder) =>
         params.oraclePubkey.equals(builder.producer)
       );
     if (idx === -1) {
-      throw new Error('OracleNotFoundError');
+      throw new Error("OracleNotFoundError");
     }
 
     const remainingAccounts = params.vrf.callback.accounts.slice(
@@ -262,7 +262,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       params.vrf.callback.accountsLen
     );
 
-    const txns = Array.from(Array(numTxns).keys()).map(i => {
+    const txns = Array.from(Array(numTxns).keys()).map((i) => {
       const proveIxn = types.vrfProveAndVerify(
         this.program,
         {
@@ -318,7 +318,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     const txns = this.proveAndVerifyInstructions(
       {
         vrf,
-        proof: params.proof ?? '',
+        proof: params.proof ?? "",
         oraclePubkey,
         oracleTokenWallet,
         oracleAuthority,
@@ -390,7 +390,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   /** Return parsed transactions for a VRF request */
   public async getCallbackTransactions(
-    requestSlot?: anchor.BN,
+    requestSlot?: BN,
     txnLimit = 50
   ): Promise<Array<ParsedTransactionWithMeta>> {
     const slot =
@@ -399,13 +399,13 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     const transactions = await this.program.connection.getSignaturesForAddress(
       this.publicKey,
       { limit: txnLimit, minContextSlot: slot.toNumber() },
-      'confirmed'
+      "confirmed"
     );
-    const signatures = transactions.map(txn => txn.signature);
+    const signatures = transactions.map((txn) => txn.signature);
     const parsedTransactions =
       await this.program.connection.getParsedTransactions(
         signatures,
-        'confirmed'
+        "confirmed"
       );
 
     const callbackTransactions: ParsedTransactionWithMeta[] = [];
@@ -415,8 +415,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         continue;
       }
 
-      const logs = txn.meta?.logMessages?.join('\n') ?? '';
-      if (logs.includes('Invoking callback')) {
+      const logs = txn.meta?.logMessages?.join("\n") ?? "";
+      if (logs.includes("Invoking callback")) {
         callbackTransactions.push(txn);
       }
     }
@@ -461,7 +461,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
     const vrfEscrow = await this.program.mint.getAccount(vrf.escrow);
     if (!vrfEscrow) {
-      throw new errors.AccountNotFoundError('Vrf Escrow', vrf.escrow);
+      throw new errors.AccountNotFoundError("Vrf Escrow", vrf.escrow);
     }
     const vrfEscrowBalance: number = this.program.mint.fromTokenAmount(
       vrfEscrow.amount
@@ -540,7 +540,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
           resolve: (result: types.VrfAccountData) => void,
           reject: (reason: string) => void
         ) => {
-          ws = this.onChange(vrf => {
+          ws = this.onChange((vrf) => {
             if (vrf.currentRound.requestSlot.gt(currentRoundOpenSlot)) {
               if (
                 vrf.status.kind ===
@@ -565,10 +565,10 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     });
 
     let requestRandomnessSignature: string | undefined = undefined;
-    if ('requestFunction' in params) {
+    if ("requestFunction" in params) {
       requestRandomnessSignature = await params
         .requestFunction()
-        .catch(async error => {
+        .catch(async (error) => {
           await closeWebsocket();
           throw new Error(`Failed to call requestRandomness, ${error}`);
         });
@@ -576,7 +576,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
       requestRandomnessSignature = await this.requestRandomness(
         params,
         options
-      ).catch(async error => {
+      ).catch(async (error) => {
         await closeWebsocket();
         throw new Error(`Failed to call requestRandomness, ${error}`);
       });
@@ -597,20 +597,17 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    *
    * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
    */
-  public async nextResult(
-    roundId?: anchor.BN,
-    timeout = 30000
-  ): Promise<VrfResult> {
-    let id: anchor.BN;
+  public async nextResult(roundId?: BN, timeout = 30000): Promise<VrfResult> {
+    let id: BN;
     if (roundId) {
       id = roundId;
     } else {
       const vrf = await this.loadData();
-      if (vrf.status.kind === 'StatusVerifying') {
+      if (vrf.status.kind === "StatusVerifying") {
         id = vrf.counter;
       } else {
         // wait for the next round
-        id = vrf.counter.add(new anchor.BN(1));
+        id = vrf.counter.add(new BN(1));
       }
     }
     let ws: number | undefined;
@@ -631,13 +628,13 @@ export class VrfAccount extends Account<types.VrfAccountData> {
             resolve: (result: VrfResult) => void,
             reject: (reason: string) => void
           ) => {
-            ws = this.onChange(vrf => {
+            ws = this.onChange((vrf) => {
               if (vrf.counter.gt(id)) {
                 reject(`Current counter is higher than requested roundId`);
               }
               if (vrf.counter.eq(id)) {
                 switch (vrf.status.kind) {
-                  case 'StatusCallbackSuccess': {
+                  case "StatusCallbackSuccess": {
                     resolve({
                       success: true,
                       result: new Uint8Array(vrf.currentRound.result),
@@ -645,7 +642,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
                     });
                     break;
                   }
-                  case 'StatusVerifyFailure': {
+                  case "StatusVerifyFailure": {
                     resolve({
                       success: false,
                       result: new Uint8Array(),
@@ -798,7 +795,7 @@ export interface VrfSetCallbackParams {
 
 export interface VrfProveAndVerifyParams {
   vrf: types.VrfAccountData;
-  counter?: anchor.BN;
+  counter?: BN;
   idx?: number;
   proof: string;
   oraclePubkey: PublicKey;
@@ -815,7 +812,7 @@ export interface VrfRequestRandomnessParams {
   vrf?: types.VrfAccountData;
 }
 
-export type VrfAccountsJSON = Omit<types.VrfAccountDataJSON, 'escrow'> & {
+export type VrfAccountsJSON = Omit<types.VrfAccountDataJSON, "escrow"> & {
   publicKey: PublicKey;
   queue: types.OracleQueueAccountDataJSON & { publicKey: PublicKey };
   permission: types.PermissionAccountDataJSON & { publicKey: PublicKey };
