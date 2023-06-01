@@ -24,7 +24,7 @@ inputs:
   pnpmVersion:
     description: "the pnpm version to install"
     required: false
-    default: "7.28.0"
+    default: "8.6.0"
 
 runs:
   using: "composite"

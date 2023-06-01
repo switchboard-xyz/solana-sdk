@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       '@commitlint/config-conventional':
-        specifier: ^17.0.2
+        specifier: ^17.4.4
         version: 17.4.4
       '@switchboard-xyz/eslint-config':
         specifier: latest
@@ -5982,7 +5982,7 @@ packages:
   file:javascript/solana.js:
     resolution: {directory: javascript/solana.js, type: directory}
     name: '@switchboard-xyz/solana.js'
-    version: 2.1.18
+    version: 2.2.0
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@coral-xyz/anchor': 0.27.0

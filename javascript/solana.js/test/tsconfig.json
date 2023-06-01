@@ -10,7 +10,7 @@
   "compilerOptions": {
     "types": [
       "node",
-      "jest"
+      "mocha"
     ],
     "module": "ESNext",
     "allowJs": true,
