@@ -61,11 +61,14 @@ async function main() {
     shell.exit(1);
   }
 
+  fs.rmSync('idl', { recursive: true });
+  fs.mkdirSync('idl', { recursive: true });
+
   execSync(
-    'anchor idl fetch -o ./src/idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet'
+    'anchor idl fetch -o ./idl/mainnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet'
   );
   execSync(
-    'anchor idl fetch -o ./src/idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet'
+    'anchor idl fetch -o ./idl/devnet.json SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet'
   );
 
   execSync(

@@ -45,7 +45,7 @@
     "@coral-xyz/borsh": "^0.27.0",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
-    "@switchboard-xyz/common": "^2.2.0",
+    "@switchboard-xyz/common": "^2.2.3",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21"
   },

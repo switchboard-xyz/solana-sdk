@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
 
 importers:
 
@@ -84,8 +88,8 @@ importers:
         specifier: ^1.73.0
         version: 1.73.0
       '@switchboard-xyz/common':
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: ^2.2.3
+        version: 2.2.3
       dotenv:
         specifier: ^16.0.3
         version: 16.0.3
@@ -1065,6 +1069,26 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@switchboard-xyz/common@2.2.3:
+    resolution: {integrity: sha512-E4NQf9aXdOiul+sySAbFPAW9k0qz4wRTfqrU7cEa8nRIvUkg6VIZ+5JfajHv/VfK9UOD+6ZfMBxq2+dHkiz9zw==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@solana/web3.js': 1.73.3
+      '@types/big.js': 6.1.6
+      '@types/bn.js': 5.1.1
+      big.js: 6.2.1
+      bn.js: 5.2.1
+      bs58: 5.0.0
+      decimal.js: 10.4.3
+      protobufjs: 7.2.3
+      yaml: 2.2.1
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+    dev: false
+
   /@switchboard-xyz/eslint-config@0.1.8:
     resolution: {integrity: sha512-ZlWCsFuyAqqALEIT6UVHNQGQRs0Oxe3p9fLLI86QpQ52aOtM96Y2N5PkfTRTCKVtGmtpOOm+QaDcDowQcSeeUw==}
     dependencies:
@@ -1922,6 +1946,10 @@ packages:
       safe-buffer: 5.2.1
     dev: false
 
+  /base-x@4.0.0:
+    resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
+    dev: false
+
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
     dev: false
@@ -1993,6 +2021,12 @@ packages:
     resolution: {integrity: sha512-Ok3Wdf5vOIlBrgCvTq96gBkJw+JUEzdBgyaza5HLtPm7yTHkjRy8+JzNyHF7BHa0bNWOQIp3m5YF0nnFcOIKLw==}
     dependencies:
       base-x: 3.0.9
+    dev: false
+
+  /bs58@5.0.0:
+    resolution: {integrity: sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==}
+    dependencies:
+      base-x: 4.0.0
     dev: false
 
   /buffer-crc32@0.2.13:
@@ -5622,14 +5656,14 @@ packages:
   file:javascript/solana.js:
     resolution: {directory: javascript/solana.js, type: directory}
     name: '@switchboard-xyz/solana.js'
-    version: 2.1.14
+    version: 2.1.18
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@coral-xyz/anchor': 0.27.0
       '@coral-xyz/borsh': 0.27.0(@solana/web3.js@1.73.3)
       '@solana/spl-token': 0.3.6(@solana/web3.js@1.73.3)
       '@solana/web3.js': 1.73.3
-      '@switchboard-xyz/common': 2.2.0
+      '@switchboard-xyz/common': 2.2.3
       '@switchboard-xyz/oracle': 2.1.11
       dotenv: 16.0.3
       lodash: 4.17.21
