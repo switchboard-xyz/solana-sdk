@@ -1,18 +1,36 @@
 {
-  "ts-node": {
-    // these options are overrides used only by ts-node
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  },
   "extends": "./tsconfig.base.json",
+  "exclude": [
+    "node_modules",
+    "**/tests/**/*.ts",
+    "lib"
+  ],
+  "include": [
+    "src/**/*"
+  ],
   "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "module": "es2022",
-    "target": "es2021",
-    "outDir": "lib/esm/",
-    "types": ["node"],
-    "rootDir": "./src"
+    "module": "ESNext",
+    "target": "es2022",
+    "lib": [
+      "ES2021",
+      "ES2022.Object",
+      "DOM"
+    ],
+    "outDir": "../lib",
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "declaration": true,
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "useDefineForClassFields": true,
+    "strictPropertyInitialization": false,
+    "allowJs": true,
+    "strict": true
+  },
+  "typedocOptions": {
+    "entryPoints": []
   }
 }
