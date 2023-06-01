@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface OracleQueueSetConfigParamsFields {
   name: Array<number> | null;
@@ -73,22 +73,22 @@ export class OracleQueueSetConfigParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.option(borsh.array(borsh.u8(), 32), 'name'),
-        borsh.option(borsh.array(borsh.u8(), 64), 'metadata'),
-        borsh.option(borsh.bool(), 'unpermissionedFeedsEnabled'),
-        borsh.option(borsh.bool(), 'unpermissionedVrfEnabled'),
-        borsh.option(borsh.bool(), 'enableBufferRelayers'),
+        borsh.option(borsh.array(borsh.u8(), 32), "name"),
+        borsh.option(borsh.array(borsh.u8(), 64), "metadata"),
+        borsh.option(borsh.bool(), "unpermissionedFeedsEnabled"),
+        borsh.option(borsh.bool(), "unpermissionedVrfEnabled"),
+        borsh.option(borsh.bool(), "enableBufferRelayers"),
         borsh.option(
           types.BorshDecimal.layout(),
-          'varianceToleranceMultiplier'
+          "varianceToleranceMultiplier"
         ),
-        borsh.option(borsh.bool(), 'slashingEnabled'),
-        borsh.option(borsh.u64(), 'reward'),
-        borsh.option(borsh.u64(), 'minStake'),
-        borsh.option(borsh.u32(), 'oracleTimeout'),
-        borsh.option(borsh.u64(), 'consecutiveFeedFailureLimit'),
-        borsh.option(borsh.u64(), 'consecutiveOracleFailureLimit'),
-        borsh.option(borsh.bool(), 'enableTeeOnly'),
+        borsh.option(borsh.bool(), "slashingEnabled"),
+        borsh.option(borsh.u64(), "reward"),
+        borsh.option(borsh.u64(), "minStake"),
+        borsh.option(borsh.u32(), "oracleTimeout"),
+        borsh.option(borsh.u64(), "consecutiveFeedFailureLimit"),
+        borsh.option(borsh.u64(), "consecutiveOracleFailureLimit"),
+        borsh.option(borsh.bool(), "enableTeeOnly"),
       ],
       property
     );

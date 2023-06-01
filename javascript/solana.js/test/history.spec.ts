@@ -1,21 +1,21 @@
-import 'mocha';
+import "mocha";
 
-import { AggregatorHistoryBuffer } from '../src';
+import { AggregatorHistoryBuffer } from "../src/index.js";
 
-import HistoryBufferAccountInfo from './data/history_buffer_account_info.json';
+import HistoryBufferAccountInfo from "./data/history_buffer_account_info.json" assert { type: "json" };
 
-import { BN } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { BN } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('History Tests', () => {
+describe("History Tests", () => {
   const historyBuffer = Buffer.from(
     HistoryBufferAccountInfo.data[0],
-    HistoryBufferAccountInfo.data[1] as 'base64'
+    HistoryBufferAccountInfo.data[1] as "base64"
   );
   const fullHistory = AggregatorHistoryBuffer.decode(historyBuffer);
 
   /** History buffer should be returned with the oldest elements (lowest timestamps) first */
-  it('Verifies a history buffer is decoded in order', async () => {
+  it("Verifies a history buffer is decoded in order", async () => {
     const history = [...fullHistory];
 
     let lastTimestamp: number | undefined = undefined;
@@ -37,7 +37,7 @@ describe('History Tests', () => {
   });
 
   /** History buffer should be returned with any elements exceeding the starting and ending timestamp removed */
-  it('Decodes a history buffer with a starting and ending timestamp', async () => {
+  it("Decodes a history buffer with a starting and ending timestamp", async () => {
     const startingTimestamp = 1670770328;
     const endingTimestamp = 1670834728;
     // Get history without the starting and ending 32,200 seconds (~ 9 hours)

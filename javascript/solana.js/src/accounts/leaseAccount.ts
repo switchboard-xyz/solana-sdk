@@ -1,18 +1,18 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account } from './account';
-import { AggregatorAccount } from './aggregatorAccount';
-import { JobAccount } from './jobAccount';
-import { QueueAccount } from './queueAccount';
+import { Account } from "./account.js";
+import { AggregatorAccount } from "./aggregatorAccount.js";
+import { JobAccount } from "./jobAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
-import * as spl from '@solana/spl-token';
+import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
   AccountMeta,
@@ -21,8 +21,8 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
-import { BN, OracleJob } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { BN, OracleJob } from "@switchboard-xyz/common";
 
 /**
  * Account type representing an {@linkcode AggregatorAccount}'s pre-funded escrow used to reward {@linkcode OracleAccount}'s for responding to open round requests.
@@ -30,7 +30,7 @@ import { BN, OracleJob } from '@switchboard-xyz/common';
  * Data: {@linkcode types.LeaseAccountData}
  */
 export class LeaseAccount extends Account<types.LeaseAccountData> {
-  static accountName = 'LeaseAccountData';
+  static accountName = "LeaseAccountData";
 
   public static size = 453;
 
@@ -87,8 +87,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   ): Promise<[LeaseAccount, types.LeaseAccountData, number]> {
     const [account, bump] = LeaseAccount.fromSeed(
       program,
-      typeof queue === 'string' ? new PublicKey(queue) : queue,
-      typeof aggregator === 'string' ? new PublicKey(aggregator) : aggregator
+      typeof queue === "string" ? new PublicKey(queue) : queue,
+      typeof aggregator === "string" ? new PublicKey(aggregator) : aggregator
     );
     const state = await account.loadData();
     return [account, state, bump];
@@ -107,7 +107,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     aggregator: PublicKey
   ): [LeaseAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('LeaseAccountData'), queue.toBytes(), aggregator.toBytes()],
+      [Buffer.from("LeaseAccountData"), queue.toBytes(), aggregator.toBytes()],
       program.programId
     );
     return [new LeaseAccount(program, publicKey), bump];
@@ -122,7 +122,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Lease', this.publicKey);
+      throw new errors.AccountNotFoundError("Lease", this.publicKey);
     return data;
   }
 
@@ -225,18 +225,18 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
         aggregator.jobPubkeysSize
       );
       const jobs = await params.aggregatorAccount.loadJobs(aggregator);
-      jobAuthorities = jobs.map(j => j.state.authority);
+      jobAuthorities = jobs.map((j) => j.state.authority);
     }
 
     const wallets = LeaseAccount.getWallets(
       jobAuthorities ?? [],
       program.mint.address
     );
-    const walletBumps = new Uint8Array(wallets.map(w => w.bump));
+    const walletBumps = new Uint8Array(wallets.map((w) => w.bump));
 
     const remainingAccounts: Array<AccountMeta> = (jobPubkeys ?? [])
-      .concat(wallets.map(w => w.publicKey))
-      .map(pubkey => {
+      .concat(wallets.map((w) => w.publicKey))
+      .map((pubkey) => {
         return { isSigner: false, isWritable: true, pubkey };
       });
 
@@ -361,7 +361,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
     const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
     if (escrowBalance === null) {
-      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
+      throw new errors.AccountNotFoundError("Lease Escrow", escrowPubkey);
     }
     return escrowBalance;
   }
@@ -387,7 +387,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
     const escrowBalance = await this.program.mint.fetchBalanceBN(escrowPubkey);
     if (escrowBalance === null) {
-      throw new errors.AccountNotFoundError('Lease Escrow', escrowPubkey);
+      throw new errors.AccountNotFoundError("Lease Escrow", escrowPubkey);
     }
     return escrowBalance;
   }
@@ -411,7 +411,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       lease.queue,
       lease.aggregator
     )[1];
-    const walletBumps = new Uint8Array(wallets.map(w => w.bump));
+    const walletBumps = new Uint8Array(wallets.map((w) => w.bump));
 
     const leaseExtend = types.leaseExtend(
       this.program,
@@ -437,8 +437,8 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     );
 
     // add job and job authority associated token accounts to remaining accounts for lease payouts
-    const jobPubkeys = jobs.map(j => j.account.publicKey);
-    const walletPubkeys = wallets.map(w => w.publicKey);
+    const jobPubkeys = jobs.map((j) => j.account.publicKey);
+    const walletPubkeys = wallets.map((w) => w.publicKey);
     const remainingAccounts: Array<AccountMeta> = jobPubkeys
       .concat(walletPubkeys)
       .map((pubkey: PublicKey): AccountMeta => {
@@ -485,7 +485,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     const maxWithdrawAmount = leaseBalance.sub(minRequiredBalance);
 
     const withdrawAmount: BN = (() => {
-      if (params.amount === 'all') return maxWithdrawAmount;
+      if (params.amount === "all") return maxWithdrawAmount;
       const requestedWithdrawAmount = this.program.mint.toTokenAmountBN(
         params.amount
       );
@@ -559,10 +559,14 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
       return txn;
     }
 
-    const withdrawAuthority = params.withdrawAuthority
-      ? params.withdrawAuthority.publicKey
-      : payer;
-    const withdrawWallet = params.withdrawWallet;
+    const withdrawAuthority =
+      "withdrawAuthority" in params && params.withdrawAuthority
+        ? params.withdrawAuthority.publicKey
+        : payer;
+    const withdrawWallet =
+      "withdrawWallet" in params && params.withdrawWallet
+        ? params.withdrawWallet
+        : this.program.mint.getAssociatedAddress(payer);
 
     const txn = new TransactionObject(
       payer,
@@ -589,7 +593,9 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
           }
         ),
       ],
-      params.withdrawAuthority ? [params.withdrawAuthority] : [],
+      "withdrawAuthority" in params && params.withdrawAuthority
+        ? [params.withdrawAuthority]
+        : [],
       options
     );
 
@@ -761,7 +767,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     // decode aggregator
     const aggregatorAccountInfo = accountInfos.shift();
     if (!aggregatorAccountInfo) {
-      throw new errors.AccountNotFoundError('Aggregator', lease.aggregator);
+      throw new errors.AccountNotFoundError("Aggregator", lease.aggregator);
     }
     const aggregator = types.AggregatorAccountData.decode(
       aggregatorAccountInfo.data
@@ -770,13 +776,13 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
     // decode queue
     const queueAccountInfo = accountInfos.shift();
     if (!queueAccountInfo) {
-      throw new errors.AccountNotFoundError('Queue', lease.queue);
+      throw new errors.AccountNotFoundError("Queue", lease.queue);
     }
     const queue = types.OracleQueueAccountData.decode(queueAccountInfo.data);
 
     const leaseAccountInfo = accountInfos.shift();
     if (!leaseAccountInfo) {
-      throw new errors.AccountNotFoundError('LeaseEscrow', lease.escrow);
+      throw new errors.AccountNotFoundError("LeaseEscrow", lease.escrow);
     }
     const escrow = spl.unpackAccount(lease.escrow, leaseAccountInfo);
     const balance = this.program.mint.fromTokenAmount(escrow.amount);
@@ -819,7 +825,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
     // load aggregator jobs for lease bumps
     const jobs = await aggregatorAccount.loadJobs(aggregator);
-    const jobAuthorities = jobs.map(j => j.state.authority);
+    const jobAuthorities = jobs.map((j) => j.state.authority);
     const wallets = LeaseAccount.getWallets(
       jobAuthorities ?? [],
       this.program.mint.address
@@ -861,7 +867,7 @@ export interface LeaseExtendParams {
 }
 
 export interface LeaseWithdrawBaseParams {
-  amount: number | 'all';
+  amount: number | "all";
   unwrap: boolean;
 }
 

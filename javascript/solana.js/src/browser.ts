@@ -5,4 +5,4 @@
  */
 export const isBrowser =
   process.env.ANCHOR_BROWSER ||
-  (typeof window !== 'undefined' && !window.process?.hasOwnProperty('type')); // eslint-disable-line no-prototype-builtins
+  (typeof window !== "undefined" && !window.process?.hasOwnProperty("type")); // eslint-disable-line no-prototype-builtins

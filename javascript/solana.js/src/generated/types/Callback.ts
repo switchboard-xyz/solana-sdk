@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CallbackFields {
   programId: PublicKey;
@@ -24,7 +25,7 @@ export class Callback {
   constructor(fields: CallbackFields) {
     this.programId = fields.programId;
     this.accounts = fields.accounts.map(
-      item => new types.AccountMetaBorsh({ ...item })
+      (item) => new types.AccountMetaBorsh({ ...item })
     );
     this.ixData = fields.ixData;
   }
@@ -32,9 +33,9 @@ export class Callback {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.publicKey('programId'),
-        borsh.vec(types.AccountMetaBorsh.layout(), 'accounts'),
-        borsh.vecU8('ixData'),
+        borsh.publicKey("programId"),
+        borsh.vec(types.AccountMetaBorsh.layout(), "accounts"),
+        borsh.vecU8("ixData"),
       ],
       property
     );
@@ -60,7 +61,7 @@ export class Callback {
   static toEncodable(fields: CallbackFields) {
     return {
       programId: fields.programId,
-      accounts: fields.accounts.map(item =>
+      accounts: fields.accounts.map((item) =>
         types.AccountMetaBorsh.toEncodable(item)
       ),
       ixData: Buffer.from(
@@ -74,7 +75,7 @@ export class Callback {
   toJSON(): CallbackJSON {
     return {
       programId: this.programId.toString(),
-      accounts: this.accounts.map(item => item.toJSON()),
+      accounts: this.accounts.map((item) => item.toJSON()),
       ixData: Array.from(this.ixData.values()),
     };
   }
@@ -82,7 +83,9 @@ export class Callback {
   static fromJSON(obj: CallbackJSON): Callback {
     return new Callback({
       programId: new PublicKey(obj.programId),
-      accounts: obj.accounts.map(item => types.AccountMetaBorsh.fromJSON(item)),
+      accounts: obj.accounts.map((item) =>
+        types.AccountMetaBorsh.fromJSON(item)
+      ),
       ixData: Uint8Array.from(obj.ixData),
     });
   }

@@ -1,21 +1,21 @@
-import * as errors from '../errors';
-import * as types from '../generated';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import {
   PermitNone,
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from '../generated/types/SwitchboardPermission';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+} from "../generated/types/SwitchboardPermission.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account } from './account';
+import { Account } from "./account.js";
 
-import { ACCOUNT_DISCRIMINATOR_SIZE } from '@coral-xyz/anchor';
+import { ACCOUNT_DISCRIMINATOR_SIZE } from "@coral-xyz/anchor";
 import {
   AccountInfo,
   Keypair,
@@ -23,7 +23,7 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  *  Parameters for initializing an {@linkcode PermissionAccount}
@@ -49,7 +49,7 @@ export interface PermissionSetParams {
  * Data: {@linkcode types.PermissionAccountData}
  */
 export class PermissionAccount extends Account<types.PermissionAccountData> {
-  static accountName = 'PermissionAccountData';
+  static accountName = "PermissionAccountData";
 
   public static size = 372;
 
@@ -67,7 +67,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Permissions', this.publicKey);
+      throw new errors.AccountNotFoundError("Permissions", this.publicKey);
     return data;
   }
 
@@ -139,9 +139,9 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   ): Promise<[PermissionAccount, types.PermissionAccountData, number]> {
     const [account, bump] = PermissionAccount.fromSeed(
       program,
-      typeof authority === 'string' ? new PublicKey(authority) : authority,
-      typeof granter === 'string' ? new PublicKey(granter) : granter,
-      typeof grantee === 'string' ? new PublicKey(grantee) : grantee
+      typeof authority === "string" ? new PublicKey(authority) : authority,
+      typeof granter === "string" ? new PublicKey(granter) : granter,
+      typeof grantee === "string" ? new PublicKey(grantee) : grantee
     );
     const state = await account.loadData();
     return [account, state, bump];
@@ -163,7 +163,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   ): [PermissionAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [
-        Buffer.from('PermissionAccountData'),
+        Buffer.from("PermissionAccountData"),
         authority.toBytes(),
         granter.toBytes(),
         grantee.toBytes(),
@@ -305,7 +305,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
 
     throw new Error(
       `Cannot find permissions to assign for account with discriminator of [${discriminator.join(
-        ', '
+        ", "
       )}]`
     );
   }

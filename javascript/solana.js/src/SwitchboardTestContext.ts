@@ -1,59 +1,50 @@
-import { AggregatorAccountData } from './generated';
 import {
   AggregatorAccount,
-  CreateQueueFeedParams,
-  CreateQueueOracleParams,
-  createStaticFeed,
-  JobAccount,
-  LoadedSwitchboardNetwork,
-  loadKeypair,
-  NetworkInitParams,
+  type CreateQueueFeedParams,
+  type CreateQueueOracleParams,
   OracleAccount,
   QueueAccount,
+} from "./accounts/index.js";
+import { AggregatorAccountData } from "./generated/index.js";
+import {
+  LoadedSwitchboardNetwork,
+  type NetworkInitParams,
   SwitchboardNetwork,
-  SwitchboardProgram,
-  TransactionObject,
-  updateStaticFeed,
-} from '.';
+} from "./SwitchboardNetwork.js";
+import { SwitchboardProgram } from "./SwitchboardProgram.js";
+import { createStaticFeed, loadKeypair, updateStaticFeed } from "./utils.js";
 
-import { AnchorProvider } from '@coral-xyz/anchor';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-// import {
-//   IOracleConfig,
-//   NodeOracle,
-//   ReleaseChannel,
-//   ReleaseChannelVersion,
-// } from '@switchboard-xyz/oracle';
-import fs from 'fs';
-import _ from 'lodash';
-import os from 'os';
-import path from 'path';
+import { AnchorProvider } from "@coral-xyz/anchor";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import fs from "fs";
+import _ from "lodash";
+import os from "os";
+import path from "path";
 
 // export type NodeConfig = IOracleConfig & Partial<ReleaseChannelVersion>;
 
 export function findAnchorTomlWallet(workingDir = process.cwd()): string {
   let numDirs = 3;
   while (numDirs) {
-    const filePath = path.join(workingDir, 'Anchor.toml');
+    const filePath = path.join(workingDir, "Anchor.toml");
     if (fs.existsSync(filePath)) {
-      const fileString = fs.readFileSync(filePath, 'utf-8');
+      const fileString = fs.readFileSync(filePath, "utf-8");
       const matches = Array.from(
         fileString.matchAll(new RegExp(/wallet\s?=\s?"(?<wallet_path>.*)"/g))
       );
       if (
         matches &&
         matches.length > 0 &&
-        'groups' in matches[0] &&
-        'wallet_path' in matches[0].groups! &&
-        matches[0].groups['wallet_path']
+        "groups" in matches[0] &&
+        "wallet_path" in matches[0].groups! &&
+        matches[0].groups["wallet_path"]
       ) {
-        const walletPath = matches[0].groups['wallet_path'];
-        return walletPath.startsWith('/') ||
-          walletPath.startsWith('C:') ||
-          walletPath.startsWith('D:')
+        const walletPath = matches[0].groups["wallet_path"];
+        return walletPath.startsWith("/") ||
+          walletPath.startsWith("C:") ||
+          walletPath.startsWith("D:")
           ? walletPath
-          : walletPath.startsWith('~')
+          : walletPath.startsWith("~")
           ? path.join(os.homedir(), walletPath.slice(1))
           : path.join(process.cwd(), walletPath);
       }
@@ -67,10 +58,10 @@ export function findAnchorTomlWallet(workingDir = process.cwd()): string {
 }
 
 export type SwitchboardTestContextInit = Omit<
-  Omit<NetworkInitParams, 'authority'>,
-  'oracles'
+  Omit<NetworkInitParams, "authority">,
+  "oracles"
 > & {
-  oracle: Omit<CreateQueueOracleParams, 'authority'>;
+  oracle: Omit<CreateQueueOracleParams, "authority">;
 };
 
 // queuePubkey: ACzh7Ra83zyjyBn1yv4JLZ1jC41kxTcMyuoFN8z1BTPX
@@ -78,8 +69,8 @@ export type SwitchboardTestContextInit = Omit<
 
 // TIP: Do NOT define an authority and defaul to Anchor.toml wallet
 export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextInit = {
-  name: 'Localnet Queue',
-  metadata: 'Localnet Metadata',
+  name: "Localnet Queue",
+  metadata: "Localnet Metadata",
   keypair: Keypair.fromSecretKey(
     new Uint8Array([
       64, 119, 125, 66, 195, 41, 127, 56, 113, 141, 220, 226, 61, 141, 93, 213,
@@ -105,7 +96,7 @@ export const DEFAULT_LOCALNET_NETWORK: SwitchboardTestContextInit = {
   unpermissionedVrf: true,
   enableBufferRelayers: true,
   oracle: {
-    name: 'Localnet Oracle',
+    name: "Localnet Oracle",
     stakeAmount: 0,
     enable: true,
     stakingWalletKeypair: Keypair.fromSecretKey(
@@ -148,7 +139,7 @@ export class SwitchboardTestContext {
   ): Promise<SwitchboardTestContext> {
     const walletFsPath = walletPath ?? findAnchorTomlWallet();
     const wallet = Keypair.fromSecretKey(
-      new Uint8Array(JSON.parse(fs.readFileSync(walletFsPath, 'utf-8')))
+      new Uint8Array(JSON.parse(fs.readFileSync(walletFsPath, "utf-8")))
     );
     const walletBalance = await connection.getBalance(wallet.publicKey);
     if (walletBalance === 0) {
@@ -184,7 +175,7 @@ export class SwitchboardTestContext {
 
     // try to load existing network
     try {
-      if ('keypair' in networkParams) {
+      if ("keypair" in networkParams) {
         const queuePubkey = networkParams.keypair!.publicKey;
         const [queueAccount, queue] = await QueueAccount.load(
           program,

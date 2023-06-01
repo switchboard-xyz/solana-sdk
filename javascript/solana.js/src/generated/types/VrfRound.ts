@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface VrfRoundFields {
   /** The alpha bytes used to calculate the VRF proof. */
@@ -67,13 +68,13 @@ export class VrfRound {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.array(borsh.u8(), 256, 'alpha'),
-        borsh.u32('alphaLen'),
-        borsh.u64('requestSlot'),
-        borsh.i64('requestTimestamp'),
-        borsh.array(borsh.u8(), 32, 'result'),
-        borsh.u32('numVerified'),
-        borsh.array(borsh.u8(), 256, 'ebuf'),
+        borsh.array(borsh.u8(), 256, "alpha"),
+        borsh.u32("alphaLen"),
+        borsh.u64("requestSlot"),
+        borsh.i64("requestTimestamp"),
+        borsh.array(borsh.u8(), 32, "result"),
+        borsh.u32("numVerified"),
+        borsh.array(borsh.u8(), 256, "ebuf"),
       ],
       property
     );

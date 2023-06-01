@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface JobAccountDataFields {
   /** Name of the job to store on-chain. */
@@ -74,16 +75,16 @@ export class JobAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.array(borsh.u8(), 64, 'metadata'),
-    borsh.publicKey('authority'),
-    borsh.i64('expiration'),
-    borsh.array(borsh.u8(), 32, 'hash'),
-    borsh.vecU8('data'),
-    borsh.u32('referenceCount'),
-    borsh.u64('totalSpent'),
-    borsh.i64('createdAt'),
-    borsh.u8('isInitializing'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.array(borsh.u8(), 64, "metadata"),
+    borsh.publicKey("authority"),
+    borsh.i64("expiration"),
+    borsh.array(borsh.u8(), 32, "hash"),
+    borsh.vecU8("data"),
+    borsh.u32("referenceCount"),
+    borsh.u64("totalSpent"),
+    borsh.i64("createdAt"),
+    borsh.u8("isInitializing"),
   ]);
 
   constructor(fields: JobAccountDataFields) {
@@ -121,7 +122,7 @@ export class JobAccountData {
   ): Promise<Array<JobAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -135,7 +136,7 @@ export class JobAccountData {
 
   static decode(data: Buffer): JobAccountData {
     if (!data.slice(0, 8).equals(JobAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = JobAccountData.layout.decode(data.slice(8));

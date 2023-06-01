@@ -11,7 +11,7 @@ import {
   SwitchboardAccount,
   SwitchboardAccountData,
   VrfAccount,
-} from './accounts';
+} from "./accounts/index.js";
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -23,9 +23,9 @@ import {
   PermissionAccountData,
   SbState,
   VrfAccountData,
-} from './generated';
+} from "./generated/index.js";
 
-import { OracleJob } from '@switchboard-xyz/common';
+import { OracleJob } from "@switchboard-xyz/common";
 
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;

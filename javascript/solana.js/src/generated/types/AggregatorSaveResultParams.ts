@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface AggregatorSaveResultParamsFields {
   oracleIdx: number;
@@ -58,16 +58,16 @@ export class AggregatorSaveResultParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u32('oracleIdx'),
-        borsh.bool('error'),
-        types.BorshDecimal.layout('value'),
-        borsh.array(borsh.u8(), 32, 'jobsChecksum'),
-        types.BorshDecimal.layout('minResponse'),
-        types.BorshDecimal.layout('maxResponse'),
-        borsh.u8('feedPermissionBump'),
-        borsh.u8('oraclePermissionBump'),
-        borsh.u8('leaseBump'),
-        borsh.u8('stateBump'),
+        borsh.u32("oracleIdx"),
+        borsh.bool("error"),
+        types.BorshDecimal.layout("value"),
+        borsh.array(borsh.u8(), 32, "jobsChecksum"),
+        types.BorshDecimal.layout("minResponse"),
+        types.BorshDecimal.layout("maxResponse"),
+        borsh.u8("feedPermissionBump"),
+        borsh.u8("oraclePermissionBump"),
+        borsh.u8("leaseBump"),
+        borsh.u8("stateBump"),
       ],
       property
     );

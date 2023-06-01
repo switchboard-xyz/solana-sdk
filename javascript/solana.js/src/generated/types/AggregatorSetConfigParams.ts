@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorSetConfigParamsFields {
   name: Array<number> | null;
@@ -73,19 +74,19 @@ export class AggregatorSetConfigParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.option(borsh.array(borsh.u8(), 32), 'name'),
-        borsh.option(borsh.array(borsh.u8(), 128), 'metadata'),
-        borsh.option(borsh.u32(), 'minUpdateDelaySeconds'),
-        borsh.option(borsh.u32(), 'minJobResults'),
-        borsh.option(borsh.u32(), 'batchSize'),
-        borsh.option(borsh.u32(), 'minOracleResults'),
-        borsh.option(borsh.u32(), 'forceReportPeriod'),
-        borsh.option(types.BorshDecimal.layout(), 'varianceThreshold'),
-        borsh.option(borsh.u32(), 'basePriorityFee'),
-        borsh.option(borsh.u32(), 'priorityFeeBump'),
-        borsh.option(borsh.u32(), 'priorityFeeBumpPeriod'),
-        borsh.option(borsh.u32(), 'maxPriorityFeeMultiplier'),
-        borsh.option(borsh.bool(), 'disableCrank'),
+        borsh.option(borsh.array(borsh.u8(), 32), "name"),
+        borsh.option(borsh.array(borsh.u8(), 128), "metadata"),
+        borsh.option(borsh.u32(), "minUpdateDelaySeconds"),
+        borsh.option(borsh.u32(), "minJobResults"),
+        borsh.option(borsh.u32(), "batchSize"),
+        borsh.option(borsh.u32(), "minOracleResults"),
+        borsh.option(borsh.u32(), "forceReportPeriod"),
+        borsh.option(types.BorshDecimal.layout(), "varianceThreshold"),
+        borsh.option(borsh.u32(), "basePriorityFee"),
+        borsh.option(borsh.u32(), "priorityFeeBump"),
+        borsh.option(borsh.u32(), "priorityFeeBumpPeriod"),
+        borsh.option(borsh.u32(), "maxPriorityFeeMultiplier"),
+        borsh.option(borsh.bool(), "disableCrank"),
       ],
       property
     );

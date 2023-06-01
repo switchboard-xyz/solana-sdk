@@ -1,12 +1,12 @@
-import 'mocha';
+import "mocha";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import assert from 'assert';
+import * as anchor from "@coral-xyz/anchor";
+import { Keypair, PublicKey } from "@solana/web3.js";
+import assert from "assert";
 
-describe('Mint Tests', () => {
+describe("Mint Tests", () => {
   let ctx: TestContext;
 
   before(async () => {
@@ -16,7 +16,7 @@ describe('Mint Tests', () => {
   const user = Keypair.generate();
   let userTokenAddress: PublicKey;
 
-  it('Creates a user token account', async () => {
+  it("Creates a user token account", async () => {
     const airdropTxn = await ctx.program.connection.requestAirdrop(
       user.publicKey,
       1 * anchor.web3.LAMPORTS_PER_SOL
@@ -37,7 +37,7 @@ describe('Mint Tests', () => {
     );
   });
 
-  it('Wraps SOL', async () => {
+  it("Wraps SOL", async () => {
     assert(userTokenAddress, `User token address does not exist`);
 
     const WRAP_AMOUNT = 0.25;
@@ -57,7 +57,7 @@ describe('Mint Tests', () => {
     );
   });
 
-  it('Unwraps SOL', async () => {
+  it("Unwraps SOL", async () => {
     assert(userTokenAddress, `User token address does not exist`);
 
     const UNWRAP_AMOUNT = 0.1;
@@ -92,7 +92,7 @@ describe('Mint Tests', () => {
     );
   });
 
-  it('Closes associated token account', async () => {
+  it("Closes associated token account", async () => {
     assert(userTokenAddress, `User token address does not exist`);
 
     await ctx.program.mint.getAssociatedBalance(user.publicKey);

@@ -1,4 +1,4 @@
-import * as sbv2 from './src';
+import * as sbv2 from '../src';
 
 import { PublicKey } from '@solana/web3.js';
 import { Big, BN, IOracleJob, toUtf8 } from '@switchboard-xyz/common';

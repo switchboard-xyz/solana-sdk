@@ -3,21 +3,21 @@ import {
   type CreateQueueFeedParams,
   JobAccount,
   type QueueAccount,
-} from './accounts';
-import { type AggregatorAccountData } from './generated';
-import { TransactionObject } from './TransactionObject';
+} from "./accounts/index.js";
+import { type AggregatorAccountData } from "./generated/index.js";
+import { TransactionObject } from "./TransactionObject.js";
 
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 export function loadKeypair(keypairPath: string): Keypair {
   const fullPath =
-    keypairPath.startsWith('/') || keypairPath.startsWith('C:')
+    keypairPath.startsWith("/") || keypairPath.startsWith("C:")
       ? keypairPath
-      : keypairPath.startsWith('~')
+      : keypairPath.startsWith("~")
       ? os.homedir() + keypairPath.slice(1)
       : path.join(process.cwd(), keypairPath);
 
@@ -32,7 +32,7 @@ export function loadKeypair(keypairPath: string): Keypair {
   }
 
   return Keypair.fromSecretKey(
-    new Uint8Array(JSON.parse(fs.readFileSync(fullPath, 'utf-8')))
+    new Uint8Array(JSON.parse(fs.readFileSync(fullPath, "utf-8")))
   );
 }
 
@@ -138,7 +138,7 @@ export async function updateStaticFeed(
   );
 
   const oldJobKeys = aggregator.jobPubkeysData.filter(
-    pubkey => !pubkey.equals(PublicKey.default)
+    (pubkey) => !pubkey.equals(PublicKey.default)
   );
 
   const oldJobs: Array<[JobAccount, number]> = oldJobKeys.map((pubkey, i) => [
@@ -146,7 +146,7 @@ export async function updateStaticFeed(
     i,
   ]);
 
-  const removeJobTxns = oldJobs.map(job =>
+  const removeJobTxns = oldJobs.map((job) =>
     aggregatorAccount.removeJobInstruction(
       aggregatorAccount.program.walletPubkey,
       {

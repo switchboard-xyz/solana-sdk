@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface TaskSpecRecordFields {
   hash: types.HashFields;
@@ -19,7 +20,7 @@ export class TaskSpecRecord {
     202, 10, 194, 236, 111, 47, 234, 48,
   ]);
 
-  static readonly layout = borsh.struct([types.Hash.layout('hash')]);
+  static readonly layout = borsh.struct([types.Hash.layout("hash")]);
 
   constructor(fields: TaskSpecRecordFields) {
     this.hash = new types.Hash({ ...fields.hash });
@@ -47,7 +48,7 @@ export class TaskSpecRecord {
   ): Promise<Array<TaskSpecRecord | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -61,7 +62,7 @@ export class TaskSpecRecord {
 
   static decode(data: Buffer): TaskSpecRecord {
     if (!data.slice(0, 8).equals(TaskSpecRecord.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = TaskSpecRecord.layout.decode(data.slice(8));

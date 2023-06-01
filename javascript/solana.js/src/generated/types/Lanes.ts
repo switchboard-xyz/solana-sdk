@@ -1,20 +1,20 @@
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
+import * as borsh from "@coral-xyz/borsh";
 
 export interface DJSON {
-  kind: 'D';
+  kind: "D";
 }
 
 export class D {
   static readonly discriminator = 0;
-  static readonly kind = 'D';
+  static readonly kind = "D";
   readonly discriminator = 0;
-  readonly kind = 'D';
+  readonly kind = "D";
 
   toJSON(): DJSON {
     return {
-      kind: 'D',
+      kind: "D",
     };
   }
 
@@ -26,18 +26,18 @@ export class D {
 }
 
 export interface CJSON {
-  kind: 'C';
+  kind: "C";
 }
 
 export class C {
   static readonly discriminator = 1;
-  static readonly kind = 'C';
+  static readonly kind = "C";
   readonly discriminator = 1;
-  readonly kind = 'C';
+  readonly kind = "C";
 
   toJSON(): CJSON {
     return {
-      kind: 'C',
+      kind: "C",
     };
   }
 
@@ -49,18 +49,18 @@ export class C {
 }
 
 export interface ABJSON {
-  kind: 'AB';
+  kind: "AB";
 }
 
 export class AB {
   static readonly discriminator = 2;
-  static readonly kind = 'AB';
+  static readonly kind = "AB";
   readonly discriminator = 2;
-  readonly kind = 'AB';
+  readonly kind = "AB";
 
   toJSON(): ABJSON {
     return {
-      kind: 'AB',
+      kind: "AB",
     };
   }
 
@@ -72,18 +72,18 @@ export class AB {
 }
 
 export interface ACJSON {
-  kind: 'AC';
+  kind: "AC";
 }
 
 export class AC {
   static readonly discriminator = 3;
-  static readonly kind = 'AC';
+  static readonly kind = "AC";
   readonly discriminator = 3;
-  readonly kind = 'AC';
+  readonly kind = "AC";
 
   toJSON(): ACJSON {
     return {
-      kind: 'AC',
+      kind: "AC",
     };
   }
 
@@ -95,18 +95,18 @@ export class AC {
 }
 
 export interface ADJSON {
-  kind: 'AD';
+  kind: "AD";
 }
 
 export class AD {
   static readonly discriminator = 4;
-  static readonly kind = 'AD';
+  static readonly kind = "AD";
   readonly discriminator = 4;
-  readonly kind = 'AD';
+  readonly kind = "AD";
 
   toJSON(): ADJSON {
     return {
-      kind: 'AD',
+      kind: "AD",
     };
   }
 
@@ -118,18 +118,18 @@ export class AD {
 }
 
 export interface BCDJSON {
-  kind: 'BCD';
+  kind: "BCD";
 }
 
 export class BCD {
   static readonly discriminator = 5;
-  static readonly kind = 'BCD';
+  static readonly kind = "BCD";
   readonly discriminator = 5;
-  readonly kind = 'BCD';
+  readonly kind = "BCD";
 
   toJSON(): BCDJSON {
     return {
-      kind: 'BCD',
+      kind: "BCD",
     };
   }
 
@@ -142,44 +142,44 @@ export class BCD {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.LanesKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('D' in obj) {
+  if ("D" in obj) {
     return new D();
   }
-  if ('C' in obj) {
+  if ("C" in obj) {
     return new C();
   }
-  if ('AB' in obj) {
+  if ("AB" in obj) {
     return new AB();
   }
-  if ('AC' in obj) {
+  if ("AC" in obj) {
     return new AC();
   }
-  if ('AD' in obj) {
+  if ("AD" in obj) {
     return new AD();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(obj: types.LanesJSON): types.LanesKind {
   switch (obj.kind) {
-    case 'D': {
+    case "D": {
       return new D();
     }
-    case 'C': {
+    case "C": {
       return new C();
     }
-    case 'AB': {
+    case "AB": {
       return new AB();
     }
-    case 'AC': {
+    case "AC": {
       return new AC();
     }
-    case 'AD': {
+    case "AD": {
       return new AD();
     }
   }
@@ -187,12 +187,12 @@ export function fromJSON(obj: types.LanesJSON): types.LanesKind {
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
-    borsh.struct([], 'D'),
-    borsh.struct([], 'C'),
-    borsh.struct([], 'AB'),
-    borsh.struct([], 'AC'),
-    borsh.struct([], 'AD'),
-    borsh.struct([], 'BCD'),
+    borsh.struct([], "D"),
+    borsh.struct([], "C"),
+    borsh.struct([], "AB"),
+    borsh.struct([], "AC"),
+    borsh.struct([], "AD"),
+    borsh.struct([], "BCD"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

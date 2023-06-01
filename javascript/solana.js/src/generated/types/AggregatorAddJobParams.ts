@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorAddJobParamsFields {
   weight: number | null;
@@ -20,7 +21,7 @@ export class AggregatorAddJobParams {
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.option(borsh.u8(), 'weight')], property);
+    return borsh.struct([borsh.option(borsh.u8(), "weight")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

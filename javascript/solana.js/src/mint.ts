@@ -1,21 +1,21 @@
-import { InsufficientFundsError, NativeMintOnlyError } from './errors';
-import { SwitchboardDecimal } from './generated';
-import { TransactionObject } from './TransactionObject';
+import { SwitchboardDecimal } from "./generated/index.js";
+import { InsufficientFundsError, NativeMintOnlyError } from "./errors.js";
+import { TransactionObject } from "./TransactionObject.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
-import { Big, BN } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { Big, BN } from "@switchboard-xyz/common";
 
 export class Mint {
   public static native = new PublicKey(
-    'So11111111111111111111111111111111111111112'
+    "So11111111111111111111111111111111111111112"
   );
 
   constructor(
@@ -270,9 +270,9 @@ export class NativeMint extends Mint {
 
     if (accountInfo === null) {
       const amount =
-        'fundUpTo' in params
+        "fundUpTo" in params
           ? params.fundUpTo
-          : 'amount' in params
+          : "amount" in params
           ? params.amount
           : 0;
 
@@ -282,7 +282,7 @@ export class NativeMint extends Mint {
 
       return [associatedToken, userInit];
     } else {
-      if ('fundUpTo' in params) {
+      if ("fundUpTo" in params) {
         if (params.fundUpTo < 0) {
           throw new Error(`fundUpTo must be a positive number`);
         }
@@ -301,7 +301,7 @@ export class NativeMint extends Mint {
         return [associatedToken, userWrap];
       }
 
-      if ('amount' in params) {
+      if ("amount" in params) {
         if (params.amount < 0) {
           throw new Error(`amount must be a positive number`);
         }
@@ -422,12 +422,12 @@ export class NativeMint extends Mint {
         : new Big(this.fromTokenAmount(userAccount.amount));
 
     let wrapAmount: Big;
-    if ('fundUpTo' in params) {
+    if ("fundUpTo" in params) {
       if (userTokenBalance.gte(params.fundUpTo)) {
         return new TransactionObject(payer, [], []);
       }
       wrapAmount = new Big(params.fundUpTo).sub(userTokenBalance);
-    } else if ('amount' in params) {
+    } else if ("amount" in params) {
       wrapAmount = new Big(params.amount);
     } else {
       throw new Error(

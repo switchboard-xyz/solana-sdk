@@ -1,18 +1,18 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
   Commitment,
@@ -21,8 +21,8 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 /**
  * Account type holding an oracle's configuration including the authority and the reward/slashing wallet along with a set of metrics tracking its reliability.
@@ -32,7 +32,7 @@ import { BN } from '@switchboard-xyz/common';
  * Data: {@linkcode types.OracleAccountData}
  */
 export class OracleAccount extends Account<types.OracleAccountData> {
-  static accountName = 'OracleAccountData';
+  static accountName = "OracleAccountData";
 
   public static size = 636;
 
@@ -88,7 +88,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   ): Promise<[OracleAccount, types.OracleAccountData]> {
     const account = new OracleAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -113,11 +113,11 @@ export class OracleAccount extends Account<types.OracleAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<types.OracleAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(this.decode(accountInfo.data)),
+      (accountInfo) => callback(this.decode(accountInfo.data)),
       commitment
     );
   }
@@ -149,7 +149,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Oracle', this.publicKey);
+      throw new errors.AccountNotFoundError("Oracle", this.publicKey);
     return data;
   }
 
@@ -166,7 +166,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     wallet: PublicKey
   ): [OracleAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('OracleAccountData'), queue.toBuffer(), wallet.toBuffer()],
+      [Buffer.from("OracleAccountData"), queue.toBuffer(), wallet.toBuffer()],
       program.programId
     );
     return [new OracleAccount(program, publicKey), bump];
@@ -238,10 +238,10 @@ export class OracleAccount extends Account<types.OracleAccountData> {
           {
             params: {
               name: new Uint8Array(
-                Buffer.from(params.name ?? '', 'utf8').slice(0, 32)
+                Buffer.from(params.name ?? "", "utf8").slice(0, 32)
               ),
               metadata: new Uint8Array(
-                Buffer.from(params.metadata ?? '', 'utf8').slice(0, 128)
+                Buffer.from(params.metadata ?? "", "utf8").slice(0, 128)
               ),
               oracleBump,
               stateBump: program.programState.bump,
@@ -464,7 +464,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       await permissionAccount.loadData();
     } catch (_) {
       throw new Error(
-        'A requested oracle permission pda account has not been initialized.'
+        "A requested oracle permission pda account has not been initialized."
       );
     }
 
@@ -578,7 +578,9 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     }
 
     const withdrawAccount =
-      params.withdrawAccount ?? this.program.mint.getAssociatedAddress(payer);
+      "withdrawAccount" in params && params.withdrawAccount
+        ? params.withdrawAccount
+        : this.program.mint.getAssociatedAddress(payer);
 
     const withdrawIxn = types.oracleWithdraw(
       this.program,
@@ -671,7 +673,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   static async fetchMultiple(
     program: SwitchboardProgram,
     publicKeys: Array<PublicKey>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): Promise<
     Array<{
       account: OracleAccount;
