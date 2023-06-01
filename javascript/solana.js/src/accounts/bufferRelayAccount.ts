@@ -1,17 +1,17 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
 import { bufferRelayerSaveResult } from "../generated";
+import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account";
-import { JobAccount } from "./jobAccount";
-import { OracleAccount } from "./oracleAccount";
-import { PermissionAccount } from "./permissionAccount";
-import { QueueAccount } from "./queueAccount";
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { JobAccount } from "./jobAccount.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
 import * as spl from "@solana/spl-token";
 import {

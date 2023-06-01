@@ -1,10 +1,10 @@
-import * as errors from "../errors";
-import * as types from "../generated";
-import { Mint } from "../mint";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { Mint } from "../mint.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";
 
-import { Account } from "./account";
+import { Account } from "./account.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";

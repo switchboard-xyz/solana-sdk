@@ -1,5 +1,5 @@
-import * as anchor from '@coral-xyz/anchor';
-import { PublicKey } from '@solana/web3.js';
+import * as anchor from "@coral-xyz/anchor";
+import { PublicKey } from "@solana/web3.js";
 
 export class SwitchboardProgramIsBrowserError extends Error {
   constructor() {
@@ -9,13 +9,13 @@ export class SwitchboardProgramIsBrowserError extends Error {
 }
 export class SwitchboardProgramReadOnlyError extends Error {
   constructor() {
-    super('SwitchboardProgram is in Read-Only mode, no keypair was provided.');
+    super("SwitchboardProgram is in Read-Only mode, no keypair was provided.");
     Object.setPrototypeOf(this, SwitchboardProgramReadOnlyError.prototype);
   }
 }
 export class ExistingKeypair extends Error {
   constructor() {
-    super('Provided keypair corresponds to an existing account.');
+    super("Provided keypair corresponds to an existing account.");
     Object.setPrototypeOf(this, ExistingKeypair.prototype);
   }
 }
@@ -27,13 +27,13 @@ export class AccountNotFoundError extends Error {
 }
 export class InstructionsPackingError extends Error {
   constructor() {
-    super('Each instruction group must fit into a single transaction');
+    super("Each instruction group must fit into a single transaction");
     Object.setPrototypeOf(this, InstructionsPackingError.prototype);
   }
 }
 export class NativeMintOnlyError extends Error {
   constructor() {
-    super('Wrap/Unwrap can only be called on a native mint');
+    super("Wrap/Unwrap can only be called on a native mint");
     Object.setPrototypeOf(this, NativeMintOnlyError.prototype);
   }
 }
@@ -74,7 +74,7 @@ export class TransactionSerializationOverflowError extends TransactionOverflowEr
 }
 export class TransactionMissingSignerError extends Error {
   constructor(signers: string[]) {
-    super(`missing signers [${signers.join(', ')}]`);
+    super(`missing signers [${signers.join(", ")}]`);
     Object.setPrototypeOf(this, TransactionMissingSignerError.prototype);
   }
 }

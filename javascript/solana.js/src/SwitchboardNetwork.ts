@@ -15,7 +15,7 @@ import {
   QueueAccount,
   QueueInitParams,
   VrfAccount,
-} from './accounts';
+} from "./accounts/index.js";
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -27,12 +27,12 @@ import {
   PermissionAccountData,
   SbState,
   VrfAccountData,
-} from './generated';
+} from "./generated/index.js";
 import {
   SendTransactionOptions,
   SwitchboardProgram,
-} from './SwitchboardProgram';
-import { TransactionObject } from './TransactionObject';
+} from "./SwitchboardProgram.js";
+import { TransactionObject } from "./TransactionObject.js";
 import {
   AggregatorDefinition,
   BufferRelayerDefinition,
@@ -50,24 +50,24 @@ import {
   ProgramStateDefinition,
   QueueDefinition,
   VrfDefinition,
-} from './types';
+} from "./types.js";
 
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
 import {
   AccountInfo,
   Keypair,
   PublicKey,
   TransactionSignature,
-} from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import fs from 'fs';
-import path from 'path';
+} from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import fs from "fs";
+import path from "path";
 
 export const isKeypairString = (value: string): boolean =>
   /^\[(\s)?[0-9]+((\s)?,(\s)?[0-9]+){31,}\]/.test(value);
 
 /** Parameters to create a new queue with a set of associated accounts */
-export type NetworkInitParams = Omit<QueueInitParams, 'authority'> & {
+export type NetworkInitParams = Omit<QueueInitParams, "authority"> & {
   authority?: Keypair;
 } & {
   /** The {@linkcode CrankAccount}s to add to the queue */
@@ -169,13 +169,13 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
 
   getCrank(crankPubkey: PublicKey | string): CrankDefinition | undefined {
     return this.crankMap.get(
-      typeof crankPubkey === 'string' ? crankPubkey : crankPubkey.toBase58()
+      typeof crankPubkey === "string" ? crankPubkey : crankPubkey.toBase58()
     );
   }
 
   getOracle(oraclePubkey: PublicKey | string): OracleDefinition | undefined {
     return this.oracleMap.get(
-      typeof oraclePubkey === 'string' ? oraclePubkey : oraclePubkey.toBase58()
+      typeof oraclePubkey === "string" ? oraclePubkey : oraclePubkey.toBase58()
     );
   }
 
@@ -183,7 +183,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     aggregatorPubkey: PublicKey | string
   ): AggregatorDefinition | undefined {
     return this.aggregatorMap.get(
-      typeof aggregatorPubkey === 'string'
+      typeof aggregatorPubkey === "string"
         ? aggregatorPubkey
         : aggregatorPubkey.toBase58()
     );
@@ -191,7 +191,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
 
   getVrf(vrfPubkey: PublicKey | string): VrfDefinition | undefined {
     return this.vrfMap.get(
-      typeof vrfPubkey === 'string' ? vrfPubkey : vrfPubkey.toBase58()
+      typeof vrfPubkey === "string" ? vrfPubkey : vrfPubkey.toBase58()
     );
   }
 
@@ -199,7 +199,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     bufferRelayerPubkey: PublicKey | string
   ): BufferRelayerDefinition | undefined {
     return this.bufferRelayerMap.get(
-      typeof bufferRelayerPubkey === 'string'
+      typeof bufferRelayerPubkey === "string"
         ? bufferRelayerPubkey
         : bufferRelayerPubkey.toBase58()
     );
@@ -207,8 +207,8 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
 
   public static find(
     program: SwitchboardProgram,
-    networkName = 'default',
-    switchboardDir = path.join(process.cwd(), '.switchboard')
+    networkName = "default",
+    switchboardDir = path.join(process.cwd(), ".switchboard")
   ): SwitchboardNetwork {
     if (
       !fs.existsSync(switchboardDir) ||
@@ -218,7 +218,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
         `Failed to find switchboard directory: ${switchboardDir}`
       );
     }
-    const networkDir = path.join(switchboardDir, 'networks');
+    const networkDir = path.join(switchboardDir, "networks");
     if (!fs.existsSync(networkDir) || !fs.statSync(networkDir).isDirectory) {
       throw new Error(
         `Failed to find switchboard network directory: ${networkDir}`
@@ -231,7 +231,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       );
     }
     const obj: Record<string, any> = JSON.parse(
-      fs.readFileSync(networkFile, 'utf-8')
+      fs.readFileSync(networkFile, "utf-8")
     );
 
     return SwitchboardNetwork.from(program, obj);
@@ -299,13 +299,13 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
 
     // calculate the total amount of funds we'll need to wrap
     let neededWrappedFunds = 0;
-    (params.oracles ?? []).forEach(o => {
+    (params.oracles ?? []).forEach((o) => {
       if (o.stakeAmount) {
         neededWrappedFunds = neededWrappedFunds + o.stakeAmount;
       }
     });
 
-    (params.aggregators ?? []).forEach(a => {
+    (params.aggregators ?? []).forEach((a) => {
       if (a.fundAmount) {
         neededWrappedFunds = neededWrappedFunds + a.fundAmount;
       }
@@ -338,7 +338,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     // create the cranks
     const cranks: Array<[TransactionObject, CrankDefinition]> =
       await Promise.all(
-        (params.cranks ?? []).map(async crankInitParams => {
+        (params.cranks ?? []).map(async (crankInitParams) => {
           const [crankAccount, crankInit] =
             await queueAccount.createCrankInstructions(payer, crankInitParams);
 
@@ -351,12 +351,12 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
           ];
         })
       );
-    txns.push(...cranks.map(crank => crank[0]));
+    txns.push(...cranks.map((crank) => crank[0]));
 
     // create the oracles
     const oracles: Array<[Array<TransactionObject>, OracleDefinition]> =
       await Promise.all(
-        (params.oracles ?? []).map(async oracleInitParams => {
+        (params.oracles ?? []).map(async (oracleInitParams) => {
           const [oracleAccount, oracleInit] =
             await queueAccount.createOracleInstructions(payer, {
               ...oracleInitParams,
@@ -387,12 +387,12 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
           ];
         })
       );
-    txns.push(...oracles.map(oracle => oracle[0]).flat());
+    txns.push(...oracles.map((oracle) => oracle[0]).flat());
 
     // create the feeds
     const aggregators: Array<[Array<TransactionObject>, AggregatorDefinition]> =
       await Promise.all(
-        (params.aggregators ?? []).map(async feedInitParams => {
+        (params.aggregators ?? []).map(async (feedInitParams) => {
           const crank = feedInitParams.crankPubkey
             ? new CrankAccount(program, feedInitParams.crankPubkey)
             : feedInitParams.crankIndex !== undefined &&
@@ -449,11 +449,11 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
           ];
         })
       );
-    txns.push(...aggregators.map(aggregator => aggregator[0]).flat());
+    txns.push(...aggregators.map((aggregator) => aggregator[0]).flat());
 
     // create the vrfs
     const vrfs: Array<[TransactionObject, VrfDefinition]> = await Promise.all(
-      (params.vrfs ?? []).map(async vrfInitParams => {
+      (params.vrfs ?? []).map(async (vrfInitParams) => {
         const [vrfAccount, vrfInit] = await queueAccount.createVrfInstructions(
           payer,
           {
@@ -483,12 +483,12 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
         ];
       })
     );
-    txns.push(...vrfs.map(vrf => vrf[0]));
+    txns.push(...vrfs.map((vrf) => vrf[0]));
 
     // create the buffer relayers
     const bufferRelayers: Array<[TransactionObject, BufferRelayerDefinition]> =
       await Promise.all(
-        (params.bufferRelayers ?? []).map(async bufferRelayerInitParams => {
+        (params.bufferRelayers ?? []).map(async (bufferRelayerInitParams) => {
           const [bufferRelayerAccount, bufferRelayerInit] =
             await queueAccount.createBufferRelayerInstructions(payer, {
               ...bufferRelayerInitParams,
@@ -516,7 +516,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
           ];
         })
       );
-    txns.push(...bufferRelayers.map(bufferRelayer => bufferRelayer[0]));
+    txns.push(...bufferRelayers.map((bufferRelayer) => bufferRelayer[0]));
 
     const accounts: ISwitchboardNetwork = {
       programState: {
@@ -526,11 +526,11 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       queue: {
         account: queueAccount,
       },
-      cranks: cranks.map(c => c[1]),
-      oracles: oracles.map(o => o[1]),
-      aggregators: aggregators.map(a => a[1]),
-      vrfs: vrfs.map(v => v[1]),
-      bufferRelayers: bufferRelayers.map(b => b[1]),
+      cranks: cranks.map((c) => c[1]),
+      oracles: oracles.map((o) => o[1]),
+      aggregators: aggregators.map((a) => a[1]),
+      vrfs: vrfs.map((v) => v[1]),
+      bufferRelayers: bufferRelayers.map((b) => b[1]),
     };
 
     return [
@@ -619,14 +619,14 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       this.programState.account.publicKey,
       this.queue.account.publicKey,
       // cranks
-      ...this.cranks.map(c => c.account.publicKey),
+      ...this.cranks.map((c) => c.account.publicKey),
       // oracles
       ...this.oracles
-        .map(o => [o.account.publicKey, o.permission.account.publicKey])
+        .map((o) => [o.account.publicKey, o.permission.account.publicKey])
         .flat(),
       // aggregators
       ...this.aggregators
-        .map(a => [
+        .map((a) => [
           a.account.publicKey,
           a.permission.account.publicKey,
           a.lease.account.publicKey,
@@ -634,11 +634,11 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
         .flat(),
       // vrfs
       ...this.vrfs
-        .map(v => [v.account.publicKey, v.permission.account.publicKey])
+        .map((v) => [v.account.publicKey, v.permission.account.publicKey])
         .flat(),
       // buffer relayers
       ...this.bufferRelayers
-        .map(b => [b.account.publicKey, b.permission.account.publicKey])
+        .map((b) => [b.account.publicKey, b.permission.account.publicKey])
         .flat(),
     ];
 
@@ -669,7 +669,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       ...this.programState,
       state: SbState.decode(
         accountInfos.get(this.programState.account.publicKey.toBase58())
-          ?.data ?? Buffer.from('')
+          ?.data ?? Buffer.from("")
       ),
     };
 
@@ -677,109 +677,111 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       ...this.queue,
       state: OracleQueueAccountData.decode(
         accountInfos.get(this.queue.account.publicKey.toBase58())?.data ??
-          Buffer.from('')
+          Buffer.from("")
       ),
     };
 
-    const cranks: Array<LoadedCrankDefinition> = this.cranks.map(crank => {
+    const cranks: Array<LoadedCrankDefinition> = this.cranks.map((crank) => {
       return {
         ...crank,
         state: CrankAccountData.decode(
           accountInfos.get(crank.account.publicKey.toBase58())?.data ??
-            Buffer.from('')
+            Buffer.from("")
         ),
       };
     });
 
-    const oracles: Array<LoadedOracleDefinition> = this.oracles.map(oracle => {
-      return {
-        ...oracle,
-        state: OracleAccountData.decode(
-          accountInfos.get(oracle.account.publicKey.toBase58())?.data ??
-            Buffer.from('')
-        ),
-        permission: {
-          ...oracle.permission,
-          state: PermissionAccountData.decode(
-            accountInfos.get(oracle.permission.account.publicKey.toBase58())
-              ?.data ?? Buffer.from('')
-          ),
-        },
-      };
-    });
-
-    const aggregators: Array<LoadedAggregatorDefinition> = this.aggregators.map(
-      aggregator => {
+    const oracles: Array<LoadedOracleDefinition> = this.oracles.map(
+      (oracle) => {
         return {
-          ...aggregator,
-          state: AggregatorAccountData.decode(
-            accountInfos.get(aggregator.account.publicKey.toBase58())?.data ??
-              Buffer.from('')
+          ...oracle,
+          state: OracleAccountData.decode(
+            accountInfos.get(oracle.account.publicKey.toBase58())?.data ??
+              Buffer.from("")
           ),
           permission: {
-            ...aggregator.permission,
+            ...oracle.permission,
             state: PermissionAccountData.decode(
-              accountInfos.get(
-                aggregator.permission.account.publicKey.toBase58()
-              )?.data ?? Buffer.from('')
-            ),
-          },
-          lease: {
-            ...aggregator.lease,
-            state: LeaseAccountData.decode(
-              accountInfos.get(aggregator.lease.account.publicKey.toBase58())
-                ?.data ?? Buffer.from('')
+              accountInfos.get(oracle.permission.account.publicKey.toBase58())
+                ?.data ?? Buffer.from("")
             ),
           },
         };
       }
     );
 
-    const vrfs: Array<LoadedVrfDefinition> = this.vrfs.map(vrf => {
+    const aggregators: Array<LoadedAggregatorDefinition> = this.aggregators.map(
+      (aggregator) => {
+        return {
+          ...aggregator,
+          state: AggregatorAccountData.decode(
+            accountInfos.get(aggregator.account.publicKey.toBase58())?.data ??
+              Buffer.from("")
+          ),
+          permission: {
+            ...aggregator.permission,
+            state: PermissionAccountData.decode(
+              accountInfos.get(
+                aggregator.permission.account.publicKey.toBase58()
+              )?.data ?? Buffer.from("")
+            ),
+          },
+          lease: {
+            ...aggregator.lease,
+            state: LeaseAccountData.decode(
+              accountInfos.get(aggregator.lease.account.publicKey.toBase58())
+                ?.data ?? Buffer.from("")
+            ),
+          },
+        };
+      }
+    );
+
+    const vrfs: Array<LoadedVrfDefinition> = this.vrfs.map((vrf) => {
       return {
         ...vrf,
         state: VrfAccountData.decode(
           accountInfos.get(vrf.account.publicKey.toBase58())?.data ??
-            Buffer.from('')
+            Buffer.from("")
         ),
         permission: {
           ...vrf.permission,
           state: PermissionAccountData.decode(
             accountInfos.get(vrf.permission.account.publicKey.toBase58())
-              ?.data ?? Buffer.from('')
+              ?.data ?? Buffer.from("")
           ),
         },
       };
     });
 
     const bufferRelayers: Array<LoadedBufferRelayerDefinition> =
-      this.bufferRelayers.map(bufferRelayer => {
+      this.bufferRelayers.map((bufferRelayer) => {
         return {
           ...bufferRelayer,
           state: BufferRelayerAccountData.decode(
             accountInfos.get(bufferRelayer.account.publicKey.toBase58())
-              ?.data ?? Buffer.from('')
+              ?.data ?? Buffer.from("")
           ),
           permission: {
             ...bufferRelayer.permission,
             state: PermissionAccountData.decode(
               accountInfos.get(
                 bufferRelayer.permission.account.publicKey.toBase58()
-              )?.data ?? Buffer.from('')
+              )?.data ?? Buffer.from("")
             ),
           },
         };
       });
 
     const jobPublicKeys: Array<PublicKey> = [];
-    aggregators.forEach(aggregator => {
+    aggregators.forEach((aggregator) => {
       const jobs = aggregator.state.jobPubkeysData.slice(
         0,
         aggregator.state.jobPubkeysSize
       );
       jobPublicKeys.push(...jobs);
     });
-    bufferRelayers.forEach(bufferRelayer => {
+    bufferRelayers.forEach((bufferRelayer) => {
       jobPublicKeys.push(bufferRelayer.state.jobPubkey);
     });
 
@@ -793,7 +795,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
               account: anchor.web3.AccountInfo<Buffer>;
             } | null)[]
           ) => {
-            return values.map(account => {
+            return values.map((account) => {
               if (account === null) {
                 return undefined;
               }
@@ -848,16 +850,16 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
       account: new ProgramStateAccount(program, program.programState.publicKey),
       bump: program.programState.bump,
     };
-    if (!('queue' in obj) || typeof obj.queue !== 'object') {
+    if (!("queue" in obj) || typeof obj.queue !== "object") {
       throw new Error(`SwitchboardNetwork requires a queue object`);
     }
 
     let queueAccount: QueueAccount;
-    if ('publicKey' in obj.queue) {
+    if ("publicKey" in obj.queue) {
       queueAccount = new QueueAccount(program, obj.queue.publicKey);
     } else if (
-      'keypair' in obj.queue &&
-      typeof obj.queue.keypair === 'string' &&
+      "keypair" in obj.queue &&
+      typeof obj.queue.keypair === "string" &&
       isKeypairString(obj.queue.keypair)
     ) {
       const queueKeypair = Keypair.fromSecretKey(
@@ -872,11 +874,11 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     };
 
     let queueAuthority: PublicKey;
-    if ('authority' in obj.queue && typeof obj.queue.authority === 'string') {
+    if ("authority" in obj.queue && typeof obj.queue.authority === "string") {
       queueAuthority = new PublicKey(obj.queue.authority);
     } else if (
-      'queueAuthorityKeypair' in obj.queue &&
-      typeof obj.queue.queueAuthorityKeypair === 'string' &&
+      "queueAuthorityKeypair" in obj.queue &&
+      typeof obj.queue.queueAuthorityKeypair === "string" &&
       isKeypairString(obj.queue.queueAuthorityKeypair)
     ) {
       const queueAuthorityKeypair = Keypair.fromSecretKey(
@@ -888,16 +890,16 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     }
 
     const cranks: Array<CrankDefinition> = [];
-    if ('cranks' in obj && Array.isArray(obj.cranks)) {
+    if ("cranks" in obj && Array.isArray(obj.cranks)) {
       for (const crank of obj.cranks ?? []) {
-        if ('publicKey' in crank) {
+        if ("publicKey" in crank) {
           const account = new CrankAccount(program, crank.publicKey);
           cranks.push({
             account,
           });
         } else if (
-          'keypair' in crank &&
-          typeof crank.keypair === 'string' &&
+          "keypair" in crank &&
+          typeof crank.keypair === "string" &&
           isKeypairString(crank.keypair)
         ) {
           const keypair = Keypair.fromSecretKey(
@@ -912,14 +914,14 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     }
 
     const oracles: Array<OracleDefinition> = [];
-    if ('oracles' in obj && Array.isArray(obj.oracles)) {
+    if ("oracles" in obj && Array.isArray(obj.oracles)) {
       for (const oracle of obj.oracles ?? []) {
         let account: OracleAccount | undefined = undefined;
-        if ('publicKey' in oracle) {
+        if ("publicKey" in oracle) {
           account = new OracleAccount(program, oracle.publicKey);
         } else if (
-          'stakingWalletKeypair' in oracle &&
-          typeof oracle.stakingWalletKeypair === 'string' &&
+          "stakingWalletKeypair" in oracle &&
+          typeof oracle.stakingWalletKeypair === "string" &&
           isKeypairString(oracle.stakingWalletKeypair)
         ) {
           const keypair = Keypair.fromSecretKey(
@@ -952,14 +954,14 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     }
 
     const aggregators: Array<AggregatorDefinition> = [];
-    if ('aggregators' in obj && Array.isArray(obj.aggregators)) {
+    if ("aggregators" in obj && Array.isArray(obj.aggregators)) {
       for (const aggregator of obj.aggregators ?? []) {
         let account: AggregatorAccount | undefined = undefined;
-        if ('publicKey' in aggregator) {
+        if ("publicKey" in aggregator) {
           account = new AggregatorAccount(program, aggregator.publicKey);
         } else if (
-          'keypair' in aggregator &&
-          typeof aggregator.keypair === 'string' &&
+          "keypair" in aggregator &&
+          typeof aggregator.keypair === "string" &&
           isKeypairString(aggregator.keypair)
         ) {
           const keypair = Keypair.fromSecretKey(
@@ -999,14 +1001,14 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     }
 
     const vrfs: Array<VrfDefinition> = [];
-    if ('vrfs' in obj && Array.isArray(obj.vrfs)) {
+    if ("vrfs" in obj && Array.isArray(obj.vrfs)) {
       for (const vrf of obj.vrfs ?? []) {
         let account: VrfAccount | undefined = undefined;
-        if ('publicKey' in vrf) {
+        if ("publicKey" in vrf) {
           account = new VrfAccount(program, vrf.publicKey);
         } else if (
-          'keypair' in vrf &&
-          typeof vrf.keypair === 'string' &&
+          "keypair" in vrf &&
+          typeof vrf.keypair === "string" &&
           isKeypairString(vrf.keypair)
         ) {
           const keypair = Keypair.fromSecretKey(
@@ -1035,14 +1037,14 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     }
 
     const bufferRelayers: Array<BufferRelayerDefinition> = [];
-    if ('bufferRelayers' in obj && Array.isArray(obj.bufferRelayers)) {
+    if ("bufferRelayers" in obj && Array.isArray(obj.bufferRelayers)) {
       for (const bufferRelayer of obj.bufferRelayers ?? []) {
         let account: BufferRelayerAccount | undefined = undefined;
-        if ('publicKey' in bufferRelayer) {
+        if ("publicKey" in bufferRelayer) {
           account = new BufferRelayerAccount(program, bufferRelayer.publicKey);
         } else if (
-          'keypair' in bufferRelayer &&
-          typeof bufferRelayer.keypair === 'string' &&
+          "keypair" in bufferRelayer &&
+          typeof bufferRelayer.keypair === "string" &&
           isKeypairString(bufferRelayer.keypair)
         ) {
           const keypair = Keypair.fromSecretKey(
@@ -1298,7 +1300,7 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     const jobs: Array<LoadedJobDefinition> = Array.from(accounts.jobs)
       .filter(
         ([jobKey]) =>
-          jobPublicKeys.findIndex(j => j.equals(new PublicKey(jobKey))) !== -1
+          jobPublicKeys.findIndex((j) => j.equals(new PublicKey(jobKey))) !== -1
       )
       .map(([jobKey, job]): LoadedJobDefinition | undefined => {
         const jobAccount = new JobAccount(program, jobKey);
@@ -1374,12 +1376,12 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
   }
 
   getJob(jobPubkey: PublicKey): LoadedJobDefinition | undefined {
-    return this.jobs.find(job => job.account.publicKey.equals(jobPubkey));
+    return this.jobs.find((job) => job.account.publicKey.equals(jobPubkey));
   }
 
   getJobs(jobPubkeys: Array<PublicKey>): Array<LoadedJobDefinition> {
     return jobPubkeys
-      .map(jobPubkey => this.getJob(jobPubkey))
+      .map((jobPubkey) => this.getJob(jobPubkey))
       .filter(Boolean) as Array<LoadedJobDefinition>;
   }
 
@@ -1395,13 +1397,13 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
         authority: this.queue.state.authority.toBase58(),
         state: this.queue.state.toJSON(),
       },
-      cranks: this.cranks.map(crank => {
+      cranks: this.cranks.map((crank) => {
         return {
           publicKey: crank.account.publicKey.toBase58(),
           state: crank.state.toJSON(),
         };
       }),
-      oracles: this.oracles.map(oracle => {
+      oracles: this.oracles.map((oracle) => {
         return {
           publicKey: oracle.account.publicKey.toBase58(),
           authority: oracle.state.oracleAuthority.toBase58(),
@@ -1413,7 +1415,7 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
           },
         };
       }),
-      aggregators: this.aggregators.map(aggregator => {
+      aggregators: this.aggregators.map((aggregator) => {
         return {
           publicKey: aggregator.account.publicKey.toBase58(),
           authority: aggregator.state.authority.toBase58(),
@@ -1449,7 +1451,7 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
               0,
               aggregator.state.jobPubkeysSize
             )
-          ).map(job => {
+          ).map((job) => {
             return {
               publicKey: job.account.publicKey.toBase58(),
               authority: job.state.authority.toBase58(),
@@ -1459,7 +1461,7 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
           }),
         };
       }),
-      vrfs: this.vrfs.map(vrf => {
+      vrfs: this.vrfs.map((vrf) => {
         return {
           publicKey: vrf.account.publicKey.toBase58(),
           authority: vrf.state.authority.toBase58(),
@@ -1469,7 +1471,7 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
               ...vrf.state.callback.toJSON(),
               accounts: vrf.state.callback.accounts
                 .slice(0, vrf.state.callback.accountsLen)
-                .map(a => a.toJSON()),
+                .map((a) => a.toJSON()),
               ixData: `[${new Uint8Array(
                 vrf.state.callback.ixData.slice(0, vrf.state.callback.ixDataLen)
               )}]`,
@@ -1484,7 +1486,7 @@ export class LoadedSwitchboardNetwork implements ILoadedSwitchboardNetwork {
           },
         };
       }),
-      bufferRelayers: this.bufferRelayers.map(bufferRelayer => {
+      bufferRelayers: this.bufferRelayers.map((bufferRelayer) => {
         const job = this.getJob(bufferRelayer.state.jobPubkey);
         return {
           publicKey: bufferRelayer.account.publicKey.toBase58(),

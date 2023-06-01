@@ -1,12 +1,12 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 
 import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
-} from "./account";
+} from "./account.js";
 
 import {
   AccountInfo,

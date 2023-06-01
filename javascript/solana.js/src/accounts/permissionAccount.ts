@@ -1,11 +1,11 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import {
   PermitNone,
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from "../generated/types/SwitchboardPermission";
+} from "../generated/types/SwitchboardPermission.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -13,7 +13,7 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account } from "./account";
+import { Account } from "./account.js";
 
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@coral-xyz/anchor";
 import {

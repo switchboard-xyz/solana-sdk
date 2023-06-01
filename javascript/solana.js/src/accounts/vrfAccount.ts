@@ -1,6 +1,6 @@
-import * as errors from "../errors";
-import * as types from "../generated";
-import { vrfCloseAction } from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { vrfCloseAction } from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -8,10 +8,10 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account";
-import { OracleAccount } from "./oracleAccount";
-import { PermissionAccount } from "./permissionAccount";
-import { QueueAccount } from "./queueAccount";
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";

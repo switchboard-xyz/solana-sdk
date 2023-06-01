@@ -1,5 +1,5 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -11,8 +11,8 @@ import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
-} from "./account";
-import { AggregatorAccount } from "./aggregatorAccount";
+} from "./account.js";
+import { AggregatorAccount } from "./aggregatorAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import {

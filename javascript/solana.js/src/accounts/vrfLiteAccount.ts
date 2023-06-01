@@ -1,18 +1,18 @@
-import * as errors from "../errors";
-import * as types from "../generated";
-import { vrfLiteInit } from "../generated";
-import { vrfLiteCloseAction } from "../generated/instructions/vrfLiteCloseAction";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
+import { vrfLiteInit } from "../generated/index.js";
+import { vrfLiteCloseAction } from "../generated/instructions/vrfLiteCloseAction.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account";
-import { OracleAccount } from "./oracleAccount";
-import { PermissionAccount } from "./permissionAccount";
-import { QueueAccount } from "./queueAccount";
-import { Callback, VrfResult } from "./vrfAccount";
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { OracleAccount } from "./oracleAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { QueueAccount } from "./queueAccount.js";
+import { Callback, VrfResult } from "./vrfAccount.js";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,

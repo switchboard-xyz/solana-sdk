@@ -1,11 +1,11 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from "../generated/types/SwitchboardPermission";
-import { SolanaClock } from "../SolanaClock";
+} from "../generated/types/SwitchboardPermission.js";
+import { SolanaClock } from "../SolanaClock.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -13,30 +13,34 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account";
-import { AggregatorAccount, AggregatorInitParams } from "./aggregatorAccount";
-import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer";
-import { BufferRelayerAccount, BufferRelayerInit } from "./bufferRelayAccount";
-import { CrankAccount, CrankInitParams } from "./crankAccount";
-import { JobAccount, JobInitParams } from "./jobAccount";
-import { LeaseAccount, LeaseInitParams } from "./leaseAccount";
+import { Account, OnAccountChangeCallback } from "./account.js";
+import {
+  AggregatorAccount,
+  AggregatorInitParams,
+} from "./aggregatorAccount.js";
+import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
+import {
+  BufferRelayerAccount,
+  BufferRelayerInit,
+} from "./bufferRelayAccount.js";
+import { CrankAccount, CrankInitParams } from "./crankAccount.js";
+import { JobAccount, JobInitParams } from "./jobAccount.js";
+import { LeaseAccount, LeaseInitParams } from "./leaseAccount.js";
 import {
   OracleAccount,
   OracleInitParams,
   OracleStakeParams,
-} from "./oracleAccount";
-import { PermissionAccount, PermissionSetParams } from "./permissionAccount";
-import { QueueDataBuffer } from "./queueDataBuffer";
-import { VrfAccount, VrfInitParams } from "./vrfAccount";
-import { VrfLiteAccount, VrfLiteInitParams } from "./vrfLiteAccount";
+} from "./oracleAccount.js";
+import { PermissionAccount, PermissionSetParams } from "./permissionAccount.js";
+import { QueueDataBuffer } from "./queueDataBuffer.js";
+import { VrfAccount, VrfInitParams } from "./vrfAccount.js";
+import { VrfLiteAccount, VrfLiteInitParams } from "./vrfLiteAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Commitment,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionSignature,

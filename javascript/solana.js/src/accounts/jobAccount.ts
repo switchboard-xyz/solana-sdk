@@ -1,5 +1,5 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -7,7 +7,7 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account } from "./account";
+import { Account } from "./account.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import {

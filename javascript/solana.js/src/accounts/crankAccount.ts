@@ -1,5 +1,5 @@
-import * as errors from "../errors";
-import * as types from "../generated";
+import * as errors from "../errors.js";
+import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -7,10 +7,13 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account";
-import { AggregatorAccount, AggregatorPdaAccounts } from "./aggregatorAccount";
-import { CrankDataBuffer } from "./crankDataBuffer";
-import { QueueAccount } from "./queueAccount";
+import { Account, OnAccountChangeCallback } from "./account.js";
+import {
+  AggregatorAccount,
+  AggregatorPdaAccounts,
+} from "./aggregatorAccount.js";
+import { CrankDataBuffer } from "./crankDataBuffer.js";
+import { QueueAccount } from "./queueAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
