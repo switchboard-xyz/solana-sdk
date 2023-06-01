@@ -1,24 +1,24 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { vrfLiteInit } from '../generated';
-import { vrfLiteCloseAction } from '../generated/instructions/vrfLiteCloseAction';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { vrfLiteInit } from "../generated";
+import { vrfLiteCloseAction } from "../generated/instructions/vrfLiteCloseAction";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
-import { Callback, VrfResult } from './vrfAccount';
+import { Account, OnAccountChangeCallback } from "./account";
+import { OracleAccount } from "./oracleAccount";
+import { PermissionAccount } from "./permissionAccount";
+import { QueueAccount } from "./queueAccount";
+import { Callback, VrfResult } from "./vrfAccount";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+} from "@solana/spl-token";
 import {
   Commitment,
   Keypair,
@@ -28,8 +28,8 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RENT_PUBKEY,
   TransactionSignature,
-} from '@solana/web3.js';
-import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 
 export interface VrfLiteInitParams {
   callback?: Callback;
@@ -71,11 +71,11 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<types.VrfLiteAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo =>
+      (accountInfo) =>
         callback(types.VrfLiteAccountData.decode(accountInfo.data)),
       commitment
     );
@@ -87,7 +87,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('VrfLite', this.publicKey);
+      throw new errors.AccountNotFoundError("VrfLite", this.publicKey);
     return data;
   }
 
@@ -226,7 +226,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
       params.vrfLite.callback.accountsLen
     );
 
-    const txns = Array.from(Array(numTxns).keys()).map(i => {
+    const txns = Array.from(Array(numTxns).keys()).map((i) => {
       const proveIxn = types.vrfLiteProveAndVerify(
         this.program,
         {
@@ -280,7 +280,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
     const txns = this.proveAndVerifyInstructions(
       {
         vrfLite,
-        proof: params.proof ?? '',
+        proof: params.proof ?? "",
         oraclePubkey,
         oracleTokenWallet,
         oracleAuthority,
@@ -321,7 +321,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
           resolve: (result: types.VrfLiteAccountData) => void,
           reject: (reason: string) => void
         ) => {
-          ws = this.onChange(vrfLite => {
+          ws = this.onChange((vrfLite) => {
             if (vrfLite.requestSlot.gt(params.requestSlot)) {
               reject(`VRF request expired`);
             }
@@ -451,7 +451,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
       id = roundId;
     } else {
       const vrf = await this.loadData();
-      if (vrf.status.kind === 'StatusVerifying') {
+      if (vrf.status.kind === "StatusVerifying") {
         id = vrf.counter;
       } else {
         // wait for the next round
@@ -476,13 +476,13 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
             resolve: (result: VrfResult) => void,
             reject: (reason: string) => void
           ) => {
-            ws = this.onChange(vrf => {
+            ws = this.onChange((vrf) => {
               if (vrf.counter.gt(id)) {
                 reject(`Current counter is higher than requested roundId`);
               }
               if (vrf.counter.eq(id)) {
                 switch (vrf.status.kind) {
-                  case 'StatusCallbackSuccess': {
+                  case "StatusCallbackSuccess": {
                     resolve({
                       success: true,
                       result: new Uint8Array(vrf.result),
@@ -490,7 +490,7 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
                     });
                     break;
                   }
-                  case 'StatusVerifyFailure': {
+                  case "StatusVerifyFailure": {
                     resolve({
                       success: false,
                       result: new Uint8Array(),
@@ -523,13 +523,13 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
     const transactions = await this.program.connection.getSignaturesForAddress(
       this.publicKey,
       { limit: txnLimit, minContextSlot: slot.toNumber() },
-      'confirmed'
+      "confirmed"
     );
-    const signatures = transactions.map(txn => txn.signature);
+    const signatures = transactions.map((txn) => txn.signature);
     const parsedTransactions =
       await this.program.connection.getParsedTransactions(
         signatures,
-        'confirmed'
+        "confirmed"
       );
 
     const callbackTransactions: ParsedTransactionWithMeta[] = [];
@@ -539,8 +539,8 @@ export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
         continue;
       }
 
-      const logs = txn.meta?.logMessages?.join('\n') ?? '';
-      if (logs.includes('Invoking callback')) {
+      const logs = txn.meta?.logMessages?.join("\n") ?? "";
+      if (logs.includes("Invoking callback")) {
         callbackTransactions.push(txn);
       }
     }

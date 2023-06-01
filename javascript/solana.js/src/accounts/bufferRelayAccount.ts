@@ -1,25 +1,25 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { bufferRelayerSaveResult } from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { bufferRelayerSaveResult } from "../generated";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { JobAccount } from './jobAccount';
-import { OracleAccount } from './oracleAccount';
-import { PermissionAccount } from './permissionAccount';
-import { QueueAccount } from './queueAccount';
+import { Account, OnAccountChangeCallback } from "./account";
+import { JobAccount } from "./jobAccount";
+import { OracleAccount } from "./oracleAccount";
+import { PermissionAccount } from "./permissionAccount";
+import { QueueAccount } from "./queueAccount";
 
-import * as spl from '@solana/spl-token';
+import * as spl from "@solana/spl-token";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
   getAccount,
   TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+} from "@solana/spl-token";
 import {
   Commitment,
   Keypair,
@@ -28,8 +28,8 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
-import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 
 /**
  * Account type holding a buffer of data sourced from the buffers sole {@linkcode JobAccount}. A buffer relayer has no consensus mechanism and relies on trusting an {@linkcode OracleAccount} to respond honestly. A buffer relayer has a max capacity of 500 bytes.
@@ -37,7 +37,7 @@ import { BN, promiseWithTimeout } from '@switchboard-xyz/common';
  * Data: {@linkcode types.BufferRelayerAccountData}
  */
 export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData> {
-  static accountName = 'BufferRelayerAccountData';
+  static accountName = "BufferRelayerAccountData";
 
   /**
    * Returns the size of an on-chain {@linkcode BufferRelayerAccount}.
@@ -65,11 +65,11 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
    */
   public onChange(
     callback: OnAccountChangeCallback<types.BufferRelayerAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => {
+      (accountInfo) => {
         callback(this.decode(accountInfo.data));
       },
       commitment
@@ -83,7 +83,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
   ): Promise<[BufferRelayerAccount, types.BufferRelayerAccountData]> {
     const account = new BufferRelayerAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -98,7 +98,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Buffer Relayer', this.publicKey);
+      throw new errors.AccountNotFoundError("Buffer Relayer", this.publicKey);
     return data;
   }
 
@@ -141,7 +141,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
         program,
         {
           params: {
-            name: [...Buffer.from(params.name ?? '', 'utf8').slice(0, 32)],
+            name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
             minUpdateDelaySeconds: params.minUpdateDelaySeconds ?? 30,
             stateBump: program.programState.bump,
           },
@@ -309,7 +309,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
             resolve: (result: types.BufferRelayerAccountData) => void,
             reject: (reason: string) => void
           ) => {
-            ws = this.onChange(bufferRelayer => {
+            ws = this.onChange((bufferRelayer) => {
               if (
                 bufferRelayer.currentRound.roundOpenSlot.gt(
                   currentRoundOpenSlot
@@ -493,7 +493,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     );
     if (!bufferEscrow) {
       throw new errors.AccountNotFoundError(
-        'Buffer Relayer Escrow',
+        "Buffer Relayer Escrow",
         bufferRelayer.escrow
       );
     }

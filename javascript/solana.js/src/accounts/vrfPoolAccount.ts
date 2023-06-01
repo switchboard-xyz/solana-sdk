@@ -1,21 +1,21 @@
-import { VRF_POOL_REQUEST_AMOUNT } from '../const';
-import { AccountNotFoundError, InsufficientFundsError } from '../errors';
-import * as types from '../generated';
-import { VrfPoolRequestEvent } from '../SwitchboardEvents';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import { VRF_POOL_REQUEST_AMOUNT } from "../const.js";
+import { AccountNotFoundError, InsufficientFundsError } from "../errors.js";
+import * as types from "../generated";
+import { VrfPoolRequestEvent } from "../SwitchboardEvents.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { PermissionAccount } from './permissionAccount';
-import { CreateVrfLiteParams, QueueAccount } from './queueAccount';
-import { Callback } from './vrfAccount';
-import { VrfLiteAccount } from './vrfLiteAccount';
+import { Account, OnAccountChangeCallback } from "./account.js";
+import { PermissionAccount } from "./permissionAccount.js";
+import { CreateVrfLiteParams, QueueAccount } from "./queueAccount.js";
+import { Callback } from "./vrfAccount.js";
+import { VrfLiteAccount } from "./vrfLiteAccount.js";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+} from "@solana/spl-token";
 import {
   AccountMeta,
   Commitment,
@@ -25,9 +25,9 @@ import {
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   SYSVAR_RENT_PUBKEY,
   TransactionSignature,
-} from '@solana/web3.js';
-import { promiseWithTimeout } from '@switchboard-xyz/common';
-import _ from 'lodash';
+} from "@solana/web3.js";
+import { promiseWithTimeout } from "@switchboard-xyz/common";
+import _ from "lodash";
 
 // export type VrfPoolRow = {
 //   timestamp: number;
@@ -35,7 +35,7 @@ import _ from 'lodash';
 // };
 
 export type VrfPoolPushNewParams = CreateVrfLiteParams &
-  Omit<VrfPoolPushParams, 'vrf'> & {
+  Omit<VrfPoolPushParams, "vrf"> & {
     queueAccount?: QueueAccount;
     vrfPool?: types.VrfPoolAccountData;
   };
@@ -84,11 +84,11 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<VrfPoolAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(VrfPoolAccount.decode(accountInfo.data)),
+      (accountInfo) => callback(VrfPoolAccount.decode(accountInfo.data)),
       commitment
     );
   }
@@ -116,7 +116,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       pool.push(row);
     }
 
-    accountData['pool'] = pool;
+    accountData["pool"] = pool;
 
     return accountData as VrfPoolAccountData;
   }
@@ -125,7 +125,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     const info = await this.program.connection.getAccountInfo(this.publicKey);
 
     if (info === null) {
-      throw new AccountNotFoundError('VrfPool', this.publicKey);
+      throw new AccountNotFoundError("VrfPool", this.publicKey);
     }
     if (!info.owner.equals(this.program.programId)) {
       throw new Error("account doesn't belong to this program");
@@ -635,7 +635,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       timeout,
       new Promise((resolve: (result: VrfPoolRequestEvent) => void) => {
         ws = this.program.addEventListener(
-          'VrfPoolRequestEvent',
+          "VrfPoolRequestEvent",
           (event, slot, signature) => {
             if (event.vrfPoolPubkey.equals(this.publicKey)) {
               resolve(event);
@@ -648,20 +648,20 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     });
 
     let requestRandomnessSignature: string | undefined = undefined;
-    if (params && 'requestFunction' in params) {
+    if (params && "requestFunction" in params) {
       requestRandomnessSignature = await params
         .requestFunction()
-        .catch(async error => {
+        .catch(async (error) => {
           await closeWebsocket();
           throw new Error(`Failed to call requestRandomness, ${error}`);
         });
     } else {
-      requestRandomnessSignature = await this.request(params).catch(
-        async error => {
-          await closeWebsocket();
-          throw new Error(`Failed to call requestRandomness, ${error}`);
-        }
-      );
+      requestRandomnessSignature = await this.request(
+        params as VrfPoolRequestParams
+      ).catch(async (error) => {
+        await closeWebsocket();
+        throw new Error(`Failed to call requestRandomness, ${error}`);
+      });
     }
 
     const event = await eventPromise;
@@ -691,7 +691,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
       escrow ?? this.program.mint.getAssociatedAddress(this.publicKey);
     const escrowBalance = await this.program.mint.fetchBalance(escrowPubkey);
     if (escrowBalance === null) {
-      throw new AccountNotFoundError('VrfPool Escrow', escrowPubkey);
+      throw new AccountNotFoundError("VrfPool Escrow", escrowPubkey);
     }
     return escrowBalance;
   }

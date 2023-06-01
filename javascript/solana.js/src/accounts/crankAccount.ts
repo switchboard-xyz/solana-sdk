@@ -1,19 +1,19 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from './account';
-import { AggregatorAccount, AggregatorPdaAccounts } from './aggregatorAccount';
-import { CrankDataBuffer } from './crankDataBuffer';
-import { QueueAccount } from './queueAccount';
+import { Account, OnAccountChangeCallback } from "./account";
+import { AggregatorAccount, AggregatorPdaAccounts } from "./aggregatorAccount";
+import { CrankDataBuffer } from "./crankDataBuffer";
+import { QueueAccount } from "./queueAccount";
 
-import * as anchor from '@coral-xyz/anchor';
-import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import {
   AccountMeta,
   Commitment,
@@ -21,7 +21,7 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.
@@ -31,7 +31,7 @@ import {
  * Buffer: {@linkcode CrankDataBuffer}
  */
 export class CrankAccount extends Account<types.CrankAccountData> {
-  static accountName = 'CrankAccountData';
+  static accountName = "CrankAccountData";
 
   /** The public key of the crank's data buffer storing a priority queue of {@linkcode AggregatorAccount}'s and their next available update timestamp */
   dataBuffer?: CrankDataBuffer;
@@ -58,11 +58,12 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   onChange(
     callback: OnAccountChangeCallback<types.CrankAccountData>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => callback(types.CrankAccountData.decode(accountInfo.data)),
+      (accountInfo) =>
+        callback(types.CrankAccountData.decode(accountInfo.data)),
       commitment
     );
   }
@@ -74,7 +75,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   ): Promise<[CrankAccount, types.CrankAccountData]> {
     const account = new CrankAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -89,7 +90,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       this.publicKey
     );
     if (data === null)
-      throw new errors.AccountNotFoundError('Crank', this.publicKey);
+      throw new errors.AccountNotFoundError("Crank", this.publicKey);
     if (!this.dataBuffer) {
       this.dataBuffer = CrankDataBuffer.fromCrank(this.program, data);
     }
@@ -128,8 +129,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           program,
           {
             params: {
-              name: Buffer.from(params.name ?? '').slice(0, 32),
-              metadata: Buffer.from(params.metadata ?? '').slice(0, 64),
+              name: Buffer.from(params.name ?? "").slice(0, 32),
+              metadata: Buffer.from(params.metadata ?? "").slice(0, 64),
               crankSize: maxRows,
             },
           },
@@ -286,7 +287,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const next =
       params.readyPubkeys ??
       (await this.peakNextReady(5, params.unixTimestamp));
-    if (next.length === 0) throw new Error('Crank is not ready to be turned.');
+    if (next.length === 0) throw new Error("Crank is not ready to be turned.");
 
     const remainingAccounts: PublicKey[] = [];
     const leaseBumpsMap: Map<string, number> = new Map();
@@ -569,7 +570,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
     if (numReady < 6) {
       // send as-is
-      return Array.from(Array(numReady).keys()).map(n => {
+      return Array.from(Array(numReady).keys()).map((n) => {
         return this.popSync(
           payer,
           {
@@ -582,7 +583,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       });
     } else {
       // stagger the ready accounts
-      return Array.from(Array(numReady).keys()).map(n => {
+      return Array.from(Array(numReady).keys()).map((n) => {
         return this.popSync(
           payer,
           {
@@ -828,17 +829,21 @@ export class CrankAccount extends Account<types.CrankAccountData> {
       );
     } else {
       // stagger the ready accounts
-      return Array.from(Array(params.readyAggregators.length).keys()).map(n => {
-        return this.popSyncV2(
-          payer,
-          {
-            ...params,
-            readyAggregators: params.readyAggregators.slice(Math.max(0, n - 4)),
-            nonce: Math.random(),
-          },
-          options
-        );
-      });
+      return Array.from(Array(params.readyAggregators.length).keys()).map(
+        (n) => {
+          return this.popSyncV2(
+            payer,
+            {
+              ...params,
+              readyAggregators: params.readyAggregators.slice(
+                Math.max(0, n - 4)
+              ),
+              nonce: Math.random(),
+            },
+            options
+          );
+        }
+      );
     }
   }
 
@@ -865,8 +870,8 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     const now = unixTimestamp ?? Math.floor(Date.now() / 1000);
     const crankRows = await this.peakNextWithTime(num);
     return crankRows
-      .filter(row => now >= row.nextTimestamp.toNumber())
-      .map(row => row.pubkey);
+      .filter((row) => now >= row.nextTimestamp.toNumber())
+      .map((row) => row.pubkey);
   }
 
   /**
@@ -876,7 +881,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
    */
   async peakNext(num?: number): Promise<PublicKey[]> {
     const crankRows = await this.peakNextWithTime(num);
-    return crankRows.map(row => row.pubkey);
+    return crankRows.map((row) => row.pubkey);
   }
 
   /**
@@ -923,7 +928,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
   ): Promise<boolean> {
     const rows = crankRows ?? (await this.loadCrank());
 
-    const idx = rows.findIndex(r => r.pubkey.equals(pubkey));
+    const idx = rows.findIndex((r) => r.pubkey.equals(pubkey));
     if (idx === -1) {
       return false;
     }
@@ -943,7 +948,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
     const crankRows = await this.loadCrank();
 
-    const aggregatorPubkeys = crankRows.map(r => r.pubkey);
+    const aggregatorPubkeys = crankRows.map((r) => r.pubkey);
     const aggregators = await AggregatorAccount.fetchMultiple(
       this.program,
       aggregatorPubkeys
@@ -962,7 +967,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
         publicKey: crank.dataBuffer,
         data: crankRows,
       },
-      aggregators: aggregators.map(a => {
+      aggregators: aggregators.map((a) => {
         return {
           publicKey: a.account.publicKey,
           data: a.data,
@@ -1076,7 +1081,7 @@ export interface CrankPopParams {
 
 export type CrankAccountsJSON = Omit<
   types.CrankAccountDataJSON,
-  'dataBuffer'
+  "dataBuffer"
 > & {
   publicKey: PublicKey;
   dataBuffer: { publicKey: PublicKey; data: Array<types.CrankRow> };

@@ -1,13 +1,13 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { Mint } from '../mint';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { Mint } from "../mint";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account } from './account';
+import { Account } from "./account";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
   AccountInfo,
   Keypair,
@@ -16,7 +16,7 @@ import {
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  * Account type representing Switchboard global program state.
@@ -24,7 +24,7 @@ import {
  * Data: {@linkcode types.SbState}
  */
 export class ProgramStateAccount extends Account<types.SbState> {
-  static accountName = 'SbState';
+  static accountName = "SbState";
 
   public static size = 1128;
 
@@ -80,7 +80,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
   ): Promise<[ProgramStateAccount, types.SbState]> {
     const account = new ProgramStateAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -92,7 +92,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
   public async loadData(): Promise<types.SbState> {
     const data = await types.SbState.fetch(this.program, this.publicKey);
     if (data === null)
-      throw new errors.AccountNotFoundError('Program State', this.publicKey);
+      throw new errors.AccountNotFoundError("Program State", this.publicKey);
     return data;
   }
 
@@ -171,11 +171,11 @@ export class ProgramStateAccount extends Account<types.SbState> {
         splMint = {
           address: mint,
           mintAuthority: payer,
-          supply: BigInt('100000000000000000'),
+          supply: BigInt("100000000000000000"),
           decimals: 9,
           isInitialized: true,
           freezeAuthority: payer,
-          tlvData: Buffer.from(''),
+          tlvData: Buffer.from(""),
         };
       }
 
@@ -204,7 +204,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
             splMint.address,
             vaultKeypair.publicKey,
             payer,
-            BigInt('100000000000000000')
+            BigInt("100000000000000000")
           )
         );
       }
@@ -240,7 +240,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
     program: SwitchboardProgram
   ): [ProgramStateAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('STATE')],
+      [Buffer.from("STATE")],
       program.programId
     );
     return [new ProgramStateAccount(program, publicKey), bump];

@@ -139,7 +139,7 @@ async function main() {
   execSync(`tsx scripts/move-cjs-to-lib`, {
     encoding: "utf-8",
   });
-  fs.rmSync("dist-cjs", { recursive: true });
+  fs.rmSync("lib-cjs", { recursive: true });
 
   console.log(`Generating entrypoints ...`);
   updateConfig();

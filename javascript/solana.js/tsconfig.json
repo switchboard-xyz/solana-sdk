@@ -31,6 +31,11 @@
     "strict": true
   },
   "typedocOptions": {
-    "entryPoints": []
+    "entryPoints": [
+      "src/index.ts",
+      "src/generated/index.ts",
+      "src/accounts/index.ts",
+      "src/SwitchboardProgram.ts"
+    ]
   }
 }

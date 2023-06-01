@@ -1,20 +1,20 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
 import {
   Account,
   BUFFER_DISCRIMINATOR,
   OnAccountChangeCallback,
-} from './account';
-import { AggregatorAccount } from './aggregatorAccount';
+} from "./account";
+import { AggregatorAccount } from "./aggregatorAccount";
 
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
 import {
   Commitment,
   Keypair,
@@ -22,8 +22,8 @@ import {
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
-import { Big, BN } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { Big, BN } from "@switchboard-xyz/common";
 
 export interface AggregatorHistoryInit {
   /** Aggregator account to add a history buffer for. */
@@ -44,7 +44,7 @@ export interface AggregatorHistoryInit {
 export class AggregatorHistoryBuffer extends Account<
   Array<types.AggregatorHistoryRow>
 > {
-  static accountName = 'AggregatorHistoryBuffer';
+  static accountName = "AggregatorHistoryBuffer";
 
   public size = 28;
 
@@ -192,7 +192,7 @@ export class AggregatorHistoryBuffer extends Account<
     );
     if (bufferAccountInfo === null) {
       throw new errors.AccountNotFoundError(
-        'Aggregator History',
+        "Aggregator History",
         this.publicKey
       );
     }
@@ -211,11 +211,11 @@ export class AggregatorHistoryBuffer extends Account<
    */
   public onChange(
     callback: OnAccountChangeCallback<Array<types.AggregatorHistoryRow>>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): number {
     return this.program.connection.onAccountChange(
       this.publicKey,
-      accountInfo => {
+      (accountInfo) => {
         callback(this.decode(accountInfo.data));
       },
       commitment
@@ -330,7 +330,7 @@ export class AggregatorHistoryBuffer extends Account<
     period?: number
   ): AggregatorHistoryMetrics {
     const endTimestamp = history
-      .map(row => row.timestamp)
+      .map((row) => row.timestamp)
       .reduce((max, ts) => (ts.gt(max) ? ts : max), new BN(0));
 
     const startTimestamp = period
@@ -345,27 +345,27 @@ export class AggregatorHistoryBuffer extends Account<
             : val;
         }, new BN(0))
       : history
-          .map(row => row.timestamp)
+          .map((row) => row.timestamp)
           .reduce((min, ts) => (ts.lt(min) ? ts : min), history[0].timestamp);
 
     const parsedHistory = history.filter(
-      row =>
+      (row) =>
         row.timestamp.gte(startTimestamp) && row.timestamp.lte(endTimestamp)
     );
 
     const start = parsedHistory.slice(0)[0];
     const end = parsedHistory.slice(-1)[0];
 
-    const timestamps = parsedHistory.map(r => r.timestamp);
-    const bigValues = parsedHistory.map(r => r.value.toBig());
+    const timestamps = parsedHistory.map((r) => r.timestamp);
+    const bigValues = parsedHistory.map((r) => r.value.toBig());
 
-    const values = bigValues.map(val => Number.parseFloat(val.toString()));
+    const values = bigValues.map((val) => Number.parseFloat(val.toString()));
 
     const minValue = Math.min(...values);
-    const min = parsedHistory.find(r => Number(r.value) === minValue);
+    const min = parsedHistory.find((r) => Number(r.value) === minValue);
 
     const maxValue = Math.max(...values);
-    const max = parsedHistory.find(r => Number(r.value) === maxValue);
+    const max = parsedHistory.find((r) => Number(r.value) === maxValue);
 
     const actualPeriod = endTimestamp.sub(startTimestamp).toNumber();
     const numSamples = parsedHistory.length;

@@ -1,15 +1,15 @@
-import * as errors from '../errors';
-import * as types from '../generated';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as errors from "../errors";
+import * as types from "../generated";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account } from './account';
+import { Account } from "./account";
 
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
 import {
   AccountInfo,
   Commitment,
@@ -18,8 +18,8 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
-import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { OracleJob, toUtf8 } from "@switchboard-xyz/common";
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.
@@ -27,7 +27,7 @@ import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
  * Data: {@linkcode types.JobAccountData}
  */
 export class JobAccount extends Account<types.JobAccountData> {
-  static accountName = 'JobAccountData';
+  static accountName = "JobAccountData";
 
   /**
    * Returns the job's name buffer in a stringified format.
@@ -71,12 +71,12 @@ export class JobAccount extends Account<types.JobAccountData> {
     }
   ): AccountInfo<Buffer> {
     let jobData: Buffer | undefined = undefined;
-    if ('data' in data && data.data && data.data.byteLength > 0) {
+    if ("data" in data && data.data && data.data.byteLength > 0) {
       jobData = Buffer.from(data.data);
     }
-    if ('job' in data) {
+    if ("job" in data) {
       jobData = Buffer.from(OracleJob.encodeDelimited(data.job).finish());
-    } else if ('tasks' in data) {
+    } else if ("tasks" in data) {
       jobData = Buffer.from(
         OracleJob.encodeDelimited(OracleJob.fromObject(data.tasks)).finish()
       );
@@ -116,7 +116,7 @@ export class JobAccount extends Account<types.JobAccountData> {
   ): Promise<[JobAccount, types.JobAccountData]> {
     const account = new JobAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -128,7 +128,7 @@ export class JobAccount extends Account<types.JobAccountData> {
   public async loadData(): Promise<types.JobAccountData> {
     const data = await types.JobAccountData.fetch(this.program, this.publicKey);
     if (data === null)
-      throw new errors.AccountNotFoundError('Job', this.publicKey);
+      throw new errors.AccountNotFoundError("Job", this.publicKey);
     return data;
   }
 
@@ -139,7 +139,7 @@ export class JobAccount extends Account<types.JobAccountData> {
     options?: TransactionObjectOptions
   ): [JobAccount, Array<TransactionObject>] {
     if (params.data.byteLength > 6400) {
-      throw new Error('Switchboard jobs need to be less than 6400 bytes');
+      throw new Error("Switchboard jobs need to be less than 6400 bytes");
     }
 
     const jobKeypair = params.keypair ?? Keypair.generate();
@@ -156,7 +156,7 @@ export class JobAccount extends Account<types.JobAccountData> {
         program,
         {
           params: {
-            name: [...Buffer.from(params.name ?? '', 'utf8').slice(0, 32)],
+            name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
             expiration: new anchor.BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             data: params.data,
@@ -195,7 +195,7 @@ export class JobAccount extends Account<types.JobAccountData> {
         program,
         {
           params: {
-            name: [...Buffer.from(params.name ?? '', 'utf8').slice(0, 32)],
+            name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
             expiration: new anchor.BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             data: new Uint8Array(),
@@ -279,7 +279,7 @@ export class JobAccount extends Account<types.JobAccountData> {
     accountInfo: AccountInfo<Buffer>
   ): types.JobAccountData {
     if (!accountInfo || accountInfo.data === null) {
-      throw new Error('Cannot decode empty JobAccountData');
+      throw new Error("Cannot decode empty JobAccountData");
     }
     return program.coder.decode(JobAccount.accountName, accountInfo?.data);
   }
@@ -309,7 +309,7 @@ export class JobAccount extends Account<types.JobAccountData> {
   static async fetchMultiple(
     program: SwitchboardProgram,
     publicKeys: Array<PublicKey>,
-    commitment: Commitment = 'confirmed'
+    commitment: Commitment = "confirmed"
   ): Promise<
     Array<{
       account: JobAccount;
