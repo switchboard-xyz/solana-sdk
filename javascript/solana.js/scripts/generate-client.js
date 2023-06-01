@@ -125,7 +125,7 @@ async function main() {
     shell.sed(
       "-i",
       'import * as types from "../types"',
-      'import * as types from "../types.js"',
+      'import * as types from "../types/index.js"',
       file
     );
     // replace borsh import

@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface EcvrfIntermediateFields {
   r: types.FieldElementZCFields;
@@ -38,11 +38,11 @@ export class EcvrfIntermediate {
   static layout(property?: string) {
     return borsh.struct(
       [
-        types.FieldElementZC.layout('r'),
-        types.FieldElementZC.layout('nS'),
-        types.FieldElementZC.layout('d'),
-        types.FieldElementZC.layout('t13'),
-        types.FieldElementZC.layout('t15'),
+        types.FieldElementZC.layout("r"),
+        types.FieldElementZC.layout("nS"),
+        types.FieldElementZC.layout("d"),
+        types.FieldElementZC.layout("t13"),
+        types.FieldElementZC.layout("t15"),
       ],
       property
     );

@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface OracleQueueAccountDataFields {
   /** Name of the queue to store on-chain. */
@@ -185,30 +186,30 @@ export class OracleQueueAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.array(borsh.u8(), 64, 'metadata'),
-    borsh.publicKey('authority'),
-    borsh.u32('oracleTimeout'),
-    borsh.u64('reward'),
-    borsh.u64('minStake'),
-    borsh.bool('slashingEnabled'),
-    types.SwitchboardDecimal.layout('varianceToleranceMultiplier'),
-    borsh.u32('feedProbationPeriod'),
-    borsh.u32('currIdx'),
-    borsh.u32('size'),
-    borsh.u32('gcIdx'),
-    borsh.u64('consecutiveFeedFailureLimit'),
-    borsh.u64('consecutiveOracleFailureLimit'),
-    borsh.bool('unpermissionedFeedsEnabled'),
-    borsh.bool('unpermissionedVrfEnabled'),
-    types.SwitchboardDecimal.layout('curatorRewardCut'),
-    borsh.bool('lockLeaseFunding'),
-    borsh.publicKey('mint'),
-    borsh.bool('enableBufferRelayers'),
-    borsh.bool('enableTeeOnly'),
-    borsh.array(borsh.u8(), 967, 'ebuf'),
-    borsh.u32('maxSize'),
-    borsh.publicKey('dataBuffer'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.array(borsh.u8(), 64, "metadata"),
+    borsh.publicKey("authority"),
+    borsh.u32("oracleTimeout"),
+    borsh.u64("reward"),
+    borsh.u64("minStake"),
+    borsh.bool("slashingEnabled"),
+    types.SwitchboardDecimal.layout("varianceToleranceMultiplier"),
+    borsh.u32("feedProbationPeriod"),
+    borsh.u32("currIdx"),
+    borsh.u32("size"),
+    borsh.u32("gcIdx"),
+    borsh.u64("consecutiveFeedFailureLimit"),
+    borsh.u64("consecutiveOracleFailureLimit"),
+    borsh.bool("unpermissionedFeedsEnabled"),
+    borsh.bool("unpermissionedVrfEnabled"),
+    types.SwitchboardDecimal.layout("curatorRewardCut"),
+    borsh.bool("lockLeaseFunding"),
+    borsh.publicKey("mint"),
+    borsh.bool("enableBufferRelayers"),
+    borsh.bool("enableTeeOnly"),
+    borsh.array(borsh.u8(), 967, "ebuf"),
+    borsh.u32("maxSize"),
+    borsh.publicKey("dataBuffer"),
   ]);
 
   constructor(fields: OracleQueueAccountDataFields) {
@@ -264,7 +265,7 @@ export class OracleQueueAccountData {
   ): Promise<Array<OracleQueueAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -278,7 +279,7 @@ export class OracleQueueAccountData {
 
   static decode(data: Buffer): OracleQueueAccountData {
     if (!data.slice(0, 8).equals(OracleQueueAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = OracleQueueAccountData.layout.decode(data.slice(8));

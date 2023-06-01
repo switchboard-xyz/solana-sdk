@@ -1,12 +1,12 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
 import {
   TransactionInstruction,
   PublicKey,
   AccountMeta,
-} from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CrankPopV2Args {
   params: types.CrankPopParamsV2Fields;
@@ -24,7 +24,7 @@ export interface CrankPopV2Accounts {
   mint: PublicKey;
 }
 
-export const layout = borsh.struct([types.CrankPopParamsV2.layout('params')]);
+export const layout = borsh.struct([types.CrankPopParamsV2.layout("params")]);
 
 export function crankPopV2(
   program: SwitchboardProgram,

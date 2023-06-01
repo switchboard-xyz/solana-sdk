@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AggregatorAccountDataFields {
   /** Name of the aggregator to store on-chain. */
@@ -233,41 +234,41 @@ export class AggregatorAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.array(borsh.u8(), 128, 'metadata'),
-    borsh.array(borsh.u8(), 32, 'reserved1'),
-    borsh.publicKey('queuePubkey'),
-    borsh.u32('oracleRequestBatchSize'),
-    borsh.u32('minOracleResults'),
-    borsh.u32('minJobResults'),
-    borsh.u32('minUpdateDelaySeconds'),
-    borsh.i64('startAfter'),
-    types.SwitchboardDecimal.layout('varianceThreshold'),
-    borsh.i64('forceReportPeriod'),
-    borsh.i64('expiration'),
-    borsh.u64('consecutiveFailureCount'),
-    borsh.i64('nextAllowedUpdateTime'),
-    borsh.bool('isLocked'),
-    borsh.publicKey('crankPubkey'),
-    types.AggregatorRound.layout('latestConfirmedRound'),
-    types.AggregatorRound.layout('currentRound'),
-    borsh.array(borsh.publicKey(), 16, 'jobPubkeysData'),
-    borsh.array(types.Hash.layout(), 16, 'jobHashes'),
-    borsh.u32('jobPubkeysSize'),
-    borsh.array(borsh.u8(), 32, 'jobsChecksum'),
-    borsh.publicKey('authority'),
-    borsh.publicKey('historyBuffer'),
-    types.SwitchboardDecimal.layout('previousConfirmedRoundResult'),
-    borsh.u64('previousConfirmedRoundSlot'),
-    borsh.bool('disableCrank'),
-    borsh.array(borsh.u8(), 16, 'jobWeights'),
-    borsh.i64('creationTimestamp'),
-    types.AggregatorResolutionMode.layout('resolutionMode'),
-    borsh.u32('basePriorityFee'),
-    borsh.u32('priorityFeeBump'),
-    borsh.u32('priorityFeeBumpPeriod'),
-    borsh.u32('maxPriorityFeeMultiplier'),
-    borsh.array(borsh.u8(), 122, 'ebuf'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.array(borsh.u8(), 128, "metadata"),
+    borsh.array(borsh.u8(), 32, "reserved1"),
+    borsh.publicKey("queuePubkey"),
+    borsh.u32("oracleRequestBatchSize"),
+    borsh.u32("minOracleResults"),
+    borsh.u32("minJobResults"),
+    borsh.u32("minUpdateDelaySeconds"),
+    borsh.i64("startAfter"),
+    types.SwitchboardDecimal.layout("varianceThreshold"),
+    borsh.i64("forceReportPeriod"),
+    borsh.i64("expiration"),
+    borsh.u64("consecutiveFailureCount"),
+    borsh.i64("nextAllowedUpdateTime"),
+    borsh.bool("isLocked"),
+    borsh.publicKey("crankPubkey"),
+    types.AggregatorRound.layout("latestConfirmedRound"),
+    types.AggregatorRound.layout("currentRound"),
+    borsh.array(borsh.publicKey(), 16, "jobPubkeysData"),
+    borsh.array(types.Hash.layout(), 16, "jobHashes"),
+    borsh.u32("jobPubkeysSize"),
+    borsh.array(borsh.u8(), 32, "jobsChecksum"),
+    borsh.publicKey("authority"),
+    borsh.publicKey("historyBuffer"),
+    types.SwitchboardDecimal.layout("previousConfirmedRoundResult"),
+    borsh.u64("previousConfirmedRoundSlot"),
+    borsh.bool("disableCrank"),
+    borsh.array(borsh.u8(), 16, "jobWeights"),
+    borsh.i64("creationTimestamp"),
+    types.AggregatorResolutionMode.layout("resolutionMode"),
+    borsh.u32("basePriorityFee"),
+    borsh.u32("priorityFeeBump"),
+    borsh.u32("priorityFeeBumpPeriod"),
+    borsh.u32("maxPriorityFeeMultiplier"),
+    borsh.array(borsh.u8(), 122, "ebuf"),
   ]);
 
   constructor(fields: AggregatorAccountDataFields) {
@@ -294,7 +295,9 @@ export class AggregatorAccountData {
     });
     this.currentRound = new types.AggregatorRound({ ...fields.currentRound });
     this.jobPubkeysData = fields.jobPubkeysData;
-    this.jobHashes = fields.jobHashes.map(item => new types.Hash({ ...item }));
+    this.jobHashes = fields.jobHashes.map(
+      (item) => new types.Hash({ ...item })
+    );
     this.jobPubkeysSize = fields.jobPubkeysSize;
     this.jobsChecksum = fields.jobsChecksum;
     this.authority = fields.authority;
@@ -336,7 +339,7 @@ export class AggregatorAccountData {
   ): Promise<Array<AggregatorAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -350,7 +353,7 @@ export class AggregatorAccountData {
 
   static decode(data: Buffer): AggregatorAccountData {
     if (!data.slice(0, 8).equals(AggregatorAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = AggregatorAccountData.layout.decode(data.slice(8));
@@ -426,8 +429,8 @@ export class AggregatorAccountData {
       crankPubkey: this.crankPubkey.toString(),
       latestConfirmedRound: this.latestConfirmedRound.toJSON(),
       currentRound: this.currentRound.toJSON(),
-      jobPubkeysData: this.jobPubkeysData.map(item => item.toString()),
-      jobHashes: this.jobHashes.map(item => item.toJSON()),
+      jobPubkeysData: this.jobPubkeysData.map((item) => item.toString()),
+      jobHashes: this.jobHashes.map((item) => item.toJSON()),
       jobPubkeysSize: this.jobPubkeysSize,
       jobsChecksum: this.jobsChecksum,
       authority: this.authority.toString(),
@@ -470,8 +473,8 @@ export class AggregatorAccountData {
         obj.latestConfirmedRound
       ),
       currentRound: types.AggregatorRound.fromJSON(obj.currentRound),
-      jobPubkeysData: obj.jobPubkeysData.map(item => new PublicKey(item)),
-      jobHashes: obj.jobHashes.map(item => types.Hash.fromJSON(item)),
+      jobPubkeysData: obj.jobPubkeysData.map((item) => new PublicKey(item)),
+      jobHashes: obj.jobHashes.map((item) => types.Hash.fromJSON(item)),
       jobPubkeysSize: obj.jobPubkeysSize,
       jobsChecksum: obj.jobsChecksum,
       authority: new PublicKey(obj.authority),

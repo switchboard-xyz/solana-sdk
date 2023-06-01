@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CrankAccountDataFields {
   /** Name of the crank to store on-chain. */
@@ -65,14 +66,14 @@ export class CrankAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 32, 'name'),
-    borsh.array(borsh.u8(), 64, 'metadata'),
-    borsh.publicKey('queuePubkey'),
-    borsh.u32('pqSize'),
-    borsh.u32('maxRows'),
-    borsh.u8('jitterModifier'),
-    borsh.array(borsh.u8(), 255, 'ebuf'),
-    borsh.publicKey('dataBuffer'),
+    borsh.array(borsh.u8(), 32, "name"),
+    borsh.array(borsh.u8(), 64, "metadata"),
+    borsh.publicKey("queuePubkey"),
+    borsh.u32("pqSize"),
+    borsh.u32("maxRows"),
+    borsh.u8("jitterModifier"),
+    borsh.array(borsh.u8(), 255, "ebuf"),
+    borsh.publicKey("dataBuffer"),
   ]);
 
   constructor(fields: CrankAccountDataFields) {
@@ -108,7 +109,7 @@ export class CrankAccountData {
   ): Promise<Array<CrankAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -122,7 +123,7 @@ export class CrankAccountData {
 
   static decode(data: Buffer): CrankAccountData {
     if (!data.slice(0, 8).equals(CrankAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = CrankAccountData.layout.decode(data.slice(8));

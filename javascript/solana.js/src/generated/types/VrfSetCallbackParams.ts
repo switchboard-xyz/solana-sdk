@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface VrfSetCallbackParamsFields {
   callback: types.CallbackFields;
@@ -20,7 +20,7 @@ export class VrfSetCallbackParams {
   }
 
   static layout(property?: string) {
-    return borsh.struct([types.Callback.layout('callback')], property);
+    return borsh.struct([types.Callback.layout("callback")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

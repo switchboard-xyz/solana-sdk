@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface ProgramConfigParamsFields {
   token: PublicKey;
@@ -38,11 +38,11 @@ export class ProgramConfigParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.publicKey('token'),
-        borsh.u8('bump'),
-        borsh.publicKey('daoMint'),
-        borsh.vec(borsh.array(borsh.u8(), 32), 'addEnclaves'),
-        borsh.vec(borsh.array(borsh.u8(), 32), 'rmEnclaves'),
+        borsh.publicKey("token"),
+        borsh.u8("bump"),
+        borsh.publicKey("daoMint"),
+        borsh.vec(borsh.array(borsh.u8(), 32), "addEnclaves"),
+        borsh.vec(borsh.array(borsh.u8(), 32), "rmEnclaves"),
       ],
       property
     );

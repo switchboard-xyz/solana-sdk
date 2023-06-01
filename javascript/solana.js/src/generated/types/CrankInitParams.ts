@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface CrankInitParamsFields {
   name: Uint8Array;
@@ -29,7 +30,7 @@ export class CrankInitParams {
 
   static layout(property?: string) {
     return borsh.struct(
-      [borsh.vecU8('name'), borsh.vecU8('metadata'), borsh.u32('crankSize')],
+      [borsh.vecU8("name"), borsh.vecU8("metadata"), borsh.u32("crankSize")],
       property
     );
   }

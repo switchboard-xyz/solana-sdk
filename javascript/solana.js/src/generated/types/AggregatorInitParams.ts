@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface AggregatorInitParamsFields {
   name: Array<number>;
@@ -68,18 +68,18 @@ export class AggregatorInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.array(borsh.u8(), 32, 'name'),
-        borsh.array(borsh.u8(), 128, 'metadata'),
-        borsh.u32('batchSize'),
-        borsh.u32('minOracleResults'),
-        borsh.u32('minJobResults'),
-        borsh.u32('minUpdateDelaySeconds'),
-        borsh.i64('startAfter'),
-        types.BorshDecimal.layout('varianceThreshold'),
-        borsh.i64('forceReportPeriod'),
-        borsh.i64('expiration'),
-        borsh.u8('stateBump'),
-        borsh.bool('disableCrank'),
+        borsh.array(borsh.u8(), 32, "name"),
+        borsh.array(borsh.u8(), 128, "metadata"),
+        borsh.u32("batchSize"),
+        borsh.u32("minOracleResults"),
+        borsh.u32("minJobResults"),
+        borsh.u32("minUpdateDelaySeconds"),
+        borsh.i64("startAfter"),
+        types.BorshDecimal.layout("varianceThreshold"),
+        borsh.i64("forceReportPeriod"),
+        borsh.i64("expiration"),
+        borsh.u8("stateBump"),
+        borsh.bool("disableCrank"),
       ],
       property
     );

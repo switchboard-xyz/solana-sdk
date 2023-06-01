@@ -1,22 +1,22 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface StatusNoneJSON {
-  kind: 'StatusNone';
+  kind: "StatusNone";
 }
 
 export class StatusNone {
   static readonly discriminator = 0;
-  static readonly kind = 'StatusNone';
+  static readonly kind = "StatusNone";
   readonly discriminator = 0;
-  readonly kind = 'StatusNone';
+  readonly kind = "StatusNone";
 
   toJSON(): StatusNoneJSON {
     return {
-      kind: 'StatusNone',
+      kind: "StatusNone",
     };
   }
 
@@ -28,18 +28,18 @@ export class StatusNone {
 }
 
 export interface StatusRequestingJSON {
-  kind: 'StatusRequesting';
+  kind: "StatusRequesting";
 }
 
 export class StatusRequesting {
   static readonly discriminator = 1;
-  static readonly kind = 'StatusRequesting';
+  static readonly kind = "StatusRequesting";
   readonly discriminator = 1;
-  readonly kind = 'StatusRequesting';
+  readonly kind = "StatusRequesting";
 
   toJSON(): StatusRequestingJSON {
     return {
-      kind: 'StatusRequesting',
+      kind: "StatusRequesting",
     };
   }
 
@@ -51,18 +51,18 @@ export class StatusRequesting {
 }
 
 export interface StatusVerifyingJSON {
-  kind: 'StatusVerifying';
+  kind: "StatusVerifying";
 }
 
 export class StatusVerifying {
   static readonly discriminator = 2;
-  static readonly kind = 'StatusVerifying';
+  static readonly kind = "StatusVerifying";
   readonly discriminator = 2;
-  readonly kind = 'StatusVerifying';
+  readonly kind = "StatusVerifying";
 
   toJSON(): StatusVerifyingJSON {
     return {
-      kind: 'StatusVerifying',
+      kind: "StatusVerifying",
     };
   }
 
@@ -74,18 +74,18 @@ export class StatusVerifying {
 }
 
 export interface StatusVerifiedJSON {
-  kind: 'StatusVerified';
+  kind: "StatusVerified";
 }
 
 export class StatusVerified {
   static readonly discriminator = 3;
-  static readonly kind = 'StatusVerified';
+  static readonly kind = "StatusVerified";
   readonly discriminator = 3;
-  readonly kind = 'StatusVerified';
+  readonly kind = "StatusVerified";
 
   toJSON(): StatusVerifiedJSON {
     return {
-      kind: 'StatusVerified',
+      kind: "StatusVerified",
     };
   }
 
@@ -97,18 +97,18 @@ export class StatusVerified {
 }
 
 export interface StatusCallbackSuccessJSON {
-  kind: 'StatusCallbackSuccess';
+  kind: "StatusCallbackSuccess";
 }
 
 export class StatusCallbackSuccess {
   static readonly discriminator = 4;
-  static readonly kind = 'StatusCallbackSuccess';
+  static readonly kind = "StatusCallbackSuccess";
   readonly discriminator = 4;
-  readonly kind = 'StatusCallbackSuccess';
+  readonly kind = "StatusCallbackSuccess";
 
   toJSON(): StatusCallbackSuccessJSON {
     return {
-      kind: 'StatusCallbackSuccess',
+      kind: "StatusCallbackSuccess",
     };
   }
 
@@ -120,18 +120,18 @@ export class StatusCallbackSuccess {
 }
 
 export interface StatusVerifyFailureJSON {
-  kind: 'StatusVerifyFailure';
+  kind: "StatusVerifyFailure";
 }
 
 export class StatusVerifyFailure {
   static readonly discriminator = 5;
-  static readonly kind = 'StatusVerifyFailure';
+  static readonly kind = "StatusVerifyFailure";
   readonly discriminator = 5;
-  readonly kind = 'StatusVerifyFailure';
+  readonly kind = "StatusVerifyFailure";
 
   toJSON(): StatusVerifyFailureJSON {
     return {
-      kind: 'StatusVerifyFailure',
+      kind: "StatusVerifyFailure",
     };
   }
 
@@ -144,50 +144,50 @@ export class StatusVerifyFailure {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function fromDecoded(obj: any): types.VrfStatusKind {
-  if (typeof obj !== 'object') {
-    throw new Error('Invalid enum object');
+  if (typeof obj !== "object") {
+    throw new Error("Invalid enum object");
   }
 
-  if ('StatusNone' in obj) {
+  if ("StatusNone" in obj) {
     return new StatusNone();
   }
-  if ('StatusRequesting' in obj) {
+  if ("StatusRequesting" in obj) {
     return new StatusRequesting();
   }
-  if ('StatusVerifying' in obj) {
+  if ("StatusVerifying" in obj) {
     return new StatusVerifying();
   }
-  if ('StatusVerified' in obj) {
+  if ("StatusVerified" in obj) {
     return new StatusVerified();
   }
-  if ('StatusCallbackSuccess' in obj) {
+  if ("StatusCallbackSuccess" in obj) {
     return new StatusCallbackSuccess();
   }
-  if ('StatusVerifyFailure' in obj) {
+  if ("StatusVerifyFailure" in obj) {
     return new StatusVerifyFailure();
   }
 
-  throw new Error('Invalid enum object');
+  throw new Error("Invalid enum object");
 }
 
 export function fromJSON(obj: types.VrfStatusJSON): types.VrfStatusKind {
   switch (obj.kind) {
-    case 'StatusNone': {
+    case "StatusNone": {
       return new StatusNone();
     }
-    case 'StatusRequesting': {
+    case "StatusRequesting": {
       return new StatusRequesting();
     }
-    case 'StatusVerifying': {
+    case "StatusVerifying": {
       return new StatusVerifying();
     }
-    case 'StatusVerified': {
+    case "StatusVerified": {
       return new StatusVerified();
     }
-    case 'StatusCallbackSuccess': {
+    case "StatusCallbackSuccess": {
       return new StatusCallbackSuccess();
     }
-    case 'StatusVerifyFailure': {
+    case "StatusVerifyFailure": {
       return new StatusVerifyFailure();
     }
   }
@@ -195,12 +195,12 @@ export function fromJSON(obj: types.VrfStatusJSON): types.VrfStatusKind {
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
-    borsh.struct([], 'StatusNone'),
-    borsh.struct([], 'StatusRequesting'),
-    borsh.struct([], 'StatusVerifying'),
-    borsh.struct([], 'StatusVerified'),
-    borsh.struct([], 'StatusCallbackSuccess'),
-    borsh.struct([], 'StatusVerifyFailure'),
+    borsh.struct([], "StatusNone"),
+    borsh.struct([], "StatusRequesting"),
+    borsh.struct([], "StatusVerifying"),
+    borsh.struct([], "StatusVerified"),
+    borsh.struct([], "StatusCallbackSuccess"),
+    borsh.struct([], "StatusVerifyFailure"),
   ]);
   if (property !== undefined) {
     return ret.replicate(property);

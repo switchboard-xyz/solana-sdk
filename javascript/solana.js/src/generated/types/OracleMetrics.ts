@@ -1,8 +1,8 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh';
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
 
 export interface OracleMetricsFields {
   /** Number of consecutive successful update request. */
@@ -81,15 +81,15 @@ export class OracleMetrics {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u64('consecutiveSuccess'),
-        borsh.u64('consecutiveError'),
-        borsh.u64('consecutiveDisagreement'),
-        borsh.u64('consecutiveLateResponse'),
-        borsh.u64('consecutiveFailure'),
-        borsh.u128('totalSuccess'),
-        borsh.u128('totalError'),
-        borsh.u128('totalDisagreement'),
-        borsh.u128('totalLateResponse'),
+        borsh.u64("consecutiveSuccess"),
+        borsh.u64("consecutiveError"),
+        borsh.u64("consecutiveDisagreement"),
+        borsh.u64("consecutiveLateResponse"),
+        borsh.u64("consecutiveFailure"),
+        borsh.u128("totalSuccess"),
+        borsh.u128("totalError"),
+        borsh.u128("totalDisagreement"),
+        borsh.u128("totalLateResponse"),
       ],
       property
     );

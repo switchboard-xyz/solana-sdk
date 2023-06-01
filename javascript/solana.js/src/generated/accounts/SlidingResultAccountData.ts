@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import { PublicKey, Connection } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SlidingResultAccountDataFields {
   data: Array<types.SlidingWindowElementFields>;
@@ -26,14 +27,14 @@ export class SlidingResultAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(types.SlidingWindowElement.layout(), 16, 'data'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 512, 'ebuf'),
+    borsh.array(types.SlidingWindowElement.layout(), 16, "data"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 512, "ebuf"),
   ]);
 
   constructor(fields: SlidingResultAccountDataFields) {
     this.data = fields.data.map(
-      item => new types.SlidingWindowElement({ ...item })
+      (item) => new types.SlidingWindowElement({ ...item })
     );
     this.bump = fields.bump;
     this.ebuf = fields.ebuf;
@@ -61,7 +62,7 @@ export class SlidingResultAccountData {
   ): Promise<Array<SlidingResultAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -75,7 +76,7 @@ export class SlidingResultAccountData {
 
   static decode(data: Buffer): SlidingResultAccountData {
     if (!data.slice(0, 8).equals(SlidingResultAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = SlidingResultAccountData.layout.decode(data.slice(8));
@@ -93,7 +94,7 @@ export class SlidingResultAccountData {
 
   toJSON(): SlidingResultAccountDataJSON {
     return {
-      data: this.data.map(item => item.toJSON()),
+      data: this.data.map((item) => item.toJSON()),
       bump: this.bump,
       ebuf: this.ebuf,
     };
@@ -101,7 +102,7 @@ export class SlidingResultAccountData {
 
   static fromJSON(obj: SlidingResultAccountDataJSON): SlidingResultAccountData {
     return new SlidingResultAccountData({
-      data: obj.data.map(item => types.SlidingWindowElement.fromJSON(item)),
+      data: obj.data.map((item) => types.SlidingWindowElement.fromJSON(item)),
       bump: obj.bump,
       ebuf: obj.ebuf,
     });
