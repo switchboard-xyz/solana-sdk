@@ -26,7 +26,7 @@ import {
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   TransactionSignature,
 } from "@solana/web3.js";
-import { promiseWithTimeout } from "@switchboard-xyz/common";
+import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 
 /**
  * Account holding a Verifiable Random Function result with a callback instruction for consuming on-chain pseudo-randomness.
@@ -390,7 +390,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
 
   /** Return parsed transactions for a VRF request */
   public async getCallbackTransactions(
-    requestSlot?: anchor.BN,
+    requestSlot?: BN,
     txnLimit = 50
   ): Promise<Array<ParsedTransactionWithMeta>> {
     const slot =
@@ -597,11 +597,8 @@ export class VrfAccount extends Account<types.VrfAccountData> {
    *
    * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
    */
-  public async nextResult(
-    roundId?: anchor.BN,
-    timeout = 30000
-  ): Promise<VrfResult> {
-    let id: anchor.BN;
+  public async nextResult(roundId?: BN, timeout = 30000): Promise<VrfResult> {
+    let id: BN;
     if (roundId) {
       id = roundId;
     } else {
@@ -610,7 +607,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         id = vrf.counter;
       } else {
         // wait for the next round
-        id = vrf.counter.add(new anchor.BN(1));
+        id = vrf.counter.add(new BN(1));
       }
     }
     let ws: number | undefined;
@@ -798,7 +795,7 @@ export interface VrfSetCallbackParams {
 
 export interface VrfProveAndVerifyParams {
   vrf: types.VrfAccountData;
-  counter?: anchor.BN;
+  counter?: BN;
   idx?: number;
   proof: string;
   oraclePubkey: PublicKey;

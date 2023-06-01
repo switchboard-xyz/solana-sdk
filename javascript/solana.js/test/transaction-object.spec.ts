@@ -6,9 +6,9 @@ import {
   ixnsEqual,
   TransactionObject,
   TransactionObjectOptions,
-} from "../src";
+} from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import {
   AccountMeta,

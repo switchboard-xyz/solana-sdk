@@ -14,7 +14,6 @@ import {
 } from "./account.js";
 import { AggregatorAccount } from "./aggregatorAccount.js";
 
-import * as anchor from "@coral-xyz/anchor";
 import {
   Commitment,
   Keypair,
@@ -94,7 +93,7 @@ export class AggregatorHistoryBuffer extends Account<
         types.AggregatorHistoryRow.layout().decode(buffer, i)
       );
 
-      if (row.timestamp.eq(new anchor.BN(0))) {
+      if (row.timestamp.eq(new BN(0))) {
         break;
       }
 

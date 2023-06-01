@@ -1,14 +1,14 @@
 import "mocha";
 
-import * as sbv2 from "../src";
+import * as sbv2 from "../src/index.js";
 import {
   AggregatorAccount,
   JobAccount,
   LeaseAccount,
   QueueAccount,
-} from "../src";
+} from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";

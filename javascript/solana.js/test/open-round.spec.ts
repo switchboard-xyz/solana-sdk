@@ -1,16 +1,16 @@
 import "mocha";
 
-import * as sbv2 from "../src";
+import { PermitOracleQueueUsage } from "../src/generated/types/SwitchboardPermission.js";
+import * as sbv2 from "../src/index.js";
 import {
   AggregatorAccount,
   OracleAccount,
   PermissionAccount,
   QueueAccount,
   types,
-} from "../src";
-import { PermitOracleQueueUsage } from "../src/generated/types/SwitchboardPermission";
+} from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair } from "@solana/web3.js";
 import { Big, OracleJob, sleep } from "@switchboard-xyz/common";

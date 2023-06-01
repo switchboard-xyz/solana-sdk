@@ -17,6 +17,7 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 /**
  * Account type representing Switchboard global program state.
@@ -257,7 +258,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
     program: SwitchboardProgram,
     to: PublicKey,
     authority: anchor.web3.Keypair,
-    params: { stateBump: number; amount: anchor.BN }
+    params: { stateBump: number; amount: BN }
   ): Promise<TransactionSignature> {
     const [account, bump] = ProgramStateAccount.fromSeed(program);
     const vault = (await account.loadData()).tokenVault;

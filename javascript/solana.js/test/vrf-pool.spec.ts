@@ -8,9 +8,9 @@ import {
   types,
   VrfLiteAccount,
   VrfPoolAccount,
-} from "../src";
+} from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { sleep } from "@switchboard-xyz/common";

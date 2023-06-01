@@ -1,5 +1,5 @@
 import * as errors from "../errors.js";
-import { bufferRelayerSaveResult } from "../generated";
+import { bufferRelayerSaveResult } from "../generated/index.js";
 import * as types from "../generated/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {

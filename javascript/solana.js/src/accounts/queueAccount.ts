@@ -220,10 +220,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               varianceToleranceMultiplier: SwitchboardDecimal.fromBig(
                 new Big(params.varianceToleranceMultiplier ?? 2)
               ),
-              consecutiveFeedFailureLimit: new anchor.BN(
+              consecutiveFeedFailureLimit: new BN(
                 params.consecutiveFeedFailureLimit ?? 1000
               ),
-              consecutiveOracleFailureLimit: new anchor.BN(
+              consecutiveOracleFailureLimit: new BN(
                 params.consecutiveOracleFailureLimit ?? 1000
               ),
               queueSize: queueSize,
@@ -1280,11 +1280,11 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               minStake: minStake,
               oracleTimeout: params.oracleTimeout ?? null,
               consecutiveFeedFailureLimit: params.consecutiveFeedFailureLimit
-                ? new anchor.BN(params.consecutiveFeedFailureLimit)
+                ? new BN(params.consecutiveFeedFailureLimit)
                 : null,
               consecutiveOracleFailureLimit:
                 params.consecutiveOracleFailureLimit
-                  ? new anchor.BN(params.consecutiveOracleFailureLimit)
+                  ? new BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
               enableTeeOnly: params.enableTeeOnly ?? false,

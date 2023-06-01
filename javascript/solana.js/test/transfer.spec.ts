@@ -8,9 +8,9 @@ import {
   QueueAccount,
   SwitchboardNetwork,
   types,
-} from "../src";
+} from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";

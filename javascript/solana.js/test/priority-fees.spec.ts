@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import "mocha";
 
-import { AggregatorAccount, types } from "../src";
+import { AggregatorAccount, types } from "../src/index.js";
 
 import { BN } from "@switchboard-xyz/common";
 import assert from "assert";

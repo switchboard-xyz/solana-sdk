@@ -7,9 +7,9 @@ import {
   QueueAccount,
   SolanaClock,
   types,
-} from "../src";
+} from "../src/index.js";
 
-import { createFeed, createFeeds, setupTest, TestContext } from "./utils";
+import { createFeed, createFeeds, setupTest, TestContext } from "./utils.js";
 
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { BN, promiseWithTimeout, sleep } from "@switchboard-xyz/common";

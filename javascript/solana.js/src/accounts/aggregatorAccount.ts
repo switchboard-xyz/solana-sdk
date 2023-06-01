@@ -256,12 +256,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
             minOracleResults: params.minRequiredOracleResults,
             minJobResults: params.minRequiredJobResults,
             minUpdateDelaySeconds: params.minUpdateDelaySeconds,
-            startAfter: new anchor.BN(params.startAfter ?? 0),
+            startAfter: new BN(params.startAfter ?? 0),
             varianceThreshold: types.SwitchboardDecimal.fromBig(
               new Big(params.varianceThreshold ?? 0)
             ).borsh,
-            forceReportPeriod: new anchor.BN(params.forceReportPeriod ?? 0),
-            expiration: new anchor.BN(params.expiration ?? 0),
+            forceReportPeriod: new BN(params.forceReportPeriod ?? 0),
+            expiration: new BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             disableCrank: params.disableCrank ?? false,
           },
@@ -794,7 +794,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    *
    * @param aggregator The pre-fetched aggregator account data.
    *
-   * @return The latest feed timestamp as an anchor.BN instance.
+   * @return The latest feed timestamp as an BN instance.
    *
    * @throws Error if the aggregator currently holds no value or no successful rounds have been confirmed yet.
    *
@@ -807,7 +807,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    */
   public static decodeLatestTimestamp(
     aggregator: types.AggregatorAccountData
-  ): anchor.BN {
+  ): BN {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
       throw new Error("Aggregator currently holds no value.");
     }
@@ -2059,7 +2059,7 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
    * @throws {string} when the timeout interval is exceeded or when the latestConfirmedRound.roundOpenSlot exceeds the target roundOpenSlot
    */
   async nextRound(
-    roundOpenSlot?: anchor.BN,
+    roundOpenSlot?: BN,
     timeout = 30000
   ): Promise<types.AggregatorAccountData> {
     const slot =

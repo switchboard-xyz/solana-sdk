@@ -8,8 +8,8 @@ import {
   OnAccountChangeCallback,
 } from "./account.js";
 
-import * as anchor from "@coral-xyz/anchor";
 import { AccountInfo, Commitment, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 /**
  * Account holding a priority queue of aggregators and their next available update time.
@@ -81,7 +81,7 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
         break;
       }
 
-      const nextTimestamp = new anchor.BN(rowBuf.slice(32, 40), "le");
+      const nextTimestamp = new BN(rowBuf.slice(32, 40), "le");
       pqData.push(new types.CrankRow({ pubkey, nextTimestamp }));
     }
 

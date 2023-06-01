@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import "mocha";
 
-import * as sbv2 from "../src";
-import { CrankAccount, QueueAccount } from "../src";
+import * as sbv2 from "../src/index.js";
+import { CrankAccount, QueueAccount } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob, sleep } from "@switchboard-xyz/common";

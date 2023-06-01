@@ -19,7 +19,7 @@ import {
   SystemProgram,
   TransactionSignature,
 } from "@solana/web3.js";
-import { OracleJob, toUtf8 } from "@switchboard-xyz/common";
+import { BN, OracleJob, toUtf8 } from "@switchboard-xyz/common";
 
 /**
  * Account type storing a list of SwitchboardTasks {@linkcode OracleJob.Task} dictating how to source data off-chain.
@@ -157,7 +157,7 @@ export class JobAccount extends Account<types.JobAccountData> {
         {
           params: {
             name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
-            expiration: new anchor.BN(params.expiration ?? 0),
+            expiration: new BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             data: params.data,
             size: params.data.byteLength,
@@ -196,7 +196,7 @@ export class JobAccount extends Account<types.JobAccountData> {
         {
           params: {
             name: [...Buffer.from(params.name ?? "", "utf8").slice(0, 32)],
-            expiration: new anchor.BN(params.expiration ?? 0),
+            expiration: new BN(params.expiration ?? 0),
             stateBump: program.programState.bump,
             data: new Uint8Array(),
             size: params.data.byteLength,

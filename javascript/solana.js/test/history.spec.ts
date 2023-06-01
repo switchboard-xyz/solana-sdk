@@ -1,8 +1,8 @@
 import "mocha";
 
-import { AggregatorHistoryBuffer } from "../src";
+import { AggregatorHistoryBuffer } from "../src/index.js";
 
-import HistoryBufferAccountInfo from "./data/history_buffer_account_info.json";
+import HistoryBufferAccountInfo from "./data/history_buffer_account_info.json" assert { type: "json" };
 
 import { BN } from "@switchboard-xyz/common";
 import assert from "assert";

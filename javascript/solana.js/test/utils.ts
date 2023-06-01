@@ -1,4 +1,3 @@
-import * as sbv2 from "../src";
 import {
   AggregatorAccount,
   CreateQueueFeedParams,
@@ -6,7 +5,8 @@ import {
   SBV2_DEVNET_PID,
   SBV2_MAINNET_PID,
   TransactionObject,
-} from "../src";
+} from "../src/index.js";
+import * as sbv2 from "../src/index.js";
 
 import {
   clusterApiUrl,

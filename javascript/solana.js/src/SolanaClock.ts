@@ -1,21 +1,21 @@
-import * as anchor from "@coral-xyz/anchor";
 import * as borsh from "@coral-xyz/borsh";
 import { Connection, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common";
 
 export interface SolanaClockDataFields {
-  slot: anchor.BN;
-  epochStartTimestamp: anchor.BN;
-  epoch: anchor.BN;
-  leaderScheduleEpoch: anchor.BN;
-  unixTimestamp: anchor.BN;
+  slot: BN;
+  epochStartTimestamp: BN;
+  epoch: BN;
+  leaderScheduleEpoch: BN;
+  unixTimestamp: BN;
 }
 
 export class SolanaClock {
-  slot: anchor.BN;
-  epochStartTimestamp: anchor.BN;
-  epoch: anchor.BN;
-  leaderScheduleEpoch: anchor.BN;
-  unixTimestamp: anchor.BN;
+  slot: BN;
+  epochStartTimestamp: BN;
+  epoch: BN;
+  leaderScheduleEpoch: BN;
+  unixTimestamp: BN;
 
   static readonly layout = borsh.struct([
     borsh.u64("slot"),
@@ -45,7 +45,7 @@ export class SolanaClock {
     });
   }
 
-  static decodeUnixTimestamp(data: Buffer): anchor.BN {
+  static decodeUnixTimestamp(data: Buffer): BN {
     return borsh.u64("unixTimestamp").decode(data, data.byteLength - 8);
   }
 

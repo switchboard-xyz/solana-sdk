@@ -1,16 +1,16 @@
 import "mocha";
 
-import * as sbv2 from "../src";
+import { SwitchboardPermission } from "../src/generated/index.js";
 import {
   OracleAccount,
   PermissionAccount,
   QueueAccount,
   TransactionObject,
   types,
-} from "../src";
-import { SwitchboardPermission } from "../src/generated";
+} from "../src/index.js";
+import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils";
+import { setupTest, TestContext } from "./utils.js";
 
 import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
 import assert from "assert";
