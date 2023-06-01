@@ -169,8 +169,7 @@ runs:
       uses: actions/cache@v3
       with:
         key:
-          ${{ runner.os }}-Solana.js-${{
-          hashFiles('javascript/solana.js/src/**') }}
+          ${{ runner.os }}-Solana.js-${{ hashFiles('javascript/solana.js/**') }}
         path: |
           javascript/solana.js/lib
     - name: Build solana.js
