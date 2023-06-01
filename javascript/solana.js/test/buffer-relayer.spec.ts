@@ -1,19 +1,19 @@
-import 'mocha';
+import "mocha";
 
 import {
   BufferRelayerAccount,
   OracleAccount,
   QueueAccount,
   types,
-} from '../src';
+} from "../src";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils";
 
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('BufferRelayer Tests', () => {
+describe("BufferRelayer Tests", () => {
   let ctx: TestContext;
 
   const queueAuthority = Keypair.generate();
@@ -27,10 +27,10 @@ describe('BufferRelayer Tests', () => {
     JSON.stringify({
       userId: 1,
       id: 1,
-      title: 'delectus aut autem',
+      title: "delectus aut autem",
       completed: false,
     }),
-    'utf-8'
+    "utf-8"
   );
 
   let userTokenAddress: PublicKey;
@@ -39,8 +39,8 @@ describe('BufferRelayer Tests', () => {
     ctx = await setupTest();
 
     [queueAccount] = await QueueAccount.create(ctx.program, {
-      name: 'buffer-relayer-queue',
-      metadata: '',
+      name: "buffer-relayer-queue",
+      metadata: "",
       authority: queueAuthority.publicKey,
       queueSize: 1,
       reward: 0,
@@ -53,8 +53,8 @@ describe('BufferRelayer Tests', () => {
     });
 
     [oracleAccount] = await queueAccount.createOracle({
-      name: 'oracle-1',
-      metadata: 'oracle-1',
+      name: "oracle-1",
+      metadata: "oracle-1",
       queueAuthority,
       enable: true,
     });
@@ -63,7 +63,7 @@ describe('BufferRelayer Tests', () => {
 
     assert(
       oracle.oracleAuthority.equals(ctx.payer.publicKey),
-      'Incorrect oracle authority'
+      "Incorrect oracle authority"
     );
 
     [userTokenAddress] = await ctx.program.mint.getOrCreateWrappedUser(
@@ -72,22 +72,22 @@ describe('BufferRelayer Tests', () => {
     );
   });
 
-  it('Creates a Buffer Relayer', async () => {
+  it("Creates a Buffer Relayer", async () => {
     [bufferAccount] = await queueAccount.createBufferRelayer({
-      name: 'My Buffer',
+      name: "My Buffer",
       minUpdateDelaySeconds: 30,
       enable: true,
       queueAuthorityPubkey: queueAuthority.publicKey,
       queueAuthority: queueAuthority,
       job: {
-        name: 'Buffer Job',
+        name: "Buffer Job",
         data: Buffer.from(
           OracleJob.encodeDelimited(
             OracleJob.create({
               tasks: [
                 OracleJob.Task.create({
                   httpTask: OracleJob.HttpTask.create({
-                    url: 'https://jsonplaceholder.typicode.com/todos/1',
+                    url: "https://jsonplaceholder.typicode.com/todos/1",
                   }),
                 }),
               ],
@@ -98,7 +98,7 @@ describe('BufferRelayer Tests', () => {
     });
   });
 
-  it('Calls openRound on a BufferRelayer', async () => {
+  it("Calls openRound on a BufferRelayer", async () => {
     if (!bufferAccount) {
       throw new Error(`No BufferRelayer account`);
     }
@@ -115,7 +115,7 @@ describe('BufferRelayer Tests', () => {
     );
   });
 
-  it('Calls saveResult on a BufferRelayer', async () => {
+  it("Calls saveResult on a BufferRelayer", async () => {
     if (!bufferAccount) {
       throw new Error(`No BufferRelayer account`);
     }

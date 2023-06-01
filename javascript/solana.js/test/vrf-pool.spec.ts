@@ -1,4 +1,4 @@
-import 'mocha';
+import "mocha";
 
 import {
   OracleAccount,
@@ -8,16 +8,16 @@ import {
   types,
   VrfLiteAccount,
   VrfPoolAccount,
-} from '../src';
+} from "../src";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils";
 
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { sleep } from '@switchboard-xyz/common';
-import { NodeOracle } from '@switchboard-xyz/oracle';
-import assert from 'assert';
+import { Keypair, PublicKey } from "@solana/web3.js";
+import { sleep } from "@switchboard-xyz/common";
+import { NodeOracle } from "@switchboard-xyz/oracle";
+import assert from "assert";
 
-describe('Vrf Pool Tests', () => {
+describe("Vrf Pool Tests", () => {
   let ctx: TestContext;
 
   before(async () => {});
@@ -44,8 +44,8 @@ describe('Vrf Pool Tests', () => {
     );
 
     [queueAccount] = await QueueAccount.create(ctx.program, {
-      name: 'q1',
-      metadata: '',
+      name: "q1",
+      metadata: "",
       queueSize: 2,
       reward: 0,
       minStake: 0,
@@ -63,7 +63,7 @@ describe('Vrf Pool Tests', () => {
     );
 
     [oracle1] = await queueAccount.createOracle({
-      name: 'Oracle 1',
+      name: "Oracle 1",
       enable: true,
       queueAuthority: queueAuthorityKeypair,
     });
@@ -71,19 +71,19 @@ describe('Vrf Pool Tests', () => {
     await oracle1.loadData();
 
     nodeOracle = await NodeOracle.fromReleaseChannel({
-      releaseChannel: 'testnet',
-      chain: 'solana',
-      network: 'localnet',
-      rpcUrl: 'http://0.0.0.0:8899',
+      releaseChannel: "testnet",
+      chain: "solana",
+      network: "localnet",
+      rpcUrl: "http://0.0.0.0:8899",
       oracleKey: oracle1.publicKey.toBase58(),
-      secretPath: '~/.config/solana/id.json',
+      secretPath: "~/.config/solana/id.json",
       silent: true,
     });
 
-    chalkString('payer', ctx.program.walletPubkey.toBase58());
-    chalkString('queueAuthority', queue.authority.toBase58());
-    chalkString('QueueAccount', queueAccount.publicKey.toBase58());
-    chalkString('OracleAccount', oracle1.publicKey.toBase58());
+    chalkString("payer", ctx.program.walletPubkey.toBase58());
+    chalkString("queueAuthority", queue.authority.toBase58());
+    chalkString("QueueAccount", queueAccount.publicKey.toBase58());
+    chalkString("OracleAccount", oracle1.publicKey.toBase58());
 
     await nodeOracle.startAndAwait(180); // gh actions can be slow to pull this
   });
@@ -92,27 +92,27 @@ describe('Vrf Pool Tests', () => {
     await nodeOracle?.stop();
   });
 
-  describe('Vrf Pool Tests', () => {});
+  describe("Vrf Pool Tests", () => {});
 
-  it('Creates a Vrf Pool', async () => {
+  it("Creates a Vrf Pool", async () => {
     [vrfPoolAccount] = await VrfPoolAccount.create(ctx.program, {
       maxRows: 100,
       minInterval: 60,
       queueAccount: queueAccount,
     });
-    chalkString('VrfPool', vrfPoolAccount.publicKey.toBase58());
+    chalkString("VrfPool", vrfPoolAccount.publicKey.toBase58());
     await sleep(3000);
     const vrfPool = await vrfPoolAccount.loadData();
     console.log(vrfPool.toJSON());
     assert(vrfPool.size === 0, `VrfPoolSizeMismatch`);
   });
 
-  it('Creates a VrfLiteAccount', async () => {
+  it("Creates a VrfLiteAccount", async () => {
     [vrfLiteAccount] = await queueAccount.createVrfLite({
       enable: true,
       queueAuthority: queueAuthorityKeypair,
     });
-    chalkString('VrfLite', vrfLiteAccount.publicKey.toBase58());
+    chalkString("VrfLite", vrfLiteAccount.publicKey.toBase58());
 
     const [permissionAccount] = PermissionAccount.fromSeed(
       ctx.program,
@@ -120,7 +120,7 @@ describe('Vrf Pool Tests', () => {
       queueAccount.publicKey,
       vrfLiteAccount.publicKey
     );
-    chalkString('VrfLitePermission', permissionAccount.publicKey.toBase58());
+    chalkString("VrfLitePermission", permissionAccount.publicKey.toBase58());
 
     const vrfLite = await vrfLiteAccount.loadData();
     const permission = await permissionAccount.loadData();
@@ -132,44 +132,44 @@ describe('Vrf Pool Tests', () => {
     );
   });
 
-  it('Pushes a VrfLiteAccount on to a pool', async () => {
+  it("Pushes a VrfLiteAccount on to a pool", async () => {
     const pushSig = await vrfPoolAccount.push({
       vrf: vrfLiteAccount,
     });
     const vrfPool = await vrfPoolAccount.loadData();
 
-    chalkString('Size', vrfPool.pool.length);
+    chalkString("Size", vrfPool.pool.length);
 
     assert(vrfPool.size === 1, `VrfPoolSizeMismatch`);
   });
 
-  it('Pops a VrfLiteAccount from a pool', async () => {
+  it("Pops a VrfLiteAccount from a pool", async () => {
     const popSig = await vrfPoolAccount.pop();
     const vrfPool = await vrfPoolAccount.loadData();
 
-    chalkString('Size', vrfPool.pool.length);
+    chalkString("Size", vrfPool.pool.length);
 
     assert(vrfPool.size === 0, `VrfPoolSizeMismatch`);
   });
 
-  it('Re-pushes a VrfLiteAccount on to a pool', async () => {
+  it("Re-pushes a VrfLiteAccount on to a pool", async () => {
     const pushSig = await vrfPoolAccount.push({
       vrf: vrfLiteAccount,
     });
     const vrfPool = await vrfPoolAccount.loadData();
 
-    chalkString('Size', vrfPool.pool.length);
+    chalkString("Size", vrfPool.pool.length);
 
     assert(vrfPool.size === 1, `VrfPoolSizeMismatch`);
   });
 
-  it('Adds new VRF Lite account to pool', async () => {
+  it("Adds new VRF Lite account to pool", async () => {
     const [newVrfLiteAccount] = await queueAccount.createVrfLite({
       queueAuthority: queueAuthorityKeypair,
       enable: true,
     });
     const newVrfLite = await vrfLiteAccount.loadData();
-    chalkString('New VrfLite', newVrfLiteAccount.publicKey.toBase58());
+    chalkString("New VrfLite", newVrfLiteAccount.publicKey.toBase58());
 
     // const permissionAccount = await newVrfLiteAccount.permissionAccount;
     // chalkString(
@@ -182,14 +182,14 @@ describe('Vrf Pool Tests', () => {
     });
     const vrfPool = await vrfPoolAccount.loadData();
 
-    chalkString('Size', vrfPool.pool.length);
+    chalkString("Size", vrfPool.pool.length);
 
     assert(vrfPool.size === 2, `VrfPoolSizeMismatch`);
   });
 
-  it('Requests randomness from the VRF Pool', async () => {
+  it("Requests randomness from the VRF Pool", async () => {
     chalkString(
-      'lastRequest',
+      "lastRequest",
       (await vrfLiteAccount.loadData()).requestTimestamp.toNumber()
     );
 
@@ -198,7 +198,7 @@ describe('Vrf Pool Tests', () => {
       amount: 0.1,
     });
 
-    console.log((await vrfPoolAccount.loadData()).pool.map(r => r.toJSON()));
+    console.log((await vrfPoolAccount.loadData()).pool.map((r) => r.toJSON()));
 
     const [event, signature] = await vrfPoolAccount.requestAndAwaitEvent({});
     console.log(signature);
@@ -219,28 +219,28 @@ describe('Vrf Pool Tests', () => {
     );
 
     assert(
-      !newVrfLiteState.result.every(val => val === 0),
+      !newVrfLiteState.result.every((val) => val === 0),
       `VrfLiteResultMissing`
     );
   });
 
-  it('Fails to request randomness back-to-back', async () => {
+  it("Fails to request randomness back-to-back", async () => {
     const signature = await vrfPoolAccount.request();
-    console.log('completed first request', signature);
+    console.log("completed first request", signature);
 
     await assert.rejects(async () => {
       await vrfPoolAccount.request();
-      console.log('completed second request');
+      console.log("completed second request");
     }, new RegExp(/VrfPoolRequestTooSoon|6096/g));
   });
 
-  it('Create a VrfAccount and request randomness', async () => {
+  it("Create a VrfAccount and request randomness", async () => {
     const [vrfAccount] = await queueAccount.createVrf({
       vrfKeypair: Keypair.generate(),
       callback: {
         programId: PublicKey.default,
         accounts: [],
-        ixData: Buffer.from(''),
+        ixData: Buffer.from(""),
       },
       enable: true,
       queueAuthority: queueAuthorityKeypair,
@@ -252,8 +252,8 @@ describe('Vrf Pool Tests', () => {
       vrfAccount.publicKey
     );
 
-    chalkString('VrfAccount', vrfAccount.publicKey.toBase58());
-    chalkString('PermissionAccount', permissionAccount.publicKey.toBase58());
+    chalkString("VrfAccount", vrfAccount.publicKey.toBase58());
+    chalkString("PermissionAccount", permissionAccount.publicKey.toBase58());
 
     // await sleep(3000);
 
@@ -268,21 +268,21 @@ describe('Vrf Pool Tests', () => {
     });
 
     assert(
-      newVrfState.status.kind === 'StatusVerified' ||
-        newVrfState.status.kind === 'StatusCallbackSuccess',
-      'VrfStatusMismatch'
+      newVrfState.status.kind === "StatusVerified" ||
+        newVrfState.status.kind === "StatusCallbackSuccess",
+      "VrfStatusMismatch"
     );
   });
 
-  describe('Closes VrfAccounts', () => {
-    it('Closes a VrfLite and permission account', async () => {
+  describe("Closes VrfAccounts", () => {
+    it("Closes a VrfLite and permission account", async () => {
       const [myVrfLiteAccount] = await queueAccount.createVrfLite({
         // keypair: vrfLiteKeypair,
         enable: true,
         queueAuthority: queueAuthorityKeypair,
       });
 
-      chalkString('VrfLite', myVrfLiteAccount.publicKey.toBase58());
+      chalkString("VrfLite", myVrfLiteAccount.publicKey.toBase58());
       const [permissionAccount] = PermissionAccount.fromSeed(
         ctx.program,
         queueAuthorityKeypair.publicKey,
@@ -318,13 +318,13 @@ describe('Vrf Pool Tests', () => {
       // assert(permissionAccountInfo === null, "PermissionAccount not closed");
     });
 
-    it('Create and closes a VrfAccount', async () => {
+    it("Create and closes a VrfAccount", async () => {
       const [vrfAccount] = await queueAccount.createVrf({
         vrfKeypair: Keypair.generate(),
         callback: {
           programId: PublicKey.default,
           accounts: [],
-          ixData: Buffer.from(''),
+          ixData: Buffer.from(""),
         },
         enable: true,
         queueAuthority: queueAuthorityKeypair,
@@ -336,8 +336,8 @@ describe('Vrf Pool Tests', () => {
         vrfAccount.publicKey
       );
 
-      chalkString('VrfAccount', vrfAccount.publicKey.toBase58());
-      chalkString('PermissionAccount', permissionAccount.publicKey.toBase58());
+      chalkString("VrfAccount", vrfAccount.publicKey.toBase58());
+      chalkString("PermissionAccount", permissionAccount.publicKey.toBase58());
 
       // await sleep(3000);
 
@@ -348,27 +348,27 @@ describe('Vrf Pool Tests', () => {
 
       const vrfAccountInfo = await ctx.program.connection.getAccountInfo(
         vrfAccount.publicKey,
-        'processed'
+        "processed"
       );
-      assert(vrfAccountInfo === null, 'VrfAccountNotClosed');
+      assert(vrfAccountInfo === null, "VrfAccountNotClosed");
     });
   });
 
-  describe('Cycles through a VrfPool', () => {
-    it('Creates a 10 row VrfPool and cycles through them', async () => {
+  describe("Cycles through a VrfPool", () => {
+    it("Creates a 10 row VrfPool and cycles through them", async () => {
       const POOL_SIZE = 10;
       const [bigVrfPoolAccount] = await VrfPoolAccount.create(ctx.program, {
         maxRows: POOL_SIZE,
         minInterval: 0, // no delay if ready
         queueAccount: queueAccount,
       });
-      chalkString('VrfPool', bigVrfPoolAccount.publicKey.toBase58());
+      chalkString("VrfPool", bigVrfPoolAccount.publicKey.toBase58());
       await sleep(3000);
       const initialVrfPool = await bigVrfPoolAccount.loadData();
 
       const txns: Array<[VrfLiteAccount, TransactionObject]> =
         await Promise.all(
-          Array.from(Array(POOL_SIZE).keys()).map(async n => {
+          Array.from(Array(POOL_SIZE).keys()).map(async (n) => {
             const [vrfLiteAccount, vrfLiteInit] =
               await bigVrfPoolAccount.pushNewInstruction(ctx.payer.publicKey, {
                 enable: true,
@@ -379,7 +379,7 @@ describe('Vrf Pool Tests', () => {
           })
         );
 
-      const packed = TransactionObject.pack(txns.map(t => t[1]));
+      const packed = TransactionObject.pack(txns.map((t) => t[1]));
       await TransactionObject.signAndSendAll(
         ctx.program.provider,
         packed,
@@ -394,7 +394,7 @@ describe('Vrf Pool Tests', () => {
 
       const pool = [...newVrfPool.pool];
 
-      assert(newVrfPool.pool.length === POOL_SIZE, 'VrfPoolSizeMismatch');
+      assert(newVrfPool.pool.length === POOL_SIZE, "VrfPoolSizeMismatch");
 
       const [tokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
         ctx.program.walletPubkey,
@@ -409,7 +409,7 @@ describe('Vrf Pool Tests', () => {
       });
 
       let vrfPool = newVrfPool;
-      let ws: number | undefined = bigVrfPoolAccount.onChange(updVrfPool => {
+      let ws: number | undefined = bigVrfPoolAccount.onChange((updVrfPool) => {
         vrfPool = updVrfPool;
       });
 
@@ -417,7 +417,7 @@ describe('Vrf Pool Tests', () => {
         Array(Math.ceil(POOL_SIZE * 1.25)).keys()
       )) {
         const idx = n % pool.length;
-        assert(vrfPool.idx === idx, 'VrfPoolIdxMismatch');
+        assert(vrfPool.idx === idx, "VrfPoolIdxMismatch");
 
         const [event, signature] =
           await bigVrfPoolAccount.requestAndAwaitEvent();
@@ -428,12 +428,12 @@ describe('Vrf Pool Tests', () => {
         );
         assert(
           event.vrfPubkey.equals(vrfLiteAccount.publicKey),
-          'VrfRowMismatch'
+          "VrfRowMismatch"
         );
 
         await sleep(1500);
         const nextIdx = (idx + 1) % pool.length;
-        assert(vrfPool.idx === nextIdx, 'VrfPoolIdxMismatch');
+        assert(vrfPool.idx === nextIdx, "VrfPoolIdxMismatch");
       }
 
       if (ws) {
@@ -455,5 +455,5 @@ const chalkString = (
   value: string | number | boolean | PublicKey
 ) =>
   console.log(
-    `\x1b[34m${key.padEnd(16, ' ')}\x1b[0m : \x1b[33m${value}\x1b[0m`
+    `\x1b[34m${key.padEnd(16, " ")}\x1b[0m : \x1b[33m${value}\x1b[0m`
   );

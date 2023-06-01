@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import 'mocha';
+import "mocha";
 
 import {
   AggregatorAccount,
@@ -8,15 +8,15 @@ import {
   QueueAccount,
   SwitchboardNetwork,
   types,
-} from '../src';
+} from "../src";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils";
 
-import { Keypair } from '@solana/web3.js';
-import { OracleJob } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import { OracleJob } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Transfer Tests', () => {
+describe("Transfer Tests", () => {
   let ctx: TestContext;
 
   //   const freshUser = Keypair.generate();
@@ -38,7 +38,7 @@ describe('Transfer Tests', () => {
     const [accounts, signatures] = await SwitchboardNetwork.create(
       ctx.program,
       {
-        name: 'Queue-1',
+        name: "Queue-1",
         reward: 0,
         minStake: 0,
         unpermissionedFeeds: false,
@@ -46,12 +46,12 @@ describe('Transfer Tests', () => {
         authority: origQueueAuthority,
         oracles: [
           {
-            name: 'Oracle-1',
+            name: "Oracle-1",
             enable: true,
             queueAuthority: origQueueAuthority,
           },
         ],
-        cranks: [{ name: 'Crank-1', maxRows: 100 }],
+        cranks: [{ name: "Crank-1", maxRows: 100 }],
       }
     );
     if (accounts.oracles.length < 1) {
@@ -70,16 +70,16 @@ describe('Transfer Tests', () => {
     const [accounts2, signatures2] = await SwitchboardNetwork.create(
       ctx.program,
       {
-        name: 'Queue-2',
+        name: "Queue-2",
         reward: 0,
         minStake: 0,
         unpermissionedFeeds: false,
         unpermissionedVrf: false,
         authority: newQueueAuthority,
         oracles: [
-          { name: 'Oracle-2', enable: true, queueAuthority: newQueueAuthority },
+          { name: "Oracle-2", enable: true, queueAuthority: newQueueAuthority },
         ],
-        cranks: [{ name: 'Crank-2', maxRows: 100 }],
+        cranks: [{ name: "Crank-2", maxRows: 100 }],
       }
     );
     if (accounts2.oracles.length < 1) {
@@ -96,9 +96,9 @@ describe('Transfer Tests', () => {
     });
   });
 
-  it('Creates an aggregator on the orig queue and crank', async () => {
+  it("Creates an aggregator on the orig queue and crank", async () => {
     [aggregatorAccount] = await origQueueAccount.createFeed({
-      name: 'Aggregator-1',
+      name: "Aggregator-1",
       authority: aggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,
@@ -149,7 +149,7 @@ describe('Transfer Tests', () => {
     );
   });
 
-  it('Transfers the aggregator to a new queue and crank along with its balances', async () => {
+  it("Transfers the aggregator to a new queue and crank along with its balances", async () => {
     if (!aggregatorAccount) {
       throw new Error(`No aggregatorAccount to transfer`);
     }
@@ -195,9 +195,9 @@ describe('Transfer Tests', () => {
     );
   });
 
-  it('Transfers an aggregator to a new queue in sequence', async () => {
+  it("Transfers an aggregator to a new queue in sequence", async () => {
     const [aggregatorAccount] = await origQueueAccount.createFeed({
-      name: 'Aggregator-2',
+      name: "Aggregator-2",
       authority: aggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,
@@ -268,10 +268,10 @@ describe('Transfer Tests', () => {
     );
   });
 
-  it('Transfers the aggregator to a new queue and crank with an existing permission account', async () => {
+  it("Transfers the aggregator to a new queue and crank with an existing permission account", async () => {
     const myAggregatorAuthority = Keypair.generate();
     const [myAggregatorAccount] = await origQueueAccount.createFeed({
-      name: 'Aggregator-2',
+      name: "Aggregator-2",
       authority: myAggregatorAuthority.publicKey,
       batchSize: 1,
       minRequiredOracleResults: 1,

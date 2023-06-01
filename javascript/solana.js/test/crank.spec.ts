@@ -1,4 +1,4 @@
-import 'mocha';
+import "mocha";
 
 import {
   AggregatorAccount,
@@ -7,15 +7,15 @@ import {
   QueueAccount,
   SolanaClock,
   types,
-} from '../src';
+} from "../src";
 
-import { createFeed, createFeeds, setupTest, TestContext } from './utils';
+import { createFeed, createFeeds, setupTest, TestContext } from "./utils";
 
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { BN, promiseWithTimeout, sleep } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { BN, promiseWithTimeout, sleep } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Crank Tests', () => {
+describe("Crank Tests", () => {
   const CRANK_SIZE = 50;
   const QUEUE_REWARD = 15_000 / LAMPORTS_PER_SOL;
   // const QUEUE_REWARD = 0;
@@ -40,8 +40,8 @@ describe('Crank Tests', () => {
     );
 
     [queueAccount] = await QueueAccount.create(ctx.program, {
-      name: 'q1',
-      metadata: '',
+      name: "q1",
+      metadata: "",
       queueSize: 2,
       reward: QUEUE_REWARD,
       minStake: 0,
@@ -56,27 +56,27 @@ describe('Crank Tests', () => {
     queue = await queueAccount.loadData();
     assert(
       queue.authority.equals(queueAuthority.publicKey),
-      'Incorrect queue authority'
+      "Incorrect queue authority"
     );
 
     const [oracle1] = await queueAccount.createOracle({
-      name: 'Oracle 1',
+      name: "Oracle 1",
       enable: true,
       queueAuthority: queueAuthority,
     });
     await oracle1.heartbeat();
 
     const [oracle2] = await queueAccount.createOracle({
-      name: 'Oracle 2',
+      name: "Oracle 2",
       enable: true,
       queueAuthority: queueAuthority,
     });
     await oracle2.heartbeat();
   });
 
-  it('Creates a Crank', async () => {
+  it("Creates a Crank", async () => {
     [crankAccount] = await queueAccount.createCrank({
-      name: 'Crank #1',
+      name: "Crank #1",
       maxRows: CRANK_SIZE,
     });
     const crank = await crankAccount.loadData();
@@ -87,7 +87,7 @@ describe('Crank Tests', () => {
     );
   });
 
-  it('Adds a set of feeds to the crank', async () => {
+  it("Adds a set of feeds to the crank", async () => {
     const aggregatorAccounts: Array<AggregatorAccount> = [];
 
     // create in batches
@@ -104,7 +104,7 @@ describe('Crank Tests', () => {
         }
       );
       await Promise.all(
-        newAggregatorAccounts.map(async aggregatorAccount => {
+        newAggregatorAccounts.map(async (aggregatorAccount) => {
           await crankAccount.push({ aggregatorAccount });
         })
       );
@@ -123,7 +123,7 @@ describe('Crank Tests', () => {
     );
 
     for (const row of crankRows) {
-      const idx = aggregatorAccounts.findIndex(aggregator =>
+      const idx = aggregatorAccounts.findIndex((aggregator) =>
         aggregator.publicKey.equals(row.pubkey)
       );
       assert(
@@ -133,9 +133,9 @@ describe('Crank Tests', () => {
     }
   });
 
-  it('Fails to push a non-permitted aggregator onto the crank', async () => {
+  it("Fails to push a non-permitted aggregator onto the crank", async () => {
     const newAggregatorAccount = await createFeed(queueAccount, {
-      name: 'No Crank Aggregator',
+      name: "No Crank Aggregator",
       // queueAuthority,
     });
 
@@ -144,9 +144,9 @@ describe('Crank Tests', () => {
     }, new RegExp(/PermissionDenied|6035|0x1793/g));
   });
 
-  it('Fails to push a new aggregator onto a full crank', async () => {
+  it("Fails to push a new aggregator onto a full crank", async () => {
     const newAggregatorAccount = await createFeed(queueAccount, {
-      name: 'No Crank Aggregator',
+      name: "No Crank Aggregator",
       queueAuthority,
     });
 
@@ -155,7 +155,7 @@ describe('Crank Tests', () => {
     }, new RegExp(/CrankMaxCapacityError|6022|0x1786/g));
   });
 
-  it('Crank pop tests', async () => {
+  it("Crank pop tests", async () => {
     const getTimestamp = async (): Promise<BN> => {
       return (await SolanaClock.fetch(ctx.program.connection)).unixTimestamp;
     };
@@ -193,13 +193,13 @@ describe('Crank Tests', () => {
 
     timestamp = await getTimestamp();
 
-    const readyRows = initialCrankRows.filter(row =>
+    const readyRows = initialCrankRows.filter((row) =>
       timestamp.gte(row.nextTimestamp)
     );
     assert(readyRows.length > 0, `No aggregators ready!`);
 
     const readyAggregators: Array<[AggregatorAccount, AggregatorPdaAccounts]> =
-      readyRows.map(r => {
+      readyRows.map((r) => {
         if (crankAccounts.has(r.pubkey.toBase58())) {
           return [
             new AggregatorAccount(ctx.program, r.pubkey),
@@ -251,7 +251,7 @@ describe('Crank Tests', () => {
       5000,
       Promise.allSettled(
         signatures.map(
-          async s => await ctx.program.connection.confirmTransaction(s)
+          async (s) => await ctx.program.connection.confirmTransaction(s)
         )
       )
     );
@@ -260,7 +260,7 @@ describe('Crank Tests', () => {
 
     let numPopped = 0;
     for (const [i, row] of initialCrankRows.entries()) {
-      const idx = newCrankRows.findIndex(newRow =>
+      const idx = newCrankRows.findIndex((newRow) =>
         newRow.pubkey.equals(row.pubkey)
       );
       assert(idx !== -1, `Failed to find aggregator #${i} - ${row.pubkey}`);

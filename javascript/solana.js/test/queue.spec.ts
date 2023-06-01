@@ -1,14 +1,14 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
-import { PermissionAccount, TransactionMissingSignerError } from '../src';
+import * as sbv2 from "../src";
+import { PermissionAccount, TransactionMissingSignerError } from "../src";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils";
 
-import { Keypair } from '@solana/web3.js';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import assert from "assert";
 
-describe('Queue Tests', () => {
+describe("Queue Tests", () => {
   let ctx: TestContext;
 
   before(async () => {
@@ -21,10 +21,10 @@ describe('Queue Tests', () => {
   const oracleAuthority = Keypair.generate();
   let oracleAccount: sbv2.OracleAccount;
 
-  it('Creates a Queue', async () => {
+  it("Creates a Queue", async () => {
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'q1',
-      metadata: '',
+      name: "q1",
+      metadata: "",
       queueSize: 2,
       reward: 0,
       minStake: 0,
@@ -38,15 +38,15 @@ describe('Queue Tests', () => {
     await queueAccount.loadData();
   });
 
-  it('Adds an oracle to a queue', async () => {
+  it("Adds an oracle to a queue", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
 
     // Create a new oracle
     [oracleAccount] = await queueAccount.createOracle({
-      name: 'oracle2',
-      metadata: '',
+      name: "oracle2",
+      metadata: "",
       queueAuthority,
       enable: true,
       authority: oracleAuthority,
@@ -69,22 +69,22 @@ describe('Queue Tests', () => {
     });
 
     const oracles = await queueAccount.loadOracles();
-    const idx = oracles.findIndex(o => o.equals(oracleAccount.publicKey));
+    const idx = oracles.findIndex((o) => o.equals(oracleAccount.publicKey));
     if (idx === -1) {
-      throw new Error('Failed to push oracle #2 onto queue');
+      throw new Error("Failed to push oracle #2 onto queue");
     }
   });
 
-  it('Pushes a second oracle onto the queue', async () => {
+  it("Pushes a second oracle onto the queue", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
     const oracleAuthority = Keypair.generate();
 
     // Create a new oracle
     const [oracleAccount] = await queueAccount.createOracle({
-      name: 'oracle2',
-      metadata: '',
+      name: "oracle2",
+      metadata: "",
       queueAuthority,
       enable: true,
       authority: oracleAuthority,
@@ -100,22 +100,22 @@ describe('Queue Tests', () => {
 
     const oracles = await queueAccount.loadOracles();
 
-    const idx = oracles.findIndex(o => o.equals(oracleAccount.publicKey));
+    const idx = oracles.findIndex((o) => o.equals(oracleAccount.publicKey));
     if (idx === -1) {
-      throw new Error('Failed to push oracle #2 onto queue');
+      throw new Error("Failed to push oracle #2 onto queue");
     }
   });
 
-  it('Fails to push oracle #3 - Queue Size Exceeded', async () => {
+  it("Fails to push oracle #3 - Queue Size Exceeded", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
     const oracleAuthority = Keypair.generate();
 
     // Create a new oracle
     const [oracleAccount] = await queueAccount.createOracle({
-      name: 'oracle3',
-      metadata: '',
+      name: "oracle3",
+      metadata: "",
       queueAuthority,
       enable: true,
       authority: oracleAuthority,
@@ -132,12 +132,12 @@ describe('Queue Tests', () => {
     }, new RegExp(/QueueOperationError|6001|0x1771/g));
   });
 
-  it('Deposits into an oracle staking wallet', async () => {
+  it("Deposits into an oracle staking wallet", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
     if (!oracleAccount) {
-      throw new Error('oracleAccount does not exist');
+      throw new Error("oracleAccount does not exist");
     }
 
     const STAKE_AMOUNT = 1.25;
@@ -165,12 +165,12 @@ describe('Queue Tests', () => {
     );
   });
 
-  it('Fails to withdraw if authority is missing', async () => {
+  it("Fails to withdraw if authority is missing", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
     if (!oracleAccount) {
-      throw new Error('oracleAccount does not exist');
+      throw new Error("oracleAccount does not exist");
     }
 
     await assert.rejects(async () => {
@@ -181,12 +181,12 @@ describe('Queue Tests', () => {
     }, TransactionMissingSignerError);
   });
 
-  it('Withdraws from an oracle staking wallet', async () => {
+  it("Withdraws from an oracle staking wallet", async () => {
     if (!queueAccount) {
-      throw new Error('OracleQueue does not exist');
+      throw new Error("OracleQueue does not exist");
     }
     if (!oracleAccount) {
-      throw new Error('oracleAccount does not exist');
+      throw new Error("oracleAccount does not exist");
     }
 
     const WITHDRAW_AMOUNT = 0.55;

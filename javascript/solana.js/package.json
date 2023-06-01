@@ -13,9 +13,9 @@
     "index.cjs",
     "index.js",
     "index.d.ts",
-    "types.cjs",
-    "types.js",
-    "types.d.ts",
+    "generated.cjs",
+    "generated.js",
+    "generated.d.ts",
     "accounts.cjs",
     "accounts.js",
     "accounts.d.ts",
@@ -29,10 +29,10 @@
       "import": "./index.js",
       "require": "./index.cjs"
     },
-    "./types": {
-      "types": "./types.d.ts",
-      "import": "./types.js",
-      "require": "./types.cjs"
+    "./generated": {
+      "types": "./generated.d.ts",
+      "import": "./generated.js",
+      "require": "./generated.cjs"
     },
     "./accounts": {
       "types": "./accounts.d.ts",

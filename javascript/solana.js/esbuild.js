@@ -1,10 +1,5 @@
 /* eslint node/no-unpublished-require: 0 */
 /* eslint no-unused-vars: 0 */
-// const { build } = require("esbuild");
-// const path = require("node:path");
-// const fs = require("node:fs");
-// const shell = require("shelljs");
-// const { execSync } = require("node:child_process");
 
 import { build } from "esbuild";
 import path from "path";
@@ -42,7 +37,7 @@ const commonOptions = {
 
 const entrypoints = {
   index: "index",
-  types: "generated/index",
+  generated: "generated/index",
   accounts: "accounts/index",
   program: "SwitchboardProgram",
 };

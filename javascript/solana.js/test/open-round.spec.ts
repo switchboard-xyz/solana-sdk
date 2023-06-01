@@ -1,22 +1,22 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
+import * as sbv2 from "../src";
 import {
   AggregatorAccount,
   OracleAccount,
   PermissionAccount,
   QueueAccount,
   types,
-} from '../src';
-import { PermitOracleQueueUsage } from '../src/generated/types/SwitchboardPermission';
+} from "../src";
+import { PermitOracleQueueUsage } from "../src/generated/types/SwitchboardPermission";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils";
 
-import { Keypair } from '@solana/web3.js';
-import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import { Big, OracleJob, sleep } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Open Round Tests', () => {
+describe("Open Round Tests", () => {
   let ctx: TestContext;
 
   const queueAuthority = Keypair.generate();
@@ -38,8 +38,8 @@ describe('Open Round Tests', () => {
     ctx = await setupTest();
 
     [queueAccount] = await sbv2.QueueAccount.create(ctx.program, {
-      name: 'q1',
-      metadata: '',
+      name: "q1",
+      metadata: "",
       queueSize: 2,
       reward: 0.0025,
       minStake: 0,
@@ -53,31 +53,31 @@ describe('Open Round Tests', () => {
     queue = await queueAccount.loadData();
     assert(
       queue.authority.equals(queueAuthority.publicKey),
-      'Incorrect queue authority'
+      "Incorrect queue authority"
     );
 
     [oracleAccount1] = await queueAccount.createOracle({
-      name: 'oracle-1',
-      metadata: 'oracle-1',
+      name: "oracle-1",
+      metadata: "oracle-1",
       queueAuthority,
       enable: true,
     });
     oracle1 = await oracleAccount1.loadData();
     assert(
       oracle1.oracleAuthority.equals(ctx.payer.publicKey),
-      'Incorrect oracle authority'
+      "Incorrect oracle authority"
     );
 
     [oracleAccount2] = await queueAccount.createOracle({
-      name: 'oracle-2',
-      metadata: 'oracle-2',
+      name: "oracle-2",
+      metadata: "oracle-2",
       queueAuthority,
       enable: true,
     });
     oracle2 = await oracleAccount2.loadData();
     assert(
       oracle2.oracleAuthority.equals(ctx.payer.publicKey),
-      'Incorrect oracle authority'
+      "Incorrect oracle authority"
     );
 
     [aggregatorAccount] = await queueAccount.createFeed({
@@ -114,13 +114,13 @@ describe('Open Round Tests', () => {
     );
   });
 
-  it('fails to call open round when aggregator lacks permissions', async () => {
+  it("fails to call open round when aggregator lacks permissions", async () => {
     await assert.rejects(async () => {
       await aggregatorAccount.openRound();
     }, new RegExp(/PermissionDenied|6035|0x1793/g));
   });
 
-  it('sets aggregator permissions', async () => {
+  it("sets aggregator permissions", async () => {
     await aggregatorPermissionAccount.set({
       permission: new PermitOracleQueueUsage(),
       enable: true,
@@ -136,7 +136,7 @@ describe('Open Round Tests', () => {
     );
   });
 
-  it('fails to call open round when not enough oracles are heartbeating', async () => {
+  it("fails to call open round when not enough oracles are heartbeating", async () => {
     await assert.rejects(async () => {
       await aggregatorAccount.openRound();
     }, new RegExp(/InsufficientOracleQueueError|6052|0x17a4/g));
@@ -148,17 +148,17 @@ describe('Open Round Tests', () => {
     }, new RegExp(/InsufficientOracleQueueError|6052|0x17a4/g));
   });
 
-  it('successfully calls open round', async () => {
+  it("successfully calls open round", async () => {
     await oracleAccount2.heartbeat();
     // start heartbeating
     await aggregatorAccount.openRound();
   });
 
-  it('oracles successfully respond and close the round', async () => {
+  it("oracles successfully respond and close the round", async () => {
     const aggregator = await aggregatorAccount.loadData();
 
     const jobs = (await aggregatorAccount.loadJobs(aggregator)).map(
-      jobs => jobs.job
+      (jobs) => jobs.job
     );
 
     const result = new Big(1337);
@@ -169,7 +169,7 @@ describe('Open Round Tests', () => {
     );
 
     await Promise.all(
-      [oracleAccount1, oracleAccount2].map(async oracleAccount => {
+      [oracleAccount1, oracleAccount2].map(async (oracleAccount) => {
         return await aggregatorAccount.saveResult({
           jobs,
           oracleAccount,
@@ -191,7 +191,7 @@ describe('Open Round Tests', () => {
     );
   });
 
-  it('aggregator calls openRoundAndAwaitResult', async () => {
+  it("aggregator calls openRoundAndAwaitResult", async () => {
     const result = new Big(1337);
 
     const [newAggregatorAccount] = await queueAccount.createFeed({
@@ -227,7 +227,7 @@ describe('Open Round Tests', () => {
 
     const jobs = (
       await newAggregatorAccount.loadJobs(currentAggregatorState)
-    ).map(jobs => jobs.job);
+    ).map((jobs) => jobs.job);
 
     const updatedAggregatorStatePromise =
       newAggregatorAccount.openRoundAndAwaitResult(undefined, 10000);
@@ -235,7 +235,7 @@ describe('Open Round Tests', () => {
     await sleep(1000); // need time for open round to hit
 
     await Promise.all(
-      [oracleAccount1, oracleAccount2].map(async oracleAccount => {
+      [oracleAccount1, oracleAccount2].map(async (oracleAccount) => {
         return await newAggregatorAccount.saveResult({
           jobs,
           oracleAccount,

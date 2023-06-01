@@ -1,9 +1,9 @@
 index.cjs
 index.js
 index.d.ts
-types.cjs
-types.js
-types.d.ts
+generated.cjs
+generated.js
+generated.d.ts
 accounts.cjs
 accounts.js
 accounts.d.ts
