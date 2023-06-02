@@ -41,7 +41,7 @@ export function functionVerify(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.fnSigner, isSigner: true, isWritable: false },
-    { pubkey: accounts.fnQuote, isSigner: false, isWritable: false },
+    { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
     { pubkey: accounts.verifierQuote, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
