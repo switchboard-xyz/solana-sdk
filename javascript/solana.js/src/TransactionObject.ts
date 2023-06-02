@@ -1,5 +1,5 @@
-import * as attestationTypes from "./attestation-generated/index.js";
-import { fromTxError } from "./generated/index.js";
+import * as attestationTypes from "./generated/attestation-program/index.js";
+import { fromTxError } from "./generated/oracle-program/errors/index.js";
 import { isBrowser } from "./browser.js";
 import * as errors from "./errors.js";
 import {
@@ -636,7 +636,7 @@ export class TransactionObject implements ITransactionObject {
         throw err;
       }
 
-      const attestationErr = attestationTypes.fromTxError(error);
+      const attestationErr = attestationTypes.fromAttestationTxError(error);
       if (attestationErr) {
         if (attestationErr.logs) {
           console.error(attestationErr.logs);

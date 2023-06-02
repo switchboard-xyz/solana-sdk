@@ -669,11 +669,15 @@
             "type": "i64"
           },
           {
+            "name": "isTriggered",
+            "type": "bool"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                1024
+                1023
               ]
             }
           }
@@ -1231,6 +1235,56 @@
           "index": false
         }
       ]
+    },
+    {
+      "name": "FunctionFundEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u32",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionInitEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionVerifyEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionWithdrawEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u32",
+          "index": false
+        }
+      ]
     }
   ],
   "errors": [
@@ -1337,6 +1391,11 @@
     {
       "code": 6020,
       "name": "IncorrectMrEnclave",
+      "msg": ""
+    },
+    {
+      "code": 6021,
+      "name": "InvalidResponder",
       "msg": ""
     }
   ]

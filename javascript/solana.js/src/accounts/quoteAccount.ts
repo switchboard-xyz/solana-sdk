@@ -1,6 +1,6 @@
 import { Account } from "../accounts/account.js";
-import * as types from "../attestation-generated/index.js";
 import * as errors from "../errors.js";
+import * as types from "../generated/attestation-program/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,

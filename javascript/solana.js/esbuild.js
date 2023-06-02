@@ -37,9 +37,24 @@ const commonOptions = {
 
 const entrypoints = {
   index: "index",
+  SwitchboardProgram: "SwitchboardProgram",
+  TransactionObject: "TransactionObject",
+  AggregatorAccount: "accounts/AggregatorAccount",
   generated: "generated/index",
-  accounts: "accounts/index",
-  program: "SwitchboardProgram",
+  "generated/accounts": "generated/accounts",
+  "generated/instructions": "generated/instructions",
+  "generated/types": "generated/types",
+  "generated/oracle": "generated/oracle-program/index",
+  "generated/oracle/accounts": "generated/oracle-program/accounts/index",
+  "generated/oracle/instructions":
+    "generated/oracle-program/instructions/index",
+  "generated/oracle/types": "generated/oracle-program/types/index",
+  "generated/attestation": "generated/attestation-program/index",
+  "generated/attestation/accounts":
+    "generated/attestation-program/accounts/index",
+  "generated/attestation/instructions":
+    "generated/attestation-program/instructions/index",
+  "generated/attestation/types": "generated/attestation-program/types/index",
 };
 
 const updateJsonFile = (relativePath, updateFunction) => {

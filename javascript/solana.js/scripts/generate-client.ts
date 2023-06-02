@@ -16,7 +16,10 @@ const projectRoot = path.join(__dirname, "..");
 
 const v2DevnetIdlPath = path.join(projectRoot, "./idl/devnet.json");
 const v2MainnetIdlPath = path.join(projectRoot, "./idl/mainnet.json");
-const v2GeneratedPath = path.join(projectRoot, "./src/generated");
+const v2GeneratedPath = path.join(
+  projectRoot,
+  "./src/generated/oracle-program"
+);
 
 const attestationDevnetIdlPath = path.join(
   projectRoot,
@@ -24,7 +27,7 @@ const attestationDevnetIdlPath = path.join(
 );
 const attestationGeneratedPath = path.join(
   projectRoot,
-  "./src/attestation-generated"
+  "./src/generated/attestation-program"
 );
 
 const switchboardCoreDir = path.join(
@@ -48,7 +51,8 @@ const ignoreFiles = [
   `${v2GeneratedPath}/types/index.ts`, // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
   `${v2GeneratedPath}/errors/index.ts`, // need to revert the program ID check,
   `${attestationGeneratedPath}/types/VerificationStatus.ts`,
-  `${v2GeneratedPath}/types/VerificationStatus.ts`,
+  `${attestationGeneratedPath}/errors/index.ts`,
+  // `${v2GeneratedPath}/types/VerificationStatus.ts`,
 ];
 
 /**
@@ -216,6 +220,11 @@ async function main() {
     execSync(`git restore ${file}`, { encoding: "utf-8" });
   }
 
+  // delete the extra QuoteAccountData
+  await fs.rm(path.join(v2GeneratedPath, "accounts", "QuoteAccountData.ts"));
+  // delete the extra VerificationStatus
+  await fs.rm(path.join(v2GeneratedPath, "types", "VerificationStatus.ts"));
+
   // run auto fix for import ordering
   execSync(`pnpm fix`, { encoding: "utf-8" });
 }
@@ -235,8 +244,10 @@ const processFile = async (file: string) => {
   return await fs
     .readFile(file, "utf-8")
     .then(async (fileString: string): Promise<string> => {
+      let updatedFileString = fileString;
+
       if (file.endsWith("errors/index.ts")) {
-        return fileString
+        return updatedFileString
           .replace(
             `import { PROGRAM_ID } from "../programId"`,
             `import { PROGRAM_ID } from "../programId.js"`
@@ -251,16 +262,27 @@ const processFile = async (file: string) => {
           );
       }
       if (file.includes("index.ts")) {
+        if (file === path.join(v2GeneratedPath, "accounts", "index.ts")) {
+          updatedFileString = updatedFileString.replace(
+            `export { QuoteAccountData } from "./QuoteAccountData"
+export type {
+  QuoteAccountDataFields,
+  QuoteAccountDataJSON,
+} from "./QuoteAccountData"
+`,
+            ``
+          );
+        }
+
         // add the .js extension to all local import/export paths
-        return fileString.replace(
+        return updatedFileString.replace(
           /((import|export)((\s\w+)?([^'"]*))from\s['"])([^'"]+)(['"])/gm,
           "$1$6.js$7"
         );
       }
-      let updatedFileString = fileString;
 
       updatedFileString =
-        `import { SwitchboardProgram } from "../../SwitchboardProgram.js"` +
+        `import { SwitchboardProgram } from "../../../SwitchboardProgram.js"` +
         "\n" +
         fileString;
 
@@ -299,7 +321,7 @@ const processFile = async (file: string) => {
         );
       }
 
-      if (file.includes("/attestation-generated/")) {
+      if (file.includes("/attestation-program/")) {
         updatedFileString = updatedFileString.replaceAll(
           `program.programId`,
           `program.attestationProgramId`

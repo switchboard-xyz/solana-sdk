@@ -1,10 +1,10 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from "../generated/types/SwitchboardPermission.js";
+} from "../generated/oracle-program/types/SwitchboardPermission.js";
 import { SolanaClock } from "../SolanaClock.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
@@ -334,10 +334,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       );
     }
 
-    const permissionGrantee = params.teeOracle
-      ? params.authority.publicKey
-      : payer;
-
     const [oracleAccount, createOracleTxnObject] =
       await OracleAccount.createInstructions(
         this.program,
@@ -348,6 +344,10 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         },
         options
       );
+
+    const permissionGrantee = params.teeOracle
+      ? params.authority.publicKey
+      : oracleAccount.publicKey;
 
     const [permissionAccount, createPermissionTxnObject] =
       PermissionAccount.createInstruction(
