@@ -5,11 +5,13 @@ import {
   type QueueAccount,
 } from "./accounts/index.js";
 import { type AggregatorAccountData } from "./generated/index.js";
+import { InvalidCronSchedule } from "./errors.js";
 import { TransactionObject } from "./TransactionObject.js";
 import { RawMrEnclave } from "./types.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
+import { isValidCron } from "cron-validator";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -212,4 +214,28 @@ export function parseMrEnclave(mrEnclave: RawMrEnclave): Uint8Array {
   return new Uint8Array(
     Array.from(myUint8Array).concat(Array(32).fill(0)).slice(0, 32)
   );
+}
+
+/**
+ * Validate a cron schedule and return a valid 6 element cron string which includes seconds
+ * @param cronSchedule - the cron string to validate
+ * @returns - a valid cron schedule with seconds included
+ * @throws {@link InvalidCronSchedule} if the cron schedule is not valid
+ */
+export function parseCronSchedule(cronSchedule: string): string {
+  if (!isValidCron(cronSchedule, { seconds: true })) {
+    throw new InvalidCronSchedule(cronSchedule);
+  }
+
+  const fields = cronSchedule.split(" ");
+  if (fields.length === 0) {
+    throw new InvalidCronSchedule(cronSchedule);
+  }
+
+  if (fields.length === 6) {
+    return cronSchedule;
+  }
+
+  fields.unshift(...Array(6 - fields.length).fill("0"));
+  return fields.join(" ");
 }

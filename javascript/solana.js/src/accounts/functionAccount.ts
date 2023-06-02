@@ -7,7 +7,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { parseMrEnclave } from "../utils.js";
+import { parseCronSchedule, parseMrEnclave } from "../utils.js";
 
 import {
   AttestationPermissionAccount,
@@ -163,9 +163,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const functionKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(functionKeypair);
 
-    if (!isValidCron(params.schedule, { seconds: true })) {
-      throw new errors.InvalidCronSchedule(params.schedule);
-    }
+    const cronSchedule = parseCronSchedule(params.schedule);
 
     const attestationQueueAccount = params.attestationQueue;
     const attestationQueue = await attestationQueueAccount.loadData();
@@ -188,7 +186,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         params: {
           name: new Uint8Array(Buffer.from(params.name ?? "", "utf8")),
           metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
-          schedule: new Uint8Array(Buffer.from(params.schedule, "utf8")),
+          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           container: new Uint8Array(Buffer.from(params.container, "utf8")),
           version: new Uint8Array(Buffer.from(params.version, "utf8")),
           containerRegistry: new Uint8Array(
