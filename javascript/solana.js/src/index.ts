@@ -11,4 +11,5 @@ export * from "./SwitchboardNetwork.js";
 export * from "./SwitchboardProgram.js";
 export * from "./SwitchboardTestContext.js";
 export * from "./TransactionObject.js";
+export * from "./types.js";
 export * from "./utils.js";
