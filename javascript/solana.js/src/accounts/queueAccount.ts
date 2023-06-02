@@ -318,12 +318,25 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: CreateQueueOracleParams,
+    params: CreateQueueOracleParams & { teeOracle?: boolean },
     options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
       : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+
+    if (
+      params.teeOracle &&
+      (!params.authority || !(params.authority instanceof Keypair))
+    ) {
+      throw new Error(
+        `Need to provide authority keypair when creating a teeOracle`
+      );
+    }
+
+    const permissionGrantee = params.teeOracle
+      ? params.authority.publicKey
+      : payer;
 
     const [oracleAccount, createOracleTxnObject] =
       await OracleAccount.createInstructions(
@@ -342,7 +355,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         payer,
         {
           granter: this.publicKey,
-          grantee: oracleAccount.publicKey,
+          grantee: permissionGrantee,
           authority: queueAuthorityPubkey,
         },
         options
@@ -393,7 +406,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: CreateQueueOracleParams,
+    params: CreateQueueOracleParams & { teeOracle?: boolean },
     options?: SendTransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];

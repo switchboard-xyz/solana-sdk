@@ -540,7 +540,11 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
     const [permissionAccount, permissionBump] =
       params?.permission ??
-      this.getPermissionAccount(queueAccount.publicKey, queue.authority);
+      this.getPermissionAccount(
+        queueAccount.publicKey,
+        queue.authority,
+        oracle.oracleAuthority
+      );
 
     try {
       await permissionAccount.loadData();
@@ -714,13 +718,14 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
   public getPermissionAccount(
     queuePubkey: PublicKey,
-    queueAuthority: PublicKey
+    queueAuthority: PublicKey,
+    grantee: PublicKey = this.publicKey
   ): [PermissionAccount, number] {
     return PermissionAccount.fromSeed(
       this.program,
       queueAuthority,
       queuePubkey,
-      this.publicKey
+      grantee
     );
   }
 

@@ -1659,7 +1659,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
 
   public teeSaveResultInstructionSync(
     payer: PublicKey,
-    params: AggregatorSaveResultSyncParams & { quotePubkey?: PublicKey },
+    params: AggregatorSaveResultSyncParams & {
+      quotePubkey?: PublicKey;
+      authority: Keypair;
+    },
     options?: TransactionObjectOptions
   ): TransactionObject {
     const [oraclePermissionAccount, oraclePermissionBump] =
@@ -1726,7 +1729,12 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
       })
     );
 
-    return new TransactionObject(payer, [saveResultIxn], [], options);
+    return new TransactionObject(
+      payer,
+      [saveResultIxn],
+      [params.authority],
+      options
+    );
   }
 
   public saveResultInstructionSync(

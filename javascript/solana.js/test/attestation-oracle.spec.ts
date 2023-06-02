@@ -21,6 +21,7 @@ describe("Attestation Oracle Tests", () => {
   let queueAccount: sbv2.QueueAccount;
   let oracleAccount: sbv2.OracleAccount;
   let oracleQuoteAccount: sbv2.QuoteAccount;
+  const oracleQuoteKeypair = Keypair.generate();
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   const quoteKeypair = Keypair.generate();
@@ -53,7 +54,14 @@ describe("Attestation Oracle Tests", () => {
     [oracleAccount] = await queueAccount.createOracle({
       enable: true,
       queueAuthorityPubkey: ctx.program.walletPubkey,
+      authority: oracleQuoteKeypair,
+      teeOracle: true,
     });
+    const oracleData = await oracleAccount.loadData();
+    assert(
+      oracleData.oracleAuthority.equals(oracleQuoteKeypair.publicKey),
+      "OracleAuthorityMismatch"
+    );
 
     if (
       sbv2.ProgramStateAccount.findEnclaveIdx(
@@ -202,8 +210,6 @@ describe("Attestation Oracle Tests", () => {
   });
 
   it("Creates a TEE oracle", async () => {
-    const oracleQuoteKeypair = Keypair.generate();
-
     [oracleQuoteAccount] = await attestationQueueAccount.createQuote({
       registryKey: new Uint8Array(Array(64).fill(1)),
       keypair: oracleQuoteKeypair,
@@ -228,9 +234,20 @@ describe("Attestation Oracle Tests", () => {
       "QuoteData MRECLAVE mismatch"
     );
 
+    const queueData = await queueAccount.loadData();
+
+    const [permissionAccount, permissionBump] =
+      oracleAccount.getPermissionAccount(
+        queueAccount.publicKey,
+        queueData.authority,
+        oracleQuoteKeypair.publicKey
+      );
+
     // Perform tee heartbeat.
     await oracleAccount.teeHeartbeat({
       quoteKeypair: oracleQuoteKeypair,
+      permission: [permissionAccount, permissionBump],
+      authority: oracleQuoteKeypair,
     });
   });
 
@@ -291,6 +308,7 @@ describe("Attestation Oracle Tests", () => {
     const oracles = await aggregatorAccount.loadCurrentRoundOracles(
       updatedAggregatorState
     );
+
     const saveResultTxn = aggregatorAccount.teeSaveResultInstructionSync(
       ctx.payer.publicKey,
       {
@@ -300,7 +318,8 @@ describe("Attestation Oracle Tests", () => {
         ),
         oraclePermission: oracleAccount.getPermissionAccount(
           queueAccount.publicKey,
-          ctx.payer.publicKey
+          ctx.payer.publicKey,
+          oracleQuoteKeypair.publicKey
         ),
         jobs: jobs.map((j) => j.job),
         value: new Big(1),
@@ -312,6 +331,7 @@ describe("Attestation Oracle Tests", () => {
         oracleIdx: 0,
         aggregator: updatedAggregatorState,
         quotePubkey: oracleQuoteAccount.publicKey,
+        authority: oracleQuoteKeypair,
       }
     );
 
