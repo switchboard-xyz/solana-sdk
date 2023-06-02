@@ -1,59 +1,60 @@
-import * as sbv2 from './src';
+import * as sbv2 from "../src/index.js";
 import {
   CrankAccount,
   QueueAccount,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK,
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
-} from './src';
+} from "../src/index.js";
+
 import {
   Aggregator,
   CHECK_ICON,
   FAILED_ICON,
   jsonReplacers,
   setupOutputDir,
-} from './utils';
+} from "./utils.js";
 
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 // import { backOff } from 'exponential-backoff';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 const VERBOSE = process.env.VERBOSE || false;
 
 const jobMapPath = path.join(
   os.homedir(),
-  'devnet-migration',
+  "devnet-migration",
   sbv2.SB_V2_PID.toBase58(),
-  'job_map.csv'
+  "job_map.csv"
 );
 const aggregatorMapPath = path.join(
   os.homedir(),
-  'devnet-migration',
+  "devnet-migration",
   sbv2.SB_V2_PID.toBase58(),
-  'aggregator_map.csv'
+  "aggregator_map.csv"
 );
 
 async function main() {
   const [oldDirPath, oldFeedDirPath, oldJobDirPath] = setupOutputDir(
-    '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+    "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
   );
   const [newDirPath, newFeedDirPath, newJobDirPath] = setupOutputDir(
     sbv2.SB_V2_PID.toBase58()
   );
 
   const devnetConnection = new Connection(
-    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
+    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl("devnet")
   );
   console.log(`rpcUrl: ${devnetConnection.rpcEndpoint}`);
 
   const payer = sbv2.SwitchboardTestContextV2.loadKeypair(
-    '~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json'
+    "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
   );
   console.log(`payer: ${payer.publicKey.toBase58()}`);
 
   const newProgram = await sbv2.SwitchboardProgram.load(
-    'devnet',
+    "devnet",
     devnetConnection,
     payer,
     sbv2.SB_V2_PID
@@ -75,12 +76,12 @@ async function main() {
 
   const aggregators = new Map<string, Aggregator>();
   for (const file of fs.readdirSync(oldFeedDirPath)) {
-    if (!file.endsWith('.json')) {
+    if (!file.endsWith(".json")) {
       continue;
     }
-    const fileName = path.basename(file).replace('.json', '');
+    const fileName = path.basename(file).replace(".json", "");
     const aggregatorDef: Aggregator = JSON.parse(
-      fs.readFileSync(path.join(oldFeedDirPath, file), 'utf-8')
+      fs.readFileSync(path.join(oldFeedDirPath, file), "utf-8")
     );
     aggregators.set(fileName, aggregatorDef);
   }
@@ -107,7 +108,7 @@ async function main() {
     try {
       // find job accounts
       const jobs: Array<{ pubkey: PublicKey; weight: number }> =
-        aggregator.definition.jobs.map(j => {
+        aggregator.definition.jobs.map((j) => {
           const newJobKey = jobMap.get(j.pubkey);
           if (!newJobKey) {
             throw new Error(`Job ${j.pubkey} was not migrated`);
@@ -121,7 +122,7 @@ async function main() {
 
       // create a feed but keep ourself as the authority until we do all final checks
       const [aggregatorAccount] = await queueAccount.createFeed({
-        authority: payer,
+        authority: payer.publicKey,
         name: aggregator.definition.name,
         metadata: aggregator.definition.metadata,
         batchSize: aggregator.definition.batchSize,
@@ -162,7 +163,7 @@ async function main() {
       console.log(
         `${CHECK_ICON} ${aggregatorKey.padEnd(
           44,
-          ' '
+          " "
         )} -> ${aggregatorAccount.publicKey.toBase58()}`
       );
 
@@ -171,7 +172,7 @@ async function main() {
           undefined,
           queueAccount,
           queue,
-          'processed'
+          "processed"
         );
         fs.writeFileSync(
           newFeedPath,
@@ -212,14 +213,14 @@ async function main() {
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
 });
 
 function writeAggregatorMap(map: Map<string, string>) {
   const fileString = `oldPubkey, newPubkey\n${Array.from(map.entries())
-    .map(r => r.join(', '))
-    .join('\n')}`;
+    .map((r) => r.join(", "))
+    .join("\n")}`;
   fs.writeFileSync(aggregatorMapPath, fileString);
 }
 
@@ -229,10 +230,10 @@ function loadJobMap(): Map<string, string> {
   }
 
   const map = new Map();
-  const fileString = fs.readFileSync(jobMapPath, 'utf-8');
-  const fileLines = fileString.split('\n').slice(1);
-  fileLines.forEach(r => {
-    const [oldPubkey, newPubkey] = r.split(', ');
+  const fileString = fs.readFileSync(jobMapPath, "utf-8");
+  const fileLines = fileString.split("\n").slice(1);
+  fileLines.forEach((r) => {
+    const [oldPubkey, newPubkey] = r.split(", ");
     map.set(oldPubkey, newPubkey);
   });
 
@@ -245,10 +246,10 @@ function loadAggregatorMap(): Map<string, string> {
   }
 
   const map = new Map();
-  const fileString = fs.readFileSync(aggregatorMapPath, 'utf-8');
-  const fileLines = fileString.split('\n').slice(1);
-  fileLines.forEach(r => {
-    const [oldPubkey, newPubkey] = r.split(', ');
+  const fileString = fs.readFileSync(aggregatorMapPath, "utf-8");
+  const fileLines = fileString.split("\n").slice(1);
+  fileLines.forEach((r) => {
+    const [oldPubkey, newPubkey] = r.split(", ");
     map.set(oldPubkey, newPubkey);
   });
 

@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "**/*"
+  ],
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "lib": [
+      "ES2022"
+    ]
+  }
+}

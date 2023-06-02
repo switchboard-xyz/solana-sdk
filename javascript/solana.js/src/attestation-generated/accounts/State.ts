@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface StateFields {
   bump: number;
@@ -24,8 +24,8 @@ export class State {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 2048, 'ebuf'),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 2048, "ebuf"),
   ]);
 
   constructor(fields: StateFields) {
@@ -55,7 +55,7 @@ export class State {
   ): Promise<Array<State | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -69,7 +69,7 @@ export class State {
 
   static decode(data: Buffer): State {
     if (!data.slice(0, 8).equals(State.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = State.layout.decode(data.slice(8));

@@ -1,20 +1,20 @@
-import * as types from '../attestation-generated';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as types from "../attestation-generated/index.js";
+import * as errors from "../errors.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
+} from "../TransactionObject.js";
 
-import { Account } from './account';
+import { Account } from "./account.js";
 
 import {
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  *  Parameters for initializing an {@linkcode AttestationPermissionAccount}
@@ -49,7 +49,7 @@ export interface AttestationPermissionSetParams {
  *  Data: {@linkcode types.AttestationPermissionAccountData}
  */
 export class AttestationPermissionAccount extends Account<types.AttestationPermissionAccountData> {
-  static accountName = 'AttestationPermissionAccountData';
+  static accountName = "AttestationPermissionAccountData";
 
   /**
    *  Load an existing PermissionAccount with its current on-chain state
@@ -68,9 +68,9 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
   > {
     const [account, bump] = AttestationPermissionAccount.fromSeed(
       program,
-      typeof authority === 'string' ? new PublicKey(authority) : authority,
-      typeof granter === 'string' ? new PublicKey(granter) : granter,
-      typeof grantee === 'string' ? new PublicKey(grantee) : grantee
+      typeof authority === "string" ? new PublicKey(authority) : authority,
+      typeof granter === "string" ? new PublicKey(granter) : granter,
+      typeof grantee === "string" ? new PublicKey(grantee) : grantee
     );
     const state = await account.loadData();
     return [account, state, bump];
@@ -94,7 +94,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
   ): [AttestationPermissionAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [
-        Buffer.from('PermissionAccountData'),
+        Buffer.from("PermissionAccountData"),
         authority.toBytes(),
         granter.toBytes(),
         grantee.toBytes(),
@@ -166,7 +166,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     );
     if (data) return data;
     throw new errors.AccountNotFoundError(
-      'Permissions (Attestation)',
+      "Permissions (Attestation)",
       this.publicKey
     );
   }

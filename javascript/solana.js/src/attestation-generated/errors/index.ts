@@ -1,7 +1,7 @@
-import { PROGRAM_ID } from '../programId';
+import { PROGRAM_ID } from "../programId.js";
 
-import * as anchor from './anchor';
-import * as custom from './custom';
+import * as anchor from "./anchor.js";
+import * as custom from "./custom.js";
 
 export function fromCode(
   code: number,
@@ -25,9 +25,9 @@ export function fromTxError(
   err: unknown
 ): custom.CustomError | anchor.AnchorError | null {
   if (
-    typeof err !== 'object' ||
+    typeof err !== "object" ||
     err === null ||
-    !hasOwnProperty(err, 'logs') ||
+    !hasOwnProperty(err, "logs") ||
     !Array.isArray(err.logs)
   ) {
     return null;

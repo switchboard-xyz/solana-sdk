@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionVerifyParamsFields {
   observedTime: BN;
@@ -35,10 +35,10 @@ export class FunctionVerifyParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.i64('observedTime'),
-        borsh.i64('nextAllowedTimestamp'),
-        borsh.bool('isFailure'),
-        borsh.array(borsh.u8(), 32, 'mrEnclave'),
+        borsh.i64("observedTime"),
+        borsh.i64("nextAllowedTimestamp"),
+        borsh.bool("isFailure"),
+        borsh.array(borsh.u8(), 32, "mrEnclave"),
       ],
       property
     );

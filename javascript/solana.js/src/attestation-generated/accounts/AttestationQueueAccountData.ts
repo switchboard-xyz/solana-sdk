@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttestationQueueAccountDataFields {
   authority: PublicKey;
@@ -63,21 +63,21 @@ export class AttestationQueueAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('authority'),
-    borsh.array(borsh.array(borsh.u8(), 32), 32, 'mrEnclaves'),
-    borsh.u32('mrEnclavesLen'),
-    borsh.array(borsh.publicKey(), 128, 'data'),
-    borsh.u32('dataLen'),
-    borsh.i64('allowAuthorityOverrideAfter'),
-    borsh.bool('requireAuthorityHeartbeatPermission'),
-    borsh.bool('requireUsagePermissions'),
-    borsh.i64('maxQuoteVerificationAge'),
-    borsh.u32('reward'),
-    borsh.i64('lastHeartbeat'),
-    borsh.i64('nodeTimeout'),
-    borsh.u32('currIdx'),
-    borsh.u32('gcIdx'),
-    borsh.array(borsh.u8(), 1024, 'ebuf'),
+    borsh.publicKey("authority"),
+    borsh.array(borsh.array(borsh.u8(), 32), 32, "mrEnclaves"),
+    borsh.u32("mrEnclavesLen"),
+    borsh.array(borsh.publicKey(), 128, "data"),
+    borsh.u32("dataLen"),
+    borsh.i64("allowAuthorityOverrideAfter"),
+    borsh.bool("requireAuthorityHeartbeatPermission"),
+    borsh.bool("requireUsagePermissions"),
+    borsh.i64("maxQuoteVerificationAge"),
+    borsh.u32("reward"),
+    borsh.i64("lastHeartbeat"),
+    borsh.i64("nodeTimeout"),
+    borsh.u32("currIdx"),
+    borsh.u32("gcIdx"),
+    borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
 
   constructor(fields: AttestationQueueAccountDataFields) {
@@ -121,7 +121,7 @@ export class AttestationQueueAccountData {
   ): Promise<Array<AttestationQueueAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -135,7 +135,7 @@ export class AttestationQueueAccountData {
 
   static decode(data: Buffer): AttestationQueueAccountData {
     if (!data.slice(0, 8).equals(AttestationQueueAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = AttestationQueueAccountData.layout.decode(data.slice(8));
@@ -165,7 +165,7 @@ export class AttestationQueueAccountData {
       authority: this.authority.toString(),
       mrEnclaves: this.mrEnclaves,
       mrEnclavesLen: this.mrEnclavesLen,
-      data: this.data.map(item => item.toString()),
+      data: this.data.map((item) => item.toString()),
       dataLen: this.dataLen,
       allowAuthorityOverrideAfter: this.allowAuthorityOverrideAfter.toString(),
       requireAuthorityHeartbeatPermission:
@@ -188,7 +188,7 @@ export class AttestationQueueAccountData {
       authority: new PublicKey(obj.authority),
       mrEnclaves: obj.mrEnclaves,
       mrEnclavesLen: obj.mrEnclavesLen,
-      data: obj.data.map(item => new PublicKey(item)),
+      data: obj.data.map((item) => new PublicKey(item)),
       dataLen: obj.dataLen,
       allowAuthorityOverrideAfter: new BN(obj.allowAuthorityOverrideAfter),
       requireAuthorityHeartbeatPermission:

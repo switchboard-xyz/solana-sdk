@@ -1,50 +1,50 @@
 export type {
   AttestationPermissionInitAccounts,
   AttestationPermissionInitArgs,
-} from './attestationPermissionInit';
-export { attestationPermissionInit } from './attestationPermissionInit';
+} from "./attestationPermissionInit.js";
+export { attestationPermissionInit } from "./attestationPermissionInit.js";
 export type {
   AttestationPermissionSetAccounts,
   AttestationPermissionSetArgs,
-} from './attestationPermissionSet';
-export { attestationPermissionSet } from './attestationPermissionSet';
+} from "./attestationPermissionSet.js";
+export { attestationPermissionSet } from "./attestationPermissionSet.js";
 export type {
   AttestationQueueAddMrEnclaveAccounts,
   AttestationQueueAddMrEnclaveArgs,
-} from './attestationQueueAddMrEnclave';
-export { attestationQueueAddMrEnclave } from './attestationQueueAddMrEnclave';
+} from "./attestationQueueAddMrEnclave.js";
+export { attestationQueueAddMrEnclave } from "./attestationQueueAddMrEnclave.js";
 export type {
   AttestationQueueInitAccounts,
   AttestationQueueInitArgs,
-} from './attestationQueueInit';
-export { attestationQueueInit } from './attestationQueueInit';
+} from "./attestationQueueInit.js";
+export { attestationQueueInit } from "./attestationQueueInit.js";
 export type {
   AttestationQueueRemoveMrEnclaveAccounts,
   AttestationQueueRemoveMrEnclaveArgs,
-} from './attestationQueueRemoveMrEnclave';
-export { attestationQueueRemoveMrEnclave } from './attestationQueueRemoveMrEnclave';
-export type { FunctionFundAccounts, FunctionFundArgs } from './functionFund';
-export { functionFund } from './functionFund';
-export type { FunctionInitAccounts, FunctionInitArgs } from './functionInit';
-export { functionInit } from './functionInit';
+} from "./attestationQueueRemoveMrEnclave.js";
+export { attestationQueueRemoveMrEnclave } from "./attestationQueueRemoveMrEnclave.js";
+export type { FunctionFundAccounts, FunctionFundArgs } from "./functionFund.js";
+export { functionFund } from "./functionFund.js";
+export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
+export { functionInit } from "./functionInit.js";
 export type {
   FunctionVerifyAccounts,
   FunctionVerifyArgs,
-} from './functionVerify';
-export { functionVerify } from './functionVerify';
+} from "./functionVerify.js";
+export { functionVerify } from "./functionVerify.js";
 export type {
   FunctionWithdrawAccounts,
   FunctionWithdrawArgs,
-} from './functionWithdraw';
-export { functionWithdraw } from './functionWithdraw';
+} from "./functionWithdraw.js";
+export { functionWithdraw } from "./functionWithdraw.js";
 export type {
   QuoteHeartbeatAccounts,
   QuoteHeartbeatArgs,
-} from './quoteHeartbeat';
-export { quoteHeartbeat } from './quoteHeartbeat';
-export type { QuoteInitAccounts, QuoteInitArgs } from './quoteInit';
-export { quoteInit } from './quoteInit';
-export type { QuoteVerifyAccounts, QuoteVerifyArgs } from './quoteVerify';
-export { quoteVerify } from './quoteVerify';
-export type { StateInitAccounts, StateInitArgs } from './stateInit';
-export { stateInit } from './stateInit';
+} from "./quoteHeartbeat.js";
+export { quoteHeartbeat } from "./quoteHeartbeat.js";
+export type { QuoteInitAccounts, QuoteInitArgs } from "./quoteInit.js";
+export { quoteInit } from "./quoteInit.js";
+export type { QuoteVerifyAccounts, QuoteVerifyArgs } from "./quoteVerify.js";
+export { quoteVerify } from "./quoteVerify.js";
+export type { StateInitAccounts, StateInitArgs } from "./stateInit.js";
+export { stateInit } from "./stateInit.js";

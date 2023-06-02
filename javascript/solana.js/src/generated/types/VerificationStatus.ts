@@ -1,22 +1,23 @@
 import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
+import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as borsh from "@coral-xyz/borsh";
 
 export interface NoneJSON {
-  kind: 'None';
+  kind: "None";
 }
 
 export class None {
   static readonly discriminator = 0;
-  static readonly kind = 'None';
+  static readonly kind = "None";
   readonly discriminator = 0;
-  readonly kind = 'None';
+  readonly kind = "None";
 
   toJSON(): NoneJSON {
     return {
-      kind: 'None',
+      kind: "None",
     };
   }
 
@@ -145,6 +146,9 @@ export function fromJSON(
   obj: types.VerificationStatusJSON
 ): types.VerificationStatusKind {
   switch (obj.kind) {
+    case "None": {
+      return new None();
+    }
     case "VerificationPending": {
       return new VerificationPending();
     }

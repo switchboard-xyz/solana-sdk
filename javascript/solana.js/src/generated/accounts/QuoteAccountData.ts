@@ -89,7 +89,9 @@ export class QuoteAccountData {
     borsh.i64("validUntil"),
     borsh.bool("isOnQueue"),
     borsh.i64("lastHeartbeat"),
-    borsh.array(borsh.u8(), 1024, "ebuf"),
+    borsh.publicKey("owner"),
+    borsh.i64("createdAt"),
+    borsh.array(borsh.u8(), 992, "ebuf"),
   ]);
 
   constructor(fields: QuoteAccountDataFields) {

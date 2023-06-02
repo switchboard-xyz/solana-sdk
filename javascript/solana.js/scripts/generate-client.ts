@@ -1,37 +1,43 @@
-const shell = require('shelljs');
-const path = require('path');
-const fsSync = require('fs');
-const fs = require('fs/promises');
-const { exec, execSync } = require('child_process');
-const _ = require('lodash');
+#!/usr/bin/env tsx
 
-const projectRoot = path.join(__dirname, '..');
+import { exec, execSync } from "child_process";
+import fsSync from "fs";
+import fs from "fs/promises";
+import _ from "lodash";
+import path from "path";
+import shell from "shelljs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const projectRoot = path.join(__dirname, "..");
 // const shx = path.join(projectRoot, 'node_modules', '.bin', 'shx');
 
-const v2DevnetIdlPath = path.join(projectRoot, './src/idl/devnet.json');
-const v2MainnetIdlPath = path.join(projectRoot, './src/idl/mainnet.json');
-const v2GeneratedPath = path.join(projectRoot, './src/generated');
+const v2DevnetIdlPath = path.join(projectRoot, "./idl/devnet.json");
+const v2MainnetIdlPath = path.join(projectRoot, "./idl/mainnet.json");
+const v2GeneratedPath = path.join(projectRoot, "./src/generated");
 
 const attestationDevnetIdlPath = path.join(
   projectRoot,
-  './src/idl/attestation-devnet.json'
+  "./idl/attestation-devnet.json"
 );
 const attestationGeneratedPath = path.join(
   projectRoot,
-  './src/attestation-generated'
+  "./src/attestation-generated"
 );
 
 const switchboardCoreDir = path.join(
   projectRoot,
-  '../../../switchboard-core/switchboard_v2'
+  "../../../switchboard-core/switchboard_v2"
 );
 const switchboardV2IdlPath = path.join(
   switchboardCoreDir,
-  'target/idl/switchboard_v2.json'
+  "target/idl/switchboard_v2.json"
 );
 const switchboardAttestationIdlPath = path.join(
   switchboardCoreDir,
-  'target/idl/switchboard_attestation_program.json'
+  "target/idl/switchboard_attestation_program.json"
 );
 
 // Super hacky. Some files need to be reset to the previous git state and will be manually managed
@@ -53,24 +59,28 @@ const ignoreFiles = [
  * @throws {String}
  * @returns {string[]}
  */
-const getAllFiles = async (dirPath, arrayOfFiles, extensions) => {
-  const files = await fs.readdir(dirPath, 'utf8');
+const getAllFiles = async (
+  dirPath: string,
+  arrayOfFiles: string[] = [],
+  extensions: string[] = []
+): Promise<string[]> => {
+  const files = await fs.readdir(dirPath, "utf8");
 
   arrayOfFiles = arrayOfFiles || [];
 
   for await (const file of files) {
-    if (fsSync.statSync(dirPath + '/' + file).isDirectory()) {
+    if (fsSync.statSync(dirPath + "/" + file).isDirectory()) {
       arrayOfFiles = await getAllFiles(
-        dirPath + '/' + file,
+        dirPath + "/" + file,
         arrayOfFiles,
         extensions
       );
     } else {
       const ext = path.extname(file);
       if (extensions && Array.isArray(extensions) && extensions.includes(ext)) {
-        arrayOfFiles.push(path.join(dirPath, '/', file));
+        arrayOfFiles.push(path.join(dirPath, "/", file));
       } else {
-        arrayOfFiles.push(path.join(dirPath, '/', file));
+        arrayOfFiles.push(path.join(dirPath, "/", file));
       }
       // if (!(extensions === undefined) || extensions.includes(ext)) {
       //   arrayOfFiles.push(path.join(dirPath, '/', file));
@@ -86,11 +96,11 @@ async function main() {
 
   // generate IDL types from local directory
   let devMode = false;
-  if (process.argv.slice(2).includes('--dev')) {
+  if (process.argv.slice(2).includes("--dev")) {
     devMode = true;
   }
 
-  if (!shell.which('anchor')) {
+  if (!shell.which("anchor")) {
     shell.echo(
       "Sorry, this script requires 'anchor' to be installed in your $PATH"
     );
@@ -103,19 +113,19 @@ async function main() {
     runCommandAsync(
       `anchor idl fetch -o ${v2MainnetIdlPath} SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster mainnet`,
       {
-        encoding: 'utf-8',
+        encoding: "utf-8",
       }
     ),
     runCommandAsync(
       `anchor idl fetch -o ${v2DevnetIdlPath} SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --provider.cluster devnet`,
       {
-        encoding: 'utf-8',
+        encoding: "utf-8",
       }
     ),
     runCommandAsync(
       `anchor idl fetch -o ${attestationDevnetIdlPath} 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --provider.cluster devnet`,
       {
-        encoding: 'utf-8',
+        encoding: "utf-8",
       }
     ),
     fsSync.existsSync(v2GeneratedPath)
@@ -131,22 +141,22 @@ async function main() {
     await Promise.all([
       runCommandAsync(
         `npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ${switchboardV2IdlPath} ${v2GeneratedPath}`,
-        { encoding: 'utf-8' }
+        { encoding: "utf-8" }
       ),
       runCommandAsync(
         `npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${switchboardAttestationIdlPath} ${attestationGeneratedPath}`,
-        { encoding: 'utf-8' }
+        { encoding: "utf-8" }
       ),
     ]);
   } else {
     await Promise.all([
       runCommandAsync(
         `npx anchor-client-gen --program-id SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f ${v2DevnetIdlPath} ${v2GeneratedPath}`,
-        { encoding: 'utf-8' }
+        { encoding: "utf-8" }
       ),
       runCommandAsync(
         `npx anchor-client-gen --program-id 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
-        { encoding: 'utf-8' }
+        { encoding: "utf-8" }
       ),
     ]);
   }
@@ -155,21 +165,21 @@ async function main() {
     fs.writeFile(
       `${v2GeneratedPath}/index.ts`,
       [
-        "export * from './accounts';",
-        "export * from './errors';",
-        "export * from './instructions';",
-        "export * from './types';",
-      ].join('\n')
+        "export * from './accounts/index.js';",
+        "export * from './errors/index.js';",
+        "export * from './instructions/index.js';",
+        "export * from './types/index.js';",
+      ].join("\n")
     ),
 
     fs.writeFile(
       `${attestationGeneratedPath}/index.ts`,
       [
-        "export * from './accounts';",
-        "export * from './errors';",
-        "export * from './instructions';",
-        "export * from './types';",
-      ].join('\n')
+        "export * from './accounts/index.js';",
+        "export * from './errors/index.js';",
+        "export * from './instructions/index.js';",
+        "export * from './types/index.js';",
+      ].join("\n")
     ),
   ]);
 
@@ -188,89 +198,125 @@ async function main() {
   );
 
   console.log(`Processing ${allGeneratedFiles.length} files ...`);
-  await Promise.all(allGeneratedFiles.map(f => processGeneratedFile(f)));
+
+  await Promise.all(allGeneratedFiles.map((f) => processFile(f)));
 
   console.log(`Formatting generated files ...`);
   await Promise.all([
     runCommandAsync(`npx prettier ${v2GeneratedPath} --write`, {
-      encoding: 'utf-8',
+      encoding: "utf-8",
     }),
     runCommandAsync(`npx prettier ${attestationGeneratedPath} --write`, {
-      encoding: 'utf-8',
+      encoding: "utf-8",
     }),
   ]);
 
   // reset ignored files
   for (const file of ignoreFiles) {
-    execSync(`git restore ${file}`, { encoding: 'utf-8' });
+    execSync(`git restore ${file}`, { encoding: "utf-8" });
   }
 
   // run auto fix for import ordering
-  execSync(`pnpm fix`, { encoding: 'utf-8' });
+  execSync(`pnpm fix`, { encoding: "utf-8" });
 }
 
 main()
   .then(() => {
     // console.log("Executed successfully");
   })
-  .catch(err => {
+  .catch((err) => {
     console.error(err);
   });
 
 /**
  * Process the generated file and add the SwitchboardProgram class
  */
-async function processGeneratedFile(file) {
-  if (file.includes('index.ts')) return;
+const processFile = async (file: string) => {
+  return await fs
+    .readFile(file, "utf-8")
+    .then(async (fileString: string): Promise<string> => {
+      if (file.endsWith("errors/index.ts")) {
+        return fileString
+          .replace(
+            `import { PROGRAM_ID } from "../programId"`,
+            `import { PROGRAM_ID } from "../programId.js"`
+          )
+          .replace(
+            `import * as anchor from "./anchor"`,
+            `import * as anchor from "./anchor.js"`
+          )
+          .replace(
+            `import * as custom from "./custom"`,
+            `import * as custom from "./custom.js"`
+          );
+      }
+      if (file.includes("index.ts")) {
+        // add the .js extension to all local import/export paths
+        return fileString.replace(
+          /((import|export)((\s\w+)?([^'"]*))from\s['"])([^'"]+)(['"])/gm,
+          "$1$6.js$7"
+        );
+      }
+      let updatedFileString = fileString;
 
-  const fileString = await fs.readFile(file, 'utf-8');
-  await fs.writeFile(
-    file,
-    `import { SwitchboardProgram } from "../../SwitchboardProgram"\n${fileString}`
-  );
+      updatedFileString =
+        `import { SwitchboardProgram } from "../../SwitchboardProgram.js"` +
+        "\n" +
+        fileString;
 
-  // replace BN import
-  shell.sed(
-    '-i',
-    'import BN from "bn.js"',
-    'import { BN } from "@switchboard-xyz/common"',
-    file
-  );
-  // replace borsh import
-  shell.sed('-i', '@project-serum', '@coral-xyz', file);
-  // remove PROGRAM_ID import, we will use SwitchboardProgram instead
-  shell.sed('-i', 'import { PROGRAM_ID } from "../programId"', '', file);
-  // replace PROGRAM_ID with program.programId
-  shell.sed('-i', 'PROGRAM_ID', 'program.programId', file);
-  // replace Connection with SwitchboardProgram
-  shell.sed('-i', 'c: Connection,', 'program: SwitchboardProgram,', file);
-  // replace c.getAccountInfo with the SwitchboardProgram connection
-  shell.sed(
-    '-i',
-    'c.getAccountInfo',
-    'program.connection.getAccountInfo',
-    file
-  );
-  // replace c.getMultipleAccountsInfo with the SwitchboardProgram connection
-  shell.sed(
-    '-i',
-    'c.getMultipleAccountsInfo',
-    'program.connection.getMultipleAccountsInfo',
-    file
-  );
+      // update the types import
+      updatedFileString = updatedFileString
+        // use full path
+        .replace(
+          `import * as types from "../types"`,
+          `import * as types from "../types/index.js"`
+        )
 
-  if (file.includes('/instructions/')) {
-    // add program as first arguement to instructions
-    shell.sed('-i', 'args:', 'program: SwitchboardProgram, args:', file);
-  }
+        // use our library to avoid version conflicts
+        .replace(
+          `import BN from "bn.js"`,
+          `import { BN } from "@switchboard-xyz/common"`
+        )
+        // better
+        .replace(
+          `import * as borsh from "@project-serum/borsh"`,
+          `import * as borsh from "@coral-xyz/borsh"`
+        )
+        // remove this import, using SwitchboardProgram
+        .replace(`import { PROGRAM_ID } from "../programId"`, ``)
+        .replaceAll(`PROGRAM_ID`, `program.programId`)
+        .replaceAll(`c: Connection,`, `program: SwitchboardProgram,`)
+        .replaceAll(`c.getAccountInfo`, `program.connection.getAccountInfo`)
+        .replaceAll(
+          `c.getMultipleAccountsInfo`,
+          `program.connection.getMultipleAccountsInfo`
+        );
 
-  if (file.includes('/attestation-generated/')) {
-    // attestation-generated files use the attestationProgramId instead of programId
-    shell.sed('-i', 'program.programId', 'program.attestationProgramId', file);
-  }
-}
+      if (file.includes("/instructions/")) {
+        updatedFileString = updatedFileString.replaceAll(
+          `args:`,
+          `program: SwitchboardProgram, args:`
+        );
+      }
 
-async function runCommandAsync(command, options) {
+      if (file.includes("/attestation-generated/")) {
+        updatedFileString = updatedFileString.replaceAll(
+          `program.programId`,
+          `program.attestationProgramId`
+        );
+      }
+
+      return updatedFileString;
+    })
+    .then(async (updatedFileString: string) => {
+      return await fs.writeFile(file, updatedFileString, "utf-8");
+    });
+};
+
+async function runCommandAsync(
+  command: string,
+  options: Record<string, any>
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const cmd = exec(command, options);
 
@@ -278,19 +324,23 @@ async function runCommandAsync(command, options) {
     //   console.log(data.toString());
     // });
 
-    cmd.stderr.on('data', data => {
+    cmd?.stderr?.on("data", (data) => {
       console.error(data.toString());
     });
 
-    cmd.on('error', error => {
+    // cmd.on("message", (data) => {
+    //   console.info(data.toString());
+    // });
+
+    cmd.on("error", (error) => {
       reject(error);
     });
 
-    cmd.on('close', code => {
+    cmd.on("close", (code) => {
       if (code !== 0) {
         reject(new Error(`Command exited with code ${code}`));
       } else {
-        resolve();
+        resolve(undefined);
       }
     });
   });

@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttestationQueueAddMrEnclaveParamsFields {
   mrEnclave: Array<number>;
@@ -21,7 +21,7 @@ export class AttestationQueueAddMrEnclaveParams {
   }
 
   static layout(property?: string) {
-    return borsh.struct([borsh.array(borsh.u8(), 32, 'mrEnclave')], property);
+    return borsh.struct([borsh.array(borsh.u8(), 32, "mrEnclave")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

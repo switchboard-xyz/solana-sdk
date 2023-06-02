@@ -546,7 +546,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       await permissionAccount.loadData();
     } catch (_) {
       throw new Error(
-        'A requested oracle permission pda account has not been initialized.'
+        "A requested oracle permission pda account has not been initialized."
       );
     }
 

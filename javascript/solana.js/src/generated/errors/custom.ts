@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
 export type CustomError =
   | ArrayOperationError
   | QueueOperationError
@@ -108,35 +108,35 @@ export type CustomError =
 export class ArrayOperationError extends Error {
   static readonly code = 6000;
   readonly code = 6000;
-  readonly name = 'ArrayOperationError';
-  readonly msg = 'Illegal operation on a Switchboard array.';
+  readonly name = "ArrayOperationError";
+  readonly msg = "Illegal operation on a Switchboard array.";
 
   constructor(readonly logs?: string[]) {
-    super('6000: Illegal operation on a Switchboard array.');
+    super("6000: Illegal operation on a Switchboard array.");
   }
 }
 
 export class QueueOperationError extends Error {
   static readonly code = 6001;
   readonly code = 6001;
-  readonly name = 'QueueOperationError';
-  readonly msg = 'Illegal operation on a Switchboard queue.';
+  readonly name = "QueueOperationError";
+  readonly msg = "Illegal operation on a Switchboard queue.";
 
   constructor(readonly logs?: string[]) {
-    super('6001: Illegal operation on a Switchboard queue.');
+    super("6001: Illegal operation on a Switchboard queue.");
   }
 }
 
 export class IncorrectProgramOwnerError extends Error {
   static readonly code = 6002;
   readonly code = 6002;
-  readonly name = 'IncorrectProgramOwnerError';
+  readonly name = "IncorrectProgramOwnerError";
   readonly msg =
-    'An account required to be owned by the program has a different owner.';
+    "An account required to be owned by the program has a different owner.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6002: An account required to be owned by the program has a different owner.'
+      "6002: An account required to be owned by the program has a different owner."
     );
   }
 }
@@ -144,29 +144,29 @@ export class IncorrectProgramOwnerError extends Error {
 export class InvalidAggregatorRound extends Error {
   static readonly code = 6003;
   readonly code = 6003;
-  readonly name = 'InvalidAggregatorRound';
-  readonly msg = 'Aggregator is not currently populated with a valid round.';
+  readonly name = "InvalidAggregatorRound";
+  readonly msg = "Aggregator is not currently populated with a valid round.";
 
   constructor(readonly logs?: string[]) {
-    super('6003: Aggregator is not currently populated with a valid round.');
+    super("6003: Aggregator is not currently populated with a valid round.");
   }
 }
 
 export class TooManyAggregatorJobs extends Error {
   static readonly code = 6004;
   readonly code = 6004;
-  readonly name = 'TooManyAggregatorJobs';
-  readonly msg = 'Aggregator cannot fit any more jobs.';
+  readonly name = "TooManyAggregatorJobs";
+  readonly msg = "Aggregator cannot fit any more jobs.";
 
   constructor(readonly logs?: string[]) {
-    super('6004: Aggregator cannot fit any more jobs.');
+    super("6004: Aggregator cannot fit any more jobs.");
   }
 }
 
 export class AggregatorCurrentRoundClosed extends Error {
   static readonly code = 6005;
   readonly code = 6005;
-  readonly name = 'AggregatorCurrentRoundClosed';
+  readonly name = "AggregatorCurrentRoundClosed";
   readonly msg =
     "Aggregator's current round is closed. No results are being accepted.";
 
@@ -180,57 +180,57 @@ export class AggregatorCurrentRoundClosed extends Error {
 export class AggregatorInvalidSaveResult extends Error {
   static readonly code = 6006;
   readonly code = 6006;
-  readonly name = 'AggregatorInvalidSaveResult';
-  readonly msg = 'Aggregator received an invalid save result instruction.';
+  readonly name = "AggregatorInvalidSaveResult";
+  readonly msg = "Aggregator received an invalid save result instruction.";
 
   constructor(readonly logs?: string[]) {
-    super('6006: Aggregator received an invalid save result instruction.');
+    super("6006: Aggregator received an invalid save result instruction.");
   }
 }
 
 export class InvalidStrDecimalConversion extends Error {
   static readonly code = 6007;
   readonly code = 6007;
-  readonly name = 'InvalidStrDecimalConversion';
-  readonly msg = 'Failed to convert string to decimal format.';
+  readonly name = "InvalidStrDecimalConversion";
+  readonly msg = "Failed to convert string to decimal format.";
 
   constructor(readonly logs?: string[]) {
-    super('6007: Failed to convert string to decimal format.');
+    super("6007: Failed to convert string to decimal format.");
   }
 }
 
 export class AccountLoaderMissingSignature extends Error {
   static readonly code = 6008;
   readonly code = 6008;
-  readonly name = 'AccountLoaderMissingSignature';
-  readonly msg = 'AccountLoader account is missing a required signature.';
+  readonly name = "AccountLoaderMissingSignature";
+  readonly msg = "AccountLoader account is missing a required signature.";
 
   constructor(readonly logs?: string[]) {
-    super('6008: AccountLoader account is missing a required signature.');
+    super("6008: AccountLoader account is missing a required signature.");
   }
 }
 
 export class MissingRequiredSignature extends Error {
   static readonly code = 6009;
   readonly code = 6009;
-  readonly name = 'MissingRequiredSignature';
-  readonly msg = 'Account is missing a required signature.';
+  readonly name = "MissingRequiredSignature";
+  readonly msg = "Account is missing a required signature.";
 
   constructor(readonly logs?: string[]) {
-    super('6009: Account is missing a required signature.');
+    super("6009: Account is missing a required signature.");
   }
 }
 
 export class ArrayOverflowError extends Error {
   static readonly code = 6010;
   readonly code = 6010;
-  readonly name = 'ArrayOverflowError';
+  readonly name = "ArrayOverflowError";
   readonly msg =
-    'The attempted action will overflow a zero-copy account array.';
+    "The attempted action will overflow a zero-copy account array.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6010: The attempted action will overflow a zero-copy account array.'
+      "6010: The attempted action will overflow a zero-copy account array."
     );
   }
 }
@@ -238,13 +238,13 @@ export class ArrayOverflowError extends Error {
 export class ArrayUnderflowError extends Error {
   static readonly code = 6011;
   readonly code = 6011;
-  readonly name = 'ArrayUnderflowError';
+  readonly name = "ArrayUnderflowError";
   readonly msg =
-    'The attempted action will underflow a zero-copy account array.';
+    "The attempted action will underflow a zero-copy account array.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6011: The attempted action will underflow a zero-copy account array.'
+      "6011: The attempted action will underflow a zero-copy account array."
     );
   }
 }
@@ -252,112 +252,112 @@ export class ArrayUnderflowError extends Error {
 export class PubkeyNotFoundError extends Error {
   static readonly code = 6012;
   readonly code = 6012;
-  readonly name = 'PubkeyNotFoundError';
-  readonly msg = 'The queried public key was not found.';
+  readonly name = "PubkeyNotFoundError";
+  readonly msg = "The queried public key was not found.";
 
   constructor(readonly logs?: string[]) {
-    super('6012: The queried public key was not found.');
+    super("6012: The queried public key was not found.");
   }
 }
 
 export class AggregatorIllegalRoundOpenCall extends Error {
   static readonly code = 6013;
   readonly code = 6013;
-  readonly name = 'AggregatorIllegalRoundOpenCall';
-  readonly msg = 'Aggregator round open called too early.';
+  readonly name = "AggregatorIllegalRoundOpenCall";
+  readonly msg = "Aggregator round open called too early.";
 
   constructor(readonly logs?: string[]) {
-    super('6013: Aggregator round open called too early.');
+    super("6013: Aggregator round open called too early.");
   }
 }
 
 export class AggregatorIllegalRoundCloseCall extends Error {
   static readonly code = 6014;
   readonly code = 6014;
-  readonly name = 'AggregatorIllegalRoundCloseCall';
-  readonly msg = 'Aggregator round close called too early.';
+  readonly name = "AggregatorIllegalRoundCloseCall";
+  readonly msg = "Aggregator round close called too early.";
 
   constructor(readonly logs?: string[]) {
-    super('6014: Aggregator round close called too early.');
+    super("6014: Aggregator round close called too early.");
   }
 }
 
 export class AggregatorClosedError extends Error {
   static readonly code = 6015;
   readonly code = 6015;
-  readonly name = 'AggregatorClosedError';
-  readonly msg = 'Aggregator is closed. Illegal action.';
+  readonly name = "AggregatorClosedError";
+  readonly msg = "Aggregator is closed. Illegal action.";
 
   constructor(readonly logs?: string[]) {
-    super('6015: Aggregator is closed. Illegal action.');
+    super("6015: Aggregator is closed. Illegal action.");
   }
 }
 
 export class IllegalOracleIdxError extends Error {
   static readonly code = 6016;
   readonly code = 6016;
-  readonly name = 'IllegalOracleIdxError';
-  readonly msg = 'Illegal oracle index.';
+  readonly name = "IllegalOracleIdxError";
+  readonly msg = "Illegal oracle index.";
 
   constructor(readonly logs?: string[]) {
-    super('6016: Illegal oracle index.');
+    super("6016: Illegal oracle index.");
   }
 }
 
 export class OracleAlreadyRespondedError extends Error {
   static readonly code = 6017;
   readonly code = 6017;
-  readonly name = 'OracleAlreadyRespondedError';
-  readonly msg = 'The provided oracle has already responded this round.';
+  readonly name = "OracleAlreadyRespondedError";
+  readonly msg = "The provided oracle has already responded this round.";
 
   constructor(readonly logs?: string[]) {
-    super('6017: The provided oracle has already responded this round.');
+    super("6017: The provided oracle has already responded this round.");
   }
 }
 
 export class ProtoDeserializeError extends Error {
   static readonly code = 6018;
   readonly code = 6018;
-  readonly name = 'ProtoDeserializeError';
-  readonly msg = 'Failed to deserialize protocol buffer.';
+  readonly name = "ProtoDeserializeError";
+  readonly msg = "Failed to deserialize protocol buffer.";
 
   constructor(readonly logs?: string[]) {
-    super('6018: Failed to deserialize protocol buffer.');
+    super("6018: Failed to deserialize protocol buffer.");
   }
 }
 
 export class UnauthorizedStateUpdateError extends Error {
   static readonly code = 6019;
   readonly code = 6019;
-  readonly name = 'UnauthorizedStateUpdateError';
-  readonly msg = 'Unauthorized program state modification attempted.';
+  readonly name = "UnauthorizedStateUpdateError";
+  readonly msg = "Unauthorized program state modification attempted.";
 
   constructor(readonly logs?: string[]) {
-    super('6019: Unauthorized program state modification attempted.');
+    super("6019: Unauthorized program state modification attempted.");
   }
 }
 
 export class MissingOracleAccountsError extends Error {
   static readonly code = 6020;
   readonly code = 6020;
-  readonly name = 'MissingOracleAccountsError';
-  readonly msg = 'Not enough oracle accounts provided to closeRounds.';
+  readonly name = "MissingOracleAccountsError";
+  readonly msg = "Not enough oracle accounts provided to closeRounds.";
 
   constructor(readonly logs?: string[]) {
-    super('6020: Not enough oracle accounts provided to closeRounds.');
+    super("6020: Not enough oracle accounts provided to closeRounds.");
   }
 }
 
 export class OracleMismatchError extends Error {
   static readonly code = 6021;
   readonly code = 6021;
-  readonly name = 'OracleMismatchError';
+  readonly name = "OracleMismatchError";
   readonly msg =
-    'An unexpected oracle account was provided for the transaction.';
+    "An unexpected oracle account was provided for the transaction.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6021: An unexpected oracle account was provided for the transaction.'
+      "6021: An unexpected oracle account was provided for the transaction."
     );
   }
 }
@@ -365,7 +365,7 @@ export class OracleMismatchError extends Error {
 export class CrankMaxCapacityError extends Error {
   static readonly code = 6022;
   readonly code = 6022;
-  readonly name = 'CrankMaxCapacityError';
+  readonly name = "CrankMaxCapacityError";
   readonly msg = "Attempted to push to a Crank that's at capacity";
 
   constructor(readonly logs?: string[]) {
@@ -376,13 +376,13 @@ export class CrankMaxCapacityError extends Error {
 export class AggregatorLeaseInsufficientFunds extends Error {
   static readonly code = 6023;
   readonly code = 6023;
-  readonly name = 'AggregatorLeaseInsufficientFunds';
+  readonly name = "AggregatorLeaseInsufficientFunds";
   readonly msg =
-    'Aggregator update call attempted but attached lease has insufficient funds.';
+    "Aggregator update call attempted but attached lease has insufficient funds.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6023: Aggregator update call attempted but attached lease has insufficient funds.'
+      "6023: Aggregator update call attempted but attached lease has insufficient funds."
     );
   }
 }
@@ -390,13 +390,13 @@ export class AggregatorLeaseInsufficientFunds extends Error {
 export class IncorrectTokenAccountMint extends Error {
   static readonly code = 6024;
   readonly code = 6024;
-  readonly name = 'IncorrectTokenAccountMint';
+  readonly name = "IncorrectTokenAccountMint";
   readonly msg =
-    'The provided token account does not point to the Switchboard token mint.';
+    "The provided token account does not point to the Switchboard token mint.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6024: The provided token account does not point to the Switchboard token mint.'
+      "6024: The provided token account does not point to the Switchboard token mint."
     );
   }
 }
@@ -404,123 +404,123 @@ export class IncorrectTokenAccountMint extends Error {
 export class InvalidEscrowAccount extends Error {
   static readonly code = 6025;
   readonly code = 6025;
-  readonly name = 'InvalidEscrowAccount';
-  readonly msg = 'An invalid escrow account was provided.';
+  readonly name = "InvalidEscrowAccount";
+  readonly msg = "An invalid escrow account was provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6025: An invalid escrow account was provided.');
+    super("6025: An invalid escrow account was provided.");
   }
 }
 
 export class CrankEmptyError extends Error {
   static readonly code = 6026;
   readonly code = 6026;
-  readonly name = 'CrankEmptyError';
-  readonly msg = 'Crank empty. Pop failed.';
+  readonly name = "CrankEmptyError";
+  readonly msg = "Crank empty. Pop failed.";
 
   constructor(readonly logs?: string[]) {
-    super('6026: Crank empty. Pop failed.');
+    super("6026: Crank empty. Pop failed.");
   }
 }
 
 export class PdaDeriveError extends Error {
   static readonly code = 6027;
   readonly code = 6027;
-  readonly name = 'PdaDeriveError';
-  readonly msg = 'Failed to derive a PDA from the provided seed.';
+  readonly name = "PdaDeriveError";
+  readonly msg = "Failed to derive a PDA from the provided seed.";
 
   constructor(readonly logs?: string[]) {
-    super('6027: Failed to derive a PDA from the provided seed.');
+    super("6027: Failed to derive a PDA from the provided seed.");
   }
 }
 
 export class AggregatorAccountNotFound extends Error {
   static readonly code = 6028;
   readonly code = 6028;
-  readonly name = 'AggregatorAccountNotFound';
-  readonly msg = 'Aggregator account missing from provided account list.';
+  readonly name = "AggregatorAccountNotFound";
+  readonly msg = "Aggregator account missing from provided account list.";
 
   constructor(readonly logs?: string[]) {
-    super('6028: Aggregator account missing from provided account list.');
+    super("6028: Aggregator account missing from provided account list.");
   }
 }
 
 export class PermissionAccountNotFound extends Error {
   static readonly code = 6029;
   readonly code = 6029;
-  readonly name = 'PermissionAccountNotFound';
-  readonly msg = 'Permission account missing from provided account list.';
+  readonly name = "PermissionAccountNotFound";
+  readonly msg = "Permission account missing from provided account list.";
 
   constructor(readonly logs?: string[]) {
-    super('6029: Permission account missing from provided account list.');
+    super("6029: Permission account missing from provided account list.");
   }
 }
 
 export class LeaseAccountDeriveFailure extends Error {
   static readonly code = 6030;
   readonly code = 6030;
-  readonly name = 'LeaseAccountDeriveFailure';
-  readonly msg = 'Failed to derive a lease account.';
+  readonly name = "LeaseAccountDeriveFailure";
+  readonly msg = "Failed to derive a lease account.";
 
   constructor(readonly logs?: string[]) {
-    super('6030: Failed to derive a lease account.');
+    super("6030: Failed to derive a lease account.");
   }
 }
 
 export class PermissionAccountDeriveFailure extends Error {
   static readonly code = 6031;
   readonly code = 6031;
-  readonly name = 'PermissionAccountDeriveFailure';
-  readonly msg = 'Failed to derive a permission account.';
+  readonly name = "PermissionAccountDeriveFailure";
+  readonly msg = "Failed to derive a permission account.";
 
   constructor(readonly logs?: string[]) {
-    super('6031: Failed to derive a permission account.');
+    super("6031: Failed to derive a permission account.");
   }
 }
 
 export class EscrowAccountNotFound extends Error {
   static readonly code = 6032;
   readonly code = 6032;
-  readonly name = 'EscrowAccountNotFound';
-  readonly msg = 'Escrow account missing from provided account list.';
+  readonly name = "EscrowAccountNotFound";
+  readonly msg = "Escrow account missing from provided account list.";
 
   constructor(readonly logs?: string[]) {
-    super('6032: Escrow account missing from provided account list.');
+    super("6032: Escrow account missing from provided account list.");
   }
 }
 
 export class LeaseAccountNotFound extends Error {
   static readonly code = 6033;
   readonly code = 6033;
-  readonly name = 'LeaseAccountNotFound';
-  readonly msg = 'Lease account missing from provided account list.';
+  readonly name = "LeaseAccountNotFound";
+  readonly msg = "Lease account missing from provided account list.";
 
   constructor(readonly logs?: string[]) {
-    super('6033: Lease account missing from provided account list.');
+    super("6033: Lease account missing from provided account list.");
   }
 }
 
 export class DecimalConversionError extends Error {
   static readonly code = 6034;
   readonly code = 6034;
-  readonly name = 'DecimalConversionError';
-  readonly msg = 'Decimal conversion method failed.';
+  readonly name = "DecimalConversionError";
+  readonly msg = "Decimal conversion method failed.";
 
   constructor(readonly logs?: string[]) {
-    super('6034: Decimal conversion method failed.');
+    super("6034: Decimal conversion method failed.");
   }
 }
 
 export class PermissionDenied extends Error {
   static readonly code = 6035;
   readonly code = 6035;
-  readonly name = 'PermissionDenied';
+  readonly name = "PermissionDenied";
   readonly msg =
-    'Permission account is missing required flags for the given action.';
+    "Permission account is missing required flags for the given action.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6035: Permission account is missing required flags for the given action.'
+      "6035: Permission account is missing required flags for the given action."
     );
   }
 }
@@ -528,35 +528,35 @@ export class PermissionDenied extends Error {
 export class QueueAtCapacity extends Error {
   static readonly code = 6036;
   readonly code = 6036;
-  readonly name = 'QueueAtCapacity';
-  readonly msg = 'Oracle queue is at lease capacity.';
+  readonly name = "QueueAtCapacity";
+  readonly msg = "Oracle queue is at lease capacity.";
 
   constructor(readonly logs?: string[]) {
-    super('6036: Oracle queue is at lease capacity.');
+    super("6036: Oracle queue is at lease capacity.");
   }
 }
 
 export class ExcessiveCrankRowsError extends Error {
   static readonly code = 6037;
   readonly code = 6037;
-  readonly name = 'ExcessiveCrankRowsError';
-  readonly msg = 'Data feed is already pushed on a crank.';
+  readonly name = "ExcessiveCrankRowsError";
+  readonly msg = "Data feed is already pushed on a crank.";
 
   constructor(readonly logs?: string[]) {
-    super('6037: Data feed is already pushed on a crank.');
+    super("6037: Data feed is already pushed on a crank.");
   }
 }
 
 export class AggregatorLockedError extends Error {
   static readonly code = 6038;
   readonly code = 6038;
-  readonly name = 'AggregatorLockedError';
+  readonly name = "AggregatorLockedError";
   readonly msg =
-    'Aggregator is locked, no setting modifications or job additions allowed.';
+    "Aggregator is locked, no setting modifications or job additions allowed.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6038: Aggregator is locked, no setting modifications or job additions allowed.'
+      "6038: Aggregator is locked, no setting modifications or job additions allowed."
     );
   }
 }
@@ -564,134 +564,134 @@ export class AggregatorLockedError extends Error {
 export class AggregatorInvalidBatchSizeError extends Error {
   static readonly code = 6039;
   readonly code = 6039;
-  readonly name = 'AggregatorInvalidBatchSizeError';
-  readonly msg = 'Aggregator invalid batch size.';
+  readonly name = "AggregatorInvalidBatchSizeError";
+  readonly msg = "Aggregator invalid batch size.";
 
   constructor(readonly logs?: string[]) {
-    super('6039: Aggregator invalid batch size.');
+    super("6039: Aggregator invalid batch size.");
   }
 }
 
 export class AggregatorJobChecksumMismatch extends Error {
   static readonly code = 6040;
   readonly code = 6040;
-  readonly name = 'AggregatorJobChecksumMismatch';
-  readonly msg = 'Oracle provided an incorrect aggregator job checksum.';
+  readonly name = "AggregatorJobChecksumMismatch";
+  readonly msg = "Oracle provided an incorrect aggregator job checksum.";
 
   constructor(readonly logs?: string[]) {
-    super('6040: Oracle provided an incorrect aggregator job checksum.');
+    super("6040: Oracle provided an incorrect aggregator job checksum.");
   }
 }
 
 export class IntegerOverflowError extends Error {
   static readonly code = 6041;
   readonly code = 6041;
-  readonly name = 'IntegerOverflowError';
-  readonly msg = 'An integer overflow occurred.';
+  readonly name = "IntegerOverflowError";
+  readonly msg = "An integer overflow occurred.";
 
   constructor(readonly logs?: string[]) {
-    super('6041: An integer overflow occurred.');
+    super("6041: An integer overflow occurred.");
   }
 }
 
 export class InvalidUpdatePeriodError extends Error {
   static readonly code = 6042;
   readonly code = 6042;
-  readonly name = 'InvalidUpdatePeriodError';
-  readonly msg = 'Minimum update period is 5 seconds.';
+  readonly name = "InvalidUpdatePeriodError";
+  readonly msg = "Minimum update period is 5 seconds.";
 
   constructor(readonly logs?: string[]) {
-    super('6042: Minimum update period is 5 seconds.');
+    super("6042: Minimum update period is 5 seconds.");
   }
 }
 
 export class NoResultsError extends Error {
   static readonly code = 6043;
   readonly code = 6043;
-  readonly name = 'NoResultsError';
-  readonly msg = 'Aggregator round evaluation attempted with no results.';
+  readonly name = "NoResultsError";
+  readonly msg = "Aggregator round evaluation attempted with no results.";
 
   constructor(readonly logs?: string[]) {
-    super('6043: Aggregator round evaluation attempted with no results.');
+    super("6043: Aggregator round evaluation attempted with no results.");
   }
 }
 
 export class InvalidExpirationError extends Error {
   static readonly code = 6044;
   readonly code = 6044;
-  readonly name = 'InvalidExpirationError';
-  readonly msg = 'An expiration constraint was broken.';
+  readonly name = "InvalidExpirationError";
+  readonly msg = "An expiration constraint was broken.";
 
   constructor(readonly logs?: string[]) {
-    super('6044: An expiration constraint was broken.');
+    super("6044: An expiration constraint was broken.");
   }
 }
 
 export class InsufficientStakeError extends Error {
   static readonly code = 6045;
   readonly code = 6045;
-  readonly name = 'InsufficientStakeError';
-  readonly msg = 'An account provided insufficient stake for action.';
+  readonly name = "InsufficientStakeError";
+  readonly msg = "An account provided insufficient stake for action.";
 
   constructor(readonly logs?: string[]) {
-    super('6045: An account provided insufficient stake for action.');
+    super("6045: An account provided insufficient stake for action.");
   }
 }
 
 export class LeaseInactiveError extends Error {
   static readonly code = 6046;
   readonly code = 6046;
-  readonly name = 'LeaseInactiveError';
-  readonly msg = 'The provided lease account is not active.';
+  readonly name = "LeaseInactiveError";
+  readonly msg = "The provided lease account is not active.";
 
   constructor(readonly logs?: string[]) {
-    super('6046: The provided lease account is not active.');
+    super("6046: The provided lease account is not active.");
   }
 }
 
 export class NoAggregatorJobsFound extends Error {
   static readonly code = 6047;
   readonly code = 6047;
-  readonly name = 'NoAggregatorJobsFound';
-  readonly msg = 'No jobs are currently included in the aggregator.';
+  readonly name = "NoAggregatorJobsFound";
+  readonly msg = "No jobs are currently included in the aggregator.";
 
   constructor(readonly logs?: string[]) {
-    super('6047: No jobs are currently included in the aggregator.');
+    super("6047: No jobs are currently included in the aggregator.");
   }
 }
 
 export class IntegerUnderflowError extends Error {
   static readonly code = 6048;
   readonly code = 6048;
-  readonly name = 'IntegerUnderflowError';
-  readonly msg = 'An integer underflow occurred.';
+  readonly name = "IntegerUnderflowError";
+  readonly msg = "An integer underflow occurred.";
 
   constructor(readonly logs?: string[]) {
-    super('6048: An integer underflow occurred.');
+    super("6048: An integer underflow occurred.");
   }
 }
 
 export class OracleQueueMismatch extends Error {
   static readonly code = 6049;
   readonly code = 6049;
-  readonly name = 'OracleQueueMismatch';
-  readonly msg = 'An invalid oracle queue account was provided.';
+  readonly name = "OracleQueueMismatch";
+  readonly msg = "An invalid oracle queue account was provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6049: An invalid oracle queue account was provided.');
+    super("6049: An invalid oracle queue account was provided.");
   }
 }
 
 export class OracleWalletMismatchError extends Error {
   static readonly code = 6050;
   readonly code = 6050;
-  readonly name = 'OracleWalletMismatchError';
+  readonly name = "OracleWalletMismatchError";
   readonly msg =
-    'An unexpected oracle wallet account was provided for the transaction.';
+    "An unexpected oracle wallet account was provided for the transaction.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6050: An unexpected oracle wallet account was provided for the transaction.'
+      "6050: An unexpected oracle wallet account was provided for the transaction."
     );
   }
 }
@@ -699,46 +699,46 @@ export class OracleWalletMismatchError extends Error {
 export class InvalidBufferAccountError extends Error {
   static readonly code = 6051;
   readonly code = 6051;
-  readonly name = 'InvalidBufferAccountError';
-  readonly msg = 'An invalid buffer account was provided.';
+  readonly name = "InvalidBufferAccountError";
+  readonly msg = "An invalid buffer account was provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6051: An invalid buffer account was provided.');
+    super("6051: An invalid buffer account was provided.");
   }
 }
 
 export class InsufficientOracleQueueError extends Error {
   static readonly code = 6052;
   readonly code = 6052;
-  readonly name = 'InsufficientOracleQueueError';
-  readonly msg = 'Insufficient oracle queue size.';
+  readonly name = "InsufficientOracleQueueError";
+  readonly msg = "Insufficient oracle queue size.";
 
   constructor(readonly logs?: string[]) {
-    super('6052: Insufficient oracle queue size.');
+    super("6052: Insufficient oracle queue size.");
   }
 }
 
 export class InvalidAuthorityError extends Error {
   static readonly code = 6053;
   readonly code = 6053;
-  readonly name = 'InvalidAuthorityError';
-  readonly msg = 'Invalid authority account provided.';
+  readonly name = "InvalidAuthorityError";
+  readonly msg = "Invalid authority account provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6053: Invalid authority account provided.');
+    super("6053: Invalid authority account provided.");
   }
 }
 
 export class InvalidTokenAccountMintError extends Error {
   static readonly code = 6054;
   readonly code = 6054;
-  readonly name = 'InvalidTokenAccountMintError';
+  readonly name = "InvalidTokenAccountMintError";
   readonly msg =
-    'A provided token wallet is associated with an incorrect mint.';
+    "A provided token wallet is associated with an incorrect mint.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6054: A provided token wallet is associated with an incorrect mint.'
+      "6054: A provided token wallet is associated with an incorrect mint."
     );
   }
 }
@@ -746,13 +746,13 @@ export class InvalidTokenAccountMintError extends Error {
 export class ExcessiveLeaseWithdrawlError extends Error {
   static readonly code = 6055;
   readonly code = 6055;
-  readonly name = 'ExcessiveLeaseWithdrawlError';
+  readonly name = "ExcessiveLeaseWithdrawlError";
   readonly msg =
-    'You must leave enough funds to perform at least 1 update in the lease.';
+    "You must leave enough funds to perform at least 1 update in the lease.";
 
   constructor(readonly logs?: string[]) {
     super(
-      '6055: You must leave enough funds to perform at least 1 update in the lease.'
+      "6055: You must leave enough funds to perform at least 1 update in the lease."
     );
   }
 }
@@ -760,523 +760,523 @@ export class ExcessiveLeaseWithdrawlError extends Error {
 export class InvalideHistoryAccountError extends Error {
   static readonly code = 6056;
   readonly code = 6056;
-  readonly name = 'InvalideHistoryAccountError';
-  readonly msg = 'Invalid history account provided.';
+  readonly name = "InvalideHistoryAccountError";
+  readonly msg = "Invalid history account provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6056: Invalid history account provided.');
+    super("6056: Invalid history account provided.");
   }
 }
 
 export class InvalidLeaseAccountEscrowError extends Error {
   static readonly code = 6057;
   readonly code = 6057;
-  readonly name = 'InvalidLeaseAccountEscrowError';
-  readonly msg = 'Invalid lease account escrow.';
+  readonly name = "InvalidLeaseAccountEscrowError";
+  readonly msg = "Invalid lease account escrow.";
 
   constructor(readonly logs?: string[]) {
-    super('6057: Invalid lease account escrow.');
+    super("6057: Invalid lease account escrow.");
   }
 }
 
 export class InvalidCrankAccountError extends Error {
   static readonly code = 6058;
   readonly code = 6058;
-  readonly name = 'InvalidCrankAccountError';
-  readonly msg = 'Invalid crank provided.';
+  readonly name = "InvalidCrankAccountError";
+  readonly msg = "Invalid crank provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6058: Invalid crank provided.');
+    super("6058: Invalid crank provided.");
   }
 }
 
 export class CrankNoElementsReadyError extends Error {
   static readonly code = 6059;
   readonly code = 6059;
-  readonly name = 'CrankNoElementsReadyError';
-  readonly msg = 'No elements ready to be popped.';
+  readonly name = "CrankNoElementsReadyError";
+  readonly msg = "No elements ready to be popped.";
 
   constructor(readonly logs?: string[]) {
-    super('6059: No elements ready to be popped.');
+    super("6059: No elements ready to be popped.");
   }
 }
 
 export class IndexOutOfBoundsError extends Error {
   static readonly code = 6060;
   readonly code = 6060;
-  readonly name = 'IndexOutOfBoundsError';
-  readonly msg = 'Index out of bounds';
+  readonly name = "IndexOutOfBoundsError";
+  readonly msg = "Index out of bounds";
 
   constructor(readonly logs?: string[]) {
-    super('6060: Index out of bounds');
+    super("6060: Index out of bounds");
   }
 }
 
 export class VrfInvalidRequestError extends Error {
   static readonly code = 6061;
   readonly code = 6061;
-  readonly name = 'VrfInvalidRequestError';
-  readonly msg = 'Invalid vrf request params';
+  readonly name = "VrfInvalidRequestError";
+  readonly msg = "Invalid vrf request params";
 
   constructor(readonly logs?: string[]) {
-    super('6061: Invalid vrf request params');
+    super("6061: Invalid vrf request params");
   }
 }
 
 export class VrfInvalidProofSubmissionError extends Error {
   static readonly code = 6062;
   readonly code = 6062;
-  readonly name = 'VrfInvalidProofSubmissionError';
-  readonly msg = 'Vrf proof failed to verify';
+  readonly name = "VrfInvalidProofSubmissionError";
+  readonly msg = "Vrf proof failed to verify";
 
   constructor(readonly logs?: string[]) {
-    super('6062: Vrf proof failed to verify');
+    super("6062: Vrf proof failed to verify");
   }
 }
 
 export class VrfVerifyError extends Error {
   static readonly code = 6063;
   readonly code = 6063;
-  readonly name = 'VrfVerifyError';
-  readonly msg = 'Error in verifying vrf proof.';
+  readonly name = "VrfVerifyError";
+  readonly msg = "Error in verifying vrf proof.";
 
   constructor(readonly logs?: string[]) {
-    super('6063: Error in verifying vrf proof.');
+    super("6063: Error in verifying vrf proof.");
   }
 }
 
 export class VrfCallbackError extends Error {
   static readonly code = 6064;
   readonly code = 6064;
-  readonly name = 'VrfCallbackError';
-  readonly msg = 'Vrf callback function failed.';
+  readonly name = "VrfCallbackError";
+  readonly msg = "Vrf callback function failed.";
 
   constructor(readonly logs?: string[]) {
-    super('6064: Vrf callback function failed.');
+    super("6064: Vrf callback function failed.");
   }
 }
 
 export class VrfCallbackParamsError extends Error {
   static readonly code = 6065;
   readonly code = 6065;
-  readonly name = 'VrfCallbackParamsError';
-  readonly msg = 'Invalid vrf callback params provided.';
+  readonly name = "VrfCallbackParamsError";
+  readonly msg = "Invalid vrf callback params provided.";
 
   constructor(readonly logs?: string[]) {
-    super('6065: Invalid vrf callback params provided.');
+    super("6065: Invalid vrf callback params provided.");
   }
 }
 
 export class VrfCallbackAlreadyCalledError extends Error {
   static readonly code = 6066;
   readonly code = 6066;
-  readonly name = 'VrfCallbackAlreadyCalledError';
-  readonly msg = 'Vrf callback has already been triggered.';
+  readonly name = "VrfCallbackAlreadyCalledError";
+  readonly msg = "Vrf callback has already been triggered.";
 
   constructor(readonly logs?: string[]) {
-    super('6066: Vrf callback has already been triggered.');
+    super("6066: Vrf callback has already been triggered.");
   }
 }
 
 export class VrfInvalidPubkeyError extends Error {
   static readonly code = 6067;
   readonly code = 6067;
-  readonly name = 'VrfInvalidPubkeyError';
-  readonly msg = 'The provided pubkey is invalid to use in ecvrf proofs';
+  readonly name = "VrfInvalidPubkeyError";
+  readonly msg = "The provided pubkey is invalid to use in ecvrf proofs";
 
   constructor(readonly logs?: string[]) {
-    super('6067: The provided pubkey is invalid to use in ecvrf proofs');
+    super("6067: The provided pubkey is invalid to use in ecvrf proofs");
   }
 }
 
 export class VrfTooManyVerifyCallsError extends Error {
   static readonly code = 6068;
   readonly code = 6068;
-  readonly name = 'VrfTooManyVerifyCallsError';
-  readonly msg = 'Number of required verify calls exceeded';
+  readonly name = "VrfTooManyVerifyCallsError";
+  readonly msg = "Number of required verify calls exceeded";
 
   constructor(readonly logs?: string[]) {
-    super('6068: Number of required verify calls exceeded');
+    super("6068: Number of required verify calls exceeded");
   }
 }
 
 export class VrfRequestAlreadyLaunchedError extends Error {
   static readonly code = 6069;
   readonly code = 6069;
-  readonly name = 'VrfRequestAlreadyLaunchedError';
-  readonly msg = 'Vrf request is already pending';
+  readonly name = "VrfRequestAlreadyLaunchedError";
+  readonly msg = "Vrf request is already pending";
 
   constructor(readonly logs?: string[]) {
-    super('6069: Vrf request is already pending');
+    super("6069: Vrf request is already pending");
   }
 }
 
 export class VrfInsufficientVerificationError extends Error {
   static readonly code = 6070;
   readonly code = 6070;
-  readonly name = 'VrfInsufficientVerificationError';
-  readonly msg = 'Insufficient amount of proofs collected for VRF callback';
+  readonly name = "VrfInsufficientVerificationError";
+  readonly msg = "Insufficient amount of proofs collected for VRF callback";
 
   constructor(readonly logs?: string[]) {
-    super('6070: Insufficient amount of proofs collected for VRF callback');
+    super("6070: Insufficient amount of proofs collected for VRF callback");
   }
 }
 
 export class InvalidVrfProducerError extends Error {
   static readonly code = 6071;
   readonly code = 6071;
-  readonly name = 'InvalidVrfProducerError';
-  readonly msg = 'An incorrect oracle attempted to submit a proof';
+  readonly name = "InvalidVrfProducerError";
+  readonly msg = "An incorrect oracle attempted to submit a proof";
 
   constructor(readonly logs?: string[]) {
-    super('6071: An incorrect oracle attempted to submit a proof');
+    super("6071: An incorrect oracle attempted to submit a proof");
   }
 }
 
 export class InvalidGovernancePidError extends Error {
   static readonly code = 6072;
   readonly code = 6072;
-  readonly name = 'InvalidGovernancePidError';
-  readonly msg = 'Invalid SPLGovernance Account Supplied';
+  readonly name = "InvalidGovernancePidError";
+  readonly msg = "Invalid SPLGovernance Account Supplied";
 
   constructor(readonly logs?: string[]) {
-    super('6072: Invalid SPLGovernance Account Supplied');
+    super("6072: Invalid SPLGovernance Account Supplied");
   }
 }
 
 export class InvalidGovernanceAccountError extends Error {
   static readonly code = 6073;
   readonly code = 6073;
-  readonly name = 'InvalidGovernanceAccountError';
-  readonly msg = 'An Invalid Governance Account was supplied';
+  readonly name = "InvalidGovernanceAccountError";
+  readonly msg = "An Invalid Governance Account was supplied";
 
   constructor(readonly logs?: string[]) {
-    super('6073: An Invalid Governance Account was supplied');
+    super("6073: An Invalid Governance Account was supplied");
   }
 }
 
 export class MissingOptionalAccount extends Error {
   static readonly code = 6074;
   readonly code = 6074;
-  readonly name = 'MissingOptionalAccount';
-  readonly msg = 'Expected an optional account';
+  readonly name = "MissingOptionalAccount";
+  readonly msg = "Expected an optional account";
 
   constructor(readonly logs?: string[]) {
-    super('6074: Expected an optional account');
+    super("6074: Expected an optional account");
   }
 }
 
 export class InvalidSpawnRecordOwner extends Error {
   static readonly code = 6075;
   readonly code = 6075;
-  readonly name = 'InvalidSpawnRecordOwner';
-  readonly msg = 'Invalid Owner for Spawn Record';
+  readonly name = "InvalidSpawnRecordOwner";
+  readonly msg = "Invalid Owner for Spawn Record";
 
   constructor(readonly logs?: string[]) {
-    super('6075: Invalid Owner for Spawn Record');
+    super("6075: Invalid Owner for Spawn Record");
   }
 }
 
 export class NoopError extends Error {
   static readonly code = 6076;
   readonly code = 6076;
-  readonly name = 'NoopError';
-  readonly msg = 'Noop error';
+  readonly name = "NoopError";
+  readonly msg = "Noop error";
 
   constructor(readonly logs?: string[]) {
-    super('6076: Noop error');
+    super("6076: Noop error");
   }
 }
 
 export class MissingRequiredAccountsError extends Error {
   static readonly code = 6077;
   readonly code = 6077;
-  readonly name = 'MissingRequiredAccountsError';
-  readonly msg = 'A required instruction account was not included';
+  readonly name = "MissingRequiredAccountsError";
+  readonly msg = "A required instruction account was not included";
 
   constructor(readonly logs?: string[]) {
-    super('6077: A required instruction account was not included');
+    super("6077: A required instruction account was not included");
   }
 }
 
 export class InvalidMintError extends Error {
   static readonly code = 6078;
   readonly code = 6078;
-  readonly name = 'InvalidMintError';
-  readonly msg = 'Invalid mint account passed for instruction';
+  readonly name = "InvalidMintError";
+  readonly msg = "Invalid mint account passed for instruction";
 
   constructor(readonly logs?: string[]) {
-    super('6078: Invalid mint account passed for instruction');
+    super("6078: Invalid mint account passed for instruction");
   }
 }
 
 export class InvalidTokenAccountKeyError extends Error {
   static readonly code = 6079;
   readonly code = 6079;
-  readonly name = 'InvalidTokenAccountKeyError';
-  readonly msg = 'An invalid token account was passed into the instruction';
+  readonly name = "InvalidTokenAccountKeyError";
+  readonly msg = "An invalid token account was passed into the instruction";
 
   constructor(readonly logs?: string[]) {
-    super('6079: An invalid token account was passed into the instruction');
+    super("6079: An invalid token account was passed into the instruction");
   }
 }
 
 export class InvalidJobAccountError extends Error {
   static readonly code = 6080;
   readonly code = 6080;
-  readonly name = 'InvalidJobAccountError';
+  readonly name = "InvalidJobAccountError";
 
   constructor(readonly logs?: string[]) {
-    super('6080: ');
+    super("6080: ");
   }
 }
 
 export class VoterStakeRegistryError extends Error {
   static readonly code = 6081;
   readonly code = 6081;
-  readonly name = 'VoterStakeRegistryError';
+  readonly name = "VoterStakeRegistryError";
 
   constructor(readonly logs?: string[]) {
-    super('6081: ');
+    super("6081: ");
   }
 }
 
 export class AccountDiscriminatorMismatch extends Error {
   static readonly code = 6082;
   readonly code = 6082;
-  readonly name = 'AccountDiscriminatorMismatch';
-  readonly msg = 'Account discriminator did not match.';
+  readonly name = "AccountDiscriminatorMismatch";
+  readonly msg = "Account discriminator did not match.";
 
   constructor(readonly logs?: string[]) {
-    super('6082: Account discriminator did not match.');
+    super("6082: Account discriminator did not match.");
   }
 }
 
 export class FuckingImpossibleError extends Error {
   static readonly code = 6083;
   readonly code = 6083;
-  readonly name = 'FuckingImpossibleError';
-  readonly msg = 'This error is fucking impossible.';
+  readonly name = "FuckingImpossibleError";
+  readonly msg = "This error is fucking impossible.";
 
   constructor(readonly logs?: string[]) {
-    super('6083: This error is fucking impossible.');
+    super("6083: This error is fucking impossible.");
   }
 }
 
 export class InvalidVrfRound extends Error {
   static readonly code = 6084;
   readonly code = 6084;
-  readonly name = 'InvalidVrfRound';
-  readonly msg = 'Responding to the wrong VRF round';
+  readonly name = "InvalidVrfRound";
+  readonly msg = "Responding to the wrong VRF round";
 
   constructor(readonly logs?: string[]) {
-    super('6084: Responding to the wrong VRF round');
+    super("6084: Responding to the wrong VRF round");
   }
 }
 
 export class JobSizeExceeded extends Error {
   static readonly code = 6085;
   readonly code = 6085;
-  readonly name = 'JobSizeExceeded';
-  readonly msg = 'Job size has exceeded the max of 6400 bytes';
+  readonly name = "JobSizeExceeded";
+  readonly msg = "Job size has exceeded the max of 6400 bytes";
 
   constructor(readonly logs?: string[]) {
-    super('6085: Job size has exceeded the max of 6400 bytes');
+    super("6085: Job size has exceeded the max of 6400 bytes");
   }
 }
 
 export class JobChunksExceeded extends Error {
   static readonly code = 6086;
   readonly code = 6086;
-  readonly name = 'JobChunksExceeded';
-  readonly msg = 'Job loading can only support a maximum of 8 chunks';
+  readonly name = "JobChunksExceeded";
+  readonly msg = "Job loading can only support a maximum of 8 chunks";
 
   constructor(readonly logs?: string[]) {
-    super('6086: Job loading can only support a maximum of 8 chunks');
+    super("6086: Job loading can only support a maximum of 8 chunks");
   }
 }
 
 export class JobDataLocked extends Error {
   static readonly code = 6087;
   readonly code = 6087;
-  readonly name = 'JobDataLocked';
-  readonly msg = 'Job has finished initializing and is immutable';
+  readonly name = "JobDataLocked";
+  readonly msg = "Job has finished initializing and is immutable";
 
   constructor(readonly logs?: string[]) {
-    super('6087: Job has finished initializing and is immutable');
+    super("6087: Job has finished initializing and is immutable");
   }
 }
 
 export class JobNotInitialized extends Error {
   static readonly code = 6088;
   readonly code = 6088;
-  readonly name = 'JobNotInitialized';
-  readonly msg = 'Job account has not finished initializing';
+  readonly name = "JobNotInitialized";
+  readonly msg = "Job account has not finished initializing";
 
   constructor(readonly logs?: string[]) {
-    super('6088: Job account has not finished initializing');
+    super("6088: Job account has not finished initializing");
   }
 }
 
 export class BufferRelayerIllegalRoundOpenCall extends Error {
   static readonly code = 6089;
   readonly code = 6089;
-  readonly name = 'BufferRelayerIllegalRoundOpenCall';
-  readonly msg = 'BufferRelayer round open called too early.';
+  readonly name = "BufferRelayerIllegalRoundOpenCall";
+  readonly msg = "BufferRelayer round open called too early.";
 
   constructor(readonly logs?: string[]) {
-    super('6089: BufferRelayer round open called too early.');
+    super("6089: BufferRelayer round open called too early.");
   }
 }
 
 export class InvalidSliderAccount extends Error {
   static readonly code = 6090;
   readonly code = 6090;
-  readonly name = 'InvalidSliderAccount';
-  readonly msg = 'Invalid slider account.';
+  readonly name = "InvalidSliderAccount";
+  readonly msg = "Invalid slider account.";
 
   constructor(readonly logs?: string[]) {
-    super('6090: Invalid slider account.');
+    super("6090: Invalid slider account.");
   }
 }
 
 export class VrfLiteHasExistingPool extends Error {
   static readonly code = 6091;
   readonly code = 6091;
-  readonly name = 'VrfLiteHasExistingPool';
-  readonly msg = 'VRF lite account belongs to an existing pool.';
+  readonly name = "VrfLiteHasExistingPool";
+  readonly msg = "VRF lite account belongs to an existing pool.";
 
   constructor(readonly logs?: string[]) {
-    super('6091: VRF lite account belongs to an existing pool.');
+    super("6091: VRF lite account belongs to an existing pool.");
   }
 }
 
 export class VrfPoolFull extends Error {
   static readonly code = 6092;
   readonly code = 6092;
-  readonly name = 'VrfPoolFull';
-  readonly msg = 'VRF pool is at max capacity.';
+  readonly name = "VrfPoolFull";
+  readonly msg = "VRF pool is at max capacity.";
 
   constructor(readonly logs?: string[]) {
-    super('6092: VRF pool is at max capacity.');
+    super("6092: VRF pool is at max capacity.");
   }
 }
 
 export class VrfPoolEmpty extends Error {
   static readonly code = 6093;
   readonly code = 6093;
-  readonly name = 'VrfPoolEmpty';
-  readonly msg = 'VRF pool is empty.';
+  readonly name = "VrfPoolEmpty";
+  readonly msg = "VRF pool is empty.";
 
   constructor(readonly logs?: string[]) {
-    super('6093: VRF pool is empty.');
+    super("6093: VRF pool is empty.");
   }
 }
 
 export class VrfAccountNotFound extends Error {
   static readonly code = 6094;
   readonly code = 6094;
-  readonly name = 'VrfAccountNotFound';
-  readonly msg = 'Failed to find VRF account in remaining accounts array.';
+  readonly name = "VrfAccountNotFound";
+  readonly msg = "Failed to find VRF account in remaining accounts array.";
 
   constructor(readonly logs?: string[]) {
-    super('6094: Failed to find VRF account in remaining accounts array.');
+    super("6094: Failed to find VRF account in remaining accounts array.");
   }
 }
 
 export class AccountCloseNotReady extends Error {
   static readonly code = 6095;
   readonly code = 6095;
-  readonly name = 'AccountCloseNotReady';
-  readonly msg = 'Account is not ready to be closed.';
+  readonly name = "AccountCloseNotReady";
+  readonly msg = "Account is not ready to be closed.";
 
   constructor(readonly logs?: string[]) {
-    super('6095: Account is not ready to be closed.');
+    super("6095: Account is not ready to be closed.");
   }
 }
 
 export class VrfPoolRequestTooSoon extends Error {
   static readonly code = 6096;
   readonly code = 6096;
-  readonly name = 'VrfPoolRequestTooSoon';
-  readonly msg = 'VRF requested too soon.';
+  readonly name = "VrfPoolRequestTooSoon";
+  readonly msg = "VRF requested too soon.";
 
   constructor(readonly logs?: string[]) {
-    super('6096: VRF requested too soon.');
+    super("6096: VRF requested too soon.");
   }
 }
 
 export class VrfPoolMiss extends Error {
   static readonly code = 6097;
   readonly code = 6097;
-  readonly name = 'VrfPoolMiss';
-  readonly msg = 'VRF pool miss.';
+  readonly name = "VrfPoolMiss";
+  readonly msg = "VRF pool miss.";
 
   constructor(readonly logs?: string[]) {
-    super('6097: VRF pool miss.');
+    super("6097: VRF pool miss.");
   }
 }
 
 export class VrfLiteOwnedByPool extends Error {
   static readonly code = 6098;
   readonly code = 6098;
-  readonly name = 'VrfLiteOwnedByPool';
-  readonly msg = 'VRF lite belongs to a pool.';
+  readonly name = "VrfLiteOwnedByPool";
+  readonly msg = "VRF lite belongs to a pool.";
 
   constructor(readonly logs?: string[]) {
-    super('6098: VRF lite belongs to a pool.');
+    super("6098: VRF lite belongs to a pool.");
   }
 }
 
 export class InsufficientTokenBalance extends Error {
   static readonly code = 6099;
   readonly code = 6099;
-  readonly name = 'InsufficientTokenBalance';
-  readonly msg = 'Escrow has insufficient funds to perform this action.';
+  readonly name = "InsufficientTokenBalance";
+  readonly msg = "Escrow has insufficient funds to perform this action.";
 
   constructor(readonly logs?: string[]) {
-    super('6099: Escrow has insufficient funds to perform this action.');
+    super("6099: Escrow has insufficient funds to perform this action.");
   }
 }
 
 export class InvalidQuoteError extends Error {
   static readonly code = 6100;
   readonly code = 6100;
-  readonly name = 'InvalidQuoteError';
-  readonly msg = 'Invalid SAS quote account';
+  readonly name = "InvalidQuoteError";
+  readonly msg = "Invalid SAS quote account";
 
   constructor(readonly logs?: string[]) {
-    super('6100: Invalid SAS quote account');
+    super("6100: Invalid SAS quote account");
   }
 }
 
 export class InvalidHistoryAccountError extends Error {
   static readonly code = 6101;
   readonly code = 6101;
-  readonly name = 'InvalidHistoryAccountError';
+  readonly name = "InvalidHistoryAccountError";
 
   constructor(readonly logs?: string[]) {
-    super('6101: ');
+    super("6101: ");
   }
 }
 
 export class GenericError extends Error {
   static readonly code = 6102;
   readonly code = 6102;
-  readonly name = 'GenericError';
+  readonly name = "GenericError";
 
   constructor(readonly logs?: string[]) {
-    super('6102: ');
+    super("6102: ");
   }
 }
 
 export class InvalidAuthorityState extends Error {
   static readonly code = 6103;
   readonly code = 6103;
-  readonly name = 'InvalidAuthorityState';
+  readonly name = "InvalidAuthorityState";
 
   constructor(readonly logs?: string[]) {
-    super('6103: ');
+    super("6103: ");
   }
 }
 

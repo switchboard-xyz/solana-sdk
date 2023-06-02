@@ -1,3 +1,4 @@
+import * as attestationTypes from "./attestation-generated/index.js";
 import { fromTxError } from "./generated/index.js";
 import { isBrowser } from "./browser.js";
 import * as errors from "./errors.js";

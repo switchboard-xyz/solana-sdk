@@ -1,22 +1,21 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
-import { programConfig } from '../src/generated';
+import { programConfig } from "../src/generated/index.js";
+import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { BN } from '@coral-xyz/anchor';
-import { NATIVE_MINT, transfer } from '@solana/spl-token';
+import { NATIVE_MINT, transfer } from "@solana/spl-token";
 import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-} from '@solana/web3.js';
-import { Big, OracleJob, sleep } from '@switchboard-xyz/common';
-import assert from 'assert';
+} from "@solana/web3.js";
+import { Big, BN, OracleJob, sleep } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Attestation Oracle Tests', () => {
+describe("Attestation Oracle Tests", () => {
   let ctx: TestContext;
 
   let queueAccount: sbv2.QueueAccount;
@@ -28,13 +27,13 @@ describe('Attestation Oracle Tests', () => {
   let attestationQuoteAccount: sbv2.QuoteAccount;
 
   const quoteVerifierMrEnclave = Array.from(
-    Buffer.from('This is the quote verifier MrEnclave')
+    Buffer.from("This is the quote verifier MrEnclave")
   )
     .concat(Array(32).fill(0))
     .slice(0, 32);
 
   const mrEnclave = Array.from(
-    Buffer.from('This is the NodeJS oracle MrEnclave')
+    Buffer.from("This is the NodeJS oracle MrEnclave")
   )
     .concat(Array(32).fill(0))
     .slice(0, 32);
@@ -58,7 +57,7 @@ describe('Attestation Oracle Tests', () => {
 
     if (
       sbv2.ProgramStateAccount.findEnclaveIdx(
-        programStateData.mrEnclaves.map(e => new Uint8Array(e)),
+        programStateData.mrEnclaves.map((e) => new Uint8Array(e)),
         new Uint8Array(mrEnclave)
       ) === -1
     ) {
@@ -94,7 +93,7 @@ describe('Attestation Oracle Tests', () => {
     }
   });
 
-  it('Creates an Attestation Queue', async () => {
+  it("Creates an Attestation Queue", async () => {
     [attestationQueueAccount] = await sbv2.AttestationQueueAccount.create(
       ctx.program,
       {
@@ -136,7 +135,7 @@ describe('Attestation Oracle Tests', () => {
     const verificationStatus =
       sbv2.QuoteAccount.getVerificationStatus(quoteState);
     assert(
-      verificationStatus.kind === 'VerificationOverride',
+      verificationStatus.kind === "VerificationOverride",
       `Quote account has not been verified`
     );
 
@@ -178,7 +177,7 @@ describe('Attestation Oracle Tests', () => {
     const verificationStatus2 =
       sbv2.QuoteAccount.getVerificationStatus(quoteState2);
     assert(
-      verificationStatus2.kind === 'VerificationSuccess',
+      verificationStatus2.kind === "VerificationSuccess",
       `Quote account has not been verified`
     );
 
@@ -194,15 +193,15 @@ describe('Attestation Oracle Tests', () => {
     const newVerificationStatus =
       sbv2.QuoteAccount.getVerificationStatus(newQuoteState);
     assert(
-      newVerificationStatus.kind === 'VerificationSuccess',
+      newVerificationStatus.kind === "VerificationSuccess",
       `Quote account has not been verified`
     );
 
     const newQueueState = await attestationQueueAccount.loadData();
-    assert(newQueueState.dataLen === 2, 'AttestationQueue incorrect size');
+    assert(newQueueState.dataLen === 2, "AttestationQueue incorrect size");
   });
 
-  it('Creates a TEE oracle', async () => {
+  it("Creates a TEE oracle", async () => {
     const oracleQuoteKeypair = Keypair.generate();
 
     [oracleQuoteAccount] = await attestationQueueAccount.createQuote({
@@ -211,7 +210,7 @@ describe('Attestation Oracle Tests', () => {
     });
     assert(
       oracleQuoteKeypair.publicKey.equals(oracleQuoteAccount.publicKey),
-      'QuotePubkeyMismatch'
+      "QuotePubkeyMismatch"
     );
 
     await oracleQuoteAccount.verify({
@@ -226,7 +225,7 @@ describe('Attestation Oracle Tests', () => {
         new Uint8Array(mrEnclave),
         new Uint8Array(quoteData.mrEnclave)
       ) === 0,
-      'QuoteData MRECLAVE mismatch'
+      "QuoteData MRECLAVE mismatch"
     );
 
     // Perform tee heartbeat.
@@ -235,17 +234,17 @@ describe('Attestation Oracle Tests', () => {
     });
   });
 
-  it('Calls TeeSaveResult', async () => {
+  it("Calls TeeSaveResult", async () => {
     const programStateData = await new sbv2.ProgramStateAccount(
       ctx.program,
       ctx.program.programState.publicKey
     ).loadData();
     assert(
       sbv2.ProgramStateAccount.findEnclaveIdx(
-        programStateData.mrEnclaves.map(e => new Uint8Array(e)),
+        programStateData.mrEnclaves.map((e) => new Uint8Array(e)),
         new Uint8Array(mrEnclave)
       ) !== -1,
-      'ProgramState does not have the NodeJS MRENCLAVE measurement'
+      "ProgramState does not have the NodeJS MRENCLAVE measurement"
     );
     // 1. Create basic aggregator with valueTask
     const [aggregatorAccount] = await queueAccount.createFeed({
@@ -280,8 +279,8 @@ describe('Attestation Oracle Tests', () => {
     const jobs = await aggregatorAccount.loadJobs(aggregator);
 
     assert(
-      aggregator.resolutionMode.kind === 'ModeSlidingResolution',
-      'Aggregator account needs to be sliding window mode'
+      aggregator.resolutionMode.kind === "ModeSlidingResolution",
+      "Aggregator account needs to be sliding window mode"
     );
 
     // 2. Call openRound
@@ -303,7 +302,7 @@ describe('Attestation Oracle Tests', () => {
           queueAccount.publicKey,
           ctx.payer.publicKey
         ),
-        jobs: jobs.map(j => j.job),
+        jobs: jobs.map((j) => j.job),
         value: new Big(1),
         minResponse: new Big(1),
         maxResponse: new Big(1),

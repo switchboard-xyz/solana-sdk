@@ -1,31 +1,31 @@
 import {
-  AggregatorAccount,
-  BufferRelayerAccount,
-  CrankAccount,
-  JobAccount,
-  LeaseAccount,
-  OracleAccount,
-  PermissionAccount,
-  ProgramStateAccount,
-  QueueAccount,
-  SwitchboardAccount,
-  SwitchboardAccountData,
-  VrfAccount,
+  type AggregatorAccount,
+  type BufferRelayerAccount,
+  type CrankAccount,
+  type JobAccount,
+  type LeaseAccount,
+  type OracleAccount,
+  type PermissionAccount,
+  type ProgramStateAccount,
+  type QueueAccount,
+  type SwitchboardAccount,
+  type SwitchboardAccountData,
+  type VrfAccount,
 } from "./accounts/index.js";
 import {
-  AggregatorAccountData,
-  BufferRelayerAccountData,
-  CrankAccountData,
-  JobAccountData,
-  LeaseAccountData,
-  OracleAccountData,
-  OracleQueueAccountData,
-  PermissionAccountData,
-  SbState,
-  VrfAccountData,
+  type AggregatorAccountData,
+  type BufferRelayerAccountData,
+  type CrankAccountData,
+  type JobAccountData,
+  type LeaseAccountData,
+  type OracleAccountData,
+  type OracleQueueAccountData,
+  type PermissionAccountData,
+  type SbState,
+  type VrfAccountData,
 } from "./generated/index.js";
 
-import { OracleJob } from "@switchboard-xyz/common";
+import { type OracleJob } from "@switchboard-xyz/common";
 
 export type RawMrEnclave = string | Buffer | Uint8Array | number[];
 
@@ -129,7 +129,7 @@ export class MrEnclave {
 
   public constructor(mrEnclave: string | Buffer | Uint8Array | number[]) {
     this.mrEnclave =
-      typeof mrEnclave === 'string'
+      typeof mrEnclave === "string"
         ? new Uint8Array(Buffer.from(mrEnclave))
         : new Uint8Array(mrEnclave);
   }

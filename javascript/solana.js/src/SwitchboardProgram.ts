@@ -40,8 +40,16 @@ import { SwitchboardEvents } from "./SwitchboardEvents.js";
 import { TransactionObject, TransactionOptions } from "./TransactionObject.js";
 import { LoadedJobDefinition } from "./types.js";
 
-import * as anchor from "@coral-xyz/anchor";
-import { ACCOUNT_DISCRIMINATOR_SIZE } from "@coral-xyz/anchor";
+import {
+  ACCOUNT_DISCRIMINATOR_SIZE,
+  AccountNamespace,
+  AnchorProvider,
+  BorshAccountsCoder,
+  Idl,
+  Program,
+  utils as AnchorUtils,
+  Wallet,
+} from "@coral-xyz/anchor";
 import {
   AccountInfo,
   Cluster,
@@ -69,14 +77,14 @@ export const DEFAULT_SEND_TRANSACTION_OPTIONS: SendTransactionOptions = {
  * Switchboard's V2 Program ID
  */
 export const SB_V2_PID = new PublicKey(
-  'SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f'
+  "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 );
 
 /**
  * Switchboard's Attestation Program ID
  */
 export const SB_ATTESTATION_PID = new PublicKey(
-  '2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7'
+  "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
 );
 
 /**
@@ -90,11 +98,11 @@ export const getSwitchboardProgramId = (
   cluster: Cluster | "localnet"
 ): PublicKey => {
   switch (cluster) {
-    case 'localnet':
-    case 'devnet':
-    case 'mainnet-beta':
+    case "localnet":
+    case "devnet":
+    case "mainnet-beta":
       return SB_V2_PID;
-    case 'testnet':
+    case "testnet":
     default:
       throw new Error(`Switchboard PID not found for cluster (${cluster})`);
   }
@@ -103,14 +111,14 @@ export const getSwitchboardProgramId = (
  * Returns the Program ID for the Switchboard Attestation Program for the specified Cluster.
  */
 export const getSwitchboardAttestationProgramId = (
-  cluster: Cluster | 'localnet'
+  cluster: Cluster | "localnet"
 ): PublicKey => {
   switch (cluster) {
-    case 'localnet':
-    case 'devnet':
-    case 'mainnet-beta':
+    case "localnet":
+    case "devnet":
+    case "mainnet-beta":
       return SB_ATTESTATION_PID;
-    case 'testnet':
+    case "testnet":
     default:
       throw new Error(
         `Switchboard Attestation PID not found for cluster (${cluster})`
@@ -146,10 +154,10 @@ export class SwitchboardProgram {
   private static readonly _readOnlyKeypair = READ_ONLY_KEYPAIR;
 
   // The anchor program instance.
-  private readonly _program: anchor.Program;
+  private readonly _program: Program;
 
   // The anchor program instance for Switchboard's attestation program.
-  private readonly _attestationProgram: anchor.Program;
+  private readonly _attestationProgram: Program;
 
   /** The Solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | "localnet";
@@ -177,9 +185,9 @@ export class SwitchboardProgram {
    * @param mint - The native mint for the Switchboard program.
    */
   constructor(
-    program: anchor.Program,
-    attestationProgram: anchor.Program,
-    cluster: Cluster | 'localnet',
+    program: Program,
+    attestationProgram: Program,
+    cluster: Cluster | "localnet",
     mint: NativeMint
   ) {
     this._program = program;
@@ -227,19 +235,19 @@ export class SwitchboardProgram {
     connection: Connection,
     payerKeypair: Keypair = READ_ONLY_KEYPAIR,
     programId?: PublicKey
-  ): Promise<anchor.Program> {
+  ): Promise<Program> {
     const pid = programId ?? getSwitchboardProgramId(cluster);
-    const provider = new anchor.AnchorProvider(
+    const provider = new AnchorProvider(
       connection,
       // If no keypair is provided, default to dummy keypair
       new AnchorWallet(payerKeypair ?? SwitchboardProgram._readOnlyKeypair),
       { commitment: "confirmed" }
     );
-    const anchorIdl = await anchor.Program.fetchIdl(pid, provider);
+    const anchorIdl = await Program.fetchIdl(pid, provider);
     if (!anchorIdl) {
       throw new Error(`Failed to find IDL for ${pid.toBase58()}`);
     }
-    const program = new anchor.Program(anchorIdl, pid, provider);
+    const program = new Program(anchorIdl, pid, provider);
 
     return program;
   }
@@ -294,9 +302,7 @@ export class SwitchboardProgram {
         attestationProgramId
       ),
     ]);
-    const mint = await NativeMint.load(
-      program.provider as anchor.AnchorProvider
-    );
+    const mint = await NativeMint.load(program.provider as AnchorProvider);
     return new SwitchboardProgram(program, attestationProgram, cluster, mint);
   };
 
@@ -315,7 +321,7 @@ export class SwitchboardProgram {
    * import { AnchorWallet, SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
    *
    * const connection = new Connection("https://api.mainnet-beta.solana.com");
-   * const provider = new anchor.AnchorProvider(
+   * const provider = new AnchorProvider(
       connection,
       new AnchorWallet(payerKeypair ?? SwitchboardProgram._readOnlyKeypair),
       { commitment: 'confirmed' }
@@ -327,7 +333,7 @@ export class SwitchboardProgram {
    * ```
    */
   static fromProvider = async (
-    provider: anchor.AnchorProvider,
+    provider: AnchorProvider,
     programId?: PublicKey,
     attestationProgramId?: PublicKey
   ): Promise<SwitchboardProgram> => {
@@ -423,7 +429,7 @@ export class SwitchboardProgram {
    * Retrieves the Switchboard V2 Program IDL.
    * @return The IDL of the Switchboard V2 Program.
    */
-  public get idl(): anchor.Idl {
+  public get idl(): Idl {
     return this._program.idl;
   }
 
@@ -431,7 +437,7 @@ export class SwitchboardProgram {
    * Retrieves the Switchboard Attestation Program IDL.
    * @return The IDL of the Switchboard Attestation Program.
    */
-  public get attestationIdl(): anchor.Idl {
+  public get attestationIdl(): Idl {
     return this._program.idl;
   }
 
@@ -439,24 +445,24 @@ export class SwitchboardProgram {
    * Retrieves the Switchboard V2 Borsh Accounts Coder.
    * @return The BorshAccountsCoder for the Switchboard V2 Program.
    */
-  public get coder(): anchor.BorshAccountsCoder {
-    return new anchor.BorshAccountsCoder(this._program.idl);
+  public get coder(): BorshAccountsCoder {
+    return new BorshAccountsCoder(this._program.idl);
   }
 
   /**
    * Retrieves the Switchboard Attestatio Borsh Accounts Coder.
    * @return The BorshAccountsCoder for the Switchboard Attestation Program.
    */
-  public get attestationCoder(): anchor.BorshAccountsCoder {
-    return new anchor.BorshAccountsCoder(this._attestationProgram.idl);
+  public get attestationCoder(): BorshAccountsCoder {
+    return new BorshAccountsCoder(this._attestationProgram.idl);
   }
 
   /**
    * Retrieves the anchor Provider used by this program to connect with the Solana cluster.
    * @return The AnchorProvider instance for the Switchboard Program.
    */
-  public get provider(): anchor.AnchorProvider {
-    return this._program.provider as anchor.AnchorProvider;
+  public get provider(): AnchorProvider {
+    return this._program.provider as AnchorProvider;
   }
 
   /**
@@ -523,7 +529,7 @@ export class SwitchboardProgram {
    * Retrieves the account namespace for the Switchboard V2 Program.
    * @return The AccountNamespace instance for the Switchboard V2 Program.
    */
-  public get account(): anchor.AccountNamespace {
+  public get account(): AccountNamespace {
     return this._program.account;
   }
 
@@ -531,7 +537,7 @@ export class SwitchboardProgram {
    * Retrieves the account namespace for the Switchboard Attestation Program.
    * @return The AccountNamespace instance for the Switchboard Attestation Program.
    */
-  public get attestationAccount(): anchor.AccountNamespace {
+  public get attestationAccount(): AccountNamespace {
     return this._attestationProgram.account;
   }
 
@@ -717,7 +723,7 @@ export class SwitchboardProgram {
           {
             memcmp: {
               offset: 0,
-              bytes: anchor.utils.bytes.bs58.encode(
+              bytes: AnchorUtils.bytes.bs58.encode(
                 JobAccountData.discriminator
               ),
             },
@@ -930,7 +936,7 @@ export const isVersionedTransaction = (tx): tx is VersionedTransaction => {
   return "version" in tx;
 };
 
-export class AnchorWallet implements anchor.Wallet {
+export class AnchorWallet implements Wallet {
   constructor(readonly payer: Keypair) {}
 
   get publicKey(): PublicKey {
@@ -964,6 +970,6 @@ export class AnchorWallet implements anchor.Wallet {
 }
 
 interface AccountInfoResponse {
-  pubkey: anchor.web3.PublicKey;
-  account: anchor.web3.AccountInfo<Buffer>;
+  pubkey: PublicKey;
+  account: AccountInfo<Buffer>;
 }

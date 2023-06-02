@@ -1,16 +1,15 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
-import { QuoteAccount } from '../src';
+import * as sbv2 from "../src/index.js";
+import { QuoteAccount } from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { BN } from '@coral-xyz/anchor';
-import { Keypair } from '@solana/web3.js';
-import { sleep } from '@switchboard-xyz/common';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import { BN, sleep } from "@switchboard-xyz/common";
+import assert from "assert";
 
-describe('Function Tests', () => {
+describe("Function Tests", () => {
   let ctx: TestContext;
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
@@ -18,7 +17,7 @@ describe('Function Tests', () => {
   const quoteVerifierKeypair = Keypair.generate();
 
   const quoteVerifierMrEnclave = Array.from(
-    Buffer.from('This is the quote verifier MrEnclave')
+    Buffer.from("This is the quote verifier MrEnclave")
   )
     .concat(Array(32).fill(0))
     .slice(0, 32);
@@ -26,7 +25,7 @@ describe('Function Tests', () => {
   let functionAccount: sbv2.FunctionAccount;
 
   const mrEnclave = Array.from(
-    Buffer.from('This is the custom function MrEnclave')
+    Buffer.from("This is the custom function MrEnclave")
   )
     .concat(Array(32).fill(0))
     .slice(0, 32);
@@ -64,15 +63,15 @@ describe('Function Tests', () => {
     });
   });
 
-  it('Creates a Function', async () => {
+  it("Creates a Function", async () => {
     const functionKeypair = Keypair.generate();
 
     [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-      name: 'FUNCTION_NAME',
-      metadata: 'FUNCTION_METADATA',
-      schedule: '* * * * *',
-      container: 'containerId',
-      version: '1.0.0',
+      name: "FUNCTION_NAME",
+      metadata: "FUNCTION_METADATA",
+      schedule: "* * * * *",
+      container: "containerId",
+      version: "1.0.0",
       mrEnclave,
       attestationQueue: attestationQueueAccount,
       keypair: functionKeypair,
@@ -89,7 +88,7 @@ describe('Function Tests', () => {
       QuoteAccount.getVerificationStatus(initialQuoteState);
 
     assert(
-      initialVerificationStatus.kind === 'None',
+      initialVerificationStatus.kind === "None",
       `Quote account should not be verified yet`
     );
 
@@ -104,14 +103,14 @@ describe('Function Tests', () => {
       QuoteAccount.getVerificationStatus(finalQuoteState);
 
     assert(
-      finalVerificationStatus.kind === 'VerificationSuccess',
+      finalVerificationStatus.kind === "VerificationSuccess",
       `Quote account should be verified`
     );
   });
 
-  it('Fund the function', async () => {
+  it("Fund the function", async () => {
     const initialBalance = await functionAccount.getBalance();
-    assert(initialBalance === 0, 'Function escrow should be unfunded');
+    assert(initialBalance === 0, "Function escrow should be unfunded");
 
     const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
       ctx.payer.publicKey,
@@ -131,11 +130,11 @@ describe('Function Tests', () => {
     );
   });
 
-  it('Withdraw from the function', async () => {
+  it("Withdraw from the function", async () => {
     const initialBalance = await functionAccount.getBalance();
     assert(
       initialBalance >= 0.1,
-      'Function escrow should have at least 0.1 wSOL'
+      "Function escrow should have at least 0.1 wSOL"
     );
 
     const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
@@ -147,7 +146,7 @@ describe('Function Tests', () => {
     );
     assert(
       initialPayerBalance !== null,
-      'Payer token wallet should already be initialized'
+      "Payer token wallet should already be initialized"
     );
 
     await functionAccount.withdraw({
@@ -175,9 +174,9 @@ describe('Function Tests', () => {
     );
   });
 
-  it('Withdraw all funds from the function', async () => {
+  it("Withdraw all funds from the function", async () => {
     const initialBalance = await functionAccount.getBalance();
-    assert(initialBalance > 0, 'Function escrow should have some funds');
+    assert(initialBalance > 0, "Function escrow should have some funds");
 
     const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
       ctx.payer.publicKey,
@@ -185,7 +184,7 @@ describe('Function Tests', () => {
     );
 
     await functionAccount.withdraw({
-      amount: 'all',
+      amount: "all",
       unwrap: false,
       withdrawWallet: payerTokenWallet,
     });

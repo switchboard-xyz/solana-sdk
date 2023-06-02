@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttestationQueueInitParamsFields {
   allowAuthorityOverrideAfter: number;
@@ -44,12 +44,12 @@ export class AttestationQueueInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.u32('allowAuthorityOverrideAfter'),
-        borsh.bool('requireAuthorityHeartbeatPermission'),
-        borsh.bool('requireUsagePermissions'),
-        borsh.u32('maxQuoteVerificationAge'),
-        borsh.u32('reward'),
-        borsh.u32('nodeTimeout'),
+        borsh.u32("allowAuthorityOverrideAfter"),
+        borsh.bool("requireAuthorityHeartbeatPermission"),
+        borsh.bool("requireUsagePermissions"),
+        borsh.u32("maxQuoteVerificationAge"),
+        borsh.u32("reward"),
+        borsh.u32("nodeTimeout"),
       ],
       property
     );

@@ -37,9 +37,9 @@ import {
   OracleJob,
   promiseWithTimeout,
   toUtf8,
-} from '@switchboard-xyz/common';
-import assert from 'assert';
-import crypto, { createHash } from 'crypto';
+} from "@switchboard-xyz/common";
+import assert from "assert";
+import crypto, { createHash } from "crypto";
 
 /**
  * Account type holding a data feed's update configuration, job accounts, and its current result.
@@ -1650,8 +1650,8 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
   }
 
   public quoteKeypairFromSeed(seed: PublicKey): Keypair {
-    const hash = createHash('sha256');
-    hash.update(Buffer.from('QuoteAccountData'));
+    const hash = createHash("sha256");
+    hash.update(Buffer.from("QuoteAccountData"));
     hash.update(seed.toBuffer());
     const kp = Keypair.fromSeed(hash.digest());
     return kp;
@@ -1712,10 +1712,10 @@ export class AggregatorAccount extends Account<types.AggregatorAccountData> {
     );
 
     const remainingAccounts: Array<PublicKey> = [];
-    params.oracles.forEach(oracle =>
+    params.oracles.forEach((oracle) =>
       remainingAccounts.push(oracle.account.publicKey)
     );
-    params.oracles.forEach(oracle =>
+    params.oracles.forEach((oracle) =>
       remainingAccounts.push(oracle.state.tokenAccount)
     );
     remainingAccounts.push(this.slidingWindowKey);

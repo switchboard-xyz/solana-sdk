@@ -1,27 +1,30 @@
-import { Account } from '../accounts/account';
-import * as types from '../attestation-generated';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import { Account } from "../accounts/account.js";
+import * as types from "../attestation-generated/index.js";
+import * as errors from "../errors.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
-import { RawMrEnclave } from '../types';
-import { parseMrEnclave } from '../utils';
+} from "../TransactionObject.js";
+import { RawMrEnclave } from "../types.js";
+import { parseMrEnclave } from "../utils.js";
 
-import { AttestationPermissionAccount, AttestationQueueAccount } from './index';
+import {
+  AttestationPermissionAccount,
+  AttestationQueueAccount,
+} from "./index.js";
 
-import * as anchor from '@coral-xyz/anchor';
+import * as anchor from "@coral-xyz/anchor";
 import {
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
-export const QUOTE_SEED: string = 'QuoteAccountData';
+export const QUOTE_SEED: string = "QuoteAccountData";
 
 /**
  *  Parameters for initializing an {@linkcode QuoteAccount}
@@ -92,7 +95,7 @@ export interface QuoteVerifyParams {
  * Data: {@linkcode types.QuoteAccountData}
  */
 export class QuoteAccount extends Account<types.QuoteAccountData> {
-  static accountName = 'QuoteAccountData';
+  static accountName = "QuoteAccountData";
 
   /**
    *  Load an existing {@linkcode QuoteAccount} with its current on-chain state
@@ -220,7 +223,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError('Quote', this.publicKey);
+    throw new errors.AccountNotFoundError("Quote", this.publicKey);
   }
 
   public heartbeatInstruction(params: {
@@ -301,7 +304,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     const attestationQueue = await attestationQueueAccount.loadData();
     const verifierIdx = attestationQueue.data
       .slice(0, attestationQueue.dataLen)
-      .findIndex(pubkey => pubkey.equals(params.verifierKeypair.publicKey));
+      .findIndex((pubkey) => pubkey.equals(params.verifierKeypair.publicKey));
     if (verifierIdx === -1) {
       throw new Error(`Verifier not found on the attestation queue`);
     }
@@ -337,6 +340,6 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 }

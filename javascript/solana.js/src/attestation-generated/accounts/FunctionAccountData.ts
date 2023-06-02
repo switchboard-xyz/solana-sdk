@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionAccountDataFields {
   name: Array<number>;
@@ -69,21 +69,21 @@ export class FunctionAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.array(borsh.u8(), 64, 'name'),
-    borsh.array(borsh.u8(), 256, 'metadata'),
-    borsh.publicKey('authority'),
-    borsh.array(borsh.u8(), 64, 'containerRegistry'),
-    borsh.array(borsh.u8(), 64, 'container'),
-    borsh.array(borsh.u8(), 32, 'version'),
-    borsh.publicKey('attestationQueue'),
-    borsh.u32('queueIdx'),
-    borsh.i64('lastExecutionTimestamp'),
-    borsh.i64('nextAllowedTimestamp'),
-    borsh.array(borsh.u8(), 64, 'schedule'),
-    borsh.publicKey('escrow'),
-    types.FunctionStatus.layout('status'),
-    borsh.i64('createdAt'),
-    borsh.array(borsh.u8(), 1024, 'ebuf'),
+    borsh.array(borsh.u8(), 64, "name"),
+    borsh.array(borsh.u8(), 256, "metadata"),
+    borsh.publicKey("authority"),
+    borsh.array(borsh.u8(), 64, "containerRegistry"),
+    borsh.array(borsh.u8(), 64, "container"),
+    borsh.array(borsh.u8(), 32, "version"),
+    borsh.publicKey("attestationQueue"),
+    borsh.u32("queueIdx"),
+    borsh.i64("lastExecutionTimestamp"),
+    borsh.i64("nextAllowedTimestamp"),
+    borsh.array(borsh.u8(), 64, "schedule"),
+    borsh.publicKey("escrow"),
+    types.FunctionStatus.layout("status"),
+    borsh.i64("createdAt"),
+    borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -126,7 +126,7 @@ export class FunctionAccountData {
   ): Promise<Array<FunctionAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -140,7 +140,7 @@ export class FunctionAccountData {
 
   static decode(data: Buffer): FunctionAccountData {
     if (!data.slice(0, 8).equals(FunctionAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = FunctionAccountData.layout.decode(data.slice(8));

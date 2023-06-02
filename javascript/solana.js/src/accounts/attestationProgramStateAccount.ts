@@ -1,9 +1,9 @@
-import * as types from '../attestation-generated';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
-import { TransactionObject } from '../TransactionObject';
+import * as types from "../attestation-generated/index.js";
+import * as errors from "../errors.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account } from './account';
+import { Account } from "./account.js";
 
 import {
   AccountInfo,
@@ -11,7 +11,7 @@ import {
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  * Account type representing Switchboard global program state.
@@ -19,7 +19,7 @@ import {
  * Data: {@linkcode types.State}
  */
 export class AttestationProgramStateAccount extends Account<types.State> {
-  static accountName = 'State';
+  static accountName = "State";
 
   public static size = 1128;
 
@@ -75,7 +75,7 @@ export class AttestationProgramStateAccount extends Account<types.State> {
   ): Promise<[AttestationProgramStateAccount, types.State]> {
     const account = new AttestationProgramStateAccount(
       program,
-      typeof publicKey === 'string' ? new PublicKey(publicKey) : publicKey
+      typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
     );
     const state = await account.loadData();
     return [account, state];
@@ -88,7 +88,7 @@ export class AttestationProgramStateAccount extends Account<types.State> {
     const data = await types.State.fetch(this.program, this.publicKey);
     if (data === null)
       throw new errors.AccountNotFoundError(
-        'Attestation Program State',
+        "Attestation Program State",
         this.publicKey
       );
     return data;
@@ -152,7 +152,7 @@ export class AttestationProgramStateAccount extends Account<types.State> {
     program: SwitchboardProgram
   ): [AttestationProgramStateAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('STATE')],
+      [Buffer.from("STATE")],
       program.attestationProgramId
     );
     return [new AttestationProgramStateAccount(program, publicKey), bump];

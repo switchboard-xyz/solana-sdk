@@ -9,9 +9,7 @@ import { Account } from "./account.js";
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -42,50 +40,10 @@ export class ProgramStateAccount extends Account<types.SbState> {
     program: SwitchboardProgram
   ): [ProgramStateAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from('STATE')],
+      [Buffer.from("STATE")],
       program.programId
     );
     return [new ProgramStateAccount(program, publicKey), bump];
-  }
-
-  /**
-   * Return a program state account state initialized to the default values.
-   */
-  public static default(): types.SbState {
-    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
-    types.SbState.discriminator.copy(buffer, 0);
-    return types.SbState.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given program state config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.SbState>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.SbStateFields = {
-      ...ProgramStateAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.SbState(fields);
-
-    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
-    types.SbState.discriminator.copy(buffer, 0);
-    types.SbState.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
   }
 
   /** Load the ProgramStateAccount with its current on-chain state */
@@ -260,14 +218,6 @@ export class ProgramStateAccount extends Account<types.SbState> {
       }
     }
     return -1;
-  public static fromSeed(
-    program: SwitchboardProgram
-  ): [ProgramStateAccount, number] {
-    const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from("STATE")],
-      program.programId
-    );
-    return [new ProgramStateAccount(program, publicKey), bump];
   }
 
   /**

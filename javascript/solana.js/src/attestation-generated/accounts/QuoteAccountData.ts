@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface QuoteAccountDataFields {
   /** TODO: Add description */
@@ -78,20 +78,20 @@ export class QuoteAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('delegatedSecuredSigner'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 32, 'quoteRegistry'),
-    borsh.array(borsh.u8(), 64, 'registryKey'),
-    borsh.publicKey('attestationQueue'),
-    borsh.array(borsh.u8(), 32, 'mrEnclave'),
-    borsh.u8('verificationStatus'),
-    borsh.i64('verificationTimestamp'),
-    borsh.i64('validUntil'),
-    borsh.bool('isOnQueue'),
-    borsh.i64('lastHeartbeat'),
-    borsh.publicKey('owner'),
-    borsh.i64('createdAt'),
-    borsh.array(borsh.u8(), 992, 'ebuf'),
+    borsh.publicKey("delegatedSecuredSigner"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 32, "quoteRegistry"),
+    borsh.array(borsh.u8(), 64, "registryKey"),
+    borsh.publicKey("attestationQueue"),
+    borsh.array(borsh.u8(), 32, "mrEnclave"),
+    borsh.u8("verificationStatus"),
+    borsh.i64("verificationTimestamp"),
+    borsh.i64("validUntil"),
+    borsh.bool("isOnQueue"),
+    borsh.i64("lastHeartbeat"),
+    borsh.publicKey("owner"),
+    borsh.i64("createdAt"),
+    borsh.array(borsh.u8(), 992, "ebuf"),
   ]);
 
   constructor(fields: QuoteAccountDataFields) {
@@ -133,7 +133,7 @@ export class QuoteAccountData {
   ): Promise<Array<QuoteAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -147,7 +147,7 @@ export class QuoteAccountData {
 
   static decode(data: Buffer): QuoteAccountData {
     if (!data.slice(0, 8).equals(QuoteAccountData.discriminator)) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = QuoteAccountData.layout.decode(data.slice(8));

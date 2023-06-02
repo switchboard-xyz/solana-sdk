@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttestationPermissionAccountDataFields {
   authority: PublicKey;
@@ -39,13 +39,13 @@ export class AttestationPermissionAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey('authority'),
-    borsh.u32('permissions'),
-    borsh.publicKey('granter'),
-    borsh.publicKey('grantee'),
-    borsh.i64('expiration'),
-    borsh.u8('bump'),
-    borsh.array(borsh.u8(), 256, 'ebuf'),
+    borsh.publicKey("authority"),
+    borsh.u32("permissions"),
+    borsh.publicKey("granter"),
+    borsh.publicKey("grantee"),
+    borsh.i64("expiration"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 256, "ebuf"),
   ]);
 
   constructor(fields: AttestationPermissionAccountDataFields) {
@@ -80,7 +80,7 @@ export class AttestationPermissionAccountData {
   ): Promise<Array<AttestationPermissionAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
-    return infos.map(info => {
+    return infos.map((info) => {
       if (info === null) {
         return null;
       }
@@ -96,7 +96,7 @@ export class AttestationPermissionAccountData {
     if (
       !data.slice(0, 8).equals(AttestationPermissionAccountData.discriminator)
     ) {
-      throw new Error('invalid account discriminator');
+      throw new Error("invalid account discriminator");
     }
 
     const dec = AttestationPermissionAccountData.layout.decode(data.slice(8));

@@ -1,9 +1,9 @@
-import { SwitchboardProgram } from '../../SwitchboardProgram';
-import * as types from '../types'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { SwitchboardProgram } from "../../SwitchboardProgram.js";
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-import * as borsh from '@coral-xyz/borsh';
-import { PublicKey } from '@solana/web3.js'; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from '@switchboard-xyz/common'; // eslint-disable-line @typescript-eslint/no-unused-vars
+import * as borsh from "@coral-xyz/borsh";
+import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionInitParamsFields {
   name: Uint8Array;
@@ -47,13 +47,13 @@ export class FunctionInitParams {
   static layout(property?: string) {
     return borsh.struct(
       [
-        borsh.vecU8('name'),
-        borsh.vecU8('metadata'),
-        borsh.vecU8('container'),
-        borsh.vecU8('containerRegistry'),
-        borsh.vecU8('version'),
-        borsh.vecU8('schedule'),
-        borsh.array(borsh.u8(), 32, 'mrEnclave'),
+        borsh.vecU8("name"),
+        borsh.vecU8("metadata"),
+        borsh.vecU8("container"),
+        borsh.vecU8("containerRegistry"),
+        borsh.vecU8("version"),
+        borsh.vecU8("schedule"),
+        borsh.array(borsh.u8(), 32, "mrEnclave"),
       ],
       property
     );

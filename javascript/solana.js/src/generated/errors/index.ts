@@ -46,7 +46,7 @@ export function fromTxError(
   }
 
   const [programIdRaw, codeRaw] = firstMatch.slice(1);
-  if (programIdRaw !== SB_V2_PID.toString()) {
+  if (programIdRaw !== PROGRAM_ID.toString()) {
     return null;
   }
 

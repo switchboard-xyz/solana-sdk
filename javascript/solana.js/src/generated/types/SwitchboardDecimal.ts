@@ -1,6 +1,7 @@
+import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+
 import * as borsh from "@coral-xyz/borsh";
 import { Big, BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SwitchboardDecimalFields {
   /**

@@ -1,22 +1,22 @@
 export type {
   AttestationPermissionAccountDataFields,
   AttestationPermissionAccountDataJSON,
-} from './AttestationPermissionAccountData';
-export { AttestationPermissionAccountData } from './AttestationPermissionAccountData';
+} from "./AttestationPermissionAccountData.js";
+export { AttestationPermissionAccountData } from "./AttestationPermissionAccountData.js";
 export type {
   AttestationQueueAccountDataFields,
   AttestationQueueAccountDataJSON,
-} from './AttestationQueueAccountData';
-export { AttestationQueueAccountData } from './AttestationQueueAccountData';
+} from "./AttestationQueueAccountData.js";
+export { AttestationQueueAccountData } from "./AttestationQueueAccountData.js";
 export type {
   FunctionAccountDataFields,
   FunctionAccountDataJSON,
-} from './FunctionAccountData';
-export { FunctionAccountData } from './FunctionAccountData';
+} from "./FunctionAccountData.js";
+export { FunctionAccountData } from "./FunctionAccountData.js";
 export type {
   QuoteAccountDataFields,
   QuoteAccountDataJSON,
-} from './QuoteAccountData';
-export { QuoteAccountData } from './QuoteAccountData';
-export type { StateFields, StateJSON } from './State';
-export { State } from './State';
+} from "./QuoteAccountData.js";
+export { QuoteAccountData } from "./QuoteAccountData.js";
+export type { StateFields, StateJSON } from "./State.js";
+export { State } from "./State.js";

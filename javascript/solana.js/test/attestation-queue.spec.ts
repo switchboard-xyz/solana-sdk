@@ -1,13 +1,13 @@
-import 'mocha';
+import "mocha";
 
-import * as sbv2 from '../src';
+import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from './utils';
+import { setupTest, TestContext } from "./utils.js";
 
-import { Keypair } from '@solana/web3.js';
-import assert from 'assert';
+import { Keypair } from "@solana/web3.js";
+import assert from "assert";
 
-describe('AttestationQueue Tests', () => {
+describe("AttestationQueue Tests", () => {
   let ctx: TestContext;
 
   before(async () => (ctx = await setupTest()));
@@ -15,7 +15,7 @@ describe('AttestationQueue Tests', () => {
   const queueAuthority = Keypair.generate();
   let queueAccount: sbv2.AttestationQueueAccount;
 
-  it('Creates a Queue', async () => {
+  it("Creates a Queue", async () => {
     [queueAccount] = await sbv2.AttestationQueueAccount.create(ctx.program, {
       reward: 69420,
       allowAuthorityOverrideAfter: 321,
@@ -34,8 +34,8 @@ describe('AttestationQueue Tests', () => {
     assert(data.authority.equals(queueAuthority.publicKey));
   });
 
-  it('Add and remove an MrEnclave', async () => {
-    if (!queueAccount) throw new Error('OracleQueue does not exist');
+  it("Add and remove an MrEnclave", async () => {
+    if (!queueAccount) throw new Error("OracleQueue does not exist");
 
     const mrEnclave = new Uint8Array([1, 2, 3]);
     await queueAccount.addMrEnclave({ mrEnclave, authority: queueAuthority });

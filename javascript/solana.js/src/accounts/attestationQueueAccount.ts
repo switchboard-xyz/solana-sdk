@@ -1,29 +1,27 @@
-import * as types from '../attestation-generated';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import * as types from "../attestation-generated/index.js";
+import * as errors from "../errors.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
-import { RawMrEnclave } from '../types';
-import { parseMrEnclave } from '../utils';
+} from "../TransactionObject.js";
+import { RawMrEnclave } from "../types.js";
+import { parseMrEnclave } from "../utils.js";
 
-import { Account } from './account';
+import { Account } from "./account.js";
 import {
   AttestationPermissionAccount,
   AttestationPermissionSetParams,
-  OracleAccount,
-  QuoteAccount,
-  QuoteAccountInitParams,
-} from '.';
+} from "./attestationPermissionAccount.js";
+import { QuoteAccount, QuoteAccountInitParams } from "./quoteAccount.js";
 
 import {
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionSignature,
-} from '@solana/web3.js';
+} from "@solana/web3.js";
 
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
@@ -89,7 +87,7 @@ export interface AttestationQueueRemoveMrEnclaveParams {
 
 export type CreateQueueQuoteParams = Omit<
   QuoteAccountInitParams,
-  'queueAccount'
+  "queueAccount"
 > &
   Partial<AttestationPermissionSetParams> & {
     queueAuthorityPubkey?: PublicKey;
@@ -107,7 +105,7 @@ export type CreateQueueQuoteParams = Omit<
  * Buffer: {@linkcode QueueDataBuffer}
  */
 export class AttestationQueueAccount extends Account<types.AttestationQueueAccountData> {
-  static accountName = 'AttestationQueueAccountData';
+  static accountName = "AttestationQueueAccountData";
 
   /**
    * Get the size of an {@linkcode QueueAccount} on-chain.
@@ -124,7 +122,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError('AttestationQueue', this.publicKey);
+    throw new errors.AccountNotFoundError("AttestationQueue", this.publicKey);
   }
 
   /**
@@ -291,7 +289,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 
   public async removeMrEnclaveInstruction(
@@ -317,6 +315,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 }

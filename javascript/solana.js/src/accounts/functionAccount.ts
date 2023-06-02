@@ -1,35 +1,35 @@
-import { Account } from '../accounts/account';
-import * as types from '../attestation-generated';
-import * as errors from '../errors';
-import { SwitchboardProgram } from '../SwitchboardProgram';
+import { Account } from "../accounts/account.js";
+import * as types from "../attestation-generated/index.js";
+import * as errors from "../errors.js";
+import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
   TransactionObjectOptions,
-} from '../TransactionObject';
-import { parseMrEnclave } from '../utils';
+} from "../TransactionObject.js";
+import { parseMrEnclave } from "../utils.js";
 
 import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
   QuoteAccount,
-} from './index';
+} from "./index.js";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-} from '@solana/spl-token';
+} from "@solana/spl-token";
 import {
   Keypair,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
   TransactionSignature,
-} from '@solana/web3.js';
-import { BN, toUtf8 } from '@switchboard-xyz/common';
-import { isValidCron } from 'cron-validator';
+} from "@solana/web3.js";
+import { BN, toUtf8 } from "@switchboard-xyz/common";
+import { isValidCron } from "cron-validator";
 
 /**
  *  Parameters for initializing an {@linkcode FunctionAccount}
@@ -76,7 +76,7 @@ export interface FunctionFundParams {
   funderAuthority?: Keypair;
 }
 interface FunctionWithdrawBaseParams {
-  amount: number | 'all';
+  amount: number | "all";
   unwrap: boolean;
 }
 export interface FunctionWithdrawUnwrapParams
@@ -112,7 +112,7 @@ export interface FunctionVerifyParams {
  * Data: {@linkcode types.FunctionAccountData}
  */
 export class FunctionAccount extends Account<types.FunctionAccountData> {
-  static accountName = 'FunctionAccountData';
+  static accountName = "FunctionAccountData";
   /**
    *  Returns the functions's name buffer in a stringified format.
    */
@@ -142,7 +142,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError('Function', this.publicKey);
+    throw new errors.AccountNotFoundError("Function", this.publicKey);
   }
 
   public static async load(
@@ -186,13 +186,13 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       {
         params: {
-          name: new Uint8Array(Buffer.from(params.name ?? '', 'utf8')),
-          metadata: new Uint8Array(Buffer.from(params.metadata ?? '', 'utf8')),
-          schedule: new Uint8Array(Buffer.from(params.schedule, 'utf8')),
-          container: new Uint8Array(Buffer.from(params.container, 'utf8')),
-          version: new Uint8Array(Buffer.from(params.version, 'utf8')),
+          name: new Uint8Array(Buffer.from(params.name ?? "", "utf8")),
+          metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
+          schedule: new Uint8Array(Buffer.from(params.schedule, "utf8")),
+          container: new Uint8Array(Buffer.from(params.container, "utf8")),
+          version: new Uint8Array(Buffer.from(params.version, "utf8")),
           containerRegistry: new Uint8Array(
-            Buffer.from(params.containerRegistry ?? '', 'utf8')
+            Buffer.from(params.containerRegistry ?? "", "utf8")
           ),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
         },
@@ -303,7 +303,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 
   public async withdrawInstruction(
@@ -321,10 +321,10 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       const minRequiredBalance = queueData.reward * 2;
       const escrowBalance = await spl
         .getAccount(this.program.connection, this.getEscrow())
-        .then(escrow => this.program.mint.fromTokenAmount(escrow.amount));
+        .then((escrow) => this.program.mint.fromTokenAmount(escrow.amount));
       const maxWithdrawAmount = escrowBalance - minRequiredBalance;
 
-      if (params.amount === 'all') return maxWithdrawAmount;
+      if (params.amount === "all") return maxWithdrawAmount;
       return Math.min(params.amount, maxWithdrawAmount);
     })();
 
@@ -397,16 +397,22 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
               function: this.publicKey,
               attestationQueue: queueAccount.publicKey,
               escrow: this.getEscrow(),
-              authority: params.withdrawAuthority
-                ? params.withdrawAuthority.publicKey
-                : payer,
-              receiver: params.withdrawWallet,
+              authority:
+                "withdrawAuthority" in params && params.withdrawAuthority
+                  ? params.withdrawAuthority.publicKey
+                  : payer,
+              receiver:
+                "withdrawWallet" in params && params.withdrawWallet
+                  ? params.withdrawWallet
+                  : this.program.mint.getAssociatedAddress(payer),
               state: this.program.attestationProgramState.publicKey, // @TODO: find state account pubkey
               tokenProgram: TOKEN_PROGRAM_ID,
             }
           ),
         ],
-        params.withdrawAuthority ? [params.withdrawAuthority] : [],
+        "withdrawAuthority" in params && params.withdrawAuthority
+          ? [params.withdrawAuthority]
+          : [],
         options
       );
     }
@@ -420,7 +426,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 
   public async getBalance(): Promise<number> {
@@ -513,6 +519,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program.walletPubkey,
       params,
       options
-    ).then(txn => this.program.signAndSend(txn, options));
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 }

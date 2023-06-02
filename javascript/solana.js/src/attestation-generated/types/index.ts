@@ -1,72 +1,72 @@
-import * as FunctionStatus from './FunctionStatus';
-import * as SwitchboardAttestationPermission from './SwitchboardAttestationPermission';
-import * as VerificationStatus from './VerificationStatus';
+import * as FunctionStatus from "./FunctionStatus.js";
+import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
+import * as VerificationStatus from "./VerificationStatus.js";
 
 export type {
   AttestationPermissionInitParamsFields,
   AttestationPermissionInitParamsJSON,
-} from './AttestationPermissionInitParams';
-export { AttestationPermissionInitParams } from './AttestationPermissionInitParams';
+} from "./AttestationPermissionInitParams.js";
+export { AttestationPermissionInitParams } from "./AttestationPermissionInitParams.js";
 export type {
   AttestationPermissionSetParamsFields,
   AttestationPermissionSetParamsJSON,
-} from './AttestationPermissionSetParams';
-export { AttestationPermissionSetParams } from './AttestationPermissionSetParams';
+} from "./AttestationPermissionSetParams.js";
+export { AttestationPermissionSetParams } from "./AttestationPermissionSetParams.js";
 export type {
   AttestationQueueAddMrEnclaveParamsFields,
   AttestationQueueAddMrEnclaveParamsJSON,
-} from './AttestationQueueAddMrEnclaveParams';
-export { AttestationQueueAddMrEnclaveParams } from './AttestationQueueAddMrEnclaveParams';
+} from "./AttestationQueueAddMrEnclaveParams.js";
+export { AttestationQueueAddMrEnclaveParams } from "./AttestationQueueAddMrEnclaveParams.js";
 export type {
   AttestationQueueInitParamsFields,
   AttestationQueueInitParamsJSON,
-} from './AttestationQueueInitParams';
-export { AttestationQueueInitParams } from './AttestationQueueInitParams';
+} from "./AttestationQueueInitParams.js";
+export { AttestationQueueInitParams } from "./AttestationQueueInitParams.js";
 export type {
   AttestationQueueRemoveMrEnclaveParamsFields,
   AttestationQueueRemoveMrEnclaveParamsJSON,
-} from './AttestationQueueRemoveMrEnclaveParams';
-export { AttestationQueueRemoveMrEnclaveParams } from './AttestationQueueRemoveMrEnclaveParams';
+} from "./AttestationQueueRemoveMrEnclaveParams.js";
+export { AttestationQueueRemoveMrEnclaveParams } from "./AttestationQueueRemoveMrEnclaveParams.js";
 export type {
   FunctionFundParamsFields,
   FunctionFundParamsJSON,
-} from './FunctionFundParams';
-export { FunctionFundParams } from './FunctionFundParams';
+} from "./FunctionFundParams.js";
+export { FunctionFundParams } from "./FunctionFundParams.js";
 export type {
   FunctionInitParamsFields,
   FunctionInitParamsJSON,
-} from './FunctionInitParams';
-export { FunctionInitParams } from './FunctionInitParams';
+} from "./FunctionInitParams.js";
+export { FunctionInitParams } from "./FunctionInitParams.js";
 export type {
   FunctionVerifyParamsFields,
   FunctionVerifyParamsJSON,
-} from './FunctionVerifyParams';
-export { FunctionVerifyParams } from './FunctionVerifyParams';
+} from "./FunctionVerifyParams.js";
+export { FunctionVerifyParams } from "./FunctionVerifyParams.js";
 export type {
   FunctionWithdrawParamsFields,
   FunctionWithdrawParamsJSON,
-} from './FunctionWithdrawParams';
-export { FunctionWithdrawParams } from './FunctionWithdrawParams';
+} from "./FunctionWithdrawParams.js";
+export { FunctionWithdrawParams } from "./FunctionWithdrawParams.js";
 export type {
   QuoteHeartbeatParamsFields,
   QuoteHeartbeatParamsJSON,
-} from './QuoteHeartbeatParams';
-export { QuoteHeartbeatParams } from './QuoteHeartbeatParams';
+} from "./QuoteHeartbeatParams.js";
+export { QuoteHeartbeatParams } from "./QuoteHeartbeatParams.js";
 export type {
   QuoteInitParamsFields,
   QuoteInitParamsJSON,
-} from './QuoteInitParams';
-export { QuoteInitParams } from './QuoteInitParams';
+} from "./QuoteInitParams.js";
+export { QuoteInitParams } from "./QuoteInitParams.js";
 export type {
   QuoteVerifyParamsFields,
   QuoteVerifyParamsJSON,
-} from './QuoteVerifyParams';
-export { QuoteVerifyParams } from './QuoteVerifyParams';
+} from "./QuoteVerifyParams.js";
+export { QuoteVerifyParams } from "./QuoteVerifyParams.js";
 export type {
   StateInitParamsFields,
   StateInitParamsJSON,
-} from './StateInitParams';
-export { StateInitParams } from './StateInitParams';
+} from "./StateInitParams.js";
+export { StateInitParams } from "./StateInitParams.js";
 export { FunctionStatus };
 
 export type FunctionStatusKind =
