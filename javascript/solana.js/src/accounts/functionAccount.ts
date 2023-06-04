@@ -22,6 +22,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
+  AddressLookupTableAccount,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -540,5 +541,48 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       params,
       options
     ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public static decodeAddressLookup(lookupTable: AddressLookupTableAccount) {
+    const addresses = lookupTable.state.addresses;
+    if (addresses.length !== 16) {
+      throw new Error(`Failed to decode address lookup table`);
+    }
+
+    const systemProgram = addresses[0]!;
+    const tokenProgram = addresses[1]!;
+    const assocatedTokenProgram = addresses[2]!;
+    const sysVarRent = addresses[3]!;
+    const sysVarRecentBlockhashes = addresses[4]!;
+    const sysVarInstructions = addresses[5]!;
+    const sysVarSlotHashes = addresses[6]!;
+    const sysVarSlotHistory = addresses[7]!;
+    const switchboardProgram = addresses[8]!;
+    const attestationProgram = addresses[9]!;
+    const statePubkey = addresses[10]!;
+    const attestationQueuePubkey = addresses[11]!;
+    const functionPubkey = addresses[12]!;
+    const escrowPubkey = addresses[13]!;
+    const fnPermission = addresses[14]!;
+    const fnQuote = addresses[15]!;
+
+    return {
+      systemProgram,
+      tokenProgram,
+      assocatedTokenProgram,
+      sysVarRent,
+      sysVarRecentBlockhashes,
+      sysVarInstructions,
+      sysVarSlotHashes,
+      sysVarSlotHistory,
+      switchboardProgram,
+      attestationProgram,
+      statePubkey,
+      attestationQueuePubkey,
+      functionPubkey,
+      escrowPubkey,
+      fnPermission,
+      fnQuote,
+    };
   }
 }
