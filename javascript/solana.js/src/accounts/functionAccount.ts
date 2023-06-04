@@ -163,10 +163,29 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const functionKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(functionKeypair);
 
+    const authority = params.authority ? params.authority.publicKey : payer;
+
     const cronSchedule = parseCronSchedule(params.schedule);
 
     const attestationQueueAccount = params.attestationQueue;
     const attestationQueue = await attestationQueueAccount.loadData();
+
+    const recentSlot = new BN(
+      (
+        await program.connection.getLatestBlockhashAndContext({
+          commitment: "finalized",
+        })
+      ).context.slot
+    );
+    const addressLookupProgram = new PublicKey(
+      "AddressLookupTab1e1111111111111111111111111"
+    );
+    const [addressLookupTable] = PublicKey.findProgramAddressSync(
+      [authority.toBuffer(), recentSlot.toBuffer("le", 8)],
+      addressLookupProgram
+    );
+
+    console.log(`addressLookupTable: ${addressLookupTable.toBase58()}`);
 
     // get PDA accounts
     const functionAccount = new FunctionAccount(
@@ -193,11 +212,13 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
             Buffer.from(params.containerRegistry ?? "", "utf8")
           ),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
+          recentSlot: recentSlot,
         },
       },
       {
         function: functionAccount.publicKey,
-        authority: params.authority ? params.authority.publicKey : payer,
+        addressLookupTable: addressLookupTable,
+        authority: authority,
         quote: quoteAccount.publicKey,
         attestationQueue: attestationQueueAccount.publicKey,
         permission: permissionAccount.publicKey,
@@ -208,6 +229,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         payer,
         systemProgram: SystemProgram.programId,
+        addressLookupProgram: addressLookupProgram,
       }
     );
     return [

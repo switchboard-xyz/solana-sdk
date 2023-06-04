@@ -13,6 +13,7 @@ export interface FunctionInitParamsFields {
   version: Uint8Array;
   schedule: Uint8Array;
   mrEnclave: Array<number>;
+  recentSlot: BN;
 }
 
 export interface FunctionInitParamsJSON {
@@ -23,6 +24,7 @@ export interface FunctionInitParamsJSON {
   version: Array<number>;
   schedule: Array<number>;
   mrEnclave: Array<number>;
+  recentSlot: string;
 }
 
 export class FunctionInitParams {
@@ -33,6 +35,7 @@ export class FunctionInitParams {
   readonly version: Uint8Array;
   readonly schedule: Uint8Array;
   readonly mrEnclave: Array<number>;
+  readonly recentSlot: BN;
 
   constructor(fields: FunctionInitParamsFields) {
     this.name = fields.name;
@@ -42,6 +45,7 @@ export class FunctionInitParams {
     this.version = fields.version;
     this.schedule = fields.schedule;
     this.mrEnclave = fields.mrEnclave;
+    this.recentSlot = fields.recentSlot;
   }
 
   static layout(property?: string) {
@@ -54,6 +58,7 @@ export class FunctionInitParams {
         borsh.vecU8("version"),
         borsh.vecU8("schedule"),
         borsh.array(borsh.u8(), 32, "mrEnclave"),
+        borsh.u64("recentSlot"),
       ],
       property
     );
@@ -93,6 +98,7 @@ export class FunctionInitParams {
         obj.schedule.length
       ),
       mrEnclave: obj.mrEnclave,
+      recentSlot: obj.recentSlot,
     });
   }
 
@@ -129,6 +135,7 @@ export class FunctionInitParams {
         fields.schedule.length
       ),
       mrEnclave: fields.mrEnclave,
+      recentSlot: fields.recentSlot,
     };
   }
 
@@ -141,6 +148,7 @@ export class FunctionInitParams {
       version: Array.from(this.version.values()),
       schedule: Array.from(this.schedule.values()),
       mrEnclave: this.mrEnclave,
+      recentSlot: this.recentSlot.toString(),
     };
   }
 
@@ -153,6 +161,7 @@ export class FunctionInitParams {
       version: Uint8Array.from(obj.version),
       schedule: Uint8Array.from(obj.schedule),
       mrEnclave: obj.mrEnclave,
+      recentSlot: new BN(obj.recentSlot),
     });
   }
 

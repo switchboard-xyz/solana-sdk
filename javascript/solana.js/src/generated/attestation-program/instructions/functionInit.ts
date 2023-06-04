@@ -15,6 +15,7 @@ export interface FunctionInitArgs {
 
 export interface FunctionInitAccounts {
   function: PublicKey;
+  addressLookupTable: PublicKey;
   authority: PublicKey;
   quote: PublicKey;
   attestationQueue: PublicKey;
@@ -26,6 +27,7 @@ export interface FunctionInitAccounts {
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
   systemProgram: PublicKey;
+  addressLookupProgram: PublicKey;
 }
 
 export const layout = borsh.struct([types.FunctionInitParams.layout("params")]);
@@ -37,7 +39,8 @@ export function functionInit(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: true, isWritable: true },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: true, isWritable: true },
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.permission, isSigner: false, isWritable: true },
@@ -52,6 +55,11 @@ export function functionInit(
       isWritable: false,
     },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
+    {
+      pubkey: accounts.addressLookupProgram,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
   const identifier = Buffer.from([0, 20, 30, 24, 100, 146, 13, 162]);
   const buffer = Buffer.alloc(1000);

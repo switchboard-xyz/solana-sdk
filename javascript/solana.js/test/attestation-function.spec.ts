@@ -66,18 +66,42 @@ describe("Function Tests", () => {
   it("Creates a Function", async () => {
     const functionKeypair = Keypair.generate();
 
-    [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-      name: "FUNCTION_NAME",
-      metadata: "FUNCTION_METADATA",
-      schedule: "* * * * *",
-      container: "containerId",
-      version: "1.0.0",
-      mrEnclave,
-      attestationQueue: attestationQueueAccount,
-      keypair: functionKeypair,
-    });
+    try {
+      [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
+        name: "FUNCTION_NAME",
+        metadata: "FUNCTION_METADATA",
+        schedule: "* * * * *",
+        container: "containerId",
+        version: "1.0.0",
+        mrEnclave,
+        attestationQueue: attestationQueueAccount,
+        keypair: functionKeypair,
+      });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
 
     const myFunction = await functionAccount.loadData();
+
+    console.log(
+      `function lookupTable: ${myFunction.addressLookupTable.toBase58()}`
+    );
+
+    await sleep(5000);
+
+    const lookupTable = await ctx.program.connection.getAddressLookupTable(
+      myFunction.addressLookupTable
+    );
+
+    console.log(`Function: ${functionAccount.publicKey}`);
+    console.log(`Sb State: ${ctx.program.attestationProgramState.publicKey}`);
+
+    console.log(
+      `Lookup Table\n${lookupTable.value?.state.addresses
+        .map((a) => "\t- " + a.toBase58())
+        .join("\n")}`
+    );
   });
 
   it("Verifies the function's quote", async () => {

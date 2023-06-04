@@ -266,6 +266,8 @@ async function programDeploy(
       "deploy",
       "-u",
       "l",
+      "-k",
+      "~/.config/solana/id.json",
       "--program-id",
       programKeypairPath,
       "--upgrade-authority",
