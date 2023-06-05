@@ -10,9 +10,9 @@ export interface PermitNodeheartbeatJSON {
 }
 
 export class PermitNodeheartbeat {
-  static readonly discriminator = 0;
+  static readonly discriminator = 1;
   static readonly kind = "PermitNodeheartbeat";
-  readonly discriminator = 0;
+  readonly discriminator = 1;
   readonly kind = "PermitNodeheartbeat";
 
   toJSON(): PermitNodeheartbeatJSON {
@@ -33,9 +33,9 @@ export interface PermitQueueUsageJSON {
 }
 
 export class PermitQueueUsage {
-  static readonly discriminator = 1;
+  static readonly discriminator = 2;
   static readonly kind = "PermitQueueUsage";
-  readonly discriminator = 1;
+  readonly discriminator = 2;
   readonly kind = "PermitQueueUsage";
 
   toJSON(): PermitQueueUsageJSON {

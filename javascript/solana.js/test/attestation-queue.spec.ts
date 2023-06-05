@@ -54,4 +54,13 @@ describe("AttestationQueue Tests", () => {
     const data2 = await queueAccount.loadData();
     assert(data2.mrEnclavesLen === 0);
   });
+
+  it("Bootstraps a new attestation queue with a single verifier oracle", async () => {
+    const { attestationQueueAccount, signatures, verifier } =
+      await sbv2.AttestationQueueAccount.bootstrapNewQueue(ctx.program);
+
+    const queueData = await attestationQueueAccount.loadData();
+
+    console.log(queueData.toJSON());
+  });
 });

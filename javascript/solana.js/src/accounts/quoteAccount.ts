@@ -258,7 +258,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     const [permissionAccount, permissionBump] = params.permission;
     const instruction = types.quoteHeartbeat(
       this.program,
-      { params: params ?? {} },
+      { params: {} },
       {
         quote: this.publicKey,
         securedSigner: params.securedSigner,

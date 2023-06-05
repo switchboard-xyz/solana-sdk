@@ -7,7 +7,7 @@ import {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { RawBuffer } from "../types.js";
-import { parseMrEnclave } from "../utils.js";
+import { parseMrEnclave, parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
 import {
@@ -20,6 +20,7 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 
@@ -227,12 +228,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         options
       );
 
-    try {
-      const permission = await permissionAccount.loadData();
-      // TODO: set permissions if we need to
-      return [quoteAccount, quoteInit];
-    } catch (error) {}
-
     if (params.enable) {
       const permissionSet = permissionAccount.setInstruction(payer, {
         enable: true,
@@ -329,4 +324,213 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       options
     ).then((txn) => this.program.signAndSend(txn, options));
   }
+
+  /**
+   * Create a new attestation queue for internal testing
+   * - Creates AttestationQueue account
+   * - Creates a Quote verifier
+   * - Sets the quote verifier secured signer
+   * - Adds Quote verifier to the queue
+   */
+  public static async bootstrapNewQueue(
+    program: SwitchboardProgram,
+    params?: CreateBootstrappedQueueParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<
+    BootstrappedAttestationQueue & { signatures?: Array<TransactionSignature> }
+  > {
+    const authority: Keypair = params?.authority ?? program.wallet.payer;
+
+    const attestationQueueKeypair = params?.keypair ?? Keypair.generate();
+    const verifierQuoteKeypair1 = Keypair.generate();
+    const verifierQuoteSigner1 = params?.securedSigner ?? Keypair.generate();
+
+    const ixns: Array<TransactionInstruction> = [];
+    const signers: Array<Keypair> = [
+      authority,
+      attestationQueueKeypair,
+      verifierQuoteKeypair1,
+      verifierQuoteSigner1,
+    ];
+
+    // create attestation queue
+    ixns.push(
+      types.attestationQueueInit(
+        program,
+        {
+          params: {
+            reward: params?.reward ?? 0,
+            allowAuthorityOverrideAfter:
+              params?.allowAuthorityOverrideAfter ?? 300,
+            maxQuoteVerificationAge: params?.maxQuoteVerificationAge ?? 604800,
+            nodeTimeout: params?.nodeTimeout ?? 180,
+            requireAuthorityHeartbeatPermission:
+              params?.requireAuthorityHeartbeatPermission ?? false,
+            requireUsagePermissions: params?.requireUsagePermissions ?? false,
+          },
+        },
+        {
+          queue: attestationQueueKeypair.publicKey,
+          authority: authority.publicKey,
+          payer: authority.publicKey,
+          systemProgram: SystemProgram.programId,
+        }
+      )
+    );
+
+    // add mrEnclave
+    ixns.push(
+      types.attestationQueueAddMrEnclave(
+        program,
+        {
+          params: {
+            mrEnclave: Array.from(
+              parseMrEnclave(params?.quoteVerifierMrEnclave ?? "")
+            ),
+          },
+        },
+        {
+          queue: attestationQueueKeypair.publicKey,
+          authority: authority.publicKey,
+        }
+      )
+    );
+
+    // create quote #1
+    ixns.push(
+      types.quoteInit(
+        program,
+        {
+          params: {
+            registryKey: parseRawBuffer(params?.registryKey ?? "", 64),
+          },
+        },
+        {
+          quote: verifierQuoteKeypair1.publicKey,
+          attestationQueue: attestationQueueKeypair.publicKey,
+          queueAuthority: authority.publicKey,
+          authority: authority.publicKey,
+          payer: authority.publicKey,
+          systemProgram: SystemProgram.programId,
+        }
+      )
+    );
+    // create & set quote #1 permissions
+    const [verifierQuotePermissions1] = AttestationPermissionAccount.fromSeed(
+      program,
+      authority.publicKey,
+      attestationQueueKeypair.publicKey,
+      verifierQuoteKeypair1.publicKey
+    );
+    ixns.push(
+      types.attestationPermissionInit(
+        program,
+        { params: {} },
+        {
+          permission: verifierQuotePermissions1.publicKey,
+          attestationQueue: attestationQueueKeypair.publicKey,
+          node: verifierQuoteKeypair1.publicKey,
+          authority: authority.publicKey,
+          payer: authority.publicKey,
+          systemProgram: SystemProgram.programId,
+        }
+      )
+    );
+    ixns.push(
+      types.attestationPermissionSet(
+        program,
+        {
+          params: {
+            permission: 1, // Permit_Node_Heartbeat
+            enable: true,
+          },
+        },
+        {
+          permission: verifierQuotePermissions1.publicKey,
+          authority: authority.publicKey,
+          attestationQueue: attestationQueueKeypair.publicKey,
+          node: verifierQuoteKeypair1.publicKey,
+        }
+      )
+    );
+
+    // set quote #1 securedSigner
+    ixns.push(
+      types.quoteRotate(
+        program,
+        {
+          params: {
+            registryKey: Array.from(
+              parseRawBuffer(params?.registryKey ?? "", 64)
+            ),
+          },
+        },
+        {
+          quote: verifierQuoteKeypair1.publicKey,
+          authority: authority.publicKey,
+          securedSigner: verifierQuoteSigner1.publicKey,
+          attestationQueue: attestationQueueKeypair.publicKey,
+        }
+      )
+    );
+
+    // quote #1 heartbeat
+    ixns.push(
+      types.quoteHeartbeat(
+        program,
+        { params: {} },
+        {
+          quote: verifierQuoteKeypair1.publicKey,
+          securedSigner: verifierQuoteSigner1.publicKey,
+          attestationQueue: attestationQueueKeypair.publicKey,
+          queueAuthority: authority.publicKey,
+          gcNode: verifierQuoteKeypair1.publicKey,
+          permission: verifierQuotePermissions1.publicKey,
+        }
+      )
+    );
+
+    const txns = TransactionObject.packIxns(
+      program.walletPubkey,
+      ixns,
+      signers,
+      options
+    );
+
+    const signatures = await program.signAndSendAll(txns, options);
+
+    const attestationQueueAccount = new AttestationQueueAccount(
+      program,
+      attestationQueueKeypair.publicKey
+    );
+
+    return {
+      attestationQueueAccount,
+      signatures,
+      verifier: {
+        quoteAccount: new QuoteAccount(
+          program,
+          verifierQuoteKeypair1.publicKey
+        ),
+        permissionAccount: verifierQuotePermissions1,
+        signer: verifierQuoteSigner1,
+      },
+    };
+  }
 }
+
+export type CreateBootstrappedQueueParams =
+  AttestationQueueAccountInitParams & {
+    quoteVerifierMrEnclave: RawBuffer;
+    registryKey: RawBuffer;
+    securedSigner?: Keypair;
+  };
+
+type BootstrappedAttestationQueue = {
+  attestationQueueAccount: AttestationQueueAccount;
+  verifier: {
+    quoteAccount: QuoteAccount;
+    permissionAccount: AttestationPermissionAccount;
+    signer: Keypair;
+  };
+};

@@ -52,6 +52,7 @@ const ignoreFiles = [
   `${v2GeneratedPath}/errors/index.ts`, // need to revert the program ID check,
   `${attestationGeneratedPath}/types/VerificationStatus.ts`,
   `${attestationGeneratedPath}/errors/index.ts`,
+  `${attestationGeneratedPath}/types/SwitchboardAttestationPermission.ts`,
   // `${v2GeneratedPath}/types/VerificationStatus.ts`,
 ];
 
