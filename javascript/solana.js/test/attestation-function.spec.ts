@@ -1,13 +1,18 @@
 import "mocha";
 
+import { functionVerify } from "../src/generated/index.js";
 import * as sbv2 from "../src/index.js";
 import { QuoteAccount } from "../src/index.js";
 
 import { setupTest, TestContext } from "./utils.js";
 
-import { Keypair } from "@solana/web3.js";
+import * as anchor from "@coral-xyz/anchor";
+import { NATIVE_MINT } from "@solana/spl-token";
+import { Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { BN, sleep } from "@switchboard-xyz/common";
 import assert from "assert";
+
+const unixTimestamp = () => Math.floor(Date.now() / 1000);
 
 describe("Function Tests", () => {
   let ctx: TestContext;
@@ -66,18 +71,42 @@ describe("Function Tests", () => {
   it("Creates a Function", async () => {
     const functionKeypair = Keypair.generate();
 
-    [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-      name: "FUNCTION_NAME",
-      metadata: "FUNCTION_METADATA",
-      schedule: "* * * * *",
-      container: "containerId",
-      version: "1.0.0",
-      mrEnclave,
-      attestationQueue: attestationQueueAccount,
-      keypair: functionKeypair,
-    });
+    try {
+      [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
+        name: "FUNCTION_NAME",
+        metadata: "FUNCTION_METADATA",
+        schedule: "* * * * *",
+        container: "containerId",
+        version: "1.0.0",
+        mrEnclave,
+        attestationQueue: attestationQueueAccount,
+        keypair: functionKeypair,
+      });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
 
     const myFunction = await functionAccount.loadData();
+
+    console.log(
+      `function lookupTable: ${myFunction.addressLookupTable.toBase58()}`
+    );
+
+    await sleep(5000);
+
+    const lookupTable = await ctx.program.connection
+      .getAddressLookupTable(myFunction.addressLookupTable)
+      .then((res) => res.value!);
+
+    console.log(`Function: ${functionAccount.publicKey}`);
+    console.log(`Sb State: ${ctx.program.attestationProgramState.publicKey}`);
+
+    console.log(
+      `Lookup Table\n${lookupTable.state.addresses
+        .map((a) => "\t- " + a.toBase58())
+        .join("\n")}`
+    );
   });
 
   it("Verifies the function's quote", async () => {
@@ -195,5 +224,89 @@ describe("Function Tests", () => {
       roundedFinalBalance === 0,
       `Function escrow should have minimal funds remaining`
     );
+  });
+
+  it("verifies the function", async () => {
+    const trustedSigner = anchor.web3.Keypair.generate();
+
+    const myFunction = await functionAccount.loadData();
+
+    const lookupTable = await ctx.program.connection
+      .getAddressLookupTable(myFunction.addressLookupTable)
+      .then((res) => res.value!);
+
+    const {
+      statePubkey,
+      attestationQueuePubkey,
+      functionPubkey,
+      escrowPubkey,
+      fnPermission,
+      fnQuote,
+    } = sbv2.FunctionAccount.decodeAddressLookup(lookupTable);
+
+    const getIxn = (): TransactionInstruction => {
+      return functionVerify(
+        ctx.program,
+        {
+          params: {
+            observedTime: new BN(unixTimestamp()),
+            nextAllowedTimestamp: new BN(unixTimestamp() + 100),
+            isFailure: false,
+            mrEnclave: Array.from(mrEnclave),
+          },
+        },
+        {
+          function: functionAccount.publicKey,
+          fnSigner: trustedSigner.publicKey,
+          verifierQuote: attestationQuoteVerifierAccount.publicKey,
+          attestationQueue: attestationQueuePubkey,
+          escrow: escrowPubkey,
+          receiver: anchor.utils.token.associatedAddress({
+            mint: NATIVE_MINT,
+            owner: ctx.payer.publicKey,
+          }),
+          verifierPermission:
+            attestationQuoteVerifierAccount.getPermissionAccount(
+              attestationQueuePubkey,
+              ctx.payer.publicKey,
+              ctx.payer.publicKey
+            )[0].publicKey,
+          fnPermission: fnPermission,
+          state: statePubkey,
+          payer: ctx.payer.publicKey,
+          fnQuote: fnQuote,
+          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        }
+      );
+    };
+
+    const blockhash = await ctx.program.connection.getLatestBlockhash();
+
+    // legacy
+    const transactionLegacy = new sbv2.TransactionObject(
+      ctx.payer.publicKey,
+      [getIxn()],
+      [quoteVerifierKeypair, trustedSigner]
+    ).toVersionedTxn(blockhash);
+    const legacyByteLength = transactionLegacy.serialize().byteLength;
+    console.log(`functionVerify (legacy): ${legacyByteLength}`);
+
+    // build txn
+    const messageV0 = new anchor.web3.TransactionMessage({
+      payerKey: ctx.payer.publicKey,
+      recentBlockhash: blockhash.blockhash,
+      instructions: [getIxn()], // note this is an array of instructions
+    }).compileToV0Message([lookupTable]);
+    const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
+    transactionV0.sign([quoteVerifierKeypair]);
+    transactionV0.sign([trustedSigner]);
+    transactionV0.sign([ctx.payer]);
+
+    const lookupTableByteLength = transactionV0.serialize().byteLength;
+
+    console.log(`functionVerify (lookup): ${lookupTableByteLength}`);
+
+    console.log(`SAVES = ${legacyByteLength - lookupTableByteLength} bytes`);
   });
 });

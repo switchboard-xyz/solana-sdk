@@ -21,7 +21,8 @@ export type CustomError =
   | InvalidVerifierIdx
   | InvalidSelfVerifyRequest
   | IncorrectMrEnclave
-  | InvalidResponder;
+  | InvalidResponder
+  | InvalidAddressLookupAddress;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -243,6 +244,16 @@ export class InvalidResponder extends Error {
   }
 }
 
+export class InvalidAddressLookupAddress extends Error {
+  static readonly code = 6022;
+  readonly code = 6022;
+  readonly name = "InvalidAddressLookupAddress";
+
+  constructor(readonly logs?: string[]) {
+    super("6022: ");
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -289,6 +300,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new IncorrectMrEnclave(logs);
     case 6021:
       return new InvalidResponder(logs);
+    case 6022:
+      return new InvalidAddressLookupAddress(logs);
   }
 
   return null;

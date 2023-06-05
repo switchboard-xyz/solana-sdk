@@ -23,6 +23,7 @@ export interface FunctionAccountDataFields {
   status: types.FunctionStatusKind;
   createdAt: BN;
   isTriggered: boolean;
+  addressLookupTable: PublicKey;
   ebuf: Array<number>;
 }
 
@@ -44,6 +45,7 @@ export interface FunctionAccountDataJSON {
   status: types.FunctionStatusJSON;
   createdAt: string;
   isTriggered: boolean;
+  addressLookupTable: string;
   ebuf: Array<number>;
 }
 
@@ -65,6 +67,7 @@ export class FunctionAccountData {
   readonly status: types.FunctionStatusKind;
   readonly createdAt: BN;
   readonly isTriggered: boolean;
+  readonly addressLookupTable: PublicKey;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
@@ -87,7 +90,8 @@ export class FunctionAccountData {
     types.FunctionStatus.layout("status"),
     borsh.i64("createdAt"),
     borsh.bool("isTriggered"),
-    borsh.array(borsh.u8(), 1023, "ebuf"),
+    borsh.publicKey("addressLookupTable"),
+    borsh.array(borsh.u8(), 991, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -106,6 +110,7 @@ export class FunctionAccountData {
     this.status = fields.status;
     this.createdAt = fields.createdAt;
     this.isTriggered = fields.isTriggered;
+    this.addressLookupTable = fields.addressLookupTable;
     this.ebuf = fields.ebuf;
   }
 
@@ -166,6 +171,7 @@ export class FunctionAccountData {
       status: types.FunctionStatus.fromDecoded(dec.status),
       createdAt: dec.createdAt,
       isTriggered: dec.isTriggered,
+      addressLookupTable: dec.addressLookupTable,
       ebuf: dec.ebuf,
     });
   }
@@ -187,6 +193,7 @@ export class FunctionAccountData {
       status: this.status.toJSON(),
       createdAt: this.createdAt.toString(),
       isTriggered: this.isTriggered,
+      addressLookupTable: this.addressLookupTable.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -208,6 +215,7 @@ export class FunctionAccountData {
       status: types.FunctionStatus.fromJSON(obj.status),
       createdAt: new BN(obj.createdAt),
       isTriggered: obj.isTriggered,
+      addressLookupTable: new PublicKey(obj.addressLookupTable),
       ebuf: obj.ebuf,
     });
   }
