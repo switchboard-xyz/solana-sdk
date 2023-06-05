@@ -51,6 +51,12 @@ describe("Function Tests", () => {
       }
     );
 
+    const queueData = await attestationQueueAccount.loadData();
+    assert(
+      queueData.authority.equals(ctx.program.walletPubkey),
+      "QueueAuthorityMismatch"
+    );
+
     await attestationQueueAccount.addMrEnclave({
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
     });
@@ -63,8 +69,15 @@ describe("Function Tests", () => {
         queueAuthorityPubkey: ctx.program.walletPubkey,
       });
 
+    const quoteData = await attestationQuoteVerifierAccount.loadData();
+    assert(
+      quoteData.authority.equals(ctx.program.walletPubkey),
+      "QuoteAuthorityMismatch"
+    );
+
     await attestationQuoteVerifierAccount.rotate({
       securedSigner: quoteVerifierSigner,
+      authority: ctx.payer,
       registryKey: new Uint8Array(Array(64).fill(1)),
     });
 
