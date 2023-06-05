@@ -81,9 +81,19 @@ describe("Function Tests", () => {
       registryKey: new Uint8Array(Array(64).fill(1)),
     });
 
+    const quoteData1 = await attestationQuoteVerifierAccount.loadData();
+    assert(
+      quoteData1.securedSigner.equals(quoteVerifierSigner.publicKey),
+      "QuoteAuthorityMismatch"
+    );
+    assert(
+      quoteData1.attestationQueue.equals(attestationQueueAccount.publicKey),
+      "AttestationQueueMismatch"
+    );
+
     // join the queue so we can verify other quotes
     await attestationQuoteVerifierAccount.heartbeat({
-      keypair: quoteVerifierKeypair,
+      securedSigner: quoteVerifierSigner,
     });
   });
 
@@ -143,7 +153,8 @@ describe("Function Tests", () => {
     await functionQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(mrEnclave),
-      verifierKeypair: quoteVerifierKeypair,
+      verifierSecuredSigner: quoteVerifierSigner,
+      verifier: attestationQuoteVerifierAccount.publicKey,
     });
 
     const finalQuoteState = await functionQuoteAccount.loadData();
@@ -277,7 +288,7 @@ describe("Function Tests", () => {
         {
           function: functionAccount.publicKey,
           fnSigner: trustedSigner.publicKey,
-          securedSigner: PublicKey.default, // TODO: update with correct account
+          securedSigner: quoteVerifierSigner.publicKey,
           verifierQuote: attestationQuoteVerifierAccount.publicKey,
           attestationQueue: attestationQueuePubkey,
           escrow: escrowPubkey,
@@ -307,7 +318,7 @@ describe("Function Tests", () => {
     const transactionLegacy = new sbv2.TransactionObject(
       ctx.payer.publicKey,
       [getIxn()],
-      [quoteVerifierKeypair, trustedSigner]
+      [quoteVerifierSigner, trustedSigner]
     ).toVersionedTxn(blockhash);
     const legacyByteLength = transactionLegacy.serialize().byteLength;
     console.log(`functionVerify (legacy): ${legacyByteLength}`);
@@ -319,7 +330,7 @@ describe("Function Tests", () => {
       instructions: [getIxn()], // note this is an array of instructions
     }).compileToV0Message([lookupTable]);
     const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
-    transactionV0.sign([quoteVerifierKeypair]);
+    transactionV0.sign([quoteVerifierSigner]);
     transactionV0.sign([trustedSigner]);
     transactionV0.sign([ctx.payer]);
 

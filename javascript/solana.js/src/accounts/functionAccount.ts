@@ -1,7 +1,11 @@
 import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import {
+  SB_ATTESTATION_PID,
+  SB_V2_PID,
+  SwitchboardProgram,
+} from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
@@ -565,15 +569,62 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     }
 
     const systemProgram = addresses[0]!;
+    if (!systemProgram.equals(anchor.web3.SystemProgram.programId)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const tokenProgram = addresses[1]!;
+    if (!tokenProgram.equals(anchor.utils.token.TOKEN_PROGRAM_ID)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const assocatedTokenProgram = addresses[2]!;
+    if (
+      !assocatedTokenProgram.equals(anchor.utils.token.ASSOCIATED_PROGRAM_ID)
+    ) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const sysVarRent = addresses[3]!;
+    if (!sysVarRent.equals(anchor.web3.SYSVAR_RENT_PUBKEY)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const sysVarRecentBlockhashes = addresses[4]!;
+    if (
+      !sysVarRecentBlockhashes.equals(
+        anchor.web3.SYSVAR_RECENT_BLOCKHASHES_PUBKEY
+      )
+    ) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const sysVarInstructions = addresses[5]!;
+    if (!sysVarInstructions.equals(anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const sysVarSlotHashes = addresses[6]!;
+    if (!sysVarSlotHashes.equals(anchor.web3.SYSVAR_SLOT_HASHES_PUBKEY)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const sysVarSlotHistory = addresses[7]!;
+    if (!sysVarSlotHistory.equals(anchor.web3.SYSVAR_SLOT_HISTORY_PUBKEY)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const switchboardProgram = addresses[8]!;
+    if (!switchboardProgram.equals(SB_V2_PID)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
     const attestationProgram = addresses[9]!;
+    if (!attestationProgram.equals(SB_ATTESTATION_PID)) {
+      throw new Error("AddressLookupMismatch");
+    }
+
+    // switchboard accounts, not worth the network calls
     const statePubkey = addresses[10]!;
     const attestationQueuePubkey = addresses[11]!;
     const functionPubkey = addresses[12]!;

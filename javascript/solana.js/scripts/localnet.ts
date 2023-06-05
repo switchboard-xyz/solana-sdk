@@ -83,6 +83,8 @@ async function main() {
 
   const isMainnet = process.argv.slice(2).includes("--mainnet");
 
+  const shouldBuild = process.argv.slice(2).includes("--build");
+
   try {
     killPort(8899);
     killPort(8900);
@@ -106,6 +108,11 @@ async function main() {
     rpcUrl = process.env.SOLANA_MAINNET_RPC_URL;
   } else if (!isMainnet && process.env.SOLANA_DEVNET_RPC_URL) {
     rpcUrl = process.env.SOLANA_DEVNET_RPC_URL;
+  }
+
+  if (shouldBuild && isDev) {
+    console.log(`rebuilding anchor programs ...`);
+    execSync(`anchor build`, { cwd: devSwitchboard });
   }
 
   if (isDev) {

@@ -221,7 +221,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         payer,
         {
           granter: this.publicKey,
-          grantee: authority,
+          grantee: quoteAccount.publicKey,
           authority: queueAuthority,
         },
         options
@@ -239,7 +239,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        node: authority,
+        node: quoteAccount.publicKey,
       });
       permissionInit.combine(permissionSet);
     }

@@ -25,6 +25,7 @@ describe("Attestation Oracle Tests", () => {
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   const quoteKeypair = Keypair.generate();
+  const quoteSigner = Keypair.generate();
   let attestationQuoteAccount: sbv2.QuoteAccount;
 
   const quoteVerifierMrEnclave = Array.from(
@@ -139,6 +140,12 @@ describe("Attestation Oracle Tests", () => {
       enable: true,
       queueAuthorityPubkey: ctx.program.walletPubkey,
     });
+
+    await attestationQuoteAccount.rotate({
+      securedSigner: quoteSigner,
+      registryKey: new Uint8Array(Array(64).fill(1)),
+    });
+
     const quoteState = await attestationQuoteAccount.loadData();
     const verificationStatus =
       sbv2.QuoteAccount.getVerificationStatus(quoteState);
@@ -148,7 +155,7 @@ describe("Attestation Oracle Tests", () => {
     );
 
     // join the queue so we can verify other quotes
-    await attestationQuoteAccount.heartbeat({ keypair: quoteKeypair });
+    await attestationQuoteAccount.heartbeat({ securedSigner: quoteSigner });
 
     const payer2 = Keypair.generate();
 
@@ -167,6 +174,7 @@ describe("Attestation Oracle Tests", () => {
     );
 
     const quoteKeypair2 = Keypair.generate();
+    const quoteSigner2 = Keypair.generate();
     const [attestationQuoteAccount2] =
       await attestationQueueAccount.createQuote({
         registryKey: new Uint8Array(Array(64).fill(1)),
@@ -176,11 +184,19 @@ describe("Attestation Oracle Tests", () => {
         authority: payer2.publicKey,
       });
 
+    await attestationQuoteAccount2.rotate({
+      securedSigner: quoteSigner2,
+      registryKey: new Uint8Array(Array(64).fill(1)),
+      authority: payer2,
+    });
+
     await attestationQuoteAccount2.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
-      verifierKeypair: quoteKeypair,
+      verifierSecuredSigner: quoteSigner,
+      verifier: attestationQuoteAccount.publicKey,
     });
+
     const quoteState2 = await attestationQuoteAccount2.loadData();
     const verificationStatus2 =
       sbv2.QuoteAccount.getVerificationStatus(quoteState2);
@@ -190,13 +206,15 @@ describe("Attestation Oracle Tests", () => {
     );
 
     // join the queue so we can verify the overrridden quote
-    await attestationQuoteAccount2.heartbeat({ keypair: quoteKeypair2 });
+    await attestationQuoteAccount2.heartbeat({ securedSigner: quoteSigner2 });
 
     await attestationQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(quoteVerifierMrEnclave),
-      verifierKeypair: quoteKeypair2,
+      verifierSecuredSigner: quoteSigner2,
+      verifier: attestationQuoteAccount2.publicKey,
     });
+
     const newQuoteState = await attestationQuoteAccount.loadData();
     const newVerificationStatus =
       sbv2.QuoteAccount.getVerificationStatus(newQuoteState);
@@ -222,7 +240,8 @@ describe("Attestation Oracle Tests", () => {
     await oracleQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
       mrEnclave: new Uint8Array(mrEnclave),
-      verifierKeypair: quoteKeypair,
+      verifierSecuredSigner: quoteSigner,
+      verifier: attestationQuoteAccount.publicKey,
     });
 
     const quoteData = await oracleQuoteAccount.loadData();

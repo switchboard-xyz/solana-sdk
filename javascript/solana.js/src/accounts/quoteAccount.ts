@@ -66,7 +66,7 @@ export interface QuoteHeartbeatSyncParams {
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
 export type QuoteHeartbeatParams = Partial<QuoteHeartbeatSyncParams> & {
-  keypair: Keypair;
+  securedSigner: Keypair;
 } & Partial<{
     quote: types.QuoteAccountData;
     queue: types.AttestationQueueAccountData;
@@ -86,9 +86,10 @@ export interface QuoteVerifyParams {
   mrEnclave: RawBuffer;
 
   /**
-   * Keypair of the verifier that has a valid MRENCLAVE quote
+   * Keypair of the secured signer generated in the verifiers secure enclave
    */
-  verifierKeypair: Keypair;
+  verifierSecuredSigner: Keypair;
+  verifier: PublicKey;
 }
 
 /**
@@ -250,6 +251,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     attestationQueue: PublicKey;
     permission: [AttestationPermissionAccount, number];
     queueAuthority: PublicKey;
+    securedSigner: PublicKey;
   }): TransactionInstruction {
     this.program.verifyAttestation();
 
@@ -259,7 +261,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       { params: params ?? {} },
       {
         quote: this.publicKey,
-        securedSigner: PublicKey.default, // TODO: update with correct account
+        securedSigner: params.securedSigner,
         attestationQueue: params.attestationQueue,
         queueAuthority: params.queueAuthority,
         gcNode: params.gcOracle,
@@ -299,12 +301,13 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         ),
       gcOracle: lastPubkey,
       attestationQueue: quote.attestationQueue,
+      securedSigner: params.securedSigner.publicKey,
     });
 
     const heartbeatTxn = new TransactionObject(
       this.program.walletPubkey,
       [heartbeatIxn],
-      [params.keypair],
+      [params.securedSigner],
       options
     );
 
@@ -379,7 +382,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     const attestationQueue = await attestationQueueAccount.loadData();
     const verifierIdx = attestationQueue.data
       .slice(0, attestationQueue.dataLen)
-      .findIndex((pubkey) => pubkey.equals(params.verifierKeypair.publicKey));
+      .findIndex((pubkey) => pubkey.equals(params.verifier));
     if (verifierIdx === -1) {
       throw new Error(`Verifier not found on the attestation queue`);
     }
@@ -395,16 +398,16 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       },
       {
         quote: this.publicKey,
-        quoteSigner: PublicKey.default, // TODO: update with correct account
-        securedSigner: PublicKey.default, // TODO: update with correct account
-        verifier: params.verifierKeypair.publicKey,
+        quoteSigner: quoteData.securedSigner,
+        securedSigner: params.verifierSecuredSigner.publicKey,
+        verifier: params.verifier,
         attestationQueue: quoteData.attestationQueue,
       }
     );
     return new TransactionObject(
       payer,
       [instruction],
-      [params.verifierKeypair],
+      [params.verifierSecuredSigner],
       options
     );
   }
