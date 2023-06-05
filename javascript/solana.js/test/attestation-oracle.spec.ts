@@ -173,7 +173,7 @@ describe("Attestation Oracle Tests", () => {
         keypair: quoteKeypair2,
         enable: true,
         queueAuthorityPubkey: ctx.program.walletPubkey,
-        owner: payer2.publicKey,
+        authority: payer2.publicKey,
       });
 
     await attestationQuoteAccount2.verify({

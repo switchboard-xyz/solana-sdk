@@ -9,39 +9,35 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteInitArgs {
-  params: types.QuoteInitParamsFields;
+export interface QuoteRotateArgs {
+  params: types.QuoteRotateParamsFields;
 }
 
-export interface QuoteInitAccounts {
+export interface QuoteRotateAccounts {
   quote: PublicKey;
-  attestationQueue: PublicKey;
-  queueAuthority: PublicKey;
   authority: PublicKey;
-  payer: PublicKey;
-  systemProgram: PublicKey;
+  securedSigner: PublicKey;
+  attestationQueue: PublicKey;
 }
 
-export const layout = borsh.struct([types.QuoteInitParams.layout("params")]);
+export const layout = borsh.struct([types.QuoteRotateParams.layout("params")]);
 
-export function quoteInit(
+export function quoteRotate(
   program: SwitchboardProgram,
-  args: QuoteInitArgs,
-  accounts: QuoteInitAccounts
+  args: QuoteRotateArgs,
+  accounts: QuoteRotateAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.quote, isSigner: true, isWritable: true },
+    { pubkey: accounts.quote, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: true, isWritable: false },
+    { pubkey: accounts.securedSigner, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
-    { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([124, 251, 28, 247, 136, 141, 198, 116]);
+  const identifier = Buffer.from([153, 94, 246, 7, 7, 124, 62, 7]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.QuoteInitParams.toEncodable(args.params),
+      params: types.QuoteRotateParams.toEncodable(args.params),
     },
     buffer
   );

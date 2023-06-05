@@ -15,6 +15,7 @@ export interface QuoteHeartbeatArgs {
 
 export interface QuoteHeartbeatAccounts {
   quote: PublicKey;
+  securedSigner: PublicKey;
   attestationQueue: PublicKey;
   queueAuthority: PublicKey;
   gcNode: PublicKey;
@@ -31,7 +32,8 @@ export function quoteHeartbeat(
   accounts: QuoteHeartbeatAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.quote, isSigner: true, isWritable: true },
+    { pubkey: accounts.quote, isSigner: false, isWritable: true },
+    { pubkey: accounts.securedSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
     { pubkey: accounts.queueAuthority, isSigner: false, isWritable: false },
     { pubkey: accounts.gcNode, isSigner: false, isWritable: true },

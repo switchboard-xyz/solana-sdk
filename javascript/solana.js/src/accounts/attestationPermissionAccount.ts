@@ -34,11 +34,11 @@ export interface AttestationPermissionSetParams {
    */
   permission: types.SwitchboardAttestationPermissionKind;
   /**
-   *  The authority with which to sign this transaction
+   *  The authority for the queue
    *
    *  @default payer
    */
-  authority?: Keypair;
+  queueAuthority?: Keypair;
 
   queue: PublicKey;
   node: PublicKey;
@@ -66,6 +66,8 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
       number
     ]
   > {
+    program.verifyAttestation();
+
     const [account, bump] = AttestationPermissionAccount.fromSeed(
       program,
       typeof authority === "string" ? new PublicKey(authority) : authority,
@@ -110,6 +112,8 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     params: AttestationPermissionAccountInitParams,
     options?: TransactionObjectOptions
   ): [AttestationPermissionAccount, TransactionObject] {
+    program.verifyAttestation();
+
     const authority = params.authority ?? payer;
 
     const [account] = AttestationPermissionAccount.fromSeed(
@@ -160,6 +164,8 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
    *  Retrieve and decode the {@linkcode types.AttestationPermissionAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationPermissionAccountData> {
+    this.program.verifyAttestation();
+
     const data = await types.AttestationPermissionAccountData.fetch(
       this.program,
       this.publicKey
@@ -179,6 +185,8 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     params: AttestationPermissionSetParams,
     options?: TransactionObjectOptions
   ): TransactionObject {
+    this.program.verifyAttestation();
+
     // const data = await this.loadData();
     return new TransactionObject(
       payer,
@@ -193,13 +201,15 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
           },
           {
             permission: this.publicKey,
-            authority: params.authority ? params.authority.publicKey : payer,
+            authority: params.queueAuthority
+              ? params.queueAuthority.publicKey
+              : payer,
             attestationQueue: params.queue,
             node: params.node,
           }
         ),
       ],
-      params.authority ? [params.authority] : [],
+      params.queueAuthority ? [params.queueAuthority] : [],
       options
     );
   }

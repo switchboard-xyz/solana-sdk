@@ -6,8 +6,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface QuoteAccountDataFields {
-  /** TODO: Add description */
-  delegatedSecuredSigner: PublicKey;
+  securedSigner: PublicKey;
   bump: number;
   /** TODO: Add description */
   quoteRegistry: Array<number>;
@@ -23,14 +22,13 @@ export interface QuoteAccountDataFields {
   isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   lastHeartbeat: BN;
-  owner: PublicKey;
+  authority: PublicKey;
   createdAt: BN;
   ebuf: Array<number>;
 }
 
 export interface QuoteAccountDataJSON {
-  /** TODO: Add description */
-  delegatedSecuredSigner: string;
+  securedSigner: string;
   bump: number;
   /** TODO: Add description */
   quoteRegistry: Array<number>;
@@ -46,14 +44,13 @@ export interface QuoteAccountDataJSON {
   isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   lastHeartbeat: string;
-  owner: string;
+  authority: string;
   createdAt: string;
   ebuf: Array<number>;
 }
 
 export class QuoteAccountData {
-  /** TODO: Add description */
-  readonly delegatedSecuredSigner: PublicKey;
+  readonly securedSigner: PublicKey;
   readonly bump: number;
   /** TODO: Add description */
   readonly quoteRegistry: Array<number>;
@@ -69,7 +66,7 @@ export class QuoteAccountData {
   readonly isOnQueue: boolean;
   /** The last time the quote heartbeated. */
   readonly lastHeartbeat: BN;
-  readonly owner: PublicKey;
+  readonly authority: PublicKey;
   readonly createdAt: BN;
   readonly ebuf: Array<number>;
 
@@ -78,7 +75,7 @@ export class QuoteAccountData {
   ]);
 
   static readonly layout = borsh.struct([
-    borsh.publicKey("delegatedSecuredSigner"),
+    borsh.publicKey("securedSigner"),
     borsh.u8("bump"),
     borsh.array(borsh.u8(), 32, "quoteRegistry"),
     borsh.array(borsh.u8(), 64, "registryKey"),
@@ -89,13 +86,13 @@ export class QuoteAccountData {
     borsh.i64("validUntil"),
     borsh.bool("isOnQueue"),
     borsh.i64("lastHeartbeat"),
-    borsh.publicKey("owner"),
+    borsh.publicKey("authority"),
     borsh.i64("createdAt"),
     borsh.array(borsh.u8(), 992, "ebuf"),
   ]);
 
   constructor(fields: QuoteAccountDataFields) {
-    this.delegatedSecuredSigner = fields.delegatedSecuredSigner;
+    this.securedSigner = fields.securedSigner;
     this.bump = fields.bump;
     this.quoteRegistry = fields.quoteRegistry;
     this.registryKey = fields.registryKey;
@@ -106,7 +103,7 @@ export class QuoteAccountData {
     this.validUntil = fields.validUntil;
     this.isOnQueue = fields.isOnQueue;
     this.lastHeartbeat = fields.lastHeartbeat;
-    this.owner = fields.owner;
+    this.authority = fields.authority;
     this.createdAt = fields.createdAt;
     this.ebuf = fields.ebuf;
   }
@@ -153,7 +150,7 @@ export class QuoteAccountData {
     const dec = QuoteAccountData.layout.decode(data.slice(8));
 
     return new QuoteAccountData({
-      delegatedSecuredSigner: dec.delegatedSecuredSigner,
+      securedSigner: dec.securedSigner,
       bump: dec.bump,
       quoteRegistry: dec.quoteRegistry,
       registryKey: dec.registryKey,
@@ -164,7 +161,7 @@ export class QuoteAccountData {
       validUntil: dec.validUntil,
       isOnQueue: dec.isOnQueue,
       lastHeartbeat: dec.lastHeartbeat,
-      owner: dec.owner,
+      authority: dec.authority,
       createdAt: dec.createdAt,
       ebuf: dec.ebuf,
     });
@@ -172,7 +169,7 @@ export class QuoteAccountData {
 
   toJSON(): QuoteAccountDataJSON {
     return {
-      delegatedSecuredSigner: this.delegatedSecuredSigner.toString(),
+      securedSigner: this.securedSigner.toString(),
       bump: this.bump,
       quoteRegistry: this.quoteRegistry,
       registryKey: this.registryKey,
@@ -183,7 +180,7 @@ export class QuoteAccountData {
       validUntil: this.validUntil.toString(),
       isOnQueue: this.isOnQueue,
       lastHeartbeat: this.lastHeartbeat.toString(),
-      owner: this.owner.toString(),
+      authority: this.authority.toString(),
       createdAt: this.createdAt.toString(),
       ebuf: this.ebuf,
     };
@@ -191,7 +188,7 @@ export class QuoteAccountData {
 
   static fromJSON(obj: QuoteAccountDataJSON): QuoteAccountData {
     return new QuoteAccountData({
-      delegatedSecuredSigner: new PublicKey(obj.delegatedSecuredSigner),
+      securedSigner: new PublicKey(obj.securedSigner),
       bump: obj.bump,
       quoteRegistry: obj.quoteRegistry,
       registryKey: obj.registryKey,
@@ -202,7 +199,7 @@ export class QuoteAccountData {
       validUntil: new BN(obj.validUntil),
       isOnQueue: obj.isOnQueue,
       lastHeartbeat: new BN(obj.lastHeartbeat),
-      owner: new PublicKey(obj.owner),
+      authority: new PublicKey(obj.authority),
       createdAt: new BN(obj.createdAt),
       ebuf: obj.ebuf,
     });

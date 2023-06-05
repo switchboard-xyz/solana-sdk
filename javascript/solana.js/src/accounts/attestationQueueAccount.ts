@@ -6,7 +6,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawMrEnclave } from "../types.js";
+import { RawBuffer } from "../types.js";
 import { parseMrEnclave } from "../utils.js";
 
 import { Account } from "./account.js";
@@ -74,14 +74,14 @@ export interface AttestationQueueAccountInitParams {
  *  Parameters for an {@linkcode types.queueAddMrEnclave} instruction.
  */
 export interface AttestationQueueAddMrEnclaveParams {
-  mrEnclave: RawMrEnclave;
+  mrEnclave: RawBuffer;
   authority?: Keypair;
 }
 /**
  *  Parameters for an {@linkcode types.queueRemoveMrEnclave} instruction.
  */
 export interface AttestationQueueRemoveMrEnclaveParams {
-  mrEnclave: RawMrEnclave;
+  mrEnclave: RawBuffer;
   authority?: Keypair;
 }
 
@@ -117,6 +117,8 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
    *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationQueueAccountData> {
+    this.program.verifyAttestation();
+
     const data = await types.AttestationQueueAccountData.fetch(
       this.program,
       this.publicKey
@@ -132,6 +134,8 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[AttestationQueueAccount, types.AttestationQueueAccountData]> {
+    program.verifyAttestation();
+
     const queueAccount = new AttestationQueueAccount(program, address);
     const state = await queueAccount.loadData();
     return [queueAccount, state];
@@ -143,6 +147,8 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAccountInitParams,
     options?: TransactionObjectOptions
   ): [AttestationQueueAccount, TransactionObject] {
+    program.verifyAttestation();
+
     const queueKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(queueKeypair);
 
@@ -191,7 +197,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: CreateQueueQuoteParams,
     options?: TransactionObjectOptions
   ): Promise<[QuoteAccount, TransactionObject]> {
-    const owner = params.owner ?? payer;
+    this.program.verifyAttestation();
+
+    const authority = params.authority ?? payer;
 
     const queueAuthority =
       params.queueAuthorityPubkey ?? (await this.loadData()).authority;
@@ -199,7 +207,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const [quoteAccount, quoteInit] = await QuoteAccount.createInstruction(
       this.program,
       payer,
-      { ...params, queueAccount: this, owner },
+      { ...params, queueAccount: this, authority },
       options
     );
 
@@ -213,7 +221,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         payer,
         {
           granter: this.publicKey,
-          grantee: owner,
+          grantee: authority,
           authority: queueAuthority,
         },
         options
@@ -231,7 +239,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        node: owner,
+        node: authority,
       });
       permissionInit.combine(permissionSet);
     }
@@ -271,6 +279,8 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAddMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueAddMrEnclave(
@@ -297,6 +307,8 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueRemoveMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueRemoveMrEnclave(

@@ -58,6 +58,11 @@ export type {
 } from "./QuoteInitParams.js";
 export { QuoteInitParams } from "./QuoteInitParams.js";
 export type {
+  QuoteRotateParamsFields,
+  QuoteRotateParamsJSON,
+} from "./QuoteRotateParams.js";
+export { QuoteRotateParams } from "./QuoteRotateParams.js";
+export type {
   QuoteVerifyParamsFields,
   QuoteVerifyParamsJSON,
 } from "./QuoteVerifyParams.js";

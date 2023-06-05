@@ -7,8 +7,8 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawMrEnclave } from "../types.js";
-import { parseMrEnclave } from "../utils.js";
+import { RawBuffer } from "../types.js";
+import { parseMrEnclave, parseRawBuffer } from "../utils.js";
 
 import {
   AttestationPermissionAccount,
@@ -49,8 +49,9 @@ export interface QuoteAccountInitParams {
    *
    *  @default payer
    */
-  owner?: PublicKey;
+  authority?: PublicKey;
 }
+
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
@@ -82,15 +83,25 @@ export interface QuoteVerifyParams {
   /**
    *  @TODO: Docs for mrEnclave
    */
-  mrEnclave: RawMrEnclave;
+  mrEnclave: RawBuffer;
 
   /**
    * Keypair of the verifier that has a valid MRENCLAVE quote
    */
   verifierKeypair: Keypair;
 }
+
 /**
- * @TODO: Documentation
+ *  Parameters for an {@linkcode types.quoteRotate} instruction.
+ */
+export interface QuoteRotateParams {
+  authority?: Keypair;
+  securedSigner: Keypair;
+  registryKey: string | Buffer | Uint8Array;
+}
+
+/**
+ * Account type representing a Switchboard Attestation quote.
  *
  * Data: {@linkcode types.QuoteAccountData}
  */
@@ -104,6 +115,8 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[QuoteAccount, types.QuoteAccountData]> {
+    program.verifyAttestation();
+
     const quoteAccount = new QuoteAccount(program, address);
     const state = await quoteAccount.loadData();
     return [quoteAccount, state];
@@ -127,12 +140,17 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     return [new QuoteAccount(program, publicKey), bump];
   }
 
+  /**
+   * Create a transaction object to initialize a quote account.
+   */
   public static async createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
     params: QuoteAccountInitParams,
     options?: TransactionObjectOptions
   ): Promise<[QuoteAccount, TransactionObject]> {
+    program.verifyAttestation();
+
     const quoteKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(quoteKeypair);
 
@@ -149,15 +167,30 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         quote: quoteKeypair.publicKey,
         attestationQueue: params.queueAccount.publicKey,
         queueAuthority: queueData.authority,
+        authority: params.authority ?? payer,
         payer,
         systemProgram: SystemProgram.programId,
-        owner: params.owner ?? payer,
       }
     );
     return [
       new QuoteAccount(program, quoteKeypair.publicKey),
       new TransactionObject(payer, [instruction], [quoteKeypair], options),
     ];
+  }
+
+  public static async create(
+    program: SwitchboardProgram,
+    params: QuoteAccountInitParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[QuoteAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createInstruction(
+      program,
+      program.walletPubkey,
+      params,
+      options
+    );
+    const txSignature = await program.signAndSend(txnObject, options);
+    return [account, txSignature];
   }
 
   public getPermissionAccount(
@@ -194,21 +227,6 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     );
   }
 
-  public static async create(
-    program: SwitchboardProgram,
-    params: QuoteAccountInitParams,
-    options?: SendTransactionObjectOptions
-  ): Promise<[QuoteAccount, TransactionSignature]> {
-    const [account, txnObject] = await this.createInstruction(
-      program,
-      program.walletPubkey,
-      params,
-      options
-    );
-    const txSignature = await program.signAndSend(txnObject, options);
-    return [account, txSignature];
-  }
-
   /**
    * Get the size of an {@linkcode QuoteAccount} on-chain.
    */
@@ -218,6 +236,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
    *  Retrieve and decode the {@linkcode types.QuoteAccountData} stored in this account.
    */
   public async loadData(): Promise<types.QuoteAccountData> {
+    this.program.verifyAttestation();
     const data = await types.QuoteAccountData.fetch(
       this.program,
       this.publicKey
@@ -232,12 +251,15 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     permission: [AttestationPermissionAccount, number];
     queueAuthority: PublicKey;
   }): TransactionInstruction {
+    this.program.verifyAttestation();
+
     const [permissionAccount, permissionBump] = params.permission;
     const instruction = types.quoteHeartbeat(
       this.program,
       { params: params ?? {} },
       {
         quote: this.publicKey,
+        securedSigner: PublicKey.default, // TODO: update with correct account
         attestationQueue: params.attestationQueue,
         queueAuthority: params.queueAuthority,
         gcNode: params.gcOracle,
@@ -273,7 +295,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         this.getPermissionAccount(
           quote.attestationQueue,
           queue.authority,
-          quote.owner
+          this.publicKey
         ),
       gcOracle: lastPubkey,
       attestationQueue: quote.attestationQueue,
@@ -290,11 +312,64 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     return txnSignature;
   }
 
+  public async rotateInstruction(
+    payer: PublicKey,
+    params: QuoteRotateParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
+    const registryKey = parseRawBuffer(params.registryKey, 64);
+
+    const quoteData = await this.loadData();
+
+    const authority = params.authority ? params.authority.publicKey : payer;
+    if (!quoteData.authority.equals(authority)) {
+      throw new errors.IncorrectAuthority(quoteData.authority, authority);
+    }
+
+    const rotateIxn = types.quoteRotate(
+      this.program,
+      {
+        params: { registryKey: [...registryKey].slice(0, 64) },
+      },
+      {
+        quote: this.publicKey,
+        authority: authority,
+        securedSigner: params.securedSigner.publicKey,
+        attestationQueue: quoteData.attestationQueue,
+      }
+    );
+
+    const rotateTxn: TransactionObject = new TransactionObject(
+      payer,
+      [rotateIxn],
+      params.authority
+        ? [params.authority, params.securedSigner]
+        : [params.securedSigner],
+      options
+    );
+    return rotateTxn;
+  }
+
+  public async rotate(
+    params: QuoteRotateParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.rotateInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
   public async verifyInstruction(
     payer: PublicKey,
     params: QuoteVerifyParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const quoteData = await this.loadData();
 
     const attestationQueueAccount = new AttestationQueueAccount(
@@ -320,6 +395,8 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       },
       {
         quote: this.publicKey,
+        quoteSigner: PublicKey.default, // TODO: update with correct account
+        securedSigner: PublicKey.default, // TODO: update with correct account
         verifier: params.verifierKeypair.publicKey,
         attestationQueue: quoteData.attestationQueue,
       }

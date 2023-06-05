@@ -44,6 +44,8 @@ export type {
 export { quoteHeartbeat } from "./quoteHeartbeat.js";
 export type { QuoteInitAccounts, QuoteInitArgs } from "./quoteInit.js";
 export { quoteInit } from "./quoteInit.js";
+export type { QuoteRotateAccounts, QuoteRotateArgs } from "./quoteRotate.js";
+export { quoteRotate } from "./quoteRotate.js";
 export type { QuoteVerifyAccounts, QuoteVerifyArgs } from "./quoteVerify.js";
 export { quoteVerify } from "./quoteVerify.js";
 export type { StateInitAccounts, StateInitArgs } from "./stateInit.js";

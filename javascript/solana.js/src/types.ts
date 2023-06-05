@@ -27,7 +27,7 @@ import {
 
 import { type OracleJob } from "@switchboard-xyz/common";
 
-export type RawMrEnclave = string | Buffer | Uint8Array | number[];
+export type RawBuffer = string | Buffer | Uint8Array | number[];
 
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;

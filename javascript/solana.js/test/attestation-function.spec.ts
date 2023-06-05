@@ -20,6 +20,7 @@ describe("Function Tests", () => {
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   let attestationQuoteVerifierAccount: sbv2.QuoteAccount;
   const quoteVerifierKeypair = Keypair.generate();
+  const quoteVerifierSigner = Keypair.generate();
 
   const quoteVerifierMrEnclave = Array.from(
     Buffer.from("This is the quote verifier MrEnclave")
@@ -61,6 +62,11 @@ describe("Function Tests", () => {
         enable: true,
         queueAuthorityPubkey: ctx.program.walletPubkey,
       });
+
+    await attestationQuoteVerifierAccount.rotate({
+      securedSigner: quoteVerifierSigner,
+      registryKey: new Uint8Array(Array(64).fill(1)),
+    });
 
     // join the queue so we can verify other quotes
     await attestationQuoteVerifierAccount.heartbeat({
@@ -258,6 +264,7 @@ describe("Function Tests", () => {
         {
           function: functionAccount.publicKey,
           fnSigner: trustedSigner.publicKey,
+          securedSigner: PublicKey.default, // TODO: update with correct account
           verifierQuote: attestationQuoteVerifierAccount.publicKey,
           attestationQueue: attestationQueuePubkey,
           escrow: escrowPubkey,

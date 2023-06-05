@@ -5,48 +5,32 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteInitParamsFields {
-  registryKey: Array<number>;
-}
+export interface QuoteInitParamsFields {}
 
-export interface QuoteInitParamsJSON {
-  registryKey: Array<number>;
-}
+export interface QuoteInitParamsJSON {}
 
 export class QuoteInitParams {
-  readonly registryKey: Array<number>;
-
-  constructor(fields: QuoteInitParamsFields) {
-    this.registryKey = fields.registryKey;
-  }
+  constructor(fields: QuoteInitParamsFields) {}
 
   static layout(property?: string) {
-    return borsh.struct([borsh.array(borsh.u8(), 64, "registryKey")], property);
+    return borsh.struct([], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QuoteInitParams({
-      registryKey: obj.registryKey,
-    });
+    return new QuoteInitParams({});
   }
 
   static toEncodable(fields: QuoteInitParamsFields) {
-    return {
-      registryKey: fields.registryKey,
-    };
+    return {};
   }
 
   toJSON(): QuoteInitParamsJSON {
-    return {
-      registryKey: this.registryKey,
-    };
+    return {};
   }
 
   static fromJSON(obj: QuoteInitParamsJSON): QuoteInitParams {
-    return new QuoteInitParams({
-      registryKey: obj.registryKey,
-    });
+    return new QuoteInitParams({});
   }
 
   toEncodable() {

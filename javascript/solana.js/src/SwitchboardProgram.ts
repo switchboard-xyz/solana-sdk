@@ -157,7 +157,7 @@ export class SwitchboardProgram {
   private readonly _program: Program;
 
   // The anchor program instance for Switchboard's attestation program.
-  private readonly _attestationProgram: Program;
+  private readonly _attestationProgram: Program | undefined;
 
   /** The Solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | "localnet";
@@ -186,7 +186,7 @@ export class SwitchboardProgram {
    */
   constructor(
     program: Program,
-    attestationProgram: Program,
+    attestationProgram: Program | undefined,
     cluster: Cluster | "localnet",
     mint: NativeMint
   ) {
@@ -300,11 +300,21 @@ export class SwitchboardProgram {
         connection,
         payerKeypair,
         attestationProgramId
-      ),
+      ).catch((err) => {
+        console.error(`Failed to load AttestationProgram`);
+        console.error(err);
+        return undefined;
+      }),
     ]);
     const mint = await NativeMint.load(program.provider as AnchorProvider);
     return new SwitchboardProgram(program, attestationProgram, cluster, mint);
   };
+
+  public verifyAttestation(): void {
+    if (this._attestationProgram === undefined) {
+      throw new Error(`Attestation Program is missing`);
+    }
+  }
 
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.

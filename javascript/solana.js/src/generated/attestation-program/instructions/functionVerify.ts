@@ -18,6 +18,7 @@ export interface FunctionVerifyAccounts {
   fnSigner: PublicKey;
   fnQuote: PublicKey;
   verifierQuote: PublicKey;
+  securedSigner: PublicKey;
   attestationQueue: PublicKey;
   escrow: PublicKey;
   receiver: PublicKey;
@@ -42,7 +43,8 @@ export function functionVerify(
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.fnSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
-    { pubkey: accounts.verifierQuote, isSigner: true, isWritable: false },
+    { pubkey: accounts.verifierQuote, isSigner: false, isWritable: false },
+    { pubkey: accounts.securedSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },

@@ -15,7 +15,9 @@ export interface QuoteVerifyArgs {
 
 export interface QuoteVerifyAccounts {
   quote: PublicKey;
+  quoteSigner: PublicKey;
   verifier: PublicKey;
+  securedSigner: PublicKey;
   attestationQueue: PublicKey;
 }
 
@@ -28,7 +30,9 @@ export function quoteVerify(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
-    { pubkey: accounts.verifier, isSigner: true, isWritable: false },
+    { pubkey: accounts.quoteSigner, isSigner: false, isWritable: false },
+    { pubkey: accounts.verifier, isSigner: false, isWritable: false },
+    { pubkey: accounts.securedSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([158, 203, 69, 10, 212, 218, 45, 184]);

@@ -49,7 +49,7 @@
           "isSigner": false
         },
         {
-          "name": "owner",
+          "name": "authority",
           "isMut": false,
           "isSigner": false
         },
@@ -74,6 +74,39 @@
       ]
     },
     {
+      "name": "quoteRotate",
+      "accounts": [
+        {
+          "name": "quote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "securedSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "QuoteRotateParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "quoteVerify",
       "accounts": [
         {
@@ -82,7 +115,17 @@
           "isSigner": false
         },
         {
+          "name": "quoteSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "verifier",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "securedSigner",
           "isMut": false,
           "isSigner": true
         },
@@ -107,6 +150,11 @@
         {
           "name": "quote",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "securedSigner",
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -303,9 +351,14 @@
           "isSigner": true
         },
         {
-          "name": "authority",
-          "isMut": false,
+          "name": "addressLookupTable",
+          "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
         },
         {
           "name": "quote",
@@ -356,6 +409,11 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -387,6 +445,11 @@
         },
         {
           "name": "verifierQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "securedSigner",
           "isMut": false,
           "isSigner": true
         },
@@ -673,11 +736,15 @@
             "type": "bool"
           },
           {
+            "name": "addressLookupTable",
+            "type": "publicKey"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                1023
+                991
               ]
             }
           }
@@ -690,10 +757,7 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "delegatedSecuredSigner",
-            "docs": [
-              "TODO: Add description"
-            ],
+            "name": "securedSigner",
             "type": "publicKey"
           },
           {
@@ -767,7 +831,7 @@
             "type": "i64"
           },
           {
-            "name": "owner",
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -966,6 +1030,10 @@
                 32
               ]
             }
+          },
+          {
+            "name": "recentSlot",
+            "type": "u64"
           }
         ]
       }
@@ -1109,6 +1177,13 @@
     },
     {
       "name": "QuoteInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "QuoteRotateParams",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1396,6 +1471,11 @@
     {
       "code": 6021,
       "name": "InvalidResponder",
+      "msg": ""
+    },
+    {
+      "code": 6022,
+      "name": "InvalidAddressLookupAddress",
       "msg": ""
     }
   ]

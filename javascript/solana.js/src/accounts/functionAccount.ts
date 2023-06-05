@@ -30,7 +30,6 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN, toUtf8 } from "@switchboard-xyz/common";
-import { isValidCron } from "cron-validator";
 
 /**
  *  Parameters for initializing an {@linkcode FunctionAccount}
@@ -59,6 +58,7 @@ export interface FunctionAccountInitParams {
    */
   authority?: Keypair;
 }
+
 /**
  *  Parameters for an {@linkcode types.functionFund} instruction.
  */
@@ -76,20 +76,24 @@ export interface FunctionFundParams {
    */
   funderAuthority?: Keypair;
 }
+
 interface FunctionWithdrawBaseParams {
   amount: number | "all";
   unwrap: boolean;
 }
+
 export interface FunctionWithdrawUnwrapParams
   extends FunctionWithdrawBaseParams {
   unwrap: true;
 }
+
 export interface FunctionWithdrawWalletParams
   extends FunctionWithdrawBaseParams {
   unwrap: false;
   withdrawWallet: PublicKey;
   withdrawAuthority?: Keypair;
 }
+
 /**
  *  Parameters for an {@linkcode types.functionWithdraw} instruction.
  */
@@ -99,6 +103,7 @@ export type FunctionWithdrawParams =
 /**
  *  Parameters for an {@linkcode types.functionVerify} instruction.
  */
+
 export interface FunctionVerifyParams {
   observedTime: anchor.BN;
   nextAllowedTimestamp: anchor.BN;
@@ -107,6 +112,7 @@ export interface FunctionVerifyParams {
   verifier: QuoteAccount;
   fnSigner: PublicKey;
 }
+
 /**
  * Account type representing a Switchboard Function.
  *
@@ -150,6 +156,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[FunctionAccount, types.FunctionAccountData]> {
+    program.verifyAttestation();
+
     const functionAccount = new FunctionAccount(program, address);
     const state = await functionAccount.loadData();
     return [functionAccount, state];
@@ -161,6 +169,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionAccountInitParams,
     options?: TransactionObjectOptions
   ): Promise<[FunctionAccount, TransactionObject]> {
+    program.verifyAttestation();
+
     const functionKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(functionKeypair);
 
@@ -185,8 +195,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       [authority.toBuffer(), recentSlot.toBuffer("le", 8)],
       addressLookupProgram
     );
-
-    console.log(`addressLookupTable: ${addressLookupTable.toBase58()}`);
 
     // get PDA accounts
     const functionAccount = new FunctionAccount(
@@ -224,7 +232,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         attestationQueue: attestationQueueAccount.publicKey,
         permission: permissionAccount.publicKey,
         escrow,
-        state: program.attestationProgramState.publicKey, // @TODO: find state account pubkey
+        state: program.attestationProgramState.publicKey,
         mint: program.mint.address,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -286,6 +294,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const fundTokenAmountBN = this.program.mint.toTokenAmountBN(
       params.fundAmount
     );
@@ -332,6 +342,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionWithdrawParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const functionData = await this.loadData();
     const [queueAccount, queueData] = await AttestationQueueAccount.load(
       this.program,
@@ -385,7 +397,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
             escrow: this.getEscrow(),
             authority: payer,
             receiver: ephemeralWallet.publicKey,
-            state: this.program.attestationProgramState.publicKey, // @TODO: find state account pubkey
+            state: this.program.attestationProgramState.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
           }
         ),
@@ -426,7 +438,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
                 "withdrawWallet" in params && params.withdrawWallet
                   ? params.withdrawWallet
                   : this.program.mint.getAssociatedAddress(payer),
-              state: this.program.attestationProgramState.publicKey, // @TODO: find state account pubkey
+              state: this.program.attestationProgramState.publicKey,
               tokenProgram: TOKEN_PROGRAM_ID,
             }
           ),
@@ -473,6 +485,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionVerifyParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
     const functionData = await this.loadData();
     const attestationQueueAccount = new AttestationQueueAccount(
       this.program,
@@ -495,9 +509,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     )[0];
 
     const quoteVerifier = await params.verifier.loadData();
-    if (!quoteVerifier.owner.equals(payer)) {
+    if (!quoteVerifier.authority.equals(payer)) {
       throw new Error(
-        `The verifier owner must be the payer of this transaction, expected ${quoteVerifier.owner}, received ${payer}`
+        `The verifier owner must be the payer of this transaction, expected ${quoteVerifier.authority}, received ${payer}`
       );
     }
 
@@ -527,6 +541,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         tokenProgram: TOKEN_PROGRAM_ID,
         payer,
         systemProgram: SystemProgram.programId,
+        securedSigner: PublicKey.default, // TODO: update with correct account
       }
     );
     return new TransactionObject(payer, [instruction], [], options);
