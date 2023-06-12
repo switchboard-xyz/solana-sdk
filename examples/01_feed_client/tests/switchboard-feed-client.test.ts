@@ -15,4 +15,6 @@ describe("switchboard-feed-client test", () => {
   before(async () => {});
 
   it("Reads a Switchboard data feed", async () => {});
+
+  it("Reads a Switchboard history buffer", async () => {});
 });

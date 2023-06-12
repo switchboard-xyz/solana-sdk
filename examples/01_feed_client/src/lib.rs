@@ -18,6 +18,11 @@ pub mod switchboard_feed_client {
     pub fn read_feed(ctx: Context<ReadFeed>, params: ReadFeedParams) -> Result<()> {
         ReadFeed::actuate(&ctx, &params)
     }
+
+    #[access_control(ctx.accounts.validate(&ctx, &params))]
+    pub fn read_history(ctx: Context<ReadHistory>, params: ReadHistoryParams) -> Result<()> {
+        ReadHistory::actuate(&ctx, &params)
+    }
 }
 
 #[error_code]
