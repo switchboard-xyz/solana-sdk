@@ -1,0 +1,24 @@
+[package]
+name = "switchboard-basic-function"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "switchboard_basic_function"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+switchboard-solana = { path = "../../rust/switchboard-solana" }
+# switchboard-v2 = { version = "^0.1.23" }
+anchor-lang = "^0.26.0"
+anchor-spl = "^0.26.0"
+solana-program = "~1.14.0"
+bytemuck = "1.13.1"
