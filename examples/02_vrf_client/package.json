@@ -1,15 +1,16 @@
 {
-  "name": "switchboard-feed-client",
+  "name": "switchboard-vrf-client",
   "version": "1.0.0",
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/sbv2-solana",
-    "directory": "examples/01_switchboard_feed_client"
+    "directory": "examples/02_vrf_client"
   },
   "scripts": {
     "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
-    "build": "node ../build.js anchor-vrf-parser 4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p",
+    "build:old": "node ../build.js anchor-vrf-parser 4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN",
+    "build": "anchor build",
     "test": "npm run localnet && npm run network:create && npm run network:start & sleep 60 && anchor test --skip-local-validator",
     "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
   },
@@ -39,7 +40,6 @@
     "prettier": "^2.4.1",
     "prettier-plugin-organize-imports": "^2.3.4",
     "shx": "^0.3.4",
-    "switchboard-solana": "workspace:*",
     "ts-mocha": "^9.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.3"
