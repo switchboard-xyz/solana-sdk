@@ -1,0 +1,8 @@
+{
+  "name": "switchboard-solana",
+  "scripts": {
+    "cargo:build": "cargo build -p switchboard-solana",
+    "lint": "cargo fmt -p switchboard-solana",
+    "test": "cargo test -p switchboard-solana"
+  }
+}

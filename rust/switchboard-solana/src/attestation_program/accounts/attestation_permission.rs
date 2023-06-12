@@ -1,12 +1,19 @@
 use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner};
+use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
 use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
+#[derive(Copy, Clone, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+pub enum SwitchboardAttestationPermission {
+    PermitNodeheartbeat = 1 << 0,
+    PermitQueueUsage = 1 << 1,
+}
+
 #[zero_copy]
 #[repr(packed)]
+#[derive(Debug)]
 pub struct AttestationPermissionAccountData {
     pub authority: Pubkey,
     pub permissions: u32,
@@ -17,16 +24,20 @@ pub struct AttestationPermissionAccountData {
     pub _ebuf: [u8; 256],
 }
 
+unsafe impl Pod for AttestationPermissionAccountData {}
+unsafe impl Zeroable for AttestationPermissionAccountData {}
+
 impl Discriminator for AttestationPermissionAccountData {
     const DISCRIMINATOR: [u8; 8] = [63, 83, 122, 184, 22, 35, 31, 70];
 }
+
 impl Owner for AttestationPermissionAccountData {
     fn owner() -> Pubkey {
         SWITCHBOARD_ATTESTATION_PROGRAM_ID
     }
 }
-unsafe impl Pod for AttestationPermissionAccountData {}
-unsafe impl Zeroable for AttestationPermissionAccountData {}
+
+impl ZeroCopy for AttestationPermissionAccountData {}
 
 impl AttestationPermissionAccountData {
     /// Returns the deserialized Switchboard AttestationPermission account
@@ -91,4 +102,19 @@ impl AttestationPermissionAccountData {
             &data[8..std::mem::size_of::<AttestationPermissionAccountData>() + 8],
         ))
     }
+
+    pub fn has(&self, p: SwitchboardAttestationPermission) -> bool {
+        self.permissions & p as u32 != 0
+    }
+
+    #[cfg(feature = "client")]
+    pub async fn fetch(
+        client: &anchor_client::Client<
+            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
+        >,
+        pubkey: Pubkey,
+    ) -> std::result::Result<Self, switchboard_common::Error> {
+        crate::client::load_account(client, pubkey).await
+    }
 }
+ 

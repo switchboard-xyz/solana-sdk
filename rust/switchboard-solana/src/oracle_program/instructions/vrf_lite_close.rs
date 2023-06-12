@@ -1,22 +1,24 @@
 use crate::*;
+use anchor_lang::solana_program::entrypoint::ProgramResult;
+use anchor_lang::solana_program::instruction::Instruction;
+use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::Discriminator;
 use anchor_spl::token::TokenAccount;
-use solana_program::entrypoint::ProgramResult;
-use solana_program::instruction::Instruction;
-use solana_program::program::{invoke, invoke_signed};
 
 #[derive(Accounts)]
-#[instruction(params: VrfCloseParams)] // rpc parameters hint
-pub struct VrfClose<'info> {
+#[instruction(params: VrfLiteCloseParams)] // rpc parameters hint
+pub struct VrfLiteClose<'info> {
     #[account(signer)]
     pub authority: AccountInfo<'info>,
     #[account(mut)]
-    pub vrf: AccountInfo<'info>,
+    pub vrf_lite: AccountInfo<'info>,
     /// CHECK:
     pub permission: AccountInfo<'info>,
     #[account(mut)]
     pub queue: AccountInfo<'info>,
     pub queue_authority: AccountInfo<'info>,
+
+    // #[account(seeds = [b"STATE"], bump = params.state_bump)]
     /// CHECK:
     pub program_state: AccountInfo<'info>,
 
@@ -27,34 +29,22 @@ pub struct VrfClose<'info> {
     #[account(mut, constraint = escrow.mint == escrow_dest.mint )]
     pub escrow_dest: Account<'info, TokenAccount>,
 
-    // #[account(seeds = [b"STATE"], bump = params.state_bump)]
     pub token_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct VrfCloseParams {
-    pub state_bump: u8,
-    pub permission_bump: u8,
+pub struct VrfLiteCloseParams {}
+
+impl Discriminator for VrfLiteClose<'_> {
+    const DISCRIMINATOR: [u8; 8] = [200, 82, 160, 32, 59, 80, 50, 137];
 }
 
-impl Discriminator for VrfClose<'_> {
-    const DISCRIMINATOR: [u8; 8] = [97, 172, 124, 16, 175, 10, 246, 147];
-}
-
-impl<'info> VrfClose<'info> {
-    pub fn get_instruction(
-        &self,
-        program_id: Pubkey,
-        state_bump: u8,
-        permission_bump: u8,
-    ) -> anchor_lang::Result<Instruction> {
+impl<'info> VrfLiteClose<'info> {
+    pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
-        let mut data: Vec<u8> = VrfClose::discriminator().try_to_vec()?;
-        let params = VrfCloseParams {
-            state_bump,
-            permission_bump,
-        };
+        let mut data: Vec<u8> = VrfLiteClose::discriminator().try_to_vec()?;
+        let params = VrfLiteCloseParams {};
         let mut param_vec: Vec<u8> = params.try_to_vec()?;
         data.append(&mut param_vec);
 
@@ -62,13 +52,8 @@ impl<'info> VrfClose<'info> {
         Ok(instruction)
     }
 
-    pub fn invoke(
-        &self,
-        program: AccountInfo<'info>,
-        state_bump: u8,
-        permission_bump: u8,
-    ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, state_bump, permission_bump)?;
+    pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
+        let instruction = self.get_instruction(*program.key)?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
@@ -77,11 +62,9 @@ impl<'info> VrfClose<'info> {
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
-        state_bump: u8,
-        permission_bump: u8,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, state_bump, permission_bump)?;
+        let instruction = self.get_instruction(*program.key)?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
@@ -90,7 +73,7 @@ impl<'info> VrfClose<'info> {
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
         vec![
             self.authority.clone(),
-            self.vrf.clone(),
+            self.vrf_lite.clone(),
             self.permission.clone(),
             self.queue.clone(),
             self.queue_authority.clone(),
@@ -111,9 +94,9 @@ impl<'info> VrfClose<'info> {
                 is_writable: self.authority.is_writable,
             },
             AccountMeta {
-                pubkey: self.vrf.key.clone(),
-                is_signer: self.vrf.is_signer,
-                is_writable: self.vrf.is_writable,
+                pubkey: self.vrf_lite.key.clone(),
+                is_signer: self.vrf_lite.is_signer,
+                is_writable: self.vrf_lite.is_writable,
             },
             AccountMeta {
                 pubkey: self.permission.key.clone(),

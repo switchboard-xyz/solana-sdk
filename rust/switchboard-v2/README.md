@@ -1,3 +1,5 @@
+6/12/2023 - Deprecated in favor of the `switchboard-solana` crate.
+
 <div align="center">
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)

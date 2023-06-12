@@ -1,9 +1,9 @@
 use crate::*;
+use anchor_lang::solana_program::entrypoint::ProgramResult;
+use anchor_lang::solana_program::instruction::Instruction;
+use anchor_lang::solana_program::program::{invoke, invoke_signed};
 use anchor_lang::Discriminator;
 use anchor_spl::token::TokenAccount;
-use solana_program::entrypoint::ProgramResult;
-use solana_program::instruction::Instruction;
-use solana_program::program::{invoke, invoke_signed};
 
 #[derive(Accounts)]
 #[instruction(params: VrfRequestRandomnessParams)] // rpc parameters hint

@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner};
+use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -7,6 +7,7 @@ use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
 #[zero_copy]
 #[repr(packed)]
+#[derive(Debug)]
 pub struct AttestationQueueAccountData {
     // Authority controls adding/removing allowed enclave measurements
     pub authority: Pubkey,
@@ -30,16 +31,20 @@ pub struct AttestationQueueAccountData {
     pub _ebuf: [u8; 1024],
 }
 
+unsafe impl Pod for AttestationQueueAccountData {}
+unsafe impl Zeroable for AttestationQueueAccountData {}
+
 impl Discriminator for AttestationQueueAccountData {
     const DISCRIMINATOR: [u8; 8] = [192, 53, 130, 67, 234, 207, 39, 171];
 }
+
 impl Owner for AttestationQueueAccountData {
     fn owner() -> Pubkey {
         SWITCHBOARD_ATTESTATION_PROGRAM_ID
     }
 }
-unsafe impl Pod for AttestationQueueAccountData {}
-unsafe impl Zeroable for AttestationQueueAccountData {}
+
+impl ZeroCopy for AttestationQueueAccountData {}
 
 impl AttestationQueueAccountData {
     /// Returns the deserialized Switchboard AttestationQueue account
@@ -101,5 +106,21 @@ impl AttestationQueueAccountData {
         Ok(bytemuck::from_bytes(
             &data[8..std::mem::size_of::<AttestationQueueAccountData>() + 8],
         ))
+    }
+
+    pub fn has_mr_enclave(&self, mr_enclave: &[u8]) -> bool {
+        self.mr_enclaves[..self.mr_enclaves_len as usize]
+            .iter()
+            .any(|x| x.to_vec() == mr_enclave.to_vec())
+    }
+
+    #[cfg(feature = "client")]
+    pub async fn fetch(
+        client: &anchor_client::Client<
+            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
+        >,
+        pubkey: Pubkey,
+    ) -> std::result::Result<Self, switchboard_common::Error> {
+        crate::client::load_account(client, pubkey).await
     }
 }

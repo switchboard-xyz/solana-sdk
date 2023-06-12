@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner};
+use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -17,12 +17,9 @@ pub enum VerificationStatus {
 
 #[zero_copy]
 #[repr(packed)]
+#[derive(Debug)]
 pub struct QuoteAccountData {
-    // If this key is not Pubkey::default, then this is the secured
-    // signing key rather than the account key itself
-    // Set for functions only
-    /// TODO: Add description
-    pub delegated_secured_signer: Pubkey,
+    pub secured_signer: Pubkey,
     pub bump: u8,
     // Set except for function quotes
     /// TODO: Add description
@@ -42,22 +39,25 @@ pub struct QuoteAccountData {
     pub is_on_queue: bool,
     /// The last time the quote heartbeated.
     pub last_heartbeat: i64,
-    pub owner: Pubkey,
+    pub authority: Pubkey,
     //
     pub created_at: i64,
     pub _ebuf: [u8; 992],
 }
 
+unsafe impl Pod for QuoteAccountData {}
+unsafe impl Zeroable for QuoteAccountData {}
+
 impl Discriminator for QuoteAccountData {
     const DISCRIMINATOR: [u8; 8] = [205, 205, 167, 232, 0, 74, 44, 160];
 }
+
 impl Owner for QuoteAccountData {
     fn owner() -> Pubkey {
         SWITCHBOARD_ATTESTATION_PROGRAM_ID
     }
 }
-unsafe impl Pod for QuoteAccountData {}
-unsafe impl Zeroable for QuoteAccountData {}
+impl ZeroCopy for QuoteAccountData {}
 
 impl QuoteAccountData {
     /// Returns the deserialized Switchboard Quote account
@@ -121,13 +121,38 @@ impl QuoteAccountData {
         ))
     }
 
-    pub fn get_pda_pubkey(&self, function_pubkey: &Pubkey) -> anchor_lang::Result<Pubkey> {
-        let pda_key = Pubkey::create_program_address(
-            &[QUOTE_SEED, function_pubkey.as_ref(), &[self.bump]],
+    pub fn get_pda_pubkey(function_pubkey: &Pubkey) -> anchor_lang::Result<Pubkey> {
+        let (pda_key, _bump) = Pubkey::find_program_address(
+            &[QUOTE_SEED, function_pubkey.as_ref()],
             &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        )
-        .map_err(|_| SwitchboardError::PdaDerivationError)?;
+        );
 
         Ok(pda_key)
+    }
+
+    pub fn is_valid(&self, clock: &Clock) -> bool {
+        if self.verification_status == VerificationStatus::VerificationOverride as u8 {
+            return true;
+        }
+        if self.verification_status == VerificationStatus::VerificationPending as u8 {
+            return false;
+        }
+        if self.verification_status == VerificationStatus::VerificationFailure as u8 {
+            return false;
+        }
+        if self.valid_until < clock.unix_timestamp {
+            return false;
+        }
+        true
+    }
+
+    #[cfg(feature = "client")]
+    pub async fn fetch(
+        client: &anchor_client::Client<
+            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
+        >,
+        pubkey: Pubkey,
+    ) -> std::result::Result<Self, switchboard_common::Error> {
+        crate::client::load_account(client, pubkey).await
     }
 }

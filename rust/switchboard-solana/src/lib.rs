@@ -1,13 +1,23 @@
 #![allow(clippy::result_large_err)]
 
 use anchor_lang::prelude::*;
-use solana_program::pubkey;
+use anchor_lang::solana_program::pubkey;
 
-pub mod accounts;
-pub use accounts::*;
+pub mod oracle_program;
+pub use oracle_program::*;
 
-pub mod instructions;
-pub use instructions::*;
+pub mod attestation_program;
+pub use attestation_program::*;
+
+#[cfg(feature = "client")]
+pub mod client;
+#[cfg(feature = "client")]
+pub use client::*;
+
+#[cfg(feature = "client")]
+pub mod sgx;
+#[cfg(feature = "client")]
+pub use sgx::*;
 
 /// Seed used to derive the SbState PDA.
 pub const STATE_SEED: &[u8] = b"STATE";
@@ -34,9 +44,12 @@ pub const FUNCTION_SEED: &[u8] = b"FunctionAccountData";
 pub const QUOTE_SEED: &[u8] = b"QuoteAccountData";
 
 /// Program id for the Switchboard oracle program
-pub const SWITCHBOARD_PROGRAM_ID: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
+/// SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+pub const SWITCHBOARD_PROGRAM_ID: anchor_lang::solana_program::pubkey::Pubkey =
+    pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
 
 /// Program id for the Switchboard oracle program
+/// 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7
 pub const SWITCHBOARD_ATTESTATION_PROGRAM_ID: Pubkey =
     pubkey!("2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7");
 

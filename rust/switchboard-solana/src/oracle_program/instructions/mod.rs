@@ -1,4 +1,3 @@
-pub mod function_verify;
 pub mod permission_set;
 pub mod vrf_close;
 pub mod vrf_lite_close;
@@ -8,7 +7,6 @@ pub mod vrf_pool_request_randomness;
 pub mod vrf_request_randomness;
 pub mod vrf_set_callback;
 
-pub use function_verify::*;
 pub use permission_set::*;
 pub use vrf_close::*;
 pub use vrf_lite_close::*;

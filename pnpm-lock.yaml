@@ -515,6 +515,10 @@ importers:
         specifier: ^4.7
         version: 4.9.3
 
+  rust/switchboard-solana: {}
+
+  rust/switchboard-v2: {}
+
 packages:
 
   /@babel/code-frame@7.12.11:
