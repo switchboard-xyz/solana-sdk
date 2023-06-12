@@ -1,11 +1,11 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import {
   PermitNone,
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from "../generated/types/SwitchboardPermission.js";
+} from "../generated/oracle-program/types/SwitchboardPermission.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,

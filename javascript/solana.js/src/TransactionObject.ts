@@ -1,4 +1,5 @@
-import { fromTxError } from "./generated/index.js";
+import * as attestationTypes from "./generated/attestation-program/index.js";
+import { fromTxError } from "./generated/oracle-program/errors/index.js";
 import { isBrowser } from "./browser.js";
 import * as errors from "./errors.js";
 import {
@@ -628,11 +629,22 @@ export class TransactionObject implements ITransactionObject {
       });
     } catch (error) {
       const err = fromTxError(error);
-      if (err === null) {
-        throw error;
+      if (err) {
+        if (err.logs) {
+          console.error(err.logs);
+        }
+        throw err;
       }
 
-      throw err;
+      const attestationErr = attestationTypes.fromAttestationTxError(error);
+      if (attestationErr) {
+        if (attestationErr.logs) {
+          console.error(attestationErr.logs);
+        }
+        throw attestationErr;
+      }
+
+      throw error;
     }
   }
 }

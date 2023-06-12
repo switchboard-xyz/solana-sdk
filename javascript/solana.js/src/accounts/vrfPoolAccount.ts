@@ -1,6 +1,6 @@
 import { VRF_POOL_REQUEST_AMOUNT } from "../const.js";
 import { AccountNotFoundError, InsufficientFundsError } from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import { VrfPoolRequestEvent } from "../SwitchboardEvents.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";

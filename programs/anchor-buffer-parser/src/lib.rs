@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
-pub use switchboard_v2::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
+pub use switchboard_solana::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
 
 declare_id!("96punQGZDShZGkzsBa3SsfTxfUnwu4XGpzXbhF7NTgcP");
 

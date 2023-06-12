@@ -1,6 +1,6 @@
 import * as errors from "../errors.js";
-import { bufferRelayerSaveResult } from "../generated/index.js";
-import * as types from "../generated/index.js";
+import { bufferRelayerSaveResult } from "../generated/oracle-program/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,

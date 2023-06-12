@@ -1,10 +1,10 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import {
   PermitOracleHeartbeat,
   PermitOracleQueueUsage,
   PermitVrfRequests,
-} from "../generated/types/SwitchboardPermission.js";
+} from "../generated/oracle-program/types/SwitchboardPermission.js";
 import { SolanaClock } from "../SolanaClock.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
@@ -318,12 +318,21 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public async createOracleInstructions(
     /** The publicKey of the account that will pay for the new accounts. Will also be used as the account authority if no other authority is provided. */
     payer: PublicKey,
-    params: CreateQueueOracleParams,
+    params: CreateQueueOracleParams & { teeOracle?: boolean },
     options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
     const queueAuthorityPubkey = params.queueAuthority
       ? params.queueAuthority.publicKey
       : params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+
+    if (
+      params.teeOracle &&
+      (!params.authority || !(params.authority instanceof Keypair))
+    ) {
+      throw new Error(
+        `Need to provide authority keypair when creating a teeOracle`
+      );
+    }
 
     const [oracleAccount, createOracleTxnObject] =
       await OracleAccount.createInstructions(
@@ -336,13 +345,17 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         options
       );
 
+    const permissionGrantee = params.teeOracle
+      ? params.authority.publicKey
+      : oracleAccount.publicKey;
+
     const [permissionAccount, createPermissionTxnObject] =
       PermissionAccount.createInstruction(
         this.program,
         payer,
         {
           granter: this.publicKey,
-          grantee: oracleAccount.publicKey,
+          grantee: permissionGrantee,
           authority: queueAuthorityPubkey,
         },
         options
@@ -393,7 +406,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
    * ```
    */
   public async createOracle(
-    params: CreateQueueOracleParams,
+    params: CreateQueueOracleParams & { teeOracle?: boolean },
     options?: SendTransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionSignature>]> {
     const signers: Keypair[] = [];
@@ -1275,6 +1288,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                 params.unpermissionedFeedsEnabled ?? null,
               unpermissionedVrfEnabled: params.unpermissionedVrfEnabled ?? null,
               enableBufferRelayers: params.enableBufferRelayers ?? null,
+              enableTeeOnly: params.enableTeeOnly ?? null,
               slashingEnabled: params.slashingEnabled ?? null,
               reward: reward,
               minStake: minStake,
@@ -1287,7 +1301,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
                   ? new BN(params.consecutiveOracleFailureLimit)
                   : null,
               varianceToleranceMultiplier: multiplier,
-              enableTeeOnly: params.enableTeeOnly ?? false,
             },
           },
           {
@@ -1418,6 +1431,10 @@ export interface QueueInitParams {
    */
   enableBufferRelayers?: boolean;
   /**
+   *  Only allow TEE oracles to heartbeat on this queue.
+   */
+  enableTeeOnly?: boolean;
+  /**
    *  The account to delegate authority to for creating permissions targeted at the queue.
    *
    *  Defaults to the payer.
@@ -1426,11 +1443,13 @@ export interface QueueInitParams {
 
   keypair?: Keypair;
   dataBufferKeypair?: Keypair;
-  enableTeeOnly?: boolean;
 }
 
 export interface QueueSetConfigParams {
-  /** Alternative keypair that is the queue authority and is permitted to make account changes. Defaults to the payer if not provided. */
+  /**
+   *  Alternative keypair that is the queue authority and is permitted to make account changes.
+   *  Defaults to the payer if not provided.
+   */
   authority?: anchor.web3.Keypair;
   /**
    *  A name to assign to this {@linkcode QueueAccount}
@@ -1445,14 +1464,18 @@ export interface QueueSetConfigParams {
    */
   unpermissionedFeedsEnabled?: boolean;
   /**
-   *  Enabling this setting means data feeds do not need explicit permission
-   *  to request VRF proofs and verifications from this queue.
+   *  Enabling this setting means data feeds do not need explicit permission to request VRF proofs
+   *  and verifications from this queue.
    */
   unpermissionedVrfEnabled?: boolean;
   /**
    *  Enabling this setting will allow buffer relayer accounts to call openRound.
    */
   enableBufferRelayers?: boolean;
+  /**
+   *  Only allow TEE oracles to heartbeat on this queue.
+   */
+  enableTeeOnly?: boolean;
   /**
    *  Whether slashing is enabled on this queue.
    */
@@ -1483,7 +1506,6 @@ export interface QueueSetConfigParams {
    *  Consecutive failure limit for an oracle before oracle permission is revoked.
    */
   consecutiveOracleFailureLimit?: number;
-  enableTeeOnly?: boolean;
 }
 
 export type QueueAccountsJSON = Omit<

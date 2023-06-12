@@ -38,13 +38,13 @@ impl UpdateResult<'_> {
         params: &UpdateResultParams,
     ) -> Result<Callback> {
         let program_id = client_state.owner.clone();
-        let accounts: Vec<switchboard_v2::AccountMetaBorsh> = vec![
-            switchboard_v2::AccountMetaBorsh {
+        let accounts: Vec<switchboard_solana::AccountMetaBorsh> = vec![
+            switchboard_solana::AccountMetaBorsh {
                 pubkey: client_state.key.clone(),
                 is_signer: false,
                 is_writable: true,
             },
-            switchboard_v2::AccountMetaBorsh {
+            switchboard_solana::AccountMetaBorsh {
                 pubkey: vrf.clone(),
                 is_signer: false,
                 is_writable: false,

@@ -1,6 +1,6 @@
 import "mocha";
 
-import { PermitOracleQueueUsage } from "../src/generated/types/SwitchboardPermission.js";
+import { PermitOracleQueueUsage } from "../src/generated/oracle-program/types/SwitchboardPermission.js";
 import * as sbv2 from "../src/index.js";
 import {
   AggregatorAccount,

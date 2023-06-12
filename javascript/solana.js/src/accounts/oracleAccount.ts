@@ -1,5 +1,5 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
@@ -20,6 +20,7 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common";
@@ -192,9 +193,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   public static async createInstructions(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: {
-      queueAccount: QueueAccount;
-    } & OracleInitParams &
+    params: { queueAccount: QueueAccount } & OracleInitParams &
       Partial<OracleStakeParams>,
     options?: TransactionObjectOptions
   ): Promise<[OracleAccount, Array<TransactionObject>]> {
@@ -498,6 +497,97 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     return txnSignature;
   }
 
+  teeHeartbeatInstruction(
+    params: OracleTeeHeartbeatSyncParams
+  ): TransactionInstruction {
+    const [permissionAccount, permissionBump] = params.permission;
+    const instruction = types.oracleTeeHeartbeat(
+      this.program,
+      { params: { permissionBump } },
+      {
+        oracle: this.publicKey,
+        oracleAuthority: params.authority,
+        tokenAccount: params.tokenWallet,
+        gcOracle: params.gcOracle ?? this.publicKey,
+        oracleQueue: params.oracleQueue,
+        permission: permissionAccount.publicKey,
+        dataBuffer: params.dataBuffer,
+        quote: params.quote,
+        programState: this.program.programState.publicKey,
+      }
+    );
+    return instruction;
+  }
+
+  async teeHeartbeat(
+    params: OracleTeeHeartbeatParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    const oracle = await this.loadData();
+    const tokenWallet = params?.tokenWallet ?? oracle.tokenAccount;
+
+    const queueAccount =
+      params?.queueAccount ??
+      new QueueAccount(this.program, oracle.queuePubkey);
+
+    const queue = params?.queue ?? (await queueAccount.loadData());
+    const oracles = await queueAccount.loadOracles();
+
+    let lastPubkey = this.publicKey;
+    if (oracles.length !== 0) {
+      lastPubkey = oracles[queue.gcIdx];
+    }
+
+    const [permissionAccount, permissionBump] =
+      params?.permission ??
+      this.getPermissionAccount(
+        queueAccount.publicKey,
+        queue.authority,
+        oracle.oracleAuthority
+      );
+
+    try {
+      await permissionAccount.loadData();
+    } catch (_) {
+      throw new Error(
+        "A requested oracle permission pda account has not been initialized."
+      );
+    }
+
+    if (
+      params?.authority &&
+      !oracle.oracleAuthority.equals(params.authority.publicKey)
+    ) {
+      throw new errors.IncorrectAuthority(
+        oracle.oracleAuthority,
+        params.authority.publicKey
+      );
+    }
+
+    const heartbeatTxn = new TransactionObject(
+      this.program.walletPubkey,
+      [
+        this.teeHeartbeatInstruction({
+          tokenWallet: tokenWallet,
+          gcOracle: lastPubkey,
+          oracleQueue: queueAccount.publicKey,
+          dataBuffer: queue.dataBuffer,
+          permission: [permissionAccount, permissionBump],
+          authority: oracle.oracleAuthority,
+          quote: params.quoteKeypair.publicKey,
+          queueAuthority: params.queueAuthority ?? queue.authority,
+        }),
+      ],
+      params?.authority
+        ? [params.authority, params.quoteKeypair]
+        : [params.quoteKeypair],
+      options
+    );
+
+    const txnSignature = await this.program.signAndSend(heartbeatTxn, options);
+    return txnSignature;
+  }
+
   async withdrawInstruction(
     payer: PublicKey,
     params: OracleWithdrawParams,
@@ -628,13 +718,14 @@ export class OracleAccount extends Account<types.OracleAccountData> {
 
   public getPermissionAccount(
     queuePubkey: PublicKey,
-    queueAuthority: PublicKey
+    queueAuthority: PublicKey,
+    grantee: PublicKey = this.publicKey
   ): [PermissionAccount, number] {
     return PermissionAccount.fromSeed(
       this.program,
       queueAuthority,
       queuePubkey,
-      this.publicKey
+      grantee
     );
   }
 
@@ -769,3 +860,25 @@ export interface OracleWithdrawWalletParams extends OracleWithdrawBaseParams {
 export type OracleWithdrawParams =
   | OracleWithdrawUnwrapParams
   | OracleWithdrawWalletParams;
+
+export type OracleTeeHeartbeatSyncParams = {
+  quote: PublicKey;
+  dataBuffer: PublicKey;
+  oracleQueue: PublicKey;
+  tokenWallet: PublicKey;
+  queueAuthority: PublicKey;
+  gcOracle: PublicKey;
+  // queue: types.OracleQueueAccountData;
+  permission: [PermissionAccount, number];
+  authority: PublicKey;
+};
+
+export type OracleTeeHeartbeatParams = {
+  quoteKeypair: Keypair;
+  queueAccount?: QueueAccount;
+  tokenWallet?: PublicKey;
+  queueAuthority?: PublicKey;
+  queue?: types.OracleQueueAccountData;
+  permission?: [PermissionAccount, number];
+  authority?: Keypair;
+};

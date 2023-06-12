@@ -1,7 +1,7 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
-import { vrfLiteInit } from "../generated/index.js";
-import { vrfLiteCloseAction } from "../generated/instructions/vrfLiteCloseAction.js";
+import { vrfLiteInit } from "../generated/oracle-program/index.js";
+import * as types from "../generated/oracle-program/index.js";
+import { vrfLiteCloseAction } from "../generated/oracle-program/instructions/vrfLiteCloseAction.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import {
   TransactionObject,

@@ -2,7 +2,7 @@ use crate::*;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 use anchor_spl::token::Token;
-pub use switchboard_v2::{
+pub use switchboard_solana::{
     OracleQueueAccountData, PermissionAccountData, SbState, VrfAccountData, VrfRequestRandomness,
     VrfSetCallback,
 };

@@ -1,0 +1,33 @@
+[package]
+name = "switchboard-solana"
+version = "0.1.0"
+edition = "2021"
+description = "A Rust library to interact with Switchboard accounts."
+readme = "README.md"
+keywords = ["switchboard", "oracle", "solana"]
+homepage = "https://docs.switchboard.xyz"
+repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-solana"
+license = "MIT"
+documentation = "https://docs.rs/switchboard-solana/"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "switchboard_solana"
+doctest = false
+
+[features]
+default = ["cpi"]
+no-entrypoint = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+rust_decimal = "=1.26.1"
+bytemuck = "1.13.1"
+superslice = "1"
+anchor-lang = "0.26.0"
+anchor-spl = "0.26.0"
+solana-program = ">= 1.13.5, < 1.15.0"
+# These may not be needed, anchor27 keeps complaining
+winnow = "=0.4.1"
+toml_edit = "=0.19.8"
+toml_datetime = "=0.6.1"

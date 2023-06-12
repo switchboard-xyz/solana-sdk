@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.2.0",
+  "version": "2.3.0-beta.5",
   "author": "",
   "license": "MIT",
   "description": "A Typescript client to interact with Switchboard on Solana.",
@@ -13,15 +13,51 @@
     "index.cjs",
     "index.js",
     "index.d.ts",
+    "SwitchboardProgram.cjs",
+    "SwitchboardProgram.js",
+    "SwitchboardProgram.d.ts",
+    "TransactionObject.cjs",
+    "TransactionObject.js",
+    "TransactionObject.d.ts",
+    "AggregatorAccount.cjs",
+    "AggregatorAccount.js",
+    "AggregatorAccount.d.ts",
     "generated.cjs",
     "generated.js",
     "generated.d.ts",
-    "accounts.cjs",
-    "accounts.js",
-    "accounts.d.ts",
-    "program.cjs",
-    "program.js",
-    "program.d.ts"
+    "generated/accounts.cjs",
+    "generated/accounts.js",
+    "generated/accounts.d.ts",
+    "generated/instructions.cjs",
+    "generated/instructions.js",
+    "generated/instructions.d.ts",
+    "generated/types.cjs",
+    "generated/types.js",
+    "generated/types.d.ts",
+    "generated/oracle.cjs",
+    "generated/oracle.js",
+    "generated/oracle.d.ts",
+    "generated/oracle/accounts.cjs",
+    "generated/oracle/accounts.js",
+    "generated/oracle/accounts.d.ts",
+    "generated/oracle/instructions.cjs",
+    "generated/oracle/instructions.js",
+    "generated/oracle/instructions.d.ts",
+    "generated/oracle/types.cjs",
+    "generated/oracle/types.js",
+    "generated/oracle/types.d.ts",
+    "generated/attestation.cjs",
+    "generated/attestation.js",
+    "generated/attestation.d.ts",
+    "generated/attestation/accounts.cjs",
+    "generated/attestation/accounts.js",
+    "generated/attestation/accounts.d.ts",
+    "generated/attestation/instructions.cjs",
+    "generated/attestation/instructions.js",
+    "generated/attestation/instructions.d.ts",
+    "generated/attestation/types.cjs",
+    "generated/attestation/types.js",
+    "generated/attestation/types.d.ts"
   ],
   "exports": {
     ".": {
@@ -29,29 +65,90 @@
       "import": "./index.js",
       "require": "./index.cjs"
     },
+    "./SwitchboardProgram": {
+      "types": "./SwitchboardProgram.d.ts",
+      "import": "./SwitchboardProgram.js",
+      "require": "./SwitchboardProgram.cjs"
+    },
+    "./TransactionObject": {
+      "types": "./TransactionObject.d.ts",
+      "import": "./TransactionObject.js",
+      "require": "./TransactionObject.cjs"
+    },
+    "./AggregatorAccount": {
+      "types": "./AggregatorAccount.d.ts",
+      "import": "./AggregatorAccount.js",
+      "require": "./AggregatorAccount.cjs"
+    },
     "./generated": {
       "types": "./generated.d.ts",
       "import": "./generated.js",
       "require": "./generated.cjs"
     },
-    "./accounts": {
-      "types": "./accounts.d.ts",
-      "import": "./accounts.js",
-      "require": "./accounts.cjs"
+    "./generated/accounts": {
+      "types": "./generated/accounts.d.ts",
+      "import": "./generated/accounts.js",
+      "require": "./generated/accounts.cjs"
     },
-    "./program": {
-      "types": "./program.d.ts",
-      "import": "./program.js",
-      "require": "./program.cjs"
+    "./generated/instructions": {
+      "types": "./generated/instructions.d.ts",
+      "import": "./generated/instructions.js",
+      "require": "./generated/instructions.cjs"
+    },
+    "./generated/types": {
+      "types": "./generated/types.d.ts",
+      "import": "./generated/types.js",
+      "require": "./generated/types.cjs"
+    },
+    "./generated/oracle": {
+      "types": "./generated/oracle.d.ts",
+      "import": "./generated/oracle.js",
+      "require": "./generated/oracle.cjs"
+    },
+    "./generated/oracle/accounts": {
+      "types": "./generated/oracle/accounts.d.ts",
+      "import": "./generated/oracle/accounts.js",
+      "require": "./generated/oracle/accounts.cjs"
+    },
+    "./generated/oracle/instructions": {
+      "types": "./generated/oracle/instructions.d.ts",
+      "import": "./generated/oracle/instructions.js",
+      "require": "./generated/oracle/instructions.cjs"
+    },
+    "./generated/oracle/types": {
+      "types": "./generated/oracle/types.d.ts",
+      "import": "./generated/oracle/types.js",
+      "require": "./generated/oracle/types.cjs"
+    },
+    "./generated/attestation": {
+      "types": "./generated/attestation.d.ts",
+      "import": "./generated/attestation.js",
+      "require": "./generated/attestation.cjs"
+    },
+    "./generated/attestation/accounts": {
+      "types": "./generated/attestation/accounts.d.ts",
+      "import": "./generated/attestation/accounts.js",
+      "require": "./generated/attestation/accounts.cjs"
+    },
+    "./generated/attestation/instructions": {
+      "types": "./generated/attestation/instructions.d.ts",
+      "import": "./generated/attestation/instructions.js",
+      "require": "./generated/attestation/instructions.cjs"
+    },
+    "./generated/attestation/types": {
+      "types": "./generated/attestation/types.d.ts",
+      "import": "./generated/attestation/types.js",
+      "require": "./generated/attestation/types.cjs"
     },
     "./package.json": "./package.json"
   },
   "scripts": {
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
-    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
-    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
-    "generate": "node ./scripts/generate-client.js",
+    "localnet": "tsx ./scripts/localnet.ts",
+    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 `# sgxProgramId` --clone BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj `# sgxProgramDataAddress` --clone th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4 `# sgxIdlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
+    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone 2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7 --clone BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj --clone th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4 --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
+    "generate": "tsx ./scripts/generate-client.ts",
     "build:old": "shx rm -rf lib || true; tsc -p tsconfig.cjs.json && tsc",
     "build": "node esbuild.js",
     "watch": "tsc -p tsconfig.cjs.json --watch",
@@ -68,7 +165,8 @@
     "@coral-xyz/borsh": "^0.27.0",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.73.0",
-    "@switchboard-xyz/common": "^2.2.3",
+    "@switchboard-xyz/common": "^2.1.46",
+    "cron-validator": "^1.3.1",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21"
   },
@@ -79,6 +177,8 @@
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.11.18",
+    "@types/shelljs": "^0.8.12",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
     "chai": "^4.3.7",
     "chalk": "^4.1.2",
     "esbuild": "^0.17.19",
@@ -89,6 +189,7 @@
     "shx": "^0.3.4",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
+    "tsx": "^3.12.7",
     "typedoc": "^0.23.23",
     "typescript": "^4.9.4"
   },

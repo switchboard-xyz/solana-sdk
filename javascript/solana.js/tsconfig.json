@@ -33,9 +33,21 @@
   "typedocOptions": {
     "entryPoints": [
       "src/index.ts",
+      "src/SwitchboardProgram.ts",
+      "src/TransactionObject.ts",
+      "src/accounts/AggregatorAccount.ts",
       "src/generated/index.ts",
-      "src/accounts/index.ts",
-      "src/SwitchboardProgram.ts"
+      "src/generated/accounts.ts",
+      "src/generated/instructions.ts",
+      "src/generated/types.ts",
+      "src/generated/oracle-program/index.ts",
+      "src/generated/oracle-program/accounts/index.ts",
+      "src/generated/oracle-program/instructions/index.ts",
+      "src/generated/oracle-program/types/index.ts",
+      "src/generated/attestation-program/index.ts",
+      "src/generated/attestation-program/accounts/index.ts",
+      "src/generated/attestation-program/instructions/index.ts",
+      "src/generated/attestation-program/types/index.ts"
     ]
   }
 }

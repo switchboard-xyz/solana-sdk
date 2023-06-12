@@ -1,5 +1,5 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/index.js";
+import * as types from "../generated/oracle-program/index.js";
 import { Mint } from "../mint.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";
@@ -9,9 +9,7 @@ import { Account } from "./account.js";
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import {
-  AccountInfo,
   Keypair,
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionInstruction,
@@ -35,43 +33,17 @@ export class ProgramStateAccount extends Account<types.SbState> {
   public readonly size = this.program.account.sbState.size;
 
   /**
-   * Return a program state account state initialized to the default values.
+   * Finds the {@linkcode ProgramStateAccount} from the static seed from which it was generated.
+   * @return ProgramStateAccount and PDA bump tuple.
    */
-  public static default(): types.SbState {
-    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
-    types.SbState.discriminator.copy(buffer, 0);
-    return types.SbState.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given program state config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.SbState>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.SbStateFields = {
-      ...ProgramStateAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.SbState(fields);
-
-    const buffer = Buffer.alloc(ProgramStateAccount.size, 0);
-    types.SbState.discriminator.copy(buffer, 0);
-    types.SbState.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
+  public static fromSeed(
+    program: SwitchboardProgram
+  ): [ProgramStateAccount, number] {
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("STATE")],
+      program.programId
+    );
+    return [new ProgramStateAccount(program, publicKey), bump];
   }
 
   /** Load the ProgramStateAccount with its current on-chain state */
@@ -234,17 +206,18 @@ export class ProgramStateAccount extends Account<types.SbState> {
   }
 
   /**
-   * Finds the {@linkcode ProgramStateAccount} from the static seed from which it was generated.
-   * @return ProgramStateAccount and PDA bump tuple.
+   * Find the index of an enclave in an array and return -1 if not found
    */
-  public static fromSeed(
-    program: SwitchboardProgram
-  ): [ProgramStateAccount, number] {
-    const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from("STATE")],
-      program.programId
-    );
-    return [new ProgramStateAccount(program, publicKey), bump];
+  public static findEnclaveIdx(
+    enclaves: Array<Uint8Array>,
+    enclave: Uint8Array
+  ): number {
+    for (const [n, e] of enclaves.entries()) {
+      if (Buffer.compare(e, enclave) === 0) {
+        return n;
+      }
+    }
+    return -1;
   }
 
   /**

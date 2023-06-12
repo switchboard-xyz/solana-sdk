@@ -10,7 +10,7 @@ import {
   SbState,
   SlidingResultAccountData,
   VrfAccountData,
-} from "../generated/index.js";
+} from "../generated/oracle-program/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
 
 import { AggregatorAccount } from "./aggregatorAccount.js";
