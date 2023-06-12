@@ -3,19 +3,34 @@
   "private": true,
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "fix": "pnpm -r fix"
+    "build": "turbo run build",
+    "build:lib": "turbo run build:lib",
+    "build:rust": "cargo build",
+    "dev": "turbo run dev",
+    "rust:dev": "cargo watch -x run -p utils -w ./rust/utils",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "fix": "pnpm -r fix",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "clean:cargo": "find . -type d \\( -name \"target\" -o -name \"test-ledger\" -o -name \".anchor\" \\) -exec rm -rf {} +",
+    "clean:js": "find . -type d -name \"node_modules\" -exec rm -rf {} +",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build --filter=docs^... && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.1",
     "@commitlint/config-conventional": "^17.4.4",
     "@switchboard-xyz/eslint-config": "latest",
     "@types/node": "^20.2.5",
-    "commitlint": "^17.4.2",
+    "commitlint": "^17.4.4",
+    "eslint": "^8.42.0",
     "shelljs": "^0.8.5",
     "shx": "^0.3.4",
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
+    "turbo": "^1.10.3",
     "typescript": "^5.0.4"
   },
   "engines": {

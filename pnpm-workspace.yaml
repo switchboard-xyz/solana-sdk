@@ -1,4 +1,5 @@
 packages:
   - "javascript/*"
-  - "programs/*"
   - "rust/*"
+  - "programs/*"
+  - "examples/*"

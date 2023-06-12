@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "pipeline": {
+    "lint": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "src/**/*.rs"],
+      "outputs": [
+        "dist/**",
+        "../../target/debug/*.d",
+        "../../target/debug/*.rlib"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "test/**/*.ts",
+        "tests/**/*.ts",
+        "tests/**/*.move",
+        "test/**/*.sol"
+      ]
+    },
+    "localnet": {
+      "dependsOn": ["build", "test", "lint"]
+    },
+    "deploy": {
+      "dependsOn": ["build", "test", "lint"]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
