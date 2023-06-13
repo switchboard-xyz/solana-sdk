@@ -134,7 +134,7 @@ impl VrfLiteAccountData {
     }
 
     #[cfg(feature = "client")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "client")))]
     pub async fn fetch(
         client: &solana_client::rpc_client::RpcClient,
         pubkey: Pubkey,
