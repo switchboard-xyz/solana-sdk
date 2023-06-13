@@ -2,7 +2,7 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# switchboard-basic-function-example
+# Basic Function
 
 > An example program written in Anchor demonstrating how to deserialize and read
 > a Switchboard VRF account on Solana.
