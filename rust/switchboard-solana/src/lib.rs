@@ -24,7 +24,7 @@ cfg_client! {
     pub mod sgx;
     pub use sgx::*;
 
-    pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
+    // pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
 }
 
 pub use anchor_lang as anchor;

@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.3.3"
+version = "0.3.5"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -21,15 +21,15 @@ no-entrypoint = []
 cpi = ["no-entrypoint"]
 client = [
     "switchboard-common/sgx",
-    "dep:solana-client",
-    "dep:bincode",
-    "dep:sgx-quote",
-    "dep:cron",
-    "dep:chrono"
+    "solana-client",
+    "bincode",
+    "sgx-quote",
+    "cron",
+    "chrono"
 ]
 
 [dependencies]
-switchboard-common = { version = "0.1.1" }
+switchboard-common = { version = "0.1.3" }
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"
