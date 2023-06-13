@@ -202,11 +202,10 @@ impl<'info> FunctionVerify<'info> {
     }
 
     #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
     pub async fn build(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        fn_signer: std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
+        client: &solana_client::rpc_client::RpcClient,
+        fn_signer: std::sync::Arc<solana_sdk::signer::keypair::Keypair>,
         pubkeys: &FunctionVerifyPubkeys,
         mr_enclave: [u8; 32],
     ) -> std::result::Result<Instruction, switchboard_common::error::Error> {
@@ -285,6 +284,7 @@ impl<'info> FunctionVerify<'info> {
     }
 
     #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
     fn build_ix(
         accounts: FunctionVerifyAccounts,
         observed_time: i64,
@@ -307,6 +307,7 @@ impl<'info> FunctionVerify<'info> {
 }
 
 #[cfg(feature = "client")]
+#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
 pub struct FunctionVerifyAccounts {
     pub function: Pubkey,
     pub fn_signer: Pubkey,
@@ -324,6 +325,7 @@ pub struct FunctionVerifyAccounts {
     pub system_program: Pubkey,
 }
 #[cfg(feature = "client")]
+#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
 impl ToAccountMetas for FunctionVerifyAccounts {
     fn to_account_metas(&self, _: Option<bool>) -> Vec<AccountMeta> {
         vec![

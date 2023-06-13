@@ -1,20 +1,13 @@
-pub use anchor_client;
-
-use anchor_client::solana_sdk::commitment_config::CommitmentConfig;
-use anchor_client::solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
-use anchor_client::solana_sdk::transaction::Transaction;
-use anchor_client::Cluster;
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::message::Message;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use sgx_quote::Quote;
+use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
 use std::env;
 use std::result::Result;
 use std::str::FromStr;
 use std::sync::Arc;
 use switchboard_common::{Error, FunctionResult, Gramine};
-
-// use crate::{FunctionVerify, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
 
 use crate::attestation_program::FunctionVerify;
 use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
@@ -26,15 +19,15 @@ pub fn generate_signer() -> Arc<Keypair> {
 }
 
 pub async fn function_verify(
+    url: String,
     fn_signer: Arc<Keypair>,
     mut ixs: Vec<Instruction>,
 ) -> Result<FunctionResult, Error> {
     let fn_signer_pubkey = crate::client::to_pubkey(fn_signer.clone())?;
 
-    let client = anchor_client::Client::new_with_options(
-        Cluster::Devnet,
-        fn_signer.to_owned(),
-        CommitmentConfig::processed(),
+    let client = solana_client::rpc_client::RpcClient::new_with_commitment(
+        url,
+        solana_sdk::commitment_config::CommitmentConfig::processed(),
     );
 
     let quote_raw = Gramine::generate_quote(&fn_signer_pubkey.to_bytes()).unwrap();
@@ -54,13 +47,9 @@ pub async fn function_verify(
 
     let message = Message::new(&ixs, Some(&pubkeys.payer));
 
-    let blockhash = client
-        .program(SWITCHBOARD_ATTESTATION_PROGRAM_ID)
-        .rpc()
-        .get_latest_blockhash()
-        .unwrap();
+    let blockhash = client.get_latest_blockhash().unwrap();
 
-    let mut tx = Transaction::new_unsigned(message);
+    let mut tx = solana_sdk::transaction::Transaction::new_unsigned(message);
     tx.partial_sign(&[fn_signer.as_ref()], blockhash);
 
     Ok(FunctionResult {

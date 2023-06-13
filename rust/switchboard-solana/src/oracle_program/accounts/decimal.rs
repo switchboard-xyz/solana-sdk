@@ -5,7 +5,7 @@ use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
 use std::convert::{From, TryInto};
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Default, Debug, Eq, PartialEq)]
 pub struct SwitchboardDecimal {

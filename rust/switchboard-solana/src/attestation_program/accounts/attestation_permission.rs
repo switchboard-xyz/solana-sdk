@@ -11,7 +11,7 @@ pub enum SwitchboardAttestationPermission {
     PermitQueueUsage = 1 << 1,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Debug)]
 pub struct AttestationPermissionAccountData {
@@ -108,13 +108,11 @@ impl AttestationPermissionAccountData {
     }
 
     #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
     pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
+        client: &solana_client::rpc_client::RpcClient,
         pubkey: Pubkey,
     ) -> std::result::Result<Self, switchboard_common::Error> {
         crate::client::load_account(client, pubkey).await
     }
 }
- 

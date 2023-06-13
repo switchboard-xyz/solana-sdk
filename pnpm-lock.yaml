@@ -212,6 +212,91 @@ importers:
         specifier: ^4.9.3
         version: 4.9.4
 
+  examples/03_basic_function:
+    dependencies:
+      '@coral-xyz/anchor':
+        specifier: ^0.27.0
+        version: 0.27.0
+      '@coral-xyz/borsh':
+        specifier: ^0.27.0
+        version: 0.27.0(@solana/web3.js@1.73.3)
+      '@project-serum/borsh':
+        specifier: ^0.2.5
+        version: 0.2.5(@solana/web3.js@1.73.3)
+      '@solana/spl-token':
+        specifier: ^0.3.6
+        version: 0.3.6(@solana/web3.js@1.73.3)
+      '@solana/web3.js':
+        specifier: ^1.73.3
+        version: 1.73.3
+      '@switchboard-xyz/common':
+        specifier: ^2.2.0
+        version: 2.2.0
+      '@switchboard-xyz/oracle':
+        specifier: ^2.1.13
+        version: 2.1.13
+      '@switchboard-xyz/solana.js':
+        specifier: workspace:*
+        version: link:../../javascript/solana.js
+      chalk:
+        specifier: ^4.1.2
+        version: 4.1.2
+      dotenv:
+        specifier: ^16.0.1
+        version: 16.0.3
+      yargs:
+        specifier: ^17.5.1
+        version: 17.6.2
+    devDependencies:
+      '@types/chai':
+        specifier: ^4.3.0
+        version: 4.3.4
+      '@types/mocha':
+        specifier: ^9.0.0
+        version: 9.1.1
+      '@types/node':
+        specifier: ^17.0.45
+        version: 17.0.45
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^5.44.0
+        version: 5.44.0(@typescript-eslint/parser@5.44.0)(eslint@8.42.0)(typescript@4.9.4)
+      '@typescript-eslint/parser':
+        specifier: ^5.44.0
+        version: 5.44.0(eslint@8.42.0)(typescript@4.9.4)
+      chai:
+        specifier: ^4.3.6
+        version: 4.3.7
+      eslint:
+        specifier: ^8.28.0
+        version: 8.42.0
+      mocha:
+        specifier: ^9.0.3
+        version: 9.2.2
+      npm-run-all:
+        specifier: ^4.1.5
+        version: 4.1.5
+      prettier:
+        specifier: ^2.4.1
+        version: 2.7.1
+      prettier-plugin-organize-imports:
+        specifier: ^2.3.4
+        version: 2.3.4(prettier@2.7.1)(typescript@4.9.4)
+      shx:
+        specifier: ^0.3.4
+        version: 0.3.4
+      switchboard-solana:
+        specifier: workspace:*
+        version: link:../../rust/switchboard-solana
+      ts-mocha:
+        specifier: ^9.0.2
+        version: 9.0.2(mocha@9.2.2)
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.1(@types/node@17.0.45)(typescript@4.9.4)
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.4
+
   javascript/feed-walkthrough:
     dependencies:
       '@solana/web3.js':
@@ -7139,7 +7224,7 @@ packages:
   file:javascript/solana.js:
     resolution: {directory: javascript/solana.js, type: directory}
     name: '@switchboard-xyz/solana.js'
-    version: 2.3.0-beta.5
+    version: 2.3.0-beta.6
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
     dependencies:
       '@coral-xyz/anchor': 0.27.0

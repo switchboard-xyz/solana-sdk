@@ -3,7 +3,7 @@ use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
-use crate::{SwitchboardError, QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
+use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
 
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -15,7 +15,7 @@ pub enum VerificationStatus {
     VerificationOverride = 1 << 3,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Debug)]
 pub struct QuoteAccountData {
@@ -147,10 +147,9 @@ impl QuoteAccountData {
     }
 
     #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
     pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
+        client: &solana_client::rpc_client::RpcClient,
         pubkey: Pubkey,
     ) -> std::result::Result<Self, switchboard_common::Error> {
         crate::client::load_account(client, pubkey).await

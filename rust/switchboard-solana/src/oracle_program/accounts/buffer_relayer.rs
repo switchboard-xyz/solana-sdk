@@ -1,3 +1,4 @@
+#![allow(unaligned_references)]
 use crate::*;
 use anchor_lang::{Discriminator, Owner};
 
@@ -27,7 +28,7 @@ pub struct BufferRelayerAccountData {
     pub result: Vec<u8>,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[derive(Default, Debug, AnchorSerialize, AnchorDeserialize)]
 pub struct BufferRelayerRound {
     /// Number of successful responses.

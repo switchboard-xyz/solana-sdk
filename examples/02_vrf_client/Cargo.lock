@@ -798,6 +798,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "hmac"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1755,8 +1764,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
-name = "switchboard-v2"
-version = "0.1.23"
+name = "switchboard-common"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a3432650dcf9ba9f8512ecd2d2424dba1accd21a2f57019964f193087fda7b4"
+dependencies = [
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2 0.10.6",
+]
+
+[[package]]
+name = "switchboard-solana"
+version = "0.0.1"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1764,6 +1785,7 @@ dependencies = [
  "rust_decimal",
  "solana-program",
  "superslice",
+ "switchboard-common",
  "toml_datetime",
  "toml_edit",
  "winnow",
@@ -1777,7 +1799,7 @@ dependencies = [
  "anchor-spl",
  "bytemuck",
  "solana-program",
- "switchboard-v2",
+ "switchboard-solana",
 ]
 
 [[package]]

@@ -14,7 +14,7 @@ pub struct VrfPoolRow {
 }
 
 #[repr(packed)]
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 pub struct VrfPoolAccountData {
     /// ACCOUNTS
     pub authority: Pubkey, // authority can never be changed or else vrf accounts are useless
@@ -94,6 +94,15 @@ impl VrfPoolAccountData {
         Ok(bytemuck::from_bytes(
             &data[8..std::mem::size_of::<VrfPoolAccountData>() + 8],
         ))
+    }
+
+    #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
+    pub async fn fetch(
+        client: &solana_client::rpc_client::RpcClient,
+        pubkey: Pubkey,
+    ) -> std::result::Result<Self, switchboard_common::Error> {
+        crate::client::load_account(client, pubkey).await
     }
 }
 

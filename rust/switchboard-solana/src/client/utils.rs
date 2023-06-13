@@ -1,6 +1,5 @@
-use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
-use anchor_client::solana_sdk::signer::keypair::Keypair;
 use anchor_lang::prelude::*;
+use solana_sdk::signer::keypair::Keypair;
 use std::result::Result;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -13,14 +12,11 @@ pub fn to_pubkey(signer: Arc<Keypair>) -> std::result::Result<Pubkey, switchboar
 }
 
 pub async fn load_account<T: bytemuck::Pod>(
-    client: &anchor_client::Client<Arc<Keypair>>,
+    client: &solana_client::rpc_client::RpcClient,
     pubkey: Pubkey,
 ) -> Result<T, switchboard_common::Error> {
     let data = client
-        .program(SWITCHBOARD_ATTESTATION_PROGRAM_ID)
-        .async_rpc()
         .get_account_data(&pubkey)
-        .await
         .map_err(|_| switchboard_common::Error::CustomMessage("AnchorParseError".to_string()))?;
     Ok(*bytemuck::try_from_bytes::<T>(&data[8..])
         .map_err(|_| switchboard_common::Error::CustomMessage("AnchorParseError".to_string()))?)

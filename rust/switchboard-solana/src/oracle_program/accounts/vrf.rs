@@ -8,7 +8,7 @@ use std::cell::Ref;
 // VrfSetCallback
 // VrfClose
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct VrfAccountData {
     /// The current status of the VRF account.
@@ -121,5 +121,14 @@ impl VrfAccountData {
             return Err(error!(SwitchboardError::VrfEmptyError));
         }
         Ok(self.current_round.result)
+    }
+
+    #[cfg(feature = "client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "client")))]
+    pub async fn fetch(
+        client: &solana_client::rpc_client::RpcClient,
+        pubkey: Pubkey,
+    ) -> std::result::Result<Self, switchboard_common::Error> {
+        crate::client::load_account(client, pubkey).await
     }
 }
