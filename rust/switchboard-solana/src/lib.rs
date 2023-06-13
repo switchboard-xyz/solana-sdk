@@ -1,3 +1,4 @@
+#![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(clippy::result_large_err)]
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey;
@@ -12,27 +13,17 @@ pub use attestation_program::*;
 //
 // This module is not intended to be part of the public API. In general, any
 // `doc(hidden)` code is not part of the public and stable API.
-// #[macro_use]
-// #[doc(hidden)]
-// pub mod macros;
+#[macro_use]
+#[doc(hidden)]
+pub mod macros;
 
-#[cfg(feature = "client")]
-#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
-#[cfg(not(target_os = "solana"))]
-pub mod client;
-#[cfg(feature = "client")]
-#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
-#[cfg(not(target_os = "solana"))]
-pub use client::*;
+cfg_client! {
+    pub mod client;
+    pub use client::*;
 
-#[cfg(feature = "client")]
-#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
-#[cfg(not(target_os = "solana"))]
-pub mod sgx;
-#[cfg(feature = "client")]
-#[cfg_attr(docsrs, doc(cfg(feature = "client")))]
-#[cfg(not(target_os = "solana"))]
-pub use sgx::*;
+    pub mod sgx;
+    pub use sgx::*;
+}
 
 /// Seed used to derive the SbState PDA.
 pub const STATE_SEED: &[u8] = b"STATE";
