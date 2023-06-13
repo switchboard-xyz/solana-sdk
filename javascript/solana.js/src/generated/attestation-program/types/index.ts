@@ -38,6 +38,16 @@ export type {
 } from "./FunctionInitParams.js";
 export { FunctionInitParams } from "./FunctionInitParams.js";
 export type {
+  FunctionSetConfigParamsFields,
+  FunctionSetConfigParamsJSON,
+} from "./FunctionSetConfigParams.js";
+export { FunctionSetConfigParams } from "./FunctionSetConfigParams.js";
+export type {
+  FunctionTriggerParamsFields,
+  FunctionTriggerParamsJSON,
+} from "./FunctionTriggerParams.js";
+export { FunctionTriggerParams } from "./FunctionTriggerParams.js";
+export type {
   FunctionVerifyParamsFields,
   FunctionVerifyParamsJSON,
 } from "./FunctionVerifyParams.js";

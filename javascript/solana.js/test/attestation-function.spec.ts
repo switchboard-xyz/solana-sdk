@@ -9,7 +9,7 @@ import { setupTest, TestContext } from "./utils.js";
 import * as anchor from "@coral-xyz/anchor";
 import { NATIVE_MINT } from "@solana/spl-token";
 import { Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { BN, sleep } from "@switchboard-xyz/common";
+import { BN, sleep, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 
 const unixTimestamp = () => Math.floor(Date.now() / 1000);
@@ -339,5 +339,62 @@ describe("Function Tests", () => {
     console.log(`functionVerify (lookup): ${lookupTableByteLength}`);
 
     console.log(`SAVES = ${legacyByteLength - lookupTableByteLength} bytes`);
+  });
+
+  it("Sets a function config", async () => {
+    const newName = "NEW_FUNCTION_NAME";
+    const newMetadata = "NEW_FUNCTION_METADATA";
+    const newContainer = "updatedContainerId";
+    const newContainerRegistry = "updated_container_registry.com";
+
+    await functionAccount.setConfig({
+      name: newName,
+      metadata: newMetadata,
+      container: newContainer,
+      containerRegistry: newContainerRegistry,
+    });
+
+    const myFunction = await functionAccount.loadData();
+
+    const updatedName = toUtf8(myFunction.name);
+    assert(
+      updatedName === newName,
+      `Function Name Mismatch: expected ${newName}, received ${updatedName}`
+    );
+
+    const updatedMetadata = toUtf8(myFunction.metadata);
+    assert(
+      updatedMetadata === newMetadata,
+      `Function Metadata Mismatch: expected ${newMetadata}, received ${updatedMetadata}`
+    );
+
+    const updatedContainer = toUtf8(myFunction.container);
+    assert(
+      updatedContainer === newContainer,
+      `Function Container Mismatch: expected ${newContainer}, received ${updatedContainer}`
+    );
+
+    const updatedContainerRegistry = toUtf8(myFunction.containerRegistry);
+    assert(
+      updatedContainerRegistry === newContainerRegistry,
+      `Function Container Registry Mismatch: expected ${newContainerRegistry}, received ${updatedContainerRegistry}`
+    );
+  });
+
+  it("Manually triggers a function", async () => {
+    const preFunctionData = await functionAccount.loadData();
+
+    assert(
+      preFunctionData.isTriggered === false,
+      "Function should be originally untriggered"
+    );
+
+    await functionAccount.trigger();
+
+    const postFunctionData = await functionAccount.loadData();
+    assert(
+      postFunctionData.isTriggered === true,
+      "Function should have been triggered"
+    );
   });
 });

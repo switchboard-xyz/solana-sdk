@@ -9,43 +9,33 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionWithdrawArgs {
-  params: types.FunctionWithdrawParamsFields;
+export interface FunctionSetConfigArgs {
+  params: types.FunctionSetConfigParamsFields;
 }
 
-export interface FunctionWithdrawAccounts {
+export interface FunctionSetConfigAccounts {
   function: PublicKey;
-  attestationQueue: PublicKey;
   authority: PublicKey;
-  escrow: PublicKey;
-  receiver: PublicKey;
-  state: PublicKey;
-  tokenProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionWithdrawParams.layout("params"),
+  types.FunctionSetConfigParams.layout("params"),
 ]);
 
-export function functionWithdraw(
+export function functionSetConfig(
   program: SwitchboardProgram,
-  args: FunctionWithdrawArgs,
-  accounts: FunctionWithdrawAccounts
+  args: FunctionSetConfigArgs,
+  accounts: FunctionSetConfigAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
-    { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
-    { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([6, 182, 241, 39, 40, 111, 65, 195]);
+  const identifier = Buffer.from([232, 132, 21, 251, 253, 189, 96, 94]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionWithdrawParams.toEncodable(args.params),
+      params: types.FunctionSetConfigParams.toEncodable(args.params),
     },
     buffer
   );

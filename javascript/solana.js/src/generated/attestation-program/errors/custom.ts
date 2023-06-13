@@ -22,7 +22,10 @@ export type CustomError =
   | InvalidSelfVerifyRequest
   | IncorrectMrEnclave
   | InvalidResponder
-  | InvalidAddressLookupAddress;
+  | InvalidAddressLookupAddress
+  | InvalidQueueError
+  | IllegalVerifier
+  | InvalidAuthorityError;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -254,6 +257,36 @@ export class InvalidAddressLookupAddress extends Error {
   }
 }
 
+export class InvalidQueueError extends Error {
+  static readonly code = 6023;
+  readonly code = 6023;
+  readonly name = "InvalidQueueError";
+
+  constructor(readonly logs?: string[]) {
+    super("6023: ");
+  }
+}
+
+export class IllegalVerifier extends Error {
+  static readonly code = 6024;
+  readonly code = 6024;
+  readonly name = "IllegalVerifier";
+
+  constructor(readonly logs?: string[]) {
+    super("6024: ");
+  }
+}
+
+export class InvalidAuthorityError extends Error {
+  static readonly code = 6025;
+  readonly code = 6025;
+  readonly name = "InvalidAuthorityError";
+
+  constructor(readonly logs?: string[]) {
+    super("6025: ");
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -302,6 +335,12 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new InvalidResponder(logs);
     case 6022:
       return new InvalidAddressLookupAddress(logs);
+    case 6023:
+      return new InvalidQueueError(logs);
+    case 6024:
+      return new IllegalVerifier(logs);
+    case 6025:
+      return new InvalidAuthorityError(logs);
   }
 
   return null;

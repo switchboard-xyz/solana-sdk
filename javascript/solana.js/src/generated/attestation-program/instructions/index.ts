@@ -28,6 +28,16 @@ export { functionFund } from "./functionFund.js";
 export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
 export { functionInit } from "./functionInit.js";
 export type {
+  FunctionSetConfigAccounts,
+  FunctionSetConfigArgs,
+} from "./functionSetConfig.js";
+export { functionSetConfig } from "./functionSetConfig.js";
+export type {
+  FunctionTriggerAccounts,
+  FunctionTriggerArgs,
+} from "./functionTrigger.js";
+export { functionTrigger } from "./functionTrigger.js";
+export type {
   FunctionVerifyAccounts,
   FunctionVerifyArgs,
 } from "./functionVerify.js";

@@ -40,7 +40,7 @@ export function functionInit(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: true, isWritable: true },
     { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: true, isWritable: true },
+    { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.permission, isSigner: false, isWritable: true },

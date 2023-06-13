@@ -36,7 +36,7 @@ import {
 import { BN, toUtf8 } from "@switchboard-xyz/common";
 
 /**
- *  Parameters for initializing an {@linkcode FunctionAccount}
+ *  Parameters for initializing a {@linkcode FunctionAccount}
  */
 export interface FunctionAccountInitParams {
   name?: string;
@@ -60,6 +60,20 @@ export interface FunctionAccountInitParams {
    *
    *  @default payer
    */
+  authority?: Keypair;
+}
+
+/**
+ *  Parameters for setting a {@linkcode FunctionAccount} config
+ */
+export interface FunctionSetConfigParams {
+  name?: string;
+  metadata?: string;
+  container?: string;
+  containerRegistry?: string;
+  version?: string;
+  schedule?: string;
+
   authority?: Keypair;
 }
 
@@ -104,6 +118,7 @@ export interface FunctionWithdrawWalletParams
 export type FunctionWithdrawParams =
   | FunctionWithdrawUnwrapParams
   | FunctionWithdrawWalletParams;
+
 /**
  *  Parameters for an {@linkcode types.functionVerify} instruction.
  */
@@ -116,6 +131,16 @@ export interface FunctionVerifyParams {
   verifier: QuoteAccount;
   fnSigner: PublicKey;
 }
+
+/**
+ *  Parameters for an {@linkcode types.functionTrigger} instruction.
+ */
+
+export interface FunctionTriggerParams {
+  authority?: Keypair;
+}
+
+/**
 
 /**
  * Account type representing a Switchboard Function.
@@ -291,6 +316,66 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
   public getEscrow(): PublicKey {
     return this.program.mint.getAssociatedAddress(this.publicKey);
+  }
+
+  public async setConfigInstruction(
+    payer: PublicKey,
+    params: FunctionSetConfigParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const functionData = await this.loadData();
+
+    if (params.authority) {
+      if (!params.authority.publicKey.equals(functionData.authority)) {
+        throw new errors.IncorrectAuthority(
+          functionData.authority,
+          params.authority.publicKey
+        );
+      }
+    } else {
+      if (!payer.equals(functionData.authority)) {
+        throw new errors.IncorrectAuthority(functionData.authority, payer);
+      }
+    }
+
+    const toOptionalBytes = (param: string | undefined): Uint8Array | null => {
+      return param ? new Uint8Array(Buffer.from(param, "utf8")) : null;
+    };
+
+    const setConfigIxn = types.functionSetConfig(
+      this.program,
+      {
+        params: {
+          name: toOptionalBytes(params.name),
+          metadata: toOptionalBytes(params.metadata),
+          container: toOptionalBytes(params.container),
+          containerRegistry: toOptionalBytes(params.containerRegistry),
+          version: toOptionalBytes(params.version),
+          schedule: toOptionalBytes(params.schedule),
+        },
+      },
+      {
+        function: this.publicKey,
+        authority: functionData.authority,
+      }
+    );
+
+    return new TransactionObject(
+      payer,
+      [setConfigIxn],
+      params?.authority ? [params.authority] : []
+    );
+  }
+
+  public async setConfig(
+    params?: FunctionSetConfigParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.setConfigInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
   }
 
   public async fundInstruction(
@@ -556,6 +641,54 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.verifyInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public async triggerInstruction(
+    payer: PublicKey,
+    params?: FunctionTriggerParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const functionData = await this.loadData();
+
+    // verify authority is correct
+    if (params && params?.authority) {
+      if (!params.authority.publicKey.equals(functionData.authority)) {
+        throw new errors.IncorrectAuthority(
+          functionData.authority,
+          params.authority.publicKey
+        );
+      }
+    } else {
+      if (!payer.equals(functionData.authority)) {
+        throw new errors.IncorrectAuthority(functionData.authority, payer);
+      }
+    }
+
+    const functionTrigger = types.functionTrigger(
+      this.program,
+      { params: {} },
+      {
+        function: this.publicKey,
+        authority: functionData.authority,
+      }
+    );
+
+    return new TransactionObject(
+      payer,
+      [functionTrigger],
+      params?.authority ? [params.authority] : []
+    );
+  }
+
+  public async trigger(
+    params?: FunctionTriggerParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.triggerInstruction(
       this.program.walletPubkey,
       params,
       options

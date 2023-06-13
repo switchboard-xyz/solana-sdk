@@ -351,14 +351,9 @@
           "isSigner": true
         },
         {
-          "name": "addressLookupTable",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "authority",
-          "isMut": true,
-          "isSigner": true
+          "isMut": false,
+          "isSigner": false
         },
         {
           "name": "quote",
@@ -409,11 +404,6 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "addressLookupProgram",
-          "isMut": false,
-          "isSigner": false
         }
       ],
       "args": [
@@ -421,6 +411,29 @@
           "name": "params",
           "type": {
             "defined": "FunctionInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionTrigger",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionTriggerParams"
           }
         }
       ]
@@ -576,7 +589,7 @@
         },
         {
           "name": "authority",
-          "isMut": true,
+          "isMut": false,
           "isSigner": true
         },
         {
@@ -1030,12 +1043,15 @@
                 32
               ]
             }
-          },
-          {
-            "name": "recentSlot",
-            "type": "u64"
           }
         ]
+      }
+    },
+    {
+      "name": "FunctionTriggerParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     },
     {
@@ -1297,21 +1313,6 @@
   ],
   "events": [
     {
-      "name": "QuoteVerifyRequestEvent",
-      "fields": [
-        {
-          "name": "quote",
-          "type": "publicKey",
-          "index": false
-        },
-        {
-          "name": "verifier",
-          "type": "publicKey",
-          "index": false
-        }
-      ]
-    },
-    {
       "name": "FunctionFundEvent",
       "fields": [
         {
@@ -1321,13 +1322,33 @@
         },
         {
           "name": "amount",
-          "type": "u32",
+          "type": "u64",
           "index": false
         }
       ]
     },
     {
       "name": "FunctionInitEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionTriggerEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionBootedEvent",
       "fields": [
         {
           "name": "function",
@@ -1356,7 +1377,177 @@
         },
         {
           "name": "amount",
-          "type": "u32",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PermissionInitEvent",
+      "fields": [
+        {
+          "name": "permission",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PermissionSetEvent",
+      "fields": [
+        {
+          "name": "permission",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueAddMrEnclaveEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueInitEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueRemoveMrEnclaveEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteHeartbeatEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteInitEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteRotateEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteOverrideEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "GarbageCollectionEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteVerifyEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QuoteVerifyRequestEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
           "index": false
         }
       ]
@@ -1365,118 +1556,103 @@
   "errors": [
     {
       "code": 6000,
-      "name": "GenericError",
-      "msg": ""
+      "name": "GenericError"
     },
     {
       "code": 6001,
-      "name": "InvalidQuoteError",
-      "msg": ""
+      "name": "InvalidQuoteError"
     },
     {
       "code": 6002,
-      "name": "QuoteExpiredError",
-      "msg": ""
+      "name": "QuoteExpiredError"
     },
     {
       "code": 6003,
-      "name": "InvalidNodeError",
-      "msg": ""
+      "name": "InvalidNodeError"
     },
     {
       "code": 6004,
-      "name": "InsufficientQueueError",
-      "msg": ""
+      "name": "InsufficientQueueError"
     },
     {
       "code": 6005,
-      "name": "QueueFullError",
-      "msg": ""
+      "name": "QueueFullError"
     },
     {
       "code": 6006,
-      "name": "InvalidSignerError",
-      "msg": ""
+      "name": "InvalidSignerError"
     },
     {
       "code": 6007,
-      "name": "MrEnclaveAlreadyExists",
-      "msg": ""
+      "name": "MrEnclaveAlreadyExists"
     },
     {
       "code": 6008,
-      "name": "MrEnclaveDoesntExist",
-      "msg": ""
+      "name": "MrEnclaveDoesntExist"
     },
     {
       "code": 6009,
-      "name": "MrEnclaveAtCapacity",
-      "msg": ""
+      "name": "MrEnclaveAtCapacity"
     },
     {
       "code": 6010,
-      "name": "PermissionDenied",
-      "msg": ""
+      "name": "PermissionDenied"
     },
     {
       "code": 6011,
-      "name": "InvalidConstraint",
-      "msg": ""
+      "name": "InvalidConstraint"
     },
     {
       "code": 6012,
-      "name": "InvalidTimestamp",
-      "msg": ""
+      "name": "InvalidTimestamp"
     },
     {
       "code": 6013,
-      "name": "InvalidMrEnclave",
-      "msg": ""
+      "name": "InvalidMrEnclave"
     },
     {
       "code": 6014,
-      "name": "InvalidReportData",
-      "msg": ""
+      "name": "InvalidReportData"
     },
     {
       "code": 6015,
-      "name": "InsufficientLoadAmountError",
-      "msg": ""
+      "name": "InsufficientLoadAmountError"
     },
     {
       "code": 6016,
-      "name": "IncorrectObservedTimeError",
-      "msg": ""
+      "name": "IncorrectObservedTimeError"
     },
     {
       "code": 6017,
-      "name": "InvalidQuoteMode",
-      "msg": ""
+      "name": "InvalidQuoteMode"
     },
     {
       "code": 6018,
-      "name": "InvalidVerifierIdx",
-      "msg": ""
+      "name": "InvalidVerifierIdx"
     },
     {
       "code": 6019,
-      "name": "InvalidSelfVerifyRequest",
-      "msg": ""
+      "name": "InvalidSelfVerifyRequest"
     },
     {
       "code": 6020,
-      "name": "IncorrectMrEnclave",
-      "msg": ""
+      "name": "IncorrectMrEnclave"
     },
     {
       "code": 6021,
-      "name": "InvalidResponder",
-      "msg": ""
+      "name": "InvalidResponder"
     },
     {
       "code": 6022,
-      "name": "InvalidAddressLookupAddress",
-      "msg": ""
+      "name": "InvalidAddressLookupAddress"
+    },
+    {
+      "code": 6023,
+      "name": "InvalidQueueError"
+    },
+    {
+      "code": 6024,
+      "name": "IllegalVerifier"
     }
   ]
 }
