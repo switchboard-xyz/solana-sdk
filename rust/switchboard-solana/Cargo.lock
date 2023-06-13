@@ -3613,7 +3613,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.3.5"
+version = "0.3.6"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -3621,6 +3621,7 @@ dependencies = [
  "bytemuck",
  "chrono",
  "cron",
+ "getrandom 0.2.9",
  "rust_decimal",
  "sgx-quote",
  "solana-client",

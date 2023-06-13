@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.3.5"
+version = "0.3.6"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -25,7 +25,8 @@ client = [
     "bincode",
     "sgx-quote",
     "cron",
-    "chrono"
+    "chrono",
+    "getrandom"
 ]
 
 [dependencies]
@@ -46,3 +47,4 @@ chrono = { version = "0.4.25", optional = true }
 toml_datetime = "=0.6.1"
 winnow = "=0.4.1"
 toml_edit = "=0.19.8"
+getrandom = { version = "0.2", optional = true }
