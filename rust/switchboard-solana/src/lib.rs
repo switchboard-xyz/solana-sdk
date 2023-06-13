@@ -23,7 +23,12 @@ cfg_client! {
 
     pub mod sgx;
     pub use sgx::*;
+
+    pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
 }
+
+pub use anchor_lang as anchor;
+pub use anchor_spl as spl;
 
 /// Seed used to derive the SbState PDA.
 pub const STATE_SEED: &[u8] = b"STATE";

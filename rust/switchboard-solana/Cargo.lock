@@ -3613,7 +3613,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -3628,6 +3628,9 @@ dependencies = [
  "solana-sdk",
  "superslice",
  "switchboard-common",
+ "toml_datetime",
+ "toml_edit",
+ "winnow",
 ]
 
 [[package]]
