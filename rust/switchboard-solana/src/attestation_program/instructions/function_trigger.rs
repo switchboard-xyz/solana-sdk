@@ -1,8 +1,4 @@
 use crate::prelude::*;
-use anchor_lang::solana_program::entrypoint::ProgramResult;
-use anchor_lang::solana_program::instruction::Instruction;
-use anchor_lang::solana_program::program::{invoke, invoke_signed};
-use anchor_lang::{Discriminator, InstructionData};
 
 #[derive(Accounts)]
 #[instruction(params: FunctionTriggerParams)] // rpc parameters hint

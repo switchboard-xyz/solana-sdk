@@ -10,8 +10,6 @@ pub use oracle_program::*;
 pub mod attestation_program;
 pub use attestation_program::*;
 
-pub use switchboard_common::{Chain, Error as SwitchboardClientError, FunctionResult};
-
 pub mod error;
 
 pub mod seeds;

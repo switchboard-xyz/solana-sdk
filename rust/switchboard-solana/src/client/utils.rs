@@ -1,8 +1,15 @@
 use crate::prelude::*;
 use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
+use std::env;
 use std::result::Result;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+pub fn load_env_pubkey(key: &str) -> Result<Pubkey, SwitchboardClientError> {
+    Pubkey::from_str(&env::var(key).unwrap())
+        .map_err(|_| SwitchboardClientError::EnvVariableMissing(key.to_string()))
+}
 
 pub fn generate_signer() -> Arc<Keypair> {
     let mut randomness = [0; 32];
@@ -10,9 +17,11 @@ pub fn generate_signer() -> Arc<Keypair> {
     Arc::new(keypair_from_seed(&randomness).unwrap())
 }
 
-pub fn to_pubkey(signer: Arc<Keypair>) -> std::result::Result<Pubkey, switchboard_common::Error> {
+pub fn signer_to_pubkey(
+    signer: Arc<Keypair>,
+) -> std::result::Result<Pubkey, SwitchboardClientError> {
     let pubkey = Pubkey::from_str(signer.to_base58_string().as_str()).map_err(|_| {
-        switchboard_common::Error::CustomMessage("failed to parse pubkey string".to_string())
+        SwitchboardClientError::CustomMessage("failed to parse pubkey string".to_string())
     })?;
     Ok(pubkey)
 }
@@ -20,10 +29,19 @@ pub fn to_pubkey(signer: Arc<Keypair>) -> std::result::Result<Pubkey, switchboar
 pub async fn load_account<T: bytemuck::Pod>(
     client: &solana_client::rpc_client::RpcClient,
     pubkey: Pubkey,
-) -> Result<T, switchboard_common::Error> {
+) -> Result<T, SwitchboardClientError> {
     let data = client
         .get_account_data(&pubkey)
-        .map_err(|_| switchboard_common::Error::CustomMessage("AnchorParseError".to_string()))?;
+        .map_err(|_| SwitchboardClientError::CustomMessage("AnchorParseError".to_string()))?;
     Ok(*bytemuck::try_from_bytes::<T>(&data[8..])
-        .map_err(|_| switchboard_common::Error::CustomMessage("AnchorParseError".to_string()))?)
+        .map_err(|_| SwitchboardClientError::CustomMessage("AnchorParseError".to_string()))?)
+}
+
+pub fn unix_timestamp() -> i64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+        .try_into()
+        .unwrap_or(0)
 }
