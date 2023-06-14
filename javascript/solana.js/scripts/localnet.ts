@@ -44,7 +44,7 @@ const SWITCHBOARD_PROGRAM_ID = new PublicKey(
 // ];
 
 const SWITCHBOARD_ATTESTATION_PROGRAM_ID = new PublicKey(
-  "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
+  "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
 );
 // const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
 //   SWITCHBOARD_ATTESTATION_PROGRAM_ID,
@@ -145,7 +145,7 @@ async function main() {
         devSwitchboard,
         defaultPubkeyPath,
         "switchboard_attestation_program",
-        "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
+        "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
       ),
     ]);
   } else {
