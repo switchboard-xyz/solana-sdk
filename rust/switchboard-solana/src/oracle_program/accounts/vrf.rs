@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
 use super::error::SwitchboardError;
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use std::cell::Ref;
@@ -8,7 +9,7 @@ use std::cell::Ref;
 // VrfSetCallback
 // VrfClose
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct VrfAccountData {
     /// The current status of the VRF account.

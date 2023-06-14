@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 use solana_sdk::signer::keypair::Keypair;
 use std::result::Result;
 use std::str::FromStr;

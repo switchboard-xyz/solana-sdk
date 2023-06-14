@@ -1,5 +1,5 @@
+use crate::prelude::*;
 use crate::{cfg_client, QuoteAccountData, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
-use anchor_lang::prelude::*;
 use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
@@ -15,7 +15,7 @@ pub enum FunctionStatus {
     InvalidPermissions = 1 << 4,
 }
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
 pub struct FunctionAccountData {

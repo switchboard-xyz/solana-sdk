@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use std::cell::Ref;
@@ -10,7 +11,7 @@ pub enum OracleResponseType {
     TypeNoResponse,
 }
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[derive(Default)]
 #[repr(packed)]
 pub struct OracleMetrics {
@@ -34,7 +35,7 @@ pub struct OracleMetrics {
     pub total_late_response: u128,
 }
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct OracleAccountData {
     /// Name of the oracle to store on-chain.

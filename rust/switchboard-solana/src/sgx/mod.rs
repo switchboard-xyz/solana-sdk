@@ -1,8 +1,11 @@
+use crate::prelude::*;
+
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::message::Message;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use sgx_quote::Quote;
 use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
+
 use std::env;
 use std::result::Result;
 use std::str::FromStr;

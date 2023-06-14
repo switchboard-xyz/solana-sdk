@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
@@ -11,7 +11,7 @@ pub enum SwitchboardAttestationPermission {
     PermitQueueUsage = 1 << 1,
 }
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 #[derive(Debug)]
 pub struct AttestationPermissionAccountData {

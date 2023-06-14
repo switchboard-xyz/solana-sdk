@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use std::cell::Ref;
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct VrfLiteAccountData {
     /// The bump used to derive the SbState account.

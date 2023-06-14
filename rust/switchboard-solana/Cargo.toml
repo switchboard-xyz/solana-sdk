@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.3.9"
+version = "0.3.10"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -16,13 +16,12 @@ name = "switchboard_solana"
 doctest = false
 
 [features]
-default = ["cpi"]
+default = ["cpi", "anchor-lang"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
 client = [
     "switchboard-common/sgx",
-    "solana-client",
-    "solana-sdk",
+    "anchor-client",
     "bincode",
     "sgx-quote",
     "cron",
@@ -34,11 +33,16 @@ switchboard-common = { version = "0.1.6" }
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"
-anchor-lang = "0.28.0"
-anchor-spl = "0.28.0"
-solana-program = ">= 1.14, < 1.17"
-solana-sdk = { version = ">= 1.14, < 1.17", optional = true }
-solana-client = { version = ">= 1.14, < 1.17", optional = true }
+# Anchor Deps
+anchor-lang = { version = "0.26.0", optional = true }
+anchor-spl = "0.26.0"
+anchor-client = { version = "0.26.0", optional = true }
+# anchor-lang = "0.26.0"
+# anchor-spl = "0.26.0"
+# Solana Deps
+solana-program = ">= 1.13.5, < 1.15"
+# solana-sdk = { version = ">= 1.13.5, < 1.15", optional = true }
+# solana-client = { version = ">= 1.13.5, < 1.15", optional = true }
 # anchor-client = { version = "0.28.0", optional = true }
 bincode = { version = "^1", optional = true }
 sgx-quote = { version = "0.1.0", optional = true }

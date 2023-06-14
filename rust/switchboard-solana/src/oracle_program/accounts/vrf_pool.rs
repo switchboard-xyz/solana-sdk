@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use std::cell::Ref;
@@ -14,7 +15,7 @@ pub struct VrfPoolRow {
 }
 
 #[repr(packed)]
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 pub struct VrfPoolAccountData {
     /// ACCOUNTS
     pub authority: Pubkey, // authority can never be changed or else vrf accounts are useless

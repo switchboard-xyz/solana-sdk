@@ -1,9 +1,10 @@
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use rust_decimal::Decimal;
 use std::cell::Ref;
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct Hash {
@@ -11,7 +12,7 @@ pub struct Hash {
     pub data: [u8; 32],
 }
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 #[derive(Default, Debug, PartialEq, Eq)]
 pub struct AggregatorRound {
@@ -53,8 +54,8 @@ pub enum AggregatorResolutionMode {
     ModeSlidingResolution = 1,
 }
 
-// #[zero_copy(unsafe)]
-#[account(zero_copy(unsafe))]
+// #[zero_copy]
+#[account(zero_copy)]
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
 pub struct AggregatorAccountData {

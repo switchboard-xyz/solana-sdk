@@ -1,9 +1,10 @@
+use crate::prelude::*;
 use crate::*;
 use anchor_lang::Discriminator;
 use bytemuck::try_cast_slice_mut;
 use std::cell::Ref;
 
-#[account(zero_copy(unsafe))]
+#[account(zero_copy)]
 #[repr(packed)]
 pub struct OracleQueueAccountData {
     /// Name of the queue to store on-chain.

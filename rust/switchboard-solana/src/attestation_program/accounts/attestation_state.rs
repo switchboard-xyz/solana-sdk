@@ -4,7 +4,7 @@ use bytemuck::{Pod, Zeroable};
 
 use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[repr(packed)]
 #[derive(Debug)]
 pub struct AttestationState {

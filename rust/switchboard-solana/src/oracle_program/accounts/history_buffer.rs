@@ -6,7 +6,7 @@ use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 use superslice::*;
 
-#[zero_copy(unsafe)]
+#[zero_copy]
 #[derive(Default)]
 #[repr(packed)]
 pub struct AggregatorHistoryRow {

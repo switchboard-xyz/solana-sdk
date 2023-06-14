@@ -1,7 +1,9 @@
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(clippy::result_large_err)]
+mod macros;
+
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::pubkey;
+use solana_program::pubkey;
 
 pub mod oracle_program;
 pub use oracle_program::*;
@@ -9,15 +11,13 @@ pub use oracle_program::*;
 pub mod attestation_program;
 pub use attestation_program::*;
 
-// // Includes re-exports used by macros.
-// //
-// // This module is not intended to be part of the public API. In general, any
-// // `doc(hidden)` code is not part of the public and stable API.
-// // #[macro_use]
-// #[doc(hidden)]
-// pub mod macros;
+pub use switchboard_common::{Chain, Error as SwitchboardClientError, FunctionResult};
 
-mod macros;
+pub mod accounts;
+pub mod instructions;
+pub mod types;
+
+pub mod prelude;
 
 cfg_client! {
     pub mod client;
@@ -25,26 +25,7 @@ cfg_client! {
 
     pub mod sgx;
     pub use sgx::*;
-
-    pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
-
-    pub mod prelude {
-        pub use crate::client::*;
-        pub use crate::sgx::*;
-
-        pub use anchor_lang as anchor;
-        pub use anchor_spl as spl;
-        pub use solana_client;
-        pub use anchor_lang::solana_program as solana_program;
-
-        pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
-
-        pub use anchor_lang::prelude::*;
-    }
 }
-
-// pub use anchor_lang as anchor;
-// pub use anchor_spl as spl;
 
 /// Seed used to derive the SbState PDA.
 pub const STATE_SEED: &[u8] = b"STATE";
