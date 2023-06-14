@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::*;
 use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
@@ -146,12 +147,12 @@ impl QuoteAccountData {
         true
     }
 
-    #[cfg(feature = "client")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "client")))]
-    pub async fn fetch(
-        client: &solana_client::rpc_client::RpcClient,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }

@@ -134,12 +134,12 @@ impl VrfLiteAccountData {
         Ok(self.result)
     }
 
-    #[cfg(feature = "client")]
-    #[cfg_attr(doc_cfg, doc(cfg(feature = "client")))]
-    pub async fn fetch(
-        client: &solana_client::rpc_client::RpcClient,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }
