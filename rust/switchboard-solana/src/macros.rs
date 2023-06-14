@@ -2,18 +2,19 @@
 macro_rules! cfg_client {
     ($($item:item)*) => {
         $(
-            #[cfg(feature = "client")]
-            #[cfg_attr(doc_cfg, doc(cfg(feature = "client")))]
+            #[cfg(not(target_os = "solana"))]
+            #[cfg_attr(doc_cfg, doc(cfg(not(target_os = "solana"))))]
             $item
         )*
     }
 }
 
 #[macro_export]
-macro_rules! cfg_not_client {
+macro_rules! cfg_program {
     ($($item:item)*) => {
         $(
-            #[cfg(not(feature = "client"))]
+            #[cfg(target_os = "solana")]
+            #[cfg_attr(doc_cfg, doc(cfg(target_os = "solana")))]
             $item
         )*
     }

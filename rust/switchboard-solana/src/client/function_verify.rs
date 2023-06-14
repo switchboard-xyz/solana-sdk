@@ -4,7 +4,7 @@ use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::message::Message;
 use anchor_lang::solana_program::pubkey::Pubkey;
 use sgx_quote::Quote;
-use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
+use solana_sdk::signer::keypair::Keypair;
 
 use std::env;
 use std::result::Result;
@@ -13,12 +13,6 @@ use std::sync::Arc;
 
 use crate::attestation_program::FunctionVerify;
 use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
-
-pub fn generate_signer() -> Arc<Keypair> {
-    let mut randomness = [0; 32];
-    switchboard_common::Gramine::read_rand(&mut randomness).unwrap();
-    Arc::new(keypair_from_seed(&randomness).unwrap())
-}
 
 pub async fn function_verify(
     url: String,

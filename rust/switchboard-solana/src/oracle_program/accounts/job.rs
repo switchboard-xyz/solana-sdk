@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 
 #[account]
 pub struct JobAccountData {

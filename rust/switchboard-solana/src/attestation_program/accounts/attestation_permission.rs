@@ -1,6 +1,5 @@
+use crate::cfg_client;
 use crate::prelude::*;
-use crate::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 

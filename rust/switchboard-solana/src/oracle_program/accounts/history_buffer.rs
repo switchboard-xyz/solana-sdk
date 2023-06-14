@@ -1,6 +1,4 @@
-use super::decimal::SwitchboardDecimal;
-use super::error::SwitchboardError;
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 use bytemuck::{try_cast_slice, try_from_bytes};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
@@ -91,7 +89,7 @@ impl<'a> AggregatorHistoryBuffer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::*;
+    use crate::prelude::*;
     impl<'info, 'a> Default for AggregatorHistoryBuffer<'a> {
         fn default() -> Self {
             unsafe { std::mem::zeroed() }
