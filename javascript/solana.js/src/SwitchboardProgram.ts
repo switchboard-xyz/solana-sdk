@@ -84,7 +84,7 @@ export const SB_V2_PID = new PublicKey(
  * Switchboard's Attestation Program ID
  */
 export const SB_ATTESTATION_PID = new PublicKey(
-  "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
+  "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
 );
 
 /**
