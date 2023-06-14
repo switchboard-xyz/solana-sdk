@@ -8,6 +8,6 @@ pub use crate::oracle_program::{
 };
 
 pub use crate::attestation_program::{
-    FunctionStatus, FunctionTriggerParams, FunctionVerifyParams, SwitchboardAttestationPermission,
-    VerificationStatus,
+    FunctionStatus, FunctionTriggerParams, FunctionVerifyParams, MrEnclave,
+    SwitchboardAttestationPermission, VerificationStatus,
 };

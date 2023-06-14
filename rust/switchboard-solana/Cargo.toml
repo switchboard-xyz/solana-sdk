@@ -16,35 +16,30 @@ name = "switchboard_solana"
 doctest = false
 
 [features]
-default = ["cpi", "anchor-lang"]
+default = ["cpi"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
-client = [
-    "switchboard-common/sgx",
-    "anchor-client",
-    "bincode",
-    "sgx-quote",
-    "cron",
-    "chrono"
-]
 
 [dependencies]
-switchboard-common = { version = "0.1.6" }
+anchor-spl = "=0.26.0"
+solana-program = ">= 1.13.5, < 1.15"
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"
-# Anchor Deps
-anchor-lang = { version = "0.26.0", optional = true }
-anchor-spl = "0.26.0"
-anchor-client = { version = "0.26.0", optional = true }
-# anchor-lang = "0.26.0"
-# anchor-spl = "0.26.0"
-# Solana Deps
-solana-program = ">= 1.13.5, < 1.15"
-# solana-sdk = { version = ">= 1.13.5, < 1.15", optional = true }
-# solana-client = { version = ">= 1.13.5, < 1.15", optional = true }
-# anchor-client = { version = "0.28.0", optional = true }
-bincode = { version = "^1", optional = true }
-sgx-quote = { version = "0.1.0", optional = true }
-cron = { version = "0.12.0", optional = true }
-chrono = { version = "0.4.25", optional = true }
+
+[target.'cfg(target_os = "solana")'.dependencies]
+switchboard-common = { version = "0.1.6" }
+anchor-lang = { version = "=0.26.0" }
+
+[target.'cfg(not(target_os = "solana"))'.dependencies]
+switchboard-common = { version = "0.1.6", features = ["sgx"] }
+anchor-client = { version = "=0.26.0" }
+bincode = { version = "^1" }
+sgx-quote = { version = "0.1.0" }
+cron = { version = "0.12.0" }
+chrono = { version = "0.4.25" }
+
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+targets = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
+rustdoc-args = ["--cfg", "doc_cfg"]

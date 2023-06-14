@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 
 #[error_code]
 #[derive(Eq, PartialEq)]
@@ -33,4 +33,10 @@ pub enum SwitchboardError {
     InvalidFunctionInput,
     #[msg("Failed to compute the PDA")]
     PdaDerivationError,
+}
+
+use crate::cfg_client;
+
+cfg_client! {
+    pub use switchboard_common::{Error as SwitchboardClientError};
 }

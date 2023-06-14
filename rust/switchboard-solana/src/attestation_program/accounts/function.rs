@@ -1,6 +1,6 @@
+use super::QuoteAccountData;
+use crate::cfg_client;
 use crate::prelude::*;
-use crate::{cfg_client, QuoteAccountData, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 

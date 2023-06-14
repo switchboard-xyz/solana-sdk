@@ -1,10 +1,11 @@
+use crate::cfg_client;
 use crate::prelude::*;
-use crate::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
 use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
+
+pub type MrEnclave = [u8; 32];
 
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -32,7 +33,7 @@ pub struct QuoteAccountData {
     /// Queue used for attestation to verify a MRENCLAVE measurement.
     pub attestation_queue: Pubkey,
     /// The quotes MRENCLAVE measurement dictating the contents of the secure enclave.
-    pub mr_enclave: [u8; 32],
+    pub mr_enclave: MrEnclave,
     pub verification_status: u8,
     pub verification_timestamp: i64,
     pub valid_until: i64,

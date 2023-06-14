@@ -1,8 +1,6 @@
 #![allow(non_snake_case)]
-use super::error::SwitchboardError;
+use crate::cfg_client;
 use crate::prelude::*;
-use crate::*;
-use anchor_lang::Discriminator;
 use std::cell::Ref;
 
 // VrfRequestRandomness

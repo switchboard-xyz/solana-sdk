@@ -1,6 +1,5 @@
+use crate::cfg_client;
 use crate::prelude::*;
-use crate::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -13,7 +12,7 @@ pub struct AttestationQueueAccountData {
     // Authority controls adding/removing allowed enclave measurements
     pub authority: Pubkey,
     // allowed enclave measurements
-    pub mr_enclaves: [[u8; 32]; 32],
+    pub mr_enclaves: [MrEnclave; 32],
     pub mr_enclaves_len: u32,
     pub data: [Pubkey; 128],
     pub data_len: u32,

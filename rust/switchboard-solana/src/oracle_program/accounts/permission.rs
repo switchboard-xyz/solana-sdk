@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 
 #[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize, Eq, PartialEq)]
 pub enum SwitchboardPermission {
