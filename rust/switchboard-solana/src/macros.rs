@@ -12,6 +12,9 @@ macro_rules! cfg_client {
 #[macro_export]
 macro_rules! cfg_not_client {
     ($($item:item)*) => {
-        $( #[cfg(not(feature = "client"))] $item )*
+        $(
+            #[cfg(not(feature = "client"))]
+            $item
+        )*
     }
 }
