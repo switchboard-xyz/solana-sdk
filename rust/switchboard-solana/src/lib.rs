@@ -9,13 +9,15 @@ pub use oracle_program::*;
 pub mod attestation_program;
 pub use attestation_program::*;
 
-// Includes re-exports used by macros.
-//
-// This module is not intended to be part of the public API. In general, any
-// `doc(hidden)` code is not part of the public and stable API.
-#[macro_use]
-#[doc(hidden)]
-pub mod macros;
+// // Includes re-exports used by macros.
+// //
+// // This module is not intended to be part of the public API. In general, any
+// // `doc(hidden)` code is not part of the public and stable API.
+// // #[macro_use]
+// #[doc(hidden)]
+// pub mod macros;
+
+mod macros;
 
 cfg_client! {
     pub mod client;
@@ -24,7 +26,21 @@ cfg_client! {
     pub mod sgx;
     pub use sgx::*;
 
-    // pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
+    pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
+
+    pub mod prelude {
+        pub use crate::client::*;
+        pub use crate::sgx::*;
+
+        pub use anchor_lang as anchor;
+        pub use anchor_spl as spl;
+        pub use solana_client;
+        pub use anchor_lang::solana_program as solana_program;
+
+        pub use switchboard_common::{FunctionResult, Chain, Error as SwitchboardClientError};
+
+        pub use anchor_lang::prelude::*;
+    }
 }
 
 // pub use anchor_lang as anchor;

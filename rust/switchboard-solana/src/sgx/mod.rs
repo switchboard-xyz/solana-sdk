@@ -7,14 +7,13 @@ use std::env;
 use std::result::Result;
 use std::str::FromStr;
 use std::sync::Arc;
-use switchboard_common::{Error, FunctionResult, Gramine};
 
 use crate::attestation_program::FunctionVerify;
 use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
 
 pub fn generate_signer() -> Arc<Keypair> {
     let mut randomness = [0; 32];
-    Gramine::read_rand(&mut randomness).unwrap();
+    switchboard_common::Gramine::read_rand(&mut randomness).unwrap();
     Arc::new(keypair_from_seed(&randomness).unwrap())
 }
 
@@ -22,7 +21,7 @@ pub async fn function_verify(
     url: String,
     fn_signer: Arc<Keypair>,
     mut ixs: Vec<Instruction>,
-) -> Result<FunctionResult, Error> {
+) -> Result<switchboard_common::FunctionResult, switchboard_common::Error> {
     let fn_signer_pubkey = crate::client::to_pubkey(fn_signer.clone())?;
 
     let client = solana_client::rpc_client::RpcClient::new_with_commitment(
@@ -30,7 +29,8 @@ pub async fn function_verify(
         solana_sdk::commitment_config::CommitmentConfig::processed(),
     );
 
-    let quote_raw = Gramine::generate_quote(&fn_signer_pubkey.to_bytes()).unwrap();
+    let quote_raw =
+        switchboard_common::Gramine::generate_quote(&fn_signer_pubkey.to_bytes()).unwrap();
     let quote = Quote::parse(&quote_raw).unwrap();
 
     let pubkeys = FunctionVerifyPubkeys::load_from_env()?;
@@ -52,7 +52,7 @@ pub async fn function_verify(
     let mut tx = solana_sdk::transaction::Transaction::new_unsigned(message);
     tx.partial_sign(&[fn_signer.as_ref()], blockhash);
 
-    Ok(FunctionResult {
+    Ok(switchboard_common::FunctionResult {
         version: 1,
         chain: switchboard_common::Chain::Solana,
         key: pubkeys.function.to_bytes(),
