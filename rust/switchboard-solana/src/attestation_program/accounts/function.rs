@@ -1,6 +1,6 @@
-use crate::{QuoteAccountData, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
-use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
+use super::QuoteAccountData;
+use crate::cfg_client;
+use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -22,11 +22,9 @@ pub struct FunctionAccountData {
     pub name: [u8; 64],
     pub metadata: [u8; 256],
     pub authority: Pubkey,
-    ///
     pub container_registry: [u8; 64],
     pub container: [u8; 64],
     pub version: [u8; 32],
-    ///
     pub attestation_queue: Pubkey,
     pub queue_idx: u32,
     pub last_execution_timestamp: i64,
@@ -163,62 +161,58 @@ impl FunctionAccountData {
         format!("{}:{}", self.get_container(), self.get_version())
     }
 
-    #[cfg(feature = "client")]
-    pub fn get_schedule(&self) -> Option<cron::Schedule> {
-        if self.schedule[0] == 0 {
-            return None;
+    cfg_client! {
+        pub fn get_schedule(&self) -> Option<cron::Schedule> {
+            if self.schedule[0] == 0 {
+                return None;
+            }
+            let every_second = cron::Schedule::try_from("* * * * * *").unwrap();
+            let schedule = std::str::from_utf8(&self.schedule)
+                .unwrap_or("* * * * * *")
+                .trim_end_matches('\0');
+            let schedule = cron::Schedule::try_from(schedule);
+            Some(schedule.unwrap_or(every_second.clone()))
         }
-        let every_second = cron::Schedule::try_from("* * * * * *").unwrap();
-        let schedule = std::str::from_utf8(&self.schedule)
-            .unwrap_or("* * * * * *")
-            .trim_end_matches('\0');
-        let schedule = cron::Schedule::try_from(schedule);
-        Some(schedule.unwrap_or(every_second.clone()))
-    }
 
-    #[cfg(feature = "client")]
-    pub fn get_last_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
-        chrono::DateTime::from_utc(
-            chrono::NaiveDateTime::from_timestamp_opt(self.last_execution_timestamp, 0).unwrap(),
-            chrono::Utc,
-        )
-    }
+        pub fn get_last_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
+            chrono::DateTime::from_utc(
+                chrono::NaiveDateTime::from_timestamp_opt(self.last_execution_timestamp, 0).unwrap(),
+                chrono::Utc,
+            )
+        }
 
-    #[cfg(feature = "client")]
-    pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {
-        let schedule = self.get_schedule();
-        if schedule.is_none() {
-            return false;
+        pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {
+            let schedule = self.get_schedule();
+            if schedule.is_none() {
+                return false;
+            }
+            let dt = self.get_last_execution_datetime();
+            let next_trigger_time = schedule.unwrap().after(&dt).next();
+            if next_trigger_time.is_none() {
+                return false;
+            }
+            let next_trigger_time = next_trigger_time.unwrap();
+            if next_trigger_time > now {
+                return false;
+            }
+            true
         }
-        let dt = self.get_last_execution_datetime();
-        let next_trigger_time = schedule.unwrap().after(&dt).next();
-        if next_trigger_time.is_none() {
-            return false;
-        }
-        let next_trigger_time = next_trigger_time.unwrap();
-        if next_trigger_time > now {
-            return false;
-        }
-        true
-    }
 
-    #[cfg(feature = "client")]
-    pub fn next_execution_timestamp(&self) -> Option<chrono::DateTime<chrono::Utc>> {
-        let schedule = self.get_schedule();
-        if schedule.is_none() {
-            return None;
-        }
-        let dt = self.get_last_execution_datetime();
-        schedule.unwrap().after(&dt).next()
-    }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+        pub fn next_execution_timestamp(&self) -> Option<chrono::DateTime<chrono::Utc>> {
+            let schedule = self.get_schedule();
+            if schedule.is_none() {
+                return None;
+            }
+            let dt = self.get_last_execution_datetime();
+            schedule.unwrap().after(&dt).next()
+        }
+
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }

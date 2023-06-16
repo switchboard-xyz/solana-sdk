@@ -1,5 +1,5 @@
-use crate::*;
-use anchor_lang::Discriminator;
+use crate::cfg_client;
+use crate::prelude::*;
 use rust_decimal::Decimal;
 use std::cell::Ref;
 
@@ -279,14 +279,13 @@ impl AggregatorAccountData {
         Ok(Clock::get()?.unix_timestamp < self.expiration)
     }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }
 

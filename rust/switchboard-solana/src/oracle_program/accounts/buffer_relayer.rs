@@ -1,5 +1,5 @@
-use crate::*;
-use anchor_lang::{Discriminator, Owner};
+#![allow(unaligned_references)]
+use crate::prelude::*;
 
 #[derive(AnchorDeserialize, Default, Debug)]
 pub struct BufferRelayerAccountData {

@@ -1,9 +1,11 @@
-use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
+use crate::cfg_client;
+use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
-use crate::{SwitchboardError, QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
+use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
+
+pub type MrEnclave = [u8; 32];
 
 #[repr(u8)]
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -31,7 +33,7 @@ pub struct QuoteAccountData {
     /// Queue used for attestation to verify a MRENCLAVE measurement.
     pub attestation_queue: Pubkey,
     /// The quotes MRENCLAVE measurement dictating the contents of the secure enclave.
-    pub mr_enclave: [u8; 32],
+    pub mr_enclave: MrEnclave,
     pub verification_status: u8,
     pub verification_timestamp: i64,
     pub valid_until: i64,
@@ -146,13 +148,12 @@ impl QuoteAccountData {
         true
     }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }

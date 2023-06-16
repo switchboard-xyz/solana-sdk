@@ -1,7 +1,6 @@
 #![allow(non_snake_case)]
-use super::error::SwitchboardError;
-use crate::*;
-use anchor_lang::Discriminator;
+use crate::cfg_client;
+use crate::prelude::*;
 use std::cell::Ref;
 
 // VrfRequestRandomness
@@ -121,5 +120,14 @@ impl VrfAccountData {
             return Err(error!(SwitchboardError::VrfEmptyError));
         }
         Ok(self.current_round.result)
+    }
+
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }

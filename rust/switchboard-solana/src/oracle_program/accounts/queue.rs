@@ -1,6 +1,7 @@
-use super::decimal::SwitchboardDecimal;
-use anchor_lang::prelude::*;
+use crate::cfg_client;
+use crate::prelude::*;
 use bytemuck::try_cast_slice_mut;
+use std::cell::Ref;
 
 #[account(zero_copy)]
 #[repr(packed)]
@@ -57,6 +58,12 @@ pub struct OracleQueueAccountData {
     pub data_buffer: Pubkey,
 }
 
+impl Default for OracleQueueAccountData {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
 impl OracleQueueAccountData {
     pub fn size() -> usize {
         std::mem::size_of::<OracleQueueAccountData>() + 8
@@ -86,9 +93,75 @@ impl OracleQueueAccountData {
             .checked_mul(batch_size.checked_add(1).unwrap().into())
             .unwrap()
     }
-}
-impl Default for OracleQueueAccountData {
-    fn default() -> Self {
-        unsafe { std::mem::zeroed() }
+
+    /// Returns the deserialized Switchboard OracleQueue account
+    ///
+    /// # Arguments
+    ///
+    /// * `account_info` - A Solana AccountInfo referencing an existing Switchboard OracleQueue
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::OracleQueueAccountData;
+    ///
+    /// let oracle_queue = OracleQueueAccountData::new(queue_account_info)?;
+    /// ```
+    pub fn new<'info>(
+        account_info: &'info AccountInfo<'info>,
+    ) -> anchor_lang::Result<Ref<'info, Self>> {
+        let data = account_info.try_borrow_data()?;
+        if data.len() < OracleQueueAccountData::discriminator().len() {
+            return Err(ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+
+        let mut disc_bytes = [0u8; 8];
+        disc_bytes.copy_from_slice(&data[..8]);
+        if disc_bytes != OracleQueueAccountData::discriminator() {
+            return Err(ErrorCode::AccountDiscriminatorMismatch.into());
+        }
+
+        Ok(Ref::map(data, |data| {
+            bytemuck::from_bytes(&data[8..std::mem::size_of::<OracleQueueAccountData>() + 8])
+        }))
+    }
+
+    /// Returns the deserialized Switchboard OracleQueue account
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - A Solana AccountInfo's data buffer
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::OracleQueueAccountData;
+    ///
+    /// let oracle_queue = OracleQueueAccountData::new(oracle_account_info.try_borrow_data()?)?;
+    /// ```
+    pub fn new_from_bytes(data: &[u8]) -> anchor_lang::Result<&OracleQueueAccountData> {
+        if data.len() < OracleQueueAccountData::discriminator().len() {
+            return Err(ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+
+        let mut disc_bytes = [0u8; 8];
+        disc_bytes.copy_from_slice(&data[..8]);
+        if disc_bytes != OracleQueueAccountData::discriminator() {
+            return Err(ErrorCode::AccountDiscriminatorMismatch.into());
+        }
+
+        Ok(bytemuck::from_bytes(
+            &data[8..std::mem::size_of::<OracleQueueAccountData>() + 8],
+        ))
+    }
+
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
+
     }
 }

@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 use anchor_lang::{Discriminator, Owner, ZeroCopy};
 use bytemuck::{Pod, Zeroable};
 
@@ -27,4 +27,18 @@ impl Owner for AttestationState {
 
 impl ZeroCopy for AttestationState {}
 
-impl AttestationState {}
+impl AttestationState {
+    pub fn get_pda() -> Pubkey {
+        let (pda_key, _) =
+            Pubkey::find_program_address(&[STATE_SEED], &SWITCHBOARD_ATTESTATION_PROGRAM_ID);
+        pda_key
+    }
+
+    pub fn verify_pda(expected: &Pubkey) -> Result<()> {
+        let key = Self::get_pda();
+        if key != *expected {
+            return Err(error!(SwitchboardError::PdaDerivationError));
+        }
+        Ok(())
+    }
+}

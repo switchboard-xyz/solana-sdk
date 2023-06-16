@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
+use crate::cfg_client;
+use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -12,7 +12,7 @@ pub struct AttestationQueueAccountData {
     // Authority controls adding/removing allowed enclave measurements
     pub authority: Pubkey,
     // allowed enclave measurements
-    pub mr_enclaves: [[u8; 32]; 32],
+    pub mr_enclaves: [MrEnclave; 32],
     pub mr_enclaves_len: u32,
     pub data: [Pubkey; 128],
     pub data_len: u32,
@@ -114,13 +114,12 @@ impl AttestationQueueAccountData {
             .any(|x| x.to_vec() == mr_enclave.to_vec())
     }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
     }
 }

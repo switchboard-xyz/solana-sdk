@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
-use anchor_lang::{Discriminator, Owner, ZeroCopy};
+use crate::cfg_client;
+use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -107,14 +107,38 @@ impl AttestationPermissionAccountData {
         self.permissions & p as u32 != 0
     }
 
-    #[cfg(feature = "client")]
-    pub async fn fetch(
-        client: &anchor_client::Client<
-            std::sync::Arc<anchor_client::solana_sdk::signer::keypair::Keypair>,
-        >,
-        pubkey: Pubkey,
-    ) -> std::result::Result<Self, switchboard_common::Error> {
-        crate::client::load_account(client, pubkey).await
+    cfg_client! {
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::load_account(client, pubkey).await
+        }
+    }
+
+    pub fn get_pda(authority: &Pubkey, attestation_queue: &Pubkey, grantee: &Pubkey) -> Pubkey {
+        let (permission_pubkey, _) = Pubkey::find_program_address(
+            &[
+                PERMISSION_SEED,
+                &authority.to_bytes(),
+                &attestation_queue.to_bytes(),
+                &grantee.to_bytes(),
+            ],
+            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+        );
+        permission_pubkey
+    }
+
+    pub fn verify_pda(
+        expected: &Pubkey,
+        authority: &Pubkey,
+        attestation_queue: &Pubkey,
+        grantee: &Pubkey,
+    ) -> Result<()> {
+        let key = Self::get_pda(authority, attestation_queue, grantee);
+        if key != *expected {
+            return Err(error!(SwitchboardError::PdaDerivationError));
+        }
+        Ok(())
     }
 }
- 

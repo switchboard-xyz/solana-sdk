@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 
 #[zero_copy]
