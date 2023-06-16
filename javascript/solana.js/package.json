@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.3.0-beta.6",
+  "version": "2.3.0-beta.7",
   "author": "",
   "license": "MIT",
   "description": "A Typescript client to interact with Switchboard on Solana.",
@@ -146,8 +146,8 @@
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "localnet": "tsx ./scripts/localnet.ts",
-    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha `# sgxProgramId` --clone BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj `# sgxProgramDataAddress` --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m `# sgxIdlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
-    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha --clone BNrpbCMbBFiCEqGdWaDMqjQmwqtGdgmoFFzGJnUexSbj --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
+    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha `# sgxProgramId` --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC `# sgxProgramDataAddress` --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m `# sgxIdlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
+    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
     "generate": "tsx ./scripts/generate-client.ts",
     "build:old": "shx rm -rf lib || true; tsc -p tsconfig.cjs.json && tsc",
     "build": "node esbuild.js",
