@@ -38,7 +38,7 @@ address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
 address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
 
 [[test.validator.clone]] # sb devnet attestation programID
-address = "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
+address = "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
 
 [[test.validator.clone]] # sb devnet attestation IDL
-address = "th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4"
+address = "GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m"

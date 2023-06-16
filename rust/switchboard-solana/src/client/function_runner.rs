@@ -84,51 +84,35 @@ impl FunctionRunner {
         &self,
         mr_enclave: MrEnclave,
     ) -> Result<Instruction, SwitchboardClientError> {
-        let current_time = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as i64;
+        let current_time = unix_timestamp();
 
-        let fn_data: FunctionAccountData = load_account(&self.client, self.function).await?;
+        let fn_data: FunctionAccountData =
+            FunctionAccountData::fetch(&self.client, self.function).await?;
 
-        let verifier_quote: QuoteAccountData = load_account(&self.client, self.verifier).await?;
+        let verifier_quote: QuoteAccountData =
+            QuoteAccountData::fetch(&self.client, self.verifier).await?;
 
         let queue_data: AttestationQueueAccountData =
             crate::client::load_account(&self.client, fn_data.attestation_queue).await?;
 
-        // let escrow = fn_data.escrow;
-        let (fn_quote, _) = Pubkey::find_program_address(
-            &[b"QuoteAccountData", &self.function.to_bytes()],
-            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+        let verifier_permission = AttestationPermissionAccountData::get_pda(
+            &queue_data.authority,
+            &fn_data.attestation_queue,
+            &self.payer,
         );
 
-        let (verifier_permission, _) = Pubkey::find_program_address(
-            &[
-                b"PermissionAccountData",
-                &queue_data.authority.to_bytes(),
-                &fn_data.attestation_queue.to_bytes(),
-                &self.payer.to_bytes(), // assuming the verifier payer is also the authority
-            ],
-            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+        let fn_permission = AttestationPermissionAccountData::get_pda(
+            &queue_data.authority,
+            &fn_data.attestation_queue,
+            &self.function,
         );
 
-        let (fn_permission, _) = Pubkey::find_program_address(
-            &[
-                b"PermissionAccountData",
-                &queue_data.authority.to_bytes(),
-                &fn_data.attestation_queue.to_bytes(),
-                &self.function.to_bytes(),
-            ],
-            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        );
-
-        let (state, _) =
-            Pubkey::find_program_address(&[b"STATE"], &SWITCHBOARD_ATTESTATION_PROGRAM_ID);
+        let state = AttestationState::get_pda();
 
         let pubkeys = FunctionVerifyPubkeys {
             function: self.function,
             fn_signer: self.signer,
-            fn_quote,
+            fn_quote: self.quote,
             verifier_quote: self.verifier,
             secured_signer: verifier_quote.authority,
             attestation_queue: fn_data.attestation_queue,

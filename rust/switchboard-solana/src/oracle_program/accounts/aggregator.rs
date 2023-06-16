@@ -170,7 +170,7 @@ impl AggregatorAccountData {
     /// ```ignore
     /// use switchboard_solana::AggregatorAccountData;
     ///
-    /// let data_feed = AggregatorAccountData::new(feed_account_info.try_borrow_data()?)?;
+    /// let data_feed = AggregatorAccountData::new_from_bytes(feed_account_info.try_borrow_data()?)?;
     /// ```
     pub fn new_from_bytes(data: &[u8]) -> anchor_lang::Result<&AggregatorAccountData> {
         if data.len() < AggregatorAccountData::discriminator().len() {

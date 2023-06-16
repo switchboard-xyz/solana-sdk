@@ -115,4 +115,30 @@ impl AttestationPermissionAccountData {
             crate::client::load_account(client, pubkey).await
         }
     }
+
+    pub fn get_pda(authority: &Pubkey, attestation_queue: &Pubkey, grantee: &Pubkey) -> Pubkey {
+        let (permission_pubkey, _) = Pubkey::find_program_address(
+            &[
+                PERMISSION_SEED,
+                &authority.to_bytes(),
+                &attestation_queue.to_bytes(),
+                &grantee.to_bytes(),
+            ],
+            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+        );
+        permission_pubkey
+    }
+
+    pub fn verify_pda(
+        expected: &Pubkey,
+        authority: &Pubkey,
+        attestation_queue: &Pubkey,
+        grantee: &Pubkey,
+    ) -> Result<()> {
+        let key = Self::get_pda(authority, attestation_queue, grantee);
+        if key != *expected {
+            return Err(error!(SwitchboardError::PdaDerivationError));
+        }
+        Ok(())
+    }
 }

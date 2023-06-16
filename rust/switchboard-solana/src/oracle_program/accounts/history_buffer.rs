@@ -22,6 +22,7 @@ pub struct AggregatorHistoryBuffer<'a> {
     /// The array of samples collected from the aggregator.
     pub rows: Ref<'a, [AggregatorHistoryRow]>,
 }
+
 impl<'a> AggregatorHistoryBuffer<'a> {
     /// Returns the deserialized Switchboard history buffer account
     ///
@@ -35,14 +36,14 @@ impl<'a> AggregatorHistoryBuffer<'a> {
 
         let mut disc_bytes = [0u8; 8];
         disc_bytes.copy_from_slice(&data[..8]);
-        if disc_bytes != *b"BUFFERxx" {
+        if disc_bytes != AggregatorHistoryBuffer::discriminator() {
             return Err(SwitchboardError::AccountDiscriminatorMismatch.into());
         }
+
         let insertion_idx: u32 = try_from_bytes::<u32>(&data[8..12]).unwrap().clone();
-        let rows = Ref::map(data, |data| try_cast_slice(&data[12..]).unwrap());
         return Ok(Self {
             insertion_idx: insertion_idx as usize,
-            rows: rows,
+            rows: Ref::map(data, |data| try_cast_slice(&data[12..]).unwrap()),
         });
     }
 
@@ -83,6 +84,16 @@ impl<'a> AggregatorHistoryBuffer<'a> {
             }
         }
         None
+    }
+}
+
+impl<'a> Discriminator for AggregatorHistoryBuffer<'a> {
+    const DISCRIMINATOR: [u8; 8] = [66, 85, 70, 70, 69, 82, 120, 120];
+}
+
+impl<'a> Owner for AggregatorHistoryBuffer<'a> {
+    fn owner() -> Pubkey {
+        SWITCHBOARD_PROGRAM_ID
     }
 }
 

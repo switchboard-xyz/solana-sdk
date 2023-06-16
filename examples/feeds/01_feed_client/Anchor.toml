@@ -7,10 +7,10 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-switchboard_vrf_client = "4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN"
+switchboard_feed_client = "4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p"
 
 [programs.devnet]
-switchboard_vrf_client = "4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN"
+switchboard_feed_client = "4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -38,7 +38,13 @@ address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
 address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
 
 [[test.validator.clone]] # sb devnet attestation programID
-address = "2No5FVKPAAYqytpkEoq93tVh33fo4p6DgAnm4S6oZHo7"
+address = "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
 
 [[test.validator.clone]] # sb devnet attestation IDL
-address = "th1SbXMTX3SrWJ1kbiSKqMDpTBaXkESxpcehXRa12T4"
+address = "GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m"
+
+[[test.validator.clone]] # sb SOL feed
+address = "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
+
+[[test.validator.clone]] # sb SOL feed historyBuffer
+address = "9GPTMZmtNU61ULAZoGxDZmnZoWeF8zvBmKp4WZY6Ln6j"
