@@ -56,7 +56,7 @@ pub enum AggregatorResolutionMode {
 // #[zero_copy]
 #[account(zero_copy)]
 #[repr(packed)]
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub struct AggregatorAccountData {
     /// Name of the aggregator to store on-chain.
     pub name: [u8; 32],
@@ -170,7 +170,7 @@ impl AggregatorAccountData {
     /// ```ignore
     /// use switchboard_solana::AggregatorAccountData;
     ///
-    /// let data_feed = AggregatorAccountData::new(feed_account_info.try_borrow_data()?)?;
+    /// let data_feed = AggregatorAccountData::new_from_bytes(feed_account_info.try_borrow_data()?)?;
     /// ```
     pub fn new_from_bytes(data: &[u8]) -> anchor_lang::Result<&AggregatorAccountData> {
         if data.len() < AggregatorAccountData::discriminator().len() {

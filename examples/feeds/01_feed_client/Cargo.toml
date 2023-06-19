@@ -1,0 +1,21 @@
+[package]
+name = "switchboard-feed-client"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "switchboard_feed_client"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+
+[dependencies]
+# switchboard-solana = "0.5.2"
+switchboard-solana = { version = "0.5.2", path = "../../../rust/switchboard-solana" }
+bytemuck = "1.13.1"

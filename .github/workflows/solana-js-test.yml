@@ -44,7 +44,9 @@ jobs:
         id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-Solana.js-${{ hashFiles('javascript/solana.js/src/**') }}
+          key:
+            ${{ runner.os }}-Solana.js-${{
+            hashFiles('javascript/solana.js/src/**') }}
           path: |
             javascript/solana.js/lib
       - name: Build solana.js
@@ -88,7 +90,9 @@ jobs:
         id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-Solana.js-${{ hashFiles('javascript/solana.js/src/**') }}
+          key:
+            ${{ runner.os }}-Solana.js-${{
+            hashFiles('javascript/solana.js/src/**') }}
           path: |
             javascript/solana.js/lib
       - name: Build solana.js
@@ -100,7 +104,8 @@ jobs:
         with:
           solana-version: v1.14.10
           cluster: devnet
-          args: "--url ${{ secrets.DEVNET_RPC_URL }} --clone
+          args:
+            "--url ${{ secrets.DEVNET_RPC_URL }} --clone
             SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
             7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
             Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone
@@ -152,7 +157,9 @@ jobs:
         id: cache-solana-sdk-build
         uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-Solana.js-${{ hashFiles('javascript/solana.js/src/**') }}
+          key:
+            ${{ runner.os }}-Solana.js-${{
+            hashFiles('javascript/solana.js/src/**') }}
           path: |
             javascript/solana.js/lib
       - name: Build solana.js
@@ -164,7 +171,8 @@ jobs:
         with:
           solana-version: v1.14.10
           cluster: mainnet
-          args: "--url ${{ secrets.MAINNET_RPC_URL }} --clone
+          args:
+            "--url ${{ secrets.MAINNET_RPC_URL }} --clone
             SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone
             7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone
             Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone

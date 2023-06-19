@@ -1,4 +1,7 @@
 packages:
   - "javascript/*"
-  - "programs/*"
   - "rust/*"
+  - "examples/feeds/*"
+  - "examples/functions/*"
+  - "examples/functions/*/sgx-function"
+  - "examples/vrf/*"

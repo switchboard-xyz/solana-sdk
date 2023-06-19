@@ -1,0 +1,50 @@
+[workspace]
+members = ["."]
+
+[provider]
+# cluster = "devnet"
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[programs.localnet]
+switchboard_feed_client = "4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p"
+
+[programs.devnet]
+switchboard_feed_client = "4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+"test:devnet" = "USE_SWITCHBOARD_DEVNET_QUEUE=true yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+[test]
+startup_wait = 15000
+
+[[test.validator.clone]] # sb devnet oracle programID
+address = "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+
+[[test.validator.clone]] # sb devnet oracle IDL
+address = "Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk"
+
+[[test.validator.clone]] # sb devnet oracle SbState
+address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
+
+[[test.validator.clone]] # sb devnet oracle tokenVault
+address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
+
+[[test.validator.clone]] # sb devnet attestation programID
+address = "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+
+[[test.validator.clone]] # sb devnet attestation IDL
+address = "GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m"
+
+[[test.validator.clone]] # sb SOL feed
+address = "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"
+
+[[test.validator.clone]] # sb SOL feed historyBuffer
+address = "9GPTMZmtNU61ULAZoGxDZmnZoWeF8zvBmKp4WZY6Ln6j"

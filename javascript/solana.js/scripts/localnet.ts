@@ -22,35 +22,16 @@ const getProgramDataAddress = (programId) => {
 
 const getIdlAddress = (programId) => {
   const base = PublicKey.findProgramAddressSync([], programId)[0];
-
-  // const buffer = Buffer.concat([
-  //   base.toBuffer(),
-  //   Buffer.from('anchor:idl'),
-  //   programId.toBuffer(),
-  // ]);
-  // const publicKeyBytes = sha256(buffer);
-  // return new PublicKey(publicKeyBytes);
-
   return PublicKey.createWithSeed(base, "anchor:idl", new PublicKey(programId));
 };
 
 const SWITCHBOARD_PROGRAM_ID = new PublicKey(
   "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 );
-// const SWITCHBOARD_PROGRAM_ACCOUNTS = [
-//   SWITCHBOARD_PROGRAM_ID,
-//   getProgramDataAddress(SWITCHBOARD_PROGRAM_ID),
-//   await getIdlAddress(SWITCHBOARD_PROGRAM_ID),
-// ];
 
 const SWITCHBOARD_ATTESTATION_PROGRAM_ID = new PublicKey(
   "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
 );
-// const SWITCHBOARD_ATTESTATION_PROGRAM_ACCOUNTS = [
-//   SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-//   getProgramDataAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
-//   await getIdlAddress(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
-// ];
 
 const jsSdkRoot = path.join(__dirname, "..");
 const solanaSdkRoot = path.join(jsSdkRoot, "..", "..");
@@ -68,7 +49,10 @@ const defaultPubkeyPath = path.join(
   "id.json"
 );
 
-function killPort(port) {
+function killPort(port: number) {
+  if (port <= 0 || port > 65536) {
+    throw new Error(`Invalid port number`);
+  }
   execSync(`lsof -t -i :${port} | xargs kill -9 || exit 0`, {
     encoding: "utf-8",
   });

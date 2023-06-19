@@ -1,0 +1,41 @@
+[workspace]
+members = ["."]
+
+[provider]
+# cluster = "devnet"
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[programs.localnet]
+anchor_vrf_lite_parser = "5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb"
+
+[programs.devnet]
+anchor_vrf_lite_parser = "5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+"test:devnet" = "USE_SWITCHBOARD_DEVNET_QUEUE=true yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+
+[test.validator]
+url = "https://api.devnet.solana.com"
+
+[test]
+startup_wait = 15000
+
+[[test.validator.clone]] # sbv2 devnet programID
+address = "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+
+[[test.validator.clone]] # sbv2 devnet IDL
+address = "Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk"
+
+[[test.validator.clone]] # sbv2 devnet SbState
+address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
+
+[[test.validator.clone]] # sbv2 devnet tokenVault
+address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
+
+[[test.validator.clone]] # sb devnet attestation programID
+address = "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+
+[[test.validator.clone]] # sb devnet attestation IDL
+address = "GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m"

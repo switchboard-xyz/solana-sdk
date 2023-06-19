@@ -1,11 +1,10 @@
 <div align="center">
-  <a href="#">
-    <img src="https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png" />
-  </a>
 
-  <h1>switchboard-solana</h1>
+![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-  <p>A Rust library to interact with Switchboard accounts on Solana.</p>
+# switchboard-solana
+
+> A Rust library to interact with Switchboard accounts on Solana.
 
   <p>
 	  <a href="https://crates.io/crates/switchboard-solana">
@@ -23,7 +22,7 @@
   </p>
 
   <h4>
-    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana/latest/switchboard-solana/">docs.rs/switchboard-solana</a>
+    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana">docs.rs/switchboard-solana</a>
   </h4>
   <h4>
     <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
@@ -42,7 +41,7 @@ Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-solana = "0.1.23"
+switchboard-solana = "0.5.0"
 ```
 
 ## Usage
