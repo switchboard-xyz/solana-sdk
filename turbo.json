@@ -12,8 +12,9 @@
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "src/**/*.rs"],
       "outputs": [
         "dist/**",
-        "../../target/debug/*.d",
-        "../../target/debug/*.rlib"
+        "lib/**",
+        "target/debug/*.d",
+        "target/debug/*.rlib"
       ]
     },
     "test": {

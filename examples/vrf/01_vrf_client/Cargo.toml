@@ -1,12 +1,12 @@
 [package]
-name = "switchboard-vrf-client"
+name = "anchor-vrf-lite-parser"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "switchboard_vrf_client"
+name = "anchor_vrf_lite_parser"
 
 [features]
 default = []
@@ -16,8 +16,8 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-switchboard-solana = { path = "../../rust/switchboard-solana" }
-# switchboard-v2 = { version = "^0.1.23" }
+switchboard-solana = { path = "../../../rust/switchboard-solana" }
+# switchboard-solana = { version = "^0.5.2", path = "../../../rust/switchboard-solana" }
 anchor-lang = "^0.26.0"
 anchor-spl = "^0.26.0"
 solana-program = "~1.14.0"

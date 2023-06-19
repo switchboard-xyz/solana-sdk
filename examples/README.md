@@ -26,7 +26,7 @@
     <td>Functions</td>
     <td>
       <ol>
-        <li><a href="./functions/01_basic_function/README.md">Basic Function Example</a>: An example program for executing a custom function</li>
+        <li><a href="./functions/01_basic_oracle/README.md">Basic Function Example</a>: An example program for executing a custom function</li>
         <li><a href="./functions/02_vrf_function/README.md">VRF Function</a>: An example showing how to use a custom SGX function to publish randomness on-chain</li>
       </ol>
     </td>

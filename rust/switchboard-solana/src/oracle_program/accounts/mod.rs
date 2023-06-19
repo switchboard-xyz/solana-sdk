@@ -1,7 +1,6 @@
 pub mod aggregator;
 pub mod buffer_relayer;
 pub mod crank;
-pub mod decimal;
 pub mod ecvrf;
 pub mod history_buffer;
 pub mod job;
@@ -18,7 +17,6 @@ pub mod vrf_pool;
 pub use aggregator::*;
 pub use buffer_relayer::*;
 pub use crank::*;
-pub use decimal::*;
 pub use ecvrf::*;
 pub use history_buffer::*;
 pub use job::*;

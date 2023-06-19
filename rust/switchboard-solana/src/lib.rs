@@ -1,8 +1,12 @@
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(clippy::result_large_err)]
+
 mod macros;
 
 use solana_program::{declare_id, pubkey, pubkey::Pubkey};
+
+pub mod decimal;
+pub use decimal::*;
 
 pub mod oracle_program;
 pub use oracle_program::*;

@@ -526,7 +526,7 @@ export type CreateBootstrappedQueueParams =
     securedSigner?: Keypair;
   };
 
-type BootstrappedAttestationQueue = {
+export type BootstrappedAttestationQueue = {
   attestationQueueAccount: AttestationQueueAccount;
   verifier: {
     quoteAccount: QuoteAccount;

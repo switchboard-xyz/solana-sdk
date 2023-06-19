@@ -14,7 +14,7 @@ pub struct UpdateResult<'info> {
         constraint = 
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
-    pub vrf: AccountLoader<'info, VrfAccountData>,
+    pub vrf: AccountLoader<'info, VrfLiteAccountData>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

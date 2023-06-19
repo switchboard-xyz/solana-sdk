@@ -4,10 +4,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "turbo run build",
-    "build:lib": "turbo run build:lib",
-    "build:rust": "cargo build",
     "dev": "turbo run dev",
-    "rust:dev": "cargo watch -x run -p utils -w ./rust/utils",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "fix": "pnpm -r fix",

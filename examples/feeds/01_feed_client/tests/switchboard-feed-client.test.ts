@@ -20,7 +20,7 @@ describe("switchboard-feed-client test", () => {
   anchor.setProvider(provider);
 
   const program: anchor.Program<SwitchboardFeedClient> =
-    anchor.workspace.AnchorVrfParser;
+    anchor.workspace.SwitchboardFeedClient;
 
   let switchboard: SwitchboardProgram;
   let aggregatorAccount: AggregatorAccount;
@@ -38,6 +38,8 @@ describe("switchboard-feed-client test", () => {
       .readFeed({ maxConfidenceInterval: null })
       .accounts({ aggregator: aggregatorAccount.publicKey })
       .rpc();
+
+    await sleep(5000);
 
     const confirmedTxn = await program.provider.connection.getParsedTransaction(
       tx,

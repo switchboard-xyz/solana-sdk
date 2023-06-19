@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "types": [
+      "mocha",
+      "chai"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "es2015"
+    ],
+    "module": "commonjs",
+    "target": "es6",
+    "esModuleInterop": true,
+    "noEmit": true,
+    "paths": {
+      "@switchboard-xyz/solana.js": [
+        "../../../javascript/solana.js"
+      ]
+    }
+  },
+  "exclude": [
+    "target"
+  ],
+  "references": [
+    {
+      "path": "../../../javascript/solana.js"
+    }
+  ]
+}

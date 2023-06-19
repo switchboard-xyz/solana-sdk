@@ -22,7 +22,7 @@ cpi = ["no-entrypoint"]
 
 [dependencies]
 anchor-spl = "=0.26.0"
-solana-program = ">= 1.13.5, < 1.15"
+solana-program = ">= 1.13.5, < 1.14.19"
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"

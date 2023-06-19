@@ -8,14 +8,14 @@ pub use switchboard_solana::SWITCHBOARD_PROGRAM_ID;
 
 pub use switchboard_solana::Callback;
 
-declare_id!("4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN");
+declare_id!("5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb");
 
 const MAX_RESULT: u64 = u64::MAX;
 
 const STATE_SEED: &[u8] = b"STATE";
 
 #[program]
-pub mod switchboard_vrf_client {
+pub mod anchor_vrf_lite_parser {
     use super::*;
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]

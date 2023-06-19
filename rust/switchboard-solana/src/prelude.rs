@@ -1,6 +1,7 @@
 use crate::{cfg_client, cfg_program};
 
 pub use crate::accounts::*;
+pub use crate::decimal::*;
 pub use crate::error::*;
 pub use crate::instructions::*;
 pub use crate::seeds::*;

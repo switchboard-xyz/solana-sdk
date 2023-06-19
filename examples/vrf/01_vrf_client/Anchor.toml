@@ -7,13 +7,10 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [programs.localnet]
-switchboard_vrf_client = "4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN"
+anchor_vrf_lite_parser = "5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb"
 
 [programs.devnet]
-switchboard_vrf_client = "4wTeTACfwiXqqvy44bNBB3V2rFjmSTXVoEr4ZAYamJEN"
-
-[registry]
-url = "https://anchor.projectserum.com"
+anchor_vrf_lite_parser = "5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
@@ -25,16 +22,16 @@ url = "https://api.devnet.solana.com"
 [test]
 startup_wait = 15000
 
-[[test.validator.clone]] # sb devnet oracle programID
+[[test.validator.clone]] # sbv2 devnet programID
 address = "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
 
-[[test.validator.clone]] # sb devnet oracle IDL
+[[test.validator.clone]] # sbv2 devnet IDL
 address = "Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk"
 
-[[test.validator.clone]] # sb devnet oracle SbState
+[[test.validator.clone]] # sbv2 devnet SbState
 address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
 
-[[test.validator.clone]] # sb devnet oracle tokenVault
+[[test.validator.clone]] # sbv2 devnet tokenVault
 address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
 
 [[test.validator.clone]] # sb devnet attestation programID

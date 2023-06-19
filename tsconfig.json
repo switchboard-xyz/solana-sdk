@@ -1,0 +1,24 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "files": [],
+    "references": [
+        {
+            "path": "javascript/solana.js"
+        },
+        {
+            "path": "javascript/feed-walkthrough"
+        },
+        {
+            "path": "examples/feeds/01_feed_client"
+        },
+        {
+            "path": "examples/feeds/02_spl_native"
+        },
+        {
+            "path": "examples/functions/01_basic_oracle"
+        },
+        {
+            "path": "examples/vrf/01_vrf_client"
+        }
+    ]
+}

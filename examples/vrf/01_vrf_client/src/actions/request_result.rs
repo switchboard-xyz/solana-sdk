@@ -3,7 +3,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 use anchor_spl::token::Token;
 pub use switchboard_solana::{
-    OracleQueueAccountData, PermissionAccountData, SbState, VrfAccountData, VrfRequestRandomness,
+    OracleQueueAccountData, PermissionAccountData, SbState, VrfLiteAccountData, VrfLiteRequestRandomness,
     VrfSetCallback,
 };
 
@@ -32,7 +32,7 @@ pub struct RequestResult<'info> {
         constraint = 
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
-    pub vrf: AccountLoader<'info, VrfAccountData>,
+    pub vrf: AccountLoader<'info, VrfLiteAccountData>,
     /// CHECK
     #[account(mut, 
         has_one = data_buffer,
@@ -75,17 +75,6 @@ pub struct RequestResult<'info> {
     )]
     pub switchboard_program: AccountInfo<'info>,
 
-    // PAYER ACCOUNTS
-    #[account(mut, 
-        constraint = 
-            payer_wallet.owner == payer_authority.key()
-            && payer_wallet.mint == program_state.load()?.token_mint
-    )]
-    pub payer_wallet: Account<'info, TokenAccount>,
-    /// CHECK:
-    #[account(signer)]
-    pub payer_authority: AccountInfo<'info>,
-
     // SYSTEM ACCOUNTS
     /// CHECK:
     #[account(address = solana_program::sysvar::recent_blockhashes::ID)]
@@ -95,7 +84,8 @@ pub struct RequestResult<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct RequestResultParams {}
+pub struct RequestResultParams {
+}
 
 impl RequestResult<'_> {
     pub fn validate(&self, _ctx: &Context<Self>, _params: &RequestResultParams) -> Result<()> {
@@ -134,24 +124,16 @@ impl RequestResult<'_> {
             &vrf_set_callback.vrf.key(),
             &UpdateResultParams {},
         )?;
-        msg!("setting callback");
-        vrf_set_callback.invoke_signed(
-            ctx.accounts.switchboard_program.to_account_info(),
-            callback,
-            state_seeds,
-        )?;
 
         // then request randomness
-        let vrf_request_randomness = VrfRequestRandomness {
+        let vrf_request_randomness = VrfLiteRequestRandomness {
             authority: ctx.accounts.state.to_account_info(),
-            vrf: ctx.accounts.vrf.to_account_info(),
-            oracle_queue: ctx.accounts.oracle_queue.to_account_info(),
+            vrf_lite: ctx.accounts.vrf.to_account_info(),
+            queue: ctx.accounts.oracle_queue.to_account_info(),
             queue_authority: ctx.accounts.queue_authority.to_account_info(),
             data_buffer: ctx.accounts.data_buffer.to_account_info(),
             permission: ctx.accounts.permission.to_account_info(),
             escrow: ctx.accounts.escrow.clone(),
-            payer_wallet: ctx.accounts.payer_wallet.clone(),
-            payer_authority: ctx.accounts.payer_authority.to_account_info(),
             recent_blockhashes: ctx.accounts.recent_blockhashes.to_account_info(),
             program_state: ctx.accounts.program_state.to_account_info(),
             token_program: ctx.accounts.token_program.to_account_info(),
@@ -160,8 +142,7 @@ impl RequestResult<'_> {
         msg!("requesting randomness");
         vrf_request_randomness.invoke_signed(
             ctx.accounts.switchboard_program.to_account_info(),
-            switchboard_state_bump,
-            permission_bump,
+            Some(callback),
             state_seeds,
         )?;
 

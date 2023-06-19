@@ -2,7 +2,7 @@ use crate::*;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
 use anchor_spl::token::Token;
-pub use switchboard_solana::{VrfAccountData, VrfClose, VrfCloseParams, PERMISSION_SEED};
+pub use switchboard_solana::{VrfLiteAccountData, VrfLiteClose, VrfCloseParams, PERMISSION_SEED};
 
 #[derive(Accounts)]
 #[instruction(params: CloseStateParams)]
@@ -26,7 +26,7 @@ pub struct CloseState<'info> {
     #[account(mut, signer)]
     pub payer: AccountInfo<'info>,
     #[account(mut)]
-    pub vrf: AccountLoader<'info, VrfAccountData>,
+    pub vrf: AccountLoader<'info, VrfLiteAccountData>,
     #[account(
         mut, 
         constraint = escrow.mint == escrow_dest.mint && escrow.owner == program_state.key()
@@ -88,7 +88,7 @@ impl CloseState<'_> {
         // TODO: Validate the current user doesnt have an open request
 
         // 1500 slots, 400ms/slot = about 10min
-        if ctx.accounts.vrf.load()?.current_round.request_slot != 0 && ctx.accounts.vrf.load()?.current_round.request_slot + 1500 > clock::Clock::get()?.slot {
+        if ctx.accounts.vrf.load()?.request_slot != 0 && ctx.accounts.vrf.load()?.request_slot + 1500 > clock::Clock::get()?.slot {
             return Err(error!(VrfErrorCode::VrfCloseNotReady));
         }
 
@@ -118,9 +118,9 @@ impl CloseState<'_> {
             &[bump],
         ]];
 
-        let vrf_close = VrfClose {
+        let vrf_close = VrfLiteClose {
             authority: ctx.accounts.state.to_account_info(),
-            vrf: ctx.accounts.vrf.to_account_info(),
+            vrf_lite: ctx.accounts.vrf.to_account_info(),
             permission: ctx.accounts.permission.to_account_info(),
             queue: ctx.accounts.oracle_queue.to_account_info(),
             queue_authority: ctx.accounts.queue_authority.to_account_info(),
@@ -134,8 +134,6 @@ impl CloseState<'_> {
         msg!("closing VRF account");
         vrf_close.invoke_signed(
             ctx.accounts.switchboard_program.to_account_info(),
-            switchboard_state_bump,
-            permission_bump,
             state_seeds,
         )?;
         msg!("VRF account closed!");

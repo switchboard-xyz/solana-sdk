@@ -56,7 +56,7 @@ pub enum AggregatorResolutionMode {
 // #[zero_copy]
 #[account(zero_copy)]
 #[repr(packed)]
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub struct AggregatorAccountData {
     /// Name of the aggregator to store on-chain.
     pub name: [u8; 32],

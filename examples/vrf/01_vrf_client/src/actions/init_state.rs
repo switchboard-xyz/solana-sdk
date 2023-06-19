@@ -1,6 +1,6 @@
 use crate::*;
 use anchor_lang::prelude::*;
-pub use switchboard_solana::VrfAccountData;
+pub use switchboard_solana::VrfLiteAccountData;
 
 #[derive(Accounts)]
 #[instruction(params: InitStateParams)]
@@ -27,7 +27,7 @@ pub struct InitState<'info> {
         constraint = 
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
-    pub vrf: AccountLoader<'info, VrfAccountData>,
+    pub vrf: AccountLoader<'info, VrfLiteAccountData>,
     #[account(address = solana_program::system_program::ID)]
     pub system_program: Program<'info, System>,
 }
