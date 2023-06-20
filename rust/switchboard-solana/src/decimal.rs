@@ -1,4 +1,4 @@
-#![allow(unaligned_references)]
+// #![allow(unaligned_references)]
 use crate::prelude::*;
 use core::cmp::Ordering;
 use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
@@ -29,7 +29,7 @@ use std::convert::{From, TryInto};
 
 #[zero_copy]
 #[repr(packed)]
-#[derive(Default, Debug, Eq, PartialEq, AnchorDeserialize, AnchorSerialize)]
+#[derive(Default, Debug, Eq, PartialEq, AnchorDeserialize)]
 pub struct SwitchboardDecimal {
     /// The part of a floating-point number that represents the significant digits of that number, and that is multiplied by the base, 10, raised to the power of scale to give the actual value of the number.
     pub mantissa: i128,
@@ -49,9 +49,15 @@ impl SwitchboardDecimal {
         Self::from_rust_decimal(dec)
     }
     pub fn scale_to(&self, new_scale: u32) -> i128 {
-        match self.scale.cmp(&new_scale) {
-            std::cmp::Ordering::Greater => self.mantissa / 10_i128.pow(self.scale - new_scale),
-            std::cmp::Ordering::Less => self.mantissa * 10_i128.pow(new_scale - self.scale),
+        match { self.scale }.cmp(&new_scale) {
+            std::cmp::Ordering::Greater => self
+                .mantissa
+                .checked_div(10_i128.pow(self.scale - new_scale))
+                .unwrap(),
+            std::cmp::Ordering::Less => self
+                .mantissa
+                .checked_mul(10_i128.pow(new_scale - self.scale))
+                .unwrap(),
             std::cmp::Ordering::Equal => self.mantissa,
         }
     }

@@ -13,7 +13,7 @@ pub struct Hash {
 
 #[zero_copy]
 #[repr(packed)]
-#[derive(Default, Debug, PartialEq, Eq)]
+#[derive(Default, PartialEq, Eq)]
 pub struct AggregatorRound {
     /// Maintains the number of successful responses received from nodes.
     /// Nodes can submit one successful response per round.

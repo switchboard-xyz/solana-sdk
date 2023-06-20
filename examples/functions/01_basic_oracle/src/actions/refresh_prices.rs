@@ -5,10 +5,11 @@ pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
         bump = program.load()?.bump,
-        constraint = !program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
+        constraint = program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
     )]
     pub program: AccountLoader<'info, MyProgramState>,
     #[account(
+        mut,
         seeds = [ORACLE_SEED],
         bump = oracle.load()?.bump
     )]
@@ -18,8 +19,8 @@ pub struct RefreshPrices<'info> {
 
     #[account(
         seeds = [QUOTE_SEED, function.key().as_ref()],
-        bump,
-        seeds::program = SWITCHBOARD_PROGRAM_ID,
+        bump = quote.load()?.bump,
+        seeds::program = SWITCHBOARD_ATTESTATION_PROGRAM_ID,
         has_one = secured_signer @ BasicOracleError::InvalidTrustedSigner,
         constraint = 
             quote.load()?.mr_enclave != [0u8; 32] @ BasicOracleError::EmptySwitchboardQuote
@@ -36,8 +37,6 @@ pub struct RefreshPricesParams {
     pub sol: Option<OracleData>,
     pub usdt: Option<OracleData>,
     pub usdc: Option<OracleData>,
-    pub doge: Option<OracleData>,
-    pub near: Option<OracleData>,
 }
 
 impl RefreshPrices<'_> {
@@ -70,14 +69,6 @@ impl RefreshPrices<'_> {
 
         if let Some(usdc) = params.usdc { 
             oracle.usdc = usdc;
-        }
-
-        if let Some(doge) = params.doge { 
-            oracle.doge = doge;
-        }
-
-        if let Some(near) = params.near { 
-            oracle.near = near;
         }
 
         Ok(())

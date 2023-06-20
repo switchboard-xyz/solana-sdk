@@ -4,6 +4,7 @@ use crate::*;
 #[instruction(params: SetEnclavesParams)] // rpc parameters hint
 pub struct SetEnclaves<'info> {
     #[account(
+        mut,
         seeds = [PROGRAM_SEED],
         bump = program.load()?.bump,
         has_one = authority

@@ -14,11 +14,7 @@ impl MyProgramState {
             return false;
         }
 
-        if !self.mr_enclaves.contains(quote_enclave) {
-            return false;
-        }
-
-        true
+        self.mr_enclaves.contains(quote_enclave)
     }
 }
 
@@ -27,18 +23,25 @@ impl MyProgramState {
 pub struct OracleData {
     pub oracle_timestamp: i64,
     pub price: i128,
-    pub volume: i128,
+    pub volume_1hr: i128,
+    pub volume_24hr: i128,
+    pub twap_1hr: i128,
     pub twap_24hr: i128,
 }
 
-// impl OracleData {
-//     pub fn get_fair_price(&self) -> anchor_lang::Result<f64> {
-//         // Do some logic here based on the twap/vwap
+impl OracleData {
+    pub fn get_fair_price(&self) -> anchor_lang::Result<f64> {
+        // Do some logic here based on the twap
 
-//         let result: f64 = self.price.try_into()?;
-//         Ok(result)
-//     }
-// }
+        let price: f64 = SwitchboardDecimal {
+            mantissa: self.price,
+            scale: 9,
+        }
+        .try_into()?;
+
+        Ok(price)
+    }
+}
 
 #[repr(packed)]
 #[account(zero_copy)]
@@ -50,6 +53,4 @@ pub struct MyOracleState {
     pub sol: OracleData,
     pub usdt: OracleData,
     pub usdc: OracleData,
-    pub doge: OracleData,
-    pub near: OracleData,
 }
