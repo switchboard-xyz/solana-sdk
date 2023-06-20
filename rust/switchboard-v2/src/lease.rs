@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct LeaseAccountData {
     /// Public key of the token account holding the lease contract funds until rewarded to oracles for successfully processing updates

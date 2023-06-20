@@ -7,7 +7,7 @@ pub enum OracleResponseType {
     TypeDisagreement,
     TypeNoResponse,
 }
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[derive(Default)]
 #[repr(packed)]
 pub struct OracleMetrics {
@@ -31,7 +31,7 @@ pub struct OracleMetrics {
     pub total_late_response: u128,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct OracleAccountData {
     /// Name of the oracle to store on-chain.

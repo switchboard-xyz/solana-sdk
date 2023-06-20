@@ -17,7 +17,7 @@ pub enum SwitchboardPermission {
     PermitVrfRequests = 1 << 2,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct PermissionAccountData {
     /// The authority that is allowed to set permissions for this account.
