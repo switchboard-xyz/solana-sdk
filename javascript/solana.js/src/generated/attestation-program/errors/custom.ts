@@ -37,7 +37,10 @@ export type CustomError =
   | FunctionNotReady
   | UserRequestsDisabled
   | MissingFunctionAuthority
-  | FunctionCloseNotReady;
+  | FunctionCloseNotReady
+  | RequestAlreadyInitialized
+  | AccountCloseNotPermitted
+  | AccountCloseNotReady;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -471,6 +474,40 @@ export class FunctionCloseNotReady extends Error {
   }
 }
 
+export class RequestAlreadyInitialized extends Error {
+  static readonly code = 6038;
+  readonly code = 6038;
+  readonly name = "RequestAlreadyInitialized";
+  readonly msg =
+    "Attempting to initialize an already created FunctionRequestAccount";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6038: Attempting to initialize an already created FunctionRequestAccount"
+    );
+  }
+}
+
+export class AccountCloseNotPermitted extends Error {
+  static readonly code = 6039;
+  readonly code = 6039;
+  readonly name = "AccountCloseNotPermitted";
+
+  constructor(readonly logs?: string[]) {
+    super("6039: ");
+  }
+}
+
+export class AccountCloseNotReady extends Error {
+  static readonly code = 6040;
+  readonly code = 6040;
+  readonly name = "AccountCloseNotReady";
+
+  constructor(readonly logs?: string[]) {
+    super("6040: ");
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -549,6 +586,12 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new MissingFunctionAuthority(logs);
     case 6037:
       return new FunctionCloseNotReady(logs);
+    case 6038:
+      return new RequestAlreadyInitialized(logs);
+    case 6039:
+      return new AccountCloseNotPermitted(logs);
+    case 6040:
+      return new AccountCloseNotReady(logs);
   }
 
   return null;

@@ -43,6 +43,11 @@ export type {
 } from "./functionRequestInit.js";
 export { functionRequestInit } from "./functionRequestInit.js";
 export type {
+  FunctionRequestInitAndTriggerAccounts,
+  FunctionRequestInitAndTriggerArgs,
+} from "./functionRequestInitAndTrigger.js";
+export { functionRequestInitAndTrigger } from "./functionRequestInitAndTrigger.js";
+export type {
   FunctionRequestSetConfigAccounts,
   FunctionRequestSetConfigArgs,
 } from "./functionRequestSetConfig.js";

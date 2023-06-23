@@ -91,7 +91,7 @@ export class FunctionRequestTriggerRound {
         borsh.u64("expirationSlot"),
         borsh.publicKey("verifier"),
         borsh.publicKey("enclaveSigner"),
-        borsh.array(borsh.u8(), 128, "ebuf"),
+        borsh.array(borsh.u8(), 64, "ebuf"),
       ],
       property
     );

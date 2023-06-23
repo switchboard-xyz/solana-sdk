@@ -28,6 +28,10 @@ export interface FunctionRequestAccountDataFields {
   hash: Array<number>;
   /** The stringified container params to pass\ */
   containerParams: Uint8Array;
+  /** The unix timestamp when the function was created. */
+  createdAt: BN;
+  /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
+  garbageCollectionSlot: BN | null;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -55,6 +59,10 @@ export interface FunctionRequestAccountDataJSON {
   hash: Array<number>;
   /** The stringified container params to pass\ */
   containerParams: Array<number>;
+  /** The unix timestamp when the function was created. */
+  createdAt: string;
+  /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
+  garbageCollectionSlot: string | null;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -82,6 +90,10 @@ export class FunctionRequestAccountData {
   readonly hash: Array<number>;
   /** The stringified container params to pass\ */
   readonly containerParams: Uint8Array;
+  /** The unix timestamp when the function was created. */
+  readonly createdAt: BN;
+  /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
+  readonly garbageCollectionSlot: BN | null;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -101,6 +113,8 @@ export class FunctionRequestAccountData {
     borsh.u32("maxContainerParamsLen"),
     borsh.array(borsh.u8(), 32, "hash"),
     borsh.vecU8("containerParams"),
+    borsh.i64("createdAt"),
+    borsh.option(borsh.u64(), "garbageCollectionSlot"),
     borsh.array(borsh.u8(), 256, "ebuf"),
   ]);
 
@@ -120,6 +134,8 @@ export class FunctionRequestAccountData {
     this.maxContainerParamsLen = fields.maxContainerParamsLen;
     this.hash = fields.hash;
     this.containerParams = fields.containerParams;
+    this.createdAt = fields.createdAt;
+    this.garbageCollectionSlot = fields.garbageCollectionSlot;
     this.ebuf = fields.ebuf;
   }
 
@@ -184,6 +200,8 @@ export class FunctionRequestAccountData {
         dec.containerParams.byteOffset,
         dec.containerParams.length
       ),
+      createdAt: dec.createdAt,
+      garbageCollectionSlot: dec.garbageCollectionSlot,
       ebuf: dec.ebuf,
     });
   }
@@ -201,6 +219,10 @@ export class FunctionRequestAccountData {
       maxContainerParamsLen: this.maxContainerParamsLen,
       hash: this.hash,
       containerParams: Array.from(this.containerParams.values()),
+      createdAt: this.createdAt.toString(),
+      garbageCollectionSlot:
+        (this.garbageCollectionSlot && this.garbageCollectionSlot.toString()) ||
+        null,
       ebuf: this.ebuf,
     };
   }
@@ -224,6 +246,10 @@ export class FunctionRequestAccountData {
       maxContainerParamsLen: obj.maxContainerParamsLen,
       hash: obj.hash,
       containerParams: Uint8Array.from(obj.containerParams),
+      createdAt: new BN(obj.createdAt),
+      garbageCollectionSlot:
+        (obj.garbageCollectionSlot && new BN(obj.garbageCollectionSlot)) ||
+        null,
       ebuf: obj.ebuf,
     });
   }

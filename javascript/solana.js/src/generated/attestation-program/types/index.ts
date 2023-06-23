@@ -1,4 +1,3 @@
-import * as FunctionRequestTriggerMode from "./FunctionRequestTriggerMode.js";
 import * as FunctionStatus from "./FunctionStatus.js";
 import * as RequestStatus from "./RequestStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
@@ -49,6 +48,11 @@ export type {
   FunctionRequestCloseParamsJSON,
 } from "./FunctionRequestCloseParams.js";
 export { FunctionRequestCloseParams } from "./FunctionRequestCloseParams.js";
+export type {
+  FunctionRequestInitAndTriggerParamsFields,
+  FunctionRequestInitAndTriggerParamsJSON,
+} from "./FunctionRequestInitAndTriggerParams.js";
+export { FunctionRequestInitAndTriggerParams } from "./FunctionRequestInitAndTriggerParams.js";
 export type {
   FunctionRequestInitParamsFields,
   FunctionRequestInitParamsJSON,
@@ -183,12 +187,3 @@ export type SwitchboardAttestationPermissionJSON =
   | SwitchboardAttestationPermission.NoneJSON
   | SwitchboardAttestationPermission.PermitNodeheartbeatJSON
   | SwitchboardAttestationPermission.PermitQueueUsageJSON;
-
-export { FunctionRequestTriggerMode };
-
-export type FunctionRequestTriggerModeKind =
-  | FunctionRequestTriggerMode.Independent
-  | FunctionRequestTriggerMode.Managed;
-export type FunctionRequestTriggerModeJSON =
-  | FunctionRequestTriggerMode.IndependentJSON
-  | FunctionRequestTriggerMode.ManagedJSON;

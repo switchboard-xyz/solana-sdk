@@ -8,20 +8,24 @@ import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript
 export interface FunctionRequestInitParamsFields {
   maxContainerParamsLen: number | null;
   containerParams: Uint8Array;
+  garbageCollectionSlot: BN | null;
 }
 
 export interface FunctionRequestInitParamsJSON {
   maxContainerParamsLen: number | null;
   containerParams: Array<number>;
+  garbageCollectionSlot: string | null;
 }
 
 export class FunctionRequestInitParams {
   readonly maxContainerParamsLen: number | null;
   readonly containerParams: Uint8Array;
+  readonly garbageCollectionSlot: BN | null;
 
   constructor(fields: FunctionRequestInitParamsFields) {
     this.maxContainerParamsLen = fields.maxContainerParamsLen;
     this.containerParams = fields.containerParams;
+    this.garbageCollectionSlot = fields.garbageCollectionSlot;
   }
 
   static layout(property?: string) {
@@ -29,6 +33,7 @@ export class FunctionRequestInitParams {
       [
         borsh.option(borsh.u32(), "maxContainerParamsLen"),
         borsh.vecU8("containerParams"),
+        borsh.option(borsh.u64(), "garbageCollectionSlot"),
       ],
       property
     );
@@ -43,6 +48,7 @@ export class FunctionRequestInitParams {
         obj.containerParams.byteOffset,
         obj.containerParams.length
       ),
+      garbageCollectionSlot: obj.garbageCollectionSlot,
     });
   }
 
@@ -54,6 +60,7 @@ export class FunctionRequestInitParams {
         fields.containerParams.byteOffset,
         fields.containerParams.length
       ),
+      garbageCollectionSlot: fields.garbageCollectionSlot,
     };
   }
 
@@ -61,6 +68,9 @@ export class FunctionRequestInitParams {
     return {
       maxContainerParamsLen: this.maxContainerParamsLen,
       containerParams: Array.from(this.containerParams.values()),
+      garbageCollectionSlot:
+        (this.garbageCollectionSlot && this.garbageCollectionSlot.toString()) ||
+        null,
     };
   }
 
@@ -70,6 +80,9 @@ export class FunctionRequestInitParams {
     return new FunctionRequestInitParams({
       maxContainerParamsLen: obj.maxContainerParamsLen,
       containerParams: Uint8Array.from(obj.containerParams),
+      garbageCollectionSlot:
+        (obj.garbageCollectionSlot && new BN(obj.garbageCollectionSlot)) ||
+        null,
     });
   }
 
