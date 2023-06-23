@@ -8,25 +8,36 @@ use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 #[zero_copy]
 #[repr(packed)]
 pub struct AttestationQueueAccountData {
-    // Authority controls adding/removing allowed enclave measurements
+    /// The address of the authority which is permitted to add/remove allowed enclave measurements.
     pub authority: Pubkey,
-    // allowed enclave measurements
-    pub mr_enclaves: [MrEnclave; 32],
+    /// Allowed enclave measurements.
+    pub mr_enclaves: [[u8; 32]; 32],
+    /// The number of allowed enclave measurements.
     pub mr_enclaves_len: u32,
+    /// The addresses of the quote verifiers who have a valid
+    /// verification status and have heartbeated on-chain recently.
     pub data: [Pubkey; 128],
+    /// The length of valid quote verifiers for the given attestation queue.
     pub data_len: u32,
-    // Allow authority to force add a node after X seconds with no heartbeat
+    /// Allow authority to force add a node after X seconds with no heartbeat.
     pub allow_authority_override_after: i64,
-    // Even if a heartbeating machine quote verifies with proper measurement,
-    // require authority signoff.
+    /// Even if a heartbeating machine quote verifies with proper measurement,
+    /// require authority signoff.
     pub require_authority_heartbeat_permission: bool,
+    /// Require FunctionAccounts to have PermitQueueUsage before they are executed.
     pub require_usage_permissions: bool,
+    /// The maximum allowable time until a EnclaveAccount needs to be re-verified on-chain.
     pub max_quote_verification_age: i64,
+    /// The reward paid to quote verifiers for attesting on-chain.
     pub reward: u32, //TODO
+    /// The unix timestamp when the last quote verifier heartbeated on-chain.
     pub last_heartbeat: i64,
-    pub node_timeout: i64,
+    pub node_timeout: i64, // TODO ??
+    /// Incrementer used to track the current quote verifier permitted to run any available functions.
     pub curr_idx: u32,
+    /// Incrementer used to garbage collect and remove stale quote verifiers.
     pub gc_idx: u32,
+    /// Reserved.
     pub _ebuf: [u8; 1024],
 }
 

@@ -1,12 +1,13 @@
-use super::QuoteAccountData;
+use super::EnclaveAccountData;
 use crate::cfg_client;
 use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
 #[repr(u8)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum FunctionStatus {
+    #[default]
     None = 0,
     Active = 1 << 0,
     NonExecutable = 1 << 1,
@@ -14,28 +15,106 @@ pub enum FunctionStatus {
     OutOfFunds = 1 << 3,
     InvalidPermissions = 1 << 4,
 }
+impl From<FunctionStatus> for u8 {
+    fn from(value: FunctionStatus) -> Self {
+        match value {
+            FunctionStatus::Active => 1 << 0,
+            FunctionStatus::NonExecutable => 1 << 1,
+            FunctionStatus::Expired => 1 << 2,
+            FunctionStatus::OutOfFunds => 1 << 3,
+            FunctionStatus::InvalidPermissions => 1 << 4,
+            _ => 0,
+        }
+    }
+}
+impl From<u8> for FunctionStatus {
+    fn from(value: u8) -> Self {
+        match value {
+            1 => FunctionStatus::Active,
+            2 => FunctionStatus::NonExecutable,
+            4 => FunctionStatus::Expired,
+            8 => FunctionStatus::OutOfFunds,
+            16 => FunctionStatus::InvalidPermissions,
+            _ => FunctionStatus::default(),
+        }
+    }
+}
 
 #[zero_copy]
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
 pub struct FunctionAccountData {
+    /// Whether the function is invoked on a schedule or by request
+    pub is_scheduled: u8, // keep this up-front for filtering
+    /// Whether the function has been manually triggered with the function_trigger instruction
+    pub is_triggered: u8, // keep this up-front for filtering
+    /// The function permissions granted by the attestation_queue.authority
+    pub permissions: u32, // keep this up-front for filtering
+    pub status: FunctionStatus, // keep this up-front for filtering
+
+    // Metadata
+    /// The name of the function for easier identification.
     pub name: [u8; 64],
+    /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
-    pub authority: Pubkey,
-    pub container_registry: [u8; 64],
-    pub container: [u8; 64],
-    pub version: [u8; 32],
-    pub attestation_queue: Pubkey,
-    pub queue_idx: u32,
-    pub last_execution_timestamp: i64,
-    pub next_allowed_timestamp: i64,
-    pub schedule: [u8; 64],
-    pub escrow: Pubkey,
-    pub status: FunctionStatus,
+    /// The unix timestamp when the function was created.
     pub created_at: i64,
-    pub is_triggered: bool,
+    /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
+    pub updated_at: i64,
+
+    // Container Settings
+    /// The off-chain registry to fetch the function container from.
+    pub container_registry: [u8; 64],
+    /// The identifier of the container in the given container_registry.
+    pub container: [u8; 64],
+    /// The version tag of the container to pull.
+    pub version: [u8; 32],
+
+    // Accounts
+    /// The authority of the function which is authorized to make account changes.
+    pub authority: Pubkey,
+    /// The wrapped SOL escrow of the function to pay for scheduled requests.
+    pub escrow: Pubkey,
+    /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
     pub address_lookup_table: Pubkey,
-    pub _ebuf: [u8; 991],
+    /// The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements.
+    pub attestation_queue: Pubkey,
+    /// An incrementer used to rotate through an AttestationQueue's verifiers.
+    pub queue_idx: u32,
+
+    // Schedule
+    /// The cron schedule to run the function on.
+    pub schedule: [u8; 64],
+    /// The unix timestamp when the function was last run.
+    pub last_execution_timestamp: i64,
+    /// The unix timestamp when the function is allowed to run next.
+    pub next_allowed_timestamp: i64,
+    /// The number of times to trigger the function upon the next invocation.
+    pub trigger_count: u64,
+    // pub schedule_container_params: Vec<u8>,
+
+    // Permission Settings
+    /// UNUSED. The unix timestamp when the current permissions expire.
+    pub permission_expiration: i64,
+
+    // Request Settings
+    /// Number of requests created for this function. Used to prevent closing when there are live requests.
+    pub num_requests: u64,
+    /// Whether custom requests have been disabled for this function.
+    pub requests_disabled: bool,
+    /// Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
+    /// Useful if you want to use CPIs to control request account creation.
+    pub requests_require_authorization: bool,
+    /// The number of slots after a request has been verified before allowing a non-authority account to close the account.
+    /// Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
+    pub requests_default_slots_until_expiration: u64,
+    /// The lamports paid to the FunctionAccount escrow on each successful update request.
+    pub requests_request_fee: u64,
+
+    /// An array of permitted mr_enclave measurements for the function.
+    pub mr_enclaves: [[u8; 32]; 32],
+    /// Reserved.
+    pub _ebuf: [u8; 1024],
 }
 
 unsafe impl Pod for FunctionAccountData {}
@@ -120,7 +199,7 @@ impl FunctionAccountData {
     /// # Arguments
     ///
     /// * `function_account_info` - Solana AccountInfo for a FunctionAccountData
-    /// * `quote_account_info` - Solana AccountInfo for a QuoteAccountData
+    /// * `quote_account_info` - Solana AccountInfo for a EnclaveAccountData
     /// * `signer` - Solana AccountInfo for a signer
     pub fn validate_quote<'a>(
         function_account_info: &'a AccountInfo<'a>,
@@ -129,16 +208,16 @@ impl FunctionAccountData {
     ) -> anchor_lang::Result<bool> {
         // deserialize accounts and verify the owner
         FunctionAccountData::new(function_account_info)?;
-        let quote = QuoteAccountData::new(quote_account_info)?;
+        let quote = EnclaveAccountData::new(quote_account_info)?;
 
         // validate function PDA matches the expected derivation
-        let expected_quote_key = QuoteAccountData::get_pda_pubkey(&function_account_info.key())?;
+        let expected_quote_key = EnclaveAccountData::get_pda_pubkey(&function_account_info.key())?;
         if quote_account_info.key() != expected_quote_key {
             return Ok(false);
         }
 
         // validate the quotes delegated signer matches
-        if quote.secured_signer != signer.key() {
+        if quote.enclave_signer != signer.key() {
             return Ok(false);
         }
 

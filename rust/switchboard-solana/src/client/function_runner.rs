@@ -89,8 +89,8 @@ impl FunctionRunner {
         let fn_data: FunctionAccountData =
             FunctionAccountData::fetch(&self.client, self.function).await?;
 
-        let verifier_quote: QuoteAccountData =
-            QuoteAccountData::fetch(&self.client, self.verifier).await?;
+        let verifier_quote: EnclaveAccountData =
+            EnclaveAccountData::fetch(&self.client, self.verifier).await?;
 
         let queue_data: AttestationQueueAccountData =
             crate::client::load_account(&self.client, fn_data.attestation_queue).await?;

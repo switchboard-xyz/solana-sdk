@@ -5,10 +5,30 @@ use std::cell::Ref;
 
 use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
-#[derive(Copy, Clone, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, Default, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum SwitchboardAttestationPermission {
+    #[default]
+    None = 0,
     PermitNodeheartbeat = 1 << 0,
     PermitQueueUsage = 1 << 1,
+}
+impl From<SwitchboardAttestationPermission> for u32 {
+    fn from(value: SwitchboardAttestationPermission) -> Self {
+        match value {
+            SwitchboardAttestationPermission::PermitNodeheartbeat => 1 << 0,
+            SwitchboardAttestationPermission::PermitQueueUsage => 1 << 1,
+            _ => 0,
+        }
+    }
+}
+impl From<u32> for SwitchboardAttestationPermission {
+    fn from(value: u32) -> Self {
+        match value {
+            1 => SwitchboardAttestationPermission::PermitNodeheartbeat,
+            2 => SwitchboardAttestationPermission::PermitQueueUsage,
+            _ => SwitchboardAttestationPermission::default(),
+        }
+    }
 }
 
 #[zero_copy]
