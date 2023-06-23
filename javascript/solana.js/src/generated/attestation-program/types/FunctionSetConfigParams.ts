@@ -13,10 +13,10 @@ export interface FunctionSetConfigParamsFields {
   version: Uint8Array | null;
   schedule: Uint8Array | null;
   mrEnclaves: Array<Array<number>> | null;
-  usersDisabled: boolean | null;
-  usersRequireAuthorization: boolean | null;
-  usersDefaultSlotsUntilExpiration: BN | null;
-  usersRequestFee: BN | null;
+  requestsDisabled: boolean | null;
+  requestsRequireAuthorization: boolean | null;
+  requestsDefaultSlotsUntilExpiration: BN | null;
+  requestsRequestFee: BN | null;
 }
 
 export interface FunctionSetConfigParamsJSON {
@@ -27,10 +27,10 @@ export interface FunctionSetConfigParamsJSON {
   version: Array<number> | null;
   schedule: Array<number> | null;
   mrEnclaves: Array<Array<number>> | null;
-  usersDisabled: boolean | null;
-  usersRequireAuthorization: boolean | null;
-  usersDefaultSlotsUntilExpiration: string | null;
-  usersRequestFee: string | null;
+  requestsDisabled: boolean | null;
+  requestsRequireAuthorization: boolean | null;
+  requestsDefaultSlotsUntilExpiration: string | null;
+  requestsRequestFee: string | null;
 }
 
 export class FunctionSetConfigParams {
@@ -41,10 +41,10 @@ export class FunctionSetConfigParams {
   readonly version: Uint8Array | null;
   readonly schedule: Uint8Array | null;
   readonly mrEnclaves: Array<Array<number>> | null;
-  readonly usersDisabled: boolean | null;
-  readonly usersRequireAuthorization: boolean | null;
-  readonly usersDefaultSlotsUntilExpiration: BN | null;
-  readonly usersRequestFee: BN | null;
+  readonly requestsDisabled: boolean | null;
+  readonly requestsRequireAuthorization: boolean | null;
+  readonly requestsDefaultSlotsUntilExpiration: BN | null;
+  readonly requestsRequestFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
     this.name = fields.name;
@@ -54,11 +54,11 @@ export class FunctionSetConfigParams {
     this.version = fields.version;
     this.schedule = fields.schedule;
     this.mrEnclaves = fields.mrEnclaves;
-    this.usersDisabled = fields.usersDisabled;
-    this.usersRequireAuthorization = fields.usersRequireAuthorization;
-    this.usersDefaultSlotsUntilExpiration =
-      fields.usersDefaultSlotsUntilExpiration;
-    this.usersRequestFee = fields.usersRequestFee;
+    this.requestsDisabled = fields.requestsDisabled;
+    this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
+    this.requestsDefaultSlotsUntilExpiration =
+      fields.requestsDefaultSlotsUntilExpiration;
+    this.requestsRequestFee = fields.requestsRequestFee;
   }
 
   static layout(property?: string) {
@@ -71,10 +71,10 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.vecU8(), "version"),
         borsh.option(borsh.vecU8(), "schedule"),
         borsh.option(borsh.vec(borsh.array(borsh.u8(), 32)), "mrEnclaves"),
-        borsh.option(borsh.bool(), "usersDisabled"),
-        borsh.option(borsh.bool(), "usersRequireAuthorization"),
-        borsh.option(borsh.u64(), "usersDefaultSlotsUntilExpiration"),
-        borsh.option(borsh.u64(), "usersRequestFee"),
+        borsh.option(borsh.bool(), "requestsDisabled"),
+        borsh.option(borsh.bool(), "requestsRequireAuthorization"),
+        borsh.option(borsh.u64(), "requestsDefaultSlotsUntilExpiration"),
+        borsh.option(borsh.u64(), "requestsRequestFee"),
       ],
       property
     );
@@ -132,10 +132,11 @@ export class FunctionSetConfigParams {
           )) ||
         null,
       mrEnclaves: obj.mrEnclaves,
-      usersDisabled: obj.usersDisabled,
-      usersRequireAuthorization: obj.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration: obj.usersDefaultSlotsUntilExpiration,
-      usersRequestFee: obj.usersRequestFee,
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        obj.requestsDefaultSlotsUntilExpiration,
+      requestsRequestFee: obj.requestsRequestFee,
     });
   }
 
@@ -190,10 +191,11 @@ export class FunctionSetConfigParams {
           )) ||
         null,
       mrEnclaves: fields.mrEnclaves,
-      usersDisabled: fields.usersDisabled,
-      usersRequireAuthorization: fields.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration: fields.usersDefaultSlotsUntilExpiration,
-      usersRequestFee: fields.usersRequestFee,
+      requestsDisabled: fields.requestsDisabled,
+      requestsRequireAuthorization: fields.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        fields.requestsDefaultSlotsUntilExpiration,
+      requestsRequestFee: fields.requestsRequestFee,
     };
   }
 
@@ -210,14 +212,14 @@ export class FunctionSetConfigParams {
       version: (this.version && Array.from(this.version.values())) || null,
       schedule: (this.schedule && Array.from(this.schedule.values())) || null,
       mrEnclaves: this.mrEnclaves,
-      usersDisabled: this.usersDisabled,
-      usersRequireAuthorization: this.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration:
-        (this.usersDefaultSlotsUntilExpiration &&
-          this.usersDefaultSlotsUntilExpiration.toString()) ||
+      requestsDisabled: this.requestsDisabled,
+      requestsRequireAuthorization: this.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        (this.requestsDefaultSlotsUntilExpiration &&
+          this.requestsDefaultSlotsUntilExpiration.toString()) ||
         null,
-      usersRequestFee:
-        (this.usersRequestFee && this.usersRequestFee.toString()) || null,
+      requestsRequestFee:
+        (this.requestsRequestFee && this.requestsRequestFee.toString()) || null,
     };
   }
 
@@ -232,14 +234,14 @@ export class FunctionSetConfigParams {
       version: (obj.version && Uint8Array.from(obj.version)) || null,
       schedule: (obj.schedule && Uint8Array.from(obj.schedule)) || null,
       mrEnclaves: obj.mrEnclaves,
-      usersDisabled: obj.usersDisabled,
-      usersRequireAuthorization: obj.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration:
-        (obj.usersDefaultSlotsUntilExpiration &&
-          new BN(obj.usersDefaultSlotsUntilExpiration)) ||
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        (obj.requestsDefaultSlotsUntilExpiration &&
+          new BN(obj.requestsDefaultSlotsUntilExpiration)) ||
         null,
-      usersRequestFee:
-        (obj.usersRequestFee && new BN(obj.usersRequestFee)) || null,
+      requestsRequestFee:
+        (obj.requestsRequestFee && new BN(obj.requestsRequestFee)) || null,
     });
   }
 

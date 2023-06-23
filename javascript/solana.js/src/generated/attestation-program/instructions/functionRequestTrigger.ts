@@ -9,47 +9,47 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserCloseArgs {
-  params: types.FunctionUserCloseParamsFields;
+export interface FunctionRequestTriggerArgs {
+  params: types.FunctionRequestTriggerParamsFields;
 }
 
-export interface FunctionUserCloseAccounts {
-  user: PublicKey;
+export interface FunctionRequestTriggerAccounts {
+  request: PublicKey;
   authority: PublicKey;
   escrow: PublicKey;
   function: PublicKey;
-  solDest: PublicKey;
-  escrowDest: PublicKey;
   state: PublicKey;
+  attestationQueue: PublicKey;
+  payer: PublicKey;
   tokenProgram: PublicKey;
   systemProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionUserCloseParams.layout("params"),
+  types.FunctionRequestTriggerParams.layout("params"),
 ]);
 
-export function functionUserClose(
+export function functionRequestTrigger(
   program: SwitchboardProgram,
-  args: FunctionUserCloseArgs,
-  accounts: FunctionUserCloseAccounts
+  args: FunctionRequestTriggerArgs,
+  accounts: FunctionRequestTriggerAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.user, isSigner: false, isWritable: true },
+    { pubkey: accounts.request, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.solDest, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([142, 34, 65, 90, 244, 242, 111, 71]);
+  const identifier = Buffer.from([74, 35, 78, 67, 196, 102, 78, 153]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionUserCloseParams.toEncodable(args.params),
+      params: types.FunctionRequestTriggerParams.toEncodable(args.params),
     },
     buffer
   );

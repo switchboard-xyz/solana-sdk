@@ -5,7 +5,7 @@ import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-es
 import { Connection, PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserAccountDataFields {
+export interface FunctionRequestAccountDataFields {
   /** Whether the request is ready to be processed. */
   isTriggered: number;
   /** The status of the current request. */
@@ -19,9 +19,9 @@ export interface FunctionUserAccountDataFields {
   /** The tokenAccount escrow */
   escrow: PublicKey;
   /** The current active request. */
-  activeRequest: types.FunctionUserRequestRoundFields;
+  activeRequest: types.FunctionRequestTriggerRoundFields;
   /** The previous request. */
-  previousRequest: types.FunctionUserRequestRoundFields;
+  previousRequest: types.FunctionRequestTriggerRoundFields;
   /** The maximum number of bytes to pass to the container params. */
   maxContainerParamsLen: number;
   /** Hash of the serialized container_params to prevent RPC tampering. */
@@ -32,7 +32,7 @@ export interface FunctionUserAccountDataFields {
   ebuf: Array<number>;
 }
 
-export interface FunctionUserAccountDataJSON {
+export interface FunctionRequestAccountDataJSON {
   /** Whether the request is ready to be processed. */
   isTriggered: number;
   /** The status of the current request. */
@@ -46,9 +46,9 @@ export interface FunctionUserAccountDataJSON {
   /** The tokenAccount escrow */
   escrow: string;
   /** The current active request. */
-  activeRequest: types.FunctionUserRequestRoundJSON;
+  activeRequest: types.FunctionRequestTriggerRoundJSON;
   /** The previous request. */
-  previousRequest: types.FunctionUserRequestRoundJSON;
+  previousRequest: types.FunctionRequestTriggerRoundJSON;
   /** The maximum number of bytes to pass to the container params. */
   maxContainerParamsLen: number;
   /** Hash of the serialized container_params to prevent RPC tampering. */
@@ -59,7 +59,7 @@ export interface FunctionUserAccountDataJSON {
   ebuf: Array<number>;
 }
 
-export class FunctionUserAccountData {
+export class FunctionRequestAccountData {
   /** Whether the request is ready to be processed. */
   readonly isTriggered: number;
   /** The status of the current request. */
@@ -73,9 +73,9 @@ export class FunctionUserAccountData {
   /** The tokenAccount escrow */
   readonly escrow: PublicKey;
   /** The current active request. */
-  readonly activeRequest: types.FunctionUserRequestRound;
+  readonly activeRequest: types.FunctionRequestTriggerRound;
   /** The previous request. */
-  readonly previousRequest: types.FunctionUserRequestRound;
+  readonly previousRequest: types.FunctionRequestTriggerRound;
   /** The maximum number of bytes to pass to the container params. */
   readonly maxContainerParamsLen: number;
   /** Hash of the serialized container_params to prevent RPC tampering. */
@@ -86,7 +86,7 @@ export class FunctionUserAccountData {
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
-    205, 175, 186, 136, 201, 78, 142, 231,
+    8, 14, 177, 85, 144, 65, 148, 246,
   ]);
 
   static readonly layout = borsh.struct([
@@ -96,25 +96,25 @@ export class FunctionUserAccountData {
     borsh.publicKey("payer"),
     borsh.publicKey("function"),
     borsh.publicKey("escrow"),
-    types.FunctionUserRequestRound.layout("activeRequest"),
-    types.FunctionUserRequestRound.layout("previousRequest"),
+    types.FunctionRequestTriggerRound.layout("activeRequest"),
+    types.FunctionRequestTriggerRound.layout("previousRequest"),
     borsh.u32("maxContainerParamsLen"),
     borsh.array(borsh.u8(), 32, "hash"),
     borsh.vecU8("containerParams"),
     borsh.array(borsh.u8(), 256, "ebuf"),
   ]);
 
-  constructor(fields: FunctionUserAccountDataFields) {
+  constructor(fields: FunctionRequestAccountDataFields) {
     this.isTriggered = fields.isTriggered;
     this.status = fields.status;
     this.authority = fields.authority;
     this.payer = fields.payer;
     this.function = fields.function;
     this.escrow = fields.escrow;
-    this.activeRequest = new types.FunctionUserRequestRound({
+    this.activeRequest = new types.FunctionRequestTriggerRound({
       ...fields.activeRequest,
     });
-    this.previousRequest = new types.FunctionUserRequestRound({
+    this.previousRequest = new types.FunctionRequestTriggerRound({
       ...fields.previousRequest,
     });
     this.maxContainerParamsLen = fields.maxContainerParamsLen;
@@ -126,7 +126,7 @@ export class FunctionUserAccountData {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey
-  ): Promise<FunctionUserAccountData | null> {
+  ): Promise<FunctionRequestAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
     if (info === null) {
@@ -142,7 +142,7 @@ export class FunctionUserAccountData {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[]
-  ): Promise<Array<FunctionUserAccountData | null>> {
+  ): Promise<Array<FunctionRequestAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
     return infos.map((info) => {
@@ -157,24 +157,24 @@ export class FunctionUserAccountData {
     });
   }
 
-  static decode(data: Buffer): FunctionUserAccountData {
-    if (!data.slice(0, 8).equals(FunctionUserAccountData.discriminator)) {
+  static decode(data: Buffer): FunctionRequestAccountData {
+    if (!data.slice(0, 8).equals(FunctionRequestAccountData.discriminator)) {
       throw new Error("invalid account discriminator");
     }
 
-    const dec = FunctionUserAccountData.layout.decode(data.slice(8));
+    const dec = FunctionRequestAccountData.layout.decode(data.slice(8));
 
-    return new FunctionUserAccountData({
+    return new FunctionRequestAccountData({
       isTriggered: dec.isTriggered,
       status: types.RequestStatus.fromDecoded(dec.status),
       authority: dec.authority,
       payer: dec.payer,
       function: dec.function,
       escrow: dec.escrow,
-      activeRequest: types.FunctionUserRequestRound.fromDecoded(
+      activeRequest: types.FunctionRequestTriggerRound.fromDecoded(
         dec.activeRequest
       ),
-      previousRequest: types.FunctionUserRequestRound.fromDecoded(
+      previousRequest: types.FunctionRequestTriggerRound.fromDecoded(
         dec.previousRequest
       ),
       maxContainerParamsLen: dec.maxContainerParamsLen,
@@ -188,7 +188,7 @@ export class FunctionUserAccountData {
     });
   }
 
-  toJSON(): FunctionUserAccountDataJSON {
+  toJSON(): FunctionRequestAccountDataJSON {
     return {
       isTriggered: this.isTriggered,
       status: this.status.toJSON(),
@@ -205,16 +205,20 @@ export class FunctionUserAccountData {
     };
   }
 
-  static fromJSON(obj: FunctionUserAccountDataJSON): FunctionUserAccountData {
-    return new FunctionUserAccountData({
+  static fromJSON(
+    obj: FunctionRequestAccountDataJSON
+  ): FunctionRequestAccountData {
+    return new FunctionRequestAccountData({
       isTriggered: obj.isTriggered,
       status: types.RequestStatus.fromJSON(obj.status),
       authority: new PublicKey(obj.authority),
       payer: new PublicKey(obj.payer),
       function: new PublicKey(obj.function),
       escrow: new PublicKey(obj.escrow),
-      activeRequest: types.FunctionUserRequestRound.fromJSON(obj.activeRequest),
-      previousRequest: types.FunctionUserRequestRound.fromJSON(
+      activeRequest: types.FunctionRequestTriggerRound.fromJSON(
+        obj.activeRequest
+      ),
+      previousRequest: types.FunctionRequestTriggerRound.fromJSON(
         obj.previousRequest
       ),
       maxContainerParamsLen: obj.maxContainerParamsLen,

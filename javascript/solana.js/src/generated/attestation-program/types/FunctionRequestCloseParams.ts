@@ -5,12 +5,12 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserCloseParamsFields {}
+export interface FunctionRequestCloseParamsFields {}
 
-export interface FunctionUserCloseParamsJSON {}
+export interface FunctionRequestCloseParamsJSON {}
 
-export class FunctionUserCloseParams {
-  constructor(fields: FunctionUserCloseParamsFields) {}
+export class FunctionRequestCloseParams {
+  constructor(fields: FunctionRequestCloseParamsFields) {}
 
   static layout(property?: string) {
     return borsh.struct([], property);
@@ -18,22 +18,24 @@ export class FunctionUserCloseParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionUserCloseParams({});
+    return new FunctionRequestCloseParams({});
   }
 
-  static toEncodable(fields: FunctionUserCloseParamsFields) {
+  static toEncodable(fields: FunctionRequestCloseParamsFields) {
     return {};
   }
 
-  toJSON(): FunctionUserCloseParamsJSON {
+  toJSON(): FunctionRequestCloseParamsJSON {
     return {};
   }
 
-  static fromJSON(obj: FunctionUserCloseParamsJSON): FunctionUserCloseParams {
-    return new FunctionUserCloseParams({});
+  static fromJSON(
+    obj: FunctionRequestCloseParamsJSON
+  ): FunctionRequestCloseParams {
+    return new FunctionRequestCloseParams({});
   }
 
   toEncodable() {
-    return FunctionUserCloseParams.toEncodable(this);
+    return FunctionRequestCloseParams.toEncodable(this);
   }
 }

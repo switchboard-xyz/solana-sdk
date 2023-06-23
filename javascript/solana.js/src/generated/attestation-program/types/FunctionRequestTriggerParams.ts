@@ -5,21 +5,21 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserRequestParamsFields {
+export interface FunctionRequestTriggerParamsFields {
   bounty: BN | null;
   slotsUntilExpiration: BN | null;
 }
 
-export interface FunctionUserRequestParamsJSON {
+export interface FunctionRequestTriggerParamsJSON {
   bounty: string | null;
   slotsUntilExpiration: string | null;
 }
 
-export class FunctionUserRequestParams {
+export class FunctionRequestTriggerParams {
   readonly bounty: BN | null;
   readonly slotsUntilExpiration: BN | null;
 
-  constructor(fields: FunctionUserRequestParamsFields) {
+  constructor(fields: FunctionRequestTriggerParamsFields) {
     this.bounty = fields.bounty;
     this.slotsUntilExpiration = fields.slotsUntilExpiration;
   }
@@ -36,20 +36,20 @@ export class FunctionUserRequestParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionUserRequestParams({
+    return new FunctionRequestTriggerParams({
       bounty: obj.bounty,
       slotsUntilExpiration: obj.slotsUntilExpiration,
     });
   }
 
-  static toEncodable(fields: FunctionUserRequestParamsFields) {
+  static toEncodable(fields: FunctionRequestTriggerParamsFields) {
     return {
       bounty: fields.bounty,
       slotsUntilExpiration: fields.slotsUntilExpiration,
     };
   }
 
-  toJSON(): FunctionUserRequestParamsJSON {
+  toJSON(): FunctionRequestTriggerParamsJSON {
     return {
       bounty: (this.bounty && this.bounty.toString()) || null,
       slotsUntilExpiration:
@@ -59,9 +59,9 @@ export class FunctionUserRequestParams {
   }
 
   static fromJSON(
-    obj: FunctionUserRequestParamsJSON
-  ): FunctionUserRequestParams {
-    return new FunctionUserRequestParams({
+    obj: FunctionRequestTriggerParamsJSON
+  ): FunctionRequestTriggerParams {
+    return new FunctionRequestTriggerParams({
       bounty: (obj.bounty && new BN(obj.bounty)) || null,
       slotsUntilExpiration:
         (obj.slotsUntilExpiration && new BN(obj.slotsUntilExpiration)) || null,
@@ -69,6 +69,6 @@ export class FunctionUserRequestParams {
   }
 
   toEncodable() {
-    return FunctionUserRequestParams.toEncodable(this);
+    return FunctionRequestTriggerParams.toEncodable(this);
   }
 }

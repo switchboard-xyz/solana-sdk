@@ -47,22 +47,22 @@ export interface FunctionAccountDataFields {
   triggerCount: BN;
   /** UNUSED. The unix timestamp when the current permissions expire. */
   permissionExpiration: BN;
-  /** Number of users created for this function. Used to prevent closing when there are live users. */
-  numUsers: BN;
+  /** Number of requests created for this function. Used to prevent closing when there are live requests. */
+  numRequests: BN;
   /** Whether custom requests have been disabled for this function. */
-  usersDisabled: boolean;
+  requestsDisabled: boolean;
   /**
-   * Whether new users need to be authorized by the FunctionAccount authority before being initialized.
-   * Useful if you want to use CPIs to control user account creation.
+   * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to use CPIs to control request account creation.
    */
-  usersRequireAuthorization: boolean;
+  requestsRequireAuthorization: boolean;
   /**
    * The number of slots after a request has been verified before allowing a non-authority account to close the account.
    * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
    */
-  usersDefaultSlotsUntilExpiration: BN;
+  requestsDefaultSlotsUntilExpiration: BN;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  usersRequestFee: BN;
+  requestsRequestFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -111,22 +111,22 @@ export interface FunctionAccountDataJSON {
   triggerCount: string;
   /** UNUSED. The unix timestamp when the current permissions expire. */
   permissionExpiration: string;
-  /** Number of users created for this function. Used to prevent closing when there are live users. */
-  numUsers: string;
+  /** Number of requests created for this function. Used to prevent closing when there are live requests. */
+  numRequests: string;
   /** Whether custom requests have been disabled for this function. */
-  usersDisabled: boolean;
+  requestsDisabled: boolean;
   /**
-   * Whether new users need to be authorized by the FunctionAccount authority before being initialized.
-   * Useful if you want to use CPIs to control user account creation.
+   * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to use CPIs to control request account creation.
    */
-  usersRequireAuthorization: boolean;
+  requestsRequireAuthorization: boolean;
   /**
    * The number of slots after a request has been verified before allowing a non-authority account to close the account.
    * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
    */
-  usersDefaultSlotsUntilExpiration: string;
+  requestsDefaultSlotsUntilExpiration: string;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  usersRequestFee: string;
+  requestsRequestFee: string;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -175,22 +175,22 @@ export class FunctionAccountData {
   readonly triggerCount: BN;
   /** UNUSED. The unix timestamp when the current permissions expire. */
   readonly permissionExpiration: BN;
-  /** Number of users created for this function. Used to prevent closing when there are live users. */
-  readonly numUsers: BN;
+  /** Number of requests created for this function. Used to prevent closing when there are live requests. */
+  readonly numRequests: BN;
   /** Whether custom requests have been disabled for this function. */
-  readonly usersDisabled: boolean;
+  readonly requestsDisabled: boolean;
   /**
-   * Whether new users need to be authorized by the FunctionAccount authority before being initialized.
-   * Useful if you want to use CPIs to control user account creation.
+   * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to use CPIs to control request account creation.
    */
-  readonly usersRequireAuthorization: boolean;
+  readonly requestsRequireAuthorization: boolean;
   /**
    * The number of slots after a request has been verified before allowing a non-authority account to close the account.
    * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
    */
-  readonly usersDefaultSlotsUntilExpiration: BN;
+  readonly requestsDefaultSlotsUntilExpiration: BN;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  readonly usersRequestFee: BN;
+  readonly requestsRequestFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   readonly mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -222,11 +222,11 @@ export class FunctionAccountData {
     borsh.i64("nextAllowedTimestamp"),
     borsh.u64("triggerCount"),
     borsh.i64("permissionExpiration"),
-    borsh.u64("numUsers"),
-    borsh.bool("usersDisabled"),
-    borsh.bool("usersRequireAuthorization"),
-    borsh.u64("usersDefaultSlotsUntilExpiration"),
-    borsh.u64("usersRequestFee"),
+    borsh.u64("numRequests"),
+    borsh.bool("requestsDisabled"),
+    borsh.bool("requestsRequireAuthorization"),
+    borsh.u64("requestsDefaultSlotsUntilExpiration"),
+    borsh.u64("requestsRequestFee"),
     borsh.array(borsh.array(borsh.u8(), 32), 32, "mrEnclaves"),
     borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
@@ -253,12 +253,12 @@ export class FunctionAccountData {
     this.nextAllowedTimestamp = fields.nextAllowedTimestamp;
     this.triggerCount = fields.triggerCount;
     this.permissionExpiration = fields.permissionExpiration;
-    this.numUsers = fields.numUsers;
-    this.usersDisabled = fields.usersDisabled;
-    this.usersRequireAuthorization = fields.usersRequireAuthorization;
-    this.usersDefaultSlotsUntilExpiration =
-      fields.usersDefaultSlotsUntilExpiration;
-    this.usersRequestFee = fields.usersRequestFee;
+    this.numRequests = fields.numRequests;
+    this.requestsDisabled = fields.requestsDisabled;
+    this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
+    this.requestsDefaultSlotsUntilExpiration =
+      fields.requestsDefaultSlotsUntilExpiration;
+    this.requestsRequestFee = fields.requestsRequestFee;
     this.mrEnclaves = fields.mrEnclaves;
     this.ebuf = fields.ebuf;
   }
@@ -326,11 +326,12 @@ export class FunctionAccountData {
       nextAllowedTimestamp: dec.nextAllowedTimestamp,
       triggerCount: dec.triggerCount,
       permissionExpiration: dec.permissionExpiration,
-      numUsers: dec.numUsers,
-      usersDisabled: dec.usersDisabled,
-      usersRequireAuthorization: dec.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration: dec.usersDefaultSlotsUntilExpiration,
-      usersRequestFee: dec.usersRequestFee,
+      numRequests: dec.numRequests,
+      requestsDisabled: dec.requestsDisabled,
+      requestsRequireAuthorization: dec.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        dec.requestsDefaultSlotsUntilExpiration,
+      requestsRequestFee: dec.requestsRequestFee,
       mrEnclaves: dec.mrEnclaves,
       ebuf: dec.ebuf,
     });
@@ -359,12 +360,12 @@ export class FunctionAccountData {
       nextAllowedTimestamp: this.nextAllowedTimestamp.toString(),
       triggerCount: this.triggerCount.toString(),
       permissionExpiration: this.permissionExpiration.toString(),
-      numUsers: this.numUsers.toString(),
-      usersDisabled: this.usersDisabled,
-      usersRequireAuthorization: this.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration:
-        this.usersDefaultSlotsUntilExpiration.toString(),
-      usersRequestFee: this.usersRequestFee.toString(),
+      numRequests: this.numRequests.toString(),
+      requestsDisabled: this.requestsDisabled,
+      requestsRequireAuthorization: this.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        this.requestsDefaultSlotsUntilExpiration.toString(),
+      requestsRequestFee: this.requestsRequestFee.toString(),
       mrEnclaves: this.mrEnclaves,
       ebuf: this.ebuf,
     };
@@ -393,13 +394,13 @@ export class FunctionAccountData {
       nextAllowedTimestamp: new BN(obj.nextAllowedTimestamp),
       triggerCount: new BN(obj.triggerCount),
       permissionExpiration: new BN(obj.permissionExpiration),
-      numUsers: new BN(obj.numUsers),
-      usersDisabled: obj.usersDisabled,
-      usersRequireAuthorization: obj.usersRequireAuthorization,
-      usersDefaultSlotsUntilExpiration: new BN(
-        obj.usersDefaultSlotsUntilExpiration
+      numRequests: new BN(obj.numRequests),
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration: new BN(
+        obj.requestsDefaultSlotsUntilExpiration
       ),
-      usersRequestFee: new BN(obj.usersRequestFee),
+      requestsRequestFee: new BN(obj.requestsRequestFee),
       mrEnclaves: obj.mrEnclaves,
       ebuf: obj.ebuf,
     });

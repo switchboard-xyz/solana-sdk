@@ -5,27 +5,27 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserVerifyParamsFields {
+export interface FunctionRequestVerifyParamsFields {
   observedTime: BN;
   isFailure: boolean;
   mrEnclave: Array<number>;
   requestSlot: BN;
 }
 
-export interface FunctionUserVerifyParamsJSON {
+export interface FunctionRequestVerifyParamsJSON {
   observedTime: string;
   isFailure: boolean;
   mrEnclave: Array<number>;
   requestSlot: string;
 }
 
-export class FunctionUserVerifyParams {
+export class FunctionRequestVerifyParams {
   readonly observedTime: BN;
   readonly isFailure: boolean;
   readonly mrEnclave: Array<number>;
   readonly requestSlot: BN;
 
-  constructor(fields: FunctionUserVerifyParamsFields) {
+  constructor(fields: FunctionRequestVerifyParamsFields) {
     this.observedTime = fields.observedTime;
     this.isFailure = fields.isFailure;
     this.mrEnclave = fields.mrEnclave;
@@ -46,7 +46,7 @@ export class FunctionUserVerifyParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionUserVerifyParams({
+    return new FunctionRequestVerifyParams({
       observedTime: obj.observedTime,
       isFailure: obj.isFailure,
       mrEnclave: obj.mrEnclave,
@@ -54,7 +54,7 @@ export class FunctionUserVerifyParams {
     });
   }
 
-  static toEncodable(fields: FunctionUserVerifyParamsFields) {
+  static toEncodable(fields: FunctionRequestVerifyParamsFields) {
     return {
       observedTime: fields.observedTime,
       isFailure: fields.isFailure,
@@ -63,7 +63,7 @@ export class FunctionUserVerifyParams {
     };
   }
 
-  toJSON(): FunctionUserVerifyParamsJSON {
+  toJSON(): FunctionRequestVerifyParamsJSON {
     return {
       observedTime: this.observedTime.toString(),
       isFailure: this.isFailure,
@@ -72,8 +72,10 @@ export class FunctionUserVerifyParams {
     };
   }
 
-  static fromJSON(obj: FunctionUserVerifyParamsJSON): FunctionUserVerifyParams {
-    return new FunctionUserVerifyParams({
+  static fromJSON(
+    obj: FunctionRequestVerifyParamsJSON
+  ): FunctionRequestVerifyParams {
+    return new FunctionRequestVerifyParams({
       observedTime: new BN(obj.observedTime),
       isFailure: obj.isFailure,
       mrEnclave: obj.mrEnclave,
@@ -82,6 +84,6 @@ export class FunctionUserVerifyParams {
   }
 
   toEncodable() {
-    return FunctionUserVerifyParams.toEncodable(this);
+    return FunctionRequestVerifyParams.toEncodable(this);
   }
 }

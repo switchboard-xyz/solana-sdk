@@ -5,21 +5,21 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserSetConfigParamsFields {
+export interface FunctionRequestSetConfigParamsFields {
   containerParams: Uint8Array;
   appendContainerParams: boolean;
 }
 
-export interface FunctionUserSetConfigParamsJSON {
+export interface FunctionRequestSetConfigParamsJSON {
   containerParams: Array<number>;
   appendContainerParams: boolean;
 }
 
-export class FunctionUserSetConfigParams {
+export class FunctionRequestSetConfigParams {
   readonly containerParams: Uint8Array;
   readonly appendContainerParams: boolean;
 
-  constructor(fields: FunctionUserSetConfigParamsFields) {
+  constructor(fields: FunctionRequestSetConfigParamsFields) {
     this.containerParams = fields.containerParams;
     this.appendContainerParams = fields.appendContainerParams;
   }
@@ -33,7 +33,7 @@ export class FunctionUserSetConfigParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionUserSetConfigParams({
+    return new FunctionRequestSetConfigParams({
       containerParams: new Uint8Array(
         obj.containerParams.buffer,
         obj.containerParams.byteOffset,
@@ -43,7 +43,7 @@ export class FunctionUserSetConfigParams {
     });
   }
 
-  static toEncodable(fields: FunctionUserSetConfigParamsFields) {
+  static toEncodable(fields: FunctionRequestSetConfigParamsFields) {
     return {
       containerParams: Buffer.from(
         fields.containerParams.buffer,
@@ -54,7 +54,7 @@ export class FunctionUserSetConfigParams {
     };
   }
 
-  toJSON(): FunctionUserSetConfigParamsJSON {
+  toJSON(): FunctionRequestSetConfigParamsJSON {
     return {
       containerParams: Array.from(this.containerParams.values()),
       appendContainerParams: this.appendContainerParams,
@@ -62,15 +62,15 @@ export class FunctionUserSetConfigParams {
   }
 
   static fromJSON(
-    obj: FunctionUserSetConfigParamsJSON
-  ): FunctionUserSetConfigParams {
-    return new FunctionUserSetConfigParams({
+    obj: FunctionRequestSetConfigParamsJSON
+  ): FunctionRequestSetConfigParams {
+    return new FunctionRequestSetConfigParams({
       containerParams: Uint8Array.from(obj.containerParams),
       appendContainerParams: obj.appendContainerParams,
     });
   }
 
   toEncodable() {
-    return FunctionUserSetConfigParams.toEncodable(this);
+    return FunctionRequestSetConfigParams.toEncodable(this);
   }
 }

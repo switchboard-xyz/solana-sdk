@@ -1,5 +1,5 @@
+import * as FunctionRequestTriggerMode from "./FunctionRequestTriggerMode.js";
 import * as FunctionStatus from "./FunctionStatus.js";
-import * as FunctionUserRequestMode from "./FunctionUserRequestMode.js";
 import * as RequestStatus from "./RequestStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
 import * as VerificationStatus from "./VerificationStatus.js";
@@ -45,6 +45,36 @@ export type {
 } from "./FunctionInitParams.js";
 export { FunctionInitParams } from "./FunctionInitParams.js";
 export type {
+  FunctionRequestCloseParamsFields,
+  FunctionRequestCloseParamsJSON,
+} from "./FunctionRequestCloseParams.js";
+export { FunctionRequestCloseParams } from "./FunctionRequestCloseParams.js";
+export type {
+  FunctionRequestInitParamsFields,
+  FunctionRequestInitParamsJSON,
+} from "./FunctionRequestInitParams.js";
+export { FunctionRequestInitParams } from "./FunctionRequestInitParams.js";
+export type {
+  FunctionRequestSetConfigParamsFields,
+  FunctionRequestSetConfigParamsJSON,
+} from "./FunctionRequestSetConfigParams.js";
+export { FunctionRequestSetConfigParams } from "./FunctionRequestSetConfigParams.js";
+export type {
+  FunctionRequestTriggerParamsFields,
+  FunctionRequestTriggerParamsJSON,
+} from "./FunctionRequestTriggerParams.js";
+export { FunctionRequestTriggerParams } from "./FunctionRequestTriggerParams.js";
+export type {
+  FunctionRequestTriggerRoundFields,
+  FunctionRequestTriggerRoundJSON,
+} from "./FunctionRequestTriggerRound.js";
+export { FunctionRequestTriggerRound } from "./FunctionRequestTriggerRound.js";
+export type {
+  FunctionRequestVerifyParamsFields,
+  FunctionRequestVerifyParamsJSON,
+} from "./FunctionRequestVerifyParams.js";
+export { FunctionRequestVerifyParams } from "./FunctionRequestVerifyParams.js";
+export type {
   FunctionSetConfigParamsFields,
   FunctionSetConfigParamsJSON,
 } from "./FunctionSetConfigParams.js";
@@ -59,36 +89,6 @@ export type {
   FunctionTriggerParamsJSON,
 } from "./FunctionTriggerParams.js";
 export { FunctionTriggerParams } from "./FunctionTriggerParams.js";
-export type {
-  FunctionUserCloseParamsFields,
-  FunctionUserCloseParamsJSON,
-} from "./FunctionUserCloseParams.js";
-export { FunctionUserCloseParams } from "./FunctionUserCloseParams.js";
-export type {
-  FunctionUserInitParamsFields,
-  FunctionUserInitParamsJSON,
-} from "./FunctionUserInitParams.js";
-export { FunctionUserInitParams } from "./FunctionUserInitParams.js";
-export type {
-  FunctionUserRequestParamsFields,
-  FunctionUserRequestParamsJSON,
-} from "./FunctionUserRequestParams.js";
-export { FunctionUserRequestParams } from "./FunctionUserRequestParams.js";
-export type {
-  FunctionUserRequestRoundFields,
-  FunctionUserRequestRoundJSON,
-} from "./FunctionUserRequestRound.js";
-export { FunctionUserRequestRound } from "./FunctionUserRequestRound.js";
-export type {
-  FunctionUserSetConfigParamsFields,
-  FunctionUserSetConfigParamsJSON,
-} from "./FunctionUserSetConfigParams.js";
-export { FunctionUserSetConfigParams } from "./FunctionUserSetConfigParams.js";
-export type {
-  FunctionUserVerifyParamsFields,
-  FunctionUserVerifyParamsJSON,
-} from "./FunctionUserVerifyParams.js";
-export { FunctionUserVerifyParams } from "./FunctionUserVerifyParams.js";
 export type {
   FunctionVerifyParamsFields,
   FunctionVerifyParamsJSON,
@@ -184,11 +184,11 @@ export type SwitchboardAttestationPermissionJSON =
   | SwitchboardAttestationPermission.PermitNodeheartbeatJSON
   | SwitchboardAttestationPermission.PermitQueueUsageJSON;
 
-export { FunctionUserRequestMode };
+export { FunctionRequestTriggerMode };
 
-export type FunctionUserRequestModeKind =
-  | FunctionUserRequestMode.Independent
-  | FunctionUserRequestMode.Managed;
-export type FunctionUserRequestModeJSON =
-  | FunctionUserRequestMode.IndependentJSON
-  | FunctionUserRequestMode.ManagedJSON;
+export type FunctionRequestTriggerModeKind =
+  | FunctionRequestTriggerMode.Independent
+  | FunctionRequestTriggerMode.Managed;
+export type FunctionRequestTriggerModeJSON =
+  | FunctionRequestTriggerMode.IndependentJSON
+  | FunctionRequestTriggerMode.ManagedJSON;

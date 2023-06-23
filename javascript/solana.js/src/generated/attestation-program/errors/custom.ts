@@ -395,11 +395,11 @@ export class MissingFunctionEscrow extends Error {
   readonly code = 6032;
   readonly name = "MissingFunctionEscrow";
   readonly msg =
-    "The FunctionAccount escrow is required if function.users_request_fee is greater than zero";
+    "The FunctionAccount escrow is required if function.requests_request_fee is greater than zero";
 
   constructor(readonly logs?: string[]) {
     super(
-      "6032: The FunctionAccount escrow is required if function.users_request_fee is greater than zero"
+      "6032: The FunctionAccount escrow is required if function.requests_request_fee is greater than zero"
     );
   }
 }
@@ -434,11 +434,11 @@ export class UserRequestsDisabled extends Error {
   readonly code = 6035;
   readonly name = "UserRequestsDisabled";
   readonly msg =
-    "The FunctionAccount has set users_disabled to true and disabled this action";
+    "The FunctionAccount has set requests_disabled to true and disabled this action";
 
   constructor(readonly logs?: string[]) {
     super(
-      "6035: The FunctionAccount has set users_disabled to true and disabled this action"
+      "6035: The FunctionAccount has set requests_disabled to true and disabled this action"
     );
   }
 }
@@ -448,11 +448,11 @@ export class MissingFunctionAuthority extends Error {
   readonly code = 6036;
   readonly name = "MissingFunctionAuthority";
   readonly msg =
-    "The FunctionAccount authority is required to sign if function.users_require_authorization is enabled";
+    "The FunctionAccount authority is required to sign if function.requests_require_authorization is enabled";
 
   constructor(readonly logs?: string[]) {
     super(
-      "6036: The FunctionAccount authority is required to sign if function.users_require_authorization is enabled"
+      "6036: The FunctionAccount authority is required to sign if function.requests_require_authorization is enabled"
     );
   }
 }
@@ -462,11 +462,11 @@ export class FunctionCloseNotReady extends Error {
   readonly code = 6037;
   readonly name = "FunctionCloseNotReady";
   readonly msg =
-    "The FunctionAccount must have no users before it can be closed";
+    "The FunctionAccount must have no requests before it can be closed";
 
   constructor(readonly logs?: string[]) {
     super(
-      "6037: The FunctionAccount must have no users before it can be closed"
+      "6037: The FunctionAccount must have no requests before it can be closed"
     );
   }
 }

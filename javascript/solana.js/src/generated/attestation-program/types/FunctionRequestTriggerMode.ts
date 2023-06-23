@@ -52,7 +52,7 @@ export class Managed {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function fromDecoded(obj: any): types.FunctionUserRequestModeKind {
+export function fromDecoded(obj: any): types.FunctionRequestTriggerModeKind {
   if (typeof obj !== "object") {
     throw new Error("Invalid enum object");
   }
@@ -68,8 +68,8 @@ export function fromDecoded(obj: any): types.FunctionUserRequestModeKind {
 }
 
 export function fromJSON(
-  obj: types.FunctionUserRequestModeJSON
-): types.FunctionUserRequestModeKind {
+  obj: types.FunctionRequestTriggerModeJSON
+): types.FunctionRequestTriggerModeKind {
   switch (obj.kind) {
     case "Independent": {
       return new Independent();

@@ -5,7 +5,7 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserRequestRoundFields {
+export interface FunctionRequestTriggerRoundFields {
   /** The status of the request. */
   status: types.RequestStatusKind;
   /** The SOL bounty in lamports used to incentivize a verifier to expedite the request. */
@@ -27,7 +27,7 @@ export interface FunctionUserRequestRoundFields {
   ebuf: Array<number>;
 }
 
-export interface FunctionUserRequestRoundJSON {
+export interface FunctionRequestTriggerRoundJSON {
   /** The status of the request. */
   status: types.RequestStatusJSON;
   /** The SOL bounty in lamports used to incentivize a verifier to expedite the request. */
@@ -49,7 +49,7 @@ export interface FunctionUserRequestRoundJSON {
   ebuf: Array<number>;
 }
 
-export class FunctionUserRequestRound {
+export class FunctionRequestTriggerRound {
   /** The status of the request. */
   readonly status: types.RequestStatusKind;
   /** The SOL bounty in lamports used to incentivize a verifier to expedite the request. */
@@ -70,7 +70,7 @@ export class FunctionUserRequestRound {
   /** Reserved. */
   readonly ebuf: Array<number>;
 
-  constructor(fields: FunctionUserRequestRoundFields) {
+  constructor(fields: FunctionRequestTriggerRoundFields) {
     this.status = fields.status;
     this.bounty = fields.bounty;
     this.requestSlot = fields.requestSlot;
@@ -99,7 +99,7 @@ export class FunctionUserRequestRound {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionUserRequestRound({
+    return new FunctionRequestTriggerRound({
       status: types.RequestStatus.fromDecoded(obj.status),
       bounty: obj.bounty,
       requestSlot: obj.requestSlot,
@@ -111,7 +111,7 @@ export class FunctionUserRequestRound {
     });
   }
 
-  static toEncodable(fields: FunctionUserRequestRoundFields) {
+  static toEncodable(fields: FunctionRequestTriggerRoundFields) {
     return {
       status: fields.status.toEncodable(),
       bounty: fields.bounty,
@@ -124,7 +124,7 @@ export class FunctionUserRequestRound {
     };
   }
 
-  toJSON(): FunctionUserRequestRoundJSON {
+  toJSON(): FunctionRequestTriggerRoundJSON {
     return {
       status: this.status.toJSON(),
       bounty: this.bounty.toString(),
@@ -137,8 +137,10 @@ export class FunctionUserRequestRound {
     };
   }
 
-  static fromJSON(obj: FunctionUserRequestRoundJSON): FunctionUserRequestRound {
-    return new FunctionUserRequestRound({
+  static fromJSON(
+    obj: FunctionRequestTriggerRoundJSON
+  ): FunctionRequestTriggerRound {
+    return new FunctionRequestTriggerRound({
       status: types.RequestStatus.fromJSON(obj.status),
       bounty: new BN(obj.bounty),
       requestSlot: new BN(obj.requestSlot),
@@ -151,6 +153,6 @@ export class FunctionUserRequestRound {
   }
 
   toEncodable() {
-    return FunctionUserRequestRound.toEncodable(this);
+    return FunctionRequestTriggerRound.toEncodable(this);
   }
 }

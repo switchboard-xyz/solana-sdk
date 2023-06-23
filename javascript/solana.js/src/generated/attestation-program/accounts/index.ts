@@ -19,9 +19,9 @@ export type {
 } from "./FunctionAccountData.js";
 export { FunctionAccountData } from "./FunctionAccountData.js";
 export type {
-  FunctionUserAccountDataFields,
-  FunctionUserAccountDataJSON,
-} from "./FunctionUserAccountData.js";
-export { FunctionUserAccountData } from "./FunctionUserAccountData.js";
+  FunctionRequestAccountDataFields,
+  FunctionRequestAccountDataJSON,
+} from "./FunctionRequestAccountData.js";
+export { FunctionRequestAccountData } from "./FunctionRequestAccountData.js";
 export type { StateFields, StateJSON } from "./State.js";
 export { State } from "./State.js";

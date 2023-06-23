@@ -9,12 +9,12 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionUserVerifyArgs {
-  params: types.FunctionUserVerifyParamsFields;
+export interface FunctionRequestVerifyArgs {
+  params: types.FunctionRequestVerifyParamsFields;
 }
 
-export interface FunctionUserVerifyAccounts {
-  user: PublicKey;
+export interface FunctionRequestVerifyAccounts {
+  request: PublicKey;
   functionEnclaveSigner: PublicKey;
   escrow: PublicKey;
   function: PublicKey;
@@ -29,16 +29,16 @@ export interface FunctionUserVerifyAccounts {
 }
 
 export const layout = borsh.struct([
-  types.FunctionUserVerifyParams.layout("params"),
+  types.FunctionRequestVerifyParams.layout("params"),
 ]);
 
-export function functionUserVerify(
+export function functionRequestVerify(
   program: SwitchboardProgram,
-  args: FunctionUserVerifyArgs,
-  accounts: FunctionUserVerifyAccounts
+  args: FunctionRequestVerifyArgs,
+  accounts: FunctionRequestVerifyAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.user, isSigner: false, isWritable: true },
+    { pubkey: accounts.request, isSigner: false, isWritable: true },
     {
       pubkey: accounts.functionEnclaveSigner,
       isSigner: true,
@@ -59,11 +59,11 @@ export function functionUserVerify(
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([228, 213, 187, 129, 246, 245, 190, 124]);
+  const identifier = Buffer.from([179, 6, 88, 97, 232, 112, 143, 253]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionUserVerifyParams.toEncodable(args.params),
+      params: types.FunctionRequestVerifyParams.toEncodable(args.params),
     },
     buffer
   );
