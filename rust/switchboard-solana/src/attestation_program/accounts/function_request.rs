@@ -1,6 +1,5 @@
 use crate::cfg_client;
 use crate::prelude::*;
-use anchor_lang::{AccountDeserialize, AccountSerialize};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
@@ -167,4 +166,29 @@ impl Owner for FunctionRequestAccountData {
     }
 }
 
-impl FunctionRequestAccountData {}
+impl FunctionRequestAccountData {
+    pub fn space(len: Option<u32>) -> usize {
+        let base: usize = 8 // discriminator 
+        + 1 // is_triggered
+        + 1 // status
+        + 32 // authority pubkey
+        + 32 // payer pubkey
+        + 32 // function pubkey
+        + 32 // escrow pubkey
+        + 225 // active_request
+        + 225 // previous_request
+        + 4 // container params len 
+        + 32 // container params hash
+        + 8 // created at
+        + 9 // expiration slot, u64 + Option (1byte)
+        + 256 // reserved
+        + 4; // vec pointer
+
+        let vec_elements: usize = len.unwrap_or(256) as usize;
+        let space = base + vec_elements;
+
+        msg!("space: {}", space);
+
+        space
+    }
+}

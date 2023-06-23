@@ -1,13 +1,11 @@
 use crate::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(params: FunctionTriggerParams)] // rpc parameters hint
+#[instruction(params:FunctionTriggerParams)]
 pub struct FunctionTrigger<'info> {
-    #[account(mut)]
-    pub function: AccountInfo<'info>,
-
-    #[account(signer)]
-    pub authority: AccountInfo<'info>,
+    #[account(mut, has_one = authority)]
+    pub function: AccountLoader<'info, FunctionAccountData>,
+    pub authority: Signer<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -52,22 +50,29 @@ impl<'info> FunctionTrigger<'info> {
     }
 
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
-        vec![self.function.clone(), self.authority.clone()]
+        let mut account_infos = Vec::new();
+        account_infos.extend(anchor_lang::ToAccountInfos::to_account_infos(
+            &self.function,
+        ));
+        account_infos.extend(anchor_lang::ToAccountInfos::to_account_infos(
+            &self.authority,
+        ));
+        account_infos
     }
 
     #[allow(unused_variables)]
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
-        vec![
-            AccountMeta {
-                pubkey: *self.function.key,
-                is_signer: self.function.is_signer,
-                is_writable: self.function.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.authority.key,
-                is_signer: self.authority.is_signer,
-                is_writable: self.authority.is_writable,
-            },
-        ]
+        let mut account_metas = Vec::new();
+        account_metas.push(anchor_lang::solana_program::instruction::AccountMeta::new(
+            self.function.key(),
+            false,
+        ));
+        account_metas.push(
+            anchor_lang::solana_program::instruction::AccountMeta::new_readonly(
+                self.authority.key(),
+                true,
+            ),
+        );
+        account_metas
     }
 }

@@ -3,4 +3,6 @@ pub use crate::oracle_program::instructions::{
     VrfPoolRequestRandomness, VrfRequestRandomness, VrfSetCallback,
 };
 
-pub use crate::attestation_program::instructions::{FunctionTrigger, FunctionVerify};
+pub use crate::attestation_program::instructions::{
+    FunctionRequestInitAndTrigger, FunctionRequestVerify, FunctionTrigger, FunctionVerify,
+};
