@@ -8,7 +8,7 @@ use crate::{QUOTE_SEED, SWITCHBOARD_ATTESTATION_PROGRAM_ID};
 pub type MrEnclave = [u8; 32];
 
 #[repr(u8)]
-#[derive(Copy, Clone, Default, Eq, PartialEq)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum VerificationStatus {
     #[default]
     None = 0,
@@ -84,7 +84,7 @@ unsafe impl Pod for EnclaveAccountData {}
 unsafe impl Zeroable for EnclaveAccountData {}
 
 impl Discriminator for EnclaveAccountData {
-    const DISCRIMINATOR: [u8; 8] = [205, 205, 167, 232, 0, 74, 44, 160];
+    const DISCRIMINATOR: [u8; 8] = [90, 162, 39, 88, 77, 157, 156, 165];
 }
 
 impl Owner for EnclaveAccountData {

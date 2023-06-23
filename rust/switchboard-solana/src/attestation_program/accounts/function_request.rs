@@ -1,10 +1,11 @@
 use crate::cfg_client;
 use crate::prelude::*;
+use anchor_lang::{AccountDeserialize, AccountSerialize};
 use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
 #[repr(u8)]
-#[derive(Copy, Clone, Default, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum RequestStatus {
     #[default]
     None = 0,
@@ -38,7 +39,6 @@ impl From<u8> for RequestStatus {
         }
     }
 }
-
 #[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionRequestTriggerRound {
     /// The status of the request.
@@ -57,7 +57,7 @@ pub struct FunctionRequestTriggerRound {
     /// valid transactions processed by the function.
     pub enclave_signer: Pubkey,
     /// Reserved.
-    pub _ebuf: [u8; 128],
+    pub _ebuf: [u8; 64],
 }
 impl Default for FunctionRequestTriggerRound {
     fn default() -> Self {
@@ -66,7 +66,7 @@ impl Default for FunctionRequestTriggerRound {
 }
 
 // #[account]
-#[derive(AnchorDeserialize, AnchorSerialize)]
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct FunctionRequestAccountData {
     // Up-Front Params for RPC filtering
     /// Whether the request is ready to be processed.
@@ -83,7 +83,6 @@ pub struct FunctionRequestAccountData {
     pub function: Pubkey,
     /// The tokenAccount escrow
     pub escrow: Pubkey,
-    // TODO: add address_lookup_table? make it set to functionAccount if not provided on init?
 
     // Rounds
     /// The current active request.
@@ -99,8 +98,63 @@ pub struct FunctionRequestAccountData {
     /// The stringified container params to pass\
     pub container_params: Vec<u8>,
 
+    // Metadata
+    /// The unix timestamp when the function was created.
+    pub created_at: i64,
+    /// The slot when the account can be garbage collected and closed by anyone for a portion of the rent.
+    pub garbage_collection_slot: Option<u64>,
+
     /// Reserved.
     pub _ebuf: [u8; 256],
+}
+
+impl anchor_lang::AccountSerialize for FunctionRequestAccountData {
+    fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
+        if writer
+            .write_all(&FunctionRequestAccountData::discriminator())
+            .is_err()
+        {
+            return Err(anchor_lang::error::ErrorCode::AccountDidNotSerialize.into());
+        }
+        if AnchorSerialize::serialize(self, writer).is_err() {
+            return Err(anchor_lang::error::ErrorCode::AccountDidNotSerialize.into());
+        }
+        Ok(())
+    }
+}
+
+impl anchor_lang::AccountDeserialize for FunctionRequestAccountData {
+    fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        if buf.len() < FunctionRequestAccountData::discriminator().len() {
+            return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+        let given_disc = &buf[..8];
+        if &FunctionRequestAccountData::discriminator() != given_disc {
+            return Err(
+                anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+                    error_name: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch.name(),
+                    error_code_number: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .into(),
+                    error_msg: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .to_string(),
+                    error_origin: Some(anchor_lang::error::ErrorOrigin::Source(
+                        anchor_lang::error::Source {
+                            filename: "programs/attestation_program/src/lib.rs",
+                            line: 357u32,
+                        },
+                    )),
+                    compared_values: None,
+                })
+                .with_account_name("FunctionRequestAccountData"),
+            );
+        }
+        Self::try_deserialize_unchecked(buf)
+    }
+    fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        let mut data: &[u8] = &buf[8..];
+        AnchorDeserialize::deserialize(&mut data)
+            .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+    }
 }
 
 impl Discriminator for FunctionRequestAccountData {

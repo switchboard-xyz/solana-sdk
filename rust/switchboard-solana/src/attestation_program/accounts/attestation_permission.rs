@@ -5,7 +5,7 @@ use std::cell::Ref;
 
 use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
-#[derive(Copy, Clone, Default, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum SwitchboardAttestationPermission {
     #[default]
     None = 0,

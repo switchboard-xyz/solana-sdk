@@ -5,7 +5,7 @@ use bytemuck::{Pod, Zeroable};
 use std::cell::Ref;
 
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
 pub enum FunctionStatus {
     #[default]
     None = 0,
@@ -39,7 +39,6 @@ impl From<u8> for FunctionStatus {
         }
     }
 }
-
 #[zero_copy]
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
