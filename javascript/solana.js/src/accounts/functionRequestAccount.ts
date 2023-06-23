@@ -32,6 +32,7 @@ export interface FunctionRequestAccountInitParams {
   functionAccount: FunctionAccount;
   maxContainerParamsLen?: number;
   containerParams?: Buffer;
+  garbageCollectionSlot?: number;
 
   /**
    *  A keypair to be used to address this account.
@@ -39,6 +40,8 @@ export interface FunctionRequestAccountInitParams {
    *  @default Keypair.generate()
    */
   keypair?: Keypair;
+
+  authority?: PublicKey;
 }
 
 /**
@@ -137,6 +140,9 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
           containerParams: new Uint8Array(
             params.containerParams ?? Buffer.from("")
           ),
+          garbageCollectionSlot: params.garbageCollectionSlot
+            ? new BN(params.garbageCollectionSlot)
+            : null,
         },
       },
       {
@@ -148,6 +154,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
         mint: program.mint.address,
         state: program.attestationProgramState.publicKey,
         payer,
+        authority: params.authority ?? payer,
         systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
