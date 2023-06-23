@@ -9,35 +9,37 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionSetConfigArgs {
-  params: types.FunctionSetConfigParamsFields;
+export interface FunctionSetPermissionsArgs {
+  params: types.FunctionSetPermissionsParamsFields;
 }
 
-export interface FunctionSetConfigAccounts {
+export interface FunctionSetPermissionsAccounts {
   function: PublicKey;
-  quote: PublicKey;
+  attestationQueue: PublicKey;
+  queueAuthority: PublicKey;
   authority: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionSetConfigParams.layout("params"),
+  types.FunctionSetPermissionsParams.layout("params"),
 ]);
 
-export function functionSetConfig(
+export function functionSetPermissions(
   program: SwitchboardProgram,
-  args: FunctionSetConfigArgs,
-  accounts: FunctionSetConfigAccounts
+  args: FunctionSetPermissionsArgs,
+  accounts: FunctionSetPermissionsAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.quote, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: true, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    { pubkey: accounts.queueAuthority, isSigner: true, isWritable: false },
+    { pubkey: accounts.authority, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([232, 132, 21, 251, 253, 189, 96, 94]);
+  const identifier = Buffer.from([90, 80, 156, 65, 119, 149, 19, 104]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionSetConfigParams.toEncodable(args.params),
+      params: types.FunctionSetPermissionsParams.toEncodable(args.params),
     },
     buffer
   );

@@ -16,7 +16,7 @@ export interface QuoteRotateArgs {
 export interface QuoteRotateAccounts {
   quote: PublicKey;
   authority: PublicKey;
-  securedSigner: PublicKey;
+  enclaveSigner: PublicKey;
   attestationQueue: PublicKey;
 }
 
@@ -30,7 +30,7 @@ export function quoteRotate(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.securedSigner, isSigner: false, isWritable: false },
+    { pubkey: accounts.enclaveSigner, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: true },
   ];
   const identifier = Buffer.from([153, 94, 246, 7, 7, 124, 62, 7]);

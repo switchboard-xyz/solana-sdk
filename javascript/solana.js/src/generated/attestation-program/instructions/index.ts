@@ -23,6 +23,11 @@ export type {
   AttestationQueueRemoveMrEnclaveArgs,
 } from "./attestationQueueRemoveMrEnclave.js";
 export { attestationQueueRemoveMrEnclave } from "./attestationQueueRemoveMrEnclave.js";
+export type {
+  FunctionCloseAccounts,
+  FunctionCloseArgs,
+} from "./functionClose.js";
+export { functionClose } from "./functionClose.js";
 export type { FunctionFundAccounts, FunctionFundArgs } from "./functionFund.js";
 export { functionFund } from "./functionFund.js";
 export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
@@ -33,10 +38,40 @@ export type {
 } from "./functionSetConfig.js";
 export { functionSetConfig } from "./functionSetConfig.js";
 export type {
+  FunctionSetPermissionsAccounts,
+  FunctionSetPermissionsArgs,
+} from "./functionSetPermissions.js";
+export { functionSetPermissions } from "./functionSetPermissions.js";
+export type {
   FunctionTriggerAccounts,
   FunctionTriggerArgs,
 } from "./functionTrigger.js";
 export { functionTrigger } from "./functionTrigger.js";
+export type {
+  FunctionUserCloseAccounts,
+  FunctionUserCloseArgs,
+} from "./functionUserClose.js";
+export { functionUserClose } from "./functionUserClose.js";
+export type {
+  FunctionUserInitAccounts,
+  FunctionUserInitArgs,
+} from "./functionUserInit.js";
+export { functionUserInit } from "./functionUserInit.js";
+export type {
+  FunctionUserRequestAccounts,
+  FunctionUserRequestArgs,
+} from "./functionUserRequest.js";
+export { functionUserRequest } from "./functionUserRequest.js";
+export type {
+  FunctionUserSetConfigAccounts,
+  FunctionUserSetConfigArgs,
+} from "./functionUserSetConfig.js";
+export { functionUserSetConfig } from "./functionUserSetConfig.js";
+export type {
+  FunctionUserVerifyAccounts,
+  FunctionUserVerifyArgs,
+} from "./functionUserVerify.js";
+export { functionUserVerify } from "./functionUserVerify.js";
 export type {
   FunctionVerifyAccounts,
   FunctionVerifyArgs,

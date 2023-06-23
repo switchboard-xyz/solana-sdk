@@ -12,6 +12,11 @@ export interface FunctionSetConfigParamsFields {
   containerRegistry: Uint8Array | null;
   version: Uint8Array | null;
   schedule: Uint8Array | null;
+  mrEnclaves: Array<Array<number>> | null;
+  usersDisabled: boolean | null;
+  usersRequireAuthorization: boolean | null;
+  usersDefaultSlotsUntilExpiration: BN | null;
+  usersRequestFee: BN | null;
 }
 
 export interface FunctionSetConfigParamsJSON {
@@ -21,6 +26,11 @@ export interface FunctionSetConfigParamsJSON {
   containerRegistry: Array<number> | null;
   version: Array<number> | null;
   schedule: Array<number> | null;
+  mrEnclaves: Array<Array<number>> | null;
+  usersDisabled: boolean | null;
+  usersRequireAuthorization: boolean | null;
+  usersDefaultSlotsUntilExpiration: string | null;
+  usersRequestFee: string | null;
 }
 
 export class FunctionSetConfigParams {
@@ -30,6 +40,11 @@ export class FunctionSetConfigParams {
   readonly containerRegistry: Uint8Array | null;
   readonly version: Uint8Array | null;
   readonly schedule: Uint8Array | null;
+  readonly mrEnclaves: Array<Array<number>> | null;
+  readonly usersDisabled: boolean | null;
+  readonly usersRequireAuthorization: boolean | null;
+  readonly usersDefaultSlotsUntilExpiration: BN | null;
+  readonly usersRequestFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
     this.name = fields.name;
@@ -38,6 +53,12 @@ export class FunctionSetConfigParams {
     this.containerRegistry = fields.containerRegistry;
     this.version = fields.version;
     this.schedule = fields.schedule;
+    this.mrEnclaves = fields.mrEnclaves;
+    this.usersDisabled = fields.usersDisabled;
+    this.usersRequireAuthorization = fields.usersRequireAuthorization;
+    this.usersDefaultSlotsUntilExpiration =
+      fields.usersDefaultSlotsUntilExpiration;
+    this.usersRequestFee = fields.usersRequestFee;
   }
 
   static layout(property?: string) {
@@ -49,6 +70,11 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.vecU8(), "containerRegistry"),
         borsh.option(borsh.vecU8(), "version"),
         borsh.option(borsh.vecU8(), "schedule"),
+        borsh.option(borsh.vec(borsh.array(borsh.u8(), 32)), "mrEnclaves"),
+        borsh.option(borsh.bool(), "usersDisabled"),
+        borsh.option(borsh.bool(), "usersRequireAuthorization"),
+        borsh.option(borsh.u64(), "usersDefaultSlotsUntilExpiration"),
+        borsh.option(borsh.u64(), "usersRequestFee"),
       ],
       property
     );
@@ -105,6 +131,11 @@ export class FunctionSetConfigParams {
             obj.schedule.length
           )) ||
         null,
+      mrEnclaves: obj.mrEnclaves,
+      usersDisabled: obj.usersDisabled,
+      usersRequireAuthorization: obj.usersRequireAuthorization,
+      usersDefaultSlotsUntilExpiration: obj.usersDefaultSlotsUntilExpiration,
+      usersRequestFee: obj.usersRequestFee,
     });
   }
 
@@ -158,6 +189,11 @@ export class FunctionSetConfigParams {
             fields.schedule.length
           )) ||
         null,
+      mrEnclaves: fields.mrEnclaves,
+      usersDisabled: fields.usersDisabled,
+      usersRequireAuthorization: fields.usersRequireAuthorization,
+      usersDefaultSlotsUntilExpiration: fields.usersDefaultSlotsUntilExpiration,
+      usersRequestFee: fields.usersRequestFee,
     };
   }
 
@@ -173,6 +209,15 @@ export class FunctionSetConfigParams {
         null,
       version: (this.version && Array.from(this.version.values())) || null,
       schedule: (this.schedule && Array.from(this.schedule.values())) || null,
+      mrEnclaves: this.mrEnclaves,
+      usersDisabled: this.usersDisabled,
+      usersRequireAuthorization: this.usersRequireAuthorization,
+      usersDefaultSlotsUntilExpiration:
+        (this.usersDefaultSlotsUntilExpiration &&
+          this.usersDefaultSlotsUntilExpiration.toString()) ||
+        null,
+      usersRequestFee:
+        (this.usersRequestFee && this.usersRequestFee.toString()) || null,
     };
   }
 
@@ -186,6 +231,15 @@ export class FunctionSetConfigParams {
         null,
       version: (obj.version && Uint8Array.from(obj.version)) || null,
       schedule: (obj.schedule && Uint8Array.from(obj.schedule)) || null,
+      mrEnclaves: obj.mrEnclaves,
+      usersDisabled: obj.usersDisabled,
+      usersRequireAuthorization: obj.usersRequireAuthorization,
+      usersDefaultSlotsUntilExpiration:
+        (obj.usersDefaultSlotsUntilExpiration &&
+          new BN(obj.usersDefaultSlotsUntilExpiration)) ||
+        null,
+      usersRequestFee:
+        (obj.usersRequestFee && new BN(obj.usersRequestFee)) || null,
     });
   }
 

@@ -16,7 +16,7 @@ import { parseCronSchedule, parseMrEnclave } from "../utils.js";
 import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
-  QuoteAccount,
+  EnclaveAccount,
 } from "./index.js";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -128,8 +128,8 @@ export interface FunctionVerifyParams {
   nextAllowedTimestamp: anchor.BN;
   isFailure: boolean;
   mrEnclave: Uint8Array;
-  verifier: QuoteAccount;
-  fnSigner: PublicKey;
+  verifier: EnclaveAccount;
+  functionEnclaveSigner: PublicKey;
 }
 
 /**
@@ -230,11 +230,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       functionKeypair.publicKey
     );
-    const [permissionAccount] = functionAccount.getPermissionAccount(
-      attestationQueueAccount.publicKey,
-      attestationQueue.authority
-    );
-    const [quoteAccount] = functionAccount.getQuoteAccount();
+
+    const [enclaveAccount] = functionAccount.getEnclaveAccount();
     const escrow = functionAccount.getEscrow();
 
     const instruction = types.functionInit(
@@ -243,23 +240,26 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         params: {
           name: new Uint8Array(Buffer.from(params.name ?? "", "utf8")),
           metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
-          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           container: new Uint8Array(Buffer.from(params.container, "utf8")),
-          version: new Uint8Array(Buffer.from(params.version, "utf8")),
           containerRegistry: new Uint8Array(
             Buffer.from(params.containerRegistry ?? "", "utf8")
           ),
+          version: new Uint8Array(Buffer.from(params.version, "utf8")),
+          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
           recentSlot: recentSlot,
+          usersDisabled: false,
+          usersRequireAuthorization: false,
+          usersDefaultSlotsUntilExpiration: new anchor.BN(1000),
+          usersRequestFee: new anchor.BN(0),
         },
       },
       {
         function: functionAccount.publicKey,
         addressLookupTable: addressLookupTable,
         authority: authority,
-        quote: quoteAccount.publicKey,
+        quote: enclaveAccount.publicKey,
         attestationQueue: attestationQueueAccount.publicKey,
-        permission: permissionAccount.publicKey,
         escrow,
         state: program.attestationProgramState.publicKey,
         mint: program.mint.address,
@@ -298,20 +298,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [account, txSignature];
   }
 
-  public getPermissionAccount(
-    queuePubkey: PublicKey,
-    queueAuthority: PublicKey
-  ): [AttestationPermissionAccount, number] {
-    return AttestationPermissionAccount.fromSeed(
-      this.program,
-      queueAuthority,
-      queuePubkey,
-      this.publicKey
-    );
-  }
-
-  public getQuoteAccount(): [QuoteAccount, number] {
-    return QuoteAccount.fromSeed(this.program, this.publicKey);
+  public getEnclaveAccount(): [EnclaveAccount, number] {
+    return EnclaveAccount.fromSeed(this.program, this.publicKey);
   }
 
   public getEscrow(): PublicKey {
@@ -352,10 +340,16 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           containerRegistry: toOptionalBytes(params.containerRegistry),
           version: toOptionalBytes(params.version),
           schedule: toOptionalBytes(params.schedule),
+          mrEnclaves: [],
+          usersDisabled: false,
+          usersRequireAuthorization: false,
+          usersDefaultSlotsUntilExpiration: new anchor.BN(1000),
+          usersRequestFee: new anchor.BN(0),
         },
       },
       {
         function: this.publicKey,
+        quote: this.getEnclaveAccount()[0].publicKey,
         authority: functionData.authority,
       }
     );
@@ -583,12 +577,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     );
     const attestationQueue = await attestationQueueAccount.loadData();
 
-    const fnPermissionAccount = this.getPermissionAccount(
-      attestationQueueAccount.publicKey,
-      attestationQueue.authority
-    )[0];
-
-    const fnQuoteAccount = this.getQuoteAccount()[0];
+    const fnEnclaveAccount = this.getEnclaveAccount()[0];
 
     const verifierPermissionAccount = AttestationPermissionAccount.fromSeed(
       this.program,
@@ -618,19 +607,16 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       },
       {
         function: this.publicKey,
-        fnSigner: params.fnSigner,
-        fnQuote: fnQuoteAccount.publicKey,
+        functionEnclaveSigner: params.functionEnclaveSigner,
+        fnQuote: fnEnclaveAccount.publicKey,
         verifierQuote: params.verifier.publicKey,
         attestationQueue: functionData.attestationQueue,
         escrow: this.getEscrow(),
         receiver: receiver,
         verifierPermission: verifierPermissionAccount.publicKey,
-        fnPermission: fnPermissionAccount.publicKey,
         state: this.program.attestationProgramState.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
-        payer,
-        systemProgram: SystemProgram.programId,
-        securedSigner: PublicKey.default, // TODO: update with correct account
+        verifierEnclaveSigner: PublicKey.default, // TODO: update with correct account
       }
     );
     return new TransactionObject(payer, [instruction], [], options);

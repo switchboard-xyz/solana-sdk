@@ -5,6 +5,29 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
+export interface NoneJSON {
+  kind: "None";
+}
+
+export class None {
+  static readonly discriminator = 0;
+  static readonly kind = "None";
+  readonly discriminator = 0;
+  readonly kind = "None";
+
+  toJSON(): NoneJSON {
+    return {
+      kind: "None",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None: {},
+    };
+  }
+}
+
 export interface PermitNodeheartbeatJSON {
   kind: "PermitNodeheartbeat";
 }
@@ -59,6 +82,9 @@ export function fromDecoded(
     throw new Error("Invalid enum object");
   }
 
+  if ("None" in obj) {
+    return new None();
+  }
   if ("PermitNodeheartbeat" in obj) {
     return new PermitNodeheartbeat();
   }
@@ -73,6 +99,9 @@ export function fromJSON(
   obj: types.SwitchboardAttestationPermissionJSON
 ): types.SwitchboardAttestationPermissionKind {
   switch (obj.kind) {
+    case "None": {
+      return new None();
+    }
     case "PermitNodeheartbeat": {
       return new PermitNodeheartbeat();
     }
@@ -84,6 +113,7 @@ export function fromJSON(
 
 export function layout(property?: string) {
   const ret = borsh.rustEnum([
+    borsh.struct([], "None"),
     borsh.struct([], "PermitNodeheartbeat"),
     borsh.struct([], "PermitQueueUsage"),
   ]);

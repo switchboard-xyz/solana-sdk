@@ -9,43 +9,44 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionVerifyArgs {
-  params: types.FunctionVerifyParamsFields;
+export interface FunctionUserVerifyArgs {
+  params: types.FunctionUserVerifyParamsFields;
 }
 
-export interface FunctionVerifyAccounts {
-  state: PublicKey;
-  attestationQueue: PublicKey;
-  function: PublicKey;
+export interface FunctionUserVerifyAccounts {
+  user: PublicKey;
   functionEnclaveSigner: PublicKey;
-  fnQuote: PublicKey;
+  escrow: PublicKey;
+  function: PublicKey;
+  functionEscrow: PublicKey;
   verifierQuote: PublicKey;
   verifierEnclaveSigner: PublicKey;
   verifierPermission: PublicKey;
-  escrow: PublicKey;
+  state: PublicKey;
+  attestationQueue: PublicKey;
   receiver: PublicKey;
   tokenProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionVerifyParams.layout("params"),
+  types.FunctionUserVerifyParams.layout("params"),
 ]);
 
-export function functionVerify(
+export function functionUserVerify(
   program: SwitchboardProgram,
-  args: FunctionVerifyArgs,
-  accounts: FunctionVerifyAccounts
+  args: FunctionUserVerifyArgs,
+  accounts: FunctionUserVerifyAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
-    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
-    { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.user, isSigner: false, isWritable: true },
     {
       pubkey: accounts.functionEnclaveSigner,
       isSigner: true,
       isWritable: false,
     },
-    { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
+    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.functionEscrow, isSigner: false, isWritable: true },
     { pubkey: accounts.verifierQuote, isSigner: false, isWritable: false },
     {
       pubkey: accounts.verifierEnclaveSigner,
@@ -53,15 +54,16 @@ export function functionVerify(
       isWritable: false,
     },
     { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([210, 108, 154, 138, 198, 14, 53, 191]);
+  const identifier = Buffer.from([228, 213, 187, 129, 246, 245, 190, 124]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionVerifyParams.toEncodable(args.params),
+      params: types.FunctionUserVerifyParams.toEncodable(args.params),
     },
     buffer
   );

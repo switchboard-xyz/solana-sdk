@@ -351,6 +351,11 @@
           "isSigner": true
         },
         {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "authority",
           "isMut": false,
           "isSigner": false
@@ -404,6 +409,11 @@
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -411,6 +421,29 @@
           "name": "params",
           "type": {
             "defined": "FunctionInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionSetConfig",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetConfigParams"
           }
         }
       ]
@@ -753,11 +786,15 @@
             "type": "publicKey"
           },
           {
+            "name": "triggerCount",
+            "type": "u64"
+          },
+          {
             "name": "ebuf",
             "type": {
               "array": [
                 "u8",
-                991
+                983
               ]
             }
           }
@@ -1042,6 +1079,54 @@
                 "u8",
                 32
               ]
+            }
+          },
+          {
+            "name": "recentSlot",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionSetConfigParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "container",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "containerRegistry",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "version",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "schedule",
+            "type": {
+              "option": "bytes"
             }
           }
         ]
@@ -1329,6 +1414,16 @@
     },
     {
       "name": "FunctionInitEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionSetConfigEvent",
       "fields": [
         {
           "name": "function",
@@ -1653,6 +1748,10 @@
     {
       "code": 6024,
       "name": "IllegalVerifier"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidAuthorityError"
     }
   ]
 }

@@ -9,35 +9,45 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionSetConfigArgs {
-  params: types.FunctionSetConfigParamsFields;
+export interface FunctionCloseArgs {
+  params: types.FunctionCloseParamsFields;
 }
 
-export interface FunctionSetConfigAccounts {
+export interface FunctionCloseAccounts {
   function: PublicKey;
-  quote: PublicKey;
   authority: PublicKey;
+  escrow: PublicKey;
+  solDest: PublicKey;
+  escrowDest: PublicKey;
+  state: PublicKey;
+  tokenProgram: PublicKey;
+  systemProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionSetConfigParams.layout("params"),
+  types.FunctionCloseParams.layout("params"),
 ]);
 
-export function functionSetConfig(
+export function functionClose(
   program: SwitchboardProgram,
-  args: FunctionSetConfigArgs,
-  accounts: FunctionSetConfigAccounts
+  args: FunctionCloseArgs,
+  accounts: FunctionCloseAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
+    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.solDest, isSigner: false, isWritable: false },
+    { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
+    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([232, 132, 21, 251, 253, 189, 96, 94]);
+  const identifier = Buffer.from([94, 164, 174, 42, 156, 29, 244, 236]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionSetConfigParams.toEncodable(args.params),
+      params: types.FunctionCloseParams.toEncodable(args.params),
     },
     buffer
   );

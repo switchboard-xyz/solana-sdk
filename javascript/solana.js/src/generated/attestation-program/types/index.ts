@@ -1,4 +1,6 @@
 import * as FunctionStatus from "./FunctionStatus.js";
+import * as FunctionUserRequestMode from "./FunctionUserRequestMode.js";
+import * as RequestStatus from "./RequestStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
 import * as VerificationStatus from "./VerificationStatus.js";
 
@@ -28,6 +30,11 @@ export type {
 } from "./AttestationQueueRemoveMrEnclaveParams.js";
 export { AttestationQueueRemoveMrEnclaveParams } from "./AttestationQueueRemoveMrEnclaveParams.js";
 export type {
+  FunctionCloseParamsFields,
+  FunctionCloseParamsJSON,
+} from "./FunctionCloseParams.js";
+export { FunctionCloseParams } from "./FunctionCloseParams.js";
+export type {
   FunctionFundParamsFields,
   FunctionFundParamsJSON,
 } from "./FunctionFundParams.js";
@@ -43,10 +50,45 @@ export type {
 } from "./FunctionSetConfigParams.js";
 export { FunctionSetConfigParams } from "./FunctionSetConfigParams.js";
 export type {
+  FunctionSetPermissionsParamsFields,
+  FunctionSetPermissionsParamsJSON,
+} from "./FunctionSetPermissionsParams.js";
+export { FunctionSetPermissionsParams } from "./FunctionSetPermissionsParams.js";
+export type {
   FunctionTriggerParamsFields,
   FunctionTriggerParamsJSON,
 } from "./FunctionTriggerParams.js";
 export { FunctionTriggerParams } from "./FunctionTriggerParams.js";
+export type {
+  FunctionUserCloseParamsFields,
+  FunctionUserCloseParamsJSON,
+} from "./FunctionUserCloseParams.js";
+export { FunctionUserCloseParams } from "./FunctionUserCloseParams.js";
+export type {
+  FunctionUserInitParamsFields,
+  FunctionUserInitParamsJSON,
+} from "./FunctionUserInitParams.js";
+export { FunctionUserInitParams } from "./FunctionUserInitParams.js";
+export type {
+  FunctionUserRequestParamsFields,
+  FunctionUserRequestParamsJSON,
+} from "./FunctionUserRequestParams.js";
+export { FunctionUserRequestParams } from "./FunctionUserRequestParams.js";
+export type {
+  FunctionUserRequestRoundFields,
+  FunctionUserRequestRoundJSON,
+} from "./FunctionUserRequestRound.js";
+export { FunctionUserRequestRound } from "./FunctionUserRequestRound.js";
+export type {
+  FunctionUserSetConfigParamsFields,
+  FunctionUserSetConfigParamsJSON,
+} from "./FunctionUserSetConfigParams.js";
+export { FunctionUserSetConfigParams } from "./FunctionUserSetConfigParams.js";
+export type {
+  FunctionUserVerifyParamsFields,
+  FunctionUserVerifyParamsJSON,
+} from "./FunctionUserVerifyParams.js";
+export { FunctionUserVerifyParams } from "./FunctionUserVerifyParams.js";
 export type {
   FunctionVerifyParamsFields,
   FunctionVerifyParamsJSON,
@@ -99,6 +141,23 @@ export type FunctionStatusJSON =
   | FunctionStatus.OutOfFundsJSON
   | FunctionStatus.InvalidPermissionsJSON;
 
+export { RequestStatus };
+
+export type RequestStatusKind =
+  | RequestStatus.None
+  | RequestStatus.RequestPending
+  | RequestStatus.RequestCancelled
+  | RequestStatus.RequestFailure
+  | RequestStatus.RequestExpired
+  | RequestStatus.RequestSuccess;
+export type RequestStatusJSON =
+  | RequestStatus.NoneJSON
+  | RequestStatus.RequestPendingJSON
+  | RequestStatus.RequestCancelledJSON
+  | RequestStatus.RequestFailureJSON
+  | RequestStatus.RequestExpiredJSON
+  | RequestStatus.RequestSuccessJSON;
+
 export { VerificationStatus };
 
 export type VerificationStatusKind =
@@ -117,8 +176,19 @@ export type VerificationStatusJSON =
 export { SwitchboardAttestationPermission };
 
 export type SwitchboardAttestationPermissionKind =
+  | SwitchboardAttestationPermission.None
   | SwitchboardAttestationPermission.PermitNodeheartbeat
   | SwitchboardAttestationPermission.PermitQueueUsage;
 export type SwitchboardAttestationPermissionJSON =
+  | SwitchboardAttestationPermission.NoneJSON
   | SwitchboardAttestationPermission.PermitNodeheartbeatJSON
   | SwitchboardAttestationPermission.PermitQueueUsageJSON;
+
+export { FunctionUserRequestMode };
+
+export type FunctionUserRequestModeKind =
+  | FunctionUserRequestMode.Independent
+  | FunctionUserRequestMode.Managed;
+export type FunctionUserRequestModeJSON =
+  | FunctionUserRequestMode.IndependentJSON
+  | FunctionUserRequestMode.ManagedJSON;

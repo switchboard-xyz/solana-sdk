@@ -1682,7 +1682,7 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
 
   public quoteKeypairFromSeed(seed: PublicKey): Keypair {
     const hash = createHash("sha256");
-    hash.update(Buffer.from("QuoteAccountData"));
+    hash.update(Buffer.from("EnclaveAccountData"));
     hash.update(seed.toBuffer());
     const kp = Keypair.fromSeed(hash.digest());
     return kp;

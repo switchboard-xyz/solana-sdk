@@ -9,35 +9,33 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionSetConfigArgs {
-  params: types.FunctionSetConfigParamsFields;
+export interface FunctionUserSetConfigArgs {
+  params: types.FunctionUserSetConfigParamsFields;
 }
 
-export interface FunctionSetConfigAccounts {
-  function: PublicKey;
-  quote: PublicKey;
+export interface FunctionUserSetConfigAccounts {
+  user: PublicKey;
   authority: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionSetConfigParams.layout("params"),
+  types.FunctionUserSetConfigParams.layout("params"),
 ]);
 
-export function functionSetConfig(
+export function functionUserSetConfig(
   program: SwitchboardProgram,
-  args: FunctionSetConfigArgs,
-  accounts: FunctionSetConfigAccounts
+  args: FunctionUserSetConfigArgs,
+  accounts: FunctionUserSetConfigAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.quote, isSigner: false, isWritable: true },
+    { pubkey: accounts.user, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
   ];
-  const identifier = Buffer.from([232, 132, 21, 251, 253, 189, 96, 94]);
+  const identifier = Buffer.from([16, 202, 74, 89, 109, 97, 126, 26]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionSetConfigParams.toEncodable(args.params),
+      params: types.FunctionUserSetConfigParams.toEncodable(args.params),
     },
     buffer
   );

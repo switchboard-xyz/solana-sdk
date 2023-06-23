@@ -9,61 +9,55 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionInitArgs {
-  params: types.FunctionInitParamsFields;
+export interface FunctionUserInitArgs {
+  params: types.FunctionUserInitParamsFields;
 }
 
-export interface FunctionInitAccounts {
+export interface FunctionUserInitAccounts {
+  user: PublicKey;
   function: PublicKey;
-  addressLookupTable: PublicKey;
-  authority: PublicKey;
-  quote: PublicKey;
+  functionAuthority: PublicKey;
   attestationQueue: PublicKey;
-  payer: PublicKey;
   escrow: PublicKey;
-  state: PublicKey;
   mint: PublicKey;
+  state: PublicKey;
+  payer: PublicKey;
+  systemProgram: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
-  systemProgram: PublicKey;
-  addressLookupProgram: PublicKey;
 }
 
-export const layout = borsh.struct([types.FunctionInitParams.layout("params")]);
+export const layout = borsh.struct([
+  types.FunctionUserInitParams.layout("params"),
+]);
 
-export function functionInit(
+export function functionUserInit(
   program: SwitchboardProgram,
-  args: FunctionInitArgs,
-  accounts: FunctionInitAccounts
+  args: FunctionUserInitArgs,
+  accounts: FunctionUserInitAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.function, isSigner: true, isWritable: true },
-    { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
-    { pubkey: accounts.quote, isSigner: false, isWritable: true },
+    { pubkey: accounts.user, isSigner: true, isWritable: true },
+    { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.functionAuthority, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
+    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.payer, isSigner: true, isWritable: true },
+    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
       pubkey: accounts.associatedTokenProgram,
       isSigner: false,
       isWritable: false,
     },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
-    {
-      pubkey: accounts.addressLookupProgram,
-      isSigner: false,
-      isWritable: false,
-    },
   ];
-  const identifier = Buffer.from([0, 20, 30, 24, 100, 146, 13, 162]);
+  const identifier = Buffer.from([237, 123, 126, 19, 238, 197, 43, 30]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionInitParams.toEncodable(args.params),
+      params: types.FunctionUserInitParams.toEncodable(args.params),
     },
     buffer
   );
