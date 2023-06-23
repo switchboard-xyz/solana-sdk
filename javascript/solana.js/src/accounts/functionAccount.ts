@@ -17,6 +17,8 @@ import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
   EnclaveAccount,
+  FunctionRequestAccount,
+  FunctionRequestAccountInitParams,
 } from "./index.js";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -139,6 +141,11 @@ export interface FunctionVerifyParams {
 export interface FunctionTriggerParams {
   authority?: Keypair;
 }
+
+export type CreateFunctionRequestParams = Omit<
+  FunctionRequestAccountInitParams,
+  "functionAccount"
+> & { user?: Keypair };
 
 /**
 
@@ -306,6 +313,39 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 
+  public async createRequestInstruction(
+    payer: PublicKey,
+    params: CreateFunctionRequestParams,
+    options?: TransactionObjectOptions
+  ): Promise<[FunctionRequestAccount, TransactionObject]> {
+    // const functionState = await this.loadData();
+    const [requestAccount, txnObject] =
+      await FunctionRequestAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          ...params,
+          functionAccount: this,
+        },
+        options
+      );
+
+    return [requestAccount, txnObject];
+  }
+
+  public async createRequest(
+    params: CreateFunctionRequestParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[FunctionRequestAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createRequestInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txSignature = await this.program.signAndSend(txnObject, options);
+    return [account, txSignature];
+  }
+
   public async setConfigInstruction(
     payer: PublicKey,
     params: FunctionSetConfigParams,
@@ -357,7 +397,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return new TransactionObject(
       payer,
       [setConfigIxn],
-      params?.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : [],
+      options
     );
   }
 

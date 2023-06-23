@@ -7,8 +7,10 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { RawBuffer } from "../types.js";
+import { parseMrEnclave } from "../utils.js";
 
-import { EnclaveAccount, FunctionAccount } from "./index.js";
+import { FunctionAccount } from "./index.js";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -22,8 +24,6 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common";
-import { RawBuffer } from "types.js";
-import { parseMrEnclave } from "utils.js";
 
 /**
  *  Parameters for initializing a {@linkcode FunctionRequestAccount}
