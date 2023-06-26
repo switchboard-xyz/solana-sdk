@@ -26,19 +26,25 @@ impl Discriminator for ActionTemplate<'_> {
 }
 
 impl<'info> ActionTemplate<'info> {
-    pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
+    pub fn get_instruction(
+        &self,
+        program_id: Pubkey,
+        params: &ActionTemplateParams,
+    ) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
         let mut data: Vec<u8> = ActionTemplate::discriminator().try_to_vec()?;
-        let params = ActionTemplateParams {};
-        let mut param_vec: Vec<u8> = params.try_to_vec()?;
-        data.append(&mut param_vec);
+        data.append(&mut params.try_to_vec()?);
 
         let instruction = Instruction::new_with_bytes(program_id, &data, accounts);
         Ok(instruction)
     }
 
-    pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
+    pub fn invoke(
+        &self,
+        program: AccountInfo<'info>,
+        params: &ActionTemplateParams,
+    ) -> ProgramResult {
         let instruction = self.get_instruction(*program.key)?;
         let account_infos = self.to_account_infos();
 
@@ -48,6 +54,7 @@ impl<'info> ActionTemplate<'info> {
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
+        params: &ActionTemplateParams,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
         let instruction = self.get_instruction(*program.key)?;
