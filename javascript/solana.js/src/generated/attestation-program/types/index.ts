@@ -84,11 +84,6 @@ export type {
 } from "./FunctionSetConfigParams.js";
 export { FunctionSetConfigParams } from "./FunctionSetConfigParams.js";
 export type {
-  FunctionSetPermissionsParamsFields,
-  FunctionSetPermissionsParamsJSON,
-} from "./FunctionSetPermissionsParams.js";
-export { FunctionSetPermissionsParams } from "./FunctionSetPermissionsParams.js";
-export type {
   FunctionTriggerParamsFields,
   FunctionTriggerParamsJSON,
 } from "./FunctionTriggerParams.js";

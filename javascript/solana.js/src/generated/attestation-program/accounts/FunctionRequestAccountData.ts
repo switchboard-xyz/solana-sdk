@@ -24,9 +24,12 @@ export interface FunctionRequestAccountDataFields {
   previousRequest: types.FunctionRequestTriggerRoundFields;
   /** The maximum number of bytes to pass to the container params. */
   maxContainerParamsLen: number;
-  /** Hash of the serialized container_params to prevent RPC tampering. */
+  /**
+   * Hash of the serialized container_params to prevent RPC tampering.
+   * Should be verified within your function to ensure you are using the correct parameters.
+   */
   hash: Array<number>;
-  /** The stringified container params to pass\ */
+  /** The stringified container params to pass to the function. */
   containerParams: Uint8Array;
   /** The unix timestamp when the function was created. */
   createdAt: BN;
@@ -55,9 +58,12 @@ export interface FunctionRequestAccountDataJSON {
   previousRequest: types.FunctionRequestTriggerRoundJSON;
   /** The maximum number of bytes to pass to the container params. */
   maxContainerParamsLen: number;
-  /** Hash of the serialized container_params to prevent RPC tampering. */
+  /**
+   * Hash of the serialized container_params to prevent RPC tampering.
+   * Should be verified within your function to ensure you are using the correct parameters.
+   */
   hash: Array<number>;
-  /** The stringified container params to pass\ */
+  /** The stringified container params to pass to the function. */
   containerParams: Array<number>;
   /** The unix timestamp when the function was created. */
   createdAt: string;
@@ -86,9 +92,12 @@ export class FunctionRequestAccountData {
   readonly previousRequest: types.FunctionRequestTriggerRound;
   /** The maximum number of bytes to pass to the container params. */
   readonly maxContainerParamsLen: number;
-  /** Hash of the serialized container_params to prevent RPC tampering. */
+  /**
+   * Hash of the serialized container_params to prevent RPC tampering.
+   * Should be verified within your function to ensure you are using the correct parameters.
+   */
   readonly hash: Array<number>;
-  /** The stringified container params to pass\ */
+  /** The stringified container params to pass to the function. */
   readonly containerParams: Uint8Array;
   /** The unix timestamp when the function was created. */
   readonly createdAt: BN;

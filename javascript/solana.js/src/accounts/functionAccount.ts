@@ -701,6 +701,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       {
         function: this.publicKey,
         authority: functionData.authority,
+        attestationQueue: functionData.attestationQueue,
       }
     );
 

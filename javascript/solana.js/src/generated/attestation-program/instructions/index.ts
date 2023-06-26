@@ -68,11 +68,6 @@ export type {
 } from "./functionSetConfig.js";
 export { functionSetConfig } from "./functionSetConfig.js";
 export type {
-  FunctionSetPermissionsAccounts,
-  FunctionSetPermissionsArgs,
-} from "./functionSetPermissions.js";
-export { functionSetPermissions } from "./functionSetPermissions.js";
-export type {
   FunctionTriggerAccounts,
   FunctionTriggerArgs,
 } from "./functionTrigger.js";
