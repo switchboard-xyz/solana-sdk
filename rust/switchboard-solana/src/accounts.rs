@@ -6,6 +6,6 @@ pub use crate::oracle_program::accounts::{
 };
 
 pub use crate::attestation_program::accounts::{
-    AttestationPermissionAccountData, AttestationQueueAccountData, AttestationState,
+    AttestationPermissionAccountData, AttestationProgramState, AttestationQueueAccountData,
     EnclaveAccountData, FunctionAccountData, FunctionRequestAccountData,
 };

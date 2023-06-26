@@ -4,6 +4,6 @@ pub use crate::oracle_program::instructions::{
 };
 
 pub use crate::attestation_program::instructions::{
-    FunctionRequestInit, FunctionRequestInitAndTrigger, FunctionRequestVerify, FunctionTrigger,
-    FunctionVerify,
+    FunctionRequestClose, FunctionRequestInit, FunctionRequestInitAndTrigger,
+    FunctionRequestVerify, FunctionTrigger, FunctionVerify,
 };

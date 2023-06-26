@@ -3,30 +3,64 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params: FunctionVerifyParams)] // rpc parameters hint
 pub struct FunctionVerify<'info> {
-    #[account(mut)]
-    pub function: AccountInfo<'info>,
-    #[account(signer)]
-    pub fn_signer: AccountInfo<'info>,
-    /// CHECK:
-    pub fn_quote: AccountInfo<'info>,
-    pub verifier_quote: AccountInfo<'info>,
-    #[account(signer)]
-    pub secured_signer: AccountInfo<'info>,
-    pub attestation_queue: AccountInfo<'info>,
-    /// CHECK:
-    #[account(mut)]
+    #[account(
+        mut,
+        has_one = attestation_queue,
+        has_one = escrow,
+    )]
+    pub function: AccountLoader<'info, FunctionAccountData>,
+
+    pub function_enclave_signer: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [QUOTE_SEED, function.key().as_ref()],
+        bump = fn_quote.load()?.bump,
+        has_one = attestation_queue
+    )]
+    pub fn_quote: AccountLoader<'info, EnclaveAccountData>,
+
+    #[account(
+        has_one = attestation_queue,
+        constraint = 
+            verifier_quote.load()?.enclave_signer == verifier_enclave_signer.key(),
+    )]
+    pub verifier_quote: AccountLoader<'info, EnclaveAccountData>,
+
+    pub verifier_enclave_signer: Signer<'info>,
+
+    #[account(
+        seeds = [
+            PERMISSION_SEED,
+            attestation_queue.load()?.authority.as_ref(),
+            attestation_queue.key().as_ref(),
+            verifier_quote.key().as_ref()
+        ],
+        bump = verifier_permission.load()?.bump,
+    )]
+    pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
+
+    #[account(
+        mut,
+        constraint = escrow.is_native() && escrow.owner == state.key()
+    )]
     pub escrow: Account<'info, TokenAccount>,
-    /// CHECK:
-    #[account(mut)]
+
+    #[account(
+        mut,
+        constraint = receiver.is_native()
+    )]
     pub receiver: Account<'info, TokenAccount>,
-    pub verifier_permission: AccountInfo<'info>,
-    pub fn_permission: AccountInfo<'info>,
-    #[account(mut)]
-    pub state: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
-    #[account(signer)]
-    pub payer: AccountInfo<'info>,
-    pub system_program: AccountInfo<'info>,
+
+    #[account(
+        seeds = [STATE_SEED],
+        bump = state.load()?.bump
+    )]
+    pub state: AccountLoader<'info, AttestationProgramState>,
+
+    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -102,97 +136,38 @@ impl<'info> FunctionVerify<'info> {
     }
 
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
-        vec![
-            self.function.clone(),
-            self.fn_signer.clone(),
-            self.fn_quote.clone(),
-            self.verifier_quote.clone(),
-            self.secured_signer.clone(),
-            self.attestation_queue.clone(),
-            self.escrow.to_account_info().clone(),
-            self.receiver.to_account_info().clone(),
-            self.verifier_permission.clone(),
-            self.fn_permission.clone(),
-            self.state.clone(),
-            self.token_program.clone(),
-            self.payer.clone(),
-            self.system_program.clone(),
-        ]
+        let mut account_infos = Vec::new();
+        account_infos.extend(self.state.to_account_infos());
+        account_infos.extend(self.attestation_queue.to_account_infos());
+        account_infos.extend(self.function.to_account_infos());
+        account_infos.extend(self.function_enclave_signer.to_account_infos());
+        account_infos.extend(self.fn_quote.to_account_infos());
+        account_infos.extend(self.verifier_quote.to_account_infos());
+        account_infos.extend(self.verifier_enclave_signer.to_account_infos());
+        account_infos.extend(self.verifier_permission.to_account_infos());
+        account_infos.extend(self.escrow.to_account_infos());
+        account_infos.extend(self.receiver.to_account_infos());
+        account_infos.extend(self.token_program.to_account_infos());
+        account_infos
     }
 
     #[allow(unused_variables)]
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
-        vec![
-            AccountMeta {
-                pubkey: *self.function.key,
-                is_signer: self.function.is_signer,
-                is_writable: self.function.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.fn_signer.key,
-                is_signer: self.fn_signer.is_signer,
-                is_writable: self.fn_signer.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.fn_quote.key,
-                is_signer: self.fn_quote.is_signer,
-                is_writable: self.fn_quote.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.verifier_quote.key,
-                is_signer: self.verifier_quote.is_signer,
-                is_writable: self.verifier_quote.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.secured_signer.key,
-                is_signer: self.verifier_quote.is_signer,
-                is_writable: self.verifier_quote.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.attestation_queue.key,
-                is_signer: self.attestation_queue.is_signer,
-                is_writable: self.attestation_queue.is_writable,
-            },
-            AccountMeta {
-                pubkey: self.escrow.key(),
-                is_signer: self.escrow.to_account_info().is_signer,
-                is_writable: self.escrow.to_account_info().is_writable,
-            },
-            AccountMeta {
-                pubkey: self.receiver.key(),
-                is_signer: self.receiver.to_account_info().is_signer,
-                is_writable: self.receiver.to_account_info().is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.verifier_permission.key,
-                is_signer: self.verifier_permission.is_signer,
-                is_writable: self.verifier_permission.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.fn_permission.key,
-                is_signer: self.fn_permission.is_signer,
-                is_writable: self.fn_permission.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.state.key,
-                is_signer: self.state.is_signer,
-                is_writable: self.state.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.token_program.key,
-                is_signer: self.token_program.is_signer,
-                is_writable: self.token_program.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.payer.key,
-                is_signer: self.payer.is_signer,
-                is_writable: self.payer.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.system_program.key,
-                is_signer: self.system_program.is_signer,
-                is_writable: self.system_program.is_writable,
-            },
-        ]
+        let mut account_metas = Vec::new();
+        account_metas.extend(self.state.to_account_metas(None));
+        account_metas.extend(self.attestation_queue.to_account_metas(None));
+        account_metas.extend(self.function.to_account_metas(None));
+        account_metas
+            .extend(self.function_enclave_signer.to_account_metas(None));
+        account_metas.extend(self.fn_quote.to_account_metas(None));
+        account_metas.extend(self.verifier_quote.to_account_metas(None));
+        account_metas
+            .extend(self.verifier_enclave_signer.to_account_metas(None));
+        account_metas.extend(self.verifier_permission.to_account_metas(None));
+        account_metas.extend(self.escrow.to_account_metas(None));
+        account_metas.extend(self.receiver.to_account_metas(None));
+        account_metas.extend(self.token_program.to_account_metas(None));
+        account_metas
     }
 }
+

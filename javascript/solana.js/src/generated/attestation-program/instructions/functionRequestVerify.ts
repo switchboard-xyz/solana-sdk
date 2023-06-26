@@ -54,7 +54,7 @@ export function functionRequestVerify(
       isWritable: false,
     },
     { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },

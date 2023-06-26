@@ -43,7 +43,8 @@ pub use anchor_lang::prelude::*;
 pub use anchor_lang::{
     AnchorDeserialize, AnchorSerialize, Discriminator, InstructionData, Owner, ZeroCopy,
 };
-pub use anchor_spl::token::{Mint, TokenAccount};
+pub use anchor_spl::associated_token::AssociatedToken;
+pub use anchor_spl::token::{Mint, Token, TokenAccount};
 pub use solana_program::entrypoint::ProgramResult;
 pub use solana_program::instruction::Instruction;
 pub use solana_program::program::{invoke, invoke_signed};

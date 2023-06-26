@@ -14,8 +14,6 @@ export interface FunctionVerifyArgs {
 }
 
 export interface FunctionVerifyAccounts {
-  state: PublicKey;
-  attestationQueue: PublicKey;
   function: PublicKey;
   functionEnclaveSigner: PublicKey;
   fnQuote: PublicKey;
@@ -24,6 +22,8 @@ export interface FunctionVerifyAccounts {
   verifierPermission: PublicKey;
   escrow: PublicKey;
   receiver: PublicKey;
+  state: PublicKey;
+  attestationQueue: PublicKey;
   tokenProgram: PublicKey;
 }
 
@@ -37,8 +37,6 @@ export function functionVerify(
   accounts: FunctionVerifyAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
-    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     {
       pubkey: accounts.functionEnclaveSigner,
@@ -55,6 +53,8 @@ export function functionVerify(
     { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([210, 108, 154, 138, 198, 14, 53, 191]);

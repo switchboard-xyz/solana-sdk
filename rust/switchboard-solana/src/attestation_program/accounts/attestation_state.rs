@@ -7,27 +7,27 @@ use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 #[zero_copy]
 #[repr(packed)]
 #[derive(Debug)]
-pub struct AttestationState {
+pub struct AttestationProgramState {
     pub bump: u8,
     pub _ebuf: [u8; 2048],
 }
 
-unsafe impl Pod for AttestationState {}
-unsafe impl Zeroable for AttestationState {}
+unsafe impl Pod for AttestationProgramState {}
+unsafe impl Zeroable for AttestationProgramState {}
 
-impl Discriminator for AttestationState {
-    const DISCRIMINATOR: [u8; 8] = [216, 146, 107, 94, 104, 75, 182, 177];
+impl Discriminator for AttestationProgramState {
+    const DISCRIMINATOR: [u8; 8] = [42, 145, 190, 11, 203, 77, 146, 231];
 }
 
-impl Owner for AttestationState {
+impl Owner for AttestationProgramState {
     fn owner() -> Pubkey {
         SWITCHBOARD_ATTESTATION_PROGRAM_ID
     }
 }
 
-impl ZeroCopy for AttestationState {}
+impl ZeroCopy for AttestationProgramState {}
 
-impl AttestationState {
+impl AttestationProgramState {
     pub fn get_pda() -> Pubkey {
         let (pda_key, _) =
             Pubkey::find_program_address(&[STATE_SEED], &SWITCHBOARD_ATTESTATION_PROGRAM_ID);

@@ -23,7 +23,7 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: Account<'info, Mint>,
     #[account(seeds = [STATE_SEED], bump = state.load()?.bump)]
-    pub state: AccountLoader<'info, AttestationState>,
+    pub state: AccountLoader<'info, AttestationProgramState>,
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
     #[account(mut)]
     pub payer: Signer<'info>,

@@ -12,3 +12,6 @@ pub use request_init::*;
 
 pub mod request_verify;
 pub use request_verify::*;
+
+pub mod request_close;
+pub use request_close::*;

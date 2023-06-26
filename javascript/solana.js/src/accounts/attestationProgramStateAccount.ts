@@ -16,9 +16,9 @@ import {
 /**
  * Account type representing Switchboard global program state.
  *
- * Data: {@linkcode types.State}
+ * Data: {@linkcode types.AttestationProgramState}
  */
-export class AttestationProgramStateAccount extends Account<types.State> {
+export class AttestationProgramStateAccount extends Account<types.AttestationProgramState> {
   static accountName = "State";
 
   public static size = 1128;
@@ -26,15 +26,16 @@ export class AttestationProgramStateAccount extends Account<types.State> {
   /**
    * @return account size of the global {@linkcode AttestationProgramStateAccount}.
    */
-  public readonly size = this.program.account.sbState.size;
+  public readonly size =
+    this.program.attestationAccount.attestationProgramState.size;
 
   /**
    * Return a program state account state initialized to the default values.
    */
-  public static default(): types.State {
+  public static default(): types.AttestationProgramState {
     const buffer = Buffer.alloc(AttestationProgramStateAccount.size, 0);
-    types.State.discriminator.copy(buffer, 0);
-    return types.State.decode(buffer);
+    types.AttestationProgramState.discriminator.copy(buffer, 0);
+    return types.AttestationProgramState.decode(buffer);
   }
 
   /**
@@ -42,22 +43,22 @@ export class AttestationProgramStateAccount extends Account<types.State> {
    */
   public static createMock(
     programId: PublicKey,
-    data: Partial<types.State>,
+    data: Partial<types.AttestationProgramState>,
     options?: {
       lamports?: number;
       rentEpoch?: number;
     }
   ): AccountInfo<Buffer> {
-    const fields: types.StateFields = {
+    const fields: types.AttestationProgramStateFields = {
       ...AttestationProgramStateAccount.default(),
       ...data,
       // any cleanup actions here
     };
-    const state = new types.State(fields);
+    const state = new types.AttestationProgramState(fields);
 
     const buffer = Buffer.alloc(AttestationProgramStateAccount.size, 0);
-    types.State.discriminator.copy(buffer, 0);
-    types.State.layout.encode(state, buffer, 8);
+    types.AttestationProgramState.discriminator.copy(buffer, 0);
+    types.AttestationProgramState.layout.encode(state, buffer, 8);
 
     return {
       executable: false,
@@ -72,7 +73,7 @@ export class AttestationProgramStateAccount extends Account<types.State> {
   public static async load(
     program: SwitchboardProgram,
     publicKey: PublicKey | string
-  ): Promise<[AttestationProgramStateAccount, types.State]> {
+  ): Promise<[AttestationProgramStateAccount, types.AttestationProgramState]> {
     const account = new AttestationProgramStateAccount(
       program,
       typeof publicKey === "string" ? new PublicKey(publicKey) : publicKey
@@ -82,10 +83,13 @@ export class AttestationProgramStateAccount extends Account<types.State> {
   }
 
   /**
-   * Retrieve and decode the {@linkcode types.State} stored in this account.
+   * Retrieve and decode the {@linkcode types.AttestationProgramState} stored in this account.
    */
-  public async loadData(): Promise<types.State> {
-    const data = await types.State.fetch(this.program, this.publicKey);
+  public async loadData(): Promise<types.AttestationProgramState> {
+    const data = await types.AttestationProgramState.fetch(
+      this.program,
+      this.publicKey
+    );
     if (data === null)
       throw new errors.AccountNotFoundError(
         "Attestation Program State",

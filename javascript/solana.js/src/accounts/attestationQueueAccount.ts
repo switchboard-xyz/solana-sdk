@@ -109,13 +109,13 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   static accountName = "AttestationQueueAccountData";
 
   /**
-   * Get the size of an {@linkcode QueueAccount} on-chain.
+   * Get the size of an {@linkcode types.AttestationQueueAccountData} on-chain.
    */
   public readonly size =
     this.program.attestationAccount.attestationQueueAccountData.size;
 
   /**
-   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.AttestationQueueAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationQueueAccountData> {
     this.program.verifyAttestation();

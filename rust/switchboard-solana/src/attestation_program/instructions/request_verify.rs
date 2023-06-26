@@ -37,7 +37,7 @@ pub struct FunctionRequestVerify<'info> {
     )]
     pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
     #[account(mut, seeds = [STATE_SEED], bump = state.load()?.bump)]
-    pub state: AccountLoader<'info, AttestationState>,
+    pub state: AccountLoader<'info, AttestationProgramState>,
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
     #[account(mut, constraint = receiver.is_native())]
     pub receiver: Box<Account<'info, TokenAccount>>,

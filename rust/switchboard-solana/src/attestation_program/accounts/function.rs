@@ -197,6 +197,26 @@ impl FunctionAccountData {
         ))
     }
 
+    pub fn get_quote_pda(fn_key: &Pubkey) -> Pubkey {
+        let (pda_key, _) = Pubkey::find_program_address(
+            &[QUOTE_SEED, &fn_key.to_bytes()],
+            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+        );
+        pda_key
+    }
+
+    pub fn get_escrow_key(fn_key: &Pubkey) -> Pubkey {
+        let (ata_key, _) = Pubkey::find_program_address(
+            &[
+                &fn_key.to_bytes(),
+                &anchor_spl::token::ID.to_bytes(),
+                &anchor_spl::token::spl_token::native_mint::ID.to_bytes(),
+            ],
+            &anchor_spl::associated_token::AssociatedToken::id(),
+        );
+        ata_key
+    }
+
     /// Validate that the provided accounts correspond to the expected function accounts
     ///
     /// # Arguments
@@ -287,7 +307,17 @@ impl FunctionAccountData {
             )
         }
 
+        pub fn get_next_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
+            chrono::DateTime::from_utc(
+                chrono::NaiveDateTime::from_timestamp_opt(self.next_allowed_timestamp, 0).unwrap(),
+                chrono::Utc,
+            )
+        }
+
         pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {
+            if self.is_triggered > 0 {
+                return true;
+            }
             let schedule = self.get_schedule();
             if schedule.is_none() {
                 return false;
@@ -302,16 +332,6 @@ impl FunctionAccountData {
                 return false;
             }
             true
-        }
-
-
-        pub fn next_execution_timestamp(&self) -> Option<chrono::DateTime<chrono::Utc>> {
-            let schedule = self.get_schedule();
-            if schedule.is_none() {
-                return None;
-            }
-            let dt = self.get_last_execution_datetime();
-            schedule.unwrap().after(&dt).next()
         }
 
         pub async fn fetch(

@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::Token;
-
 
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestInitParams)]
@@ -37,7 +34,7 @@ pub struct FunctionRequestInit<'info> {
         seeds = [STATE_SEED], 
         bump = state.load()?.bump
     )]
-    pub state: AccountLoader<'info, AttestationState>,
+    pub state: AccountLoader<'info, AttestationProgramState>,
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
     #[account(mut)]
     pub payer: Signer<'info>,

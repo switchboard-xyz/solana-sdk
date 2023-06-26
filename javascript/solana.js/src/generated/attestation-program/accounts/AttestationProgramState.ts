@@ -5,22 +5,22 @@ import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-es
 import { Connection, PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface StateFields {
+export interface AttestationProgramStateFields {
   bump: number;
   ebuf: Array<number>;
 }
 
-export interface StateJSON {
+export interface AttestationProgramStateJSON {
   bump: number;
   ebuf: Array<number>;
 }
 
-export class State {
+export class AttestationProgramState {
   readonly bump: number;
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([
-    216, 146, 107, 94, 104, 75, 182, 177,
+    42, 145, 190, 11, 203, 77, 146, 231,
   ]);
 
   static readonly layout = borsh.struct([
@@ -28,7 +28,7 @@ export class State {
     borsh.array(borsh.u8(), 2048, "ebuf"),
   ]);
 
-  constructor(fields: StateFields) {
+  constructor(fields: AttestationProgramStateFields) {
     this.bump = fields.bump;
     this.ebuf = fields.ebuf;
   }
@@ -36,7 +36,7 @@ export class State {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey
-  ): Promise<State | null> {
+  ): Promise<AttestationProgramState | null> {
     const info = await program.connection.getAccountInfo(address);
 
     if (info === null) {
@@ -52,7 +52,7 @@ export class State {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[]
-  ): Promise<Array<State | null>> {
+  ): Promise<Array<AttestationProgramState | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
     return infos.map((info) => {
@@ -67,28 +67,28 @@ export class State {
     });
   }
 
-  static decode(data: Buffer): State {
-    if (!data.slice(0, 8).equals(State.discriminator)) {
+  static decode(data: Buffer): AttestationProgramState {
+    if (!data.slice(0, 8).equals(AttestationProgramState.discriminator)) {
       throw new Error("invalid account discriminator");
     }
 
-    const dec = State.layout.decode(data.slice(8));
+    const dec = AttestationProgramState.layout.decode(data.slice(8));
 
-    return new State({
+    return new AttestationProgramState({
       bump: dec.bump,
       ebuf: dec.ebuf,
     });
   }
 
-  toJSON(): StateJSON {
+  toJSON(): AttestationProgramStateJSON {
     return {
       bump: this.bump,
       ebuf: this.ebuf,
     };
   }
 
-  static fromJSON(obj: StateJSON): State {
-    return new State({
+  static fromJSON(obj: AttestationProgramStateJSON): AttestationProgramState {
+    return new AttestationProgramState({
       bump: obj.bump,
       ebuf: obj.ebuf,
     });
