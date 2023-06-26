@@ -132,6 +132,10 @@ impl Owner for FunctionAccountData {
 impl ZeroCopy for FunctionAccountData {}
 
 impl FunctionAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<FunctionAccountData>()
+    }
+
     /// Returns the deserialized Switchboard Function account
     ///
     /// # Arguments
@@ -223,6 +227,22 @@ impl FunctionAccountData {
         Ok(true)
     }
 
+    pub fn is_empty_schedule(&self) -> bool {
+        if self.schedule == [0u8; 64] {
+            return true;
+        }
+        let first_byte_null = self
+            .schedule
+            .first()
+            .map(|&byte| byte == 0)
+            .unwrap_or(false);
+        if first_byte_null {
+            return true;
+        }
+
+        false
+    }
+
     pub fn get_container(&self) -> String {
         std::str::from_utf8(&self.container)
             .unwrap_or("")
@@ -237,6 +257,14 @@ impl FunctionAccountData {
 
     pub fn get_name(&self) -> String {
         format!("{}:{}", self.get_container(), self.get_version())
+    }
+
+    pub fn is_valid_enclave(&self, mr_enclave: &[u8; 32]) -> bool {
+        if *mr_enclave == [0u8; 32] {
+            return false;
+        }
+
+        self.mr_enclaves.contains(mr_enclave)
     }
 
     cfg_client! {
