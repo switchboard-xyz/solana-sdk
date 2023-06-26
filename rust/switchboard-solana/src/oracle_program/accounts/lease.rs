@@ -27,4 +27,8 @@ pub struct LeaseAccountData {
     pub _ebuf: [u8; 255],
 }
 
-impl LeaseAccountData {}
+impl LeaseAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<LeaseAccountData>()
+    }
+}

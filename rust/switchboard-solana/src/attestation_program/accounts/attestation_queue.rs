@@ -57,6 +57,10 @@ impl Owner for AttestationQueueAccountData {
 impl ZeroCopy for AttestationQueueAccountData {}
 
 impl AttestationQueueAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<AttestationQueueAccountData>()
+    }
+
     /// Returns the deserialized Switchboard AttestationQueue account
     ///
     /// # Arguments

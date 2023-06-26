@@ -17,4 +17,8 @@ pub struct SbState {
     pub _ebuf: [u8; 991],
 }
 
-impl SbState {}
+impl SbState {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<SbState>()
+    }
+}

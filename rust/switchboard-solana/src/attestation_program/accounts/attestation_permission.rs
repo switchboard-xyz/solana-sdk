@@ -60,6 +60,10 @@ impl Owner for AttestationPermissionAccountData {
 impl ZeroCopy for AttestationPermissionAccountData {}
 
 impl AttestationPermissionAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<AttestationPermissionAccountData>()
+    }
+
     /// Returns the deserialized Switchboard AttestationPermission account
     ///
     /// # Arguments

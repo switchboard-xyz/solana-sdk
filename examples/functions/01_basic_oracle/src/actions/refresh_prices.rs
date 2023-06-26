@@ -5,9 +5,10 @@ pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
         bump = program.load()?.bump,
-        constraint = program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
+        // constraint = program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
     )]
     pub program: AccountLoader<'info, MyProgramState>,
+
     #[account(
         mut,
         seeds = [ORACLE_SEED],
@@ -21,13 +22,13 @@ pub struct RefreshPrices<'info> {
         seeds = [QUOTE_SEED, function.key().as_ref()],
         bump = quote.load()?.bump,
         seeds::program = SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        has_one = secured_signer @ BasicOracleError::InvalidTrustedSigner,
+        has_one = enclave_signer @ BasicOracleError::InvalidTrustedSigner,
         constraint = 
             quote.load()?.mr_enclave != [0u8; 32] @ BasicOracleError::EmptySwitchboardQuote
     )]
-    pub quote: AccountLoader<'info, QuoteAccountData>,
+    pub quote: AccountLoader<'info, EnclaveAccountData>,
 
-    pub secured_signer: Signer<'info>,
+    pub enclave_signer: Signer<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

@@ -95,6 +95,10 @@ impl Owner for EnclaveAccountData {
 impl ZeroCopy for EnclaveAccountData {}
 
 impl EnclaveAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<EnclaveAccountData>()
+    }
+
     /// Returns the deserialized Switchboard Quote account
     ///
     /// # Arguments

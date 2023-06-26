@@ -38,7 +38,7 @@ impl SetEnclaves<'_> {
 
         if let Some(enclaves) = params.mr_enclaves.clone() {
             if !enclaves.is_empty() {
-                program.mr_enclaves = parse_mr_enclaves(&enclaves)?;
+                // program.mr_enclaves = parse_mr_enclaves(&enclaves)?;
             }
         }
 

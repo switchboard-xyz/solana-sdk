@@ -108,7 +108,7 @@ pub struct FunctionAccountData {
     /// Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
     pub requests_default_slots_until_expiration: u64,
     /// The lamports paid to the FunctionAccount escrow on each successful update request.
-    pub requests_request_fee: u64,
+    pub requests_fee: u64,
 
     /// An array of permitted mr_enclave measurements for the function.
     pub mr_enclaves: [[u8; 32]; 32],

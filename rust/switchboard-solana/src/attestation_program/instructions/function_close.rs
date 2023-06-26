@@ -8,6 +8,7 @@ pub struct FunctionClose<'info> {
         close = sol_dest,
         has_one = authority,
         has_one = escrow,
+        has_one = address_lookup_table,
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
 
@@ -19,21 +20,31 @@ pub struct FunctionClose<'info> {
     )]
     pub escrow: Box<Account<'info, TokenAccount>>,
 
+    /// CHECK: handled in function has_one
+    #[account(
+        mut,
+        constraint = *address_lookup_table.owner == address_lookup_program.key()
+    )]
+    pub address_lookup_table: AccountInfo<'info>,
+
     /// CHECK:
     pub sol_dest: AccountInfo<'info>,
 
     #[account(mut, constraint = escrow.is_native())]
     pub escrow_dest: Box<Account<'info, TokenAccount>>,
 
-    #[account(
-        seeds = [STATE_SEED],
-         bump = state.load()?.bump
-        )]
+    #[account(seeds = [STATE_SEED], bump = state.load()?.bump)]
     pub state: AccountLoader<'info, AttestationProgramState>,
 
     pub token_program: Program<'info, Token>,
 
     pub system_program: Program<'info, System>,
+
+    /// CHECK:
+    #[account(
+        constraint = address_lookup_program.executable && address_lookup_program.key().as_ref() == solana_address_lookup_table_program::id().as_ref()
+    )]
+    pub address_lookup_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
@@ -84,11 +95,13 @@ impl<'info> FunctionClose<'info> {
         account_infos.extend(self.function.to_account_infos());
         account_infos.extend(self.authority.to_account_infos());
         account_infos.extend(self.escrow.to_account_infos());
+        account_infos.extend(self.address_lookup_table.to_account_infos());
         account_infos.extend(self.sol_dest.to_account_infos());
         account_infos.extend(self.escrow_dest.to_account_infos());
         account_infos.extend(self.state.to_account_infos());
         account_infos.extend(self.token_program.to_account_infos());
         account_infos.extend(self.system_program.to_account_infos());
+        account_infos.extend(self.address_lookup_program.to_account_infos());
         account_infos
     }
 
@@ -98,11 +111,13 @@ impl<'info> FunctionClose<'info> {
         account_metas.extend(self.function.to_account_metas(None));
         account_metas.extend(self.authority.to_account_metas(None));
         account_metas.extend(self.escrow.to_account_metas(None));
+        account_metas.extend(self.address_lookup_table.to_account_metas(None));
         account_metas.extend(self.sol_dest.to_account_metas(None));
         account_metas.extend(self.escrow_dest.to_account_metas(None));
         account_metas.extend(self.state.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas.extend(self.system_program.to_account_metas(None));
+        account_metas.extend(self.address_lookup_program.to_account_metas(None));
         account_metas
     }
 }

@@ -31,4 +31,8 @@ pub struct PermissionAccountData {
     pub _ebuf: [u8; 255],
 }
 
-impl PermissionAccountData {}
+impl PermissionAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<PermissionAccountData>()
+    }
+}

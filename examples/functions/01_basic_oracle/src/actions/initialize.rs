@@ -20,6 +20,7 @@ pub struct Initialize<'info> {
         bump
     )]
     pub oracle: AccountLoader<'info, MyOracleState>,
+
     /// CHECK:
     pub authority: Signer<'info>,
 
@@ -28,6 +29,7 @@ pub struct Initialize<'info> {
 
     // SYSTEM ACCOUNTS
     pub system_program: Program<'info, System>,
+
     /// CHECK:
     #[account(address = solana_program::sysvar::rent::ID)]
     pub rent: AccountInfo<'info>,
@@ -54,9 +56,9 @@ impl Initialize<'_> {
         let program = &mut ctx.accounts.program.load_init()?;
         program.bump = *ctx.bumps.get("program").unwrap_or(&0);
         program.authority = ctx.accounts.authority.key();
-        if !params.mr_enclaves.is_empty() {
-            program.mr_enclaves = parse_mr_enclaves(&params.mr_enclaves)?;
-        }
+        // if !params.mr_enclaves.is_empty() {
+        //     program.mr_enclaves = parse_mr_enclaves(&params.mr_enclaves)?;
+        // }
 
         let oracle = &mut ctx.accounts.oracle.load_init()?;
         oracle.bump = *ctx.bumps.get("oracle").unwrap_or(&0);

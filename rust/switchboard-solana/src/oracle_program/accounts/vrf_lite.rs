@@ -52,6 +52,10 @@ impl Default for VrfLiteAccountData {
 }
 
 impl VrfLiteAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<VrfLiteAccountData>()
+    }
+
     /// Returns the deserialized Switchboard VRF Lite account
     ///
     /// # Arguments

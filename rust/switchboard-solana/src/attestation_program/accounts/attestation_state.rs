@@ -28,6 +28,10 @@ impl Owner for AttestationProgramState {
 impl ZeroCopy for AttestationProgramState {}
 
 impl AttestationProgramState {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<AttestationProgramState>()
+    }
+
     pub fn get_pda() -> Pubkey {
         let (pda_key, _) =
             Pubkey::find_program_address(&[STATE_SEED], &SWITCHBOARD_ATTESTATION_PROGRAM_ID);

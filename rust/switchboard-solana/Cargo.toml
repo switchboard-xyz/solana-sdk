@@ -23,6 +23,7 @@ cpi = ["no-entrypoint"]
 [dependencies]
 anchor-spl = "=0.28.0"
 solana-program = ">= 1.16, < 1.17"
+solana-address-lookup-table-program = ">= 1.16, < 1.17"
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"

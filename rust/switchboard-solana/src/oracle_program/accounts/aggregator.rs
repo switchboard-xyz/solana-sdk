@@ -127,6 +127,10 @@ pub struct AggregatorAccountData {
 }
 
 impl AggregatorAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<AggregatorAccountData>()
+    }
+
     /// Returns the deserialized Switchboard Aggregator account
     ///
     /// # Arguments

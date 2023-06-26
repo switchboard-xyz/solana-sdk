@@ -12,7 +12,7 @@ pub use crate::oracle_program::{
 };
 
 pub use crate::attestation_program::{
-    FunctionCloseParams, FunctionRequestCloseParams, FunctionRequestInitParams,
+    FunctionCloseParams, FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitParams,
     FunctionRequestVerifyParams, FunctionStatus, FunctionTriggerParams, FunctionVerifyParams,
     MrEnclave, SwitchboardAttestationPermission, VerificationStatus,
 };

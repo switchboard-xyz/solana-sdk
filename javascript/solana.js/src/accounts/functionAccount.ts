@@ -789,8 +789,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const statePubkey = addresses[10]!;
     const attestationQueuePubkey = addresses[11]!;
     const functionPubkey = addresses[12]!;
-    const escrowPubkey = addresses[13]!;
-    const fnQuote = addresses[14]!;
+    const fnQuote = addresses[13]!;
+    const escrowPubkey = addresses[14]!;
 
     return {
       systemProgram,
@@ -806,8 +806,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       statePubkey,
       attestationQueuePubkey,
       functionPubkey,
-      escrowPubkey,
       fnQuote,
+      escrowPubkey,
     };
   }
 }

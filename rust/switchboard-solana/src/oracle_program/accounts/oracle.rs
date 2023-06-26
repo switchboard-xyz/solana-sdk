@@ -61,6 +61,10 @@ pub struct OracleAccountData {
 }
 
 impl OracleAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<OracleAccountData>()
+    }
+
     /// Returns the deserialized Switchboard Oracle account
     ///
     /// # Arguments

@@ -34,4 +34,8 @@ pub struct CrankAccountData {
     pub data_buffer: Pubkey,
 }
 
-impl CrankAccountData {}
+impl CrankAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<CrankAccountData>()
+    }
+}

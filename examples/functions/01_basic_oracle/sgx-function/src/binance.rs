@@ -1,12 +1,13 @@
 // Note: Binance API requires a non-US IP address
 
 use crate::*;
+use bytemuck;
 
 pub use switchboard_utils::reqwest;
 
 use serde::Deserialize;
 
-const ONE: i128 = 1000000000;
+const ONE: i128 = 1e9;
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Default, Clone, Debug)]

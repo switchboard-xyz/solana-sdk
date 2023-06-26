@@ -18,4 +18,8 @@ pub struct SlidingResultAccountData {
     pub _ebuf: [u8; 512],
 }
 
-impl SlidingResultAccountData {}
+impl SlidingResultAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<SlidingResultAccountData>()
+    }
+}
