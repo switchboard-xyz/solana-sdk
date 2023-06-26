@@ -4348,6 +4348,7 @@ dependencies = [
  "cron",
  "rust_decimal",
  "sgx-quote",
+ "solana-address-lookup-table-program",
  "solana-program",
  "superslice",
  "switchboard-common",

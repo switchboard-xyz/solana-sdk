@@ -2,7 +2,7 @@ use crate::*;
 use bytemuck::{Pod, Zeroable};
 
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub enum Symbols {
+pub enum TradingSymbol {
     #[default]
     Unknown = 0,
     BTC = 1,
@@ -13,32 +13,32 @@ pub enum Symbols {
     DOGE,
 }
 
-unsafe impl Pod for Symbols {}
-unsafe impl Zeroable for Symbols {}
+unsafe impl Pod for TradingSymbol {}
+unsafe impl Zeroable for TradingSymbol {}
 
-impl From<Symbols> for u32 {
-    fn from(value: Symbols) -> Self {
+impl From<TradingSymbol> for u32 {
+    fn from(value: TradingSymbol) -> Self {
         match value {
-            Symbols::BTC => 1,
-            Symbols::USDT => 2,
-            Symbols::USDC => 3,
-            Symbols::ETH => 4,
-            Symbols::SOL => 5,
-            Symbols::DOGE => 6,
+            TradingSymbol::BTC => 1,
+            TradingSymbol::USDT => 2,
+            TradingSymbol::USDC => 3,
+            TradingSymbol::ETH => 4,
+            TradingSymbol::SOL => 5,
+            TradingSymbol::DOGE => 6,
             _ => 0,
         }
     }
 }
-impl From<u32> for Symbols {
+impl From<u32> for TradingSymbol {
     fn from(value: u32) -> Self {
         match value {
-            1 => Symbols::BTC,
-            2 => Symbols::USDT,
-            3 => Symbols::USDC,
-            4 => Symbols::ETH,
-            5 => Symbols::SOL,
-            6 => Symbols::DOGE,
-            _ => Symbols::default(),
+            1 => TradingSymbol::BTC,
+            2 => TradingSymbol::USDT,
+            3 => TradingSymbol::USDC,
+            4 => TradingSymbol::ETH,
+            5 => TradingSymbol::SOL,
+            6 => TradingSymbol::DOGE,
+            _ => TradingSymbol::default(),
         }
     }
 }
@@ -51,9 +51,7 @@ pub struct MyProgramState {
     pub function: Pubkey,
 }
 
-// #[repr(packed)]
-#[zero_copy(unsafe)]
-#[derive(Default, Debug, AnchorDeserialize, AnchorSerialize)]
+#[derive(Copy, Clone, Default, AnchorSerialize, AnchorDeserialize)]
 pub struct OracleData {
     pub oracle_timestamp: i64,
     pub price: i128,
@@ -64,11 +62,9 @@ pub struct OracleData {
     // pub reserved: [u8; 12], // makes 100 bytes exactly
 }
 
-// #[repr(packed)]
-#[zero_copy(unsafe)]
-#[derive(Default, Debug, AnchorDeserialize, AnchorSerialize)]
-pub struct OracleDataWithSymbol {
-    pub symbol: Symbols,
+#[derive(Copy, Clone, Default, AnchorSerialize, AnchorDeserialize)]
+pub struct OracleDataWithTradingSymbol {
+    pub symbol: TradingSymbol,
     pub data: OracleData,
 }
 
@@ -98,7 +94,6 @@ pub struct MyOracleState {
     pub usdt: OracleData,
     pub usdc: OracleData,
     pub doge: OracleData,
-    // space for 24 more slots
     // can always re-allocate to add more
     // pub reserved: [u8; 2400],
 }

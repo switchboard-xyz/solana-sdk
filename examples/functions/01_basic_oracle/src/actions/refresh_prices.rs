@@ -31,13 +31,10 @@ pub struct RefreshPrices<'info> {
     pub enclave_signer: Signer<'info>,
 }
 
+
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct RefreshPricesParams {
-    pub btc: Option<OracleData>,
-    pub eth: Option<OracleData>,
-    pub sol: Option<OracleData>,
-    pub usdt: Option<OracleData>,
-    pub usdc: Option<OracleData>,
+    pub symbols: Vec<OracleDataWithTradingSymbol>,
 }
 
 impl RefreshPrices<'_> {
@@ -52,25 +49,27 @@ impl RefreshPrices<'_> {
     pub fn actuate(ctx: &Context<Self>, params: &RefreshPricesParams) -> anchor_lang::Result<()> {
         let oracle = &mut ctx.accounts.oracle.load_mut()?;
 
-        if let Some(btc) = params.btc { 
-            oracle.btc = btc;
-        }
+        // for data in params.data
 
-        if let Some(eth) = params.eth { 
-            oracle.eth = eth;
-        }
+        // if let Some(btc) = params.btc { 
+        //     oracle.btc = btc;
+        // }
 
-        if let Some(sol) = params.sol { 
-            oracle.sol = sol;
-        }
+        // if let Some(eth) = params.eth { 
+        //     oracle.eth = eth;
+        // }
 
-        if let Some(usdt) = params.usdt { 
-            oracle.usdt = usdt;
-        }
+        // if let Some(sol) = params.sol { 
+        //     oracle.sol = sol;
+        // }
 
-        if let Some(usdc) = params.usdc { 
-            oracle.usdc = usdc;
-        }
+        // if let Some(usdt) = params.usdt { 
+        //     oracle.usdt = usdt;
+        // }
+
+        // if let Some(usdc) = params.usdc { 
+        //     oracle.usdc = usdc;
+        // }
 
         Ok(())
     }
