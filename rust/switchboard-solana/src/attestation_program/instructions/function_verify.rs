@@ -22,44 +22,38 @@ pub struct FunctionVerify<'info> {
 
     #[account(
         has_one = attestation_queue,
-        constraint = 
-            verifier_quote.load()?.enclave_signer == verifier_enclave_signer.key(),
+        constraint = verifier_quote.load()?.enclave_signer == verifier_enclave_signer.key(),
     )]
     pub verifier_quote: AccountLoader<'info, EnclaveAccountData>,
 
     pub verifier_enclave_signer: Signer<'info>,
 
     #[account(
-        seeds = [
-            PERMISSION_SEED,
-            attestation_queue.load()?.authority.as_ref(),
-            attestation_queue.key().as_ref(),
-            verifier_quote.key().as_ref()
-        ],
+        seeds = [PERMISSION_SEED,
+        attestation_queue.load()?.authority.as_ref(),
+        attestation_queue.key().as_ref(),
+        verifier_quote.key().as_ref()],
         bump = verifier_permission.load()?.bump,
     )]
-    pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
+    pub verifier_permission: AccountLoader<'info,AttestationPermissionAccountData>,
 
     #[account(
         mut,
         constraint = escrow.is_native() && escrow.owner == state.key()
     )]
-    pub escrow: Account<'info, TokenAccount>,
+    pub escrow: Box<Account<'info, TokenAccount>>,
 
     #[account(
-        mut,
+        mut, 
         constraint = receiver.is_native()
     )]
-    pub receiver: Account<'info, TokenAccount>,
+    pub receiver: Box<Account<'info, TokenAccount>>,
 
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump
-    )]
+    #[account(seeds = [STATE_SEED], bump = state.load()?.bump)]
     pub state: AccountLoader<'info, AttestationProgramState>,
 
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
+    
     pub token_program: Program<'info, Token>,
 }
 
@@ -137,8 +131,6 @@ impl<'info> FunctionVerify<'info> {
 
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
         let mut account_infos = Vec::new();
-        account_infos.extend(self.state.to_account_infos());
-        account_infos.extend(self.attestation_queue.to_account_infos());
         account_infos.extend(self.function.to_account_infos());
         account_infos.extend(self.function_enclave_signer.to_account_infos());
         account_infos.extend(self.fn_quote.to_account_infos());
@@ -147,6 +139,8 @@ impl<'info> FunctionVerify<'info> {
         account_infos.extend(self.verifier_permission.to_account_infos());
         account_infos.extend(self.escrow.to_account_infos());
         account_infos.extend(self.receiver.to_account_infos());
+        account_infos.extend(self.state.to_account_infos());
+        account_infos.extend(self.attestation_queue.to_account_infos());
         account_infos.extend(self.token_program.to_account_infos());
         account_infos
     }
@@ -154,8 +148,6 @@ impl<'info> FunctionVerify<'info> {
     #[allow(unused_variables)]
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
         let mut account_metas = Vec::new();
-        account_metas.extend(self.state.to_account_metas(None));
-        account_metas.extend(self.attestation_queue.to_account_metas(None));
         account_metas.extend(self.function.to_account_metas(None));
         account_metas
             .extend(self.function_enclave_signer.to_account_metas(None));
@@ -166,6 +158,8 @@ impl<'info> FunctionVerify<'info> {
         account_metas.extend(self.verifier_permission.to_account_metas(None));
         account_metas.extend(self.escrow.to_account_metas(None));
         account_metas.extend(self.receiver.to_account_metas(None));
+        account_metas.extend(self.state.to_account_metas(None));
+        account_metas.extend(self.attestation_queue.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas
     }
