@@ -7,7 +7,7 @@ use std::cell::Ref;
 // VrfSetCallback
 // VrfClose
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct VrfAccountData {
     /// The current status of the VRF account.

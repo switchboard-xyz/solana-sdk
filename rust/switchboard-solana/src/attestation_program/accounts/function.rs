@@ -39,7 +39,7 @@ impl From<u8> for FunctionStatus {
         }
     }
 }
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
 pub struct FunctionAccountData {

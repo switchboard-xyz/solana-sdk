@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct SbState {
     /// The account authority permitted to make account changes.

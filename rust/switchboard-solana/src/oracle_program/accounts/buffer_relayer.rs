@@ -1,7 +1,6 @@
-#![allow(unaligned_references)]
 use crate::prelude::*;
 
-#[derive(AnchorDeserialize, Default, Debug)]
+#[account]
 pub struct BufferRelayerAccountData {
     /// Name of the buffer account to store on-chain.
     pub name: [u8; 32],
@@ -27,8 +26,7 @@ pub struct BufferRelayerAccountData {
     pub result: Vec<u8>,
 }
 
-#[zero_copy]
-#[derive(Default, Debug, AnchorSerialize, AnchorDeserialize)]
+#[derive(Default, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BufferRelayerRound {
     /// Number of successful responses.
     pub num_success: u32,
@@ -96,13 +94,5 @@ impl BufferRelayerAccountData {
             return Err(SwitchboardError::StaleFeed.into());
         }
         Ok(())
-    }
-}
-impl Discriminator for BufferRelayerAccountData {
-    const DISCRIMINATOR: [u8; 8] = [50, 35, 51, 115, 169, 219, 158, 52];
-}
-impl Owner for BufferRelayerAccountData {
-    fn owner() -> Pubkey {
-        SWITCHBOARD_PROGRAM_ID
     }
 }

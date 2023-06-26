@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[derive(Default)]
 #[repr(packed)]
 pub struct SlidingWindowElement {
@@ -10,7 +10,7 @@ pub struct SlidingWindowElement {
     pub timestamp: i64,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct SlidingResultAccountData {
     pub data: [SlidingWindowElement; 16],

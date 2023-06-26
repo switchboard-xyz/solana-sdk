@@ -5,7 +5,7 @@ use std::cell::Ref;
 
 use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 pub struct AttestationQueueAccountData {
     /// The address of the authority which is permitted to add/remove allowed enclave measurements.

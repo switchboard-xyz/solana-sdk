@@ -27,7 +27,7 @@ use std::convert::{From, TryInto};
 //     }
 // }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Default, Debug, Eq, PartialEq, AnchorDeserialize)]
 pub struct SwitchboardDecimal {

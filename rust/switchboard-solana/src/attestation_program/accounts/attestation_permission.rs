@@ -31,7 +31,7 @@ impl From<u32> for SwitchboardAttestationPermission {
     }
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Debug)]
 pub struct AttestationPermissionAccountData {
