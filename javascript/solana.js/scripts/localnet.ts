@@ -268,7 +268,7 @@ async function programDeploy(
     {
       cwd: switchboardDir,
       encoding: "utf8",
-      // stdio: 'pipe',
+      stdio: "pipe",
       shell: "/bin/zsh",
     }
   );
@@ -289,7 +289,7 @@ async function programDeploy(
     {
       cwd: switchboardDir,
       encoding: "utf8",
-      // stdio: 'pipe',
+      stdio: "pipe",
       shell: "/bin/zsh",
     }
   );
