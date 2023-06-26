@@ -153,7 +153,7 @@
     "build": "node esbuild.js",
     "watch": "tsc -p tsconfig.cjs.json --watch",
     "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
-    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
+    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --exit",
     "test:localnet:mainnet": "SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f SOLANA_LOCALNET=1 SOLANA_CLUSTER=mainnet-beta node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
     "prepack": "npm run lint && npm run build",
     "lint": "gts lint ./src",

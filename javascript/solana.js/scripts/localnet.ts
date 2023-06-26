@@ -292,7 +292,10 @@ async function programDeploy(
       stdio: "pipe",
       shell: "/bin/zsh",
     }
-  );
+  ).catch((e) => {
+    console.error(e);
+    throw e;
+  });
 }
 
 async function runCommandAsync(command, options) {
