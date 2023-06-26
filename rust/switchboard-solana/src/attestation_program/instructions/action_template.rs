@@ -45,7 +45,7 @@ impl<'info> ActionTemplate<'info> {
         program: AccountInfo<'info>,
         params: &ActionTemplateParams,
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+        let instruction = self.get_instruction(*program.key, params)?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
@@ -57,7 +57,7 @@ impl<'info> ActionTemplate<'info> {
         params: &ActionTemplateParams,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+        let instruction = self.get_instruction(*program.key, params)?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
