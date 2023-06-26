@@ -257,8 +257,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           recentSlot: recentSlot,
           requestsDisabled: false,
           requestsRequireAuthorization: false,
-          requestsDefaultSlotsUntilExpiration: new anchor.BN(1000),
-          requestsRequestFee: new anchor.BN(0),
+          requestsDefaultSlotsUntilExpiration: new BN(1000),
+          requestsRequestFee: new BN(0),
         },
       },
       {
@@ -383,8 +383,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           mrEnclaves: [],
           requestsDisabled: false,
           requestsRequireAuthorization: false,
-          requestsDefaultSlotsUntilExpiration: new anchor.BN(1000),
-          requestsRequestFee: new anchor.BN(0),
+          requestsDefaultSlotsUntilExpiration: new BN(1000),
+          requestsRequestFee: new BN(0),
         },
       },
       {
