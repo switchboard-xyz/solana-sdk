@@ -12,9 +12,9 @@ pub use crate::oracle_program::{
 };
 
 pub use crate::attestation_program::{
-    FunctionRequestCloseParams, FunctionRequestInitParams, FunctionRequestVerifyParams,
-    FunctionStatus, FunctionTriggerParams, FunctionVerifyParams, MrEnclave,
-    SwitchboardAttestationPermission, VerificationStatus,
+    FunctionCloseParams, FunctionRequestCloseParams, FunctionRequestInitParams,
+    FunctionRequestVerifyParams, FunctionStatus, FunctionTriggerParams, FunctionVerifyParams,
+    MrEnclave, SwitchboardAttestationPermission, VerificationStatus,
 };
 
 cfg_client! {

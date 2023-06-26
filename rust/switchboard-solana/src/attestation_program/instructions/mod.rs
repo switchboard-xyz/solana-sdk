@@ -4,6 +4,9 @@ pub use function_verify::*;
 pub mod function_trigger;
 pub use function_trigger::*;
 
+pub mod function_close;
+pub use function_close::*;
+
 pub mod function_request_init_and_trigger;
 pub use function_request_init_and_trigger::*;
 
