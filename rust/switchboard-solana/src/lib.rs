@@ -39,4 +39,12 @@ pub const SWITCHBOARD_PROGRAM_ID: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKd
 pub const SWITCHBOARD_ATTESTATION_PROGRAM_ID: Pubkey =
     pubkey!("SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha");
 
+/// The minimum number of slots before a request is considered expired.
+pub const MINIMUM_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 150; // 1 min at 400ms/slot
+
+/// The default number of slots before a request expires.
+pub const DEFAULT_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 2250; // 15 min at 400ms/slot
+
+pub const DEFAULT_USERS_CONTAINER_PARAMS_LEN: u32 = 256;
+
 declare_id!(SWITCHBOARD_PROGRAM_ID);

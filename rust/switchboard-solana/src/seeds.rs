@@ -19,5 +19,5 @@ pub const BUFFER_DISCRIMINATOR: &[u8] = b"BUFFERxx";
 /// Seed used to derive the FunctionAccountData PDA.
 pub const FUNCTION_SEED: &[u8] = b"FunctionAccountData";
 
-/// Seed used to derive the QuoteAccountData PDA.
+/// Seed used to derive the EnclaveAccountData PDA.
 pub const QUOTE_SEED: &[u8] = b"QuoteAccountData";

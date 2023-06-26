@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use solana_program::borsh::get_instance_packed_len;
 
 #[repr(u8)]
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
@@ -103,6 +104,27 @@ pub struct FunctionRequestAccountData {
     /// Reserved.
     pub _ebuf: [u8; 256],
 }
+impl Default for FunctionRequestAccountData {
+    fn default() -> Self {
+        // unsafe { std::mem::zeroed() }
+        Self {
+            is_triggered: 0,
+            status: RequestStatus::None,
+            authority: Pubkey::default(),
+            payer: Pubkey::default(),
+            function: Pubkey::default(),
+            escrow: Pubkey::default(),
+            active_request: FunctionRequestTriggerRound::default(),
+            previous_request: FunctionRequestTriggerRound::default(),
+            max_container_params_len: 0,
+            hash: [0u8; 32],
+            container_params: Vec::new(),
+            created_at: 0,
+            garbage_collection_slot: None,
+            _ebuf: [0u8; 256],
+        }
+    }
+}
 
 impl anchor_lang::AccountSerialize for FunctionRequestAccountData {
     fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
@@ -165,27 +187,22 @@ impl Owner for FunctionRequestAccountData {
 
 impl FunctionRequestAccountData {
     pub fn space(len: Option<u32>) -> usize {
-        let base: usize = 8 // discriminator 
-        + 1 // is_triggered
-        + 1 // status
-        + 32 // authority pubkey
-        + 32 // payer pubkey
-        + 32 // function pubkey
-        + 32 // escrow pubkey
-        + 225 // active_request
-        + 225 // previous_request
-        + 4 // container params len 
-        + 32 // container params hash
-        + 8 // created at
-        + 9 // expiration slot, u64 + Option (1byte)
-        + 256 // reserved
-        + 4; // vec pointer
+        let base: usize = 8  // discriminator
+            + get_instance_packed_len(&FunctionRequestAccountData::default()).unwrap();
+        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_USERS_CONTAINER_PARAMS_LEN) as usize;
+        base + vec_elements
+    }
 
-        let vec_elements: usize = len.unwrap_or(256) as usize;
-        let space = base + vec_elements;
+    // verify if their is a non-expired pending request
+    pub fn is_round_active(&self, clock: &Clock) -> bool {
+        if self.status == RequestStatus::RequestPending {
+            if self.active_request.expiration_slot < clock.slot {
+                return false;
+            }
 
-        msg!("space: {}", space);
+            return true;
+        }
 
-        space
+        false
     }
 }
