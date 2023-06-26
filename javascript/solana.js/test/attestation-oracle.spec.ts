@@ -20,13 +20,13 @@ describe("Attestation Oracle Tests", () => {
 
   let queueAccount: sbv2.QueueAccount;
   let oracleAccount: sbv2.OracleAccount;
-  let oracleQuoteAccount: sbv2.QuoteAccount;
+  let oracleQuoteAccount: sbv2.EnclaveAccount;
   const oracleQuoteKeypair = Keypair.generate();
 
   let attestationQueueAccount: sbv2.AttestationQueueAccount;
   const quoteKeypair = Keypair.generate();
   const quoteSigner = Keypair.generate();
-  let attestationQuoteAccount: sbv2.QuoteAccount;
+  let attestationQuoteAccount: sbv2.EnclaveAccount;
 
   const quoteVerifierMrEnclave = Array.from(
     Buffer.from("This is the quote verifier MrEnclave")
@@ -142,20 +142,20 @@ describe("Attestation Oracle Tests", () => {
     });
 
     await attestationQuoteAccount.rotate({
-      securedSigner: quoteSigner,
+      enclaveSigner: quoteSigner,
       registryKey: new Uint8Array(Array(64).fill(1)),
     });
 
     const quoteState = await attestationQuoteAccount.loadData();
     const verificationStatus =
-      sbv2.QuoteAccount.getVerificationStatus(quoteState);
+      sbv2.EnclaveAccount.getVerificationStatus(quoteState);
     assert(
       verificationStatus.kind === "VerificationOverride",
       `Quote account has not been verified`
     );
 
     // join the queue so we can verify other quotes
-    await attestationQuoteAccount.heartbeat({ securedSigner: quoteSigner });
+    await attestationQuoteAccount.heartbeat({ enclaveSigner: quoteSigner });
 
     const payer2 = Keypair.generate();
 
@@ -185,7 +185,7 @@ describe("Attestation Oracle Tests", () => {
       });
 
     await attestationQuoteAccount2.rotate({
-      securedSigner: quoteSigner2,
+      enclaveSigner: quoteSigner2,
       registryKey: new Uint8Array(Array(64).fill(1)),
       authority: payer2,
     });
@@ -199,14 +199,14 @@ describe("Attestation Oracle Tests", () => {
 
     const quoteState2 = await attestationQuoteAccount2.loadData();
     const verificationStatus2 =
-      sbv2.QuoteAccount.getVerificationStatus(quoteState2);
+      sbv2.EnclaveAccount.getVerificationStatus(quoteState2);
     assert(
       verificationStatus2.kind === "VerificationSuccess",
       `Quote account has not been verified`
     );
 
     // join the queue so we can verify the overrridden quote
-    await attestationQuoteAccount2.heartbeat({ securedSigner: quoteSigner2 });
+    await attestationQuoteAccount2.heartbeat({ enclaveSigner: quoteSigner2 });
 
     await attestationQuoteAccount.verify({
       timestamp: new BN(Math.floor(Date.now() / 1000)),
@@ -217,7 +217,7 @@ describe("Attestation Oracle Tests", () => {
 
     const newQuoteState = await attestationQuoteAccount.loadData();
     const newVerificationStatus =
-      sbv2.QuoteAccount.getVerificationStatus(newQuoteState);
+      sbv2.EnclaveAccount.getVerificationStatus(newQuoteState);
     assert(
       newVerificationStatus.kind === "VerificationSuccess",
       `Quote account has not been verified`
