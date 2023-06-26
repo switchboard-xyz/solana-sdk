@@ -4,10 +4,10 @@ use crate::*;
 pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
-        bump = program.load()?.bump,
+        bump = program_state.load()?.bump,
         // constraint = program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
     )]
-    pub program: AccountLoader<'info, MyProgramState>,
+    pub program_state: AccountLoader<'info, MyProgramState>,
 
     #[account(
         mut,
@@ -34,7 +34,7 @@ pub struct RefreshPrices<'info> {
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct RefreshPricesParams {
-    pub symbols: Vec<OracleDataWithTradingSymbol>,
+    pub rows: Vec<OracleDataWithTradingSymbol>,
 }
 
 impl RefreshPrices<'_> {
@@ -48,6 +48,7 @@ impl RefreshPrices<'_> {
 
     pub fn actuate(ctx: &Context<Self>, params: &RefreshPricesParams) -> anchor_lang::Result<()> {
         let oracle = &mut ctx.accounts.oracle.load_mut()?;
+        oracle.save_rows(&params.rows)?;
 
         // for data in params.data
 

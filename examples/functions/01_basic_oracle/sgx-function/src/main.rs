@@ -4,7 +4,8 @@ pub mod binance;
 pub use binance::*;
 
 pub use basic_oracle::{
-    self, OracleData, RefreshPrices, RefreshPricesParams, SwitchboardDecimal, ID as PROGRAM_ID,
+    self, OracleData, OracleDataWithTradingSymbol, RefreshPrices, RefreshPricesParams,
+    SwitchboardDecimal, TradingSymbol, ID as PROGRAM_ID,
 };
 
 #[tokio::main(worker_threads = 12)]

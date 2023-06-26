@@ -15,4 +15,6 @@ pub enum BasicOracleError {
     InvalidMrEnclave,
     #[msg("Switchboard QuoteAccount has an empty MrEnclave (invalid)")]
     EmptySwitchboardQuote,
+    #[msg("Failed to find a valid trading symbol for this price")]
+    InvalidSymbol,
 }

@@ -1,13 +1,12 @@
 // Note: Binance API requires a non-US IP address
 
 use crate::*;
-use bytemuck;
 
-pub use switchboard_utils::reqwest;
+// pub use switchboard_utils::reqwest;
 
 use serde::Deserialize;
 
-const ONE: i128 = 1e9;
+const ONE: i128 = 1000000000;
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Default, Clone, Debug)]
@@ -62,15 +61,16 @@ impl Into<OracleData> for IndexData {
 
 pub struct Binance {
     btc_usdt: IndexData,
+    usdc_usdt: IndexData,
     eth_usdt: IndexData,
     sol_usdt: IndexData,
-    usdc_usdt: IndexData,
+    doge_usdt: IndexData,
 }
 
 impl Binance {
     // Fetch data from the Binance API
     pub async fn fetch() -> std::result::Result<Binance, SwitchboardClientError> {
-        let symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "USDCUSDT"];
+        let symbols = ["BTCUSDT", "USDCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT"];
 
         let tickers_1hr = reqwest::get(format!(
             "https://api.binance.com/api/v3/ticker?symbols=[{}]&windowSize=1h",
@@ -121,34 +121,38 @@ impl Binance {
 
         Ok(Binance {
             btc_usdt: data.get(0).unwrap().clone(),
-            eth_usdt: data.get(1).unwrap().clone(),
-            sol_usdt: data.get(2).unwrap().clone(),
-            usdc_usdt: data.get(3).unwrap().clone(),
+            usdc_usdt: data.get(1).unwrap().clone(),
+            eth_usdt: data.get(2).unwrap().clone(),
+            sol_usdt: data.get(3).unwrap().clone(),
+            doge_usdt: data.get(4).unwrap().clone(),
         })
     }
 
     pub fn to_ixns(&self, runner: &FunctionRunner) -> Vec<Instruction> {
-        let btc_usdt: OracleData = self.btc_usdt.clone().into();
-        // let btc_usdc: OracleData = self.btc_usdc.clone().into();
-        let eth_usdt: OracleData = self.eth_usdt.clone().into();
-        let sol_usdt: OracleData = self.sol_usdt.clone().into();
-        let usdc_usdt: OracleData = self.usdc_usdt.clone().into();
-        let usdt_usdc: OracleData = OracleData {
-            oracle_timestamp: usdc_usdt.oracle_timestamp,
-            price: ONE.checked_div(usdc_usdt.price).unwrap(),
-            volume_1hr: usdc_usdt.volume_1hr,
-            volume_24hr: usdc_usdt.volume_24hr,
-            twap_1hr: ONE.checked_div(usdc_usdt.twap_1hr).unwrap(),
-            twap_24hr: ONE.checked_div(usdc_usdt.twap_24hr).unwrap(),
-        };
+        let rows: Vec<OracleDataWithTradingSymbol> = vec![
+            OracleDataWithTradingSymbol {
+                symbol: TradingSymbol::BTC,
+                data: self.btc_usdt.clone().into(),
+            },
+            OracleDataWithTradingSymbol {
+                symbol: TradingSymbol::USDC,
+                data: self.usdc_usdt.clone().into(),
+            },
+            OracleDataWithTradingSymbol {
+                symbol: TradingSymbol::ETH,
+                data: self.eth_usdt.clone().into(),
+            },
+            OracleDataWithTradingSymbol {
+                symbol: TradingSymbol::SOL,
+                data: self.sol_usdt.clone().into(),
+            },
+            OracleDataWithTradingSymbol {
+                symbol: TradingSymbol::DOGE,
+                data: self.doge_usdt.clone().into(),
+            },
+        ];
 
-        let params = RefreshPricesParams {
-            btc: Some(btc_usdt),
-            eth: Some(eth_usdt),
-            sol: Some(sol_usdt),
-            usdt: Some(usdt_usdc),
-            usdc: Some(usdc_usdt),
-        };
+        let params = RefreshPricesParams { rows };
 
         let (program_state_pubkey, _state_bump) =
             Pubkey::find_program_address(&[b"BASICORACLE"], &PROGRAM_ID);
