@@ -25,6 +25,23 @@ pub struct BufferRelayerAccountData {
     /// The buffer holding the latest confirmed result.
     pub result: Vec<u8>,
 }
+impl Default for BufferRelayerAccountData {
+    fn default() -> Self {
+        Self {
+            name: [0u8; 32],
+            queue_pubkey: Pubkey::default(),
+            escrow: Pubkey::default(),
+            authority: Pubkey::default(),
+            job_pubkey: Pubkey::default(),
+            job_hash: [0u8; 32],
+            min_update_delay_seconds: 0,
+            is_locked: false,
+            current_round: BufferRelayerRound::default(),
+            latest_confirmed_round: BufferRelayerRound::default(),
+            result: Vec::new(),
+        }
+    }
+}
 
 #[derive(Default, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct BufferRelayerRound {

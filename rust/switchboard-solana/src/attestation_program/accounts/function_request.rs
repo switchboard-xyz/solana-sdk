@@ -106,7 +106,6 @@ pub struct FunctionRequestAccountData {
 }
 impl Default for FunctionRequestAccountData {
     fn default() -> Self {
-        // unsafe { std::mem::zeroed() }
         Self {
             is_triggered: 0,
             status: RequestStatus::None,
