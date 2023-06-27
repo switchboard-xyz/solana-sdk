@@ -17,4 +17,8 @@ pub enum BasicOracleError {
     EmptySwitchboardQuote,
     #[msg("Failed to find a valid trading symbol for this price")]
     InvalidSymbol,
+    #[msg("FunctionAccount pubkey did not match program_state.function")]
+    IncorrectSwitchboardFunction,
+    #[msg("FunctionAccount pubkey did not match program_state.function")]
+    InvalidSwitchboardFunction,
 }

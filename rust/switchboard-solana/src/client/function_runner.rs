@@ -211,7 +211,7 @@ impl ToAccountMetas for FunctionVerifyAccounts {
                 is_writable: false,
             },
             AccountMeta {
-                pubkey: FunctionAccountData::get_quote_pda(&self.function),
+                pubkey: FunctionAccountData::get_enclave_pda(&self.function),
                 is_signer: false,
                 is_writable: true,
             },

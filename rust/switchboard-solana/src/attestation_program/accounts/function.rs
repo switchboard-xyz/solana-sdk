@@ -197,7 +197,7 @@ impl FunctionAccountData {
         ))
     }
 
-    pub fn get_quote_pda(fn_key: &Pubkey) -> Pubkey {
+    pub fn get_enclave_pda(fn_key: &Pubkey) -> Pubkey {
         let (pda_key, _) = Pubkey::find_program_address(
             &[QUOTE_SEED, &fn_key.to_bytes()],
             &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
@@ -222,25 +222,41 @@ impl FunctionAccountData {
     /// # Arguments
     ///
     /// * `function_account_info` - Solana AccountInfo for a FunctionAccountData
-    /// * `quote_account_info` - Solana AccountInfo for a EnclaveAccountData
+    /// * `enclave_account_info` - Solana AccountInfo for a EnclaveAccountData
     /// * `signer` - Solana AccountInfo for a signer
-    pub fn validate_quote<'a>(
-        function_account_info: &'a AccountInfo<'a>,
-        quote_account_info: &'a AccountInfo<'a>,
+    pub fn validate_enclave<'a>(
+        function_account_info: &AccountInfo<'a>,
+        enclave_account_info: &AccountInfo<'a>,
         signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        // deserialize accounts and verify the owner
-        FunctionAccountData::new(function_account_info)?;
-        let quote = EnclaveAccountData::new(quote_account_info)?;
-
         // validate function PDA matches the expected derivation
-        let expected_quote_key = EnclaveAccountData::get_pda_pubkey(&function_account_info.key())?;
-        if quote_account_info.key() != expected_quote_key {
+        let expected_enclave_key =
+            EnclaveAccountData::get_pda_pubkey(&function_account_info.key())?;
+        if enclave_account_info.key() != expected_enclave_key {
             return Ok(false);
         }
 
-        // validate the quotes delegated signer matches
-        if quote.enclave_signer != signer.key() {
+        // deserialize accounts and verify the owner
+        let function_loader =
+            AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone())?;
+        let func = function_loader.load()?;
+
+        let enclave_loader =
+            AccountLoader::<'_, EnclaveAccountData>::try_from(&enclave_account_info.clone())?;
+        let enclave = enclave_loader.load()?;
+
+        // validate the enclaves enclave is not empty
+        if enclave.mr_enclave == [0u8; 32] {
+            return Ok(false);
+        }
+
+        // validate the enclaves measurement is present in FunctionAccount config
+        if !func.is_valid_enclave(&enclave.mr_enclave) {
+            return Ok(false);
+        }
+
+        // validate the enclaves delegated signer matches
+        if enclave.enclave_signer != signer.key() {
             return Ok(false);
         }
 

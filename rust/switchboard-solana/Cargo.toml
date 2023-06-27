@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.6.0"
+version = "0.6.1"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -22,19 +22,20 @@ cpi = ["no-entrypoint"]
 
 [dependencies]
 anchor-spl = "0.28.0"
-solana-program = ">= 1.16, < 1.17"
-solana-address-lookup-table-program = ">= 1.16, < 1.17"
+solana-program = ">= 1.16.1, < 1.17"
+solana-address-lookup-table-program = ">= 1.16.1, < 1.17"
 rust_decimal = "^1"
 bytemuck = "^1"
 superslice = "1"
 
 [target.'cfg(target_os = "solana")'.dependencies]
-switchboard-common = { version = "0.5.3" }
+switchboard-common = { version = "0.6" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.5.3", features = ["sgx"] }
+switchboard-common = { version = "0.6", features = ["client"] }
 anchor-client = { version = "0.28.0" }
+solana-client = ">= 1.16.1, < 1.17"
 bincode = { version = "^1" }
 sgx-quote = { version = "0.1.0" }
 cron = { version = "0.12.0" }

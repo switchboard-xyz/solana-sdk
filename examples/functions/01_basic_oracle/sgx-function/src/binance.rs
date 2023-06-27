@@ -2,7 +2,7 @@
 
 use crate::*;
 
-// pub use switchboard_utils::reqwest;
+pub use switchboard_utils::reqwest;
 
 use serde::Deserialize;
 

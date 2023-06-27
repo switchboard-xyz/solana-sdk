@@ -5,7 +5,7 @@ pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
         bump = program_state.load()?.bump,
-        // constraint = program.load()?.is_valid_enclave(&quote.load()?.mr_enclave) @ BasicOracleError::InvalidMrEnclave
+        has_one = function @ BasicOracleError::IncorrectSwitchboardFunction,
     )]
     pub program_state: AccountLoader<'info, MyProgramState>,
 
@@ -16,21 +16,19 @@ pub struct RefreshPrices<'info> {
     )]
     pub oracle: AccountLoader<'info, MyOracleState>,
 
-    pub function: AccountLoader<'info, FunctionAccountData>,
-
+    // We use this to derive and verify the functions enclave state
     #[account(
-        seeds = [QUOTE_SEED, function.key().as_ref()],
-        bump = quote.load()?.bump,
-        seeds::program = SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        has_one = enclave_signer @ BasicOracleError::InvalidTrustedSigner,
         constraint = 
-            quote.load()?.mr_enclave != [0u8; 32] @ BasicOracleError::EmptySwitchboardQuote
+            FunctionAccountData::validate_enclave(
+                &function.to_account_info(), 
+                &enclave.to_account_info(), 
+                &enclave_signer.to_account_info()
+            )?
     )]
-    pub quote: AccountLoader<'info, EnclaveAccountData>,
-
+    pub function: AccountLoader<'info, FunctionAccountData>,
+    pub enclave: AccountLoader<'info, EnclaveAccountData>,
     pub enclave_signer: Signer<'info>,
 }
-
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct RefreshPricesParams {
@@ -49,28 +47,6 @@ impl RefreshPrices<'_> {
     pub fn actuate(ctx: &Context<Self>, params: &RefreshPricesParams) -> anchor_lang::Result<()> {
         let oracle = &mut ctx.accounts.oracle.load_mut()?;
         oracle.save_rows(&params.rows)?;
-
-        // for data in params.data
-
-        // if let Some(btc) = params.btc { 
-        //     oracle.btc = btc;
-        // }
-
-        // if let Some(eth) = params.eth { 
-        //     oracle.eth = eth;
-        // }
-
-        // if let Some(sol) = params.sol { 
-        //     oracle.sol = sol;
-        // }
-
-        // if let Some(usdt) = params.usdt { 
-        //     oracle.usdt = usdt;
-        // }
-
-        // if let Some(usdc) = params.usdc { 
-        //     oracle.usdc = usdc;
-        // }
 
         Ok(())
     }

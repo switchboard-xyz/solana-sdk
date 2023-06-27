@@ -4292,9 +4292,9 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.5.3"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfdba3cdca0076ce8db2bd2df851e079bbac393240dc63147de71943c5c5ae81"
+checksum = "59120b4a1fcc0e72443648f41b8fab8c36f6789c28eb3d5a689e8b111c1a6c13"
 dependencies = [
  "getrandom 0.2.10",
  "hex",
@@ -4319,6 +4319,7 @@ dependencies = [
  "rust_decimal",
  "sgx-quote",
  "solana-address-lookup-table-program",
+ "solana-client",
  "solana-program",
  "superslice",
  "switchboard-common",
