@@ -8,8 +8,12 @@ COPY . .
 
 WORKDIR /home/root/switchboard-function/sgx-function
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
-    cargo build --release && \
+# RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=./sgx-function/target,id=${TARGETPLATFORM} \
+#     cargo build --release && \
+#     cargo strip && \
+#     mv /home/root/switchboard-function/sgx-function/target/release/${CARGO_NAME} /sgx
+
+RUN cargo build --release && \
     cargo strip && \
     mv /home/root/switchboard-function/sgx-function/target/release/${CARGO_NAME} /sgx
 
