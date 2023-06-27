@@ -16,7 +16,7 @@ export interface FunctionSetConfigParamsFields {
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
   requestsDefaultSlotsUntilExpiration: BN | null;
-  requestsRequestFee: BN | null;
+  requestsFee: BN | null;
 }
 
 export interface FunctionSetConfigParamsJSON {
@@ -30,7 +30,7 @@ export interface FunctionSetConfigParamsJSON {
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
   requestsDefaultSlotsUntilExpiration: string | null;
-  requestsRequestFee: string | null;
+  requestsFee: string | null;
 }
 
 export class FunctionSetConfigParams {
@@ -44,7 +44,7 @@ export class FunctionSetConfigParams {
   readonly requestsDisabled: boolean | null;
   readonly requestsRequireAuthorization: boolean | null;
   readonly requestsDefaultSlotsUntilExpiration: BN | null;
-  readonly requestsRequestFee: BN | null;
+  readonly requestsFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
     this.name = fields.name;
@@ -58,7 +58,7 @@ export class FunctionSetConfigParams {
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
     this.requestsDefaultSlotsUntilExpiration =
       fields.requestsDefaultSlotsUntilExpiration;
-    this.requestsRequestFee = fields.requestsRequestFee;
+    this.requestsFee = fields.requestsFee;
   }
 
   static layout(property?: string) {
@@ -74,7 +74,7 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.bool(), "requestsDisabled"),
         borsh.option(borsh.bool(), "requestsRequireAuthorization"),
         borsh.option(borsh.u64(), "requestsDefaultSlotsUntilExpiration"),
-        borsh.option(borsh.u64(), "requestsRequestFee"),
+        borsh.option(borsh.u64(), "requestsFee"),
       ],
       property
     );
@@ -136,7 +136,7 @@ export class FunctionSetConfigParams {
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
       requestsDefaultSlotsUntilExpiration:
         obj.requestsDefaultSlotsUntilExpiration,
-      requestsRequestFee: obj.requestsRequestFee,
+      requestsFee: obj.requestsFee,
     });
   }
 
@@ -195,7 +195,7 @@ export class FunctionSetConfigParams {
       requestsRequireAuthorization: fields.requestsRequireAuthorization,
       requestsDefaultSlotsUntilExpiration:
         fields.requestsDefaultSlotsUntilExpiration,
-      requestsRequestFee: fields.requestsRequestFee,
+      requestsFee: fields.requestsFee,
     };
   }
 
@@ -218,8 +218,7 @@ export class FunctionSetConfigParams {
         (this.requestsDefaultSlotsUntilExpiration &&
           this.requestsDefaultSlotsUntilExpiration.toString()) ||
         null,
-      requestsRequestFee:
-        (this.requestsRequestFee && this.requestsRequestFee.toString()) || null,
+      requestsFee: (this.requestsFee && this.requestsFee.toString()) || null,
     };
   }
 
@@ -240,8 +239,7 @@ export class FunctionSetConfigParams {
         (obj.requestsDefaultSlotsUntilExpiration &&
           new BN(obj.requestsDefaultSlotsUntilExpiration)) ||
         null,
-      requestsRequestFee:
-        (obj.requestsRequestFee && new BN(obj.requestsRequestFee)) || null,
+      requestsFee: (obj.requestsFee && new BN(obj.requestsFee)) || null,
     });
   }
 

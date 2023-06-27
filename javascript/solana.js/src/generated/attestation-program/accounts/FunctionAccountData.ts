@@ -62,7 +62,7 @@ export interface FunctionAccountDataFields {
    */
   requestsDefaultSlotsUntilExpiration: BN;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  requestsRequestFee: BN;
+  requestsFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -126,7 +126,7 @@ export interface FunctionAccountDataJSON {
    */
   requestsDefaultSlotsUntilExpiration: string;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  requestsRequestFee: string;
+  requestsFee: string;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -190,7 +190,7 @@ export class FunctionAccountData {
    */
   readonly requestsDefaultSlotsUntilExpiration: BN;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  readonly requestsRequestFee: BN;
+  readonly requestsFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   readonly mrEnclaves: Array<Array<number>>;
   /** Reserved. */
@@ -226,7 +226,7 @@ export class FunctionAccountData {
     borsh.bool("requestsDisabled"),
     borsh.bool("requestsRequireAuthorization"),
     borsh.u64("requestsDefaultSlotsUntilExpiration"),
-    borsh.u64("requestsRequestFee"),
+    borsh.u64("requestsFee"),
     borsh.array(borsh.array(borsh.u8(), 32), 32, "mrEnclaves"),
     borsh.array(borsh.u8(), 1024, "ebuf"),
   ]);
@@ -258,7 +258,7 @@ export class FunctionAccountData {
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
     this.requestsDefaultSlotsUntilExpiration =
       fields.requestsDefaultSlotsUntilExpiration;
-    this.requestsRequestFee = fields.requestsRequestFee;
+    this.requestsFee = fields.requestsFee;
     this.mrEnclaves = fields.mrEnclaves;
     this.ebuf = fields.ebuf;
   }
@@ -331,7 +331,7 @@ export class FunctionAccountData {
       requestsRequireAuthorization: dec.requestsRequireAuthorization,
       requestsDefaultSlotsUntilExpiration:
         dec.requestsDefaultSlotsUntilExpiration,
-      requestsRequestFee: dec.requestsRequestFee,
+      requestsFee: dec.requestsFee,
       mrEnclaves: dec.mrEnclaves,
       ebuf: dec.ebuf,
     });
@@ -365,7 +365,7 @@ export class FunctionAccountData {
       requestsRequireAuthorization: this.requestsRequireAuthorization,
       requestsDefaultSlotsUntilExpiration:
         this.requestsDefaultSlotsUntilExpiration.toString(),
-      requestsRequestFee: this.requestsRequestFee.toString(),
+      requestsFee: this.requestsFee.toString(),
       mrEnclaves: this.mrEnclaves,
       ebuf: this.ebuf,
     };
@@ -400,7 +400,7 @@ export class FunctionAccountData {
       requestsDefaultSlotsUntilExpiration: new BN(
         obj.requestsDefaultSlotsUntilExpiration
       ),
-      requestsRequestFee: new BN(obj.requestsRequestFee),
+      requestsFee: new BN(obj.requestsFee),
       mrEnclaves: obj.mrEnclaves,
       ebuf: obj.ebuf,
     });

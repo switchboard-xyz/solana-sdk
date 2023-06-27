@@ -10,6 +10,7 @@ export interface FunctionRequestVerifyParamsFields {
   isFailure: boolean;
   mrEnclave: Array<number>;
   requestSlot: BN;
+  containerParamsHash: Array<number>;
 }
 
 export interface FunctionRequestVerifyParamsJSON {
@@ -17,6 +18,7 @@ export interface FunctionRequestVerifyParamsJSON {
   isFailure: boolean;
   mrEnclave: Array<number>;
   requestSlot: string;
+  containerParamsHash: Array<number>;
 }
 
 export class FunctionRequestVerifyParams {
@@ -24,12 +26,14 @@ export class FunctionRequestVerifyParams {
   readonly isFailure: boolean;
   readonly mrEnclave: Array<number>;
   readonly requestSlot: BN;
+  readonly containerParamsHash: Array<number>;
 
   constructor(fields: FunctionRequestVerifyParamsFields) {
     this.observedTime = fields.observedTime;
     this.isFailure = fields.isFailure;
     this.mrEnclave = fields.mrEnclave;
     this.requestSlot = fields.requestSlot;
+    this.containerParamsHash = fields.containerParamsHash;
   }
 
   static layout(property?: string) {
@@ -39,6 +43,7 @@ export class FunctionRequestVerifyParams {
         borsh.bool("isFailure"),
         borsh.array(borsh.u8(), 32, "mrEnclave"),
         borsh.u64("requestSlot"),
+        borsh.array(borsh.u8(), 32, "containerParamsHash"),
       ],
       property
     );
@@ -51,6 +56,7 @@ export class FunctionRequestVerifyParams {
       isFailure: obj.isFailure,
       mrEnclave: obj.mrEnclave,
       requestSlot: obj.requestSlot,
+      containerParamsHash: obj.containerParamsHash,
     });
   }
 
@@ -60,6 +66,7 @@ export class FunctionRequestVerifyParams {
       isFailure: fields.isFailure,
       mrEnclave: fields.mrEnclave,
       requestSlot: fields.requestSlot,
+      containerParamsHash: fields.containerParamsHash,
     };
   }
 
@@ -69,6 +76,7 @@ export class FunctionRequestVerifyParams {
       isFailure: this.isFailure,
       mrEnclave: this.mrEnclave,
       requestSlot: this.requestSlot.toString(),
+      containerParamsHash: this.containerParamsHash,
     };
   }
 
@@ -80,6 +88,7 @@ export class FunctionRequestVerifyParams {
       isFailure: obj.isFailure,
       mrEnclave: obj.mrEnclave,
       requestSlot: new BN(obj.requestSlot),
+      containerParamsHash: obj.containerParamsHash,
     });
   }
 

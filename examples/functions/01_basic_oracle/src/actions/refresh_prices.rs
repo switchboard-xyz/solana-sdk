@@ -5,7 +5,7 @@ pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
         bump = program_state.load()?.bump,
-        has_one = function @ BasicOracleError::IncorrectSwitchboardFunction,
+        // has_one = function @ BasicOracleError::IncorrectSwitchboardFunction,
     )]
     pub program_state: AccountLoader<'info, MyProgramState>,
 
@@ -29,6 +29,8 @@ pub struct RefreshPrices<'info> {
     pub enclave: AccountLoader<'info, EnclaveAccountData>,
     pub enclave_signer: Signer<'info>,
 }
+
+
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct RefreshPricesParams {

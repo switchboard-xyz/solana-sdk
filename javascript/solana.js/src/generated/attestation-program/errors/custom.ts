@@ -398,11 +398,11 @@ export class MissingFunctionEscrow extends Error {
   readonly code = 6032;
   readonly name = "MissingFunctionEscrow";
   readonly msg =
-    "The FunctionAccount escrow is required if function.requests_request_fee is greater than zero";
+    "The FunctionAccount escrow is required if function.requests_fee is greater than zero";
 
   constructor(readonly logs?: string[]) {
     super(
-      "6032: The FunctionAccount escrow is required if function.requests_request_fee is greater than zero"
+      "6032: The FunctionAccount escrow is required if function.requests_fee is greater than zero"
     );
   }
 }

@@ -66,6 +66,7 @@ export interface FunctionRequestVerifyParams {
   isFailure?: boolean;
   mrEnclave: RawBuffer;
   requestSlot: number | BN;
+  containerParamsHash: RawBuffer;
 
   // accounts
   functionEnclaveSigner: PublicKey;
@@ -316,6 +317,9 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
             typeof params.requestSlot === "number"
               ? new BN(params.requestSlot)
               : params.requestSlot,
+          containerParamsHash: Array.from(
+            parseMrEnclave(params.containerParamsHash)
+          ),
         },
       },
       {

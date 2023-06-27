@@ -91,8 +91,9 @@ pub struct FunctionRequestAccountData {
     /// The maximum number of bytes to pass to the container params.
     pub max_container_params_len: u32,
     /// Hash of the serialized container_params to prevent RPC tampering.
-    pub hash: [u8; 32],
-    /// The stringified container params to pass\
+    /// Should be verified within your function to ensure you are using the correct parameters.
+    pub container_params_hash: [u8; 32],
+    /// The stringified container params to pass to the function.
     pub container_params: Vec<u8>,
 
     // Metadata
@@ -116,7 +117,7 @@ impl Default for FunctionRequestAccountData {
             active_request: FunctionRequestTriggerRound::default(),
             previous_request: FunctionRequestTriggerRound::default(),
             max_container_params_len: 0,
-            hash: [0u8; 32],
+            container_params_hash: [0u8; 32],
             container_params: Vec::new(),
             created_at: 0,
             garbage_collection_slot: None,

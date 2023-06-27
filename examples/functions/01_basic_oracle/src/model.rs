@@ -1,55 +1,15 @@
 use crate::*;
 use bytemuck::{Pod, Zeroable};
 
-#[repr(u8)]
-#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
-pub enum TradingSymbol {
-    #[default]
-    Unknown = 0,
-    BTC = 1,
-    USDC = 2,
-    ETH = 3,
-    SOL = 4,
-    DOGE = 5,
-}
-
-unsafe impl Pod for TradingSymbol {}
-unsafe impl Zeroable for TradingSymbol {}
-
-impl From<TradingSymbol> for u8 {
-    fn from(value: TradingSymbol) -> Self {
-        match value {
-            TradingSymbol::BTC => 1,
-            TradingSymbol::USDC => 2,
-            TradingSymbol::ETH => 3,
-            TradingSymbol::SOL => 4,
-            TradingSymbol::DOGE => 5,
-            _ => 0,
-        }
-    }
-}
-impl From<u8> for TradingSymbol {
-    fn from(value: u8) -> Self {
-        match value {
-            1 => TradingSymbol::BTC,
-            2 => TradingSymbol::USDC,
-            3 => TradingSymbol::ETH,
-            4 => TradingSymbol::SOL,
-            5 => TradingSymbol::DOGE,
-            _ => TradingSymbol::default(),
-        }
-    }
-}
-
 #[account(zero_copy(unsafe))]
-#[derive(Default, Debug, AnchorSerialize)]
 pub struct MyProgramState {
     pub bump: u8,
     pub authority: Pubkey,
     pub function: Pubkey,
 }
 
-#[derive(Copy, Clone, Default, AnchorSerialize, AnchorDeserialize)]
+#[repr(packed)]
+#[zero_copy(unsafe)]
 pub struct OracleData {
     pub oracle_timestamp: i64,
     pub price: i128,
@@ -60,9 +20,31 @@ pub struct OracleData {
 }
 
 #[derive(Copy, Clone, Default, AnchorSerialize, AnchorDeserialize)]
+pub struct OracleDataBorsh {
+    pub oracle_timestamp: i64,
+    pub price: i128,
+    pub volume_1hr: i128,
+    pub volume_24hr: i128,
+    pub twap_1hr: i128,
+    pub twap_24hr: i128,
+}
+impl From<OracleDataBorsh> for OracleData {
+    fn from(value: OracleDataBorsh) -> Self {
+        Self {
+            oracle_timestamp: value.oracle_timestamp,
+            price: value.price.clone(),
+            volume_1hr: value.volume_1hr.clone(),
+            volume_24hr: value.volume_24hr.clone(),
+            twap_1hr: value.twap_1hr.clone(),
+            twap_24hr: value.twap_24hr.clone(),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Default, AnchorSerialize, AnchorDeserialize)]
 pub struct OracleDataWithTradingSymbol {
     pub symbol: TradingSymbol,
-    pub data: OracleData,
+    pub data: OracleDataBorsh,
 }
 
 impl OracleData {
@@ -81,7 +63,7 @@ impl OracleData {
     }
 }
 
-// #[repr(packed)]
+#[repr(packed)]
 #[account(zero_copy(unsafe))]
 pub struct MyOracleState {
     pub bump: u8,
@@ -93,11 +75,7 @@ pub struct MyOracleState {
     // can always re-allocate to add more
     // pub reserved: [u8; 2400],
 }
-impl Default for MyOracleState {
-    fn default() -> Self {
-        unsafe { std::mem::zeroed() }
-    }
-}
+
 impl MyOracleState {
     pub fn save_rows(
         &mut self,
@@ -105,20 +83,25 @@ impl MyOracleState {
     ) -> anchor_lang::Result<()> {
         for row in rows.iter() {
             match row.symbol {
-                TradingSymbol::BTC => {
-                    self.btc = row.data;
+                TradingSymbol::Btc => {
+                    msg!("saving BTC price, {}", { row.data.price });
+                    self.btc = row.data.into();
                 }
-                TradingSymbol::USDC => {
-                    self.usdc = row.data;
+                TradingSymbol::Usdc => {
+                    msg!("saving USDC price, {}", { row.data.price });
+                    self.usdc = row.data.into();
                 }
-                TradingSymbol::ETH => {
-                    self.eth = row.data;
+                TradingSymbol::Eth => {
+                    msg!("saving ETH price, {}", { row.data.price });
+                    self.eth = row.data.into();
                 }
-                TradingSymbol::SOL => {
-                    self.sol = row.data;
+                TradingSymbol::Sol => {
+                    msg!("saving SOL price, {}", { row.data.price });
+                    self.sol = row.data.into();
                 }
-                TradingSymbol::DOGE => {
-                    self.doge = row.data;
+                TradingSymbol::Doge => {
+                    msg!("saving DOGE price, {}", { row.data.price });
+                    self.doge = row.data.into();
                 }
                 _ => {
                     msg!("no trading symbol found for {:?}", row.symbol);
@@ -128,5 +111,45 @@ impl MyOracleState {
         }
 
         Ok(())
+    }
+}
+
+#[repr(u8)]
+#[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
+pub enum TradingSymbol {
+    #[default]
+    Unknown = 0,
+    Btc = 1,
+    Usdc = 2,
+    Eth = 3,
+    Sol = 4,
+    Doge = 5,
+}
+
+unsafe impl Pod for TradingSymbol {}
+unsafe impl Zeroable for TradingSymbol {}
+
+impl From<TradingSymbol> for u8 {
+    fn from(value: TradingSymbol) -> Self {
+        match value {
+            TradingSymbol::Btc => 1,
+            TradingSymbol::Usdc => 2,
+            TradingSymbol::Eth => 3,
+            TradingSymbol::Sol => 4,
+            TradingSymbol::Doge => 5,
+            _ => 0,
+        }
+    }
+}
+impl From<u8> for TradingSymbol {
+    fn from(value: u8) -> Self {
+        match value {
+            1 => TradingSymbol::Btc,
+            2 => TradingSymbol::Usdc,
+            3 => TradingSymbol::Eth,
+            4 => TradingSymbol::Sol,
+            5 => TradingSymbol::Doge,
+            _ => TradingSymbol::default(),
+        }
     }
 }

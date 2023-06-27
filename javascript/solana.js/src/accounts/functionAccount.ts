@@ -258,7 +258,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: false,
           requestsRequireAuthorization: false,
           requestsDefaultSlotsUntilExpiration: new BN(1000),
-          requestsRequestFee: new BN(0),
+          requestsFee: new BN(0),
         },
       },
       {
@@ -384,7 +384,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: false,
           requestsRequireAuthorization: false,
           requestsDefaultSlotsUntilExpiration: new BN(1000),
-          requestsRequestFee: new BN(0),
+          requestsFee: new BN(0),
         },
       },
       {

@@ -17,11 +17,13 @@ export interface FunctionCloseAccounts {
   function: PublicKey;
   authority: PublicKey;
   escrow: PublicKey;
+  addressLookupTable: PublicKey;
   solDest: PublicKey;
   escrowDest: PublicKey;
   state: PublicKey;
   tokenProgram: PublicKey;
   systemProgram: PublicKey;
+  addressLookupProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
@@ -37,11 +39,17 @@ export function functionClose(
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
     { pubkey: accounts.solDest, isSigner: false, isWritable: false },
     { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
+    {
+      pubkey: accounts.addressLookupProgram,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
   const identifier = Buffer.from([94, 164, 174, 42, 156, 29, 244, 236]);
   const buffer = Buffer.alloc(1000);

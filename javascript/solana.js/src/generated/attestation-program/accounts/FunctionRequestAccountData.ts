@@ -28,7 +28,7 @@ export interface FunctionRequestAccountDataFields {
    * Hash of the serialized container_params to prevent RPC tampering.
    * Should be verified within your function to ensure you are using the correct parameters.
    */
-  hash: Array<number>;
+  containerParamsHash: Array<number>;
   /** The stringified container params to pass to the function. */
   containerParams: Uint8Array;
   /** The unix timestamp when the function was created. */
@@ -62,7 +62,7 @@ export interface FunctionRequestAccountDataJSON {
    * Hash of the serialized container_params to prevent RPC tampering.
    * Should be verified within your function to ensure you are using the correct parameters.
    */
-  hash: Array<number>;
+  containerParamsHash: Array<number>;
   /** The stringified container params to pass to the function. */
   containerParams: Array<number>;
   /** The unix timestamp when the function was created. */
@@ -96,7 +96,7 @@ export class FunctionRequestAccountData {
    * Hash of the serialized container_params to prevent RPC tampering.
    * Should be verified within your function to ensure you are using the correct parameters.
    */
-  readonly hash: Array<number>;
+  readonly containerParamsHash: Array<number>;
   /** The stringified container params to pass to the function. */
   readonly containerParams: Uint8Array;
   /** The unix timestamp when the function was created. */
@@ -120,7 +120,7 @@ export class FunctionRequestAccountData {
     types.FunctionRequestTriggerRound.layout("activeRequest"),
     types.FunctionRequestTriggerRound.layout("previousRequest"),
     borsh.u32("maxContainerParamsLen"),
-    borsh.array(borsh.u8(), 32, "hash"),
+    borsh.array(borsh.u8(), 32, "containerParamsHash"),
     borsh.vecU8("containerParams"),
     borsh.i64("createdAt"),
     borsh.option(borsh.u64(), "garbageCollectionSlot"),
@@ -141,7 +141,7 @@ export class FunctionRequestAccountData {
       ...fields.previousRequest,
     });
     this.maxContainerParamsLen = fields.maxContainerParamsLen;
-    this.hash = fields.hash;
+    this.containerParamsHash = fields.containerParamsHash;
     this.containerParams = fields.containerParams;
     this.createdAt = fields.createdAt;
     this.garbageCollectionSlot = fields.garbageCollectionSlot;
@@ -203,7 +203,7 @@ export class FunctionRequestAccountData {
         dec.previousRequest
       ),
       maxContainerParamsLen: dec.maxContainerParamsLen,
-      hash: dec.hash,
+      containerParamsHash: dec.containerParamsHash,
       containerParams: new Uint8Array(
         dec.containerParams.buffer,
         dec.containerParams.byteOffset,
@@ -226,7 +226,7 @@ export class FunctionRequestAccountData {
       activeRequest: this.activeRequest.toJSON(),
       previousRequest: this.previousRequest.toJSON(),
       maxContainerParamsLen: this.maxContainerParamsLen,
-      hash: this.hash,
+      containerParamsHash: this.containerParamsHash,
       containerParams: Array.from(this.containerParams.values()),
       createdAt: this.createdAt.toString(),
       garbageCollectionSlot:
@@ -253,7 +253,7 @@ export class FunctionRequestAccountData {
         obj.previousRequest
       ),
       maxContainerParamsLen: obj.maxContainerParamsLen,
-      hash: obj.hash,
+      containerParamsHash: obj.containerParamsHash,
       containerParams: Uint8Array.from(obj.containerParams),
       createdAt: new BN(obj.createdAt),
       garbageCollectionSlot:

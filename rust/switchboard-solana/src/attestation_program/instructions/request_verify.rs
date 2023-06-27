@@ -46,7 +46,11 @@ pub struct FunctionRequestVerify<'info> {
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionRequestVerifyParams {
-    // params here
+    pub observed_time: i64,
+    pub is_failure: bool,
+    pub mr_enclave: [u8; 32],
+    pub request_slot: u64,
+    pub container_params_hash: [u8; 32],
 }
 
 impl InstructionData for FunctionRequestVerifyParams {}
@@ -60,11 +64,25 @@ impl Discriminator for FunctionRequestVerify<'_> {
 }
 
 impl<'info> FunctionRequestVerify<'info> {
-    pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
+    pub fn get_instruction(
+        &self,
+        program_id: Pubkey,
+        observed_time: i64,
+        is_failure: bool,
+        mr_enclave: [u8; 32],
+        request_slot: u64,
+        container_params_hash: [u8; 32],
+    ) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
         let mut data: Vec<u8> = FunctionRequestVerify::discriminator().try_to_vec()?;
-        let params = FunctionRequestVerifyParams {};
+        let params = FunctionRequestVerifyParams {
+            observed_time,
+            is_failure,
+            mr_enclave,
+            request_slot,
+            container_params_hash,
+        };
         let mut param_vec: Vec<u8> = params.try_to_vec()?;
         data.append(&mut param_vec);
 
