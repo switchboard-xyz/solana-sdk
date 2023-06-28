@@ -8,7 +8,9 @@ use std::cell::Ref;
 // VrfPoolRemove
 // TODO: VrfPoolAdd (Can be done off-chain)
 
-#[derive(Default, Debug, Copy, Clone, AnchorDeserialize, AnchorSerialize)]
+#[repr(packed)]
+#[zero_copy(unsafe)]
+#[derive(Default, Debug)]
 pub struct VrfPoolRow {
     pub timestamp: i64,
     pub pubkey: Pubkey,
