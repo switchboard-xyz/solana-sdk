@@ -67,22 +67,11 @@ impl<'info> FunctionRequestVerify<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,
-        observed_time: i64,
-        is_failure: bool,
-        mr_enclave: [u8; 32],
-        request_slot: u64,
-        container_params_hash: [u8; 32],
+        params: &FunctionRequestVerifyParams,
     ) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
         let mut data: Vec<u8> = FunctionRequestVerify::discriminator().try_to_vec()?;
-        let params = FunctionRequestVerifyParams {
-            observed_time,
-            is_failure,
-            mr_enclave,
-            request_slot,
-            container_params_hash,
-        };
         let mut param_vec: Vec<u8> = params.try_to_vec()?;
         data.append(&mut param_vec);
 
@@ -90,8 +79,12 @@ impl<'info> FunctionRequestVerify<'info> {
         Ok(instruction)
     }
 
-    pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+    pub fn invoke(
+        &self,
+        program: AccountInfo<'info>,
+        params: &FunctionRequestVerifyParams,
+    ) -> ProgramResult {
+        let instruction = self.get_instruction(*program.key, params)?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
@@ -100,9 +93,10 @@ impl<'info> FunctionRequestVerify<'info> {
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
+        params: &FunctionRequestVerifyParams,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+        let instruction = self.get_instruction(*program.key, params)?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)

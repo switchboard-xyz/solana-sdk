@@ -131,23 +131,23 @@ impl Binance {
     pub fn to_ixns(&self, runner: &FunctionRunner) -> Vec<Instruction> {
         let rows: Vec<OracleDataWithTradingSymbol> = vec![
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::BTC,
+                symbol: TradingSymbol::Btc,
                 data: self.btc_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::USDC,
+                symbol: TradingSymbol::Usc,
                 data: self.usdc_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::ETH,
+                symbol: TradingSymbol::Eth,
                 data: self.eth_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::SOL,
+                symbol: TradingSymbol::Sol,
                 data: self.sol_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::DOGE,
+                symbol: TradingSymbol::Doge,
                 data: self.doge_usdt.clone().into(),
             },
         ];

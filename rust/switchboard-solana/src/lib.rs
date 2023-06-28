@@ -35,9 +35,9 @@ cfg_client! {
 pub const SWITCHBOARD_PROGRAM_ID: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
 
 /// Program id for the Switchboard oracle program
-/// SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha
+/// sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx
 pub const SWITCHBOARD_ATTESTATION_PROGRAM_ID: Pubkey =
-    pubkey!("SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha");
+    pubkey!("sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx");
 
 /// The minimum number of slots before a request is considered expired.
 pub const MINIMUM_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 150; // 1 min at 400ms/slot

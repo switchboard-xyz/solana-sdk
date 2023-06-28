@@ -31,14 +31,6 @@ pub mod basic_oracle {
     }
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]
-    pub fn set_enclaves(
-        ctx: Context<SetEnclaves>,
-        params: SetEnclavesParams,
-    ) -> anchor_lang::Result<()> {
-        SetEnclaves::actuate(&ctx, &params)
-    }
-
-    #[access_control(ctx.accounts.validate(&ctx, &params))]
     pub fn refresh_oracles(
         ctx: Context<RefreshPrices>,
         params: RefreshPricesParams,

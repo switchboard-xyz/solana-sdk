@@ -5,7 +5,7 @@ pub struct RefreshPrices<'info> {
     #[account(
         seeds = [PROGRAM_SEED],
         bump = program_state.load()?.bump,
-        // has_one = function @ BasicOracleError::IncorrectSwitchboardFunction,
+        has_one = function @ BasicOracleError::IncorrectSwitchboardFunction,
     )]
     pub program_state: AccountLoader<'info, MyProgramState>,
 

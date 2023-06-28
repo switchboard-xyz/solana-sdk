@@ -30,7 +30,7 @@ const SWITCHBOARD_PROGRAM_ID = new PublicKey(
 );
 
 const SWITCHBOARD_ATTESTATION_PROGRAM_ID = new PublicKey(
-  "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+  "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
 );
 
 const jsSdkRoot = path.join(__dirname, "..");
@@ -129,7 +129,7 @@ async function main() {
         devSwitchboard,
         defaultPubkeyPath,
         "switchboard_attestation_program",
-        "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+        "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
       ),
     ]);
   } else {

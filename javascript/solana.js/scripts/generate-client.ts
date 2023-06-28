@@ -128,7 +128,7 @@ async function main() {
       }
     ),
     runCommandAsync(
-      `anchor idl fetch -o ${attestationDevnetIdlPath} SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha --provider.cluster devnet`,
+      `anchor idl fetch -o ${attestationDevnetIdlPath} sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx --provider.cluster devnet`,
       {
         encoding: "utf-8",
       }
@@ -149,7 +149,7 @@ async function main() {
         { encoding: "utf-8" }
       ),
       runCommandAsync(
-        `npx anchor-client-gen --program-id SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha ${switchboardAttestationIdlPath} ${attestationGeneratedPath}`,
+        `npx anchor-client-gen --program-id sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx ${switchboardAttestationIdlPath} ${attestationGeneratedPath}`,
         { encoding: "utf-8" }
       ),
     ]);
@@ -160,7 +160,7 @@ async function main() {
         { encoding: "utf-8" }
       ),
       runCommandAsync(
-        `npx anchor-client-gen --program-id SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
+        `npx anchor-client-gen --program-id sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
         { encoding: "utf-8" }
       ),
     ]);
