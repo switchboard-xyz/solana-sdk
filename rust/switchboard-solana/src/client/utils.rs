@@ -40,7 +40,7 @@ pub async fn load_account<T: bytemuck::Pod + Discriminator + Owner>(
 
     let mut disc_bytes = [0u8; 8];
     disc_bytes.copy_from_slice(&data[..8]);
-    if disc_bytes != AggregatorAccountData::discriminator() {
+    if disc_bytes != T::discriminator() {
         return Err(SwitchboardClientError::CustomMessage(
             "Discriminator error, check the account type".to_string(),
         ));
