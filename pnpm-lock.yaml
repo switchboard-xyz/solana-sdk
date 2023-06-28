@@ -188,8 +188,8 @@ importers:
         specifier: ^1.73.3
         version: 1.73.3
       '@switchboard-xyz/common':
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: ^2.2.4
+        version: 2.2.4
       '@switchboard-xyz/oracle':
         specifier: ^2.1.13
         version: 2.1.13
@@ -380,8 +380,8 @@ importers:
         specifier: ^1.77.3
         version: 1.77.3
       '@switchboard-xyz/common':
-        specifier: ^2.2.3
-        version: 2.2.3
+        specifier: ^2.2.4
+        version: 2.2.4
       cron-validator:
         specifier: ^1.3.1
         version: 1.3.1
@@ -1529,8 +1529,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@switchboard-xyz/common@2.2.3:
-    resolution: {integrity: sha512-E4NQf9aXdOiul+sySAbFPAW9k0qz4wRTfqrU7cEa8nRIvUkg6VIZ+5JfajHv/VfK9UOD+6ZfMBxq2+dHkiz9zw==}
+  /@switchboard-xyz/common@2.2.4:
+    resolution: {integrity: sha512-T8m7jQYWL6CEjNLeosZ0mld9BaTzkhX2lemCKO46p5oFTExuClcY8C++Dz13dloBd9MZ9GONxxG7sQIyk6b1XQ==}
     engines: {node: '>=12'}
     dependencies:
       '@solana/web3.js': 1.77.3
@@ -6774,7 +6774,7 @@ packages:
       '@coral-xyz/borsh': 0.28.0(@solana/web3.js@1.77.3)
       '@solana/spl-token': 0.3.8(@solana/web3.js@1.77.3)
       '@solana/web3.js': 1.77.3
-      '@switchboard-xyz/common': 2.2.3
+      '@switchboard-xyz/common': 2.2.4
       '@switchboard-xyz/oracle': 2.1.11
       cron-validator: 1.3.1
       dotenv: 16.3.1
