@@ -234,7 +234,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        node: enclaveAccount.publicKey,
+        enclave: enclaveAccount.publicKey,
       });
       permissionInit.combine(permissionSet);
     }
@@ -449,7 +449,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           permission: verifierQuotePermissions1.publicKey,
           authority: authority.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
-          node: verifierQuoteKeypair1.publicKey,
+          enclave: verifierQuoteKeypair1.publicKey,
         }
       )
     );

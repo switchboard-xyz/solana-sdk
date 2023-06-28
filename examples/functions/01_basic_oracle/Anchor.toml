@@ -32,8 +32,8 @@ address = "CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd"
 address = "7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie"
 
 # [[test.validator.clone]] # sb devnet attestation programID
-# address = "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+# address = "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
 # [[test.validator.clone]] # sb devnet attestation IDL
-# address = "GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m"
+# address = "5ExuoQR69trmKQfB95fDsUGsUrrChbGq9PFgt8qouncz"
 [[test.validator.clone]] # sb devnet attestation State
 address = "EuCumvrswq5HZC4ME1wh7Q7V6dN8DRetP3eM1gU4RPYp"
