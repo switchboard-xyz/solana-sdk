@@ -15,12 +15,12 @@
     "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.27.0",
-    "@coral-xyz/borsh": "^0.27.0",
+    "@coral-xyz/anchor": "^0.28.0",
+    "@coral-xyz/borsh": "^0.28.0",
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
-    "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.2.0",
+    "@solana/web3.js": "^1.77.3",
+    "@switchboard-xyz/common": "^2.2.4",
     "@switchboard-xyz/oracle": "^2.1.13",
     "@switchboard-xyz/solana.js": "workspace:*",
     "chalk": "^4.1.2",

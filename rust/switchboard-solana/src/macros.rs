@@ -1,3 +1,6 @@
+// #[cfg(any(not(target_os = "solana"), feature = "client"))]
+// #[cfg_attr(doc_cfg, doc(cfg(any(not(target_os = "solana"), feature = "client"))))]
+
 #[macro_export]
 macro_rules! cfg_client {
     ($($item:item)*) => {

@@ -40,7 +40,7 @@ pub mod anchor_vrf_lite_parser {
 }
 
 #[repr(packed)]
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 pub struct VrfClient {
     pub bump: u8,
     pub max_result: u64,

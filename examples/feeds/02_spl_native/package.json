@@ -8,14 +8,14 @@
     "directory": "programs/native-feed-parser"
   },
   "scripts": {
-    "build:bpf": "cargo build-sbf --manifest-path=Cargo.toml",
+    "build:bpf": "cargo-build-sbf",
     "deploy": "solana program deploy target/deploy/native_feed_parser.so",
     "test": "echo \"For workspace native-feed-parser, use the anchor:test script\" && exit 0"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.27.0",
-    "@solana/web3.js": "^1.73.3",
-    "@switchboard-xyz/common": "^2.2.0",
+    "@coral-xyz/anchor": "^0.28.0",
+    "@solana/web3.js": "^1.77.3",
+    "@switchboard-xyz/common": "^2.2.4",
     "@switchboard-xyz/oracle": "^2.1.13",
     "@switchboard-xyz/solana.js": "workspace:*"
   },
