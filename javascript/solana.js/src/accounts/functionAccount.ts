@@ -725,7 +725,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
   public static decodeAddressLookup(lookupTable: AddressLookupTableAccount) {
     const addresses = lookupTable.state.addresses;
-    if (addresses.length !== 15) {
+    if (addresses.length < 15) {
       throw new Error(`Failed to decode address lookup table`);
     }
 
@@ -791,6 +791,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const functionPubkey = addresses[12]!;
     const fnQuote = addresses[13]!;
     const escrowPubkey = addresses[14]!;
+    const mintPubkey = addresses[15]!;
 
     return {
       systemProgram,
@@ -808,6 +809,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       functionPubkey,
       fnQuote,
       escrowPubkey,
+      mintPubkey,
     };
   }
 }
