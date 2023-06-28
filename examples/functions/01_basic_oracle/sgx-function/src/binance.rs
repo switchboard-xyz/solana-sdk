@@ -5,6 +5,7 @@ use crate::*;
 pub use switchboard_utils::reqwest;
 
 use serde::Deserialize;
+use basic_oracle::{TradingSymbol, OracleDataBorsh};
 
 const ONE: i128 = 1000000000;
 
@@ -31,8 +32,8 @@ pub struct IndexData {
     pub hr: Ticker,
     pub d: Ticker,
 }
-impl Into<OracleData> for IndexData {
-    fn into(self) -> OracleData {
+impl Into<OracleDataBorsh> for IndexData {
+    fn into(self) -> OracleDataBorsh {
         let oracle_timestamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
@@ -48,7 +49,7 @@ impl Into<OracleData> for IndexData {
         let twap_1hr = parse_string_value(self.hr.weightedAvgPrice.as_str());
         let twap_24hr = parse_string_value(self.d.weightedAvgPrice.as_str());
 
-        OracleData {
+        OracleDataBorsh {
             oracle_timestamp,
             price,
             volume_1hr,
@@ -135,7 +136,7 @@ impl Binance {
                 data: self.btc_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::Usc,
+                symbol: TradingSymbol::Usdc,
                 data: self.usdc_usdt.clone().into(),
             },
             OracleDataWithTradingSymbol {
