@@ -8,7 +8,7 @@ WORKDIR /home/root/solana-sdk
 COPY ./rust/switchboard-solana/Cargo.toml \
      ./rust/switchboard-solana/Cargo.lock \
      ./rust/switchboard-solana/
-     
+
 COPY ./examples/functions/01_basic_oracle/Cargo.toml \
      ./examples/functions/01_basic_oracle/Cargo.lock \
      ./examples/functions/01_basic_oracle/
@@ -41,3 +41,4 @@ COPY --from=builder /sgx/${CARGO_NAME} /sgx/app
 
 # Get the measurement from the enclave
 RUN /get_measurement.sh
+ENTRYPOINT ["bash", "/boot.sh"]
