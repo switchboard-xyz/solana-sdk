@@ -6,56 +6,116 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface AttestationQueueAccountDataFields {
+  /** The address of the authority which is permitted to add/remove allowed enclave measurements. */
   authority: PublicKey;
+  /** Allowed enclave measurements. */
   mrEnclaves: Array<Array<number>>;
+  /** The number of allowed enclave measurements. */
   mrEnclavesLen: number;
+  /**
+   * The addresses of the quote verifiers who have a valid
+   * verification status and have heartbeated on-chain recently.
+   */
   data: Array<PublicKey>;
+  /** The length of valid quote verifiers for the given attestation queue. */
   dataLen: number;
+  /** Allow authority to force add a node after X seconds with no heartbeat. */
   allowAuthorityOverrideAfter: BN;
+  /**
+   * Even if a heartbeating machine quote verifies with proper measurement,
+   * require authority signoff.
+   */
   requireAuthorityHeartbeatPermission: boolean;
+  /** Require FunctionAccounts to have PermitQueueUsage before they are executed. */
   requireUsagePermissions: boolean;
+  /** The maximum allowable time until a EnclaveAccount needs to be re-verified on-chain. */
   maxQuoteVerificationAge: BN;
+  /** The reward paid to quote verifiers for attesting on-chain. */
   reward: number;
+  /** The unix timestamp when the last quote verifier heartbeated on-chain. */
   lastHeartbeat: BN;
   nodeTimeout: BN;
+  /** Incrementer used to track the current quote verifier permitted to run any available functions. */
   currIdx: number;
+  /** Incrementer used to garbage collect and remove stale quote verifiers. */
   gcIdx: number;
+  /** Reserved. */
   ebuf: Array<number>;
 }
 
 export interface AttestationQueueAccountDataJSON {
+  /** The address of the authority which is permitted to add/remove allowed enclave measurements. */
   authority: string;
+  /** Allowed enclave measurements. */
   mrEnclaves: Array<Array<number>>;
+  /** The number of allowed enclave measurements. */
   mrEnclavesLen: number;
+  /**
+   * The addresses of the quote verifiers who have a valid
+   * verification status and have heartbeated on-chain recently.
+   */
   data: Array<string>;
+  /** The length of valid quote verifiers for the given attestation queue. */
   dataLen: number;
+  /** Allow authority to force add a node after X seconds with no heartbeat. */
   allowAuthorityOverrideAfter: string;
+  /**
+   * Even if a heartbeating machine quote verifies with proper measurement,
+   * require authority signoff.
+   */
   requireAuthorityHeartbeatPermission: boolean;
+  /** Require FunctionAccounts to have PermitQueueUsage before they are executed. */
   requireUsagePermissions: boolean;
+  /** The maximum allowable time until a EnclaveAccount needs to be re-verified on-chain. */
   maxQuoteVerificationAge: string;
+  /** The reward paid to quote verifiers for attesting on-chain. */
   reward: number;
+  /** The unix timestamp when the last quote verifier heartbeated on-chain. */
   lastHeartbeat: string;
   nodeTimeout: string;
+  /** Incrementer used to track the current quote verifier permitted to run any available functions. */
   currIdx: number;
+  /** Incrementer used to garbage collect and remove stale quote verifiers. */
   gcIdx: number;
+  /** Reserved. */
   ebuf: Array<number>;
 }
 
 export class AttestationQueueAccountData {
+  /** The address of the authority which is permitted to add/remove allowed enclave measurements. */
   readonly authority: PublicKey;
+  /** Allowed enclave measurements. */
   readonly mrEnclaves: Array<Array<number>>;
+  /** The number of allowed enclave measurements. */
   readonly mrEnclavesLen: number;
+  /**
+   * The addresses of the quote verifiers who have a valid
+   * verification status and have heartbeated on-chain recently.
+   */
   readonly data: Array<PublicKey>;
+  /** The length of valid quote verifiers for the given attestation queue. */
   readonly dataLen: number;
+  /** Allow authority to force add a node after X seconds with no heartbeat. */
   readonly allowAuthorityOverrideAfter: BN;
+  /**
+   * Even if a heartbeating machine quote verifies with proper measurement,
+   * require authority signoff.
+   */
   readonly requireAuthorityHeartbeatPermission: boolean;
+  /** Require FunctionAccounts to have PermitQueueUsage before they are executed. */
   readonly requireUsagePermissions: boolean;
+  /** The maximum allowable time until a EnclaveAccount needs to be re-verified on-chain. */
   readonly maxQuoteVerificationAge: BN;
+  /** The reward paid to quote verifiers for attesting on-chain. */
   readonly reward: number;
+  /** The unix timestamp when the last quote verifier heartbeated on-chain. */
   readonly lastHeartbeat: BN;
   readonly nodeTimeout: BN;
+  /** Incrementer used to track the current quote verifier permitted to run any available functions. */
   readonly currIdx: number;
+  /** Incrementer used to garbage collect and remove stale quote verifiers. */
   readonly gcIdx: number;
+  /** Reserved. */
   readonly ebuf: Array<number>;
 
   static readonly discriminator = Buffer.from([

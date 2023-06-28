@@ -10,7 +10,7 @@ pub enum OracleResponseType {
     TypeNoResponse,
 }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[derive(Default)]
 #[repr(packed)]
 pub struct OracleMetrics {
@@ -34,7 +34,7 @@ pub struct OracleMetrics {
     pub total_late_response: u128,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct OracleAccountData {
     /// Name of the oracle to store on-chain.
@@ -61,6 +61,10 @@ pub struct OracleAccountData {
 }
 
 impl OracleAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<OracleAccountData>()
+    }
+
     /// Returns the deserialized Switchboard Oracle account
     ///
     /// # Arguments

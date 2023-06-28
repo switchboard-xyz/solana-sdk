@@ -15,6 +15,7 @@ export interface FunctionSetConfigArgs {
 
 export interface FunctionSetConfigAccounts {
   function: PublicKey;
+  quote: PublicKey;
   authority: PublicKey;
 }
 
@@ -29,6 +30,7 @@ export function functionSetConfig(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
   ];
   const identifier = Buffer.from([232, 132, 21, 251, 253, 189, 96, 94]);

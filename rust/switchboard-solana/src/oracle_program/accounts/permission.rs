@@ -10,7 +10,7 @@ pub enum SwitchboardPermission {
     PermitVrfRequests = 1 << 2,
 }
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct PermissionAccountData {
     /// The authority that is allowed to set permissions for this account.
@@ -31,4 +31,8 @@ pub struct PermissionAccountData {
     pub _ebuf: [u8; 255],
 }
 
-impl PermissionAccountData {}
+impl PermissionAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<PermissionAccountData>()
+    }
+}

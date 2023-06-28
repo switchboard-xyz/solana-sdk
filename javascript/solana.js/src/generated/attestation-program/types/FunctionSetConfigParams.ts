@@ -12,6 +12,11 @@ export interface FunctionSetConfigParamsFields {
   containerRegistry: Uint8Array | null;
   version: Uint8Array | null;
   schedule: Uint8Array | null;
+  mrEnclaves: Array<Array<number>> | null;
+  requestsDisabled: boolean | null;
+  requestsRequireAuthorization: boolean | null;
+  requestsDefaultSlotsUntilExpiration: BN | null;
+  requestsFee: BN | null;
 }
 
 export interface FunctionSetConfigParamsJSON {
@@ -21,6 +26,11 @@ export interface FunctionSetConfigParamsJSON {
   containerRegistry: Array<number> | null;
   version: Array<number> | null;
   schedule: Array<number> | null;
+  mrEnclaves: Array<Array<number>> | null;
+  requestsDisabled: boolean | null;
+  requestsRequireAuthorization: boolean | null;
+  requestsDefaultSlotsUntilExpiration: string | null;
+  requestsFee: string | null;
 }
 
 export class FunctionSetConfigParams {
@@ -30,6 +40,11 @@ export class FunctionSetConfigParams {
   readonly containerRegistry: Uint8Array | null;
   readonly version: Uint8Array | null;
   readonly schedule: Uint8Array | null;
+  readonly mrEnclaves: Array<Array<number>> | null;
+  readonly requestsDisabled: boolean | null;
+  readonly requestsRequireAuthorization: boolean | null;
+  readonly requestsDefaultSlotsUntilExpiration: BN | null;
+  readonly requestsFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
     this.name = fields.name;
@@ -38,6 +53,12 @@ export class FunctionSetConfigParams {
     this.containerRegistry = fields.containerRegistry;
     this.version = fields.version;
     this.schedule = fields.schedule;
+    this.mrEnclaves = fields.mrEnclaves;
+    this.requestsDisabled = fields.requestsDisabled;
+    this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
+    this.requestsDefaultSlotsUntilExpiration =
+      fields.requestsDefaultSlotsUntilExpiration;
+    this.requestsFee = fields.requestsFee;
   }
 
   static layout(property?: string) {
@@ -49,6 +70,11 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.vecU8(), "containerRegistry"),
         borsh.option(borsh.vecU8(), "version"),
         borsh.option(borsh.vecU8(), "schedule"),
+        borsh.option(borsh.vec(borsh.array(borsh.u8(), 32)), "mrEnclaves"),
+        borsh.option(borsh.bool(), "requestsDisabled"),
+        borsh.option(borsh.bool(), "requestsRequireAuthorization"),
+        borsh.option(borsh.u64(), "requestsDefaultSlotsUntilExpiration"),
+        borsh.option(borsh.u64(), "requestsFee"),
       ],
       property
     );
@@ -105,6 +131,12 @@ export class FunctionSetConfigParams {
             obj.schedule.length
           )) ||
         null,
+      mrEnclaves: obj.mrEnclaves,
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        obj.requestsDefaultSlotsUntilExpiration,
+      requestsFee: obj.requestsFee,
     });
   }
 
@@ -158,6 +190,12 @@ export class FunctionSetConfigParams {
             fields.schedule.length
           )) ||
         null,
+      mrEnclaves: fields.mrEnclaves,
+      requestsDisabled: fields.requestsDisabled,
+      requestsRequireAuthorization: fields.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        fields.requestsDefaultSlotsUntilExpiration,
+      requestsFee: fields.requestsFee,
     };
   }
 
@@ -173,6 +211,14 @@ export class FunctionSetConfigParams {
         null,
       version: (this.version && Array.from(this.version.values())) || null,
       schedule: (this.schedule && Array.from(this.schedule.values())) || null,
+      mrEnclaves: this.mrEnclaves,
+      requestsDisabled: this.requestsDisabled,
+      requestsRequireAuthorization: this.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        (this.requestsDefaultSlotsUntilExpiration &&
+          this.requestsDefaultSlotsUntilExpiration.toString()) ||
+        null,
+      requestsFee: (this.requestsFee && this.requestsFee.toString()) || null,
     };
   }
 
@@ -186,6 +232,14 @@ export class FunctionSetConfigParams {
         null,
       version: (obj.version && Uint8Array.from(obj.version)) || null,
       schedule: (obj.schedule && Uint8Array.from(obj.schedule)) || null,
+      mrEnclaves: obj.mrEnclaves,
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        (obj.requestsDefaultSlotsUntilExpiration &&
+          new BN(obj.requestsDefaultSlotsUntilExpiration)) ||
+        null,
+      requestsFee: (obj.requestsFee && new BN(obj.requestsFee)) || null,
     });
   }
 

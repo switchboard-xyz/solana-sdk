@@ -55,6 +55,7 @@ import {
   Cluster,
   ConfirmOptions,
   Connection,
+  GetProgramAccountsResponse,
   Keypair,
   PublicKey,
   SendOptions,
@@ -84,7 +85,7 @@ export const SB_V2_PID = new PublicKey(
  * Switchboard's Attestation Program ID
  */
 export const SB_ATTESTATION_PID = new PublicKey(
-  "SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha"
+  "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
 );
 
 /**
@@ -740,7 +741,7 @@ export class SwitchboardProgram {
           },
         ],
       })
-      .then((values: Array<AccountInfoResponse | undefined>) => {
+      .then((values: GetProgramAccountsResponse) => {
         return values.filter(Boolean) as Array<AccountInfoResponse>;
       });
 
@@ -780,7 +781,7 @@ export class SwitchboardProgram {
     slidingResult: Map<string, SlidingResultAccountData>;
     vrfs: Map<string, VrfAccountData>;
   }> {
-    const accountInfos: Array<AccountInfoResponse> =
+    const accountInfos: GetProgramAccountsResponse =
       await this.connection.getProgramAccounts(this.programId);
 
     // buffer - [42, 55, 46, 46, 45, 52, 78, 78]

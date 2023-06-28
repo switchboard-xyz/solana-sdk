@@ -14,7 +14,7 @@ import {
   AttestationPermissionAccount,
   AttestationPermissionSetParams,
 } from "./attestationPermissionAccount.js";
-import { QuoteAccount, QuoteAccountInitParams } from "./quoteAccount.js";
+import { EnclaveAccount, EnclaveAccountInitParams } from "./enclaveAccount.js";
 
 import {
   Keypair,
@@ -87,7 +87,7 @@ export interface AttestationQueueRemoveMrEnclaveParams {
 }
 
 export type CreateQueueQuoteParams = Omit<
-  QuoteAccountInitParams,
+  EnclaveAccountInitParams,
   "queueAccount"
 > &
   Partial<AttestationPermissionSetParams> & {
@@ -109,13 +109,13 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   static accountName = "AttestationQueueAccountData";
 
   /**
-   * Get the size of an {@linkcode QueueAccount} on-chain.
+   * Get the size of an {@linkcode types.AttestationQueueAccountData} on-chain.
    */
   public readonly size =
     this.program.attestationAccount.attestationQueueAccountData.size;
 
   /**
-   *  Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.AttestationQueueAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationQueueAccountData> {
     this.program.verifyAttestation();
@@ -197,7 +197,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     payer: PublicKey,
     params: CreateQueueQuoteParams,
     options?: TransactionObjectOptions
-  ): Promise<[QuoteAccount, TransactionObject]> {
+  ): Promise<[EnclaveAccount, TransactionObject]> {
     this.program.verifyAttestation();
 
     const authority = params.authority ?? payer;
@@ -205,7 +205,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const queueAuthority =
       params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
-    const [quoteAccount, quoteInit] = await QuoteAccount.createInstruction(
+    const [enclaveAccount, quoteInit] = await EnclaveAccount.createInstruction(
       this.program,
       payer,
       { ...params, queueAccount: this, authority },
@@ -213,7 +213,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     );
 
     if (!params.createPermissions && !params.enable) {
-      return [quoteAccount, quoteInit];
+      return [enclaveAccount, quoteInit];
     }
 
     const [permissionAccount, permissionInit] =
@@ -222,7 +222,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         payer,
         {
           granter: this.publicKey,
-          grantee: quoteAccount.publicKey,
+          grantee: enclaveAccount.publicKey,
           authority: queueAuthority,
         },
         options
@@ -234,18 +234,18 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        node: quoteAccount.publicKey,
+        enclave: enclaveAccount.publicKey,
       });
       permissionInit.combine(permissionSet);
     }
 
-    return [quoteAccount, quoteInit.combine(permissionInit)];
+    return [enclaveAccount, quoteInit.combine(permissionInit)];
   }
 
   public async createQuote(
     params: CreateQueueQuoteParams,
     options?: SendTransactionObjectOptions
-  ): Promise<[QuoteAccount, TransactionSignature]> {
+  ): Promise<[EnclaveAccount, TransactionSignature]> {
     const [account, txnObject] = await this.createQuoteInstruction(
       this.program.walletPubkey,
       params,
@@ -449,7 +449,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           permission: verifierQuotePermissions1.publicKey,
           authority: authority.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
-          node: verifierQuoteKeypair1.publicKey,
+          enclave: verifierQuoteKeypair1.publicKey,
         }
       )
     );
@@ -468,7 +468,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         {
           quote: verifierQuoteKeypair1.publicKey,
           authority: authority.publicKey,
-          securedSigner: verifierQuoteSigner1.publicKey,
+          enclaveSigner: verifierQuoteSigner1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
         }
       )
@@ -481,7 +481,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         { params: {} },
         {
           quote: verifierQuoteKeypair1.publicKey,
-          securedSigner: verifierQuoteSigner1.publicKey,
+          enclaveSigner: verifierQuoteSigner1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
           queueAuthority: authority.publicKey,
           gcNode: verifierQuoteKeypair1.publicKey,
@@ -508,7 +508,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       attestationQueueAccount,
       signatures,
       verifier: {
-        quoteAccount: new QuoteAccount(
+        quoteAccount: new EnclaveAccount(
           program,
           verifierQuoteKeypair1.publicKey
         ),
@@ -529,7 +529,7 @@ export type CreateBootstrappedQueueParams =
 export type BootstrappedAttestationQueue = {
   attestationQueueAccount: AttestationQueueAccount;
   verifier: {
-    quoteAccount: QuoteAccount;
+    quoteAccount: EnclaveAccount;
     permissionAccount: AttestationPermissionAccount;
     signer: Keypair;
   };

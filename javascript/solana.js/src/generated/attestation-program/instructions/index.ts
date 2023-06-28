@@ -23,10 +23,45 @@ export type {
   AttestationQueueRemoveMrEnclaveArgs,
 } from "./attestationQueueRemoveMrEnclave.js";
 export { attestationQueueRemoveMrEnclave } from "./attestationQueueRemoveMrEnclave.js";
+export type {
+  FunctionCloseAccounts,
+  FunctionCloseArgs,
+} from "./functionClose.js";
+export { functionClose } from "./functionClose.js";
 export type { FunctionFundAccounts, FunctionFundArgs } from "./functionFund.js";
 export { functionFund } from "./functionFund.js";
 export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
 export { functionInit } from "./functionInit.js";
+export type {
+  FunctionRequestCloseAccounts,
+  FunctionRequestCloseArgs,
+} from "./functionRequestClose.js";
+export { functionRequestClose } from "./functionRequestClose.js";
+export type {
+  FunctionRequestInitAccounts,
+  FunctionRequestInitArgs,
+} from "./functionRequestInit.js";
+export { functionRequestInit } from "./functionRequestInit.js";
+export type {
+  FunctionRequestInitAndTriggerAccounts,
+  FunctionRequestInitAndTriggerArgs,
+} from "./functionRequestInitAndTrigger.js";
+export { functionRequestInitAndTrigger } from "./functionRequestInitAndTrigger.js";
+export type {
+  FunctionRequestSetConfigAccounts,
+  FunctionRequestSetConfigArgs,
+} from "./functionRequestSetConfig.js";
+export { functionRequestSetConfig } from "./functionRequestSetConfig.js";
+export type {
+  FunctionRequestTriggerAccounts,
+  FunctionRequestTriggerArgs,
+} from "./functionRequestTrigger.js";
+export { functionRequestTrigger } from "./functionRequestTrigger.js";
+export type {
+  FunctionRequestVerifyAccounts,
+  FunctionRequestVerifyArgs,
+} from "./functionRequestVerify.js";
+export { functionRequestVerify } from "./functionRequestVerify.js";
 export type {
   FunctionSetConfigAccounts,
   FunctionSetConfigArgs,

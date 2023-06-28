@@ -1,4 +1,3 @@
-import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
 import { SwitchboardProgram } from "../SwitchboardProgram.js";
@@ -10,6 +9,7 @@ import {
 import { RawBuffer } from "../types.js";
 import { parseMrEnclave, parseRawBuffer } from "../utils.js";
 
+import { Account } from "./account.js";
 import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
@@ -27,9 +27,9 @@ import {
 export const QUOTE_SEED: string = "QuoteAccountData";
 
 /**
- *  Parameters for initializing an {@linkcode QuoteAccount}
+ *  Parameters for initializing an {@linkcode EnclaveAccount}
  */
-export interface QuoteAccountInitParams {
+export interface EnclaveAccountInitParams {
   /**
    * Key to lookup the buffer data on IPFS or an alternative decentralized storage solution.
    */
@@ -55,7 +55,7 @@ export interface QuoteAccountInitParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export interface QuoteHeartbeatSyncParams {
+export interface EnclaveHeartbeatSyncParams {
   gcOracle: PublicKey;
   attestationQueue: PublicKey;
   permission: [AttestationPermissionAccount, number];
@@ -65,17 +65,17 @@ export interface QuoteHeartbeatSyncParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export type QuoteHeartbeatParams = Partial<QuoteHeartbeatSyncParams> & {
-  securedSigner: Keypair;
+export type EnclaveHeartbeatParams = Partial<EnclaveHeartbeatSyncParams> & {
+  enclaveSigner: Keypair;
 } & Partial<{
-    quote: types.QuoteAccountData;
+    quote: types.EnclaveAccountData;
     queue: types.AttestationQueueAccountData;
   }>;
 
 /**
  *  Parameters for an {@linkcode types.quoteVerify} instruction.
  */
-export interface QuoteVerifyParams {
+export interface EnclaveVerifyParams {
   /**
    *  @TODO: Docs for timestamp
    */
@@ -95,50 +95,50 @@ export interface QuoteVerifyParams {
 /**
  *  Parameters for an {@linkcode types.quoteRotate} instruction.
  */
-export interface QuoteRotateParams {
+export interface EnclaveRotateParams {
   authority?: Keypair;
-  securedSigner: Keypair;
+  enclaveSigner: Keypair;
   registryKey: string | Buffer | Uint8Array;
 }
 
 /**
  * Account type representing a Switchboard Attestation quote.
  *
- * Data: {@linkcode types.QuoteAccountData}
+ * Data: {@linkcode types.EnclaveAccountData}
  */
-export class QuoteAccount extends Account<types.QuoteAccountData> {
-  static accountName = "QuoteAccountData";
+export class EnclaveAccount extends Account<types.EnclaveAccountData> {
+  static accountName = "EnclaveAccountData";
 
   /**
-   *  Load an existing {@linkcode QuoteAccount} with its current on-chain state
+   *  Load an existing {@linkcode EnclaveAccount} with its current on-chain state
    */
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
-  ): Promise<[QuoteAccount, types.QuoteAccountData]> {
+  ): Promise<[EnclaveAccount, types.EnclaveAccountData]> {
     program.verifyAttestation();
 
-    const quoteAccount = new QuoteAccount(program, address);
-    const state = await quoteAccount.loadData();
-    return [quoteAccount, state];
+    const enclaveAccount = new EnclaveAccount(program, address);
+    const state = await enclaveAccount.loadData();
+    return [enclaveAccount, state];
   }
 
   /**
-   * Finds the {@linkcode QuoteAccount} from the seed from which it was generated.
+   * Finds the {@linkcode EnclaveAccount} from the seed from which it was generated.
    *
-   * Only applicable for QuoteAccounts tied to a {@linkcode FunctionAccount}. Quotes can also be generated from a keypair.
+   * Only applicable for EnclaveAccounts tied to a {@linkcode FunctionAccount}. Enclaves can also be generated from a keypair.
    *
-   * @return QuoteAccount and PDA bump tuple.
+   * @return EnclaveAccount and PDA bump tuple.
    */
   public static fromSeed(
     program: SwitchboardProgram,
     functionPubkey: PublicKey
-  ): [QuoteAccount, number] {
+  ): [EnclaveAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from(QUOTE_SEED), functionPubkey.toBytes()],
       program.attestationProgramId
     );
-    return [new QuoteAccount(program, publicKey), bump];
+    return [new EnclaveAccount(program, publicKey), bump];
   }
 
   /**
@@ -147,9 +147,9 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   public static async createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: QuoteAccountInitParams,
+    params: EnclaveAccountInitParams,
     options?: TransactionObjectOptions
-  ): Promise<[QuoteAccount, TransactionObject]> {
+  ): Promise<[EnclaveAccount, TransactionObject]> {
     program.verifyAttestation();
 
     const quoteKeypair = params.keypair ?? Keypair.generate();
@@ -174,16 +174,16 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       }
     );
     return [
-      new QuoteAccount(program, quoteKeypair.publicKey),
+      new EnclaveAccount(program, quoteKeypair.publicKey),
       new TransactionObject(payer, [instruction], [quoteKeypair], options),
     ];
   }
 
   public static async create(
     program: SwitchboardProgram,
-    params: QuoteAccountInitParams,
+    params: EnclaveAccountInitParams,
     options?: SendTransactionObjectOptions
-  ): Promise<[QuoteAccount, TransactionSignature]> {
+  ): Promise<[EnclaveAccount, TransactionSignature]> {
     const [account, txnObject] = await this.createInstruction(
       program,
       program.walletPubkey,
@@ -208,7 +208,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   }
 
   static getVerificationStatus(
-    state: types.QuoteAccountData
+    state: types.EnclaveAccountData
   ): types.VerificationStatusKind {
     switch (state.verificationStatus) {
       case types.VerificationStatus.None.discriminator:
@@ -229,21 +229,22 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   }
 
   /**
-   * Get the size of an {@linkcode QuoteAccount} on-chain.
+   * Get the size of an {@linkcode EnclaveAccount} on-chain.
    */
-  public readonly size = this.program.attestationAccount.quoteAccountData.size;
+  public readonly size =
+    this.program.attestationAccount.enclaveAccountData.size;
 
   /**
-   *  Retrieve and decode the {@linkcode types.QuoteAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.EnclaveAccountData} stored in this account.
    */
-  public async loadData(): Promise<types.QuoteAccountData> {
+  public async loadData(): Promise<types.EnclaveAccountData> {
     this.program.verifyAttestation();
-    const data = await types.QuoteAccountData.fetch(
+    const data = await types.EnclaveAccountData.fetch(
       this.program,
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError("Quote", this.publicKey);
+    throw new errors.AccountNotFoundError("Enclave", this.publicKey);
   }
 
   public heartbeatInstruction(params: {
@@ -251,7 +252,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
     attestationQueue: PublicKey;
     permission: [AttestationPermissionAccount, number];
     queueAuthority: PublicKey;
-    securedSigner: PublicKey;
+    enclaveSigner: PublicKey;
   }): TransactionInstruction {
     this.program.verifyAttestation();
 
@@ -261,7 +262,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       { params: {} },
       {
         quote: this.publicKey,
-        securedSigner: params.securedSigner,
+        enclaveSigner: params.enclaveSigner,
         attestationQueue: params.attestationQueue,
         queueAuthority: params.queueAuthority,
         gcNode: params.gcOracle,
@@ -272,7 +273,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   }
 
   public async heartbeat(
-    params: QuoteHeartbeatParams,
+    params: EnclaveHeartbeatParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const quote = params.quote ?? (await this.loadData());
@@ -301,13 +302,13 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
         ),
       gcOracle: lastPubkey,
       attestationQueue: quote.attestationQueue,
-      securedSigner: params.securedSigner.publicKey,
+      enclaveSigner: params.enclaveSigner.publicKey,
     });
 
     const heartbeatTxn = new TransactionObject(
       this.program.walletPubkey,
       [heartbeatIxn],
-      [params.securedSigner],
+      [params.enclaveSigner],
       options
     );
 
@@ -317,7 +318,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
 
   public async rotateInstruction(
     payer: PublicKey,
-    params: QuoteRotateParams,
+    params: EnclaveRotateParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     this.program.verifyAttestation();
@@ -339,7 +340,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       {
         quote: this.publicKey,
         authority: authority,
-        securedSigner: params.securedSigner.publicKey,
+        enclaveSigner: params.enclaveSigner.publicKey,
         attestationQueue: quoteData.attestationQueue,
       }
     );
@@ -348,15 +349,15 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       payer,
       [rotateIxn],
       params.authority
-        ? [params.authority, params.securedSigner]
-        : [params.securedSigner],
+        ? [params.authority, params.enclaveSigner]
+        : [params.enclaveSigner],
       options
     );
     return rotateTxn;
   }
 
   public async rotate(
-    params: QuoteRotateParams,
+    params: EnclaveRotateParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.rotateInstruction(
@@ -368,7 +369,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
 
   public async verifyInstruction(
     payer: PublicKey,
-    params: QuoteVerifyParams,
+    params: EnclaveVerifyParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     this.program.verifyAttestation();
@@ -398,8 +399,8 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
       },
       {
         quote: this.publicKey,
-        quoteSigner: quoteData.securedSigner,
-        securedSigner: params.verifierSecuredSigner.publicKey,
+        quoteSigner: quoteData.enclaveSigner,
+        enclaveSigner: params.verifierSecuredSigner.publicKey,
         verifier: params.verifier,
         attestationQueue: quoteData.attestationQueue,
       }
@@ -413,7 +414,7 @@ export class QuoteAccount extends Account<types.QuoteAccountData> {
   }
 
   public async verify(
-    params: QuoteVerifyParams,
+    params: EnclaveVerifyParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.verifyInstruction(

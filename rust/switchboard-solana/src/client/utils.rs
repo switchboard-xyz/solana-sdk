@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use solana_sdk::signer::keypair::{keypair_from_seed, Keypair};
+use solana_sdk::signer::Signer;
 use std::env;
 use std::result::Result;
 use std::str::FromStr;
@@ -20,10 +21,7 @@ pub fn generate_signer() -> Arc<Keypair> {
 pub fn signer_to_pubkey(
     signer: Arc<Keypair>,
 ) -> std::result::Result<Pubkey, SwitchboardClientError> {
-    let pubkey = Pubkey::from_str(signer.to_base58_string().as_str()).map_err(|_| {
-        SwitchboardClientError::CustomMessage("failed to parse pubkey string".to_string())
-    })?;
-    Ok(pubkey)
+    Ok(signer.pubkey())
 }
 
 pub async fn load_account<T: bytemuck::Pod + Discriminator + Owner>(

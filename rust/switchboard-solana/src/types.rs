@@ -1,3 +1,5 @@
+use crate::cfg_client;
+
 pub use crate::decimal::SwitchboardDecimal;
 
 pub use crate::oracle_program::{
@@ -10,6 +12,11 @@ pub use crate::oracle_program::{
 };
 
 pub use crate::attestation_program::{
-    FunctionStatus, FunctionTriggerParams, FunctionVerifyParams, MrEnclave,
-    SwitchboardAttestationPermission, VerificationStatus,
+    FunctionCloseParams, FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitParams,
+    FunctionRequestVerifyParams, FunctionStatus, FunctionTriggerParams, FunctionVerifyParams,
+    MrEnclave, SwitchboardAttestationPermission, VerificationStatus,
 };
+
+cfg_client! {
+    pub use crate::client::function_runner::FunctionVerifyAccounts;
+}

@@ -1,6 +1,6 @@
 {
   "name": "@switchboard-xyz/solana.js",
-  "version": "2.3.0-beta.7",
+  "version": "2.3.0-beta.9",
   "author": "",
   "license": "MIT",
   "description": "A Typescript client to interact with Switchboard on Solana.",
@@ -146,14 +146,14 @@
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "localnet": "tsx ./scripts/localnet.ts",
-    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha `# sgxProgramId` --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC `# sgxProgramDataAddress` --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m `# sgxIdlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
-    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC --clone GjWPcr9QrdHk8At821qcZPM9NPpCDGivaTCMQG5nWj2m --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
+    "local:validator": "shx mkdir -p .anchor/test-ledger || true; solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --url https://api.devnet.solana.com --rpc-port 8899  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f `# programId` --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF `# programDataAddress` --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk `# idlAddress` --clone sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx `# sgxProgramId` --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC `# sgxProgramDataAddress` --clone 5ExuoQR69trmKQfB95fDsUGsUrrChbGq9PFgt8qouncz `# sgxIdlAddress` --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd `# programState` --clone 7hkp1xfPBcD2t1vZMoWWQPzipHVcXeLAAaiGXdPSfDie `# switchboardVault`",
+    "local:validator:mainnet": "solana-test-validator -q -r --ledger .anchor/test-ledger --mint $(solana-keygen pubkey ~/.config/solana/id.json) --bind-address 0.0.0.0 --rpc-port 8899  --url https://api.mainnet-beta.solana.com  --clone SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f --clone 7nYabs9dUhvxYwdTnrWVBL9MYviKSfrEbdWCUbcnwkpF --clone Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk --clone sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx --clone FSD8p7tDkhffAiMgAvMXi9veJW1uSod4H3F3REn7nMNC --clone 5ExuoQR69trmKQfB95fDsUGsUrrChbGq9PFgt8qouncz --clone CyZuD7RPDcrqCGbNvLCyqk6Py9cEZTKmNKujfPi3ynDd --clone J7nSEX8ADf3pVVicd6yKy2Skvg8iLePEmkLUisAAaioD",
     "generate": "tsx ./scripts/generate-client.ts",
     "build:old": "shx rm -rf lib || true; tsc -p tsconfig.cjs.json && tsc",
     "build": "node esbuild.js",
     "watch": "tsc -p tsconfig.cjs.json --watch",
     "test": "node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
-    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
+    "test:localnet": "SOLANA_LOCALNET=1 node ./node_modules/mocha/bin/mocha --exit",
     "test:localnet:mainnet": "SWITCHBOARD_PROGRAM_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f SOLANA_LOCALNET=1 SOLANA_CLUSTER=mainnet-beta node ./node_modules/mocha/bin/mocha --loader=ts-node/esm --extension ts --timeout 60000 --exit",
     "prepack": "npm run lint && npm run build",
     "lint": "gts lint ./src",
@@ -161,13 +161,13 @@
     "fix": "gts fix ./src ./test"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.27.0",
-    "@coral-xyz/borsh": "^0.27.0",
-    "@solana/spl-token": "^0.3.6",
-    "@solana/web3.js": "^1.73.0",
-    "@switchboard-xyz/common": "^2.1.46",
+    "@coral-xyz/anchor": "^0.28.0",
+    "@coral-xyz/borsh": "^0.28.0",
+    "@solana/spl-token": "^0.3.8",
+    "@solana/web3.js": "^1.77.3",
+    "@switchboard-xyz/common": "^2.2.4",
     "cron-validator": "^1.3.1",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
@@ -176,7 +176,7 @@
     "@types/chai": "^4.3.4",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.3.1",
     "@types/shelljs": "^0.8.12",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "chai": "^4.3.7",
@@ -191,7 +191,7 @@
     "ts-node": "^10.9.1",
     "tsx": "^3.12.7",
     "typedoc": "^0.23.23",
-    "typescript": "^4.9.4"
+    "typescript": "^5.1.3"
   },
   "pre-commit": [
     "build"

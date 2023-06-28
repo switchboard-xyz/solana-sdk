@@ -41,7 +41,7 @@ export interface AttestationPermissionSetParams {
   queueAuthority?: Keypair;
 
   queue: PublicKey;
-  node: PublicKey;
+  enclave: PublicKey;
 }
 /**
  *  Account type dictating the level of permissions between a granter and a grantee.
@@ -205,7 +205,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
               ? params.queueAuthority.publicKey
               : payer,
             attestationQueue: params.queue,
-            node: params.node,
+            enclave: params.enclave,
           }
         ),
       ],

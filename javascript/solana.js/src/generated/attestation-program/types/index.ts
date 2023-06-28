@@ -1,4 +1,5 @@
 import * as FunctionStatus from "./FunctionStatus.js";
+import * as RequestStatus from "./RequestStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
 import * as VerificationStatus from "./VerificationStatus.js";
 
@@ -28,6 +29,11 @@ export type {
 } from "./AttestationQueueRemoveMrEnclaveParams.js";
 export { AttestationQueueRemoveMrEnclaveParams } from "./AttestationQueueRemoveMrEnclaveParams.js";
 export type {
+  FunctionCloseParamsFields,
+  FunctionCloseParamsJSON,
+} from "./FunctionCloseParams.js";
+export { FunctionCloseParams } from "./FunctionCloseParams.js";
+export type {
   FunctionFundParamsFields,
   FunctionFundParamsJSON,
 } from "./FunctionFundParams.js";
@@ -37,6 +43,41 @@ export type {
   FunctionInitParamsJSON,
 } from "./FunctionInitParams.js";
 export { FunctionInitParams } from "./FunctionInitParams.js";
+export type {
+  FunctionRequestCloseParamsFields,
+  FunctionRequestCloseParamsJSON,
+} from "./FunctionRequestCloseParams.js";
+export { FunctionRequestCloseParams } from "./FunctionRequestCloseParams.js";
+export type {
+  FunctionRequestInitAndTriggerParamsFields,
+  FunctionRequestInitAndTriggerParamsJSON,
+} from "./FunctionRequestInitAndTriggerParams.js";
+export { FunctionRequestInitAndTriggerParams } from "./FunctionRequestInitAndTriggerParams.js";
+export type {
+  FunctionRequestInitParamsFields,
+  FunctionRequestInitParamsJSON,
+} from "./FunctionRequestInitParams.js";
+export { FunctionRequestInitParams } from "./FunctionRequestInitParams.js";
+export type {
+  FunctionRequestSetConfigParamsFields,
+  FunctionRequestSetConfigParamsJSON,
+} from "./FunctionRequestSetConfigParams.js";
+export { FunctionRequestSetConfigParams } from "./FunctionRequestSetConfigParams.js";
+export type {
+  FunctionRequestTriggerParamsFields,
+  FunctionRequestTriggerParamsJSON,
+} from "./FunctionRequestTriggerParams.js";
+export { FunctionRequestTriggerParams } from "./FunctionRequestTriggerParams.js";
+export type {
+  FunctionRequestTriggerRoundFields,
+  FunctionRequestTriggerRoundJSON,
+} from "./FunctionRequestTriggerRound.js";
+export { FunctionRequestTriggerRound } from "./FunctionRequestTriggerRound.js";
+export type {
+  FunctionRequestVerifyParamsFields,
+  FunctionRequestVerifyParamsJSON,
+} from "./FunctionRequestVerifyParams.js";
+export { FunctionRequestVerifyParams } from "./FunctionRequestVerifyParams.js";
 export type {
   FunctionSetConfigParamsFields,
   FunctionSetConfigParamsJSON,
@@ -99,6 +140,23 @@ export type FunctionStatusJSON =
   | FunctionStatus.OutOfFundsJSON
   | FunctionStatus.InvalidPermissionsJSON;
 
+export { RequestStatus };
+
+export type RequestStatusKind =
+  | RequestStatus.None
+  | RequestStatus.RequestPending
+  | RequestStatus.RequestCancelled
+  | RequestStatus.RequestFailure
+  | RequestStatus.RequestExpired
+  | RequestStatus.RequestSuccess;
+export type RequestStatusJSON =
+  | RequestStatus.NoneJSON
+  | RequestStatus.RequestPendingJSON
+  | RequestStatus.RequestCancelledJSON
+  | RequestStatus.RequestFailureJSON
+  | RequestStatus.RequestExpiredJSON
+  | RequestStatus.RequestSuccessJSON;
+
 export { VerificationStatus };
 
 export type VerificationStatusKind =
@@ -117,8 +175,10 @@ export type VerificationStatusJSON =
 export { SwitchboardAttestationPermission };
 
 export type SwitchboardAttestationPermissionKind =
+  | SwitchboardAttestationPermission.None
   | SwitchboardAttestationPermission.PermitNodeheartbeat
   | SwitchboardAttestationPermission.PermitQueueUsage;
 export type SwitchboardAttestationPermissionJSON =
+  | SwitchboardAttestationPermission.NoneJSON
   | SwitchboardAttestationPermission.PermitNodeheartbeatJSON
   | SwitchboardAttestationPermission.PermitQueueUsageJSON;

@@ -17,7 +17,7 @@ export interface AttestationPermissionSetAccounts {
   permission: PublicKey;
   authority: PublicKey;
   attestationQueue: PublicKey;
-  node: PublicKey;
+  enclave: PublicKey;
 }
 
 export const layout = borsh.struct([
@@ -33,7 +33,7 @@ export function attestationPermissionSet(
     { pubkey: accounts.permission, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
-    { pubkey: accounts.node, isSigner: false, isWritable: false },
+    { pubkey: accounts.enclave, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([56, 253, 255, 201, 100, 153, 10, 76]);
   const buffer = Buffer.alloc(1000);

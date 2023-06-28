@@ -15,19 +15,16 @@ export interface FunctionVerifyArgs {
 
 export interface FunctionVerifyAccounts {
   function: PublicKey;
-  fnSigner: PublicKey;
+  functionEnclaveSigner: PublicKey;
   fnQuote: PublicKey;
   verifierQuote: PublicKey;
-  securedSigner: PublicKey;
-  attestationQueue: PublicKey;
+  verifierEnclaveSigner: PublicKey;
+  verifierPermission: PublicKey;
   escrow: PublicKey;
   receiver: PublicKey;
-  verifierPermission: PublicKey;
-  fnPermission: PublicKey;
   state: PublicKey;
+  attestationQueue: PublicKey;
   tokenProgram: PublicKey;
-  payer: PublicKey;
-  systemProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
@@ -41,19 +38,24 @@ export function functionVerify(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.fnSigner, isSigner: true, isWritable: false },
+    {
+      pubkey: accounts.functionEnclaveSigner,
+      isSigner: true,
+      isWritable: false,
+    },
     { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
     { pubkey: accounts.verifierQuote, isSigner: false, isWritable: false },
-    { pubkey: accounts.securedSigner, isSigner: true, isWritable: false },
-    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    {
+      pubkey: accounts.verifierEnclaveSigner,
+      isSigner: true,
+      isWritable: false,
+    },
+    { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
-    { pubkey: accounts.fnPermission, isSigner: false, isWritable: false },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
-    { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([210, 108, 154, 138, 198, 14, 53, 191]);
   const buffer = Buffer.alloc(1000);

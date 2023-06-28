@@ -16,7 +16,9 @@ import { parseCronSchedule, parseMrEnclave } from "../utils.js";
 import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
-  QuoteAccount,
+  EnclaveAccount,
+  FunctionRequestAccount,
+  FunctionRequestAccountInitParams,
 } from "./index.js";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -128,8 +130,8 @@ export interface FunctionVerifyParams {
   nextAllowedTimestamp: anchor.BN;
   isFailure: boolean;
   mrEnclave: Uint8Array;
-  verifier: QuoteAccount;
-  fnSigner: PublicKey;
+  verifier: EnclaveAccount;
+  functionEnclaveSigner: PublicKey;
 }
 
 /**
@@ -139,6 +141,11 @@ export interface FunctionVerifyParams {
 export interface FunctionTriggerParams {
   authority?: Keypair;
 }
+
+export type CreateFunctionRequestParams = Omit<
+  FunctionRequestAccountInitParams,
+  "functionAccount"
+> & { user?: Keypair };
 
 /**
 
@@ -230,11 +237,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       functionKeypair.publicKey
     );
-    const [permissionAccount] = functionAccount.getPermissionAccount(
-      attestationQueueAccount.publicKey,
-      attestationQueue.authority
-    );
-    const [quoteAccount] = functionAccount.getQuoteAccount();
+
+    const [enclaveAccount] = functionAccount.getEnclaveAccount();
     const escrow = functionAccount.getEscrow();
 
     const instruction = types.functionInit(
@@ -243,23 +247,26 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         params: {
           name: new Uint8Array(Buffer.from(params.name ?? "", "utf8")),
           metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
-          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           container: new Uint8Array(Buffer.from(params.container, "utf8")),
-          version: new Uint8Array(Buffer.from(params.version, "utf8")),
           containerRegistry: new Uint8Array(
             Buffer.from(params.containerRegistry ?? "", "utf8")
           ),
+          version: new Uint8Array(Buffer.from(params.version, "utf8")),
+          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
           recentSlot: recentSlot,
+          requestsDisabled: false,
+          requestsRequireAuthorization: false,
+          requestsDefaultSlotsUntilExpiration: new BN(1000),
+          requestsFee: new BN(0),
         },
       },
       {
         function: functionAccount.publicKey,
         addressLookupTable: addressLookupTable,
         authority: authority,
-        quote: quoteAccount.publicKey,
+        quote: enclaveAccount.publicKey,
         attestationQueue: attestationQueueAccount.publicKey,
-        permission: permissionAccount.publicKey,
         escrow,
         state: program.attestationProgramState.publicKey,
         mint: program.mint.address,
@@ -298,24 +305,45 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [account, txSignature];
   }
 
-  public getPermissionAccount(
-    queuePubkey: PublicKey,
-    queueAuthority: PublicKey
-  ): [AttestationPermissionAccount, number] {
-    return AttestationPermissionAccount.fromSeed(
-      this.program,
-      queueAuthority,
-      queuePubkey,
-      this.publicKey
-    );
-  }
-
-  public getQuoteAccount(): [QuoteAccount, number] {
-    return QuoteAccount.fromSeed(this.program, this.publicKey);
+  public getEnclaveAccount(): [EnclaveAccount, number] {
+    return EnclaveAccount.fromSeed(this.program, this.publicKey);
   }
 
   public getEscrow(): PublicKey {
     return this.program.mint.getAssociatedAddress(this.publicKey);
+  }
+
+  public async createRequestInstruction(
+    payer: PublicKey,
+    params: CreateFunctionRequestParams,
+    options?: TransactionObjectOptions
+  ): Promise<[FunctionRequestAccount, TransactionObject]> {
+    // const functionState = await this.loadData();
+    const [requestAccount, txnObject] =
+      await FunctionRequestAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          ...params,
+          functionAccount: this,
+        },
+        options
+      );
+
+    return [requestAccount, txnObject];
+  }
+
+  public async createRequest(
+    params: CreateFunctionRequestParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[FunctionRequestAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createRequestInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    const txSignature = await this.program.signAndSend(txnObject, options);
+    return [account, txSignature];
   }
 
   public async setConfigInstruction(
@@ -352,10 +380,16 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           containerRegistry: toOptionalBytes(params.containerRegistry),
           version: toOptionalBytes(params.version),
           schedule: toOptionalBytes(params.schedule),
+          mrEnclaves: [],
+          requestsDisabled: false,
+          requestsRequireAuthorization: false,
+          requestsDefaultSlotsUntilExpiration: new BN(1000),
+          requestsFee: new BN(0),
         },
       },
       {
         function: this.publicKey,
+        quote: this.getEnclaveAccount()[0].publicKey,
         authority: functionData.authority,
       }
     );
@@ -363,7 +397,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return new TransactionObject(
       payer,
       [setConfigIxn],
-      params?.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : [],
+      options
     );
   }
 
@@ -583,12 +618,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     );
     const attestationQueue = await attestationQueueAccount.loadData();
 
-    const fnPermissionAccount = this.getPermissionAccount(
-      attestationQueueAccount.publicKey,
-      attestationQueue.authority
-    )[0];
-
-    const fnQuoteAccount = this.getQuoteAccount()[0];
+    const fnEnclaveAccount = this.getEnclaveAccount()[0];
 
     const verifierPermissionAccount = AttestationPermissionAccount.fromSeed(
       this.program,
@@ -618,19 +648,16 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       },
       {
         function: this.publicKey,
-        fnSigner: params.fnSigner,
-        fnQuote: fnQuoteAccount.publicKey,
+        functionEnclaveSigner: params.functionEnclaveSigner,
+        fnQuote: fnEnclaveAccount.publicKey,
         verifierQuote: params.verifier.publicKey,
         attestationQueue: functionData.attestationQueue,
         escrow: this.getEscrow(),
         receiver: receiver,
         verifierPermission: verifierPermissionAccount.publicKey,
-        fnPermission: fnPermissionAccount.publicKey,
         state: this.program.attestationProgramState.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
-        payer,
-        systemProgram: SystemProgram.programId,
-        securedSigner: PublicKey.default, // TODO: update with correct account
+        verifierEnclaveSigner: PublicKey.default, // TODO: update with correct account
       }
     );
     return new TransactionObject(payer, [instruction], [], options);
@@ -674,6 +701,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       {
         function: this.publicKey,
         authority: functionData.authority,
+        attestationQueue: functionData.attestationQueue,
       }
     );
 
@@ -697,7 +725,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
   public static decodeAddressLookup(lookupTable: AddressLookupTableAccount) {
     const addresses = lookupTable.state.addresses;
-    if (addresses.length !== 16) {
+    if (addresses.length !== 15) {
       throw new Error(`Failed to decode address lookup table`);
     }
 
@@ -761,9 +789,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const statePubkey = addresses[10]!;
     const attestationQueuePubkey = addresses[11]!;
     const functionPubkey = addresses[12]!;
-    const escrowPubkey = addresses[13]!;
-    const fnPermission = addresses[14]!;
-    const fnQuote = addresses[15]!;
+    const fnQuote = addresses[13]!;
+    const escrowPubkey = addresses[14]!;
 
     return {
       systemProgram,
@@ -779,9 +806,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       statePubkey,
       attestationQueuePubkey,
       functionPubkey,
-      escrowPubkey,
-      fnPermission,
       fnQuote,
+      escrowPubkey,
     };
   }
 }

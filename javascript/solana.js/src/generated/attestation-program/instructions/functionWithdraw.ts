@@ -38,7 +38,7 @@ export function functionWithdraw(
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([6, 182, 241, 39, 40, 111, 65, 195]);

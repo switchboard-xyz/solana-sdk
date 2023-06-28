@@ -128,7 +128,7 @@ async function main() {
       }
     ),
     runCommandAsync(
-      `anchor idl fetch -o ${attestationDevnetIdlPath} SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha --provider.cluster devnet`,
+      `anchor idl fetch -o ${attestationDevnetIdlPath} sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx --provider.cluster devnet`,
       {
         encoding: "utf-8",
       }
@@ -149,7 +149,7 @@ async function main() {
         { encoding: "utf-8" }
       ),
       runCommandAsync(
-        `npx anchor-client-gen --program-id SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha ${switchboardAttestationIdlPath} ${attestationGeneratedPath}`,
+        `npx anchor-client-gen --program-id sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx ${switchboardAttestationIdlPath} ${attestationGeneratedPath}`,
         { encoding: "utf-8" }
       ),
     ]);
@@ -160,7 +160,7 @@ async function main() {
         { encoding: "utf-8" }
       ),
       runCommandAsync(
-        `npx anchor-client-gen --program-id SBAPyGPyvYEXTiTEfVrktmpvm3Bae3VoZmjYZ6694Ha ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
+        `npx anchor-client-gen --program-id sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx ${attestationDevnetIdlPath} ${attestationGeneratedPath}`,
         { encoding: "utf-8" }
       ),
     ]);
@@ -221,8 +221,6 @@ async function main() {
     execSync(`git restore ${file}`, { encoding: "utf-8" });
   }
 
-  // delete the extra QuoteAccountData
-  await fs.rm(path.join(v2GeneratedPath, "accounts", "QuoteAccountData.ts"));
   // delete the extra VerificationStatus
   await fs.rm(path.join(v2GeneratedPath, "types", "VerificationStatus.ts"));
 
@@ -263,18 +261,6 @@ const processFile = async (file: string) => {
           );
       }
       if (file.includes("index.ts")) {
-        if (file === path.join(v2GeneratedPath, "accounts", "index.ts")) {
-          updatedFileString = updatedFileString.replace(
-            `export { QuoteAccountData } from "./QuoteAccountData"
-export type {
-  QuoteAccountDataFields,
-  QuoteAccountDataJSON,
-} from "./QuoteAccountData"
-`,
-            ``
-          );
-        }
-
         // add the .js extension to all local import/export paths
         return updatedFileString.replace(
           /((import|export)((\s\w+)?([^'"]*))from\s['"])([^'"]+)(['"])/gm,

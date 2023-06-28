@@ -3,7 +3,7 @@ use crate::cfg_client;
 use crate::prelude::*;
 use std::cell::Ref;
 
-#[account(zero_copy)]
+#[account(zero_copy(unsafe))]
 #[repr(packed)]
 pub struct VrfLiteAccountData {
     /// The bump used to derive the SbState account.
@@ -52,6 +52,10 @@ impl Default for VrfLiteAccountData {
 }
 
 impl VrfLiteAccountData {
+    pub fn size() -> usize {
+        8 + std::mem::size_of::<VrfLiteAccountData>()
+    }
+
     /// Returns the deserialized Switchboard VRF Lite account
     ///
     /// # Arguments

@@ -16,6 +16,7 @@ export interface FunctionTriggerArgs {
 export interface FunctionTriggerAccounts {
   function: PublicKey;
   authority: PublicKey;
+  attestationQueue: PublicKey;
 }
 
 export const layout = borsh.struct([
@@ -30,6 +31,7 @@ export function functionTrigger(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
   ];
   const identifier = Buffer.from([45, 224, 218, 184, 248, 83, 239, 200]);
   const buffer = Buffer.alloc(1000);

@@ -37,7 +37,7 @@ export function functionFund(
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.funder, isSigner: false, isWritable: true },
     { pubkey: accounts.funderAuthority, isSigner: true, isWritable: false },
-    { pubkey: accounts.state, isSigner: false, isWritable: true },
+    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
       pubkey: accounts.associatedTokenProgram,

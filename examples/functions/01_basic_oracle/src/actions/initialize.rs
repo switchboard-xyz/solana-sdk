@@ -20,6 +20,9 @@ pub struct Initialize<'info> {
         bump
     )]
     pub oracle: AccountLoader<'info, MyOracleState>,
+
+    pub function: AccountLoader<'info, FunctionAccountData>,
+
     /// CHECK:
     pub authority: Signer<'info>,
 
@@ -28,14 +31,14 @@ pub struct Initialize<'info> {
 
     // SYSTEM ACCOUNTS
     pub system_program: Program<'info, System>,
-    /// CHECK:
-    #[account(address = solana_program::sysvar::rent::ID)]
-    pub rent: AccountInfo<'info>,
+    // /// CHECK:
+    // #[account(address = solana_program::sysvar::rent::ID)]
+    // pub rent: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct InitializeParams {
-    pub mr_enclaves: Vec<[u8; 32]>,
+    // pub mr_enclaves: Vec<[u8; 32]>,
 }
 
 impl Initialize<'_> {
@@ -44,9 +47,9 @@ impl Initialize<'_> {
         _ctx: &Context<Self>,
         params: &InitializeParams,
     ) -> anchor_lang::Result<()> {
-        if params.mr_enclaves.len() > 32 {
-            return Err(error!(BasicOracleError::ArrayOverflow));
-        }
+        // if params.mr_enclaves.len() > 32 {
+        //     return Err(error!(BasicOracleError::ArrayOverflow));
+        // }
         Ok(())
     }
 
@@ -54,9 +57,7 @@ impl Initialize<'_> {
         let program = &mut ctx.accounts.program.load_init()?;
         program.bump = *ctx.bumps.get("program").unwrap_or(&0);
         program.authority = ctx.accounts.authority.key();
-        if !params.mr_enclaves.is_empty() {
-            program.mr_enclaves = parse_mr_enclaves(&params.mr_enclaves)?;
-        }
+        program.function = ctx.accounts.function.key();
 
         let oracle = &mut ctx.accounts.oracle.load_init()?;
         oracle.bump = *ctx.bumps.get("oracle").unwrap_or(&0);

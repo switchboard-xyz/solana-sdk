@@ -14,6 +14,10 @@ export interface FunctionInitParamsFields {
   schedule: Uint8Array;
   mrEnclave: Array<number>;
   recentSlot: BN;
+  requestsDisabled: boolean;
+  requestsRequireAuthorization: boolean;
+  requestsDefaultSlotsUntilExpiration: BN;
+  requestsFee: BN;
 }
 
 export interface FunctionInitParamsJSON {
@@ -25,6 +29,10 @@ export interface FunctionInitParamsJSON {
   schedule: Array<number>;
   mrEnclave: Array<number>;
   recentSlot: string;
+  requestsDisabled: boolean;
+  requestsRequireAuthorization: boolean;
+  requestsDefaultSlotsUntilExpiration: string;
+  requestsFee: string;
 }
 
 export class FunctionInitParams {
@@ -36,6 +44,10 @@ export class FunctionInitParams {
   readonly schedule: Uint8Array;
   readonly mrEnclave: Array<number>;
   readonly recentSlot: BN;
+  readonly requestsDisabled: boolean;
+  readonly requestsRequireAuthorization: boolean;
+  readonly requestsDefaultSlotsUntilExpiration: BN;
+  readonly requestsFee: BN;
 
   constructor(fields: FunctionInitParamsFields) {
     this.name = fields.name;
@@ -46,6 +58,11 @@ export class FunctionInitParams {
     this.schedule = fields.schedule;
     this.mrEnclave = fields.mrEnclave;
     this.recentSlot = fields.recentSlot;
+    this.requestsDisabled = fields.requestsDisabled;
+    this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
+    this.requestsDefaultSlotsUntilExpiration =
+      fields.requestsDefaultSlotsUntilExpiration;
+    this.requestsFee = fields.requestsFee;
   }
 
   static layout(property?: string) {
@@ -59,6 +76,10 @@ export class FunctionInitParams {
         borsh.vecU8("schedule"),
         borsh.array(borsh.u8(), 32, "mrEnclave"),
         borsh.u64("recentSlot"),
+        borsh.bool("requestsDisabled"),
+        borsh.bool("requestsRequireAuthorization"),
+        borsh.u64("requestsDefaultSlotsUntilExpiration"),
+        borsh.u64("requestsFee"),
       ],
       property
     );
@@ -99,6 +120,11 @@ export class FunctionInitParams {
       ),
       mrEnclave: obj.mrEnclave,
       recentSlot: obj.recentSlot,
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        obj.requestsDefaultSlotsUntilExpiration,
+      requestsFee: obj.requestsFee,
     });
   }
 
@@ -136,6 +162,11 @@ export class FunctionInitParams {
       ),
       mrEnclave: fields.mrEnclave,
       recentSlot: fields.recentSlot,
+      requestsDisabled: fields.requestsDisabled,
+      requestsRequireAuthorization: fields.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        fields.requestsDefaultSlotsUntilExpiration,
+      requestsFee: fields.requestsFee,
     };
   }
 
@@ -149,6 +180,11 @@ export class FunctionInitParams {
       schedule: Array.from(this.schedule.values()),
       mrEnclave: this.mrEnclave,
       recentSlot: this.recentSlot.toString(),
+      requestsDisabled: this.requestsDisabled,
+      requestsRequireAuthorization: this.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration:
+        this.requestsDefaultSlotsUntilExpiration.toString(),
+      requestsFee: this.requestsFee.toString(),
     };
   }
 
@@ -162,6 +198,12 @@ export class FunctionInitParams {
       schedule: Uint8Array.from(obj.schedule),
       mrEnclave: obj.mrEnclave,
       recentSlot: new BN(obj.recentSlot),
+      requestsDisabled: obj.requestsDisabled,
+      requestsRequireAuthorization: obj.requestsRequireAuthorization,
+      requestsDefaultSlotsUntilExpiration: new BN(
+        obj.requestsDefaultSlotsUntilExpiration
+      ),
+      requestsFee: new BN(obj.requestsFee),
     });
   }
 

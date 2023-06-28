@@ -521,7 +521,7 @@
         {
           "name": "quote",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "rewardWallet",
@@ -1451,7 +1451,7 @@
         {
           "name": "quote",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "programState",
@@ -2551,97 +2551,6 @@
     }
   ],
   "accounts": [
-    {
-      "name": "QuoteAccountData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "delegatedSecuredSigner",
-            "type": "publicKey"
-          },
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "quoteRegistry",
-            "docs": [
-              "TODO: Add description"
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "registryKey",
-            "docs": [
-              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
-          },
-          {
-            "name": "attestationQueue",
-            "docs": [
-              "Queue used for attestation to verify a MRENCLAVE measurement."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "mrEnclave",
-            "docs": [
-              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "verificationStatus",
-            "type": "u8"
-          },
-          {
-            "name": "verificationTimestamp",
-            "type": "i64"
-          },
-          {
-            "name": "validUntil",
-            "type": "i64"
-          },
-          {
-            "name": "isOnQueue",
-            "type": "bool"
-          },
-          {
-            "name": "lastHeartbeat",
-            "docs": [
-              "The last time the quote heartbeated."
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "ebuf",
-            "type": {
-              "array": [
-                "u8",
-                1024
-              ]
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "SbState",
       "type": {
@@ -5776,6 +5685,132 @@
       }
     },
     {
+      "name": "EnclaveAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The address of the signer generated within an enclave."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the EnclaveAccount which is permitted to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "Queue used for attestation to verify a MRENCLAVE measurement."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mrEnclave",
+            "docs": [
+              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "verificationStatus",
+            "docs": [
+              "The VerificationStatus of the quote."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "verificationTimestamp",
+            "docs": [
+              "The unix timestamp when the quote was last verified."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "validUntil",
+            "docs": [
+              "The unix timestamp when the quotes verification status expires."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the quote was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quoteRegistry",
+            "docs": [
+              "The off-chain registry where the verifiers quote can be located."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "registryKey",
+            "docs": [
+              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "isOnQueue",
+            "docs": [
+              "Whether the quote is located on the AttestationQueues buffer."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "lastHeartbeat",
+            "docs": [
+              "The last time the quote heartbeated on-chain."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "The PDA bump. Only set for FunctionAccount quotes."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "Hash",
       "type": {
         "kind": "struct",
@@ -6769,6 +6804,9 @@
       "type": {
         "kind": "enum",
         "variants": [
+          {
+            "name": "None"
+          },
           {
             "name": "VerificationPending"
           },
@@ -8170,6 +8208,11 @@
     {
       "code": 6102,
       "name": "GenericError",
+      "msg": ""
+    },
+    {
+      "code": 6103,
+      "name": "InvalidAuthorityState",
       "msg": ""
     }
   ]

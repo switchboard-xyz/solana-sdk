@@ -2,7 +2,7 @@ import "mocha";
 
 import { functionVerify } from "../src/generated/index.js";
 import * as sbv2 from "../src/index.js";
-import { QuoteAccount } from "../src/index.js";
+import { AttestationQueueAccount, EnclaveAccount } from "../src/index.js";
 
 import { setupTest, TestContext } from "./utils.js";
 
@@ -17,8 +17,8 @@ const unixTimestamp = () => Math.floor(Date.now() / 1000);
 describe("Function Tests", () => {
   let ctx: TestContext;
 
-  let attestationQueueAccount: sbv2.AttestationQueueAccount;
-  let attestationQuoteVerifierAccount: sbv2.QuoteAccount;
+  let attestationQueueAccount: AttestationQueueAccount;
+  let attestationQuoteVerifierAccount: EnclaveAccount;
   const quoteVerifierKeypair = Keypair.generate();
   const quoteVerifierSigner = Keypair.generate();
 
@@ -76,14 +76,14 @@ describe("Function Tests", () => {
     );
 
     await attestationQuoteVerifierAccount.rotate({
-      securedSigner: quoteVerifierSigner,
+      enclaveSigner: quoteVerifierSigner,
       authority: ctx.payer,
       registryKey: new Uint8Array(Array(64).fill(1)),
     });
 
     const quoteData1 = await attestationQuoteVerifierAccount.loadData();
     assert(
-      quoteData1.securedSigner.equals(quoteVerifierSigner.publicKey),
+      quoteData1.enclaveSigner.equals(quoteVerifierSigner.publicKey),
       "QuoteAuthorityMismatch"
     );
     assert(
@@ -93,7 +93,7 @@ describe("Function Tests", () => {
 
     // join the queue so we can verify other quotes
     await attestationQuoteVerifierAccount.heartbeat({
-      securedSigner: quoteVerifierSigner,
+      enclaveSigner: quoteVerifierSigner,
     });
   });
 
@@ -139,11 +139,11 @@ describe("Function Tests", () => {
   });
 
   it("Verifies the function's quote", async () => {
-    const [functionQuoteAccount] = functionAccount.getQuoteAccount();
+    const [functionQuoteAccount] = functionAccount.getEnclaveAccount();
 
     const initialQuoteState = await functionQuoteAccount.loadData();
     const initialVerificationStatus =
-      QuoteAccount.getVerificationStatus(initialQuoteState);
+      EnclaveAccount.getVerificationStatus(initialQuoteState);
 
     assert(
       initialVerificationStatus.kind === "None",
@@ -159,7 +159,7 @@ describe("Function Tests", () => {
 
     const finalQuoteState = await functionQuoteAccount.loadData();
     const finalVerificationStatus =
-      QuoteAccount.getVerificationStatus(finalQuoteState);
+      EnclaveAccount.getVerificationStatus(finalQuoteState);
 
     assert(
       finalVerificationStatus.kind === "VerificationSuccess",
@@ -270,7 +270,6 @@ describe("Function Tests", () => {
       attestationQueuePubkey,
       functionPubkey,
       escrowPubkey,
-      fnPermission,
       fnQuote,
     } = sbv2.FunctionAccount.decodeAddressLookup(lookupTable);
 
@@ -287,8 +286,8 @@ describe("Function Tests", () => {
         },
         {
           function: functionAccount.publicKey,
-          fnSigner: trustedSigner.publicKey,
-          securedSigner: quoteVerifierSigner.publicKey,
+          functionEnclaveSigner: trustedSigner.publicKey,
+          verifierEnclaveSigner: quoteVerifierSigner.publicKey,
           verifierQuote: attestationQuoteVerifierAccount.publicKey,
           attestationQueue: attestationQueuePubkey,
           escrow: escrowPubkey,
@@ -302,12 +301,9 @@ describe("Function Tests", () => {
               ctx.payer.publicKey,
               ctx.payer.publicKey
             )[0].publicKey,
-          fnPermission: fnPermission,
           state: statePubkey,
-          payer: ctx.payer.publicKey,
           fnQuote: fnQuote,
           tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-          systemProgram: anchor.web3.SystemProgram.programId,
         }
       );
     };
@@ -385,7 +381,7 @@ describe("Function Tests", () => {
     const preFunctionData = await functionAccount.loadData();
 
     assert(
-      preFunctionData.isTriggered === false,
+      preFunctionData.isTriggered === 0,
       "Function should be originally untriggered"
     );
 
@@ -393,7 +389,7 @@ describe("Function Tests", () => {
 
     const postFunctionData = await functionAccount.loadData();
     assert(
-      postFunctionData.isTriggered === true,
+      postFunctionData.isTriggered === 1,
       "Function should have been triggered"
     );
   });

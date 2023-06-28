@@ -10,7 +10,9 @@ import {
   MrEnclave,
   types,
   attestationTypes,
+  AttestationProgramStateAccount,
 } from "@switchboard-xyz/solana.js";
+import { sleep } from "@switchboard-xyz/common";
 
 const unixTimestamp = () => Math.floor(Date.now() / 1000);
 
@@ -50,10 +52,12 @@ describe("basic_oracle", () => {
   let functionAccount: FunctionAccount;
 
   before(async () => {
+    const switchboardProgram = await SwitchboardProgram.fromProvider(
+      program.provider as anchor.AnchorProvider
+    );
+    await AttestationProgramStateAccount.getOrCreate(switchboardProgram);
     switchboard = await AttestationQueueAccount.bootstrapNewQueue(
-      await SwitchboardProgram.fromProvider(
-        program.provider as anchor.AnchorProvider
-      )
+      switchboardProgram
     );
 
     [functionAccount] = await FunctionAccount.create(
@@ -71,11 +75,12 @@ describe("basic_oracle", () => {
   it("Is initialized!", async () => {
     // Add your test here.
     const tx = await program.methods
-      .initialize({ mrEnclaves: [] })
+      .initialize({})
       .accounts({
         program: programStatePubkey,
         oracle: oraclePubkey,
         authority: payer,
+        function: functionAccount.publicKey,
       })
       .rpc()
       .catch((err) => {
@@ -85,32 +90,24 @@ describe("basic_oracle", () => {
     console.log("Your transaction signature", tx);
   });
 
-  it("Adds an enclave measurement", async () => {
-    // Add your test here.
-    const tx = await program.methods
-      .setEnclaves({ mrEnclaves: [Array.from(MRENCLAVE)] })
-      .accounts({
-        program: programStatePubkey,
-        authority: payer,
-      })
-      .rpc()
-      .catch((err) => {
-        console.error(err);
-        throw err;
-      });
-    console.log("Your transaction signature", tx);
-    const programState = await program.account.myProgramState.fetch(
-      programStatePubkey
-    );
-    console.log(
-      `MrEnclaves:\n\t${programState.mrEnclaves
-        .filter(
-          (e) => Buffer.compare(Buffer.from(e), Buffer.from(emptyEnclave)) !== 0
-        )
-        .map((e) => `[${e}]`)
-        .join("\n\t")}`
-    );
-  });
+  // it("Adds an enclave measurement", async () => {
+  //   // Add your test here.
+  //   const tx = await program.methods
+  //     .setEnclaves({ mrEnclaves: [Array.from(MRENCLAVE)] })
+  //     .accounts({
+  //       program: programStatePubkey,
+  //       authority: payer,
+  //     })
+  //     .rpc()
+  //     .catch((err) => {
+  //       console.error(err);
+  //       throw err;
+  //     });
+  //   console.log("Your transaction signature", tx);
+  //   const programState = await program.account.myProgramState.fetch(
+  //     programStatePubkey
+  //   );
+  // });
 
   it("Oracle refreshes the prices", async () => {
     const securedSigner = anchor.web3.Keypair.generate();
@@ -133,54 +130,55 @@ describe("basic_oracle", () => {
       },
       {
         function: functionAccount.publicKey,
-        fnSigner: securedSigner.publicKey,
-        securedSigner: switchboard.verifier.signer.publicKey,
+        functionEnclaveSigner: securedSigner.publicKey,
+        verifierEnclaveSigner: switchboard.verifier.signer.publicKey,
         verifierQuote: switchboard.verifier.quoteAccount.publicKey,
         attestationQueue: switchboard.attestationQueueAccount.publicKey,
         escrow: functionAccount.getEscrow(),
         receiver: rewardAddress,
         verifierPermission: switchboard.verifier.permissionAccount.publicKey,
-        fnPermission: functionAccount.getPermissionAccount(
-          switchboard.attestationQueueAccount.publicKey,
-          payer
-        )[0].publicKey,
         state:
           switchboard.attestationQueueAccount.program.attestationProgramState
             .publicKey,
-        payer: payer,
-        fnQuote: functionAccount.getQuoteAccount()[0].publicKey,
+        fnQuote: functionAccount.getEnclaveAccount()[0].publicKey,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        systemProgram: anchor.web3.SystemProgram.programId,
       }
     );
 
     // Add your test here.
     const tx = await program.methods
       .refreshOracles({
-        btc: {
-          oracleTimestamp: new anchor.BN(0),
-          price: new anchor.BN("25225000000000"), // 25225
-          volume: new anchor.BN("1337000000000000"), // 1337000
-          twap24hr: new anchor.BN("25550000000000"), // 25550
-        },
-        eth: {
-          oracleTimestamp: new anchor.BN(0),
-          price: new anchor.BN("1815000000000"), // 1815
-          volume: new anchor.BN("556000000000000"), // 556000
-          twap24hr: new anchor.BN("1913000000000"), // 1913
-        },
-        sol: null,
-        usdt: null,
-        usdc: null,
-        doge: null,
-        near: null,
+        rows: [
+          {
+            symbol: { btc: {} },
+            data: {
+              oracleTimestamp: new anchor.BN(unixTimestamp()),
+              price: new anchor.BN("25225000000000"), // 25225
+              volume1hr: new anchor.BN("25225000000000"), // 1337000
+              volume24hr: new anchor.BN("25225000000000"), // 1337000
+              twap1hr: new anchor.BN("25225000000000"), // 25550
+              twap24hr: new anchor.BN("25225000000000"), // 25550
+            },
+          },
+          {
+            symbol: { eth: {} },
+            data: {
+              oracleTimestamp: new anchor.BN(unixTimestamp()),
+              price: new anchor.BN("1750000000000"), // 1750
+              volume1hr: new anchor.BN("420000000000"), // 420000
+              volume24hr: new anchor.BN("420000000000"), // 420000
+              twap1hr: new anchor.BN("1750000000000"), // 1750
+              twap24hr: new anchor.BN("1750000000000"), // 1750
+            },
+          },
+        ],
       })
       .accounts({
-        program: programStatePubkey,
+        programState: programStatePubkey,
         oracle: oraclePubkey,
         function: functionAccount.publicKey,
-        quote: functionAccount.getQuoteAccount()[0].publicKey,
-        securedSigner: securedSigner.publicKey,
+        enclave: functionAccount.getEnclaveAccount()[0].publicKey,
+        enclaveSigner: securedSigner.publicKey,
       })
       .preInstructions([functionVerifyIxn])
       .signers([switchboard.verifier.signer, securedSigner])
@@ -192,13 +190,17 @@ describe("basic_oracle", () => {
 
     console.log("Your transaction signature", tx);
 
+    await sleep(5000);
+
     const oracleState = await program.account.myOracleState.fetch(oraclePubkey);
 
-    console.log(`BTC`);
+    console.log(oracleState);
+
+    console.log(`BTC\n`);
     printData(oracleState.btc);
-    console.log(`ETH`);
+    console.log(`ETH\n`);
     printData(oracleState.eth);
-    console.log(`SOL`);
+    console.log(`SOL\n`);
     printData(oracleState.sol);
   });
 });
@@ -212,12 +214,15 @@ function normalizeDecimals(value: anchor.BN) {
 function printData(obj: {
   oracleTimestamp: anchor.BN;
   price: anchor.BN;
-  volume: anchor.BN;
+  volume1hr: anchor.BN;
+  volume24hr: anchor.BN;
+  twap1hr: anchor.BN;
   twap24hr: anchor.BN;
 }) {
-  console.log(
-    `\tprice: $${normalizeDecimals(obj.price)}\n\tvolume: ${normalizeDecimals(
-      obj.volume
-    )}\n\t24Hr Twap: $${normalizeDecimals(obj.twap24hr)}`
-  );
+  console.log(`\tprice: ${normalizeDecimals(obj.price)}`);
+  console.log(`\ttimestamp: ${obj.oracleTimestamp.toNumber()}`);
+  console.log(`\t1Hr Volume: ${normalizeDecimals(obj.volume1hr)}`);
+  console.log(`\t24Hr Volume: ${normalizeDecimals(obj.volume24hr)}`);
+  console.log(`\t1Hr Twap: ${normalizeDecimals(obj.twap1hr)}`);
+  console.log(`\t24Hr Twap: ${normalizeDecimals(obj.twap24hr)}`);
 }

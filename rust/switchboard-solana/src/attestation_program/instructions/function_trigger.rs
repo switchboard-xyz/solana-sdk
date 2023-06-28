@@ -1,36 +1,40 @@
 use crate::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(params: FunctionTriggerParams)] // rpc parameters hint
+#[instruction(params:FunctionTriggerParams)]
 pub struct FunctionTrigger<'info> {
-    #[account(mut)]
-    pub function: AccountInfo<'info>,
+    #[account(
+        mut,
+        has_one = authority,
+        has_one = attestation_queue,
+    )]
+    pub function: AccountLoader<'info, FunctionAccountData>,
 
-    #[account(signer)]
-    pub authority: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+
+    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionTriggerParams {}
+
 impl InstructionData for FunctionTriggerParams {}
+
 impl Discriminator for FunctionTriggerParams {
     const DISCRIMINATOR: [u8; 8] = [45, 224, 218, 184, 248, 83, 239, 200];
 }
+
 impl Discriminator for FunctionTrigger<'_> {
     const DISCRIMINATOR: [u8; 8] = [45, 224, 218, 184, 248, 83, 239, 200];
 }
 
 impl<'info> FunctionTrigger<'info> {
     pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
-        let accounts = self.to_account_metas(None);
-
-        let mut data: Vec<u8> = FunctionTrigger::discriminator().try_to_vec()?;
-        let params = FunctionTriggerParams {};
-        let mut param_vec: Vec<u8> = params.try_to_vec()?;
-        data.append(&mut param_vec);
-
-        let instruction = Instruction::new_with_bytes(program_id, &data, accounts);
-        Ok(instruction)
+        Ok(Instruction::new_with_bytes(
+            program_id,
+            &FunctionTrigger::discriminator().try_to_vec()?,
+            self.to_account_metas(None),
+        ))
     }
 
     pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
@@ -52,22 +56,19 @@ impl<'info> FunctionTrigger<'info> {
     }
 
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
-        vec![self.function.clone(), self.authority.clone()]
+        let mut account_infos = Vec::new();
+        account_infos.extend(self.function.to_account_infos());
+        account_infos.extend(self.authority.to_account_infos());
+        account_infos.extend(self.attestation_queue.to_account_infos());
+        account_infos
     }
 
     #[allow(unused_variables)]
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
-        vec![
-            AccountMeta {
-                pubkey: *self.function.key,
-                is_signer: self.function.is_signer,
-                is_writable: self.function.is_writable,
-            },
-            AccountMeta {
-                pubkey: *self.authority.key,
-                is_signer: self.authority.is_signer,
-                is_writable: self.authority.is_writable,
-            },
-        ]
+        let mut account_metas = Vec::new();
+        account_metas.extend(self.function.to_account_metas(None));
+        account_metas.extend(self.authority.to_account_metas(None));
+        account_metas.extend(self.attestation_queue.to_account_metas(None));
+        account_metas
     }
 }

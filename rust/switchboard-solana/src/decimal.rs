@@ -27,13 +27,13 @@ use std::convert::{From, TryInto};
 //     }
 // }
 
-#[zero_copy]
+#[zero_copy(unsafe)]
 #[repr(packed)]
 #[derive(Default, Debug, Eq, PartialEq, AnchorDeserialize)]
 pub struct SwitchboardDecimal {
     /// The part of a floating-point number that represents the significant digits of that number, and that is multiplied by the base, 10, raised to the power of scale to give the actual value of the number.
     pub mantissa: i128,
-    /// 	The number of decimal places to move to the left to yield the actual value.
+    /// The number of decimal places to move to the left to yield the actual value.
     pub scale: u32,
 }
 

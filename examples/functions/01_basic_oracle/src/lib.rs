@@ -12,7 +12,7 @@ pub use utils::*;
 pub mod actions;
 pub use actions::*;
 
-declare_id!("9PAxFbRDepv1ziPeUW5KHcpgpgPtxWV4ZzVwqDBqymok");
+declare_id!("6tdxUefBQRpL1CbJhzXgcMtWChKqXj9P9Rz2bvTWiiar");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 
@@ -28,14 +28,6 @@ pub mod basic_oracle {
         params: InitializeParams,
     ) -> anchor_lang::Result<()> {
         Initialize::actuate(&ctx, &params)
-    }
-
-    #[access_control(ctx.accounts.validate(&ctx, &params))]
-    pub fn set_enclaves(
-        ctx: Context<SetEnclaves>,
-        params: SetEnclavesParams,
-    ) -> anchor_lang::Result<()> {
-        SetEnclaves::actuate(&ctx, &params)
     }
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]
