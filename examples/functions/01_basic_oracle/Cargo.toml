@@ -17,7 +17,6 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-# anchor-lang = "0.28.0"
-switchboard-solana = "=0.6.9"
-# switchboard-solana = { version = "0.6", path = "../../../rust/switchboard-solana" }
+switchboard-solana = "=0.7.0"
+# switchboard-solana = { version = "0.7.0", path = "../../../rust/switchboard-solana" }
 bytemuck = "^1"
