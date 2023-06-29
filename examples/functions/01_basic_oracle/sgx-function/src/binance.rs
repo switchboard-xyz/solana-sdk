@@ -9,6 +9,15 @@ use basic_oracle::{TradingSymbol, OracleDataBorsh};
 
 const ONE: i128 = 1000000000;
 
+pub fn ix_discriminator(name: &str) -> [u8; 8] {
+    let preimage = format!("global:{}", name);
+    let mut sighash = [0u8; 8];
+    sighash.copy_from_slice(
+        &anchor_lang::solana_program::hash::hash(preimage.as_bytes()).to_bytes()[..8],
+    );
+    sighash
+}
+
 #[allow(non_snake_case)]
 #[derive(Deserialize, Default, Clone, Debug)]
 pub struct Ticker {
@@ -143,14 +152,14 @@ impl Binance {
                 symbol: TradingSymbol::Eth,
                 data: self.eth_usdt.clone().into(),
             },
-            OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::Sol,
-                data: self.sol_usdt.clone().into(),
-            },
-            OracleDataWithTradingSymbol {
-                symbol: TradingSymbol::Doge,
-                data: self.doge_usdt.clone().into(),
-            },
+            // OracleDataWithTradingSymbol {
+                // symbol: TradingSymbol::Sol,
+                // data: self.sol_usdt.clone().into(),
+            // },
+            // OracleDataWithTradingSymbol {
+                // symbol: TradingSymbol::Doge,
+                // data: self.doge_usdt.clone().into(),
+            // },
         ];
 
         let params = RefreshPricesParams { rows };
@@ -190,7 +199,7 @@ impl Binance {
                     is_writable: false,
                 },
             ],
-            data: params.try_to_vec().unwrap_or_default(),
+            data: [ix_discriminator("refresh_oracles").to_vec(), params.try_to_vec().unwrap()].concat(),
         };
 
         vec![ixn]
