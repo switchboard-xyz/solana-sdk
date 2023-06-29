@@ -160,7 +160,7 @@ impl FunctionRunner {
             .await
             .map_err(|e| SwitchboardClientError::CustomError {
                 message: "failed to run function verify".to_string(),
-                source: Box::new(e),
+                source: std::sync::Arc::new(e),
             })
             .unwrap()
             .emit();
