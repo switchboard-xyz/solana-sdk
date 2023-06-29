@@ -16,9 +16,9 @@ no-log-ix-name = []
 cpi = ["no-entrypoint"]
 
 [dependencies]
-switchboard-solana = { path = "../../../rust/switchboard-solana" }
-# switchboard-solana = { version = "^0.5.2", path = "../../../rust/switchboard-solana" }
-anchor-lang = "^0.26.0"
-anchor-spl = "^0.26.0"
-solana-program = "~1.14.0"
 bytemuck = "1.13.1"
+switchboard-solana = { path = "../../../rust/switchboard-solana", version = "0.6.7" }
+# switchboard-solana = { version = "^0.5.2", path = "../../../rust/switchboard-solana" }
+# anchor-lang = "^0.28.0"
+# anchor-spl = "^0.28.0"
+# solana-program = "1.16.1"

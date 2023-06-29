@@ -98,10 +98,16 @@ impl FunctionRunner {
         let verifier_permission = AttestationPermissionAccountData::get_pda(
             &queue_data.authority,
             &fn_data.attestation_queue,
-            &self.payer,
+            &self.verifier,
         );
 
-        let next_allowed_timestamp: i64 = fn_data.get_next_execution_datetime().timestamp();
+        let maybe_next_allowed_timestamp = fn_data.get_next_execution_datetime();
+        let next_allowed_timestamp: i64;
+        if maybe_next_allowed_timestamp.is_some() {
+            next_allowed_timestamp = maybe_next_allowed_timestamp.unwrap().timestamp();
+        } else {
+            next_allowed_timestamp = i64::MAX;
+        }
 
         let ixn_params = FunctionVerifyParams {
             observed_time: current_time,
@@ -114,7 +120,7 @@ impl FunctionRunner {
             function: self.function,
             function_enclave_signer: self.signer,
             verifier_quote: self.verifier,
-            verifier_enclave_signer: verifier_quote.authority,
+            verifier_enclave_signer: verifier_quote.enclave_signer,
             verifier_permission: verifier_permission,
             attestation_queue: fn_data.attestation_queue,
             receiver: self.reward_receiver,

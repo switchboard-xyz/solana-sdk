@@ -16,8 +16,8 @@ switchboard_feed_client = "4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p"
 url = "https://anchor.projectserum.com"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
-"test:devnet" = "USE_SWITCHBOARD_DEVNET_QUEUE=true yarn run ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+test = "pnpm exec ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
+"test:devnet" = "USE_SWITCHBOARD_DEVNET_QUEUE=true pnpm exec ts-mocha -p ./tsconfig.json -t 60000 ./tests/*.test.ts --exit"
 
 [test.validator]
 url = "https://api.devnet.solana.com"
@@ -42,6 +42,9 @@ address = "sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx"
 
 [[test.validator.clone]] # sb devnet attestation IDL
 address = "5ExuoQR69trmKQfB95fDsUGsUrrChbGq9PFgt8qouncz"
+
+[[test.validator.clone]] # sb devnet programState
+address = "BzqtGXZPiDSinP4xMFgPf6FLgSa6iPufK4m4JJFgMnTK"
 
 [[test.validator.clone]] # sb SOL feed
 address = "GvDMxPzN1sCj7L26YDK2HnMRXEQmQ2aemov8YBtPS7vR"

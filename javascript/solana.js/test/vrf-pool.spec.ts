@@ -77,7 +77,7 @@ describe("Vrf Pool Tests", () => {
       rpcUrl: "http://0.0.0.0:8899",
       oracleKey: oracle1.publicKey.toBase58(),
       secretPath: "~/.config/solana/id.json",
-      silent: true,
+      silent: false,
     });
 
     chalkString("payer", ctx.program.walletPubkey.toBase58());
