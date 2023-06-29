@@ -29,6 +29,8 @@ describe("anchor-vrf-lite-parser test", () => {
   const provider = AnchorProvider.env();
   anchor.setProvider(provider);
 
+  console.log(anchor.workspace);
+
   const vrfClientProgram: anchor.Program<AnchorVrfLiteParser> =
     anchor.workspace.AnchorVrfLiteParser;
 
@@ -76,7 +78,7 @@ describe("anchor-vrf-lite-parser test", () => {
       switchboard = await SwitchboardTestContext.loadFromProvider(provider, {
         // You can provide a keypair to so the PDA schemes dont change between test runs
         name: "Test Queue",
-        keypair: SwitchboardTestContext.loadKeypair("~/.keypairs/queue.json"),
+        // keypair: SwitchboardTestContext.loadKeypair("~/.keypairs/queue.json"),
         queueSize: 10,
         reward: 0,
         minStake: 0,
@@ -84,13 +86,13 @@ describe("anchor-vrf-lite-parser test", () => {
         unpermissionedFeeds: true,
         unpermissionedVrf: true,
         enableBufferRelayers: true,
-        oracle: {
-          name: "Test Oracle",
-          enable: true,
-          stakingWalletKeypair: SwitchboardTestContext.loadKeypair(
-            "~/.keypairs/oracleWallet.json"
-          ),
-        },
+        // oracle: {
+        //   name: "Test Oracle",
+        //   enable: true,
+        //   stakingWalletKeypair: SwitchboardTestContext.loadKeypair(
+        //     "~/.keypairs/oracleWallet.json"
+        //   ),
+        // },
       });
       queueAccount = switchboard.queue;
       queue = await queueAccount.loadData();

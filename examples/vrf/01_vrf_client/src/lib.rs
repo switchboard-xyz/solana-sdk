@@ -1,8 +1,8 @@
 pub mod actions;
 pub use actions::*;
 
-pub use anchor_lang::prelude::*;
 use anchor_spl::token::TokenAccount;
+pub use switchboard_solana::prelude::*;
 
 pub use switchboard_solana::SWITCHBOARD_PROGRAM_ID;
 
