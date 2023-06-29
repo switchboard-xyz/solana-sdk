@@ -18,6 +18,6 @@ default = []
 
 [dependencies]
 # anchor-lang = "0.28.0"
-switchboard-solana = "=0.6.7"
+switchboard-solana = "=0.6.8"
 # switchboard-solana = { version = "0.6", path = "../../../rust/switchboard-solana" }
 bytemuck = "^1"

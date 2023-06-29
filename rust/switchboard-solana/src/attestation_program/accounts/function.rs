@@ -323,11 +323,13 @@ impl FunctionAccountData {
             )
         }
 
-        pub fn get_next_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
-            chrono::DateTime::from_utc(
-                chrono::NaiveDateTime::from_timestamp_opt(self.next_allowed_timestamp, 0).unwrap(),
-                chrono::Utc,
-            )
+        pub fn get_next_execution_datetime(&self) -> Option<chrono::DateTime<chrono::Utc>> {
+            let schedule = self.get_schedule();
+            if schedule.is_none() {
+                return None;
+            }
+            let dt = self.get_last_execution_datetime();
+            schedule.unwrap().after(&dt).next()
         }
 
         pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {

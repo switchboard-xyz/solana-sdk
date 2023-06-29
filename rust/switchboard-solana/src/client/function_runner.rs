@@ -101,7 +101,13 @@ impl FunctionRunner {
             &self.verifier,
         );
 
-        let next_allowed_timestamp: i64 = fn_data.get_next_execution_datetime().timestamp();
+        let maybe_next_allowed_timestamp = fn_data.get_next_execution_datetime();
+        let next_allowed_timestamp: i64;
+        if maybe_next_allowed_timestamp.is_some() {
+            next_allowed_timestamp = maybe_next_allowed_timestamp.unwrap().timestamp();
+        } else {
+            next_allowed_timestamp = i64::MAX;
+        }
 
         let ixn_params = FunctionVerifyParams {
             observed_time: current_time,
