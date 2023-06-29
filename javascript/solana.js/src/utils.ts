@@ -10,7 +10,7 @@ import { TransactionObject } from "./TransactionObject.js";
 import { RawBuffer } from "./types.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
-import { OracleJob } from "@switchboard-xyz/common";
+import { BN, OracleJob } from "@switchboard-xyz/common";
 import { isValidCron } from "cron-validator";
 import fs from "fs";
 import os from "os";
@@ -242,4 +242,15 @@ export function parseCronSchedule(cronSchedule: string): string {
 
   fields.unshift(...Array(6 - fields.length).fill("0"));
   return fields.join(" ");
+}
+
+export function numToBN(num?: number | BN, defaultVal = 0): BN {
+  if (!num) {
+    return new BN(defaultVal);
+  }
+  if (typeof num === "number") {
+    return new BN(num);
+  }
+
+  return num;
 }

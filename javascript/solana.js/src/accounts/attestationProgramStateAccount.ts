@@ -30,43 +30,17 @@ export class AttestationProgramStateAccount extends Account<types.AttestationPro
     this.program.attestationAccount.attestationProgramState.size;
 
   /**
-   * Return a program state account state initialized to the default values.
+   * Finds the {@linkcode AttestationProgramStateAccount} from the static seed from which it was generated.
+   * @return AttestationProgramStateAccount and PDA bump tuple.
    */
-  public static default(): types.AttestationProgramState {
-    const buffer = Buffer.alloc(AttestationProgramStateAccount.size, 0);
-    types.AttestationProgramState.discriminator.copy(buffer, 0);
-    return types.AttestationProgramState.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given program state config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.AttestationProgramState>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.AttestationProgramStateFields = {
-      ...AttestationProgramStateAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.AttestationProgramState(fields);
-
-    const buffer = Buffer.alloc(AttestationProgramStateAccount.size, 0);
-    types.AttestationProgramState.discriminator.copy(buffer, 0);
-    types.AttestationProgramState.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
+  public static fromSeed(
+    program: SwitchboardProgram
+  ): [AttestationProgramStateAccount, number] {
+    const [publicKey, bump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("STATE")],
+      program.attestationProgramId
+    );
+    return [new AttestationProgramStateAccount(program, publicKey), bump];
   }
 
   /** Load the AttestationProgramStateAccount with its current on-chain state */
@@ -146,19 +120,5 @@ export class AttestationProgramStateAccount extends Account<types.AttestationPro
 
       return [account, bump, programInit];
     }
-  }
-
-  /**
-   * Finds the {@linkcode AttestationProgramStateAccount} from the static seed from which it was generated.
-   * @return AttestationProgramStateAccount and PDA bump tuple.
-   */
-  public static fromSeed(
-    program: SwitchboardProgram
-  ): [AttestationProgramStateAccount, number] {
-    const [publicKey, bump] = PublicKey.findProgramAddressSync(
-      [Buffer.from("STATE")],
-      program.attestationProgramId
-    );
-    return [new AttestationProgramStateAccount(program, publicKey), bump];
   }
 }

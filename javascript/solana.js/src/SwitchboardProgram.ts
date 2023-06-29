@@ -208,12 +208,25 @@ export class SwitchboardProgram {
     };
 
     // TODO: produce the attestation state account from the seed.
-    const attestationStateAccount =
-      AttestationProgramStateAccount.fromSeed(this);
-    this.attestationProgramState = {
-      publicKey: attestationStateAccount[0].publicKey,
-      bump: attestationStateAccount[1],
-    };
+    if (this._attestationProgram) {
+      const attestationStateAccount =
+        AttestationProgramStateAccount.fromSeed(this);
+      this.attestationProgramState = {
+        publicKey: attestationStateAccount[0].publicKey,
+        bump: attestationStateAccount[1],
+      };
+    } else {
+      const [attestationProgramStatePubkey, attestationProgramStateBump] =
+        PublicKey.findProgramAddressSync(
+          [Buffer.from("STATE")],
+          SB_ATTESTATION_PID
+        );
+
+      this.attestationProgramState = {
+        publicKey: attestationProgramStatePubkey,
+        bump: attestationProgramStateBump,
+      };
+    }
 
     this.mint = mint;
   }

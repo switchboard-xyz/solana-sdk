@@ -1,6 +1,9 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import {
+  SB_ATTESTATION_PID,
+  SwitchboardProgram,
+} from "../SwitchboardProgram.js";
 import {
   SendTransactionObjectOptions,
   TransactionObject,
@@ -15,6 +18,10 @@ import {
   AttestationPermissionSetParams,
 } from "./attestationPermissionAccount.js";
 import { EnclaveAccount, EnclaveAccountInitParams } from "./enclaveAccount.js";
+import {
+  FunctionAccount,
+  FunctionAccountInitParams,
+} from "./functionAccount.js";
 
 import {
   Keypair,
@@ -23,7 +30,6 @@ import {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
-
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
  */
@@ -93,6 +99,14 @@ export type CreateQueueQuoteParams = Omit<
   Partial<AttestationPermissionSetParams> & {
     queueAuthorityPubkey?: PublicKey;
   } & { createPermissions?: boolean };
+
+export type CreateFunctionParams = Omit<
+  FunctionAccountInitParams,
+  "attestationQueue"
+> &
+  Partial<AttestationPermissionSetParams> & {
+    queueAuthorityPubkey?: PublicKey;
+  };
 
 /**
  * Account type representing an oracle queue's configuration along with a buffer account holding a
@@ -247,6 +261,61 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     options?: SendTransactionObjectOptions
   ): Promise<[EnclaveAccount, TransactionSignature]> {
     const [account, txnObject] = await this.createQuoteInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
+    return [account, await this.program.signAndSend(txnObject, options)];
+  }
+
+  public async createFunctionInstruction(
+    payer: PublicKey,
+    params: CreateFunctionParams,
+    options?: TransactionObjectOptions
+  ): Promise<[FunctionAccount, TransactionObject]> {
+    this.program.verifyAttestation();
+
+    const queueAuthority =
+      params.queueAuthorityPubkey ?? (await this.loadData()).authority;
+
+    const [functionAccount, functionInit] =
+      await FunctionAccount.createInstruction(
+        this.program,
+        payer,
+        { ...params, attestationQueue: this },
+        options
+      );
+
+    if (params.enable) {
+      const permissionSet = types.attestationPermissionSet(
+        this.program,
+        {
+          params: {
+            permission:
+              types.SwitchboardAttestationPermission.PermitQueueUsage
+                .discriminator,
+            enable: params.enable,
+          },
+        },
+        {
+          permission: SB_ATTESTATION_PID, // optional
+          authority: queueAuthority,
+          attestationQueue: this.publicKey,
+          enclave: functionAccount.getEnclavePubkey(),
+        }
+      );
+
+      functionInit.add(permissionSet);
+    }
+
+    return [functionAccount, functionInit];
+  }
+
+  public async createFunction(
+    params: CreateFunctionParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<[FunctionAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createFunctionInstruction(
       this.program.walletPubkey,
       params,
       options

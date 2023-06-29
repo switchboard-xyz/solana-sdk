@@ -11,7 +11,7 @@ import {
   TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { parseCronSchedule, parseMrEnclave } from "../utils.js";
+import { numToBN, parseCronSchedule, parseMrEnclave } from "../utils.js";
 
 import {
   AttestationPermissionAccount,
@@ -50,6 +50,11 @@ export interface FunctionAccountInitParams {
 
   mrEnclave: Buffer | Uint8Array | number[];
   attestationQueue: AttestationQueueAccount;
+
+  requestsDisabled?: boolean;
+  requestsRequireAuthorization?: boolean;
+  requestsDefaultSlotsUntilExpiration?: number | BN;
+  requestsFee?: number | BN;
 
   /**
    *  A keypair to be used to address this account.
@@ -255,10 +260,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
           recentSlot: recentSlot,
-          requestsDisabled: false,
-          requestsRequireAuthorization: false,
-          requestsDefaultSlotsUntilExpiration: new BN(1000),
-          requestsFee: new BN(0),
+          requestsDisabled: params.requestsDisabled ?? false,
+          requestsRequireAuthorization:
+            params.requestsRequireAuthorization ?? false,
+          requestsDefaultSlotsUntilExpiration: numToBN(
+            params.requestsDefaultSlotsUntilExpiration,
+            1000
+          ),
+          requestsFee: numToBN(params.requestsFee),
         },
       },
       {
@@ -307,6 +316,10 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
   public getEnclaveAccount(): [EnclaveAccount, number] {
     return EnclaveAccount.fromSeed(this.program, this.publicKey);
+  }
+
+  public getEnclavePubkey(): PublicKey {
+    return this.getEnclaveAccount()[0].publicKey;
   }
 
   public getEscrow(): PublicKey {
