@@ -98,19 +98,26 @@ describe("Function Tests", () => {
   });
 
   it("Creates a Function", async () => {
-    const functionKeypair = Keypair.generate();
+    const authorityKeypair = Keypair.generate();
+
+    console.log(`authorityKeypair: ${authorityKeypair.publicKey}`);
 
     try {
-      [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-        name: "FUNCTION_NAME",
-        metadata: "FUNCTION_METADATA",
-        schedule: "* * * * *",
-        container: "containerId",
-        version: "1.0.0",
-        mrEnclave,
-        attestationQueue: attestationQueueAccount,
-        authority: Keypair.generate(),
-      });
+      [functionAccount] = await sbv2.FunctionAccount.create(
+        ctx.program,
+        {
+          name: "FUNCTION_NAME",
+          metadata: "FUNCTION_METADATA",
+          schedule: "* * * * *",
+          container: "containerId",
+          version: "1.0.0",
+          mrEnclave,
+          attestationQueue: attestationQueueAccount,
+          authority: authorityKeypair.publicKey,
+        },
+        undefined,
+        { skipPreflight: true }
+      );
     } catch (error) {
       console.error(error);
       throw error;

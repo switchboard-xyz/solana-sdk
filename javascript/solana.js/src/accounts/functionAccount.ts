@@ -47,6 +47,7 @@ import {
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN, toUtf8 } from "@switchboard-xyz/common";
+import assert from "assert";
 
 export type FunctionAccountInitSeeds = {
   recentSlot?: number;
@@ -74,11 +75,10 @@ export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
 
   /**
    *  An authority to be used to control this account.
-   *  Authority needs to sign to initialize the address lookup table.
    *
    *  @default payer
    */
-  authority?: Keypair;
+  authority?: PublicKey;
 };
 
 /**
@@ -296,9 +296,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   ): Promise<[FunctionAccount, TransactionObject]> {
     program.verifyAttestation();
 
-    const authorityPubkey = params.authority
-      ? params.authority.publicKey
-      : payer;
+    const authorityPubkey = params.authority ?? payer;
 
     const cronSchedule = parseCronSchedule(params.schedule);
 
@@ -317,6 +315,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const creatorSeed = params.creatorSeed
       ? parseRawBuffer(params.creatorSeed, 32)
       : payer.toBytes();
+    assert(creatorSeed.length === 32);
 
     const functionAccount = FunctionAccount.fromSeed(
       program,
@@ -327,6 +326,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const addressLookupProgram = new PublicKey(
       "AddressLookupTab1e1111111111111111111111111"
     );
+
     const [addressLookupTable] = PublicKey.findProgramAddressSync(
       [functionAccount.publicKey.toBuffer(), recentSlot.toBuffer("le", 8)],
       addressLookupProgram
@@ -357,6 +357,13 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     }
 
     const enclaveAccount = functionAccount.getEnclaveAccount();
+
+    console.log(`creatorSeed: ${creatorSeed}`);
+    console.log(`recentSlot: ${recentSlot.toNumber()}`);
+    console.log(`function: ${functionAccount.publicKey}`);
+    console.log(`fnQuote: ${enclaveAccount.publicKey}`);
+    console.log(`wallet: ${escrowWallet.publicKey}`);
+    console.log(`tokenWallet: ${escrowWallet.tokenWallet}`);
 
     const instruction = types.functionInit(
       program,
@@ -409,7 +416,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           ComputeBudgetProgram.setComputeUnitLimit({ units: 250_000 }),
           instruction,
         ],
-        params.authority ? [params.authority] : [],
+        [],
         {
           ...options,
           computeUnitLimit: undefined,
