@@ -6,34 +6,43 @@ pub struct FunctionClose<'info> {
     #[account(
         mut,
         close = sol_dest,
+        seeds = [
+            FUNCTION_SEED,
+            function.load()?.creator_seed.as_ref(), 
+            &function.load()?.created_at.to_le_bytes()
+        ],
+        bump = function.load()?.bump,
         has_one = authority,
-        has_one = escrow,
         has_one = address_lookup_table,
+        has_one = escrow_wallet,
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     pub authority: Signer<'info>,
 
-    #[account(
-        mut,
-        constraint = escrow.is_native() && escrow.owner == state.key()
-    )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
-
     /// CHECK: handled in function has_one
     #[account(
         mut,
-        constraint = *address_lookup_table.owner == address_lookup_program.key()
+        owner = address_lookup_program.key(),
     )]
     pub address_lookup_table: AccountInfo<'info>,
+
+    #[account(mut)]
+    pub escrow_wallet: Box<Account<'info, SwitchboardWallet>>,
 
     /// CHECK:
     pub sol_dest: AccountInfo<'info>,
 
-    #[account(mut, constraint = escrow.is_native())]
+    #[account(
+        mut,
+        constraint = escrow_dest.is_native()
+    )]
     pub escrow_dest: Box<Account<'info, TokenAccount>>,
 
-    #[account(seeds = [STATE_SEED], bump = state.load()?.bump)]
+    #[account(
+        seeds = [STATE_SEED],
+        bump = state.load()?.bump,
+    )]
     pub state: AccountLoader<'info, AttestationProgramState>,
 
     pub token_program: Program<'info, Token>,
@@ -42,7 +51,8 @@ pub struct FunctionClose<'info> {
 
     /// CHECK:
     #[account(
-        constraint = address_lookup_program.executable && address_lookup_program.key().as_ref() == solana_address_lookup_table_program::id().as_ref()
+        constraint = address_lookup_program.executable,
+        address = solana_address_lookup_table_program::id(),
     )]
     pub address_lookup_program: AccountInfo<'info>,
 }
@@ -94,8 +104,8 @@ impl<'info> FunctionClose<'info> {
         let mut account_infos = Vec::new();
         account_infos.extend(self.function.to_account_infos());
         account_infos.extend(self.authority.to_account_infos());
-        account_infos.extend(self.escrow.to_account_infos());
         account_infos.extend(self.address_lookup_table.to_account_infos());
+        account_infos.extend(self.escrow_wallet.to_account_infos());
         account_infos.extend(self.sol_dest.to_account_infos());
         account_infos.extend(self.escrow_dest.to_account_infos());
         account_infos.extend(self.state.to_account_infos());
@@ -110,8 +120,8 @@ impl<'info> FunctionClose<'info> {
         let mut account_metas = Vec::new();
         account_metas.extend(self.function.to_account_metas(None));
         account_metas.extend(self.authority.to_account_metas(None));
-        account_metas.extend(self.escrow.to_account_metas(None));
         account_metas.extend(self.address_lookup_table.to_account_metas(None));
+        account_metas.extend(self.escrow_wallet.to_account_metas(None));
         account_metas.extend(self.sol_dest.to_account_metas(None));
         account_metas.extend(self.escrow_dest.to_account_metas(None));
         account_metas.extend(self.state.to_account_metas(None));

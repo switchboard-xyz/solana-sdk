@@ -57,7 +57,7 @@ pub struct FunctionAccountData {
     /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
     /// The unix timestamp when the function was created.
-    pub created_at: i64,
+    pub created_at: u64,
     /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
     pub updated_at: i64,
 
@@ -72,14 +72,12 @@ pub struct FunctionAccountData {
     // Accounts
     /// The authority of the function which is authorized to make account changes.
     pub authority: Pubkey,
-    /// The wrapped SOL escrow of the function to pay for scheduled requests.
-    pub escrow: Pubkey,
-    /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
-    pub address_lookup_table: Pubkey,
     /// The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements.
     pub attestation_queue: Pubkey,
     /// An incrementer used to rotate through an AttestationQueue's verifiers.
     pub queue_idx: u32,
+    /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
+    pub address_lookup_table: Pubkey,
 
     // Schedule
     /// The cron schedule to run the function on.
@@ -112,8 +110,25 @@ pub struct FunctionAccountData {
 
     /// An array of permitted mr_enclave measurements for the function.
     pub mr_enclaves: [[u8; 32]; 32],
+
+    /// PDA bump.
+    pub bump: u8,
+    /// The payer who originally created the function. Cannot change, used to derive PDA.
+    pub creator_seed: [u8; 32],
+
+    /// The SwitchboardWallet that will handle pre-funding rewards paid out to function runners.
+    pub escrow_wallet: Pubkey,
+    /// The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners.
+    pub escrow_token_wallet: Pubkey,
+
+    /// The SwitchboardWallet that will handle acruing rewards from requests.
+    /// Defaults to the escrow_wallet.
+    pub reward_escrow_wallet: Pubkey,
+    /// The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters.
+    pub reward_escrow_token_wallet: Pubkey,
+
     /// Reserved.
-    pub _ebuf: [u8; 1024],
+    pub _ebuf: [u8; 895],
 }
 
 unsafe impl Pod for FunctionAccountData {}
