@@ -37,8 +37,14 @@ pub struct AttestationQueueAccountData {
     pub curr_idx: u32,
     /// Incrementer used to garbage collect and remove stale quote verifiers.
     pub gc_idx: u32,
+
+    /// The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes.
+    pub verifier_min_stake: u64,
+    /// The minimum number of lamports a function needs to lock-up in order to use a queues resources.
+    pub function_min_stake: u64,
+
     /// Reserved.
-    pub _ebuf: [u8; 1024],
+    pub _ebuf: [u8; 1008],
 }
 
 unsafe impl Pod for AttestationQueueAccountData {}
