@@ -83,7 +83,6 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     let nameSeed: Uint8Array;
     if (typeof name === "string") {
       nameSeed = new Uint8Array(Buffer.from(name, "utf-8")).slice(0, 32);
-      // nameSeed = parseRawBuffer(name, 32);
     } else if (name instanceof Uint8Array) {
       nameSeed = name;
     } else {
@@ -360,7 +359,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         authority: walletState.authority,
         attestationQueue: walletState.attestationQueue,
         tokenWallet: this.tokenWallet,
-        funderWallet: null,
+        funderWallet: this.program.attestationProgramId, // null
         funder: payer,
         state: this.program.attestationProgramState.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
@@ -380,12 +379,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         })
     );
 
-    return new TransactionObject(
-      this.program.wallet.payer.publicKey,
-      [ixn],
-      [],
-      options
-    );
+    return new TransactionObject(payer, [ixn], [], options);
   }
 
   public async wrap(
