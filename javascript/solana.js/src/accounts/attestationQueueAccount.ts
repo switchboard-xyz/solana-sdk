@@ -304,7 +304,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           permission: SB_ATTESTATION_PID, // optional
           authority: queueAuthority,
           attestationQueue: this.publicKey,
-          enclave: functionAccount.getEnclavePubkey(),
+          enclave: functionAccount.getEnclaveAccount().publicKey,
         }
       );
 
@@ -490,7 +490,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       )
     );
     // create & set quote #1 permissions
-    const [verifierQuotePermissions1] = AttestationPermissionAccount.fromSeed(
+    const verifierQuotePermissions1 = AttestationPermissionAccount.fromSeed(
       program,
       authority.publicKey,
       attestationQueueKeypair.publicKey,

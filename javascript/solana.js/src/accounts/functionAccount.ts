@@ -36,11 +36,14 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
+  AccountInfo,
   AddressLookupTableAccount,
   ComputeBudgetProgram,
   Keypair,
   PublicKey,
+  SendOptions,
   SystemProgram,
+  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN, toUtf8 } from "@switchboard-xyz/common";
@@ -101,13 +104,42 @@ export interface FunctionSetConfigParams {
  *  Parameters for an {@linkcode types.functionVerify} instruction.
  */
 
+export interface FunctionVerifySyncParams {
+  observedTime: anchor.BN;
+  nextAllowedTimestamp: anchor.BN;
+  isFailure: boolean;
+  mrEnclave: Uint8Array;
+
+  escrowWallet: PublicKey;
+
+  functionAuthority: PublicKey;
+  functionEnclaveSigner: PublicKey;
+
+  attestationQueue: PublicKey;
+  attestationQueueAuthority: PublicKey;
+
+  quoteVerifier: PublicKey;
+  quoteVerifierEnclaveSigner: PublicKey;
+
+  receiver: PublicKey;
+}
+
+/**
+ *  Parameters for an {@linkcode types.functionVerify} instruction.
+ */
+
 export interface FunctionVerifyParams {
   observedTime: anchor.BN;
   nextAllowedTimestamp: anchor.BN;
   isFailure: boolean;
   mrEnclave: Uint8Array;
   verifier: EnclaveAccount;
+  verifierEnclaveSigner: PublicKey;
   functionEnclaveSigner: PublicKey;
+  receiver: PublicKey;
+
+  fnState?: types.FunctionAccountData;
+  attestationQueueAuthority?: PublicKey;
 }
 
 /**
@@ -157,6 +189,44 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   public readonly size =
     this.program.attestationAccount.functionAccountData.size;
 
+  public get wallet(): Promise<SwitchboardWallet> {
+    if (!this._wallet) {
+      this._wallet = this.loadData().then((fnState) => {
+        return new SwitchboardWallet(this.program, fnState.escrowWallet);
+      });
+    }
+
+    return this._wallet;
+  }
+
+  public static fromSeed(
+    program: SwitchboardProgram,
+    creatorSeed: Uint8Array,
+    recentSlot: BN
+  ): FunctionAccount {
+    const functionPubkey = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("FunctionAccountData"),
+        creatorSeed,
+        recentSlot.toBuffer("le", 8),
+      ],
+      program.attestationProgramId
+    )[0];
+    return new FunctionAccount(program, functionPubkey);
+  }
+
+  public async getBalance(): Promise<number> {
+    const wallet = await this.wallet;
+    const balance = await wallet.getBalance();
+    return balance;
+  }
+
+  public async getBalanceBN(): Promise<BN> {
+    const wallet = await this.wallet;
+    const balance = await wallet.getBalanceBN();
+    return balance;
+  }
+
   /**
    *  Retrieve and decode the {@linkcode types.FunctionAccountData} stored in this account.
    */
@@ -174,26 +244,36 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return data;
   }
 
-  public get wallet(): Promise<SwitchboardWallet> {
-    if (!this._wallet) {
-      this._wallet = this.loadData().then((fnState) => {
-        return new SwitchboardWallet(this.program, fnState.escrowWallet);
-      });
+  /**
+   *  Decode the {@linkcode types.FunctionAccountData} stored in this account.
+   */
+  public static async decode(
+    program: SwitchboardProgram,
+    accountInfo: AccountInfo<Buffer>
+  ): Promise<[FunctionAccount, types.FunctionAccountData]> {
+    if (!accountInfo.owner.equals(program.attestationProgramId)) {
+      throw new errors.IncorrectOwner(
+        program.attestationProgramId,
+        accountInfo.owner
+      );
     }
 
-    return this._wallet;
-  }
+    const data = types.FunctionAccountData.decode(accountInfo.data);
+    if (!data) {
+      throw new errors.AccountNotFoundError("Function", PublicKey.default);
+    }
 
-  public async getBalance(): Promise<number> {
-    const wallet = await this.wallet;
-    const balance = await wallet.getBalance();
-    return balance;
-  }
+    const functionAccount = FunctionAccount.fromSeed(
+      program,
+      new Uint8Array(data.creatorSeed),
+      data.createdAt
+    );
 
-  public async getBalanceBN(): Promise<BN> {
-    const wallet = await this.wallet;
-    const balance = await wallet.getBalanceBN();
-    return balance;
+    functionAccount._wallet = Promise.resolve(
+      new SwitchboardWallet(program, data.escrowWallet)
+    );
+
+    return [functionAccount, data];
   }
 
   public static async load(
@@ -205,22 +285,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const functionAccount = new FunctionAccount(program, address);
     const state = await functionAccount.loadData();
     return [functionAccount, state];
-  }
-
-  public static fromSeed(
-    program: SwitchboardProgram,
-    creatorSeed: Uint8Array,
-    recentSlot: BN
-  ): FunctionAccount {
-    const functionPubkey = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("FunctionAccountData"),
-        creatorSeed,
-        recentSlot.toBuffer("le", 8),
-      ],
-      program.attestationProgramId
-    )[0];
-    return new FunctionAccount(program, functionPubkey);
   }
 
   public static async createInstruction(
@@ -293,7 +357,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       escrowWalletAuthority = authorityPubkey;
     }
 
-    const [enclaveAccount] = functionAccount.getEnclaveAccount();
+    const enclaveAccount = functionAccount.getEnclaveAccount();
 
     const instruction = types.functionInit(
       program,
@@ -372,16 +436,8 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [account, txSignature];
   }
 
-  public getEnclaveAccount(): [EnclaveAccount, number] {
+  public getEnclaveAccount(): EnclaveAccount {
     return EnclaveAccount.fromSeed(this.program, this.publicKey);
-  }
-
-  public getEnclavePubkey(): PublicKey {
-    return this.getEnclaveAccount()[0].publicKey;
-  }
-
-  public getEscrow(): PublicKey {
-    return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 
   public async createRequestInstruction(
@@ -569,39 +625,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     ).then((txn) => this.program.signAndSend(txn, options));
   }
 
-  public async verifyInstruction(
-    payer: PublicKey,
-    params: FunctionVerifyParams,
-    options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
+  public verifyInstructionSync(
+    params: FunctionVerifySyncParams
+  ): TransactionInstruction {
+    const fnEnclaveAccount = this.getEnclaveAccount();
+    const wallet = new SwitchboardWallet(this.program, params.escrowWallet);
+    const escrowTokenWallet = wallet.tokenWallet;
 
-    const functionData = await this.loadData();
-    const attestationQueueAccount = new AttestationQueueAccount(
-      this.program,
-      functionData.attestationQueue
-    );
-    const attestationQueue = await attestationQueueAccount.loadData();
-
-    const fnEnclaveAccount = this.getEnclaveAccount()[0];
-
-    const verifierPermissionAccount = AttestationPermissionAccount.fromSeed(
-      this.program,
-      attestationQueue.authority,
-      attestationQueueAccount.publicKey,
-      payer
-    )[0];
-
-    const quoteVerifier = await params.verifier.loadData();
-    if (!quoteVerifier.authority.equals(payer)) {
-      throw new Error(
-        `The verifier owner must be the payer of this transaction, expected ${quoteVerifier.authority}, received ${payer}`
-      );
-    }
-
-    const receiver = await this.program.mint.getOrCreateAssociatedUser(payer);
-
-    const instruction = types.functionVerify(
+    return types.functionVerify(
       this.program,
       {
         params: {
@@ -614,35 +645,111 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       {
         // fn accounts
         function: this.publicKey,
-        authority: functionData.authority,
+        authority: params.functionAuthority,
         functionEnclaveSigner: params.functionEnclaveSigner,
         fnQuote: fnEnclaveAccount.publicKey,
         // verifier accounts
-        verifierQuote: params.verifier.publicKey,
-        verifierEnclaveSigner: PublicKey.default, // TODO: update with correct account
-        verifierPermission: verifierPermissionAccount.publicKey,
+        verifierQuote: params.quoteVerifier,
+        verifierEnclaveSigner: params.quoteVerifierEnclaveSigner,
+        verifierPermission: AttestationPermissionAccount.fromSeed(
+          this.program,
+          params.attestationQueueAuthority,
+          params.attestationQueue,
+          params.quoteVerifier
+        ).publicKey,
         // token accounts
-        escrowWallet: functionData.escrowWallet,
-        escrowTokenWallet: functionData.escrowTokenWallet,
-        receiver: receiver,
+        escrowWallet: params.escrowWallet,
+        escrowTokenWallet: escrowTokenWallet,
+        receiver: params.receiver,
         // others
         state: this.program.attestationProgramState.publicKey,
-        attestationQueue: functionData.attestationQueue,
+        attestationQueue: params.attestationQueue,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
       }
     );
-    return new TransactionObject(payer, [instruction], [], options);
+  }
+
+  public async verifyInstruction(
+    params: FunctionVerifyParams
+  ): Promise<TransactionInstruction> {
+    this.program.verifyAttestation();
+
+    const functionData = params.fnState ?? (await this.loadData());
+
+    const wallet = await this.wallet;
+
+    let attestationQueueAuthority = params.attestationQueueAuthority;
+    if (!attestationQueueAuthority) {
+      const attestationQueueAccount = new AttestationQueueAccount(
+        this.program,
+        functionData.attestationQueue
+      );
+      attestationQueueAuthority = (await attestationQueueAccount.loadData())
+        .authority;
+    }
+
+    const quoteVerifier = await params.verifier.loadData();
+
+    return this.verifyInstructionSync({
+      observedTime: params.observedTime,
+      nextAllowedTimestamp: params.nextAllowedTimestamp,
+      isFailure: params.isFailure,
+      mrEnclave: params.mrEnclave,
+
+      escrowWallet: wallet.publicKey,
+      functionAuthority: functionData.authority,
+      functionEnclaveSigner: params.functionEnclaveSigner,
+
+      attestationQueue: functionData.attestationQueue,
+      attestationQueueAuthority: attestationQueueAuthority,
+
+      quoteVerifier: params.verifier.publicKey,
+      quoteVerifierEnclaveSigner: quoteVerifier.enclaveSigner,
+
+      receiver: params.receiver,
+    });
+  }
+
+  public async verifyTransaction(
+    params: FunctionVerifyParams
+  ): Promise<anchor.web3.VersionedTransaction> {
+    const fnState = await this.loadData();
+    const ixn = await this.verifyInstruction({ ...params, fnState });
+
+    const lookupTable = await this.program.connection
+      .getAddressLookupTable(fnState.addressLookupTable)
+      .then((res) => res.value!);
+
+    const messageV0 = new anchor.web3.TransactionMessage({
+      payerKey: this.program.walletPubkey,
+      recentBlockhash: (await this.program.connection.getLatestBlockhash())
+        .blockhash,
+      instructions: [ixn], // note this is an array of instructions
+    }).compileToV0Message([lookupTable]);
+    const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
+
+    return transactionV0;
   }
 
   public async verify(
     params: FunctionVerifyParams,
-    options?: SendTransactionObjectOptions
+    signers: {
+      quoteVerifier: Keypair;
+      fnEnclaveSigner: Keypair;
+    },
+    options?: SendOptions
   ): Promise<TransactionSignature> {
-    return await this.verifyInstruction(
-      this.program.walletPubkey,
-      params,
+    const transactionV0 = await this.verifyTransaction(params);
+
+    transactionV0.sign([signers.quoteVerifier]);
+    transactionV0.sign([signers.fnEnclaveSigner]);
+    transactionV0.sign([this.program.wallet.payer]);
+
+    const txnSignature = await this.program.connection.sendEncodedTransaction(
+      Buffer.from(transactionV0.serialize()).toString("base64"),
       options
-    ).then((txn) => this.program.signAndSend(txn, options));
+    );
+    return txnSignature;
   }
 
   public async triggerInstruction(

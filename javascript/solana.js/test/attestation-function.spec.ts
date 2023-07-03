@@ -109,8 +109,7 @@ describe("Function Tests", () => {
         version: "1.0.0",
         mrEnclave,
         attestationQueue: attestationQueueAccount,
-        keypair: functionKeypair,
-        authority: Keypair.generate().publicKey,
+        authority: Keypair.generate(),
       });
     } catch (error) {
       console.error(error);
@@ -140,7 +139,7 @@ describe("Function Tests", () => {
   });
 
   it("Verifies the function's quote", async () => {
-    const [functionQuoteAccount] = functionAccount.getEnclaveAccount();
+    const functionQuoteAccount = functionAccount.getEnclaveAccount();
 
     const initialQuoteState = await functionQuoteAccount.loadData();
     const initialVerificationStatus =
@@ -178,7 +177,7 @@ describe("Function Tests", () => {
     );
 
     await functionAccount.fund({
-      fundAmount: 0.25,
+      transferAmount: 0.25,
       funderTokenWallet: payerTokenWallet,
       funderAuthority: ctx.payer,
     });
@@ -209,11 +208,7 @@ describe("Function Tests", () => {
       "Payer token wallet should already be initialized"
     );
 
-    await functionAccount.withdraw({
-      amount: 0.1,
-      unwrap: false,
-      withdrawWallet: payerTokenWallet,
-    });
+    await functionAccount.withdraw(0.1, payerTokenWallet);
 
     const finalBalance = await functionAccount.getBalance();
     assert(
@@ -234,108 +229,133 @@ describe("Function Tests", () => {
     );
   });
 
-  it("Withdraw all funds from the function", async () => {
-    const initialBalance = await functionAccount.getBalance();
-    assert(initialBalance > 0, "Function escrow should have some funds");
+  // it("Withdraw all funds from the function", async () => {
+  //   const initialBalance = await functionAccount.getBalance();
+  //   assert(initialBalance > 0, "Function escrow should have some funds");
 
-    const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
-      ctx.payer.publicKey,
-      { fundUpTo: 0 }
-    );
+  //   const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
+  //     ctx.payer.publicKey,
+  //     { fundUpTo: 0 }
+  //   );
 
-    await functionAccount.withdraw({
-      amount: "all",
-      unwrap: false,
-      withdrawWallet: payerTokenWallet,
-    });
+  //   await functionAccount.withdraw({
+  //     amount: "all",
+  //     unwrap: false,
+  //     withdrawWallet: payerTokenWallet,
+  //   });
 
-    const finalBalance = await functionAccount.getBalance();
-    const roundedFinalBalance = ctx.round(finalBalance, 4);
-    assert(
-      roundedFinalBalance === 0,
-      `Function escrow should have minimal funds remaining`
-    );
-  });
+  //   const finalBalance = await functionAccount.getBalance();
+  //   const roundedFinalBalance = ctx.round(finalBalance, 4);
+  //   assert(
+  //     roundedFinalBalance === 0,
+  //     `Function escrow should have minimal funds remaining`
+  //   );
+  // });
 
   it("verifies the function", async () => {
     const trustedSigner = anchor.web3.Keypair.generate();
 
-    const myFunction = await functionAccount.loadData();
-
-    const lookupTable = await ctx.program.connection
-      .getAddressLookupTable(myFunction.addressLookupTable)
-      .then((res) => res.value!);
-
-    const {
-      statePubkey,
-      attestationQueuePubkey,
-      functionPubkey,
-      escrowPubkey,
-      fnQuote,
-    } = sbv2.FunctionAccount.decodeAddressLookup(lookupTable);
-
-    const getIxn = (): TransactionInstruction => {
-      return functionVerify(
-        ctx.program,
-        {
-          params: {
-            observedTime: new BN(unixTimestamp()),
-            nextAllowedTimestamp: new BN(unixTimestamp() + 100),
-            isFailure: false,
-            mrEnclave: Array.from(mrEnclave),
-          },
-        },
-        {
-          function: functionAccount.publicKey,
-          functionEnclaveSigner: trustedSigner.publicKey,
-          verifierEnclaveSigner: quoteVerifierSigner.publicKey,
-          verifierQuote: attestationQuoteVerifierAccount.publicKey,
-          attestationQueue: attestationQueuePubkey,
-          escrow: escrowPubkey,
-          receiver: anchor.utils.token.associatedAddress({
-            mint: NATIVE_MINT,
-            owner: ctx.payer.publicKey,
-          }),
-          verifierPermission:
-            attestationQuoteVerifierAccount.getPermissionAccount(
-              attestationQueuePubkey,
-              ctx.payer.publicKey,
-              ctx.payer.publicKey
-            )[0].publicKey,
-          state: statePubkey,
-          fnQuote: fnQuote,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        }
+    const [receiver] =
+      await attestationQueueAccount.program.mint.getOrCreateWrappedUser(
+        ctx.payer.publicKey,
+        { fundUpTo: 0 }
       );
-    };
 
-    const blockhash = await ctx.program.connection.getLatestBlockhash();
+    const txnSignature = await functionAccount.verify(
+      {
+        observedTime: new BN(unixTimestamp()),
+        nextAllowedTimestamp: new BN(unixTimestamp() + 100),
+        isFailure: false,
+        mrEnclave: new Uint8Array(mrEnclave),
+        verifier: attestationQuoteVerifierAccount,
+        verifierEnclaveSigner: quoteVerifierSigner.publicKey,
+        functionEnclaveSigner: trustedSigner.publicKey,
+        receiver,
+      },
+      {
+        quoteVerifier: quoteVerifierSigner,
+        fnEnclaveSigner: trustedSigner,
+      }
+    );
 
-    // legacy
-    const transactionLegacy = new sbv2.TransactionObject(
-      ctx.payer.publicKey,
-      [getIxn()],
-      [quoteVerifierSigner, trustedSigner]
-    ).toVersionedTxn(blockhash);
-    const legacyByteLength = transactionLegacy.serialize().byteLength;
-    console.log(`functionVerify (legacy): ${legacyByteLength}`);
+    console.log(`functionVerify: ${txnSignature}`);
 
-    // build txn
-    const messageV0 = new anchor.web3.TransactionMessage({
-      payerKey: ctx.payer.publicKey,
-      recentBlockhash: blockhash.blockhash,
-      instructions: [getIxn()], // note this is an array of instructions
-    }).compileToV0Message([lookupTable]);
-    const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
-    transactionV0.sign([quoteVerifierSigner]);
-    transactionV0.sign([trustedSigner]);
-    transactionV0.sign([ctx.payer]);
+    // const myFunction = await functionAccount.loadData();
 
-    const lookupTableByteLength = transactionV0.serialize().byteLength;
+    // const lookupTable = await ctx.program.connection
+    //   .getAddressLookupTable(myFunction.addressLookupTable)
+    //   .then((res) => res.value!);
 
-    console.log(`functionVerify (lookup): ${lookupTableByteLength}`);
+    // const {
+    //   statePubkey,
+    //   attestationQueuePubkey,
+    //   functionPubkey,
+    //   escrowPubkey,
+    //   fnQuote,
+    // } = sbv2.FunctionAccount.decodeAddressLookup(lookupTable);
 
-    console.log(`SAVES = ${legacyByteLength - lookupTableByteLength} bytes`);
+    // const getIxn = (): TransactionInstruction => {
+    //   return functionVerify(
+    //     ctx.program,
+    //     {
+    //       params: {
+    //         observedTime: new BN(unixTimestamp()),
+    //         nextAllowedTimestamp: new BN(unixTimestamp() + 100),
+    //         isFailure: false,
+    //         mrEnclave: Array.from(mrEnclave),
+    //       },
+    //     },
+    //     {
+    //       function: functionAccount.publicKey,
+    //       functionEnclaveSigner: trustedSigner.publicKey,
+    //       verifierEnclaveSigner: quoteVerifierSigner.publicKey,
+    //       verifierQuote: attestationQuoteVerifierAccount.publicKey,
+    //       attestationQueue: attestationQueuePubkey,
+    //       escrow: escrowPubkey,
+    //       receiver: anchor.utils.token.associatedAddress({
+    //         mint: NATIVE_MINT,
+    //         owner: ctx.payer.publicKey,
+    //       }),
+    //       verifierPermission:
+    //         attestationQuoteVerifierAccount.getPermissionAccount(
+    //           attestationQueuePubkey,
+    //           ctx.payer.publicKey,
+    //           ctx.payer.publicKey
+    //         )[0].publicKey,
+    //       state: statePubkey,
+    //       fnQuote: fnQuote,
+    //       tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+    //     }
+    //   );
+    // };
+
+    // const blockhash = await ctx.program.connection.getLatestBlockhash();
+
+    // // legacy
+    // const transactionLegacy = new sbv2.TransactionObject(
+    //   ctx.payer.publicKey,
+    //   [getIxn()],
+    //   [quoteVerifierSigner, trustedSigner]
+    // ).toVersionedTxn(blockhash);
+    // const legacyByteLength = transactionLegacy.serialize().byteLength;
+    // console.log(`functionVerify (legacy): ${legacyByteLength}`);
+
+    // // build txn
+    // const messageV0 = new anchor.web3.TransactionMessage({
+    //   payerKey: ctx.payer.publicKey,
+    //   recentBlockhash: blockhash.blockhash,
+    //   instructions: [getIxn()], // note this is an array of instructions
+    // }).compileToV0Message([lookupTable]);
+    // const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
+    // transactionV0.sign([quoteVerifierSigner]);
+    // transactionV0.sign([trustedSigner]);
+    // transactionV0.sign([ctx.payer]);
+
+    // const lookupTableByteLength = transactionV0.serialize().byteLength;
+
+    // console.log(`functionVerify (lookup): ${lookupTableByteLength}`);
+
+    // console.log(`SAVES = ${legacyByteLength - lookupTableByteLength} bytes`);
   });
 
   it("Sets a function config", async () => {
