@@ -15,7 +15,10 @@ export interface FunctionOverrideCloseAccounts {
   systemProgram: PublicKey;
 }
 
-export function functionOverrideClose(accounts: FunctionOverrideCloseAccounts) {
+export function functionOverrideClose(
+  program: SwitchboardProgram,
+  accounts: FunctionOverrideCloseAccounts
+) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.solDest, isSigner: false, isWritable: false },
