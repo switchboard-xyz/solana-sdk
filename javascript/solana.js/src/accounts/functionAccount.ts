@@ -36,6 +36,7 @@ import {
 } from "@solana/spl-token";
 import {
   AddressLookupTableAccount,
+  ComputeBudgetProgram,
   Keypair,
   PublicKey,
   SystemProgram,
@@ -345,9 +346,15 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       functionAccount,
       new TransactionObject(
         payer,
-        [instruction],
+        [
+          ComputeBudgetProgram.setComputeUnitLimit({ units: 250_000 }),
+          instruction,
+        ],
         params.authority ? [params.authority] : [],
-        options
+        {
+          ...options,
+          computeUnitLimit: undefined,
+        }
       ),
     ];
   }
