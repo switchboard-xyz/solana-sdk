@@ -303,7 +303,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     const cronSchedule = parseCronSchedule(params.schedule);
 
     const attestationQueueAccount = params.attestationQueue;
-    const attestationQueue = await attestationQueueAccount.loadData();
 
     const recentSlot: BN = params.recentSlot
       ? new BN(params.recentSlot)
@@ -329,7 +328,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       "AddressLookupTab1e1111111111111111111111111"
     );
     const [addressLookupTable] = PublicKey.findProgramAddressSync(
-      [authorityPubkey.toBuffer(), recentSlot.toBuffer("le", 8)],
+      [functionAccount.publicKey.toBuffer(), recentSlot.toBuffer("le", 8)],
       addressLookupProgram
     );
 

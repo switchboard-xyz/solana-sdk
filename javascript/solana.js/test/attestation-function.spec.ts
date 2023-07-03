@@ -280,6 +280,8 @@ describe("Function Tests", () => {
 
     console.log(`functionVerify: ${txnSignature}`);
 
+    // TODO: assert function status and enclave signer
+
     // const myFunction = await functionAccount.loadData();
 
     // const lookupTable = await ctx.program.connection
