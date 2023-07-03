@@ -19,8 +19,8 @@ export interface WalletFundAccounts {
   authority: PublicKey;
   attestationQueue: PublicKey;
   tokenWallet: PublicKey;
-  payerWallet: PublicKey;
-  payer: PublicKey;
+  funderWallet: PublicKey;
+  funder: PublicKey;
   state: PublicKey;
   tokenProgram: PublicKey;
   systemProgram: PublicKey;
@@ -39,8 +39,8 @@ export function walletFund(
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
-    { pubkey: accounts.payerWallet, isSigner: false, isWritable: true },
-    { pubkey: accounts.payer, isSigner: true, isWritable: false },
+    { pubkey: accounts.funderWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.funder, isSigner: true, isWritable: false },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },

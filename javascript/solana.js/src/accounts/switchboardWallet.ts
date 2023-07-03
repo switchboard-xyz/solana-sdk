@@ -32,7 +32,7 @@ export interface SwitchboardWalletWrapParams {
   wrapAmount?: number;
 }
 
-export type SwitchboardWalletDepositParams = SwitchboardWalletTransferParams &
+export type SwitchboardWalletFundParams = SwitchboardWalletTransferParams &
   SwitchboardWalletWrapParams;
 
 export interface SwitchboardWalletState {
@@ -261,26 +261,22 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
   }
 
   public async fundInstruction(
-    params: SwitchboardWalletDepositParams,
+    payer: PublicKey,
+    params: SwitchboardWalletFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const walletState = await this.loadData();
 
-    let payer: Keypair;
-
+    let funderPubkey = payer;
     if (params.funderAuthority) {
-      payer = params.funderAuthority;
-    } else {
-      payer = this.program.wallet.payer;
+      funderPubkey = params.funderAuthority.publicKey;
     }
 
-    let payerTokenWallet: PublicKey;
+    let funderTokenWallet: PublicKey;
     if (params.funderTokenWallet) {
-      payerTokenWallet = params.funderTokenWallet;
+      funderTokenWallet = params.funderTokenWallet;
     } else {
-      payerTokenWallet = this.program.mint.getAssociatedAddress(
-        payer.publicKey
-      );
+      funderTokenWallet = this.program.mint.getAssociatedAddress(funderPubkey);
     }
 
     let transferAmount: BN | null = null;
@@ -302,8 +298,8 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         authority: walletState.authority,
         attestationQueue: walletState.attestationQueue,
         tokenWallet: this.tokenWallet,
-        payerWallet: payerTokenWallet,
-        payer: payer.publicKey,
+        funderWallet: funderTokenWallet,
+        funder: funderPubkey,
         state: this.program.attestationProgramState.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -325,21 +321,26 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     return new TransactionObject(
       this.program.wallet.payer.publicKey,
       [ixn],
-      [payer],
+      params.funderAuthority ? [params.funderAuthority] : [],
       options
     );
   }
 
   public async fund(
-    params: SwitchboardWalletDepositParams,
+    params: SwitchboardWalletFundParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
-    const transaction = await this.fundInstruction(params, options);
+    const transaction = await this.fundInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    );
     const txnSignature = await this.program.signAndSend(transaction, options);
     return txnSignature;
   }
 
   public async wrapInstruction(
+    payer: PublicKey,
     amount: number,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
@@ -359,8 +360,8 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         authority: walletState.authority,
         attestationQueue: walletState.attestationQueue,
         tokenWallet: this.tokenWallet,
-        payerWallet: null,
-        payer: this.program.walletPubkey,
+        funderWallet: null,
+        funder: payer,
         state: this.program.attestationProgramState.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -391,12 +392,17 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     amount: number,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
-    const transaction = await this.wrapInstruction(amount, options);
+    const transaction = await this.wrapInstruction(
+      this.program.walletPubkey,
+      amount,
+      options
+    );
     const txnSignature = await this.program.signAndSend(transaction, options);
     return txnSignature;
   }
 
   public async withdrawInstruction(
+    payer: PublicKey,
     amount: number,
     destinationWallet?: PublicKey,
     options?: TransactionObjectOptions
@@ -405,9 +411,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
 
     const destinationTokenWallet =
       destinationWallet ??
-      (await this.program.mint.getOrCreateAssociatedUser(
-        this.program.walletPubkey
-      ));
+      (await this.program.mint.getOrCreateAssociatedUser(payer));
 
     const ixn = types.walletWithdraw(
       this.program,
@@ -436,12 +440,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         })
     );
 
-    return new TransactionObject(
-      this.program.wallet.payer.publicKey,
-      [ixn],
-      [],
-      options
-    );
+    return new TransactionObject(payer, [ixn], [], options);
   }
 
   public async withdraw(
@@ -450,6 +449,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const transaction = await this.withdrawInstruction(
+      this.program.walletPubkey,
       amount,
       destinationWallet,
       options

@@ -26,6 +26,7 @@ import {
   FunctionRequestAccount,
   FunctionRequestAccountInitParams,
   SwitchboardWallet,
+  SwitchboardWalletFundParams,
 } from "./index.js";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -40,7 +41,6 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { BN, toUtf8 } from "@switchboard-xyz/common";
@@ -66,11 +66,12 @@ export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
 
   requestsDisabled?: boolean;
   requestsRequireAuthorization?: boolean;
-  requestsDefaultSlotsUntilExpiration?: number | BN;
-  requestsFee?: number | BN;
+  requestsDefaultSlotsUntilExpiration?: number;
+  requestsFee?: number;
 
   /**
    *  An authority to be used to control this account.
+   *  Authority needs to sign to initialize the address lookup table.
    *
    *  @default payer
    */
@@ -87,51 +88,14 @@ export interface FunctionSetConfigParams {
   containerRegistry?: string;
   version?: string;
   schedule?: string;
+  mrEnclaves?: Array<RawBuffer>;
+  requestsDisabled?: boolean;
+  requestsRequireAuthorization?: boolean;
+  requestsDefaultSlotsUntilExpiration?: number;
+  requestsFee?: number;
 
   authority?: Keypair;
 }
-
-/**
- *  Parameters for an {@linkcode types.functionFund} instruction.
- */
-export interface FunctionFundParams {
-  /**
-   *  The amount to fund this function with.
-   */
-  fundAmount: number;
-  /**
-   *  _OPTIONAL_ The token account to fund the lease from. Defaults to payer's associated token account.
-   */
-  funderTokenWallet?: PublicKey;
-  /**
-   *  _OPTIONAL_ The funderTokenWallet authority if it differs from the provided payer.
-   */
-  funderAuthority?: Keypair;
-}
-
-interface FunctionWithdrawBaseParams {
-  amount: number | "all";
-  unwrap: boolean;
-}
-
-export interface FunctionWithdrawUnwrapParams
-  extends FunctionWithdrawBaseParams {
-  unwrap: true;
-}
-
-export interface FunctionWithdrawWalletParams
-  extends FunctionWithdrawBaseParams {
-  unwrap: false;
-  withdrawWallet: PublicKey;
-  withdrawAuthority?: Keypair;
-}
-
-/**
- *  Parameters for an {@linkcode types.functionWithdraw} instruction.
- */
-export type FunctionWithdrawParams =
-  | FunctionWithdrawUnwrapParams
-  | FunctionWithdrawWalletParams;
 
 /**
  *  Parameters for an {@linkcode types.functionVerify} instruction.
@@ -168,16 +132,21 @@ export type CreateFunctionRequestParams = Omit<
  */
 export class FunctionAccount extends Account<types.FunctionAccountData> {
   static accountName = "FunctionAccountData";
+
+  private _wallet: Promise<SwitchboardWallet> | undefined = undefined;
+
   /**
    *  Returns the functions's name buffer in a stringified format.
    */
   public static getName = (functionData: types.FunctionAccountData) =>
     toUtf8(functionData.name);
+
   /**
    *  Returns the functions's metadata buffer in a stringified format.
    */
   public static getMetadata = (functionData: types.FunctionAccountData) =>
     toUtf8(functionData.metadata);
+
   /**
    *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
    */
@@ -196,8 +165,35 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program,
       this.publicKey
     );
-    if (data) return data;
-    throw new errors.AccountNotFoundError("Function", this.publicKey);
+    if (!data) {
+      throw new errors.AccountNotFoundError("Function", this.publicKey);
+    }
+    this._wallet = Promise.resolve(
+      new SwitchboardWallet(this.program, data.escrowWallet)
+    );
+    return data;
+  }
+
+  public get wallet(): Promise<SwitchboardWallet> {
+    if (!this._wallet) {
+      this._wallet = this.loadData().then((fnState) => {
+        return new SwitchboardWallet(this.program, fnState.escrowWallet);
+      });
+    }
+
+    return this._wallet;
+  }
+
+  public async getBalance(): Promise<number> {
+    const wallet = await this.wallet;
+    const balance = await wallet.getBalance();
+    return balance;
+  }
+
+  public async getBalanceBN(): Promise<BN> {
+    const wallet = await this.wallet;
+    const balance = await wallet.getBalanceBN();
+    return balance;
   }
 
   public static async load(
@@ -456,10 +452,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           version: toOptionalBytes(params.version),
           schedule: toOptionalBytes(params.schedule),
           mrEnclaves: [],
-          requestsDisabled: false,
-          requestsRequireAuthorization: false,
-          requestsDefaultSlotsUntilExpiration: new BN(1000),
-          requestsFee: new BN(0),
+          requestsDisabled: params.requestsDisabled ?? null,
+          requestsRequireAuthorization:
+            params.requestsRequireAuthorization ?? null,
+          requestsDefaultSlotsUntilExpiration:
+            params.requestsDefaultSlotsUntilExpiration
+              ? new BN(params.requestsDefaultSlotsUntilExpiration)
+              : null,
+          requestsFee: params.requestsFee ? new BN(params.requestsFee) : null,
         },
       },
       {
@@ -488,196 +488,86 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     ).then((txn) => this.program.signAndSend(txn, options));
   }
 
-  // public async fundInstruction(
-  //   payer: PublicKey,
-  //   params: FunctionFundParams,
-  //   options?: TransactionObjectOptions
-  // ): Promise<TransactionObject> {
-  //   this.program.verifyAttestation();
+  public async fundInstruction(
+    payer: PublicKey,
+    params: SwitchboardWalletFundParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
 
-  //   const fundTokenAmountBN = this.program.mint.toTokenAmountBN(
-  //     params.fundAmount
-  //   );
+    const wallet = await this.wallet;
 
-  //   // TODO: Create funder token wallet if it doesnt exist
-  //   const funderAuthority = params.funderAuthority
-  //     ? params.funderAuthority.publicKey
-  //     : payer;
-  //   const funderTokenWallet =
-  //     params.funderTokenWallet ??
-  //     this.program.mint.getAssociatedAddress(funderAuthority);
+    const txn = await wallet.fundInstruction(payer, params, options);
+    return txn;
+  }
 
-  //   const functionData = await this.loadData();
-  //   const instruction = types.functionFund(
-  //     this.program,
-  //     { params: { amount: fundTokenAmountBN } },
-  //     {
-  //       function: this.publicKey,
-  //       attestationQueue: functionData.attestationQueue,
-  //       escrow: this.getEscrow(),
-  //       funder: funderTokenWallet,
-  //       funderAuthority: funderAuthority,
-  //       state: this.program.attestationProgramState.publicKey,
-  //       tokenProgram: TOKEN_PROGRAM_ID,
-  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //     }
-  //   );
-  //   return new TransactionObject(payer, [instruction], [], options);
-  // }
+  public async fund(
+    params: SwitchboardWalletFundParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.fundInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
 
-  // public async fund(
-  //   params: FunctionFundParams,
-  //   options?: SendTransactionObjectOptions
-  // ): Promise<TransactionSignature> {
-  //   return await this.fundInstruction(
-  //     this.program.walletPubkey,
-  //     params,
-  //     options
-  //   ).then((txn) => this.program.signAndSend(txn, options));
-  // }
+  public async wrapInstruction(
+    payer: PublicKey,
+    amount: number,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
 
-  // public async withdrawInstruction(
-  //   payer: PublicKey,
-  //   params: FunctionWithdrawParams,
-  //   options?: TransactionObjectOptions
-  // ): Promise<TransactionObject> {
-  //   this.program.verifyAttestation();
+    const wallet = await this.wallet;
 
-  //   const functionData = await this.loadData();
-  //   const [queueAccount, queueData] = await AttestationQueueAccount.load(
-  //     this.program,
-  //     functionData.attestationQueue
-  //   );
+    const txn = await wallet.wrapInstruction(payer, amount, options);
+    return txn;
+  }
 
-  //   const withdrawAmount: number = await (async () => {
-  //     const minRequiredBalance = queueData.reward * 2;
-  //     const escrowBalance = await spl
-  //       .getAccount(this.program.connection, this.getEscrow())
-  //       .then((escrow) => this.program.mint.fromTokenAmount(escrow.amount));
-  //     const maxWithdrawAmount = escrowBalance - minRequiredBalance;
+  public async wrap(
+    amount: number,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.wrapInstruction(
+      this.program.walletPubkey,
+      amount,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
 
-  //     if (params.amount === "all") return maxWithdrawAmount;
-  //     return Math.min(params.amount, maxWithdrawAmount);
-  //   })();
+  public async withdrawInstruction(
+    payer: PublicKey,
+    amount: number,
+    destinationWallet?: PublicKey,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
 
-  //   if (params.unwrap) {
-  //     const ephemeralWallet = Keypair.generate();
+    const wallet = await this.wallet;
 
-  //     const instructions: TransactionInstruction[] = [
-  //       // initialize space for ephemeral token account
-  //       SystemProgram.createAccount({
-  //         fromPubkey: payer,
-  //         newAccountPubkey: ephemeralWallet.publicKey,
-  //         lamports:
-  //           await this.program.connection.getMinimumBalanceForRentExemption(
-  //             spl.ACCOUNT_SIZE
-  //           ),
-  //         space: spl.ACCOUNT_SIZE,
-  //         programId: spl.TOKEN_PROGRAM_ID,
-  //       }),
-  //       // initialize ephemeral token account
-  //       spl.createInitializeAccountInstruction(
-  //         ephemeralWallet.publicKey,
-  //         this.program.mint.address,
-  //         payer,
-  //         spl.TOKEN_PROGRAM_ID
-  //       ),
-  //       // perform withdraw
-  //       types.functionWithdraw(
-  //         this.program,
-  //         {
-  //           params: {
-  //             amount: this.program.mint.toTokenAmountBN(withdrawAmount),
-  //           },
-  //         },
-  //         {
-  //           function: this.publicKey,
-  //           attestationQueue: queueAccount.publicKey,
-  //           escrow: this.getEscrow(),
-  //           authority: payer,
-  //           receiver: ephemeralWallet.publicKey,
-  //           state: this.program.attestationProgramState.publicKey,
-  //           tokenProgram: TOKEN_PROGRAM_ID,
-  //         }
-  //       ),
-  //       // close ephemeral token account
-  //       spl.createCloseAccountInstruction(
-  //         ephemeralWallet.publicKey,
-  //         payer,
-  //         payer
-  //       ),
-  //     ];
+    const txn = await wallet.withdrawInstruction(
+      payer,
+      amount,
+      destinationWallet,
+      options
+    );
 
-  //     return new TransactionObject(
-  //       payer,
-  //       instructions,
-  //       [ephemeralWallet],
-  //       options
-  //     );
-  //   } else {
-  //     return new TransactionObject(
-  //       payer,
-  //       [
-  //         types.functionWithdraw(
-  //           this.program,
-  //           {
-  //             params: {
-  //               amount: this.program.mint.toTokenAmountBN(withdrawAmount),
-  //             },
-  //           },
-  //           {
-  //             function: this.publicKey,
-  //             attestationQueue: queueAccount.publicKey,
-  //             escrow: this.getEscrow(),
-  //             authority:
-  //               "withdrawAuthority" in params && params.withdrawAuthority
-  //                 ? params.withdrawAuthority.publicKey
-  //                 : payer,
-  //             receiver:
-  //               "withdrawWallet" in params && params.withdrawWallet
-  //                 ? params.withdrawWallet
-  //                 : this.program.mint.getAssociatedAddress(payer),
-  //             state: this.program.attestationProgramState.publicKey,
-  //             tokenProgram: TOKEN_PROGRAM_ID,
-  //           }
-  //         ),
-  //       ],
-  //       "withdrawAuthority" in params && params.withdrawAuthority
-  //         ? [params.withdrawAuthority]
-  //         : [],
-  //       options
-  //     );
-  //   }
-  // }
+    return txn;
+  }
 
-  // public async withdraw(
-  //   params: FunctionWithdrawParams,
-  //   options?: SendTransactionObjectOptions
-  // ): Promise<TransactionSignature> {
-  //   return await this.withdrawInstruction(
-  //     this.program.walletPubkey,
-  //     params,
-  //     options
-  //   ).then((txn) => this.program.signAndSend(txn, options));
-  // }
-
-  // public async getBalance(): Promise<number> {
-  //   const balance = await this.program.mint.getAssociatedBalance(
-  //     this.publicKey
-  //   );
-  //   if (balance === null) {
-  //     throw new errors.AccountNotFoundError(
-  //       `Function escrow`,
-  //       this.getEscrow()
-  //     );
-  //   }
-  //   return balance;
-  // }
-
-  // public async getBalanceBN(): Promise<BN> {
-  //   const balance = await this.getBalance();
-  //   return this.program.mint.toTokenAmountBN(balance);
-  // }
+  public async withdraw(
+    amount: number,
+    destinationWallet?: PublicKey,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.withdrawInstruction(
+      this.program.walletPubkey,
+      amount,
+      destinationWallet,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
 
   public async verifyInstruction(
     payer: PublicKey,
