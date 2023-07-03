@@ -358,13 +358,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
     const enclaveAccount = functionAccount.getEnclaveAccount();
 
-    console.log(`creatorSeed: ${creatorSeed}`);
-    console.log(`recentSlot: ${recentSlot.toNumber()}`);
-    console.log(`function: ${functionAccount.publicKey}`);
-    console.log(`fnQuote: ${enclaveAccount.publicKey}`);
-    console.log(`wallet: ${escrowWallet.publicKey}`);
-    console.log(`tokenWallet: ${escrowWallet.tokenWallet}`);
-
     const instruction = types.functionInit(
       program,
       {
@@ -526,7 +519,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       },
       {
         function: this.publicKey,
-        quote: this.getEnclaveAccount()[0].publicKey,
+        quote: this.getEnclaveAccount().publicKey,
         authority: functionData.authority,
       }
     );
@@ -751,8 +744,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     transactionV0.sign([signers.fnEnclaveSigner]);
     transactionV0.sign([this.program.wallet.payer]);
 
+    const rawTxn = transactionV0.serialize();
+
+    console.log(`functionVerify bytes: ${rawTxn.byteLength}`);
+
     const txnSignature = await this.program.connection.sendEncodedTransaction(
-      Buffer.from(transactionV0.serialize()).toString("base64"),
+      Buffer.from(rawTxn).toString("base64"),
       options
     );
     return txnSignature;
