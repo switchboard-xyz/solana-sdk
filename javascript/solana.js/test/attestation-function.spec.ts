@@ -110,6 +110,7 @@ describe("Function Tests", () => {
         mrEnclave,
         attestationQueue: attestationQueueAccount,
         keypair: functionKeypair,
+        authority: Keypair.generate().publicKey,
       });
     } catch (error) {
       console.error(error);

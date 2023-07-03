@@ -39,6 +39,10 @@ export interface AttestationQueueAccountDataFields {
   currIdx: number;
   /** Incrementer used to garbage collect and remove stale quote verifiers. */
   gcIdx: number;
+  /** The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes. */
+  verifierMinStake: BN;
+  /** The minimum number of lamports a function needs to lock-up in order to use a queues resources. */
+  functionMinStake: BN;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -77,6 +81,10 @@ export interface AttestationQueueAccountDataJSON {
   currIdx: number;
   /** Incrementer used to garbage collect and remove stale quote verifiers. */
   gcIdx: number;
+  /** The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes. */
+  verifierMinStake: string;
+  /** The minimum number of lamports a function needs to lock-up in order to use a queues resources. */
+  functionMinStake: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -115,6 +123,10 @@ export class AttestationQueueAccountData {
   readonly currIdx: number;
   /** Incrementer used to garbage collect and remove stale quote verifiers. */
   readonly gcIdx: number;
+  /** The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes. */
+  readonly verifierMinStake: BN;
+  /** The minimum number of lamports a function needs to lock-up in order to use a queues resources. */
+  readonly functionMinStake: BN;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -137,7 +149,9 @@ export class AttestationQueueAccountData {
     borsh.i64("nodeTimeout"),
     borsh.u32("currIdx"),
     borsh.u32("gcIdx"),
-    borsh.array(borsh.u8(), 1024, "ebuf"),
+    borsh.u64("verifierMinStake"),
+    borsh.u64("functionMinStake"),
+    borsh.array(borsh.u8(), 1008, "ebuf"),
   ]);
 
   constructor(fields: AttestationQueueAccountDataFields) {
@@ -156,6 +170,8 @@ export class AttestationQueueAccountData {
     this.nodeTimeout = fields.nodeTimeout;
     this.currIdx = fields.currIdx;
     this.gcIdx = fields.gcIdx;
+    this.verifierMinStake = fields.verifierMinStake;
+    this.functionMinStake = fields.functionMinStake;
     this.ebuf = fields.ebuf;
   }
 
@@ -216,6 +232,8 @@ export class AttestationQueueAccountData {
       nodeTimeout: dec.nodeTimeout,
       currIdx: dec.currIdx,
       gcIdx: dec.gcIdx,
+      verifierMinStake: dec.verifierMinStake,
+      functionMinStake: dec.functionMinStake,
       ebuf: dec.ebuf,
     });
   }
@@ -237,6 +255,8 @@ export class AttestationQueueAccountData {
       nodeTimeout: this.nodeTimeout.toString(),
       currIdx: this.currIdx,
       gcIdx: this.gcIdx,
+      verifierMinStake: this.verifierMinStake.toString(),
+      functionMinStake: this.functionMinStake.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -260,6 +280,8 @@ export class AttestationQueueAccountData {
       nodeTimeout: new BN(obj.nodeTimeout),
       currIdx: obj.currIdx,
       gcIdx: obj.gcIdx,
+      verifierMinStake: new BN(obj.verifierMinStake),
+      functionMinStake: new BN(obj.functionMinStake),
       ebuf: obj.ebuf,
     });
   }

@@ -9,43 +9,45 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionWithdrawArgs {
-  params: types.FunctionWithdrawParamsFields;
+export interface FunctionExtendLookupArgs {
+  params: types.FunctionExtendLookupParamsFields;
 }
 
-export interface FunctionWithdrawAccounts {
+export interface FunctionExtendLookupAccounts {
   function: PublicKey;
-  attestationQueue: PublicKey;
+  payer: PublicKey;
   authority: PublicKey;
-  escrow: PublicKey;
-  receiver: PublicKey;
-  state: PublicKey;
-  tokenProgram: PublicKey;
+  attestationQueue: PublicKey;
+  addressLookupTable: PublicKey;
+  addressLookupProgram: PublicKey;
 }
 
 export const layout = borsh.struct([
-  types.FunctionWithdrawParams.layout("params"),
+  types.FunctionExtendLookupParams.layout("params"),
 ]);
 
-export function functionWithdraw(
+export function functionExtendLookup(
   program: SwitchboardProgram,
-  args: FunctionWithdrawArgs,
-  accounts: FunctionWithdrawAccounts
+  args: FunctionExtendLookupArgs,
+  accounts: FunctionExtendLookupAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
-    { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: false },
-    { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
+    {
+      pubkey: accounts.addressLookupProgram,
+      isSigner: false,
+      isWritable: false,
+    },
   ];
-  const identifier = Buffer.from([6, 182, 241, 39, 40, 111, 65, 195]);
+  const identifier = Buffer.from([76, 22, 195, 201, 117, 67, 51, 152]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionWithdrawParams.toEncodable(args.params),
+      params: types.FunctionExtendLookupParams.toEncodable(args.params),
     },
     buffer
   );

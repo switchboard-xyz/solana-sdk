@@ -68,6 +68,7 @@ describe("basic_oracle", () => {
         schedule: "15 * * * * *",
         mrEnclave: MRENCLAVE,
         attestationQueue: switchboard.attestationQueueAccount,
+        authority: programStatePubkey,
       }
     );
   });

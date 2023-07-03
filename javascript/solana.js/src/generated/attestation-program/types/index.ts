@@ -1,4 +1,5 @@
 import * as FunctionStatus from "./FunctionStatus.js";
+import * as FundingStatus from "./FundingStatus.js";
 import * as RequestStatus from "./RequestStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
 import * as VerificationStatus from "./VerificationStatus.js";
@@ -34,10 +35,10 @@ export type {
 } from "./FunctionCloseParams.js";
 export { FunctionCloseParams } from "./FunctionCloseParams.js";
 export type {
-  FunctionFundParamsFields,
-  FunctionFundParamsJSON,
-} from "./FunctionFundParams.js";
-export { FunctionFundParams } from "./FunctionFundParams.js";
+  FunctionExtendLookupParamsFields,
+  FunctionExtendLookupParamsJSON,
+} from "./FunctionExtendLookupParams.js";
+export { FunctionExtendLookupParams } from "./FunctionExtendLookupParams.js";
 export type {
   FunctionInitParamsFields,
   FunctionInitParamsJSON,
@@ -79,10 +80,20 @@ export type {
 } from "./FunctionRequestVerifyParams.js";
 export { FunctionRequestVerifyParams } from "./FunctionRequestVerifyParams.js";
 export type {
+  FunctionSetAuthorityParamsFields,
+  FunctionSetAuthorityParamsJSON,
+} from "./FunctionSetAuthorityParams.js";
+export { FunctionSetAuthorityParams } from "./FunctionSetAuthorityParams.js";
+export type {
   FunctionSetConfigParamsFields,
   FunctionSetConfigParamsJSON,
 } from "./FunctionSetConfigParams.js";
 export { FunctionSetConfigParams } from "./FunctionSetConfigParams.js";
+export type {
+  FunctionSetEscrowParamsFields,
+  FunctionSetEscrowParamsJSON,
+} from "./FunctionSetEscrowParams.js";
+export { FunctionSetEscrowParams } from "./FunctionSetEscrowParams.js";
 export type {
   FunctionTriggerParamsFields,
   FunctionTriggerParamsJSON,
@@ -93,11 +104,8 @@ export type {
   FunctionVerifyParamsJSON,
 } from "./FunctionVerifyParams.js";
 export { FunctionVerifyParams } from "./FunctionVerifyParams.js";
-export type {
-  FunctionWithdrawParamsFields,
-  FunctionWithdrawParamsJSON,
-} from "./FunctionWithdrawParams.js";
-export { FunctionWithdrawParams } from "./FunctionWithdrawParams.js";
+export type { QuoteFields, QuoteJSON } from "./Quote.js";
+export { Quote } from "./Quote.js";
 export type {
   QuoteHeartbeatParamsFields,
   QuoteHeartbeatParamsJSON,
@@ -123,6 +131,26 @@ export type {
   StateInitParamsJSON,
 } from "./StateInitParams.js";
 export { StateInitParams } from "./StateInitParams.js";
+export type {
+  WalletCloseParamsFields,
+  WalletCloseParamsJSON,
+} from "./WalletCloseParams.js";
+export { WalletCloseParams } from "./WalletCloseParams.js";
+export type {
+  WalletFundParamsFields,
+  WalletFundParamsJSON,
+} from "./WalletFundParams.js";
+export { WalletFundParams } from "./WalletFundParams.js";
+export type {
+  WalletInitParamsFields,
+  WalletInitParamsJSON,
+} from "./WalletInitParams.js";
+export { WalletInitParams } from "./WalletInitParams.js";
+export type {
+  WalletWithdrawParamsFields,
+  WalletWithdrawParamsJSON,
+} from "./WalletWithdrawParams.js";
+export { WalletWithdrawParams } from "./WalletWithdrawParams.js";
 export { FunctionStatus };
 
 export type FunctionStatusKind =
@@ -139,6 +167,13 @@ export type FunctionStatusJSON =
   | FunctionStatus.ExpiredJSON
   | FunctionStatus.OutOfFundsJSON
   | FunctionStatus.InvalidPermissionsJSON;
+
+export { FundingStatus };
+
+export type FundingStatusKind = FundingStatus.Inactive | FundingStatus.Active;
+export type FundingStatusJSON =
+  | FundingStatus.InactiveJSON
+  | FundingStatus.ActiveJSON;
 
 export { RequestStatus };
 

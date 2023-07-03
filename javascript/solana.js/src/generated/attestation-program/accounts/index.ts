@@ -28,3 +28,8 @@ export type {
   FunctionRequestAccountDataJSON,
 } from "./FunctionRequestAccountData.js";
 export { FunctionRequestAccountData } from "./FunctionRequestAccountData.js";
+export type {
+  SwitchboardWalletFields,
+  SwitchboardWalletJSON,
+} from "./SwitchboardWallet.js";
+export { SwitchboardWallet } from "./SwitchboardWallet.js";

@@ -22,6 +22,7 @@ import {
   FunctionAccount,
   FunctionAccountInitParams,
 } from "./functionAccount.js";
+import { SwitchboardWallet } from "./switchboardWallet.js";
 
 import {
   Keypair,
@@ -271,6 +272,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   public async createFunctionInstruction(
     payer: PublicKey,
     params: CreateFunctionParams,
+    wallet?: SwitchboardWallet,
     options?: TransactionObjectOptions
   ): Promise<[FunctionAccount, TransactionObject]> {
     this.program.verifyAttestation();
@@ -283,6 +285,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         this.program,
         payer,
         { ...params, attestationQueue: this },
+        wallet,
         options
       );
 
@@ -313,11 +316,13 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
 
   public async createFunction(
     params: CreateFunctionParams,
+    wallet?: SwitchboardWallet,
     options?: SendTransactionObjectOptions
   ): Promise<[FunctionAccount, TransactionSignature]> {
     const [account, txnObject] = await this.createFunctionInstruction(
       this.program.walletPubkey,
       params,
+      wallet,
       options
     );
     return [account, await this.program.signAndSend(txnObject, options)];

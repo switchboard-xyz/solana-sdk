@@ -9,53 +9,51 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionCloseArgs {
-  params: types.FunctionCloseParamsFields;
+export interface WalletInitArgs {
+  params: types.WalletInitParamsFields;
 }
 
-export interface FunctionCloseAccounts {
-  function: PublicKey;
+export interface WalletInitAccounts {
+  wallet: PublicKey;
+  mint: PublicKey;
   authority: PublicKey;
-  addressLookupTable: PublicKey;
-  escrowWallet: PublicKey;
-  solDest: PublicKey;
-  escrowDest: PublicKey;
+  attestationQueue: PublicKey;
+  tokenWallet: PublicKey;
+  payer: PublicKey;
   state: PublicKey;
   tokenProgram: PublicKey;
+  associatedTokenProgram: PublicKey;
   systemProgram: PublicKey;
-  addressLookupProgram: PublicKey;
 }
 
-export const layout = borsh.struct([
-  types.FunctionCloseParams.layout("params"),
-]);
+export const layout = borsh.struct([types.WalletInitParams.layout("params")]);
 
-export function functionClose(
+export function walletInit(
   program: SwitchboardProgram,
-  args: FunctionCloseArgs,
-  accounts: FunctionCloseAccounts
+  args: WalletInitArgs,
+  accounts: WalletInitAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
-    { pubkey: accounts.escrowWallet, isSigner: false, isWritable: true },
-    { pubkey: accounts.solDest, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
+    { pubkey: accounts.wallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.mint, isSigner: false, isWritable: false },
+    { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
+    { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
-    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
     {
-      pubkey: accounts.addressLookupProgram,
+      pubkey: accounts.associatedTokenProgram,
       isSigner: false,
       isWritable: false,
     },
+    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([94, 164, 174, 42, 156, 29, 244, 236]);
+  const identifier = Buffer.from([196, 234, 169, 159, 123, 161, 11, 108]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionCloseParams.toEncodable(args.params),
+      params: types.WalletInitParams.toEncodable(args.params),
     },
     buffer
   );

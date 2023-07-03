@@ -21,6 +21,9 @@ pub struct Initialize<'info> {
     )]
     pub oracle: AccountLoader<'info, MyOracleState>,
 
+    #[account(
+        constraint = function.load()?.authority == program.key()
+    )]
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     /// CHECK:
@@ -31,15 +34,10 @@ pub struct Initialize<'info> {
 
     // SYSTEM ACCOUNTS
     pub system_program: Program<'info, System>,
-    // /// CHECK:
-    // #[account(address = solana_program::sysvar::rent::ID)]
-    // pub rent: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct InitializeParams {
-    // pub mr_enclaves: Vec<[u8; 32]>,
-}
+pub struct InitializeParams {}
 
 impl Initialize<'_> {
     pub fn validate(
@@ -47,9 +45,6 @@ impl Initialize<'_> {
         _ctx: &Context<Self>,
         params: &InitializeParams,
     ) -> anchor_lang::Result<()> {
-        // if params.mr_enclaves.len() > 32 {
-        //     return Err(error!(BasicOracleError::ArrayOverflow));
-        // }
         Ok(())
     }
 

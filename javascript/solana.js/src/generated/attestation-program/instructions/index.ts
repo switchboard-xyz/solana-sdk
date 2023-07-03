@@ -28,10 +28,17 @@ export type {
   FunctionCloseArgs,
 } from "./functionClose.js";
 export { functionClose } from "./functionClose.js";
-export type { FunctionFundAccounts, FunctionFundArgs } from "./functionFund.js";
-export { functionFund } from "./functionFund.js";
+export type { FunctionDeactivateLookupAccounts } from "./functionDeactivateLookup.js";
+export { functionDeactivateLookup } from "./functionDeactivateLookup.js";
+export type {
+  FunctionExtendLookupAccounts,
+  FunctionExtendLookupArgs,
+} from "./functionExtendLookup.js";
+export { functionExtendLookup } from "./functionExtendLookup.js";
 export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
 export { functionInit } from "./functionInit.js";
+export type { FunctionOverrideCloseAccounts } from "./functionOverrideClose.js";
+export { functionOverrideClose } from "./functionOverrideClose.js";
 export type {
   FunctionRequestCloseAccounts,
   FunctionRequestCloseArgs,
@@ -63,10 +70,20 @@ export type {
 } from "./functionRequestVerify.js";
 export { functionRequestVerify } from "./functionRequestVerify.js";
 export type {
+  FunctionSetAuthorityAccounts,
+  FunctionSetAuthorityArgs,
+} from "./functionSetAuthority.js";
+export { functionSetAuthority } from "./functionSetAuthority.js";
+export type {
   FunctionSetConfigAccounts,
   FunctionSetConfigArgs,
 } from "./functionSetConfig.js";
 export { functionSetConfig } from "./functionSetConfig.js";
+export type {
+  FunctionSetEscrowAccounts,
+  FunctionSetEscrowArgs,
+} from "./functionSetEscrow.js";
+export { functionSetEscrow } from "./functionSetEscrow.js";
 export type {
   FunctionTriggerAccounts,
   FunctionTriggerArgs,
@@ -77,11 +94,6 @@ export type {
   FunctionVerifyArgs,
 } from "./functionVerify.js";
 export { functionVerify } from "./functionVerify.js";
-export type {
-  FunctionWithdrawAccounts,
-  FunctionWithdrawArgs,
-} from "./functionWithdraw.js";
-export { functionWithdraw } from "./functionWithdraw.js";
 export type {
   QuoteHeartbeatAccounts,
   QuoteHeartbeatArgs,
@@ -95,3 +107,14 @@ export type { QuoteVerifyAccounts, QuoteVerifyArgs } from "./quoteVerify.js";
 export { quoteVerify } from "./quoteVerify.js";
 export type { StateInitAccounts, StateInitArgs } from "./stateInit.js";
 export { stateInit } from "./stateInit.js";
+export type { WalletCloseAccounts, WalletCloseArgs } from "./walletClose.js";
+export { walletClose } from "./walletClose.js";
+export type { WalletFundAccounts, WalletFundArgs } from "./walletFund.js";
+export { walletFund } from "./walletFund.js";
+export type { WalletInitAccounts, WalletInitArgs } from "./walletInit.js";
+export { walletInit } from "./walletInit.js";
+export type {
+  WalletWithdrawAccounts,
+  WalletWithdrawArgs,
+} from "./walletWithdraw.js";
+export { walletWithdraw } from "./walletWithdraw.js";

@@ -6,7 +6,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-basic_oracle = "HgVykECRLmtSfquJz7NTBg5H8SfL2ehTFZnzfDJQuxt2"
+basic_oracle = "CE1HrS25FhvPjcAH4Zjka6uJBbYrDRY7uZ8PPSkiUwAh"
 
 [provider]
 cluster = "Localnet"

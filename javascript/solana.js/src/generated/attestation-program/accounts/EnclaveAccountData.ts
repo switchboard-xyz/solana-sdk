@@ -32,6 +32,16 @@ export interface EnclaveAccountDataFields {
   lastHeartbeat: BN;
   /** The PDA bump. Only set for FunctionAccount quotes. */
   bump: number;
+  /**
+   * The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.
+   * We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one.
+   */
+  rewardEscrow: PublicKey;
+  /**
+   * The SwitchboardWallet account containing the queues required min_stake.
+   * Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards.
+   */
+  stakeWallet: PublicKey;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -63,6 +73,16 @@ export interface EnclaveAccountDataJSON {
   lastHeartbeat: string;
   /** The PDA bump. Only set for FunctionAccount quotes. */
   bump: number;
+  /**
+   * The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.
+   * We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one.
+   */
+  rewardEscrow: string;
+  /**
+   * The SwitchboardWallet account containing the queues required min_stake.
+   * Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards.
+   */
+  stakeWallet: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -94,6 +114,16 @@ export class EnclaveAccountData {
   readonly lastHeartbeat: BN;
   /** The PDA bump. Only set for FunctionAccount quotes. */
   readonly bump: number;
+  /**
+   * The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.
+   * We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one.
+   */
+  readonly rewardEscrow: PublicKey;
+  /**
+   * The SwitchboardWallet account containing the queues required min_stake.
+   * Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards.
+   */
+  readonly stakeWallet: PublicKey;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -115,7 +145,9 @@ export class EnclaveAccountData {
     borsh.bool("isOnQueue"),
     borsh.i64("lastHeartbeat"),
     borsh.u8("bump"),
-    borsh.array(borsh.u8(), 1024, "ebuf"),
+    borsh.publicKey("rewardEscrow"),
+    borsh.publicKey("stakeWallet"),
+    borsh.array(borsh.u8(), 928, "ebuf"),
   ]);
 
   constructor(fields: EnclaveAccountDataFields) {
@@ -132,6 +164,8 @@ export class EnclaveAccountData {
     this.isOnQueue = fields.isOnQueue;
     this.lastHeartbeat = fields.lastHeartbeat;
     this.bump = fields.bump;
+    this.rewardEscrow = fields.rewardEscrow;
+    this.stakeWallet = fields.stakeWallet;
     this.ebuf = fields.ebuf;
   }
 
@@ -190,6 +224,8 @@ export class EnclaveAccountData {
       isOnQueue: dec.isOnQueue,
       lastHeartbeat: dec.lastHeartbeat,
       bump: dec.bump,
+      rewardEscrow: dec.rewardEscrow,
+      stakeWallet: dec.stakeWallet,
       ebuf: dec.ebuf,
     });
   }
@@ -209,6 +245,8 @@ export class EnclaveAccountData {
       isOnQueue: this.isOnQueue,
       lastHeartbeat: this.lastHeartbeat.toString(),
       bump: this.bump,
+      rewardEscrow: this.rewardEscrow.toString(),
+      stakeWallet: this.stakeWallet.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -228,6 +266,8 @@ export class EnclaveAccountData {
       isOnQueue: obj.isOnQueue,
       lastHeartbeat: new BN(obj.lastHeartbeat),
       bump: obj.bump,
+      rewardEscrow: new PublicKey(obj.rewardEscrow),
+      stakeWallet: new PublicKey(obj.stakeWallet),
       ebuf: obj.ebuf,
     });
   }

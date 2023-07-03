@@ -12,7 +12,7 @@ pub use utils::*;
 pub mod actions;
 pub use actions::*;
 
-declare_id!("6tdxUefBQRpL1CbJhzXgcMtWChKqXj9P9Rz2bvTWiiar");
+declare_id!("CE1HrS25FhvPjcAH4Zjka6uJBbYrDRY7uZ8PPSkiUwAh");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 
@@ -36,5 +36,13 @@ pub mod basic_oracle {
         params: RefreshPricesParams,
     ) -> anchor_lang::Result<()> {
         RefreshPrices::actuate(&ctx, &params)
+    }
+
+    #[access_control(ctx.accounts.validate(&ctx, &params))]
+    pub fn set_function(
+        ctx: Context<SetFunction>,
+        params: SetFunctionParams,
+    ) -> anchor_lang::Result<()> {
+        SetFunction::actuate(&ctx, &params)
     }
 }

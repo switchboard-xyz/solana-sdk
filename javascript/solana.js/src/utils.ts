@@ -199,7 +199,7 @@ export function parseRawBuffer(rawBuffer: RawBuffer, size = 32): Uint8Array {
       myUint8Array = new Uint8Array(Buffer.from(rawBuffer, "base64"));
     } else {
       // assume utf-8
-      myUint8Array = new Uint8Array(Buffer.from(rawBuffer));
+      myUint8Array = new Uint8Array(Buffer.from(rawBuffer, "utf-8"));
     }
   } else if (rawBuffer instanceof Buffer) {
     myUint8Array = new Uint8Array(rawBuffer);
