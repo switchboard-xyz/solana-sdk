@@ -543,6 +543,61 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     ).then((txn) => this.program.signAndSend(txn, options));
   }
 
+  public async resetEscrowInstruction(
+    payer: PublicKey,
+    authority?: Keypair,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    this.program.verifyAttestation();
+
+    const functionState = await this.loadData();
+
+    const defaultWallet = SwitchboardWallet.fromSeed(
+      this.program,
+      functionState.attestationQueue,
+      functionState.authority,
+      this.publicKey.toBytes()
+    );
+
+    const ixn = types.functionResetEscrow(
+      this.program,
+      { params: {} },
+      {
+        function: this.publicKey,
+        authority: functionState.authority,
+        attestationQueue: functionState.attestationQueue,
+        mint: this.program.mint.address,
+        escrowWallet: functionState.escrowWallet,
+        defaultWallet: defaultWallet.publicKey,
+        tokenWallet: defaultWallet.tokenWallet,
+        payer: payer,
+        state: this.program.attestationProgramState.publicKey,
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      }
+    );
+
+    const txn = new TransactionObject(
+      payer,
+      [ixn],
+      authority ? [authority] : [],
+      options
+    );
+    return txn;
+  }
+
+  public async resetEscrow(
+    authority?: Keypair,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.resetEscrowInstruction(
+      this.program.walletPubkey,
+      authority,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
   public async fundInstruction(
     payer: PublicKey,
     params: SwitchboardWalletFundParams,

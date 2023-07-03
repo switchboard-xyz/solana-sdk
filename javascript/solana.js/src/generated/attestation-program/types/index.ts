@@ -80,6 +80,11 @@ export type {
 } from "./FunctionRequestVerifyParams.js";
 export { FunctionRequestVerifyParams } from "./FunctionRequestVerifyParams.js";
 export type {
+  FunctionResetEscrowParamsFields,
+  FunctionResetEscrowParamsJSON,
+} from "./FunctionResetEscrowParams.js";
+export { FunctionResetEscrowParams } from "./FunctionResetEscrowParams.js";
+export type {
   FunctionSetAuthorityParamsFields,
   FunctionSetAuthorityParamsJSON,
 } from "./FunctionSetAuthorityParams.js";

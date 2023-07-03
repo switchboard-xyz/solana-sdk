@@ -128,7 +128,7 @@ pub struct FunctionAccountData {
     pub reward_escrow_token_wallet: Pubkey,
 
     /// Reserved.
-    pub _ebuf: [u8; 895],
+    pub _ebuf: [u8; 879],
 }
 
 unsafe impl Pod for FunctionAccountData {}

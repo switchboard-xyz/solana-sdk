@@ -29,12 +29,12 @@ export interface FunctionAccountDataFields {
   version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   authority: PublicKey;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  addressLookupTable: PublicKey;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   attestationQueue: PublicKey;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  addressLookupTable: PublicKey;
   /** The cron schedule to run the function on. */
   schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -106,12 +106,12 @@ export interface FunctionAccountDataJSON {
   version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   authority: string;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  addressLookupTable: string;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   attestationQueue: string;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  addressLookupTable: string;
   /** The cron schedule to run the function on. */
   schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -183,12 +183,12 @@ export class FunctionAccountData {
   readonly version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   readonly authority: PublicKey;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  readonly addressLookupTable: PublicKey;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   readonly attestationQueue: PublicKey;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   readonly queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  readonly addressLookupTable: PublicKey;
   /** The cron schedule to run the function on. */
   readonly schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -252,9 +252,9 @@ export class FunctionAccountData {
     borsh.array(borsh.u8(), 64, "container"),
     borsh.array(borsh.u8(), 32, "version"),
     borsh.publicKey("authority"),
-    borsh.publicKey("addressLookupTable"),
     borsh.publicKey("attestationQueue"),
     borsh.u32("queueIdx"),
+    borsh.publicKey("addressLookupTable"),
     borsh.array(borsh.u8(), 64, "schedule"),
     borsh.i64("lastExecutionTimestamp"),
     borsh.i64("nextAllowedTimestamp"),
@@ -272,7 +272,7 @@ export class FunctionAccountData {
     borsh.publicKey("escrowTokenWallet"),
     borsh.publicKey("rewardEscrowWallet"),
     borsh.publicKey("rewardEscrowTokenWallet"),
-    borsh.array(borsh.u8(), 959, "ebuf"),
+    borsh.array(borsh.u8(), 879, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -288,9 +288,9 @@ export class FunctionAccountData {
     this.container = fields.container;
     this.version = fields.version;
     this.authority = fields.authority;
-    this.addressLookupTable = fields.addressLookupTable;
     this.attestationQueue = fields.attestationQueue;
     this.queueIdx = fields.queueIdx;
+    this.addressLookupTable = fields.addressLookupTable;
     this.schedule = fields.schedule;
     this.lastExecutionTimestamp = fields.lastExecutionTimestamp;
     this.nextAllowedTimestamp = fields.nextAllowedTimestamp;
@@ -366,9 +366,9 @@ export class FunctionAccountData {
       container: dec.container,
       version: dec.version,
       authority: dec.authority,
-      addressLookupTable: dec.addressLookupTable,
       attestationQueue: dec.attestationQueue,
       queueIdx: dec.queueIdx,
+      addressLookupTable: dec.addressLookupTable,
       schedule: dec.schedule,
       lastExecutionTimestamp: dec.lastExecutionTimestamp,
       nextAllowedTimestamp: dec.nextAllowedTimestamp,
@@ -405,9 +405,9 @@ export class FunctionAccountData {
       container: this.container,
       version: this.version,
       authority: this.authority.toString(),
-      addressLookupTable: this.addressLookupTable.toString(),
       attestationQueue: this.attestationQueue.toString(),
       queueIdx: this.queueIdx,
+      addressLookupTable: this.addressLookupTable.toString(),
       schedule: this.schedule,
       lastExecutionTimestamp: this.lastExecutionTimestamp.toString(),
       nextAllowedTimestamp: this.nextAllowedTimestamp.toString(),
@@ -444,9 +444,9 @@ export class FunctionAccountData {
       container: obj.container,
       version: obj.version,
       authority: new PublicKey(obj.authority),
-      addressLookupTable: new PublicKey(obj.addressLookupTable),
       attestationQueue: new PublicKey(obj.attestationQueue),
       queueIdx: obj.queueIdx,
+      addressLookupTable: new PublicKey(obj.addressLookupTable),
       schedule: obj.schedule,
       lastExecutionTimestamp: new BN(obj.lastExecutionTimestamp),
       nextAllowedTimestamp: new BN(obj.nextAllowedTimestamp),

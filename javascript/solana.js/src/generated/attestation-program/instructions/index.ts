@@ -70,6 +70,11 @@ export type {
 } from "./functionRequestVerify.js";
 export { functionRequestVerify } from "./functionRequestVerify.js";
 export type {
+  FunctionResetEscrowAccounts,
+  FunctionResetEscrowArgs,
+} from "./functionResetEscrow.js";
+export { functionResetEscrow } from "./functionResetEscrow.js";
+export type {
   FunctionSetAuthorityAccounts,
   FunctionSetAuthorityArgs,
 } from "./functionSetAuthority.js";

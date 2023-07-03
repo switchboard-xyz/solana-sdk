@@ -36,6 +36,7 @@ impl From<u8> for RequestStatus {
         }
     }
 }
+
 #[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionRequestTriggerRound {
     /// The status of the request.
@@ -147,7 +148,7 @@ impl anchor_lang::AccountDeserialize for FunctionRequestAccountData {
             return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
         }
         let given_disc = &buf[..8];
-        if &FunctionRequestAccountData::discriminator() != given_disc {
+        if FunctionRequestAccountData::discriminator() != given_disc {
             return Err(
                 anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
                     error_name: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch.name(),
