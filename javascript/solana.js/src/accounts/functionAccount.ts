@@ -731,25 +731,35 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   }
 
   public async verify(
-    params: FunctionVerifyParams,
-    signers: {
-      quoteVerifier: Keypair;
-      fnEnclaveSigner: Keypair;
+    params: {
+      observedTime: anchor.BN;
+      nextAllowedTimestamp: anchor.BN;
+      isFailure: boolean;
+      mrEnclave: Uint8Array;
+
+      verifier: EnclaveAccount;
+      verifierEnclaveSigner: Keypair;
+
+      functionEnclaveSigner: Keypair;
+      receiver: PublicKey;
+
+      fnState?: types.FunctionAccountData;
+      attestationQueueAuthority?: PublicKey;
     },
     options?: SendOptions
   ): Promise<TransactionSignature> {
-    const transactionV0 = await this.verifyTransaction(params);
+    const transactionV0 = await this.verifyTransaction({
+      ...params,
+      verifierEnclaveSigner: params.verifierEnclaveSigner.publicKey,
+      functionEnclaveSigner: params.functionEnclaveSigner.publicKey,
+    });
 
-    transactionV0.sign([signers.quoteVerifier]);
-    transactionV0.sign([signers.fnEnclaveSigner]);
+    transactionV0.sign([params.verifierEnclaveSigner]);
+    transactionV0.sign([params.functionEnclaveSigner]);
     transactionV0.sign([this.program.wallet.payer]);
 
-    const rawTxn = transactionV0.serialize();
-
-    console.log(`functionVerify bytes: ${rawTxn.byteLength}`);
-
     const txnSignature = await this.program.connection.sendEncodedTransaction(
-      Buffer.from(rawTxn).toString("base64"),
+      Buffer.from(transactionV0.serialize()).toString("base64"),
       options
     );
     return txnSignature;

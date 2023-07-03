@@ -273,26 +273,22 @@ describe("Function Tests", () => {
 
     const nextAllowedTimestamp = timestamp + 100;
 
-    const txnSignature = await functionAccount.verify(
-      {
-        observedTime: new BN(timestamp),
-        nextAllowedTimestamp: new BN(nextAllowedTimestamp),
-        isFailure: false,
-        mrEnclave: new Uint8Array(mrEnclave),
-        verifier: attestationQuoteVerifierAccount,
-        verifierEnclaveSigner: quoteVerifierSigner.publicKey,
-        functionEnclaveSigner: trustedSigner.publicKey,
-        receiver,
-      },
-      {
-        quoteVerifier: quoteVerifierSigner,
-        fnEnclaveSigner: trustedSigner,
-      }
-    );
+    const txnSignature = await functionAccount.verify({
+      observedTime: new BN(timestamp),
+      nextAllowedTimestamp: new BN(nextAllowedTimestamp),
+      isFailure: false,
+      mrEnclave: new Uint8Array(mrEnclave),
+      verifier: attestationQuoteVerifierAccount,
+      verifierEnclaveSigner: quoteVerifierSigner,
+      functionEnclaveSigner: trustedSigner,
+      receiver,
+    });
 
-    console.log(`functionVerify: ${txnSignature}`);
+    // console.log(`functionVerify: ${txnSignature}`);
 
     // await printLogs(ctx.program.connection, txnSignature, true);
+
+    await sleep(3000); // wait for rpc to catch up
 
     const functionState = await functionAccount.loadData();
     const quoteState = await fnQuoteAccount.loadData();
