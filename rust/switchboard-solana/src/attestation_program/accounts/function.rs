@@ -56,8 +56,8 @@ pub struct FunctionAccountData {
     pub name: [u8; 64],
     /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
-    /// The unix timestamp when the function was created.
-    pub created_at: i64,
+    /// The Solana slot when the function was created. (PDA)
+    pub created_at_slot: u64,
     /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
     pub updated_at: i64,
 
@@ -129,8 +129,11 @@ pub struct FunctionAccountData {
     /// The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters.
     pub reward_escrow_token_wallet: Pubkey,
 
+    /// The unix timestamp when the function was created.
+    pub created_at: i64,
+
     /// Reserved.
-    pub _ebuf: [u8; 879],
+    pub _ebuf: [u8; 871],
 }
 
 impl anchor_lang::AccountDeserialize for FunctionAccountData {

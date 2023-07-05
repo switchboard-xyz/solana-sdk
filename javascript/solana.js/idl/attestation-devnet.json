@@ -1632,11 +1632,11 @@
             }
           },
           {
-            "name": "createdAt",
+            "name": "createdAtSlot",
             "docs": [
-              "The unix timestamp when the function was created."
+              "The Solana slot when the function was created. (PDA)"
             ],
-            "type": "i64"
+            "type": "u64"
           },
           {
             "name": "updatedAt",
@@ -1852,6 +1852,13 @@
             "type": "publicKey"
           },
           {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function was created."
+            ],
+            "type": "i64"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -1859,7 +1866,7 @@
             "type": {
               "array": [
                 "u8",
-                879
+                871
               ]
             }
           }

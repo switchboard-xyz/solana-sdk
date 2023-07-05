@@ -15,5 +15,5 @@ serde = "^1"
 serde_json = "^1"
 switchboard-utils = "0.8.0"
 # switchboard-utils = { version = "0.8.1", path = "../../../../../sbv2-core/rust/switchboard-utils" }
-switchboard-solana = "0.8.3"
-# switchboard-solana = { version = "0.8.3", path = "../../../../rust/switchboard-solana" }
+switchboard-solana = "0.8.4"
+# switchboard-solana = { version = "0.8.4", path = "../../../../rust/switchboard-solana" }

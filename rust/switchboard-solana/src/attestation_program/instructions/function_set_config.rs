@@ -8,7 +8,7 @@ pub struct FunctionSetConfig<'info> {
         seeds = [
             FUNCTION_SEED,
             function.load()?.creator_seed.as_ref(), 
-            &function.load()?.created_at.to_le_bytes()
+            &function.load()?.created_at_slot.to_le_bytes()
         ],
         bump = function.load()?.bump,
         has_one = authority @ SwitchboardError::InvalidAuthority

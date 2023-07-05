@@ -17,8 +17,8 @@ export interface FunctionAccountDataFields {
   name: Array<number>;
   /** The metadata of the function for easier identification. */
   metadata: Array<number>;
-  /** The unix timestamp when the function was created. */
-  createdAt: BN;
+  /** The Solana slot when the function was created. (PDA) */
+  createdAtSlot: BN;
   /** The unix timestamp when the function config (container, registry, version, or schedule) was changed. */
   updatedAt: BN;
   /** The off-chain registry to fetch the function container from. */
@@ -78,6 +78,8 @@ export interface FunctionAccountDataFields {
   rewardEscrowWallet: PublicKey;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   rewardEscrowTokenWallet: PublicKey;
+  /** The unix timestamp when the function was created. */
+  createdAt: BN;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -94,8 +96,8 @@ export interface FunctionAccountDataJSON {
   name: Array<number>;
   /** The metadata of the function for easier identification. */
   metadata: Array<number>;
-  /** The unix timestamp when the function was created. */
-  createdAt: string;
+  /** The Solana slot when the function was created. (PDA) */
+  createdAtSlot: string;
   /** The unix timestamp when the function config (container, registry, version, or schedule) was changed. */
   updatedAt: string;
   /** The off-chain registry to fetch the function container from. */
@@ -155,6 +157,8 @@ export interface FunctionAccountDataJSON {
   rewardEscrowWallet: string;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   rewardEscrowTokenWallet: string;
+  /** The unix timestamp when the function was created. */
+  createdAt: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -171,8 +175,8 @@ export class FunctionAccountData {
   readonly name: Array<number>;
   /** The metadata of the function for easier identification. */
   readonly metadata: Array<number>;
-  /** The unix timestamp when the function was created. */
-  readonly createdAt: BN;
+  /** The Solana slot when the function was created. (PDA) */
+  readonly createdAtSlot: BN;
   /** The unix timestamp when the function config (container, registry, version, or schedule) was changed. */
   readonly updatedAt: BN;
   /** The off-chain registry to fetch the function container from. */
@@ -232,6 +236,8 @@ export class FunctionAccountData {
   readonly rewardEscrowWallet: PublicKey;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   readonly rewardEscrowTokenWallet: PublicKey;
+  /** The unix timestamp when the function was created. */
+  readonly createdAt: BN;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -246,7 +252,7 @@ export class FunctionAccountData {
     types.FunctionStatus.layout("status"),
     borsh.array(borsh.u8(), 64, "name"),
     borsh.array(borsh.u8(), 256, "metadata"),
-    borsh.i64("createdAt"),
+    borsh.u64("createdAtSlot"),
     borsh.i64("updatedAt"),
     borsh.array(borsh.u8(), 64, "containerRegistry"),
     borsh.array(borsh.u8(), 64, "container"),
@@ -272,7 +278,8 @@ export class FunctionAccountData {
     borsh.publicKey("escrowTokenWallet"),
     borsh.publicKey("rewardEscrowWallet"),
     borsh.publicKey("rewardEscrowTokenWallet"),
-    borsh.array(borsh.u8(), 879, "ebuf"),
+    borsh.i64("createdAt"),
+    borsh.array(borsh.u8(), 871, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -282,7 +289,7 @@ export class FunctionAccountData {
     this.status = fields.status;
     this.name = fields.name;
     this.metadata = fields.metadata;
-    this.createdAt = fields.createdAt;
+    this.createdAtSlot = fields.createdAtSlot;
     this.updatedAt = fields.updatedAt;
     this.containerRegistry = fields.containerRegistry;
     this.container = fields.container;
@@ -309,6 +316,7 @@ export class FunctionAccountData {
     this.escrowTokenWallet = fields.escrowTokenWallet;
     this.rewardEscrowWallet = fields.rewardEscrowWallet;
     this.rewardEscrowTokenWallet = fields.rewardEscrowTokenWallet;
+    this.createdAt = fields.createdAt;
     this.ebuf = fields.ebuf;
   }
 
@@ -360,7 +368,7 @@ export class FunctionAccountData {
       status: types.FunctionStatus.fromDecoded(dec.status),
       name: dec.name,
       metadata: dec.metadata,
-      createdAt: dec.createdAt,
+      createdAtSlot: dec.createdAtSlot,
       updatedAt: dec.updatedAt,
       containerRegistry: dec.containerRegistry,
       container: dec.container,
@@ -387,6 +395,7 @@ export class FunctionAccountData {
       escrowTokenWallet: dec.escrowTokenWallet,
       rewardEscrowWallet: dec.rewardEscrowWallet,
       rewardEscrowTokenWallet: dec.rewardEscrowTokenWallet,
+      createdAt: dec.createdAt,
       ebuf: dec.ebuf,
     });
   }
@@ -399,7 +408,7 @@ export class FunctionAccountData {
       status: this.status.toJSON(),
       name: this.name,
       metadata: this.metadata,
-      createdAt: this.createdAt.toString(),
+      createdAtSlot: this.createdAtSlot.toString(),
       updatedAt: this.updatedAt.toString(),
       containerRegistry: this.containerRegistry,
       container: this.container,
@@ -426,6 +435,7 @@ export class FunctionAccountData {
       escrowTokenWallet: this.escrowTokenWallet.toString(),
       rewardEscrowWallet: this.rewardEscrowWallet.toString(),
       rewardEscrowTokenWallet: this.rewardEscrowTokenWallet.toString(),
+      createdAt: this.createdAt.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -438,7 +448,7 @@ export class FunctionAccountData {
       status: types.FunctionStatus.fromJSON(obj.status),
       name: obj.name,
       metadata: obj.metadata,
-      createdAt: new BN(obj.createdAt),
+      createdAtSlot: new BN(obj.createdAtSlot),
       updatedAt: new BN(obj.updatedAt),
       containerRegistry: obj.containerRegistry,
       container: obj.container,
@@ -466,6 +476,7 @@ export class FunctionAccountData {
       escrowTokenWallet: new PublicKey(obj.escrowTokenWallet),
       rewardEscrowWallet: new PublicKey(obj.rewardEscrowWallet),
       rewardEscrowTokenWallet: new PublicKey(obj.rewardEscrowTokenWallet),
+      createdAt: new BN(obj.createdAt),
       ebuf: obj.ebuf,
     });
   }
