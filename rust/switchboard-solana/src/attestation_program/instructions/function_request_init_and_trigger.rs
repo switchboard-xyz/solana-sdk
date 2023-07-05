@@ -6,30 +6,44 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     #[account(
         init,
         payer = payer,
-        space = FunctionRequestAccountData::space(
-            params.max_container_params_len
-        ),
+        space = FunctionRequestAccountData::space(params.max_container_params_len),
     )]
     pub request: Box<Account<'info, FunctionRequestAccountData>>,
-    #[account(mut, has_one = attestation_queue)]
+
+    #[account(
+        mut,
+        has_one = attestation_queue,
+    )]
     pub function: AccountLoader<'info, FunctionAccountData>,
+
     #[account(
         init,
         payer = payer,
         associated_token::mint = mint,
         associated_token::authority = request,
+
     )]
     pub escrow: Box<Account<'info, TokenAccount>>,
+
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: Account<'info, Mint>,
-    #[account(seeds = [STATE_SEED], bump = state.load()?.bump)]
+
+    #[account(
+        seeds = [STATE_SEED],
+        bump = state.load()?.bump,
+    )]
     pub state: AccountLoader<'info, AttestationProgramState>,
+
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+
     #[account(mut)]
     pub payer: Signer<'info>,
+
     pub system_program: Program<'info, System>,
-    pub token_program: Program<'info, anchor_spl::token::Token>,
-    pub associated_token_program: Program<'info, anchor_spl::associated_token::AssociatedToken>,
+
+    pub token_program: Program<'info, Token>,
+
+    pub associated_token_program: Program<'info, AssociatedToken>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

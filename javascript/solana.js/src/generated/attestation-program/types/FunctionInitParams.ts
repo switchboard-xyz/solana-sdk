@@ -18,6 +18,7 @@ export interface FunctionInitParamsFields {
   requestsRequireAuthorization: boolean;
   requestsDefaultSlotsUntilExpiration: BN;
   requestsFee: BN;
+  creatorSeed: Array<number> | null;
 }
 
 export interface FunctionInitParamsJSON {
@@ -33,6 +34,7 @@ export interface FunctionInitParamsJSON {
   requestsRequireAuthorization: boolean;
   requestsDefaultSlotsUntilExpiration: string;
   requestsFee: string;
+  creatorSeed: Array<number> | null;
 }
 
 export class FunctionInitParams {
@@ -48,6 +50,7 @@ export class FunctionInitParams {
   readonly requestsRequireAuthorization: boolean;
   readonly requestsDefaultSlotsUntilExpiration: BN;
   readonly requestsFee: BN;
+  readonly creatorSeed: Array<number> | null;
 
   constructor(fields: FunctionInitParamsFields) {
     this.name = fields.name;
@@ -63,6 +66,7 @@ export class FunctionInitParams {
     this.requestsDefaultSlotsUntilExpiration =
       fields.requestsDefaultSlotsUntilExpiration;
     this.requestsFee = fields.requestsFee;
+    this.creatorSeed = fields.creatorSeed;
   }
 
   static layout(property?: string) {
@@ -80,6 +84,7 @@ export class FunctionInitParams {
         borsh.bool("requestsRequireAuthorization"),
         borsh.u64("requestsDefaultSlotsUntilExpiration"),
         borsh.u64("requestsFee"),
+        borsh.option(borsh.array(borsh.u8(), 32), "creatorSeed"),
       ],
       property
     );
@@ -125,6 +130,7 @@ export class FunctionInitParams {
       requestsDefaultSlotsUntilExpiration:
         obj.requestsDefaultSlotsUntilExpiration,
       requestsFee: obj.requestsFee,
+      creatorSeed: obj.creatorSeed,
     });
   }
 
@@ -167,6 +173,7 @@ export class FunctionInitParams {
       requestsDefaultSlotsUntilExpiration:
         fields.requestsDefaultSlotsUntilExpiration,
       requestsFee: fields.requestsFee,
+      creatorSeed: fields.creatorSeed,
     };
   }
 
@@ -185,6 +192,7 @@ export class FunctionInitParams {
       requestsDefaultSlotsUntilExpiration:
         this.requestsDefaultSlotsUntilExpiration.toString(),
       requestsFee: this.requestsFee.toString(),
+      creatorSeed: this.creatorSeed,
     };
   }
 
@@ -204,6 +212,7 @@ export class FunctionInitParams {
         obj.requestsDefaultSlotsUntilExpiration
       ),
       requestsFee: new BN(obj.requestsFee),
+      creatorSeed: obj.creatorSeed,
     });
   }
 

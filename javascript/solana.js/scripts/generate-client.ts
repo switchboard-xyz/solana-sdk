@@ -53,6 +53,8 @@ const ignoreFiles = [
   `${attestationGeneratedPath}/types/VerificationStatus.ts`,
   `${attestationGeneratedPath}/errors/index.ts`,
   `${attestationGeneratedPath}/types/SwitchboardAttestationPermission.ts`,
+  `${attestationGeneratedPath}/instructions/functionDeactivateLookup.ts`,
+  `${attestationGeneratedPath}/instructions/functionOverrideClose.ts`,
   // `${v2GeneratedPath}/types/VerificationStatus.ts`,
 ];
 

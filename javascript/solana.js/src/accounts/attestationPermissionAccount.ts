@@ -60,22 +60,18 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     granter: PublicKey | string,
     grantee: PublicKey | string
   ): Promise<
-    [
-      AttestationPermissionAccount,
-      types.AttestationPermissionAccountData,
-      number
-    ]
+    [AttestationPermissionAccount, types.AttestationPermissionAccountData]
   > {
     program.verifyAttestation();
 
-    const [account, bump] = AttestationPermissionAccount.fromSeed(
+    const account = AttestationPermissionAccount.fromSeed(
       program,
       typeof authority === "string" ? new PublicKey(authority) : authority,
       typeof granter === "string" ? new PublicKey(granter) : granter,
       typeof grantee === "string" ? new PublicKey(grantee) : grantee
     );
     const state = await account.loadData();
-    return [account, state, bump];
+    return [account, state];
   }
 
   /**
@@ -93,7 +89,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
     authority: PublicKey,
     granter: PublicKey,
     grantee: PublicKey
-  ): [AttestationPermissionAccount, number] {
+  ): AttestationPermissionAccount {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [
         Buffer.from("PermissionAccountData"),
@@ -103,7 +99,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
       ],
       program.attestationProgramId
     );
-    return [new AttestationPermissionAccount(program, publicKey), bump];
+    return new AttestationPermissionAccount(program, publicKey);
   }
 
   public static createInstruction(
@@ -116,7 +112,7 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
 
     const authority = params.authority ?? payer;
 
-    const [account] = AttestationPermissionAccount.fromSeed(
+    const account = AttestationPermissionAccount.fromSeed(
       program,
       authority,
       params.granter,

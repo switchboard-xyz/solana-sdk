@@ -4,17 +4,20 @@ use crate::prelude::*;
 #[instruction(params:FunctionSetConfigParams)]
 pub struct FunctionSetConfig<'info> {
     #[account(
-        mut, 
-        has_one = authority
+        mut,
+        seeds = [
+            FUNCTION_SEED,
+            function.load()?.creator_seed.as_ref(), 
+            &function.load()?.created_at.to_le_bytes()
+        ],
+        bump = function.load()?.bump,
+        has_one = authority @ SwitchboardError::InvalidAuthority
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     #[account(
         mut,
-        seeds = [
-            QUOTE_SEED,
-            function.key().as_ref()
-        ],
+        seeds = [QUOTE_SEED, function.key().as_ref()],
         bump = quote.load()?.bump,
     )]
     pub quote: AccountLoader<'info, EnclaveAccountData>,

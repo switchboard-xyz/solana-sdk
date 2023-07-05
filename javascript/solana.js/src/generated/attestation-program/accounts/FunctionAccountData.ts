@@ -29,14 +29,12 @@ export interface FunctionAccountDataFields {
   version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   authority: PublicKey;
-  /** The wrapped SOL escrow of the function to pay for scheduled requests. */
-  escrow: PublicKey;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  addressLookupTable: PublicKey;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   attestationQueue: PublicKey;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  addressLookupTable: PublicKey;
   /** The cron schedule to run the function on. */
   schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -65,6 +63,21 @@ export interface FunctionAccountDataFields {
   requestsFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
+  /** PDA bump. */
+  bump: number;
+  /** The payer who originally created the function. Cannot change, used to derive PDA. */
+  creatorSeed: Array<number>;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  escrowWallet: PublicKey;
+  /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
+  escrowTokenWallet: PublicKey;
+  /**
+   * The SwitchboardWallet that will handle acruing rewards from requests.
+   * Defaults to the escrow_wallet.
+   */
+  rewardEscrowWallet: PublicKey;
+  /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
+  rewardEscrowTokenWallet: PublicKey;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -93,14 +106,12 @@ export interface FunctionAccountDataJSON {
   version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   authority: string;
-  /** The wrapped SOL escrow of the function to pay for scheduled requests. */
-  escrow: string;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  addressLookupTable: string;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   attestationQueue: string;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  addressLookupTable: string;
   /** The cron schedule to run the function on. */
   schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -129,6 +140,21 @@ export interface FunctionAccountDataJSON {
   requestsFee: string;
   /** An array of permitted mr_enclave measurements for the function. */
   mrEnclaves: Array<Array<number>>;
+  /** PDA bump. */
+  bump: number;
+  /** The payer who originally created the function. Cannot change, used to derive PDA. */
+  creatorSeed: Array<number>;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  escrowWallet: string;
+  /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
+  escrowTokenWallet: string;
+  /**
+   * The SwitchboardWallet that will handle acruing rewards from requests.
+   * Defaults to the escrow_wallet.
+   */
+  rewardEscrowWallet: string;
+  /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
+  rewardEscrowTokenWallet: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -157,14 +183,12 @@ export class FunctionAccountData {
   readonly version: Array<number>;
   /** The authority of the function which is authorized to make account changes. */
   readonly authority: PublicKey;
-  /** The wrapped SOL escrow of the function to pay for scheduled requests. */
-  readonly escrow: PublicKey;
-  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
-  readonly addressLookupTable: PublicKey;
   /** The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements. */
   readonly attestationQueue: PublicKey;
   /** An incrementer used to rotate through an AttestationQueue's verifiers. */
   readonly queueIdx: number;
+  /** The address_lookup_table of the function used to increase the number of accounts we can fit into a function result. */
+  readonly addressLookupTable: PublicKey;
   /** The cron schedule to run the function on. */
   readonly schedule: Array<number>;
   /** The unix timestamp when the function was last run. */
@@ -193,6 +217,21 @@ export class FunctionAccountData {
   readonly requestsFee: BN;
   /** An array of permitted mr_enclave measurements for the function. */
   readonly mrEnclaves: Array<Array<number>>;
+  /** PDA bump. */
+  readonly bump: number;
+  /** The payer who originally created the function. Cannot change, used to derive PDA. */
+  readonly creatorSeed: Array<number>;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  readonly escrowWallet: PublicKey;
+  /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
+  readonly escrowTokenWallet: PublicKey;
+  /**
+   * The SwitchboardWallet that will handle acruing rewards from requests.
+   * Defaults to the escrow_wallet.
+   */
+  readonly rewardEscrowWallet: PublicKey;
+  /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
+  readonly rewardEscrowTokenWallet: PublicKey;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -207,16 +246,15 @@ export class FunctionAccountData {
     types.FunctionStatus.layout("status"),
     borsh.array(borsh.u8(), 64, "name"),
     borsh.array(borsh.u8(), 256, "metadata"),
-    borsh.i64("createdAt"),
+    borsh.u64("createdAt"),
     borsh.i64("updatedAt"),
     borsh.array(borsh.u8(), 64, "containerRegistry"),
     borsh.array(borsh.u8(), 64, "container"),
     borsh.array(borsh.u8(), 32, "version"),
     borsh.publicKey("authority"),
-    borsh.publicKey("escrow"),
-    borsh.publicKey("addressLookupTable"),
     borsh.publicKey("attestationQueue"),
     borsh.u32("queueIdx"),
+    borsh.publicKey("addressLookupTable"),
     borsh.array(borsh.u8(), 64, "schedule"),
     borsh.i64("lastExecutionTimestamp"),
     borsh.i64("nextAllowedTimestamp"),
@@ -228,7 +266,13 @@ export class FunctionAccountData {
     borsh.u64("requestsDefaultSlotsUntilExpiration"),
     borsh.u64("requestsFee"),
     borsh.array(borsh.array(borsh.u8(), 32), 32, "mrEnclaves"),
-    borsh.array(borsh.u8(), 1024, "ebuf"),
+    borsh.u8("bump"),
+    borsh.array(borsh.u8(), 32, "creatorSeed"),
+    borsh.publicKey("escrowWallet"),
+    borsh.publicKey("escrowTokenWallet"),
+    borsh.publicKey("rewardEscrowWallet"),
+    borsh.publicKey("rewardEscrowTokenWallet"),
+    borsh.array(borsh.u8(), 879, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -244,10 +288,9 @@ export class FunctionAccountData {
     this.container = fields.container;
     this.version = fields.version;
     this.authority = fields.authority;
-    this.escrow = fields.escrow;
-    this.addressLookupTable = fields.addressLookupTable;
     this.attestationQueue = fields.attestationQueue;
     this.queueIdx = fields.queueIdx;
+    this.addressLookupTable = fields.addressLookupTable;
     this.schedule = fields.schedule;
     this.lastExecutionTimestamp = fields.lastExecutionTimestamp;
     this.nextAllowedTimestamp = fields.nextAllowedTimestamp;
@@ -260,6 +303,12 @@ export class FunctionAccountData {
       fields.requestsDefaultSlotsUntilExpiration;
     this.requestsFee = fields.requestsFee;
     this.mrEnclaves = fields.mrEnclaves;
+    this.bump = fields.bump;
+    this.creatorSeed = fields.creatorSeed;
+    this.escrowWallet = fields.escrowWallet;
+    this.escrowTokenWallet = fields.escrowTokenWallet;
+    this.rewardEscrowWallet = fields.rewardEscrowWallet;
+    this.rewardEscrowTokenWallet = fields.rewardEscrowTokenWallet;
     this.ebuf = fields.ebuf;
   }
 
@@ -317,10 +366,9 @@ export class FunctionAccountData {
       container: dec.container,
       version: dec.version,
       authority: dec.authority,
-      escrow: dec.escrow,
-      addressLookupTable: dec.addressLookupTable,
       attestationQueue: dec.attestationQueue,
       queueIdx: dec.queueIdx,
+      addressLookupTable: dec.addressLookupTable,
       schedule: dec.schedule,
       lastExecutionTimestamp: dec.lastExecutionTimestamp,
       nextAllowedTimestamp: dec.nextAllowedTimestamp,
@@ -333,6 +381,12 @@ export class FunctionAccountData {
         dec.requestsDefaultSlotsUntilExpiration,
       requestsFee: dec.requestsFee,
       mrEnclaves: dec.mrEnclaves,
+      bump: dec.bump,
+      creatorSeed: dec.creatorSeed,
+      escrowWallet: dec.escrowWallet,
+      escrowTokenWallet: dec.escrowTokenWallet,
+      rewardEscrowWallet: dec.rewardEscrowWallet,
+      rewardEscrowTokenWallet: dec.rewardEscrowTokenWallet,
       ebuf: dec.ebuf,
     });
   }
@@ -351,10 +405,9 @@ export class FunctionAccountData {
       container: this.container,
       version: this.version,
       authority: this.authority.toString(),
-      escrow: this.escrow.toString(),
-      addressLookupTable: this.addressLookupTable.toString(),
       attestationQueue: this.attestationQueue.toString(),
       queueIdx: this.queueIdx,
+      addressLookupTable: this.addressLookupTable.toString(),
       schedule: this.schedule,
       lastExecutionTimestamp: this.lastExecutionTimestamp.toString(),
       nextAllowedTimestamp: this.nextAllowedTimestamp.toString(),
@@ -367,6 +420,12 @@ export class FunctionAccountData {
         this.requestsDefaultSlotsUntilExpiration.toString(),
       requestsFee: this.requestsFee.toString(),
       mrEnclaves: this.mrEnclaves,
+      bump: this.bump,
+      creatorSeed: this.creatorSeed,
+      escrowWallet: this.escrowWallet.toString(),
+      escrowTokenWallet: this.escrowTokenWallet.toString(),
+      rewardEscrowWallet: this.rewardEscrowWallet.toString(),
+      rewardEscrowTokenWallet: this.rewardEscrowTokenWallet.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -385,10 +444,9 @@ export class FunctionAccountData {
       container: obj.container,
       version: obj.version,
       authority: new PublicKey(obj.authority),
-      escrow: new PublicKey(obj.escrow),
-      addressLookupTable: new PublicKey(obj.addressLookupTable),
       attestationQueue: new PublicKey(obj.attestationQueue),
       queueIdx: obj.queueIdx,
+      addressLookupTable: new PublicKey(obj.addressLookupTable),
       schedule: obj.schedule,
       lastExecutionTimestamp: new BN(obj.lastExecutionTimestamp),
       nextAllowedTimestamp: new BN(obj.nextAllowedTimestamp),
@@ -402,6 +460,12 @@ export class FunctionAccountData {
       ),
       requestsFee: new BN(obj.requestsFee),
       mrEnclaves: obj.mrEnclaves,
+      bump: obj.bump,
+      creatorSeed: obj.creatorSeed,
+      escrowWallet: new PublicKey(obj.escrowWallet),
+      escrowTokenWallet: new PublicKey(obj.escrowTokenWallet),
+      rewardEscrowWallet: new PublicKey(obj.rewardEscrowWallet),
+      rewardEscrowTokenWallet: new PublicKey(obj.rewardEscrowTokenWallet),
       ebuf: obj.ebuf,
     });
   }

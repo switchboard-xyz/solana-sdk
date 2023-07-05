@@ -9,34 +9,43 @@ import {
 } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionFundArgs {
-  params: types.FunctionFundParamsFields;
+export interface FunctionResetEscrowArgs {
+  params: types.FunctionResetEscrowParamsFields;
 }
 
-export interface FunctionFundAccounts {
+export interface FunctionResetEscrowAccounts {
   function: PublicKey;
+  authority: PublicKey;
   attestationQueue: PublicKey;
-  escrow: PublicKey;
-  funder: PublicKey;
-  funderAuthority: PublicKey;
+  mint: PublicKey;
+  escrowWallet: PublicKey;
+  defaultWallet: PublicKey;
+  tokenWallet: PublicKey;
+  payer: PublicKey;
   state: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
+  systemProgram: PublicKey;
 }
 
-export const layout = borsh.struct([types.FunctionFundParams.layout("params")]);
+export const layout = borsh.struct([
+  types.FunctionResetEscrowParams.layout("params"),
+]);
 
-export function functionFund(
+export function functionResetEscrow(
   program: SwitchboardProgram,
-  args: FunctionFundArgs,
-  accounts: FunctionFundAccounts
+  args: FunctionResetEscrowArgs,
+  accounts: FunctionResetEscrowAccounts
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
-    { pubkey: accounts.funder, isSigner: false, isWritable: true },
-    { pubkey: accounts.funderAuthority, isSigner: true, isWritable: false },
+    { pubkey: accounts.mint, isSigner: false, isWritable: false },
+    { pubkey: accounts.escrowWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.defaultWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
@@ -44,12 +53,13 @@ export function functionFund(
       isSigner: false,
       isWritable: false,
     },
+    { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([216, 39, 120, 216, 124, 169, 163, 62]);
+  const identifier = Buffer.from([18, 242, 138, 38, 112, 252, 39, 228]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.FunctionFundParams.toEncodable(args.params),
+      params: types.FunctionResetEscrowParams.toEncodable(args.params),
     },
     buffer
   );

@@ -20,7 +20,9 @@ export interface FunctionInitAccounts {
   quote: PublicKey;
   attestationQueue: PublicKey;
   payer: PublicKey;
-  escrow: PublicKey;
+  wallet: PublicKey;
+  walletAuthority: PublicKey;
+  tokenWallet: PublicKey;
   state: PublicKey;
   mint: PublicKey;
   tokenProgram: PublicKey;
@@ -37,13 +39,15 @@ export function functionInit(
   accounts: FunctionInitAccounts
 ) {
   const keys: Array<AccountMeta> = [
-    { pubkey: accounts.function, isSigner: true, isWritable: true },
+    { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.wallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.walletAuthority, isSigner: true, isWritable: false },
+    { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },

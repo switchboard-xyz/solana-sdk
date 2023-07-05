@@ -58,7 +58,7 @@ export interface EnclaveAccountInitParams {
 export interface EnclaveHeartbeatSyncParams {
   gcOracle: PublicKey;
   attestationQueue: PublicKey;
-  permission: [AttestationPermissionAccount, number];
+  permission: AttestationPermissionAccount;
   queueAuthority: PublicKey;
 }
 
@@ -133,12 +133,12 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   public static fromSeed(
     program: SwitchboardProgram,
     functionPubkey: PublicKey
-  ): [EnclaveAccount, number] {
+  ): EnclaveAccount {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from(QUOTE_SEED), functionPubkey.toBytes()],
       program.attestationProgramId
     );
-    return [new EnclaveAccount(program, publicKey), bump];
+    return new EnclaveAccount(program, publicKey);
   }
 
   /**
@@ -198,7 +198,7 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
     queuePubkey: PublicKey,
     queueAuthority: PublicKey,
     owner: PublicKey
-  ): [AttestationPermissionAccount, number] {
+  ): AttestationPermissionAccount {
     return AttestationPermissionAccount.fromSeed(
       this.program,
       queueAuthority,
@@ -250,13 +250,12 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   public heartbeatInstruction(params: {
     gcOracle: PublicKey;
     attestationQueue: PublicKey;
-    permission: [AttestationPermissionAccount, number];
+    permission: AttestationPermissionAccount;
     queueAuthority: PublicKey;
     enclaveSigner: PublicKey;
   }): TransactionInstruction {
     this.program.verifyAttestation();
 
-    const [permissionAccount, permissionBump] = params.permission;
     const instruction = types.quoteHeartbeat(
       this.program,
       { params: {} },
@@ -266,7 +265,7 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
         attestationQueue: params.attestationQueue,
         queueAuthority: params.queueAuthority,
         gcNode: params.gcOracle,
-        permission: permissionAccount.publicKey,
+        permission: params.permission.publicKey,
       }
     );
     return instruction;

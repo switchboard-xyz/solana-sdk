@@ -41,7 +41,7 @@ impl From<u8> for FunctionStatus {
 }
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, AnchorDeserialize)]
 pub struct FunctionAccountData {
     /// Whether the function is invoked on a schedule or by request
     pub is_scheduled: u8, // keep this up-front for filtering
@@ -57,7 +57,7 @@ pub struct FunctionAccountData {
     /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
     /// The unix timestamp when the function was created.
-    pub created_at: i64,
+    pub created_at: u64,
     /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
     pub updated_at: i64,
 
@@ -69,17 +69,17 @@ pub struct FunctionAccountData {
     /// The version tag of the container to pull.
     pub version: [u8; 32],
 
+    // OFFFSET = 511
+
     // Accounts
     /// The authority of the function which is authorized to make account changes.
     pub authority: Pubkey,
-    /// The wrapped SOL escrow of the function to pay for scheduled requests.
-    pub escrow: Pubkey,
-    /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
-    pub address_lookup_table: Pubkey,
     /// The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements.
     pub attestation_queue: Pubkey,
     /// An incrementer used to rotate through an AttestationQueue's verifiers.
     pub queue_idx: u32,
+    /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
+    pub address_lookup_table: Pubkey,
 
     // Schedule
     /// The cron schedule to run the function on.
@@ -112,8 +112,59 @@ pub struct FunctionAccountData {
 
     /// An array of permitted mr_enclave measurements for the function.
     pub mr_enclaves: [[u8; 32]; 32],
+
+    /// PDA bump.
+    pub bump: u8,
+    /// The payer who originally created the function. Cannot change, used to derive PDA.
+    pub creator_seed: [u8; 32],
+
+    /// The SwitchboardWallet that will handle pre-funding rewards paid out to function runners.
+    pub escrow_wallet: Pubkey,
+    /// The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners.
+    pub escrow_token_wallet: Pubkey,
+
+    /// The SwitchboardWallet that will handle acruing rewards from requests.
+    /// Defaults to the escrow_wallet.
+    pub reward_escrow_wallet: Pubkey,
+    /// The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters.
+    pub reward_escrow_token_wallet: Pubkey,
+
     /// Reserved.
-    pub _ebuf: [u8; 1024],
+    pub _ebuf: [u8; 879],
+}
+
+impl anchor_lang::AccountDeserialize for FunctionAccountData {
+    fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        if buf.len() < FunctionAccountData::discriminator().len() {
+            return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+        let given_disc = &buf[..8];
+        if FunctionAccountData::discriminator() != given_disc {
+            return Err(
+                anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+                    error_name: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch.name(),
+                    error_code_number: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .into(),
+                    error_msg: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .to_string(),
+                    error_origin: Some(anchor_lang::error::ErrorOrigin::Source(
+                        anchor_lang::error::Source {
+                            filename: "programs/attestation_program/src/lib.rs",
+                            line: 1u32,
+                        },
+                    )),
+                    compared_values: None,
+                })
+                .with_account_name("FunctionAccountData"),
+            );
+        }
+        Self::try_deserialize_unchecked(buf)
+    }
+    fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        let mut data: &[u8] = &buf[8..];
+        AnchorDeserialize::deserialize(&mut data)
+            .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+    }
 }
 
 unsafe impl Pod for FunctionAccountData {}
@@ -304,6 +355,51 @@ impl FunctionAccountData {
     }
 
     cfg_client! {
+        pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                0,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(FunctionAccountData::discriminator().to_vec()),
+            ))
+        }
+
+        pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                9,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+            ))
+        }
+
+        pub fn get_is_scheduled_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                8,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+            ))
+        }
+
+        pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                14,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![FunctionStatus::Active as u8]),
+            ))
+        }
+
+        pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                543,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(queue_pubkey.to_bytes().into()),
+            ))
+        }
+
+        pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
+            vec![
+                FunctionAccountData::get_discriminator_filter(),
+                FunctionAccountData::get_is_triggered_filter(),
+                FunctionAccountData::get_is_scheduled_filter(),
+                FunctionAccountData::get_is_active_filter(),
+                FunctionAccountData::get_queue_filter(queue_pubkey),
+            ]
+        }
+
         pub fn get_schedule(&self) -> Option<cron::Schedule> {
             if self.schedule[0] == 0 {
                 return None;
@@ -313,7 +409,7 @@ impl FunctionAccountData {
                 .unwrap_or("* * * * * *")
                 .trim_end_matches('\0');
             let schedule = cron::Schedule::try_from(schedule);
-            Some(schedule.unwrap_or(every_second.clone()))
+            Some(schedule.unwrap_or(every_second))
         }
 
         pub fn get_last_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
@@ -324,12 +420,8 @@ impl FunctionAccountData {
         }
 
         pub fn get_next_execution_datetime(&self) -> Option<chrono::DateTime<chrono::Utc>> {
-            let schedule = self.get_schedule();
-            if schedule.is_none() {
-                return None;
-            }
-            let dt = self.get_last_execution_datetime();
-            schedule.unwrap().after(&dt).next()
+            let schedule = self.get_schedule()?;
+            schedule.after(&self.get_last_execution_datetime()).next()
         }
 
         pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {
@@ -352,11 +444,21 @@ impl FunctionAccountData {
             true
         }
 
+        pub fn is_scheduled(&self) -> bool {
+            self.schedule[0] == 0
+        }
+
         pub async fn fetch(
             client: &solana_client::rpc_client::RpcClient,
             pubkey: Pubkey,
         ) -> std::result::Result<Self, switchboard_common::Error> {
             crate::client::load_account(client, pubkey).await
         }
+
+        // pub async fn get_program_accounts(
+        //     client: &solana_client::rpc_client::RpcClient
+        // ) -> std::result::Result<Vec<FunctionAccountData>, switchboard_common::Error> {
+        //     let accounts = client.get_program_accounts(&SWITCHBOARD_ATTESTATION_PROGRAM_ID)?;
+        // }
     }
 }

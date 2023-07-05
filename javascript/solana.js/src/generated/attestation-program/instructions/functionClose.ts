@@ -16,8 +16,8 @@ export interface FunctionCloseArgs {
 export interface FunctionCloseAccounts {
   function: PublicKey;
   authority: PublicKey;
-  escrow: PublicKey;
   addressLookupTable: PublicKey;
+  escrowWallet: PublicKey;
   solDest: PublicKey;
   escrowDest: PublicKey;
   state: PublicKey;
@@ -38,8 +38,8 @@ export function functionClose(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
+    { pubkey: accounts.escrowWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.solDest, isSigner: false, isWritable: false },
     { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },

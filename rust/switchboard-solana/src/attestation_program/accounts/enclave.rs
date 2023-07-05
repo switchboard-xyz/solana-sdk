@@ -42,7 +42,7 @@ impl From<u8> for VerificationStatus {
 
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug)]
+#[derive(Debug, AnchorDeserialize)]
 pub struct EnclaveAccountData {
     /// The address of the signer generated within an enclave.
     pub enclave_signer: Pubkey,
@@ -76,8 +76,49 @@ pub struct EnclaveAccountData {
     /// The PDA bump. Only set for FunctionAccount quotes.
     pub bump: u8,
 
+    /// The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.
+    /// We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one.
+    pub reward_escrow: Pubkey,
+    /// The SwitchboardWallet account containing the queues required min_stake.
+    /// Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards.
+    pub stake_wallet: Pubkey,
+
     /// Reserved.
-    pub _ebuf: [u8; 1024],
+    pub _ebuf: [u8; 928],
+}
+
+impl anchor_lang::AccountDeserialize for EnclaveAccountData {
+    fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        if buf.len() < EnclaveAccountData::discriminator().len() {
+            return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+        let given_disc = &buf[..8];
+        if EnclaveAccountData::discriminator() != given_disc {
+            return Err(
+                anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+                    error_name: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch.name(),
+                    error_code_number: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .into(),
+                    error_msg: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .to_string(),
+                    error_origin: Some(anchor_lang::error::ErrorOrigin::Source(
+                        anchor_lang::error::Source {
+                            filename: "programs/attestation_program/src/lib.rs",
+                            line: 1u32,
+                        },
+                    )),
+                    compared_values: None,
+                })
+                .with_account_name("EnclaveAccountData"),
+            );
+        }
+        Self::try_deserialize_unchecked(buf)
+    }
+    fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        let mut data: &[u8] = &buf[8..];
+        AnchorDeserialize::deserialize(&mut data)
+            .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+    }
 }
 
 unsafe impl Pod for EnclaveAccountData {}

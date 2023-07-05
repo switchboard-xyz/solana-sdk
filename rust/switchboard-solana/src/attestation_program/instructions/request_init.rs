@@ -6,40 +6,51 @@ pub struct FunctionRequestInit<'info> {
     #[account(
         init,
         payer = payer,
-        space = FunctionRequestAccountData::space(
-            params.max_container_params_len
-        )
+        space = FunctionRequestAccountData::space(params.max_container_params_len)
     )]
     pub request: Box<Account<'info, FunctionRequestAccountData>>,
+
     /// CHECK: the authority of the request
     pub authority: AccountInfo<'info>,
+
     #[account(
-        mut, 
-        has_one = attestation_queue
+        mut, // write lock issues ??
+        has_one = attestation_queue,
+        // has_one = authority @ SwitchboardError::InvalidAuthority,
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
+
     /// CHECK: function authority required to permit new requests
     #[account(mut)]
     pub function_authority: Option<AccountInfo<'info>>,
+
     #[account(
         init,
         payer = payer,
         associated_token::mint = mint,
         associated_token::authority = request,
+
     )]
     pub escrow: Box<Account<'info, TokenAccount>>,
+
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: Account<'info, Mint>,
+
     #[account(
-        seeds = [STATE_SEED], 
+        seeds = [STATE_SEED],
         bump = state.load()?.bump
     )]
     pub state: AccountLoader<'info, AttestationProgramState>,
+
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+
     #[account(mut)]
     pub payer: Signer<'info>,
+
     pub system_program: Program<'info, System>,
+
     pub token_program: Program<'info, Token>,
+
     pub associated_token_program: Program<'info, AssociatedToken>,
 }
 

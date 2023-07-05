@@ -17,6 +17,7 @@ export * from "./permissionAccount.js";
 export * from "./programStateAccount.js";
 export * from "./queueAccount.js";
 export * from "./queueDataBuffer.js";
+export * from "./switchboardWallet.js";
 export * from "./vrfAccount.js";
 export * from "./vrfLiteAccount.js";
 export * from "./vrfPoolAccount.js";

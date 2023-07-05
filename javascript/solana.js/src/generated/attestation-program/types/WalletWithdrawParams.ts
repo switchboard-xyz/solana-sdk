@@ -5,18 +5,18 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface FunctionWithdrawParamsFields {
+export interface WalletWithdrawParamsFields {
   amount: BN;
 }
 
-export interface FunctionWithdrawParamsJSON {
+export interface WalletWithdrawParamsJSON {
   amount: string;
 }
 
-export class FunctionWithdrawParams {
+export class WalletWithdrawParams {
   readonly amount: BN;
 
-  constructor(fields: FunctionWithdrawParamsFields) {
+  constructor(fields: WalletWithdrawParamsFields) {
     this.amount = fields.amount;
   }
 
@@ -26,30 +26,30 @@ export class FunctionWithdrawParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new FunctionWithdrawParams({
+    return new WalletWithdrawParams({
       amount: obj.amount,
     });
   }
 
-  static toEncodable(fields: FunctionWithdrawParamsFields) {
+  static toEncodable(fields: WalletWithdrawParamsFields) {
     return {
       amount: fields.amount,
     };
   }
 
-  toJSON(): FunctionWithdrawParamsJSON {
+  toJSON(): WalletWithdrawParamsJSON {
     return {
       amount: this.amount.toString(),
     };
   }
 
-  static fromJSON(obj: FunctionWithdrawParamsJSON): FunctionWithdrawParams {
-    return new FunctionWithdrawParams({
+  static fromJSON(obj: WalletWithdrawParamsJSON): WalletWithdrawParams {
+    return new WalletWithdrawParams({
       amount: new BN(obj.amount),
     });
   }
 
   toEncodable() {
-    return FunctionWithdrawParams.toEncodable(this);
+    return WalletWithdrawParams.toEncodable(this);
   }
 }

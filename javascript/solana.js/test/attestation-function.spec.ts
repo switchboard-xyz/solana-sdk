@@ -4,7 +4,7 @@ import { functionVerify } from "../src/generated/index.js";
 import * as sbv2 from "../src/index.js";
 import { AttestationQueueAccount, EnclaveAccount } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import { printLogs, setupTest, TestContext } from "./utils.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import { NATIVE_MINT } from "@solana/spl-token";
@@ -98,19 +98,26 @@ describe("Function Tests", () => {
   });
 
   it("Creates a Function", async () => {
-    const functionKeypair = Keypair.generate();
+    // const authorityKeypair = Keypair.generate();
+
+    // console.log(`authorityKeypair: ${authorityKeypair.publicKey}`);
 
     try {
-      [functionAccount] = await sbv2.FunctionAccount.create(ctx.program, {
-        name: "FUNCTION_NAME",
-        metadata: "FUNCTION_METADATA",
-        schedule: "* * * * *",
-        container: "containerId",
-        version: "1.0.0",
-        mrEnclave,
-        attestationQueue: attestationQueueAccount,
-        keypair: functionKeypair,
-      });
+      [functionAccount] = await sbv2.FunctionAccount.create(
+        ctx.program,
+        {
+          name: "FUNCTION_NAME",
+          metadata: "FUNCTION_METADATA",
+          schedule: "* * * * *",
+          container: "containerId",
+          version: "1.0.0",
+          mrEnclave,
+          attestationQueue: attestationQueueAccount,
+          // authority: authorityKeypair.publicKey,
+        },
+        undefined,
+        { skipPreflight: true }
+      );
     } catch (error) {
       console.error(error);
       throw error;
@@ -139,7 +146,7 @@ describe("Function Tests", () => {
   });
 
   it("Verifies the function's quote", async () => {
-    const [functionQuoteAccount] = functionAccount.getEnclaveAccount();
+    const functionQuoteAccount = functionAccount.getEnclaveAccount();
 
     const initialQuoteState = await functionQuoteAccount.loadData();
     const initialVerificationStatus =
@@ -177,7 +184,7 @@ describe("Function Tests", () => {
     );
 
     await functionAccount.fund({
-      fundAmount: 0.25,
+      transferAmount: 0.25,
       funderTokenWallet: payerTokenWallet,
       funderAuthority: ctx.payer,
     });
@@ -208,11 +215,7 @@ describe("Function Tests", () => {
       "Payer token wallet should already be initialized"
     );
 
-    await functionAccount.withdraw({
-      amount: 0.1,
-      unwrap: false,
-      withdrawWallet: payerTokenWallet,
-    });
+    await functionAccount.withdraw(0.1, payerTokenWallet);
 
     const finalBalance = await functionAccount.getBalance();
     assert(
@@ -233,108 +236,74 @@ describe("Function Tests", () => {
     );
   });
 
-  it("Withdraw all funds from the function", async () => {
-    const initialBalance = await functionAccount.getBalance();
-    assert(initialBalance > 0, "Function escrow should have some funds");
+  // it("Withdraw all funds from the function", async () => {
+  //   const initialBalance = await functionAccount.getBalance();
+  //   assert(initialBalance > 0, "Function escrow should have some funds");
 
-    const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
+  //   const [payerTokenWallet] = await ctx.program.mint.getOrCreateWrappedUser(
+  //     ctx.payer.publicKey,
+  //     { fundUpTo: 0 }
+  //   );
+
+  //   await functionAccount.withdraw({
+  //     amount: "all",
+  //     unwrap: false,
+  //     withdrawWallet: payerTokenWallet,
+  //   });
+
+  //   const finalBalance = await functionAccount.getBalance();
+  //   const roundedFinalBalance = ctx.round(finalBalance, 4);
+  //   assert(
+  //     roundedFinalBalance === 0,
+  //     `Function escrow should have minimal funds remaining`
+  //   );
+  // });
+
+  it("verifies the function", async () => {
+    const fnQuoteAccount = functionAccount.getEnclaveAccount();
+
+    const trustedSigner = anchor.web3.Keypair.generate();
+
+    const [receiver] = await ctx.program.mint.getOrCreateWrappedUser(
       ctx.payer.publicKey,
       { fundUpTo: 0 }
     );
 
-    await functionAccount.withdraw({
-      amount: "all",
-      unwrap: false,
-      withdrawWallet: payerTokenWallet,
+    const timestamp = unixTimestamp();
+
+    const nextAllowedTimestamp = timestamp + 100;
+
+    const txnSignature = await functionAccount.verify({
+      observedTime: new BN(timestamp),
+      nextAllowedTimestamp: new BN(nextAllowedTimestamp),
+      isFailure: false,
+      mrEnclave: new Uint8Array(mrEnclave),
+      verifier: attestationQuoteVerifierAccount,
+      verifierEnclaveSigner: quoteVerifierSigner,
+      functionEnclaveSigner: trustedSigner,
+      receiver,
     });
 
-    const finalBalance = await functionAccount.getBalance();
-    const roundedFinalBalance = ctx.round(finalBalance, 4);
+    // console.log(`functionVerify: ${txnSignature}`);
+
+    // await printLogs(ctx.program.connection, txnSignature, true);
+
+    await sleep(3000); // wait for rpc to catch up
+
+    const functionState = await functionAccount.loadData();
+    const quoteState = await fnQuoteAccount.loadData();
+
     assert(
-      roundedFinalBalance === 0,
-      `Function escrow should have minimal funds remaining`
+      quoteState.enclaveSigner.equals(trustedSigner.publicKey),
+      "Function EnclaveSigner mismatch"
     );
-  });
 
-  it("verifies the function", async () => {
-    const trustedSigner = anchor.web3.Keypair.generate();
+    assert(
+      functionState.nextAllowedTimestamp.toNumber() === nextAllowedTimestamp,
+      "Next Allowed timestamp mismatch"
+    );
 
-    const myFunction = await functionAccount.loadData();
-
-    const lookupTable = await ctx.program.connection
-      .getAddressLookupTable(myFunction.addressLookupTable)
-      .then((res) => res.value!);
-
-    const {
-      statePubkey,
-      attestationQueuePubkey,
-      functionPubkey,
-      escrowPubkey,
-      fnQuote,
-    } = sbv2.FunctionAccount.decodeAddressLookup(lookupTable);
-
-    const getIxn = (): TransactionInstruction => {
-      return functionVerify(
-        ctx.program,
-        {
-          params: {
-            observedTime: new BN(unixTimestamp()),
-            nextAllowedTimestamp: new BN(unixTimestamp() + 100),
-            isFailure: false,
-            mrEnclave: Array.from(mrEnclave),
-          },
-        },
-        {
-          function: functionAccount.publicKey,
-          functionEnclaveSigner: trustedSigner.publicKey,
-          verifierEnclaveSigner: quoteVerifierSigner.publicKey,
-          verifierQuote: attestationQuoteVerifierAccount.publicKey,
-          attestationQueue: attestationQueuePubkey,
-          escrow: escrowPubkey,
-          receiver: anchor.utils.token.associatedAddress({
-            mint: NATIVE_MINT,
-            owner: ctx.payer.publicKey,
-          }),
-          verifierPermission:
-            attestationQuoteVerifierAccount.getPermissionAccount(
-              attestationQueuePubkey,
-              ctx.payer.publicKey,
-              ctx.payer.publicKey
-            )[0].publicKey,
-          state: statePubkey,
-          fnQuote: fnQuote,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        }
-      );
-    };
-
-    const blockhash = await ctx.program.connection.getLatestBlockhash();
-
-    // legacy
-    const transactionLegacy = new sbv2.TransactionObject(
-      ctx.payer.publicKey,
-      [getIxn()],
-      [quoteVerifierSigner, trustedSigner]
-    ).toVersionedTxn(blockhash);
-    const legacyByteLength = transactionLegacy.serialize().byteLength;
-    console.log(`functionVerify (legacy): ${legacyByteLength}`);
-
-    // build txn
-    const messageV0 = new anchor.web3.TransactionMessage({
-      payerKey: ctx.payer.publicKey,
-      recentBlockhash: blockhash.blockhash,
-      instructions: [getIxn()], // note this is an array of instructions
-    }).compileToV0Message([lookupTable]);
-    const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
-    transactionV0.sign([quoteVerifierSigner]);
-    transactionV0.sign([trustedSigner]);
-    transactionV0.sign([ctx.payer]);
-
-    const lookupTableByteLength = transactionV0.serialize().byteLength;
-
-    console.log(`functionVerify (lookup): ${lookupTableByteLength}`);
-
-    console.log(`SAVES = ${legacyByteLength - lookupTableByteLength} bytes`);
+    assert(functionState.status.kind === "Active", "Function status mismatch");
   });
 
   it("Sets a function config", async () => {

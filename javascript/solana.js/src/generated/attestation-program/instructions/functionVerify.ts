@@ -15,12 +15,14 @@ export interface FunctionVerifyArgs {
 
 export interface FunctionVerifyAccounts {
   function: PublicKey;
+  authority: PublicKey;
   functionEnclaveSigner: PublicKey;
   fnQuote: PublicKey;
   verifierQuote: PublicKey;
   verifierEnclaveSigner: PublicKey;
   verifierPermission: PublicKey;
-  escrow: PublicKey;
+  escrowWallet: PublicKey;
+  escrowTokenWallet: PublicKey;
   receiver: PublicKey;
   state: PublicKey;
   attestationQueue: PublicKey;
@@ -38,6 +40,7 @@ export function functionVerify(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.authority, isSigner: false, isWritable: false },
     {
       pubkey: accounts.functionEnclaveSigner,
       isSigner: true,
@@ -51,7 +54,8 @@ export function functionVerify(
       isWritable: false,
     },
     { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
-    { pubkey: accounts.escrow, isSigner: false, isWritable: true },
+    { pubkey: accounts.escrowWallet, isSigner: false, isWritable: false },
+    { pubkey: accounts.escrowTokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },

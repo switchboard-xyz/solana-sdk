@@ -33,6 +33,8 @@ pub enum SwitchboardError {
     InvalidFunctionInput,
     #[msg("Failed to compute the PDA")]
     PdaDerivationError,
+    #[msg("Illegal Operation")]
+    IllegalExecuteAttempt,
 }
 
 use crate::cfg_client;
