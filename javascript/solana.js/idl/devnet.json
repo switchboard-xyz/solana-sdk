@@ -5796,6 +5796,22 @@
             "type": "u8"
           },
           {
+            "name": "rewardEscrow",
+            "docs": [
+              "The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.",
+              "We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "stakeWallet",
+            "docs": [
+              "The SwitchboardWallet account containing the queues required min_stake.",
+              "Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards."
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -5803,7 +5819,7 @@
             "type": {
               "array": [
                 "u8",
-                1024
+                928
               ]
             }
           }

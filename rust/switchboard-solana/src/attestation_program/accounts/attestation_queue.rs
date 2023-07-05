@@ -7,7 +7,7 @@ use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, AnchorDeserialize)]
+#[derive(AnchorDeserialize)]
 pub struct AttestationQueueAccountData {
     /// The address of the authority which is permitted to add/remove allowed enclave measurements.
     pub authority: Pubkey,

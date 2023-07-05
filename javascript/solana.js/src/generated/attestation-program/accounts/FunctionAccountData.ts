@@ -246,7 +246,7 @@ export class FunctionAccountData {
     types.FunctionStatus.layout("status"),
     borsh.array(borsh.u8(), 64, "name"),
     borsh.array(borsh.u8(), 256, "metadata"),
-    borsh.u64("createdAt"),
+    borsh.i64("createdAt"),
     borsh.i64("updatedAt"),
     borsh.array(borsh.u8(), 64, "containerRegistry"),
     borsh.array(borsh.u8(), 64, "container"),

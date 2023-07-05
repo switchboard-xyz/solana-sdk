@@ -4249,7 +4249,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.7.0"
+version = "0.8.3"
 dependencies = [
  "anchor-client",
  "anchor-lang",

@@ -57,7 +57,7 @@ pub struct FunctionAccountData {
     /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
     /// The unix timestamp when the function was created.
-    pub created_at: u64,
+    pub created_at: i64,
     /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
     pub updated_at: i64,
 

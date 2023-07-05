@@ -37,8 +37,6 @@ export type {
 export { functionExtendLookup } from "./functionExtendLookup.js";
 export type { FunctionInitAccounts, FunctionInitArgs } from "./functionInit.js";
 export { functionInit } from "./functionInit.js";
-export type { FunctionOverrideCloseAccounts } from "./functionOverrideClose.js";
-export { functionOverrideClose } from "./functionOverrideClose.js";
 export type {
   FunctionRequestCloseAccounts,
   FunctionRequestCloseArgs,

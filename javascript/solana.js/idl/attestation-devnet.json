@@ -31,6 +31,254 @@
       ]
     },
     {
+      "name": "walletInit",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletFund",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "funderWallet",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "funder",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletFundParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletWithdraw",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletWithdrawParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletClose",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletCloseParams"
+          }
+        }
+      ]
+    },
+    {
       "name": "quoteInit",
       "accounts": [
         {
@@ -349,7 +597,7 @@
         {
           "name": "function",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "addressLookupTable",
@@ -377,7 +625,18 @@
           "isSigner": true
         },
         {
-          "name": "escrow",
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "walletAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "tokenWallet",
           "isMut": true,
           "isSigner": false
         },
@@ -435,12 +694,12 @@
           "isSigner": true
         },
         {
-          "name": "escrow",
+          "name": "addressLookupTable",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "addressLookupTable",
+          "name": "escrowWallet",
           "isMut": true,
           "isSigner": false
         },
@@ -513,11 +772,270 @@
       ]
     },
     {
+      "name": "functionSetAuthority",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "walletAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetAuthorityParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionSetEscrow",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newEscrowAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newEscrowTokenWallet",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetEscrowParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionResetEscrow",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "defaultWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionResetEscrowParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionExtendLookup",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionExtendLookupParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionDeactivateLookup",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "functionVerify",
       "accounts": [
         {
           "name": "function",
           "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -546,7 +1064,12 @@
           "isSigner": false
         },
         {
-          "name": "escrow",
+          "name": "escrowWallet",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenWallet",
           "isMut": true,
           "isSigner": false
         },
@@ -604,107 +1127,6 @@
           "name": "params",
           "type": {
             "defined": "FunctionTriggerParams"
-          }
-        }
-      ]
-    },
-    {
-      "name": "functionFund",
-      "accounts": [
-        {
-          "name": "function",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "attestationQueue",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "escrow",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "funder",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "funderAuthority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "FunctionFundParams"
-          }
-        }
-      ]
-    },
-    {
-      "name": "functionWithdraw",
-      "accounts": [
-        {
-          "name": "function",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "attestationQueue",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        },
-        {
-          "name": "escrow",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "receiver",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "FunctionWithdrawParams"
           }
         }
       ]
@@ -1083,6 +1505,77 @@
       }
     },
     {
+      "name": "SwitchboardWallet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "initialized",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "resourceCount",
+            "type": "u32"
+          },
+          {
+            "name": "withdrawAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "resources",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "resourcesMaxLen",
+            "type": "u32"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "FunctionAccountData",
       "type": {
         "kind": "struct",
@@ -1196,20 +1689,6 @@
             "type": "publicKey"
           },
           {
-            "name": "escrow",
-            "docs": [
-              "The wrapped SOL escrow of the function to pay for scheduled requests."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "addressLookupTable",
-            "docs": [
-              "The address_lookup_table of the function used to increase the number of accounts we can fit into a function result."
-            ],
-            "type": "publicKey"
-          },
-          {
             "name": "attestationQueue",
             "docs": [
               "The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements."
@@ -1222,6 +1701,13 @@
               "An incrementer used to rotate through an AttestationQueue's verifiers."
             ],
             "type": "u32"
+          },
+          {
+            "name": "addressLookupTable",
+            "docs": [
+              "The address_lookup_table of the function used to increase the number of accounts we can fit into a function result."
+            ],
+            "type": "publicKey"
           },
           {
             "name": "schedule",
@@ -1318,6 +1804,54 @@
             }
           },
           {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "creatorSeed",
+            "docs": [
+              "The payer who originally created the function. Cannot change, used to derive PDA."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "escrowWallet",
+            "docs": [
+              "The SwitchboardWallet that will handle pre-funding rewards paid out to function runners."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrowTokenWallet",
+            "docs": [
+              "The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "rewardEscrowWallet",
+            "docs": [
+              "The SwitchboardWallet that will handle acruing rewards from requests.",
+              "Defaults to the escrow_wallet."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "rewardEscrowTokenWallet",
+            "docs": [
+              "The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters."
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -1325,7 +1859,7 @@
             "type": {
               "array": [
                 "u8",
-                1024
+                879
               ]
             }
           }
@@ -1378,6 +1912,13 @@
             "name": "escrow",
             "docs": [
               "The tokenAccount escrow"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The Attestation Queue for this request."
             ],
             "type": "publicKey"
           },
@@ -1569,6 +2110,22 @@
             "type": "u8"
           },
           {
+            "name": "rewardEscrow",
+            "docs": [
+              "The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.",
+              "We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "stakeWallet",
+            "docs": [
+              "The SwitchboardWallet account containing the queues required min_stake.",
+              "Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards."
+            ],
+            "type": "publicKey"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -1576,7 +2133,7 @@
             "type": {
               "array": [
                 "u8",
-                1024
+                928
               ]
             }
           }
@@ -1701,6 +2258,20 @@
             "type": "u32"
           },
           {
+            "name": "verifierMinStake",
+            "docs": [
+              "The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "functionMinStake",
+            "docs": [
+              "The minimum number of lamports a function needs to lock-up in order to use a queues resources."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -1708,7 +2279,7 @@
             "type": {
               "array": [
                 "u8",
-                1024
+                1008
               ]
             }
           }
@@ -1766,13 +2337,15 @@
       }
     },
     {
-      "name": "FunctionFundParams",
+      "name": "FunctionExtendLookupParams",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "amount",
-            "type": "u64"
+            "name": "newAddresses",
+            "type": {
+              "vec": "publicKey"
+            }
           }
         ]
       }
@@ -1834,8 +2407,33 @@
           {
             "name": "requestsFee",
             "type": "u64"
+          },
+          {
+            "name": "creatorSeed",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
           }
         ]
+      }
+    },
+    {
+      "name": "FunctionResetEscrowParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionSetAuthorityParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
       }
     },
     {
@@ -1920,6 +2518,13 @@
       }
     },
     {
+      "name": "FunctionSetEscrowParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
       "name": "FunctionTriggerParams",
       "type": {
         "kind": "struct",
@@ -1951,18 +2556,6 @@
                 32
               ]
             }
-          }
-        ]
-      }
-    },
-    {
-      "name": "FunctionWithdrawParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "amount",
-            "type": "u64"
           }
         ]
       }
@@ -2263,6 +2856,63 @@
       }
     },
     {
+      "name": "WalletCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "WalletFundParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "transferAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "wrapAmount",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WalletInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "maxLen",
+            "type": {
+              "option": "u32"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WalletWithdrawParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "FunctionRequestTriggerRound",
       "type": {
         "kind": "struct",
@@ -2335,6 +2985,78 @@
       }
     },
     {
+      "name": "Quote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The address of the signer generated within an enclave."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mrEnclave",
+            "docs": [
+              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "verificationStatus",
+            "docs": [
+              "The VerificationStatus of the quote."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "verificationTimestamp",
+            "docs": [
+              "The unix timestamp when the quote was last verified."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "validUntil",
+            "docs": [
+              "The unix timestamp when the quotes verification status expires."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quoteRegistry",
+            "docs": [
+              "The off-chain registry where the verifiers quote can be located."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "registryKey",
+            "docs": [
+              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "FunctionStatus",
       "type": {
         "kind": "enum",
@@ -2356,6 +3078,20 @@
           },
           {
             "name": "InvalidPermissions"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Inactive"
+          },
+          {
+            "name": "Active"
           }
         ]
       }

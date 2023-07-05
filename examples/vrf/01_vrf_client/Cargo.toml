@@ -17,5 +17,5 @@ cpi = ["no-entrypoint"]
 
 [dependencies]
 bytemuck = "1.13.1"
-switchboard-solana = { path = "../../../rust/switchboard-solana", version = "0.7.0" }
-# switchboard-solana = { version = "^0.7.0", path = "../../../rust/switchboard-solana" }
+switchboard-solana = { path = "../../../rust/switchboard-solana", version = "0.8.3" }
+# switchboard-solana = { version = "^0.8.3", path = "../../../rust/switchboard-solana" }
