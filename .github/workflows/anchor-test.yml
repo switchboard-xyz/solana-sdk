@@ -10,8 +10,8 @@ on:
       - "rust/switchboard-v2/**"
 
 jobs:
-  vrfParserTest:
-    name: "Anchor VRF Parser Tests"
+  vrfClientTests:
+    name: "VRF Client Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 25
     defaults:
@@ -25,8 +25,8 @@ jobs:
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solanaVersion: "v1.14.18"
-          anchorVersion: "0.26.0"
+          solanaVersion: "v1.16.1"
+          anchorVersion: "0.28.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
@@ -46,15 +46,15 @@ jobs:
             './programs/anchor-vrf-parser/src/**') }}
 
       - name: Anchor Build
-        working-directory: programs/anchor-vrf-parser
+        working-directory: examples/vrf/01_vrf_client
         run: pnpm build
 
       - name: Anchor Test
-        working-directory: programs/anchor-vrf-parser
+        working-directory: examples/vrf/01_vrf_client
         run: anchor test
 
-  feedParserTest:
-    name: "Anchor Feed Parser Tests"
+  feedClientTests:
+    name: "Feed Client Tests"
     runs-on: ubuntu-latest
     timeout-minutes: 25
     defaults:
@@ -68,8 +68,8 @@ jobs:
       - name: Setup Workspace
         uses: ./.github/actions/setup-workspace
         with:
-          solanaVersion: "v1.14.18"
-          anchorVersion: "0.26.0"
+          solanaVersion: "v1.16.1"
+          anchorVersion: "0.28.0"
           nodeVersion: ${{ matrix.nodeVersion }}
 
       - name: Cache Build
@@ -89,9 +89,9 @@ jobs:
             './programs/anchor-feed-parser/src/**') }}
 
       - name: Anchor Build
-        working-directory: programs/anchor-feed-parser
+        working-directory: examples/feeds/01_feed_client
         run: pnpm build
 
       - name: Anchor Test
-        working-directory: programs/anchor-feed-parser
+        working-directory: examples/feeds/01_feed_client
         run: anchor test
