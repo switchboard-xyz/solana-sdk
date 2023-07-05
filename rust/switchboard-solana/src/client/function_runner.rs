@@ -8,6 +8,10 @@ use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::signer::keypair::Keypair;
 use std::result::Result;
 use std::sync::Arc;
+use hex;
+use std::env;
+use switchboard_common::ChainResultInfo::Solana;
+use switchboard_common::SOLFunctionResult;
 
 #[derive(Clone)]
 pub struct FunctionRunner {
@@ -17,6 +21,9 @@ pub struct FunctionRunner {
     pub signer: Pubkey,
 
     pub function: Pubkey,
+    pub function_data: FunctionAccountData,
+    pub fn_request_key: Pubkey,
+    pub fn_request_data: Vec<u8>,
     pub quote: Pubkey,
     pub payer: Pubkey,
     pub verifier: Pubkey,
@@ -42,6 +49,12 @@ impl FunctionRunner {
         let signer = signer_to_pubkey(signer_keypair.clone())?;
 
         let function = load_env_pubkey("FUNCTION_KEY")?;
+        let function_data = *bytemuck::try_from_bytes(&hex::decode(
+            env::var("FUNCTION_DATA").unwrap()).unwrap()).unwrap();
+        let fn_request_key = load_env_pubkey("FUNCTION_REQUEST_KEY").unwrap_or_default();
+        let fn_request_data = Vec::new();
+        // let fn_request_data = bytemuck::try_from_bytes(hex::decode(env::var("FUNCTION_REQUEST_DATA")
+            // .unwrap_or_default()).unwrap_or_default()).unwrap_or_default();
         let payer = load_env_pubkey("PAYER")?;
         let verifier = load_env_pubkey("VERIFIER")?;
         let reward_receiver = load_env_pubkey("REWARD_RECEIVER")?;
@@ -56,6 +69,9 @@ impl FunctionRunner {
             signer_keypair,
             signer,
             function,
+            function_data,
+            fn_request_key,
+            fn_request_data,
             quote,
             payer,
             verifier,
@@ -146,12 +162,14 @@ impl FunctionRunner {
 
         Ok(FunctionResult {
             version: 1,
-            chain: switchboard_common::Chain::Solana,
-            key: self.function.to_bytes(),
-            signer: self.signer.to_bytes(),
-            serialized_tx: bincode::serialize(&tx).unwrap(),
             quote: quote_raw,
-            ..Default::default()
+            fn_key: self.function.to_bytes().into(),
+            signer: self.signer.to_bytes().into(),
+            fn_request_key: self.fn_request_key.to_bytes().into(),
+            fn_request_hash: Vec::new(),
+            chain_result_info: Solana(SOLFunctionResult {
+                serialized_tx: bincode::serialize(&tx).unwrap(),
+            }),
         })
     }
 

@@ -33,13 +33,14 @@ switchboard-common = { version = "0.8.1" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.8.1", features = ["client"] }
+switchboard-common = { version = "0.8.4", features = ["client"] }
 anchor-client = { version = "0.28.0" }
 solana-client = ">= 1.16.1, < 1.17"
 bincode = { version = "^1" }
 sgx-quote = { version = "0.1.0" }
 cron = { version = "0.12.0" }
 chrono = { version = "0.4.25" }
+hex = "0.4.3"
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "doc_cfg"]
