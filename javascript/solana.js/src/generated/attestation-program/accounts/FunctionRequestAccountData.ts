@@ -18,6 +18,8 @@ export interface FunctionRequestAccountDataFields {
   function: PublicKey;
   /** The tokenAccount escrow */
   escrow: PublicKey;
+  /** The Attestation Queue for this request. */
+  attestationQueue: PublicKey;
   /** The current active request. */
   activeRequest: types.FunctionRequestTriggerRoundFields;
   /** The previous request. */
@@ -52,6 +54,8 @@ export interface FunctionRequestAccountDataJSON {
   function: string;
   /** The tokenAccount escrow */
   escrow: string;
+  /** The Attestation Queue for this request. */
+  attestationQueue: string;
   /** The current active request. */
   activeRequest: types.FunctionRequestTriggerRoundJSON;
   /** The previous request. */
@@ -86,6 +90,8 @@ export class FunctionRequestAccountData {
   readonly function: PublicKey;
   /** The tokenAccount escrow */
   readonly escrow: PublicKey;
+  /** The Attestation Queue for this request. */
+  readonly attestationQueue: PublicKey;
   /** The current active request. */
   readonly activeRequest: types.FunctionRequestTriggerRound;
   /** The previous request. */
@@ -117,6 +123,7 @@ export class FunctionRequestAccountData {
     borsh.publicKey("payer"),
     borsh.publicKey("function"),
     borsh.publicKey("escrow"),
+    borsh.publicKey("attestationQueue"),
     types.FunctionRequestTriggerRound.layout("activeRequest"),
     types.FunctionRequestTriggerRound.layout("previousRequest"),
     borsh.u32("maxContainerParamsLen"),
@@ -134,6 +141,7 @@ export class FunctionRequestAccountData {
     this.payer = fields.payer;
     this.function = fields.function;
     this.escrow = fields.escrow;
+    this.attestationQueue = fields.attestationQueue;
     this.activeRequest = new types.FunctionRequestTriggerRound({
       ...fields.activeRequest,
     });
@@ -196,6 +204,7 @@ export class FunctionRequestAccountData {
       payer: dec.payer,
       function: dec.function,
       escrow: dec.escrow,
+      attestationQueue: dec.attestationQueue,
       activeRequest: types.FunctionRequestTriggerRound.fromDecoded(
         dec.activeRequest
       ),
@@ -223,6 +232,7 @@ export class FunctionRequestAccountData {
       payer: this.payer.toString(),
       function: this.function.toString(),
       escrow: this.escrow.toString(),
+      attestationQueue: this.attestationQueue.toString(),
       activeRequest: this.activeRequest.toJSON(),
       previousRequest: this.previousRequest.toJSON(),
       maxContainerParamsLen: this.maxContainerParamsLen,
@@ -246,6 +256,7 @@ export class FunctionRequestAccountData {
       payer: new PublicKey(obj.payer),
       function: new PublicKey(obj.function),
       escrow: new PublicKey(obj.escrow),
+      attestationQueue: new PublicKey(obj.attestationQueue),
       activeRequest: types.FunctionRequestTriggerRound.fromJSON(
         obj.activeRequest
       ),

@@ -41,7 +41,7 @@ impl From<u8> for FunctionStatus {
 }
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, AnchorDeserialize)]
 pub struct FunctionAccountData {
     /// Whether the function is invoked on a schedule or by request
     pub is_scheduled: u8, // keep this up-front for filtering
@@ -68,6 +68,8 @@ pub struct FunctionAccountData {
     pub container: [u8; 64],
     /// The version tag of the container to pull.
     pub version: [u8; 32],
+
+    // OFFFSET = 511
 
     // Accounts
     /// The authority of the function which is authorized to make account changes.
@@ -129,6 +131,40 @@ pub struct FunctionAccountData {
 
     /// Reserved.
     pub _ebuf: [u8; 879],
+}
+
+impl anchor_lang::AccountDeserialize for FunctionAccountData {
+    fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        if buf.len() < FunctionAccountData::discriminator().len() {
+            return Err(anchor_lang::error::ErrorCode::AccountDiscriminatorNotFound.into());
+        }
+        let given_disc = &buf[..8];
+        if FunctionAccountData::discriminator() != given_disc {
+            return Err(
+                anchor_lang::error::Error::from(anchor_lang::error::AnchorError {
+                    error_name: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch.name(),
+                    error_code_number: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .into(),
+                    error_msg: anchor_lang::error::ErrorCode::AccountDiscriminatorMismatch
+                        .to_string(),
+                    error_origin: Some(anchor_lang::error::ErrorOrigin::Source(
+                        anchor_lang::error::Source {
+                            filename: "programs/attestation_program/src/lib.rs",
+                            line: 1u32,
+                        },
+                    )),
+                    compared_values: None,
+                })
+                .with_account_name("FunctionAccountData"),
+            );
+        }
+        Self::try_deserialize_unchecked(buf)
+    }
+    fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
+        let mut data: &[u8] = &buf[8..];
+        AnchorDeserialize::deserialize(&mut data)
+            .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
+    }
 }
 
 unsafe impl Pod for FunctionAccountData {}
@@ -319,6 +355,43 @@ impl FunctionAccountData {
     }
 
     cfg_client! {
+        pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                9,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+            ))
+        }
+
+        pub fn get_is_scheduled_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                8,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+            ))
+        }
+
+        pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                14,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![FunctionStatus::Active as u8]),
+            ))
+        }
+
+        pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                543,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(queue_pubkey.to_bytes().into()),
+            ))
+        }
+
+        pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
+            vec![
+                FunctionAccountData::get_is_triggered_filter(),
+                FunctionAccountData::get_is_scheduled_filter(),
+                FunctionAccountData::get_is_active_filter(),
+                FunctionAccountData::get_queue_filter(queue_pubkey),
+            ]
+        }
+
         pub fn get_schedule(&self) -> Option<cron::Schedule> {
             if self.schedule[0] == 0 {
                 return None;
@@ -328,7 +401,7 @@ impl FunctionAccountData {
                 .unwrap_or("* * * * * *")
                 .trim_end_matches('\0');
             let schedule = cron::Schedule::try_from(schedule);
-            Some(schedule.unwrap_or(every_second.clone()))
+            Some(schedule.unwrap_or(every_second))
         }
 
         pub fn get_last_execution_datetime(&self) -> chrono::DateTime<chrono::Utc> {
@@ -339,12 +412,8 @@ impl FunctionAccountData {
         }
 
         pub fn get_next_execution_datetime(&self) -> Option<chrono::DateTime<chrono::Utc>> {
-            let schedule = self.get_schedule();
-            if schedule.is_none() {
-                return None;
-            }
-            let dt = self.get_last_execution_datetime();
-            schedule.unwrap().after(&dt).next()
+            let schedule = self.get_schedule()?;
+            schedule.after(&self.get_last_execution_datetime()).next()
         }
 
         pub fn should_execute(&self, now: chrono::DateTime<chrono::Utc>) -> bool {
@@ -367,11 +436,21 @@ impl FunctionAccountData {
             true
         }
 
+        pub fn is_scheduled(&self) -> bool {
+            self.schedule[0] == 0
+        }
+
         pub async fn fetch(
             client: &solana_client::rpc_client::RpcClient,
             pubkey: Pubkey,
         ) -> std::result::Result<Self, switchboard_common::Error> {
             crate::client::load_account(client, pubkey).await
         }
+
+        // pub async fn get_program_accounts(
+        //     client: &solana_client::rpc_client::RpcClient
+        // ) -> std::result::Result<Vec<FunctionAccountData>, switchboard_common::Error> {
+        //     let accounts = client.get_program_accounts(&SWITCHBOARD_ATTESTATION_PROGRAM_ID)?;
+        // }
     }
 }

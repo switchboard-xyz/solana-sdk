@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{cfg_client, prelude::*};
 use solana_program::borsh::get_instance_packed_len;
 
 #[repr(u8)]
@@ -81,6 +81,8 @@ pub struct FunctionRequestAccountData {
     pub function: Pubkey,
     /// The tokenAccount escrow
     pub escrow: Pubkey,
+    /// The Attestation Queue for this request.
+    pub attestation_queue: Pubkey,
 
     // Rounds
     /// The current active request.
@@ -115,6 +117,7 @@ impl Default for FunctionRequestAccountData {
             payer: Pubkey::default(),
             function: Pubkey::default(),
             escrow: Pubkey::default(),
+            attestation_queue: Pubkey::default(),
             active_request: FunctionRequestTriggerRound::default(),
             previous_request: FunctionRequestTriggerRound::default(),
             max_container_params_len: 0,
@@ -159,7 +162,7 @@ impl anchor_lang::AccountDeserialize for FunctionRequestAccountData {
                     error_origin: Some(anchor_lang::error::ErrorOrigin::Source(
                         anchor_lang::error::Source {
                             filename: "programs/attestation_program/src/lib.rs",
-                            line: 357u32,
+                            line: 1u32,
                         },
                     )),
                     compared_values: None,
@@ -205,5 +208,43 @@ impl FunctionRequestAccountData {
         }
 
         false
+    }
+
+    cfg_client! {
+        pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                8,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+            ))
+        }
+
+        pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                9,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![RequestStatus::RequestPending as u8]),
+            ))
+        }
+
+        pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                138,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(queue_pubkey.to_bytes().into()),
+            ))
+        }
+
+        pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
+            vec![
+                FunctionRequestAccountData::get_is_triggered_filter(),
+                FunctionRequestAccountData::get_is_active_filter(),
+                FunctionRequestAccountData::get_queue_filter(queue_pubkey),
+            ]
+        }
+
+        pub async fn fetch(
+            client: &solana_client::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::Error> {
+            crate::client::fetch_anchor_account(client, pubkey).await
+        }
     }
 }

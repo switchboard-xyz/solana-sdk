@@ -2,7 +2,6 @@ use crate::cfg_client;
 use crate::prelude::*;
 use solana_program::borsh::get_instance_packed_len;
 
-// #[account]
 #[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct SwitchboardWallet {
     pub bump: u8,
@@ -39,6 +38,7 @@ impl Default for SwitchboardWallet {
         }
     }
 }
+
 impl anchor_lang::AccountSerialize for SwitchboardWallet {
     fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
         if writer

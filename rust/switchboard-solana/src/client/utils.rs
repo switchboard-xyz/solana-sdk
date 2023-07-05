@@ -50,6 +50,22 @@ pub async fn load_account<T: bytemuck::Pod + Discriminator + Owner>(
         .map_err(|_| SwitchboardClientError::CustomMessage("AnchorParseError".to_string()))?)
 }
 
+pub async fn fetch_anchor_account<T: Discriminator + Owner + AccountDeserialize>(
+    client: &solana_client::rpc_client::RpcClient,
+    pubkey: Pubkey,
+) -> Result<T, SwitchboardClientError> {
+    T::try_deserialize(
+        &mut client
+            .get_account_data(&pubkey)
+            .map_err(|e| SwitchboardClientError::CustomError {
+                message: "SolanaFetchError".to_string(),
+                source: std::sync::Arc::new(e),
+            })?
+            .as_slice(),
+    )
+    .map_err(|_| SwitchboardClientError::CustomMessage("AnchorParseError".to_string()))
+}
+
 pub fn unix_timestamp() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
