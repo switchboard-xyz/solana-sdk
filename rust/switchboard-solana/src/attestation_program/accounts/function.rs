@@ -355,6 +355,13 @@ impl FunctionAccountData {
     }
 
     cfg_client! {
+        pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+                0,
+                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(FunctionAccountData::discriminator().to_vec()),
+            ))
+        }
+
         pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
             solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
                 9,
@@ -385,6 +392,7 @@ impl FunctionAccountData {
 
         pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
             vec![
+                FunctionAccountData::get_discriminator_filter(),
                 FunctionAccountData::get_is_triggered_filter(),
                 FunctionAccountData::get_is_scheduled_filter(),
                 FunctionAccountData::get_is_active_filter(),

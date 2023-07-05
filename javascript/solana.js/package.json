@@ -143,6 +143,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "close-functions": "tsx ./scripts/close-functions.ts",
     "keypair:create": "shx find ~/.config/solana/id.json || solana-keygen new -s --no-bip39-passphrase --outfile ~/.config/solana/id.json",
     "localnet:down": "kill -9 $(pgrep command solana-test-validator) || exit 0",
     "localnet": "tsx ./scripts/localnet.ts",
