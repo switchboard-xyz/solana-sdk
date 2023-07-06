@@ -76,10 +76,12 @@ pub struct EnclaveAccountData {
     /// The PDA bump. Only set for FunctionAccount quotes.
     pub bump: u8,
 
-    /// The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.
+    /// The OperatorContractAccount that is assigned to the verifier. Must already be init and approved.
+    /// If this is set, then we verify the reward_receiver is owned by this operator.
+    pub operator: Pubkey,
     /// We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one.
     pub reward_escrow: Pubkey,
-    /// The SwitchboardWallet account containing the queues required min_stake.
+    /// The wallet containing the enclaves min_stake.
     /// Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards.
     pub stake_wallet: Pubkey,
 
