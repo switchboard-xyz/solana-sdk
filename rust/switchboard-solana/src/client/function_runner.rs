@@ -21,9 +21,9 @@ pub struct FunctionRunner {
     pub signer: Pubkey,
 
     pub function: Pubkey,
-    pub function_data: FunctionAccountData,
+    pub function_data: Box<FunctionAccountData>,
     pub fn_request_key: Pubkey,
-    pub fn_request_data: Vec<u8>,
+    pub fn_request_data: Box<FunctionRequestAccountData>,
     pub quote: Pubkey,
     pub payer: Pubkey,
     pub verifier: Pubkey,
@@ -52,9 +52,8 @@ impl FunctionRunner {
         let function_data = *bytemuck::try_from_bytes(&hex::decode(
             env::var("FUNCTION_DATA").unwrap()).unwrap()).unwrap();
         let fn_request_key = load_env_pubkey("FUNCTION_REQUEST_KEY").unwrap_or_default();
-        let fn_request_data = Vec::new();
-        // let fn_request_data = bytemuck::try_from_bytes(hex::decode(env::var("FUNCTION_REQUEST_DATA")
-            // .unwrap_or_default()).unwrap_or_default()).unwrap_or_default();
+        let fn_request_data = FunctionRequestAccountData::try_from_slice(&hex::decode(env::var("FUNCTION_REQUEST_DATA")
+            .unwrap_or_default()).unwrap_or_default()).unwrap_or_default();
         let payer = load_env_pubkey("PAYER")?;
         let verifier = load_env_pubkey("VERIFIER")?;
         let reward_receiver = load_env_pubkey("REWARD_RECEIVER")?;
@@ -69,9 +68,9 @@ impl FunctionRunner {
             signer_keypair,
             signer,
             function,
-            function_data,
+            function_data: Box::new(function_data),
             fn_request_key,
-            fn_request_data,
+            fn_request_data: Box::new(fn_request_data),
             quote,
             payer,
             verifier,
