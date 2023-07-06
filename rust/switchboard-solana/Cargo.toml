@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.8.5"
+version = "0.8.6"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -33,7 +33,7 @@ switchboard-common = { version = "0.8.1" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.8.4", features = ["client"] }
+switchboard-common = { version = "0.8.5", features = ["client"] }
 anchor-client = { version = "0.28.0" }
 solana-client = ">= 1.16.1, < 1.17"
 bincode = { version = "^1" }
