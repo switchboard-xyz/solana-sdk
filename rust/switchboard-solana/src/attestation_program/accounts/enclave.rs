@@ -42,7 +42,7 @@ impl From<u8> for VerificationStatus {
 
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, AnchorDeserialize)]
+#[derive(Debug)]
 pub struct EnclaveAccountData {
     /// The address of the signer generated within an enclave.
     pub enclave_signer: Pubkey,
@@ -115,8 +115,9 @@ impl anchor_lang::AccountDeserialize for EnclaveAccountData {
         Self::try_deserialize_unchecked(buf)
     }
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
-        let mut data: &[u8] = &buf[8..];
-        AnchorDeserialize::deserialize(&mut data)
+        let data: &[u8] = &buf[8..];
+        bytemuck::try_from_bytes(data)
+            .map(|r: &Self| r.clone())
             .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
     }
 }

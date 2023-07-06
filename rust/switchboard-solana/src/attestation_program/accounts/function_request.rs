@@ -212,30 +212,30 @@ impl FunctionRequestAccountData {
 
     cfg_client! {
         pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 0,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(FunctionRequestAccountData::discriminator().to_vec()),
+                FunctionRequestAccountData::discriminator().to_vec(),
             ))
         }
 
         pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 8,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+                vec![1u8],
             ))
         }
 
         pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 9,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![RequestStatus::RequestPending as u8]),
+                vec![RequestStatus::RequestPending as u8],
             ))
         }
 
         pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 138,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(queue_pubkey.to_bytes().into()),
+                queue_pubkey.to_bytes().into(),
             ))
         }
 

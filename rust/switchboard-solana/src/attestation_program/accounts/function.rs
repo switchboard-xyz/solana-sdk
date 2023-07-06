@@ -41,7 +41,7 @@ impl From<u8> for FunctionStatus {
 }
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, PartialEq, AnchorDeserialize)]
+#[derive(Debug, PartialEq)]
 pub struct FunctionAccountData {
     /// Whether the function is invoked on a schedule or by request
     pub is_scheduled: u8, // keep this up-front for filtering
@@ -163,9 +163,11 @@ impl anchor_lang::AccountDeserialize for FunctionAccountData {
         }
         Self::try_deserialize_unchecked(buf)
     }
+
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
-        let mut data: &[u8] = &buf[8..];
-        AnchorDeserialize::deserialize(&mut data)
+        let data: &[u8] = &buf[8..];
+        bytemuck::try_from_bytes(data)
+            .map(|r: &Self| r.clone())
             .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
     }
 }
@@ -359,37 +361,37 @@ impl FunctionAccountData {
 
     cfg_client! {
         pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 0,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(FunctionAccountData::discriminator().to_vec()),
+                FunctionAccountData::discriminator().to_vec(),
             ))
         }
 
         pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 9,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+                vec![1u8],
             ))
         }
 
         pub fn get_is_scheduled_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 8,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![1u8]),
+                vec![1u8],
             ))
         }
 
         pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 14,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(vec![FunctionStatus::Active as u8]),
+                vec![FunctionStatus::Active as u8],
             ))
         }
 
         pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new(
+            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
                 543,
-                solana_client::rpc_filter::MemcmpEncodedBytes::Bytes(queue_pubkey.to_bytes().into()),
+                queue_pubkey.to_bytes().into(),
             ))
         }
 

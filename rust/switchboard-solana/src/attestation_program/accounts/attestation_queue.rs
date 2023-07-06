@@ -7,7 +7,6 @@ use crate::SWITCHBOARD_ATTESTATION_PROGRAM_ID;
 
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(AnchorDeserialize)]
 pub struct AttestationQueueAccountData {
     /// The address of the authority which is permitted to add/remove allowed enclave measurements.
     pub authority: Pubkey,
@@ -76,8 +75,9 @@ impl anchor_lang::AccountDeserialize for AttestationQueueAccountData {
         Self::try_deserialize_unchecked(buf)
     }
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
-        let mut data: &[u8] = &buf[8..];
-        AnchorDeserialize::deserialize(&mut data)
+        let data: &[u8] = &buf[8..];
+        bytemuck::try_from_bytes(data)
+            .map(|r: &Self| r.clone())
             .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
     }
 }
