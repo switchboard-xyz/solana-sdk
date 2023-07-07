@@ -264,8 +264,6 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     params: SwitchboardWalletFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    const walletState = await this.loadData();
-
     let funderPubkey = payer;
     if (params.funderAuthority) {
       funderPubkey = params.funderAuthority.publicKey;
@@ -288,12 +286,14 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
       wrapAmount = this.program.mint.toTokenAmountBN(params.wrapAmount);
     }
 
+    const walletState = await this.loadData();
+
     const ixn = types.walletFund(
       this.program,
       { params: { transferAmount, wrapAmount } },
       {
         wallet: this.publicKey,
-        mint: walletState.mint,
+        mint: this.program.mint.address,
         authority: walletState.authority,
         attestationQueue: walletState.attestationQueue,
         tokenWallet: this.tokenWallet,

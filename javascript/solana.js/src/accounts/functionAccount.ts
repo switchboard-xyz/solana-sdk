@@ -199,6 +199,10 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return this._wallet;
   }
 
+  public set wallet(_wallet: Promise<SwitchboardWallet>) {
+    this._wallet = _wallet;
+  }
+
   public static fromSeed(
     program: SwitchboardProgram,
     creatorSeed: Uint8Array,
@@ -401,6 +405,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         addressLookupProgram: addressLookupProgram,
       }
     );
+
+    functionAccount.wallet = Promise.resolve(escrowWallet);
+
     return [
       functionAccount,
       new TransactionObject(
