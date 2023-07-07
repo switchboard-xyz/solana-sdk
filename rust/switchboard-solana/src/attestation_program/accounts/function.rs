@@ -132,8 +132,11 @@ pub struct FunctionAccountData {
     /// The unix timestamp when the function was created.
     pub created_at: i64,
 
+    /// Time this function has been sitting in an explicitly triggered state
+    pub triggered_since: i64,
+
     /// Reserved.
-    pub _ebuf: [u8; 871],
+    pub _ebuf: [u8; 863],
 }
 
 impl anchor_lang::AccountDeserialize for FunctionAccountData {
