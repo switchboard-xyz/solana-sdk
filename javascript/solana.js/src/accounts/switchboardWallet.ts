@@ -318,7 +318,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     );
 
     return new TransactionObject(
-      this.program.wallet.payer.publicKey,
+      payer,
       [ixn],
       params.funderAuthority ? [params.funderAuthority] : [],
       options
