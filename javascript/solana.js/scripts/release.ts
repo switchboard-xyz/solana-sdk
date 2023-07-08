@@ -1,43 +1,43 @@
-import * as sbv2 from './src';
-import { AggregatorAccount, TransactionObject } from './src';
-import { setupOutputDir } from './utils';
+import * as sbv2 from "./src";
+import { AggregatorAccount, TransactionObject } from "./src";
+import { setupOutputDir } from "./utils";
 
-import * as anchor from '@coral-xyz/anchor';
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
-import { sleep } from '@switchboard-xyz/common';
+import * as anchor from "@coral-xyz/anchor";
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import { sleep } from "@switchboard-xyz/common";
 // import { backOff } from 'exponential-backoff';
-import fs from 'fs';
-import _ from 'lodash';
-import os from 'os';
-import path from 'path';
+import fs from "fs";
+import _ from "lodash";
+import os from "os";
+import path from "path";
 
 const aggregatorMapPath = path.join(
   os.homedir(),
-  'devnet-migration',
+  "devnet-migration",
   sbv2.SB_V2_PID.toBase58(),
-  'aggregator_map.csv'
+  "aggregator_map.csv"
 );
 
 async function main() {
   const [oldDirPath, oldFeedDirPath, oldJobDirPath] = setupOutputDir(
-    '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+    "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
   );
   const [newDirPath, newFeedDirPath, newJobDirPath] = setupOutputDir(
     sbv2.SB_V2_PID.toBase58()
   );
 
   const devnetConnection = new Connection(
-    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
+    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl("devnet")
   );
   console.log(`rpcUrl: ${devnetConnection.rpcEndpoint}`);
 
   const payer = sbv2.SwitchboardTestContextV2.loadKeypair(
-    '~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json'
+    "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
   );
   console.log(`payer: ${payer.publicKey.toBase58()}`);
 
   const newProgram = await sbv2.SwitchboardProgram.load(
-    'devnet',
+    "devnet",
     devnetConnection,
     payer,
     sbv2.SB_V2_PID
@@ -45,7 +45,7 @@ async function main() {
 
   const aggregatorMap = loadAggregatorMap();
   const reverseAggregatorMap = new Map(
-    Array.from(aggregatorMap.entries()).map(r => [r[1], r[0]])
+    Array.from(aggregatorMap.entries()).map((r) => [r[1], r[0]])
   );
 
   console.log(
@@ -53,19 +53,19 @@ async function main() {
   );
 
   const oldAggregatorKeys = Array.from(aggregatorMap.keys()).map(
-    a => new PublicKey(a)
+    (a) => new PublicKey(a)
   );
 
   const oldAggregators = await fetchAggregators(
     devnetConnection,
     oldAggregatorKeys,
-    new PublicKey('2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG')
+    new PublicKey("2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG")
   );
 
   console.log(`Loaded ${oldAggregators.size} old aggregators `);
 
   const newAggregatorKeys = Array.from(aggregatorMap.values()).map(
-    a => new PublicKey(a)
+    (a) => new PublicKey(a)
   );
 
   const aggregators = await fetchAggregators(
@@ -95,9 +95,9 @@ async function main() {
       newProgram,
       new PublicKey(aggregatorKey)
     );
-    if (aggregator.resolutionMode.kind === 'ModeRoundResolution') {
+    if (aggregator.resolutionMode.kind === "ModeRoundResolution") {
       txns.push(
-        aggregatorAccount.setSlidingWindowInstruction(payer.publicKey, {
+        aggregatorAccount.setResolutionModeInstruction(payer.publicKey, {
           authority: payer,
           mode: new sbv2.types.AggregatorResolutionMode.ModeSlidingResolution(),
         })
@@ -136,12 +136,12 @@ async function main() {
   const parsedTxns = await devnetConnection.getParsedTransactions(signatures);
 
   fs.writeFileSync(
-    './set-authority-txns.json',
+    "./set-authority-txns.json",
     JSON.stringify(packedTxns, undefined, 2)
   );
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
 });
 
@@ -151,10 +151,10 @@ function loadAggregatorMap(): Map<string, string> {
   }
 
   const map = new Map();
-  const fileString = fs.readFileSync(aggregatorMapPath, 'utf-8');
-  const fileLines = fileString.split('\n').slice(1);
-  fileLines.forEach(r => {
-    const [oldPubkey, newPubkey] = r.split(', ');
+  const fileString = fs.readFileSync(aggregatorMapPath, "utf-8");
+  const fileLines = fileString.split("\n").slice(1);
+  fileLines.forEach((r) => {
+    const [oldPubkey, newPubkey] = r.split(", ");
     map.set(oldPubkey, newPubkey);
   });
 

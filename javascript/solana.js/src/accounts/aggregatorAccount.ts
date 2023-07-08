@@ -2060,7 +2060,7 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
     };
   }
 
-  setSlidingWindowInstruction(
+  setResolutionModeInstruction(
     payer: PublicKey,
     params: {
       authority?: Keypair;
@@ -2090,19 +2090,19 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
     );
   }
 
-  async setSlidingWindow(
+  async setResolutionMode(
     params: {
       authority?: Keypair;
       mode: AggregatorResolutionModeKind;
     },
     options?: TransactionObjectOptions
   ): Promise<TransactionSignature> {
-    const setSlidingWindowTxn = this.setSlidingWindowInstruction(
+    const setResolutionModeTxn = this.setResolutionModeInstruction(
       this.program.walletPubkey,
       params,
       options
     );
-    const txnSignature = await this.program.signAndSend(setSlidingWindowTxn);
+    const txnSignature = await this.program.signAndSend(setResolutionModeTxn);
     return txnSignature;
   }
 

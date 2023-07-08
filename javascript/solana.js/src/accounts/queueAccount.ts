@@ -597,7 +597,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     // set resolution mode
     if (params.slidingWindow !== undefined && params.slidingWindow === true) {
-      const setResolutionMode = aggregatorAccount.setSlidingWindowInstruction(
+      const setResolutionMode = aggregatorAccount.setResolutionModeInstruction(
         payer,
         {
           authority: undefined,
