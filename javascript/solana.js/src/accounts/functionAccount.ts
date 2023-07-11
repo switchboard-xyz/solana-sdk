@@ -513,7 +513,11 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           containerRegistry: toOptionalBytes(params.containerRegistry),
           version: toOptionalBytes(params.version),
           schedule: toOptionalBytes(params.schedule),
-          mrEnclaves: [],
+          mrEnclaves: params.mrEnclaves
+            ? params.mrEnclaves.map((mrEnclave) =>
+                Array.from(parseRawBuffer(mrEnclave))
+              )
+            : null,
           requestsDisabled: params.requestsDisabled ?? null,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? null,
