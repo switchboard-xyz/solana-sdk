@@ -1,21 +1,21 @@
-import {
-  AggregatorAccount,
-  type CreateQueueFeedParams,
-  type CreateQueueOracleParams,
-  OracleAccount,
-  QueueAccount,
+import type { AggregatorAccount, OracleAccount } from "./accounts/index.js";
+import type {
+  CreateQueueFeedParams,
+  CreateQueueOracleParams,
 } from "./accounts/index.js";
-import { AggregatorAccountData } from "./generated/index.js";
-import {
+import { QueueAccount } from "./accounts/index.js";
+import type { AggregatorAccountData } from "./generated/index.js";
+import type {
   LoadedSwitchboardNetwork,
-  type NetworkInitParams,
-  SwitchboardNetwork,
+  NetworkInitParams,
 } from "./SwitchboardNetwork.js";
+import { SwitchboardNetwork } from "./SwitchboardNetwork.js";
 import { SwitchboardProgram } from "./SwitchboardProgram.js";
 import { createStaticFeed, loadKeypair, updateStaticFeed } from "./utils.js";
 
-import { AnchorProvider } from "@coral-xyz/anchor";
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import type { AnchorProvider } from "@coral-xyz/anchor";
+import type { Connection, PublicKey } from "@solana/web3.js";
+import { Keypair } from "@solana/web3.js";
 import fs from "fs";
 import _ from "lodash";
 import os from "os";

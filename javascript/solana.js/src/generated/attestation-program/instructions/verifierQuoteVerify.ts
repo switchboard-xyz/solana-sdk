@@ -1,53 +1,47 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import {
-  AccountMeta,
-  PublicKey,
-  TransactionInstruction,
-} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type { AccountMeta, PublicKey } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteVerifyArgs {
-  params: types.QuoteVerifyParamsFields;
+export interface VerifierQuoteVerifyArgs {
+  params: types.VerifierQuoteVerifyParamsFields;
 }
 
-export interface QuoteVerifyAccounts {
+export interface VerifierQuoteVerifyAccounts {
   quote: PublicKey;
-  quoteSigner: PublicKey;
   verifier: PublicKey;
   enclaveSigner: PublicKey;
   attestationQueue: PublicKey;
 }
 
-export const layout = borsh.struct([types.QuoteVerifyParams.layout("params")]);
+export const layout = borsh.struct([
+  types.VerifierQuoteVerifyParams.layout("params"),
+]);
 
-export function quoteVerify(
+export function verifierQuoteVerify(
   program: SwitchboardProgram,
-  args: QuoteVerifyArgs,
-  accounts: QuoteVerifyAccounts
+  args: VerifierQuoteVerifyArgs,
+  accounts: VerifierQuoteVerifyAccounts,
+  programId: PublicKey = program.attestationProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.quote, isSigner: false, isWritable: true },
-    { pubkey: accounts.quoteSigner, isSigner: false, isWritable: false },
     { pubkey: accounts.verifier, isSigner: false, isWritable: false },
     { pubkey: accounts.enclaveSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
   ];
-  const identifier = Buffer.from([158, 203, 69, 10, 212, 218, 45, 184]);
+  const identifier = Buffer.from([73, 38, 235, 197, 78, 209, 141, 253]);
   const buffer = Buffer.alloc(1000);
   const len = layout.encode(
     {
-      params: types.QuoteVerifyParams.toEncodable(args.params),
+      params: types.VerifierQuoteVerifyParams.toEncodable(args.params),
     },
     buffer
   );
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
-  const ix = new TransactionInstruction({
-    keys,
-    programId: program.attestationProgramId,
-    data,
-  });
+  const ix = new TransactionInstruction({ keys, programId, data });
   return ix;
 }

@@ -1,24 +1,23 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 import { parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
 
 import * as spl from "@solana/spl-token";
-import {
+import type {
   AccountMeta,
   Keypair,
-  PublicKey,
-  SystemProgram,
   TransactionSignature,
 } from "@solana/web3.js";
-import { BN } from "@switchboard-xyz/common";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
+import type { BN } from "@switchboard-xyz/common";
 import assert from "assert";
 
 export interface SwitchboardWalletTransferParams {

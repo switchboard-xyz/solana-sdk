@@ -22,4 +22,7 @@ COPY --from=builder /sgx/app /sgx
 # Get the measurement from the enclave
 RUN /get_measurement.sh
 
+RUN cp /app.manifest.sgx /sgx/app.manifest.sgx
+RUN cp /app.sig /sgx/app.sig
+
 ENTRYPOINT ["bash", "/boot.sh"]

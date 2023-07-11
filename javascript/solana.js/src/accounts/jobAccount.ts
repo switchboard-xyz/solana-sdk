@@ -1,23 +1,25 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
 import { Account } from "./account.js";
 
 import * as anchor from "@coral-xyz/anchor";
-import {
+import type {
   AccountInfo,
   Commitment,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  TransactionSignature,
 } from "@solana/web3.js";
 import { BN, OracleJob, toUtf8 } from "@switchboard-xyz/common";
 

@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from "./SwitchboardProgram.js";
+import type { SwitchboardProgram } from "./SwitchboardProgram.js";
 
 /**
  * Switchboard wrapper for anchor program errors.

@@ -14,11 +14,6 @@ export type {
 } from "./AttestationQueueAccountData.js";
 export { AttestationQueueAccountData } from "./AttestationQueueAccountData.js";
 export type {
-  EnclaveAccountDataFields,
-  EnclaveAccountDataJSON,
-} from "./EnclaveAccountData.js";
-export { EnclaveAccountData } from "./EnclaveAccountData.js";
-export type {
   FunctionAccountDataFields,
   FunctionAccountDataJSON,
 } from "./FunctionAccountData.js";
@@ -33,3 +28,8 @@ export type {
   SwitchboardWalletJSON,
 } from "./SwitchboardWallet.js";
 export { SwitchboardWallet } from "./SwitchboardWallet.js";
+export type {
+  VerifierAccountDataFields,
+  VerifierAccountDataJSON,
+} from "./VerifierAccountData.js";
+export { VerifierAccountData } from "./VerifierAccountData.js";

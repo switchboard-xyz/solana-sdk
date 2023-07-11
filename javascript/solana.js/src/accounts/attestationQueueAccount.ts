@@ -1,36 +1,30 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import {
-  SB_ATTESTATION_PID,
-  SwitchboardProgram,
-} from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import { SB_ATTESTATION_PID } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawBuffer } from "../types.js";
+import { TransactionObject } from "../TransactionObject.js";
+import type { RawBuffer } from "../types.js";
 import { parseMrEnclave, parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
-import {
-  AttestationPermissionAccount,
-  AttestationPermissionSetParams,
-} from "./attestationPermissionAccount.js";
-import { EnclaveAccount, EnclaveAccountInitParams } from "./enclaveAccount.js";
-import {
-  FunctionAccount,
-  FunctionAccountInitParams,
-} from "./functionAccount.js";
-import { SwitchboardWallet } from "./switchboardWallet.js";
+import type { AttestationPermissionSetParams } from "./attestationPermissionAccount.js";
+import { AttestationPermissionAccount } from "./attestationPermissionAccount.js";
+import type { FunctionAccountInitParams } from "./functionAccount.js";
+import { FunctionAccount } from "./functionAccount.js";
+import type { SwitchboardWallet } from "./switchboardWallet.js";
+import type { VerifierAccountInitParams } from "./verifierAccount.js";
+import { VerifierAccount } from "./verifierAccount.js";
 
-import {
-  Keypair,
+import type {
   PublicKey,
-  SystemProgram,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, SystemProgram } from "@solana/web3.js";
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
  */
@@ -94,7 +88,7 @@ export interface AttestationQueueRemoveMrEnclaveParams {
 }
 
 export type CreateQueueQuoteParams = Omit<
-  EnclaveAccountInitParams,
+  VerifierAccountInitParams,
   "queueAccount"
 > &
   Partial<AttestationPermissionSetParams> & {
@@ -208,11 +202,11 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     return [account, await program.signAndSend(txnObject, options)];
   }
 
-  public async createQuoteInstruction(
+  public async createVerifierInstruction(
     payer: PublicKey,
     params: CreateQueueQuoteParams,
     options?: TransactionObjectOptions
-  ): Promise<[EnclaveAccount, TransactionObject]> {
+  ): Promise<[VerifierAccount, TransactionObject]> {
     this.program.verifyAttestation();
 
     const authority = params.authority ?? payer;
@@ -220,15 +214,16 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const queueAuthority =
       params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
-    const [enclaveAccount, quoteInit] = await EnclaveAccount.createInstruction(
-      this.program,
-      payer,
-      { ...params, queueAccount: this, authority },
-      options
-    );
+    const [verifierAccount, quoteInit] =
+      await VerifierAccount.createInstruction(
+        this.program,
+        payer,
+        { ...params, queueAccount: this, authority },
+        options
+      );
 
     if (!params.createPermissions && !params.enable) {
-      return [enclaveAccount, quoteInit];
+      return [verifierAccount, quoteInit];
     }
 
     const [permissionAccount, permissionInit] =
@@ -237,7 +232,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         payer,
         {
           granter: this.publicKey,
-          grantee: enclaveAccount.publicKey,
+          grantee: verifierAccount.publicKey,
           authority: queueAuthority,
         },
         options
@@ -249,19 +244,19 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         permission:
           new types.SwitchboardAttestationPermission.PermitNodeheartbeat(),
         queue: this.publicKey,
-        enclave: enclaveAccount.publicKey,
+        enclave: verifierAccount.publicKey,
       });
       permissionInit.combine(permissionSet);
     }
 
-    return [enclaveAccount, quoteInit.combine(permissionInit)];
+    return [verifierAccount, quoteInit.combine(permissionInit)];
   }
 
-  public async createQuote(
+  public async createVerifier(
     params: CreateQueueQuoteParams,
     options?: SendTransactionObjectOptions
-  ): Promise<[EnclaveAccount, TransactionSignature]> {
-    const [account, txnObject] = await this.createQuoteInstruction(
+  ): Promise<[VerifierAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createVerifierInstruction(
       this.program.walletPubkey,
       params,
       options
@@ -304,7 +299,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           permission: SB_ATTESTATION_PID, // optional
           authority: queueAuthority,
           attestationQueue: this.publicKey,
-          enclave: functionAccount.getEnclaveAccount().publicKey,
+          grantee: functionAccount.publicKey,
         }
       );
 
@@ -416,15 +411,15 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const authority: Keypair = params?.authority ?? program.wallet.payer;
 
     const attestationQueueKeypair = params?.keypair ?? Keypair.generate();
-    const verifierQuoteKeypair1 = Keypair.generate();
-    const verifierQuoteSigner1 = params?.securedSigner ?? Keypair.generate();
+    const verifierKeypair1 = Keypair.generate();
+    const verifierSigner1 = params?.enclaveSigner ?? Keypair.generate();
 
     const ixns: Array<TransactionInstruction> = [];
     const signers: Array<Keypair> = [
       authority,
       attestationQueueKeypair,
-      verifierQuoteKeypair1,
-      verifierQuoteSigner1,
+      verifierKeypair1,
+      verifierSigner1,
     ];
 
     // create attestation queue
@@ -459,7 +454,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         {
           params: {
             mrEnclave: Array.from(
-              parseMrEnclave(params?.quoteVerifierMrEnclave ?? "")
+              parseMrEnclave(params?.verifierrEnclave ?? "")
             ),
           },
         },
@@ -472,7 +467,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
 
     // create quote #1
     ixns.push(
-      types.quoteInit(
+      types.verifierInit(
         program,
         {
           params: {
@@ -480,7 +475,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           },
         },
         {
-          quote: verifierQuoteKeypair1.publicKey,
+          verifier: verifierKeypair1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
           queueAuthority: authority.publicKey,
           authority: authority.publicKey,
@@ -494,7 +489,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       program,
       authority.publicKey,
       attestationQueueKeypair.publicKey,
-      verifierQuoteKeypair1.publicKey
+      verifierKeypair1.publicKey
     );
     ixns.push(
       types.attestationPermissionInit(
@@ -503,7 +498,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         {
           permission: verifierQuotePermissions1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
-          node: verifierQuoteKeypair1.publicKey,
+          node: verifierKeypair1.publicKey,
           authority: authority.publicKey,
           payer: authority.publicKey,
           systemProgram: SystemProgram.programId,
@@ -523,14 +518,14 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           permission: verifierQuotePermissions1.publicKey,
           authority: authority.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
-          enclave: verifierQuoteKeypair1.publicKey,
+          grantee: verifierKeypair1.publicKey,
         }
       )
     );
 
     // set quote #1 securedSigner
     ixns.push(
-      types.quoteRotate(
+      types.verifierQuoteRotate(
         program,
         {
           params: {
@@ -540,9 +535,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
           },
         },
         {
-          quote: verifierQuoteKeypair1.publicKey,
+          verifier: verifierKeypair1.publicKey,
           authority: authority.publicKey,
-          enclaveSigner: verifierQuoteSigner1.publicKey,
+          enclaveSigner: verifierSigner1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
         }
       )
@@ -550,15 +545,15 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
 
     // quote #1 heartbeat
     ixns.push(
-      types.quoteHeartbeat(
+      types.verifierHeartbeat(
         program,
         { params: {} },
         {
-          quote: verifierQuoteKeypair1.publicKey,
-          enclaveSigner: verifierQuoteSigner1.publicKey,
+          verifier: verifierKeypair1.publicKey,
+          verifierSigner: verifierSigner1.publicKey,
           attestationQueue: attestationQueueKeypair.publicKey,
           queueAuthority: authority.publicKey,
-          gcNode: verifierQuoteKeypair1.publicKey,
+          gcNode: verifierKeypair1.publicKey,
           permission: verifierQuotePermissions1.publicKey,
         }
       )
@@ -579,31 +574,40 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     );
 
     return {
-      attestationQueueAccount,
-      signatures,
-      verifier: {
-        quoteAccount: new EnclaveAccount(
-          program,
-          verifierQuoteKeypair1.publicKey
-        ),
-        permissionAccount: verifierQuotePermissions1,
-        signer: verifierQuoteSigner1,
+      program: program,
+      attestationQueue: {
+        account: attestationQueueAccount,
+        publicKey: attestationQueueAccount.publicKey,
+        authority: authority.publicKey,
       },
+      verifier: {
+        account: new VerifierAccount(program, verifierKeypair1.publicKey),
+        publicKey: verifierKeypair1.publicKey,
+        permissionAccount: verifierQuotePermissions1,
+        signer: verifierSigner1,
+      },
+      signatures,
     };
   }
 }
 
 export type CreateBootstrappedQueueParams =
   AttestationQueueAccountInitParams & {
-    quoteVerifierMrEnclave: RawBuffer;
-    registryKey: RawBuffer;
-    securedSigner?: Keypair;
+    verifierrEnclave: RawBuffer;
+    registryKey?: RawBuffer;
+    enclaveSigner?: Keypair;
   };
 
 export type BootstrappedAttestationQueue = {
-  attestationQueueAccount: AttestationQueueAccount;
+  program: SwitchboardProgram;
+  attestationQueue: {
+    account: AttestationQueueAccount;
+    publicKey: PublicKey;
+    authority: PublicKey;
+  };
   verifier: {
-    quoteAccount: EnclaveAccount;
+    account: VerifierAccount;
+    publicKey: PublicKey;
     permissionAccount: AttestationPermissionAccount;
     signer: Keypair;
   };

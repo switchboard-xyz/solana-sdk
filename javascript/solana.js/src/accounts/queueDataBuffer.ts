@@ -1,19 +1,12 @@
 import * as errors from "../errors.js";
-import * as types from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type * as types from "../generated/oracle-program/index.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
 
-import {
-  Account,
-  BUFFER_DISCRIMINATOR,
-  OnAccountChangeCallback,
-} from "./account.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account, BUFFER_DISCRIMINATOR } from "./account.js";
 
-import {
-  AccountInfo,
-  Commitment,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-} from "@solana/web3.js";
+import type { AccountInfo, Commitment } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import assert from "assert";
 
 /**

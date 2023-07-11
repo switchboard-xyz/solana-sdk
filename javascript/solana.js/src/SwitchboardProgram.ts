@@ -1,3 +1,7 @@
+import type {
+  SwitchboardAccountData,
+  SwitchboardAccountType,
+} from "./accounts/index.js";
 import {
   AttestationProgramStateAccount,
   BUFFER_DISCRIMINATOR,
@@ -6,8 +10,6 @@ import {
   JobAccount,
   ProgramStateAccount,
   QueueAccount,
-  SwitchboardAccountData,
-  SwitchboardAccountType,
 } from "./accounts/index.js";
 import {
   AggregatorAccountData,
@@ -36,33 +38,31 @@ import {
 } from "./const.js";
 import * as errors from "./errors.js";
 import { NativeMint } from "./mint.js";
-import { SwitchboardEvents } from "./SwitchboardEvents.js";
-import { TransactionObject, TransactionOptions } from "./TransactionObject.js";
-import { LoadedJobDefinition } from "./types.js";
+import type { SwitchboardEvents } from "./SwitchboardEvents.js";
+import type { TransactionOptions } from "./TransactionObject.js";
+import { TransactionObject } from "./TransactionObject.js";
+import type { LoadedJobDefinition } from "./types.js";
 
+import type { AccountNamespace, Idl, Wallet } from "@coral-xyz/anchor";
 import {
   ACCOUNT_DISCRIMINATOR_SIZE,
-  AccountNamespace,
   AnchorProvider,
   BorshAccountsCoder,
-  Idl,
   Program,
   utils as AnchorUtils,
-  Wallet,
 } from "@coral-xyz/anchor";
-import {
+import type {
   AccountInfo,
   Cluster,
   ConfirmOptions,
   Connection,
   GetProgramAccountsResponse,
-  Keypair,
-  PublicKey,
   SendOptions,
   Transaction,
   TransactionSignature,
   VersionedTransaction,
 } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {

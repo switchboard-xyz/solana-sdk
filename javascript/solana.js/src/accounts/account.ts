@@ -11,21 +11,21 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
 
-import { AggregatorAccount } from "./aggregatorAccount.js";
-import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
-import { BufferRelayerAccount } from "./bufferRelayAccount.js";
-import { CrankAccount } from "./crankAccount.js";
-import { CrankDataBuffer } from "./crankDataBuffer.js";
-import { JobAccount } from "./jobAccount.js";
-import { LeaseAccount } from "./leaseAccount.js";
-import { OracleAccount } from "./oracleAccount.js";
-import { PermissionAccount } from "./permissionAccount.js";
-import { ProgramStateAccount } from "./programStateAccount.js";
-import { QueueAccount } from "./queueAccount.js";
-import { QueueDataBuffer } from "./queueDataBuffer.js";
-import { VrfAccount } from "./vrfAccount.js";
+import type { AggregatorAccount } from "./aggregatorAccount.js";
+import type { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
+import type { BufferRelayerAccount } from "./bufferRelayAccount.js";
+import type { CrankAccount } from "./crankAccount.js";
+import type { CrankDataBuffer } from "./crankDataBuffer.js";
+import type { JobAccount } from "./jobAccount.js";
+import type { LeaseAccount } from "./leaseAccount.js";
+import type { OracleAccount } from "./oracleAccount.js";
+import type { PermissionAccount } from "./permissionAccount.js";
+import type { ProgramStateAccount } from "./programStateAccount.js";
+import type { QueueAccount } from "./queueAccount.js";
+import type { QueueDataBuffer } from "./queueDataBuffer.js";
+import type { VrfAccount } from "./vrfAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 

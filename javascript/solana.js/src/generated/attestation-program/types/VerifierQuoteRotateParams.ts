@@ -5,18 +5,18 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteRotateParamsFields {
+export interface VerifierQuoteRotateParamsFields {
   registryKey: Array<number>;
 }
 
-export interface QuoteRotateParamsJSON {
+export interface VerifierQuoteRotateParamsJSON {
   registryKey: Array<number>;
 }
 
-export class QuoteRotateParams {
+export class VerifierQuoteRotateParams {
   readonly registryKey: Array<number>;
 
-  constructor(fields: QuoteRotateParamsFields) {
+  constructor(fields: VerifierQuoteRotateParamsFields) {
     this.registryKey = fields.registryKey;
   }
 
@@ -26,30 +26,32 @@ export class QuoteRotateParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QuoteRotateParams({
+    return new VerifierQuoteRotateParams({
       registryKey: obj.registryKey,
     });
   }
 
-  static toEncodable(fields: QuoteRotateParamsFields) {
+  static toEncodable(fields: VerifierQuoteRotateParamsFields) {
     return {
       registryKey: fields.registryKey,
     };
   }
 
-  toJSON(): QuoteRotateParamsJSON {
+  toJSON(): VerifierQuoteRotateParamsJSON {
     return {
       registryKey: this.registryKey,
     };
   }
 
-  static fromJSON(obj: QuoteRotateParamsJSON): QuoteRotateParams {
-    return new QuoteRotateParams({
+  static fromJSON(
+    obj: VerifierQuoteRotateParamsJSON
+  ): VerifierQuoteRotateParams {
+    return new VerifierQuoteRotateParams({
       registryKey: obj.registryKey,
     });
   }
 
   toEncodable() {
-    return QuoteRotateParams.toEncodable(this);
+    return VerifierQuoteRotateParams.toEncodable(this);
   }
 }

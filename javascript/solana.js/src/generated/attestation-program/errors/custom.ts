@@ -56,9 +56,10 @@ export class InvalidQuote extends Error {
   static readonly code = 6001;
   readonly code = 6001;
   readonly name = "InvalidQuote";
+  readonly msg = "The provided enclave quote is invalid";
 
   constructor(readonly logs?: string[]) {
-    super("6001: ");
+    super("6001: The provided enclave quote is invalid");
   }
 }
 

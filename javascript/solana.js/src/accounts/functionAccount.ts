@@ -1,32 +1,32 @@
 import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import {
-  SB_ATTESTATION_PID,
-  SB_V2_PID,
-  SwitchboardProgram,
-} from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import { SB_ATTESTATION_PID, SB_V2_PID } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawBuffer } from "../types.js";
+import { TransactionObject } from "../TransactionObject.js";
+import type { RawBuffer } from "../types.js";
 import {
+  handleOptionalPubkeys,
   numToBN,
   parseCronSchedule,
   parseMrEnclave,
   parseRawBuffer,
 } from "../utils.js";
 
+import type {
+  FunctionRequestAccountInitParams,
+  SwitchboardWalletFundParams,
+  VerifierAccount,
+} from "./index.js";
 import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
-  EnclaveAccount,
   FunctionRequestAccount,
-  FunctionRequestAccountInitParams,
   SwitchboardWallet,
-  SwitchboardWalletFundParams,
 } from "./index.js";
 
 import * as anchor from "@coral-xyz/anchor";
@@ -35,19 +35,23 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
+import type {
   AccountInfo,
   AddressLookupTableAccount,
-  ComputeBudgetProgram,
   Keypair,
-  PublicKey,
   SendOptions,
-  SystemProgram,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import {
+  ComputeBudgetProgram,
+  PublicKey,
+  SystemProgram,
+} from "@solana/web3.js";
 import { BN, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
+
+export type ContainerRegistryType = "dockerhub" | "ipfs";
 
 export type FunctionAccountInitSeeds = {
   recentSlot?: number;
@@ -61,9 +65,9 @@ export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
   name?: string;
   metadata?: string;
   container: string;
-  version: string;
-  containerRegistry?: string;
-  schedule: string;
+  version?: string;
+  containerRegistry?: ContainerRegistryType;
+  schedule?: string;
 
   mrEnclave: Buffer | Uint8Array | number[];
   attestationQueue: AttestationQueueAccount;
@@ -88,7 +92,7 @@ export interface FunctionSetConfigParams {
   name?: string;
   metadata?: string;
   container?: string;
-  containerRegistry?: string;
+  containerRegistry?: ContainerRegistryType;
   version?: string;
   schedule?: string;
   mrEnclaves?: Array<RawBuffer>;
@@ -98,6 +102,24 @@ export interface FunctionSetConfigParams {
   requestsFee?: number;
 
   authority?: Keypair;
+}
+
+/**
+ *  Parameters for setting a {@linkcode FunctionAccount} escrow
+ */
+export interface FunctionSetEscrowParams {
+  authority?: Keypair;
+  newEscrow: SwitchboardWallet;
+  newEscrowAuthority?: Keypair;
+}
+
+/**
+ *  Parameters for setting a {@linkcode FunctionAccount} authority
+ */
+export interface FunctionSetAuthorityParams {
+  authority?: Keypair;
+  newAuthority: PublicKey;
+  walletAuthority?: Keypair;
 }
 
 /**
@@ -111,8 +133,6 @@ export interface FunctionVerifySyncParams {
   mrEnclave: Uint8Array;
 
   escrowWallet: PublicKey;
-
-  functionAuthority: PublicKey;
   functionEnclaveSigner: PublicKey;
 
   attestationQueue: PublicKey;
@@ -133,7 +153,7 @@ export interface FunctionVerifyParams {
   nextAllowedTimestamp: anchor.BN;
   isFailure: boolean;
   mrEnclave: Uint8Array;
-  verifier: EnclaveAccount;
+  verifier: VerifierAccount;
   verifierEnclaveSigner: PublicKey;
   functionEnclaveSigner: PublicKey;
   receiver: PublicKey;
@@ -170,14 +190,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   /**
    *  Returns the functions's name buffer in a stringified format.
    */
-  public static getName = (functionData: types.FunctionAccountData) =>
-    toUtf8(functionData.name);
+  public static getName = (functionState: types.FunctionAccountData) =>
+    toUtf8(functionState.name);
 
   /**
    *  Returns the functions's metadata buffer in a stringified format.
    */
-  public static getMetadata = (functionData: types.FunctionAccountData) =>
-    toUtf8(functionData.metadata);
+  public static getMetadata = (functionState: types.FunctionAccountData) =>
+    toUtf8(functionState.metadata);
 
   /**
    *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
@@ -302,7 +322,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
     const authorityPubkey = params.authority ?? payer;
 
-    const cronSchedule = parseCronSchedule(params.schedule);
+    const cronSchedule: Buffer = params.schedule
+      ? Buffer.from(parseCronSchedule(params.schedule), "utf-8")
+      : Buffer.from(Array(64).fill(0));
 
     const attestationQueueAccount = params.attestationQueue;
 
@@ -360,8 +382,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       escrowWalletAuthority = authorityPubkey;
     }
 
-    const enclaveAccount = functionAccount.getEnclaveAccount();
-
     const instruction = types.functionInit(
       program,
       {
@@ -370,10 +390,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
           container: new Uint8Array(Buffer.from(params.container, "utf8")),
           containerRegistry: new Uint8Array(
-            Buffer.from(params.containerRegistry ?? "", "utf8")
+            Buffer.from(params.containerRegistry ?? "dockerhub", "utf8")
           ),
-          version: new Uint8Array(Buffer.from(params.version, "utf8")),
-          schedule: new Uint8Array(Buffer.from(cronSchedule, "utf8")),
+          version: new Uint8Array(
+            Buffer.from(params.version ?? "latest", "utf8")
+          ),
+          schedule: new Uint8Array(cronSchedule),
           mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
           recentSlot: recentSlot,
           requestsDisabled: params.requestsDisabled ?? false,
@@ -391,13 +413,11 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         function: functionAccount.publicKey,
         addressLookupTable: addressLookupTable,
         authority: authorityPubkey,
-        quote: enclaveAccount.publicKey,
         attestationQueue: attestationQueueAccount.publicKey,
         payer,
         wallet: escrowWallet.publicKey,
         walletAuthority: escrowWalletAuthority,
         tokenWallet: escrowWallet.tokenWallet,
-        state: program.attestationProgramState.publicKey,
         mint: program.mint.address,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -442,10 +462,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [account, txSignature];
   }
 
-  public getEnclaveAccount(): EnclaveAccount {
-    return EnclaveAccount.fromSeed(this.program, this.publicKey);
-  }
-
   public async createRequestInstruction(
     payer: PublicKey,
     params: CreateFunctionRequestParams,
@@ -484,18 +500,18 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: FunctionSetConfigParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    const functionData = await this.loadData();
+    const functionState = await this.loadData();
 
     if (params.authority) {
-      if (!params.authority.publicKey.equals(functionData.authority)) {
+      if (!params.authority.publicKey.equals(functionState.authority)) {
         throw new errors.IncorrectAuthority(
-          functionData.authority,
+          functionState.authority,
           params.authority.publicKey
         );
       }
     } else {
-      if (!payer.equals(functionData.authority)) {
-        throw new errors.IncorrectAuthority(functionData.authority, payer);
+      if (!payer.equals(functionState.authority)) {
+        throw new errors.IncorrectAuthority(functionState.authority, payer);
       }
     }
 
@@ -521,17 +537,17 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: params.requestsDisabled ?? null,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? null,
-          requestsDefaultSlotsUntilExpiration:
+          requestsDefaultSlotsUntilExpiration: Number.isFinite(
             params.requestsDefaultSlotsUntilExpiration
-              ? new BN(params.requestsDefaultSlotsUntilExpiration)
-              : null,
+          )
+            ? new BN(params.requestsDefaultSlotsUntilExpiration)
+            : null,
           requestsFee: params.requestsFee ? new BN(params.requestsFee) : null,
         },
       },
       {
         function: this.publicKey,
-        quote: this.getEnclaveAccount().publicKey,
-        authority: functionData.authority,
+        authority: functionState.authority,
       }
     );
 
@@ -548,6 +564,112 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.setConfigInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public async setEscrowInstruction(
+    payer: PublicKey,
+    params: FunctionSetEscrowParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const signers: Keypair[] = [];
+    if (params.authority) {
+      signers.push(params.authority);
+    }
+    if (params.newEscrowAuthority) {
+      signers.push(params.newEscrowAuthority);
+    }
+    const functionState = await this.loadData();
+
+    const currentWallet = await this.wallet;
+    const currentWalletState = await currentWallet.loadData();
+
+    const newWallet = params.newEscrow;
+    const newWalletState = await newWallet.loadData();
+
+    const functionSetEscrowIxn = types.functionSetEscrow(
+      this.program,
+      { params: {} },
+      {
+        function: this.publicKey,
+        authority: functionState.authority,
+        attestationQueue: functionState.attestationQueue,
+        escrowWallet: currentWallet.publicKey,
+        escrowAuthority: currentWalletState.authority,
+        newEscrow: newWallet.publicKey,
+        newEscrowAuthority: newWalletState.authority,
+        newEscrowTokenWallet: newWallet.tokenWallet,
+      }
+    );
+
+    return new TransactionObject(
+      payer,
+      [functionSetEscrowIxn],
+      signers,
+      options
+    );
+  }
+
+  public async setEscrow(
+    params: FunctionSetEscrowParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.setEscrowInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public async setAuthorityInstruction(
+    payer: PublicKey,
+    params: FunctionSetAuthorityParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const signers: Keypair[] = [];
+    if (params.authority) {
+      signers.push(params.authority);
+    }
+    if (params.walletAuthority) {
+      signers.push(params.walletAuthority);
+    }
+
+    const functionState = await this.loadData();
+    const wallet = await this.wallet;
+    const walletState = await wallet.loadData();
+
+    const functionSetAuthorityIxn = types.functionSetAuthority(
+      this.program,
+      { params: {} },
+      {
+        function: this.publicKey,
+        authority: functionState.authority,
+        attestationQueue: functionState.attestationQueue,
+        escrowWallet: wallet.publicKey,
+        escrowAuthority: walletState.authority,
+        newAuthority: params.newAuthority,
+        walletAuthority: params.walletAuthority
+          ? params.walletAuthority.publicKey
+          : SB_ATTESTATION_PID,
+      }
+    );
+
+    return new TransactionObject(
+      payer,
+      [handleOptionalPubkeys(functionSetAuthorityIxn)],
+      signers,
+      options
+    );
+  }
+
+  public async setAuthority(
+    params: FunctionSetAuthorityParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.setAuthorityInstruction(
       this.program.walletPubkey,
       params,
       options
@@ -582,7 +704,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         defaultWallet: defaultWallet.publicKey,
         tokenWallet: defaultWallet.tokenWallet,
         payer: payer,
-        state: this.program.attestationProgramState.publicKey,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
         associatedTokenProgram: anchor.utils.token.ASSOCIATED_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
@@ -693,7 +814,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   public verifyInstructionSync(
     params: FunctionVerifySyncParams
   ): TransactionInstruction {
-    const fnEnclaveAccount = this.getEnclaveAccount();
     const wallet = new SwitchboardWallet(this.program, params.escrowWallet);
     const escrowTokenWallet = wallet.tokenWallet;
 
@@ -710,12 +830,10 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       {
         // fn accounts
         function: this.publicKey,
-        authority: params.functionAuthority,
         functionEnclaveSigner: params.functionEnclaveSigner,
-        fnQuote: fnEnclaveAccount.publicKey,
         // verifier accounts
-        verifierQuote: params.quoteVerifier,
-        verifierEnclaveSigner: params.quoteVerifierEnclaveSigner,
+        verifier: params.quoteVerifier,
+        verifierSigner: params.quoteVerifierEnclaveSigner,
         verifierPermission: AttestationPermissionAccount.fromSeed(
           this.program,
           params.attestationQueueAuthority,
@@ -727,7 +845,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         escrowTokenWallet: escrowTokenWallet,
         receiver: params.receiver,
         // others
-        state: this.program.attestationProgramState.publicKey,
         attestationQueue: params.attestationQueue,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
       }
@@ -739,7 +856,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   ): Promise<TransactionInstruction> {
     this.program.verifyAttestation();
 
-    const functionData = params.fnState ?? (await this.loadData());
+    const functionState = params.fnState ?? (await this.loadData());
 
     const wallet = await this.wallet;
 
@@ -747,7 +864,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     if (!attestationQueueAuthority) {
       const attestationQueueAccount = new AttestationQueueAccount(
         this.program,
-        functionData.attestationQueue
+        functionState.attestationQueue
       );
       attestationQueueAuthority = (await attestationQueueAccount.loadData())
         .authority;
@@ -762,14 +879,13 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       mrEnclave: params.mrEnclave,
 
       escrowWallet: wallet.publicKey,
-      functionAuthority: functionData.authority,
       functionEnclaveSigner: params.functionEnclaveSigner,
 
-      attestationQueue: functionData.attestationQueue,
+      attestationQueue: functionState.attestationQueue,
       attestationQueueAuthority: attestationQueueAuthority,
 
       quoteVerifier: params.verifier.publicKey,
-      quoteVerifierEnclaveSigner: quoteVerifier.enclaveSigner,
+      quoteVerifierEnclaveSigner: quoteVerifier.enclave.enclaveSigner,
 
       receiver: params.receiver,
     });
@@ -803,7 +919,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       isFailure: boolean;
       mrEnclave: Uint8Array;
 
-      verifier: EnclaveAccount;
+      verifier: VerifierAccount;
       verifierEnclaveSigner: Keypair;
 
       functionEnclaveSigner: Keypair;
@@ -836,19 +952,19 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params?: FunctionTriggerParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    const functionData = await this.loadData();
+    const functionState = await this.loadData();
 
     // verify authority is correct
     if (params && params?.authority) {
-      if (!params.authority.publicKey.equals(functionData.authority)) {
+      if (!params.authority.publicKey.equals(functionState.authority)) {
         throw new errors.IncorrectAuthority(
-          functionData.authority,
+          functionState.authority,
           params.authority.publicKey
         );
       }
     } else {
-      if (!payer.equals(functionData.authority)) {
-        throw new errors.IncorrectAuthority(functionData.authority, payer);
+      if (!payer.equals(functionState.authority)) {
+        throw new errors.IncorrectAuthority(functionState.authority, payer);
       }
     }
 
@@ -857,15 +973,16 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       { params: {} },
       {
         function: this.publicKey,
-        authority: functionData.authority,
-        attestationQueue: functionData.attestationQueue,
+        authority: functionState.authority,
+        attestationQueue: functionState.attestationQueue,
       }
     );
 
     return new TransactionObject(
       payer,
       [functionTrigger],
-      params?.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : [],
+      options
     );
   }
 
@@ -882,7 +999,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
 
   public static decodeAddressLookup(lookupTable: AddressLookupTableAccount) {
     const addresses = lookupTable.state.addresses;
-    if (addresses.length < 18) {
+    if (addresses.length < 16) {
       throw new Error(`Failed to decode address lookup table`);
     }
 
@@ -943,14 +1060,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     }
 
     // switchboard accounts, not worth the network calls
-    const statePubkey = addresses[10]!;
-    const attestationQueuePubkey = addresses[11]!;
-    const functionPubkey = addresses[12]!;
-    const functionAuthorityPubkey = addresses[13]!;
-    const fnQuote = addresses[14]!;
-    const mintPubkey = addresses[15]!;
-    const walletPubkey = addresses[16]!;
-    const escrowPubkey = addresses[17]!;
+    const attestationQueuePubkey = addresses[10]!;
+    const functionPubkey = addresses[11]!;
+    const functionAuthorityPubkey = addresses[12]!;
+    const mintPubkey = addresses[13]!;
+    const walletPubkey = addresses[14]!;
+    const escrowPubkey = addresses[15]!;
 
     return {
       systemProgram, // 1
@@ -963,14 +1078,33 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       sysVarSlotHistory,
       switchboardProgram,
       attestationProgram, // 10
-      statePubkey,
       attestationQueuePubkey,
       functionPubkey,
       functionAuthorityPubkey,
-      fnQuote, // 15
       mintPubkey,
-      walletPubkey,
-      escrowPubkey, // 18
+      walletPubkey, // 15
+      escrowPubkey, // 16
     };
+  }
+
+  public static getVerificationStatus(
+    state: types.FunctionAccountData
+  ): types.VerificationStatusKind {
+    switch (state.enclave.verificationStatus) {
+      case types.VerificationStatus.None.discriminator:
+        return new types.VerificationStatus.None();
+      case types.VerificationStatus.VerificationPending.discriminator:
+        return new types.VerificationStatus.VerificationPending();
+      case types.VerificationStatus.VerificationFailure.discriminator:
+        return new types.VerificationStatus.VerificationFailure();
+      case types.VerificationStatus.VerificationSuccess.discriminator:
+        return new types.VerificationStatus.VerificationSuccess();
+      case types.VerificationStatus.VerificationOverride.discriminator:
+        return new types.VerificationStatus.VerificationOverride();
+    }
+
+    throw new Error(
+      `Failed to get the verification status, expected [${types.VerificationStatus.None.discriminator}, ${types.VerificationStatus.VerificationPending.discriminator}, ${types.VerificationStatus.VerificationFailure.discriminator}, ${types.VerificationStatus.VerificationSuccess.discriminator}], or ${types.VerificationStatus.VerificationOverride.discriminator}], received ${state.enclave.verificationStatus}`
+    );
   }
 }

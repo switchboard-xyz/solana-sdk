@@ -20,6 +20,8 @@ export interface QuoteFields {
   quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   registryKey: Array<number>;
+  /** Reserved. */
+  ebuf: Array<number>;
 }
 
 export interface QuoteJSON {
@@ -37,6 +39,8 @@ export interface QuoteJSON {
   quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   registryKey: Array<number>;
+  /** Reserved. */
+  ebuf: Array<number>;
 }
 
 export class Quote {
@@ -54,6 +58,8 @@ export class Quote {
   readonly quoteRegistry: Array<number>;
   /** Key to lookup the buffer data on IPFS or an alternative decentralized storage solution. */
   readonly registryKey: Array<number>;
+  /** Reserved. */
+  readonly ebuf: Array<number>;
 
   constructor(fields: QuoteFields) {
     this.enclaveSigner = fields.enclaveSigner;
@@ -63,6 +69,7 @@ export class Quote {
     this.validUntil = fields.validUntil;
     this.quoteRegistry = fields.quoteRegistry;
     this.registryKey = fields.registryKey;
+    this.ebuf = fields.ebuf;
   }
 
   static layout(property?: string) {
@@ -75,6 +82,7 @@ export class Quote {
         borsh.i64("validUntil"),
         borsh.array(borsh.u8(), 32, "quoteRegistry"),
         borsh.array(borsh.u8(), 64, "registryKey"),
+        borsh.array(borsh.u8(), 256, "ebuf"),
       ],
       property
     );
@@ -90,6 +98,7 @@ export class Quote {
       validUntil: obj.validUntil,
       quoteRegistry: obj.quoteRegistry,
       registryKey: obj.registryKey,
+      ebuf: obj.ebuf,
     });
   }
 
@@ -102,6 +111,7 @@ export class Quote {
       validUntil: fields.validUntil,
       quoteRegistry: fields.quoteRegistry,
       registryKey: fields.registryKey,
+      ebuf: fields.ebuf,
     };
   }
 
@@ -114,6 +124,7 @@ export class Quote {
       validUntil: this.validUntil.toString(),
       quoteRegistry: this.quoteRegistry,
       registryKey: this.registryKey,
+      ebuf: this.ebuf,
     };
   }
 
@@ -126,6 +137,7 @@ export class Quote {
       validUntil: new BN(obj.validUntil),
       quoteRegistry: obj.quoteRegistry,
       registryKey: obj.registryKey,
+      ebuf: obj.ebuf,
     });
   }
 

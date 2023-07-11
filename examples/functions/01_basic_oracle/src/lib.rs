@@ -1,4 +1,7 @@
+pub mod actions;
+pub use actions::*;
 pub use switchboard_solana::prelude::*;
+declare_id!("EF68PJkRqQu2VthTSy19kg6TWynMtRmLpxcMDKEdLC8t");
 
 pub mod error;
 pub use error::*;
@@ -9,10 +12,7 @@ pub use model::*;
 pub mod utils;
 pub use utils::*;
 
-pub mod actions;
-pub use actions::*;
 
-declare_id!("CE1HrS25FhvPjcAH4Zjka6uJBbYrDRY7uZ8PPSkiUwAh");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 
@@ -44,5 +44,13 @@ pub mod basic_oracle {
         params: SetFunctionParams,
     ) -> anchor_lang::Result<()> {
         SetFunction::actuate(&ctx, &params)
+    }
+
+    #[access_control(ctx.accounts.validate(&ctx, &params))]
+    pub fn trigger_function(
+        ctx: Context<TriggerFunction>,
+        params: TriggerFunctionParams,
+    ) -> anchor_lang::Result<()> {
+        TriggerFunction::actuate(&ctx, &params)
     }
 }

@@ -4,16 +4,14 @@ use crate::prelude::*;
 #[instruction(params:FunctionInitParams)]
 pub struct FunctionInit<'info> {
     #[account(
-        init,
-        space = FunctionAccountData::size(),
-        payer = payer,
-        seeds = [
-            FUNCTION_SEED,
-            params.creator_seed.unwrap_or(payer.key().to_bytes()).as_ref(),
-            params.recent_slot.to_le_bytes().as_ref()
-        ],
-        bump,
-    )]
+      init,
+      space = FunctionAccountData::size(),
+      payer = payer,
+      seeds = [FUNCTION_SEED,
+      params.creator_seed.unwrap_or(payer.key().to_bytes()).as_ref(),
+      params.recent_slot.to_le_bytes().as_ref()],
+      bump,
+  )]
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     /// CHECK: todo
@@ -22,15 +20,6 @@ pub struct FunctionInit<'info> {
 
     /// CHECK:
     pub authority: AccountInfo<'info>,
-
-    #[account(
-        init,
-        seeds = [QUOTE_SEED, function.key().as_ref()],
-        space = EnclaveAccountData::size(),
-        payer = payer,
-        bump,
-    )]
-    pub quote: AccountLoader<'info, EnclaveAccountData>,
 
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
 
@@ -47,12 +36,6 @@ pub struct FunctionInit<'info> {
     #[account(mut)]
     pub token_wallet: AccountInfo<'info>,
 
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
-
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: Account<'info, Mint>,
 
@@ -64,9 +47,9 @@ pub struct FunctionInit<'info> {
 
     /// CHECK:
     #[account(
-        constraint = address_lookup_program.executable,
-        address = solana_address_lookup_table_program::id(),
-    )]
+      constraint = address_lookup_program.executable,
+      address = solana_address_lookup_table_program::id(),
+  )]
     pub address_lookup_program: AccountInfo<'info>,
 }
 
@@ -140,13 +123,11 @@ impl<'info> FunctionInit<'info> {
         account_infos.extend(self.function.to_account_infos());
         account_infos.extend(self.address_lookup_table.to_account_infos());
         account_infos.extend(self.authority.to_account_infos());
-        account_infos.extend(self.quote.to_account_infos());
         account_infos.extend(self.attestation_queue.to_account_infos());
         account_infos.extend(self.payer.to_account_infos());
         account_infos.extend(self.wallet.to_account_infos());
         account_infos.extend(self.wallet_authority.to_account_infos());
         account_infos.extend(self.token_wallet.to_account_infos());
-        account_infos.extend(self.state.to_account_infos());
         account_infos.extend(self.mint.to_account_infos());
         account_infos.extend(self.token_program.to_account_infos());
         account_infos.extend(self.associated_token_program.to_account_infos());
@@ -161,7 +142,6 @@ impl<'info> FunctionInit<'info> {
         account_metas.extend(self.function.to_account_metas(None));
         account_metas.extend(self.address_lookup_table.to_account_metas(None));
         account_metas.extend(self.authority.to_account_metas(None));
-        account_metas.extend(self.quote.to_account_metas(None));
         account_metas.extend(self.attestation_queue.to_account_metas(None));
         account_metas.extend(self.payer.to_account_metas(None));
         account_metas.extend(self.wallet.to_account_metas(None));
@@ -171,7 +151,6 @@ impl<'info> FunctionInit<'info> {
             account_metas.push(AccountMeta::new_readonly(crate::ID, false));
         }
         account_metas.extend(self.token_wallet.to_account_metas(None));
-        account_metas.extend(self.state.to_account_metas(None));
         account_metas.extend(self.mint.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas.extend(self.associated_token_program.to_account_metas(None));

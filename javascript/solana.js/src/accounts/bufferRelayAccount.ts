@@ -1,14 +1,13 @@
 import * as errors from "../errors.js";
 import { bufferRelayerSaveResult } from "../generated/oracle-program/index.js";
 import * as types from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from "../TransactionObject.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { TransactionObjectOptions } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
-import { JobAccount } from "./jobAccount.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
+import type { JobAccount } from "./jobAccount.js";
 import { OracleAccount } from "./oracleAccount.js";
 import { PermissionAccount } from "./permissionAccount.js";
 import { QueueAccount } from "./queueAccount.js";
@@ -20,14 +19,16 @@ import {
   getAccount,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
+import type {
   Commitment,
+  TransactionInstruction,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
   Keypair,
   PublicKey,
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
-  TransactionInstruction,
-  TransactionSignature,
 } from "@solana/web3.js";
 import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 

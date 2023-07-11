@@ -1,30 +1,27 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
-import {
-  AggregatorAccount,
-  AggregatorPdaAccounts,
-} from "./aggregatorAccount.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
+import type { AggregatorPdaAccounts } from "./aggregatorAccount.js";
+import { AggregatorAccount } from "./aggregatorAccount.js";
 import { CrankDataBuffer } from "./crankDataBuffer.js";
 import { QueueAccount } from "./queueAccount.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import {
+import type {
   AccountMeta,
   Commitment,
-  Keypair,
-  PublicKey,
-  SystemProgram,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 
 /**
  * Account holding a priority queue of aggregators and their next available update time. This is a scheduling mechanism to ensure {@linkcode AggregatorAccount}'s are updated as close as possible to their specified update interval.

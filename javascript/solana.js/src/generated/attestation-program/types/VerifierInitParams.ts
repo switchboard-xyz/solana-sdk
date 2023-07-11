@@ -5,12 +5,12 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteInitParamsFields {}
+export interface VerifierInitParamsFields {}
 
-export interface QuoteInitParamsJSON {}
+export interface VerifierInitParamsJSON {}
 
-export class QuoteInitParams {
-  constructor(fields: QuoteInitParamsFields) {}
+export class VerifierInitParams {
+  constructor(fields: VerifierInitParamsFields) {}
 
   static layout(property?: string) {
     return borsh.struct([], property);
@@ -18,22 +18,22 @@ export class QuoteInitParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QuoteInitParams({});
+    return new VerifierInitParams({});
   }
 
-  static toEncodable(fields: QuoteInitParamsFields) {
+  static toEncodable(fields: VerifierInitParamsFields) {
     return {};
   }
 
-  toJSON(): QuoteInitParamsJSON {
+  toJSON(): VerifierInitParamsJSON {
     return {};
   }
 
-  static fromJSON(obj: QuoteInitParamsJSON): QuoteInitParams {
-    return new QuoteInitParams({});
+  static fromJSON(obj: VerifierInitParamsJSON): VerifierInitParams {
+    return new VerifierInitParams({});
   }
 
   toEncodable() {
-    return QuoteInitParams.toEncodable(this);
+    return VerifierInitParams.toEncodable(this);
   }
 }

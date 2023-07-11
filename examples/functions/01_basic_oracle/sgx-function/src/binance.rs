@@ -174,22 +174,12 @@ impl Binance {
             program_id: basic_oracle::ID,
             accounts: vec![
                 AccountMeta {
-                    pubkey: program_state_pubkey,
-                    is_signer: false,
-                    is_writable: false,
-                },
-                AccountMeta {
                     pubkey: oracle_pubkey,
                     is_signer: false,
                     is_writable: true,
                 },
                 AccountMeta {
                     pubkey: runner.function,
-                    is_signer: false,
-                    is_writable: false,
-                },
-                AccountMeta {
-                    pubkey: runner.quote,
                     is_signer: false,
                     is_writable: false,
                 },

@@ -1,12 +1,9 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import {
-  AccountMeta,
-  PublicKey,
-  TransactionInstruction,
-} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type { AccountMeta, PublicKey } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionCloseArgs {
@@ -20,7 +17,6 @@ export interface FunctionCloseAccounts {
   escrowWallet: PublicKey;
   solDest: PublicKey;
   escrowDest: PublicKey;
-  state: PublicKey;
   tokenProgram: PublicKey;
   systemProgram: PublicKey;
   addressLookupProgram: PublicKey;
@@ -33,7 +29,8 @@ export const layout = borsh.struct([
 export function functionClose(
   program: SwitchboardProgram,
   args: FunctionCloseArgs,
-  accounts: FunctionCloseAccounts
+  accounts: FunctionCloseAccounts,
+  programId: PublicKey = program.attestationProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
@@ -42,7 +39,6 @@ export function functionClose(
     { pubkey: accounts.escrowWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.solDest, isSigner: false, isWritable: false },
     { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     { pubkey: accounts.systemProgram, isSigner: false, isWritable: false },
     {
@@ -60,10 +56,6 @@ export function functionClose(
     buffer
   );
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
-  const ix = new TransactionInstruction({
-    keys,
-    programId: program.attestationProgramId,
-    data,
-  });
+  const ix = new TransactionInstruction({ keys, programId, data });
   return ix;
 }

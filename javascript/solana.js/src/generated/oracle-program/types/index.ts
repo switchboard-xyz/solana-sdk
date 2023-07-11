@@ -1,11 +1,10 @@
 import * as AggregatorResolutionMode from "./AggregatorResolutionMode.js";
 import * as Error from "./Error.js";
-import * as Lanes from "./Lanes.js";
+import type * as Lanes from "./Lanes.js";
 import * as OracleResponseType from "./OracleResponseType.js";
 import * as Shuffle from "./Shuffle.js";
 import * as SwitchboardPermission from "./SwitchboardPermission.js";
 import * as VrfStatus from "./VrfStatus.js";
-
 export type {
   AccountMetaBorshFields,
   AccountMetaBorshJSON,
@@ -391,7 +390,6 @@ export type {
   VrfSetCallbackParamsJSON,
 } from "./VrfSetCallbackParams.js";
 export { VrfSetCallbackParams } from "./VrfSetCallbackParams.js";
-
 /**
  * The `Lanes` enum represents a subset of the lanes `A,B,C,D` of a
  * `FieldElement2625x4`.
@@ -409,7 +407,6 @@ export type LanesJSON =
   | Lanes.ADJSON;
 
 export { Shuffle };
-
 /**
  * The `Shuffle` enum represents a shuffle of a `FieldElement2625x4`.
  *
@@ -439,9 +436,7 @@ export type ShuffleJSON =
   | Shuffle.BADCJSON
   | Shuffle.BACDJSON
   | Shuffle.ABDCJSON;
-
 export { Error };
-
 export type ErrorKind =
   | Error.InvalidPublicKey
   | Error.SerializationError
@@ -452,18 +447,14 @@ export type ErrorJSON =
   | Error.SerializationErrorJSON
   | Error.DeserializationErrorJSON
   | Error.InvalidDataErrorJSON;
-
 export { AggregatorResolutionMode };
-
 export type AggregatorResolutionModeKind =
   | AggregatorResolutionMode.ModeRoundResolution
   | AggregatorResolutionMode.ModeSlidingResolution;
 export type AggregatorResolutionModeJSON =
   | AggregatorResolutionMode.ModeRoundResolutionJSON
   | AggregatorResolutionMode.ModeSlidingResolutionJSON;
-
 export { SwitchboardPermission };
-
 export type SwitchboardPermissionKind =
   | SwitchboardPermission.PermitNone
   | SwitchboardPermission.PermitOracleHeartbeat
@@ -474,9 +465,7 @@ export type SwitchboardPermissionJSON =
   | SwitchboardPermission.PermitOracleHeartbeatJSON
   | SwitchboardPermission.PermitOracleQueueUsageJSON
   | SwitchboardPermission.PermitVrfRequestsJSON;
-
 export { OracleResponseType };
-
 export type OracleResponseTypeKind =
   | OracleResponseType.TypeSuccess
   | OracleResponseType.TypeError
@@ -487,9 +476,7 @@ export type OracleResponseTypeJSON =
   | OracleResponseType.TypeErrorJSON
   | OracleResponseType.TypeDisagreementJSON
   | OracleResponseType.TypeNoResponseJSON;
-
 export { VrfStatus };
-
 export type VrfStatusKind =
   | VrfStatus.StatusNone
   | VrfStatus.StatusRequesting

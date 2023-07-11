@@ -1,21 +1,19 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/oracle-program/index.js";
 import { Mint } from "../mint.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";
 
 import { Account } from "./account.js";
 
-import * as anchor from "@coral-xyz/anchor";
+import type * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
+import type {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
-import { BN } from "@switchboard-xyz/common";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
+import type { BN } from "@switchboard-xyz/common";
 
 /**
  * Account type representing Switchboard global program state.

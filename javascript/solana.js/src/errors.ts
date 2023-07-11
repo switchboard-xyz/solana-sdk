@@ -1,5 +1,5 @@
-import * as anchor from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import type * as anchor from "@coral-xyz/anchor";
+import type { PublicKey } from "@solana/web3.js";
 
 export class SwitchboardProgramIsBrowserError extends Error {
   constructor() {

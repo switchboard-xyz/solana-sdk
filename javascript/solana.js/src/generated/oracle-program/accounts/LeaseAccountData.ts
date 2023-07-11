@@ -1,4 +1,4 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -111,14 +111,15 @@ export class LeaseAccountData {
 
   static async fetch(
     program: SwitchboardProgram,
-    address: PublicKey
+    address: PublicKey,
+    programId: PublicKey = program.programId
   ): Promise<LeaseAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
     if (info === null) {
       return null;
     }
-    if (!info.owner.equals(program.programId)) {
+    if (!info.owner.equals(programId)) {
       throw new Error("account doesn't belong to this program");
     }
 
@@ -127,7 +128,8 @@ export class LeaseAccountData {
 
   static async fetchMultiple(
     program: SwitchboardProgram,
-    addresses: PublicKey[]
+    addresses: PublicKey[],
+    programId: PublicKey = program.programId
   ): Promise<Array<LeaseAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
@@ -135,7 +137,7 @@ export class LeaseAccountData {
       if (info === null) {
         return null;
       }
-      if (!info.owner.equals(program.programId)) {
+      if (!info.owner.equals(programId)) {
         throw new Error("account doesn't belong to this program");
       }
 

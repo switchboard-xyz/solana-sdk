@@ -2,23 +2,25 @@ import * as attestationTypes from "./generated/attestation-program/index.js";
 import { fromTxError } from "./generated/oracle-program/errors/index.js";
 import { isBrowser } from "./browser.js";
 import * as errors from "./errors.js";
-import {
+import type {
   AnchorWallet,
-  DEFAULT_SEND_TRANSACTION_OPTIONS,
   SendTransactionOptions,
 } from "./SwitchboardProgram.js";
+import { DEFAULT_SEND_TRANSACTION_OPTIONS } from "./SwitchboardProgram.js";
 
-import { AnchorProvider } from "@coral-xyz/anchor";
-import {
-  ComputeBudgetProgram,
+import type { AnchorProvider } from "@coral-xyz/anchor";
+import type {
   Keypair,
   NonceInformation,
+  TransactionInstruction,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
+  ComputeBudgetProgram,
   PACKET_DATA_SIZE,
   PublicKey,
   Transaction,
-  TransactionInstruction,
   TransactionMessage,
-  TransactionSignature,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { sleep } from "@switchboard-xyz/common";

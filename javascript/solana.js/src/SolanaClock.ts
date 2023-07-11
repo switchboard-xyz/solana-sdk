@@ -1,6 +1,7 @@
 import * as borsh from "@coral-xyz/borsh";
-import { Connection, SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
-import { BN } from "@switchboard-xyz/common";
+import type { Connection } from "@solana/web3.js";
+import { SYSVAR_CLOCK_PUBKEY } from "@solana/web3.js";
+import type { BN } from "@switchboard-xyz/common";
 
 export interface SolanaClockDataFields {
   slot: BN;

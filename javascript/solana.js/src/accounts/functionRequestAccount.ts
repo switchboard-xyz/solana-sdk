@@ -1,13 +1,13 @@
 import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawBuffer } from "../types.js";
+import { TransactionObject } from "../TransactionObject.js";
+import type { RawBuffer } from "../types.js";
 import { parseMrEnclave } from "../utils.js";
 
 import { FunctionAccount } from "./index.js";
@@ -16,13 +16,12 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
-  Keypair,
+import type {
   PublicKey,
-  SystemProgram,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, SystemProgram } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common";
 
 /**

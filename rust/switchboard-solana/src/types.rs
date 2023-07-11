@@ -14,7 +14,7 @@ pub use crate::oracle_program::{
 pub use crate::attestation_program::{
     FunctionCloseParams, FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitParams,
     FunctionRequestVerifyParams, FunctionSetEscrowParams, FunctionStatus, FunctionTriggerParams,
-    FunctionVerifyParams, MrEnclave, SwitchboardAttestationPermission, VerificationStatus,
+    FunctionVerifyParams, MrEnclave, Quote, SwitchboardAttestationPermission, VerificationStatus,
     WalletFundParams, WalletInitParams,
 };
 

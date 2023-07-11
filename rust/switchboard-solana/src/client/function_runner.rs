@@ -2,14 +2,14 @@ use crate::prelude::*;
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::message::Message;
 use anchor_lang::solana_program::pubkey::Pubkey;
+use hex;
 use sgx_quote::Quote;
 use solana_client::rpc_client::RpcClient;
 use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::signer::keypair::Keypair;
+use std::env;
 use std::result::Result;
 use std::sync::Arc;
-use hex;
-use std::env;
 use switchboard_common::ChainResultInfo::Solana;
 use switchboard_common::SOLFunctionResult;
 
@@ -22,9 +22,10 @@ pub struct FunctionRunner {
 
     pub function: Pubkey,
     pub function_data: Box<FunctionAccountData>,
+
     pub fn_request_key: Pubkey,
     pub fn_request_data: Box<FunctionRequestAccountData>,
-    pub quote: Pubkey,
+    
     pub payer: Pubkey,
     pub verifier: Pubkey,
     pub reward_receiver: Pubkey,
@@ -49,19 +50,20 @@ impl FunctionRunner {
         let signer = signer_to_pubkey(signer_keypair.clone())?;
 
         let function = load_env_pubkey("FUNCTION_KEY")?;
-        let function_data = *bytemuck::try_from_bytes(&hex::decode(
-            env::var("FUNCTION_DATA").unwrap()).unwrap()).unwrap();
+        let function_data = *bytemuck::try_from_bytes(
+            &hex::decode(env::var("FUNCTION_DATA").unwrap_or_default()).unwrap_or_default(),
+        )
+        .unwrap_or(&Default::default());
+
         let fn_request_key = load_env_pubkey("FUNCTION_REQUEST_KEY").unwrap_or_default();
-        let fn_request_data = FunctionRequestAccountData::try_from_slice(&hex::decode(env::var("FUNCTION_REQUEST_DATA")
-            .unwrap_or_default()).unwrap_or_default()).unwrap_or_default();
+        let fn_request_data = FunctionRequestAccountData::try_from_slice(
+            &hex::decode(env::var("FUNCTION_REQUEST_DATA").unwrap_or_default()).unwrap_or_default(),
+        )
+        .unwrap_or_default();
+      
         let payer = load_env_pubkey("PAYER")?;
         let verifier = load_env_pubkey("VERIFIER")?;
         let reward_receiver = load_env_pubkey("REWARD_RECEIVER")?;
-
-        let (quote, _bump) = Pubkey::find_program_address(
-            &[QUOTE_SEED, function.as_ref()],
-            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        );
 
         Ok(Self {
             client: Arc::new(client),
@@ -71,7 +73,6 @@ impl FunctionRunner {
             function_data: Box::new(function_data),
             fn_request_key,
             fn_request_data: Box::new(fn_request_data),
-            quote,
             payer,
             verifier,
             reward_receiver,
@@ -104,8 +105,8 @@ impl FunctionRunner {
         let fn_data: FunctionAccountData =
             FunctionAccountData::fetch(&self.client, self.function).await?;
 
-        let verifier_quote: EnclaveAccountData =
-            EnclaveAccountData::fetch(&self.client, self.verifier).await?;
+        let verifier_quote: VerifierAccountData =
+            VerifierAccountData::fetch(&self.client, self.verifier).await?;
 
         let queue_data: AttestationQueueAccountData =
             crate::client::load_account(&self.client, fn_data.attestation_queue).await?;
@@ -135,8 +136,10 @@ impl FunctionRunner {
             function: self.function,
             function_enclave_signer: self.signer,
             verifier_quote: self.verifier,
-            verifier_enclave_signer: verifier_quote.enclave_signer,
-            verifier_permission: verifier_permission,
+            verifier_enclave_signer: verifier_quote.enclave.enclave_signer,
+            verifier_permission,
+            escrow_wallet: fn_data.escrow_wallet,
+            escrow_token_wallet: fn_data.escrow_token_wallet,
             attestation_queue: fn_data.attestation_queue,
             receiver: self.reward_receiver,
         };
@@ -193,6 +196,8 @@ pub struct FunctionVerifyAccounts {
     pub verifier_quote: Pubkey,
     pub verifier_enclave_signer: Pubkey,
     pub verifier_permission: Pubkey,
+    pub escrow_wallet: Pubkey,
+    pub escrow_token_wallet: Pubkey,
     pub receiver: Pubkey,
     pub attestation_queue: Pubkey,
 }
@@ -234,11 +239,6 @@ impl ToAccountMetas for FunctionVerifyAccounts {
                 is_writable: false,
             },
             AccountMeta {
-                pubkey: FunctionAccountData::get_enclave_pda(&self.function),
-                is_signer: false,
-                is_writable: true,
-            },
-            AccountMeta {
                 pubkey: self.verifier_quote,
                 is_signer: false,
                 is_writable: false,
@@ -254,7 +254,12 @@ impl ToAccountMetas for FunctionVerifyAccounts {
                 is_writable: false,
             },
             AccountMeta {
-                pubkey: FunctionAccountData::get_escrow_key(&self.function),
+                pubkey: self.escrow_wallet,
+                is_signer: false,
+                is_writable: false,
+            },
+            AccountMeta {
+                pubkey: self.escrow_token_wallet,
                 is_signer: false,
                 is_writable: true,
             },
@@ -262,11 +267,6 @@ impl ToAccountMetas for FunctionVerifyAccounts {
                 pubkey: self.receiver,
                 is_signer: false,
                 is_writable: true,
-            },
-            AccountMeta {
-                pubkey: AttestationProgramState::get_pda(),
-                is_signer: false,
-                is_writable: false,
             },
             AccountMeta {
                 pubkey: self.attestation_queue,

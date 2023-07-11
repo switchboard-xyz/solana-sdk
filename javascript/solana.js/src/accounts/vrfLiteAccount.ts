@@ -2,32 +2,33 @@ import * as errors from "../errors.js";
 import { vrfLiteInit } from "../generated/oracle-program/index.js";
 import * as types from "../generated/oracle-program/index.js";
 import { vrfLiteCloseAction } from "../generated/oracle-program/instructions/vrfLiteCloseAction.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
-  TransactionObject,
-  TransactionObjectOptions,
-} from "../TransactionObject.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { TransactionObjectOptions } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
 import { OracleAccount } from "./oracleAccount.js";
 import { PermissionAccount } from "./permissionAccount.js";
 import { QueueAccount } from "./queueAccount.js";
-import { Callback, VrfResult } from "./vrfAccount.js";
+import type { Callback, VrfResult } from "./vrfAccount.js";
 
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
+import type {
   Commitment,
-  Keypair,
   ParsedTransactionWithMeta,
   PublicKey,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
+  Keypair,
   SystemProgram,
   SYSVAR_INSTRUCTIONS_PUBKEY,
   SYSVAR_RENT_PUBKEY,
-  TransactionSignature,
 } from "@solana/web3.js";
 import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 

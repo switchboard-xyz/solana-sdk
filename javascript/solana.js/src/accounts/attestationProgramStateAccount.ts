@@ -1,16 +1,16 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";
 
 import { Account } from "./account.js";
 
+import type { TransactionSignature } from "@solana/web3.js";
 import {
   AccountInfo,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  TransactionSignature,
 } from "@solana/web3.js";
 
 /**

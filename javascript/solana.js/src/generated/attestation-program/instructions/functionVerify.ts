@@ -1,12 +1,9 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import {
-  AccountMeta,
-  PublicKey,
-  TransactionInstruction,
-} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type { AccountMeta, PublicKey } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionVerifyArgs {
@@ -15,16 +12,13 @@ export interface FunctionVerifyArgs {
 
 export interface FunctionVerifyAccounts {
   function: PublicKey;
-  authority: PublicKey;
   functionEnclaveSigner: PublicKey;
-  fnQuote: PublicKey;
-  verifierQuote: PublicKey;
-  verifierEnclaveSigner: PublicKey;
+  verifier: PublicKey;
+  verifierSigner: PublicKey;
   verifierPermission: PublicKey;
   escrowWallet: PublicKey;
   escrowTokenWallet: PublicKey;
   receiver: PublicKey;
-  state: PublicKey;
   attestationQueue: PublicKey;
   tokenProgram: PublicKey;
 }
@@ -36,28 +30,22 @@ export const layout = borsh.struct([
 export function functionVerify(
   program: SwitchboardProgram,
   args: FunctionVerifyArgs,
-  accounts: FunctionVerifyAccounts
+  accounts: FunctionVerifyAccounts,
+  programId: PublicKey = program.attestationProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
     {
       pubkey: accounts.functionEnclaveSigner,
       isSigner: true,
       isWritable: false,
     },
-    { pubkey: accounts.fnQuote, isSigner: false, isWritable: true },
-    { pubkey: accounts.verifierQuote, isSigner: false, isWritable: false },
-    {
-      pubkey: accounts.verifierEnclaveSigner,
-      isSigner: true,
-      isWritable: false,
-    },
+    { pubkey: accounts.verifier, isSigner: false, isWritable: false },
+    { pubkey: accounts.verifierSigner, isSigner: true, isWritable: false },
     { pubkey: accounts.verifierPermission, isSigner: false, isWritable: false },
     { pubkey: accounts.escrowWallet, isSigner: false, isWritable: false },
     { pubkey: accounts.escrowTokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.receiver, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
   ];
@@ -70,10 +58,6 @@ export function functionVerify(
     buffer
   );
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
-  const ix = new TransactionInstruction({
-    keys,
-    programId: program.attestationProgramId,
-    data,
-  });
+  const ix = new TransactionInstruction({ keys, programId, data });
   return ix;
 }

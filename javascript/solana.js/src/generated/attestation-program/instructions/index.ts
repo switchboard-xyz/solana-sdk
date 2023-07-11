@@ -97,19 +97,25 @@ export type {
   FunctionVerifyArgs,
 } from "./functionVerify.js";
 export { functionVerify } from "./functionVerify.js";
-export type {
-  QuoteHeartbeatAccounts,
-  QuoteHeartbeatArgs,
-} from "./quoteHeartbeat.js";
-export { quoteHeartbeat } from "./quoteHeartbeat.js";
-export type { QuoteInitAccounts, QuoteInitArgs } from "./quoteInit.js";
-export { quoteInit } from "./quoteInit.js";
-export type { QuoteRotateAccounts, QuoteRotateArgs } from "./quoteRotate.js";
-export { quoteRotate } from "./quoteRotate.js";
-export type { QuoteVerifyAccounts, QuoteVerifyArgs } from "./quoteVerify.js";
-export { quoteVerify } from "./quoteVerify.js";
 export type { StateInitAccounts, StateInitArgs } from "./stateInit.js";
 export { stateInit } from "./stateInit.js";
+export type {
+  VerifierHeartbeatAccounts,
+  VerifierHeartbeatArgs,
+} from "./verifierHeartbeat.js";
+export { verifierHeartbeat } from "./verifierHeartbeat.js";
+export type { VerifierInitAccounts, VerifierInitArgs } from "./verifierInit.js";
+export { verifierInit } from "./verifierInit.js";
+export type {
+  VerifierQuoteRotateAccounts,
+  VerifierQuoteRotateArgs,
+} from "./verifierQuoteRotate.js";
+export { verifierQuoteRotate } from "./verifierQuoteRotate.js";
+export type {
+  VerifierQuoteVerifyAccounts,
+  VerifierQuoteVerifyArgs,
+} from "./verifierQuoteVerify.js";
+export { verifierQuoteVerify } from "./verifierQuoteVerify.js";
 export type { WalletCloseAccounts, WalletCloseArgs } from "./walletClose.js";
 export { walletClose } from "./walletClose.js";
 export type { WalletFundAccounts, WalletFundArgs } from "./walletFund.js";

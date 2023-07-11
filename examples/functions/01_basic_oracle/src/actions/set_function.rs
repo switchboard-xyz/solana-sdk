@@ -18,20 +18,18 @@ pub struct SetFunction<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct SetFunctionParams {
-    
-}
+pub struct SetFunctionParams { }
 
 impl SetFunction<'_> {
     pub fn validate(
         &self,
         _ctx: &Context<Self>,
-        params: &SetFunctionParams,
+        _params: &SetFunctionParams,
     ) -> anchor_lang::Result<()> {
         Ok(())
     }
 
-    pub fn actuate(ctx: &Context<Self>, params: &SetFunctionParams) -> anchor_lang::Result<()> {
+    pub fn actuate(ctx: &Context<Self>, _params: &SetFunctionParams) -> anchor_lang::Result<()> {
         let program = &mut ctx.accounts.program.load_init()?;
         program.function = ctx.accounts.function.key();
         Ok(())

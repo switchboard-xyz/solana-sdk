@@ -6,24 +6,22 @@ import {
   PermitOracleQueueUsage,
   PermitVrfRequests,
 } from "../generated/oracle-program/types/SwitchboardPermission.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
 import { Account } from "./account.js";
 
 import { ACCOUNT_DISCRIMINATOR_SIZE } from "@coral-xyz/anchor";
-import {
+import type {
   AccountInfo,
   Keypair,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
   TransactionSignature,
 } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram } from "@solana/web3.js";
 
 /**
  *  Parameters for initializing an {@linkcode PermissionAccount}

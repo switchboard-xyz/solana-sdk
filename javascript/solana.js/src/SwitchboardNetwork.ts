@@ -1,19 +1,21 @@
-import {
-  AggregatorAccount,
-  BufferRelayerAccount,
-  CrankAccount,
+import type {
   CreateQueueBufferRelayerParams,
   CreateQueueCrankParams,
   CreateQueueFeedParams,
   CreateQueueOracleParams,
   CreateQueueVrfParams,
+  QueueInitParams,
+} from "./accounts/index.js";
+import {
+  AggregatorAccount,
+  BufferRelayerAccount,
+  CrankAccount,
   JobAccount,
   LeaseAccount,
   OracleAccount,
   PermissionAccount,
   ProgramStateAccount,
   QueueAccount,
-  QueueInitParams,
   VrfAccount,
 } from "./accounts/index.js";
 import {
@@ -28,12 +30,12 @@ import {
   SbState,
   VrfAccountData,
 } from "./generated/index.js";
-import {
+import type {
   SendTransactionOptions,
   SwitchboardProgram,
 } from "./SwitchboardProgram.js";
 import { TransactionObject } from "./TransactionObject.js";
-import {
+import type {
   AggregatorDefinition,
   BufferRelayerDefinition,
   CrankDefinition,
@@ -53,12 +55,8 @@ import {
 } from "./types.js";
 
 import * as anchor from "@coral-xyz/anchor";
-import {
-  AccountInfo,
-  Keypair,
-  PublicKey,
-  TransactionSignature,
-} from "@solana/web3.js";
+import type { AccountInfo, TransactionSignature } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 import fs from "fs";
 import path from "path";
@@ -331,7 +329,10 @@ export class SwitchboardNetwork implements ISwitchboardNetwork {
     const [queueAccount, queueInit] = await QueueAccount.createInstructions(
       program,
       payer,
-      { ...params, authority: queueAuthorityPubkey }
+      {
+        ...params,
+        authority: queueAuthorityPubkey,
+      }
     );
     txns.push(queueInit);
 

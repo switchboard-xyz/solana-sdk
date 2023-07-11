@@ -5,12 +5,12 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteHeartbeatParamsFields {}
+export interface VerifierHeartbeatParamsFields {}
 
-export interface QuoteHeartbeatParamsJSON {}
+export interface VerifierHeartbeatParamsJSON {}
 
-export class QuoteHeartbeatParams {
-  constructor(fields: QuoteHeartbeatParamsFields) {}
+export class VerifierHeartbeatParams {
+  constructor(fields: VerifierHeartbeatParamsFields) {}
 
   static layout(property?: string) {
     return borsh.struct([], property);
@@ -18,22 +18,22 @@ export class QuoteHeartbeatParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QuoteHeartbeatParams({});
+    return new VerifierHeartbeatParams({});
   }
 
-  static toEncodable(fields: QuoteHeartbeatParamsFields) {
+  static toEncodable(fields: VerifierHeartbeatParamsFields) {
     return {};
   }
 
-  toJSON(): QuoteHeartbeatParamsJSON {
+  toJSON(): VerifierHeartbeatParamsJSON {
     return {};
   }
 
-  static fromJSON(obj: QuoteHeartbeatParamsJSON): QuoteHeartbeatParams {
-    return new QuoteHeartbeatParams({});
+  static fromJSON(obj: VerifierHeartbeatParamsJSON): VerifierHeartbeatParams {
+    return new VerifierHeartbeatParams({});
   }
 
   toEncodable() {
-    return QuoteHeartbeatParams.toEncodable(this);
+    return VerifierHeartbeatParams.toEncodable(this);
   }
 }

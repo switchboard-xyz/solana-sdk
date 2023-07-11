@@ -35,6 +35,12 @@ pub enum SwitchboardError {
     PdaDerivationError,
     #[msg("Illegal Operation")]
     IllegalExecuteAttempt,
+    #[msg("The provided enclave quote is invalid")]
+    InvalidQuote,
+    #[msg("The provided queue address did not match the expected address on-chain")]
+    InvalidQueue,
+    #[msg("The provided enclave_signer does not match the expected enclave_signer")]
+    InvalidEnclaveSigner,
 }
 
 use crate::cfg_client;

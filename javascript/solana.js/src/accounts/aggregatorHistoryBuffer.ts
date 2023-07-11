@@ -1,27 +1,22 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/oracle-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import {
-  Account,
-  BUFFER_DISCRIMINATOR,
-  OnAccountChangeCallback,
-} from "./account.js";
-import { AggregatorAccount } from "./aggregatorAccount.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account, BUFFER_DISCRIMINATOR } from "./account.js";
+import type { AggregatorAccount } from "./aggregatorAccount.js";
 
-import {
+import type {
   Commitment,
-  Keypair,
-  PublicKey,
-  SystemProgram,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Big, BN } from "@switchboard-xyz/common";
 
 export interface AggregatorHistoryInit {

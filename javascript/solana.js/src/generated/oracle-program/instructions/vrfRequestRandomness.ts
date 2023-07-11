@@ -1,12 +1,9 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import {
-  AccountMeta,
-  PublicKey,
-  TransactionInstruction,
-} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type { AccountMeta, PublicKey } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface VrfRequestRandomnessArgs {
@@ -35,7 +32,8 @@ export const layout = borsh.struct([
 export function vrfRequestRandomness(
   program: SwitchboardProgram,
   args: VrfRequestRandomnessArgs,
-  accounts: VrfRequestRandomnessAccounts
+  accounts: VrfRequestRandomnessAccounts,
+  programId: PublicKey = program.programId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },
@@ -60,10 +58,6 @@ export function vrfRequestRandomness(
     buffer
   );
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
-  const ix = new TransactionInstruction({
-    keys,
-    programId: program.programId,
-    data,
-  });
+  const ix = new TransactionInstruction({ keys, programId, data });
   return ix;
 }

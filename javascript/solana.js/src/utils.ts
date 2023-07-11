@@ -1,20 +1,45 @@
-import {
-  type AggregatorAccount,
-  type CreateQueueFeedParams,
-  JobAccount,
-  type QueueAccount,
+import type {
+  AggregatorAccount,
+  CreateQueueFeedParams,
+  QueueAccount,
 } from "./accounts/index.js";
-import { type AggregatorAccountData } from "./generated/index.js";
+import { JobAccount } from "./accounts/index.js";
+import type { AggregatorAccountData } from "./generated/index.js";
 import { InvalidCronSchedule } from "./errors.js";
 import { TransactionObject } from "./TransactionObject.js";
-import { RawBuffer } from "./types.js";
+import type { RawBuffer } from "./types.js";
 
+import type { AccountMeta } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js";
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { BN, OracleJob } from "@switchboard-xyz/common";
 import { isValidCron } from "cron-validator";
 import fs from "fs";
 import os from "os";
 import path from "path";
+
+export function handleOptionalPubkeys(
+  ixn: TransactionInstruction
+): TransactionInstruction {
+  const programId = ixn.programId;
+  const data = ixn.data;
+  const keys = ixn.keys.map((meta: AccountMeta): AccountMeta => {
+    if (meta.pubkey.equals(programId)) {
+      return {
+        isSigner: false,
+        isWritable: false,
+        pubkey: programId,
+      };
+    }
+
+    return meta;
+  });
+  return new TransactionInstruction({
+    programId,
+    keys,
+    data,
+  });
+}
 
 export function loadKeypair(keypairPath: string): Keypair {
   const fullPath =

@@ -6,45 +6,40 @@ import {
   PermitVrfRequests,
 } from "../generated/oracle-program/types/SwitchboardPermission.js";
 import { SolanaClock } from "../SolanaClock.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
-import {
-  AggregatorAccount,
-  AggregatorInitParams,
-} from "./aggregatorAccount.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
+import type { AggregatorInitParams } from "./aggregatorAccount.js";
+import { AggregatorAccount } from "./aggregatorAccount.js";
 import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
-import {
-  BufferRelayerAccount,
-  BufferRelayerInit,
-} from "./bufferRelayAccount.js";
-import { CrankAccount, CrankInitParams } from "./crankAccount.js";
-import { JobAccount, JobInitParams } from "./jobAccount.js";
-import { LeaseAccount, LeaseInitParams } from "./leaseAccount.js";
-import {
-  OracleAccount,
-  OracleInitParams,
-  OracleStakeParams,
-} from "./oracleAccount.js";
-import { PermissionAccount, PermissionSetParams } from "./permissionAccount.js";
+import type { BufferRelayerInit } from "./bufferRelayAccount.js";
+import { BufferRelayerAccount } from "./bufferRelayAccount.js";
+import type { CrankInitParams } from "./crankAccount.js";
+import { CrankAccount } from "./crankAccount.js";
+import type { JobInitParams } from "./jobAccount.js";
+import { JobAccount } from "./jobAccount.js";
+import type { LeaseInitParams } from "./leaseAccount.js";
+import { LeaseAccount } from "./leaseAccount.js";
+import type { OracleInitParams, OracleStakeParams } from "./oracleAccount.js";
+import { OracleAccount } from "./oracleAccount.js";
+import type { PermissionSetParams } from "./permissionAccount.js";
+import { PermissionAccount } from "./permissionAccount.js";
 import { QueueDataBuffer } from "./queueDataBuffer.js";
-import { VrfAccount, VrfInitParams } from "./vrfAccount.js";
-import { VrfLiteAccount, VrfLiteInitParams } from "./vrfLiteAccount.js";
+import type { VrfInitParams } from "./vrfAccount.js";
+import { VrfAccount } from "./vrfAccount.js";
+import type { VrfLiteInitParams } from "./vrfLiteAccount.js";
+import { VrfLiteAccount } from "./vrfLiteAccount.js";
 
-import * as anchor from "@coral-xyz/anchor";
-import * as spl from "@solana/spl-token";
-import {
-  Commitment,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  TransactionSignature,
-} from "@solana/web3.js";
+import type * as anchor from "@coral-xyz/anchor";
+import type * as spl from "@solana/spl-token";
+import type { Commitment, TransactionSignature } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Big, BN, SwitchboardDecimal, toUtf8 } from "@switchboard-xyz/common";
 
 /**
@@ -917,18 +912,20 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       options
     );
 
-    // eslint-disable-next-line prefer-const
-    let [permissionAccount, permissionInit] =
-      PermissionAccount.createInstruction(
-        this.program,
-        payer,
-        {
-          granter: this.publicKey,
-          grantee: vrfAccount.publicKey,
-          authority: queueAuthorityPubkey,
-        },
-        options
-      );
+    let [
+      // eslint-disable-next-line prefer-const
+      permissionAccount,
+      permissionInit,
+    ] = PermissionAccount.createInstruction(
+      this.program,
+      payer,
+      {
+        granter: this.publicKey,
+        grantee: vrfAccount.publicKey,
+        authority: queueAuthorityPubkey,
+      },
+      options
+    );
 
     if (
       params.enable &&
@@ -1059,13 +1056,15 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     txns.push(bufferInit);
 
-    // eslint-disable-next-line prefer-const
-    let [permissionAccount, permissionInit] =
-      PermissionAccount.createInstruction(this.program, payer, {
-        granter: this.publicKey,
-        grantee: bufferAccount.publicKey,
-        authority: queueAuthorityPubkey,
-      });
+    let [
+      // eslint-disable-next-line prefer-const
+      permissionAccount,
+      permissionInit,
+    ] = PermissionAccount.createInstruction(this.program, payer, {
+      granter: this.publicKey,
+      grantee: bufferAccount.publicKey,
+      authority: queueAuthorityPubkey,
+    });
 
     if (
       params.enable &&

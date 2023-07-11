@@ -12,4 +12,4 @@ no-entrypoint = []
 
 [dependencies]
 # switchboard-solana = "0.8.4"
-switchboard-solana = { version = "0.8.4", path = "../../../rust/switchboard-solana" }
+switchboard-solana = { version = "0.9.1", path = "../../../rust/switchboard-solana" }

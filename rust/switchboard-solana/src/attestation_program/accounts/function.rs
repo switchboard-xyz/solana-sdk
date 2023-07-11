@@ -1,4 +1,3 @@
-use super::EnclaveAccountData;
 use crate::cfg_client;
 use crate::prelude::*;
 use bytemuck::{Pod, Zeroable};
@@ -43,23 +42,36 @@ impl From<u8> for FunctionStatus {
 #[repr(packed)]
 #[derive(Debug, PartialEq)]
 pub struct FunctionAccountData {
+    // Easy Filtering Config
     /// Whether the function is invoked on a schedule or by request
-    pub is_scheduled: u8, // keep this up-front for filtering
+    pub is_scheduled: u8,
     /// Whether the function has been manually triggered with the function_trigger instruction
-    pub is_triggered: u8, // keep this up-front for filtering
+    pub is_triggered: u8,
     /// The function permissions granted by the attestation_queue.authority
-    pub permissions: u32, // keep this up-front for filtering
-    pub status: FunctionStatus, // keep this up-front for filtering
+    pub permissions: u32,
+    pub status: FunctionStatus,
 
     // Metadata
+    /// PDA bump.
+    pub bump: u8,
+    /// The payer who originally created the function. Cannot change, used to derive PDA.
+    pub creator_seed: [u8; 32],
     /// The name of the function for easier identification.
     pub name: [u8; 64],
     /// The metadata of the function for easier identification.
     pub metadata: [u8; 256],
     /// The Solana slot when the function was created. (PDA)
     pub created_at_slot: u64,
+    /// The unix timestamp when the function was created.
+    pub created_at: i64,
     /// The unix timestamp when the function config (container, registry, version, or schedule) was changed.
     pub updated_at: i64,
+
+    // Attestation Config
+    /// The enclave quote
+    pub enclave: Quote,
+    /// An array of permitted mr_enclave measurements for the function.
+    pub mr_enclaves: [[u8; 32]; 32],
 
     // Container Settings
     /// The off-chain registry to fetch the function container from.
@@ -68,10 +80,12 @@ pub struct FunctionAccountData {
     pub container: [u8; 64],
     /// The version tag of the container to pull.
     pub version: [u8; 32],
+    /// The expected schema for the container params.
+    pub params_schema: [u8; 256],
+    /// The default params passed to the container during scheduled execution.
+    pub default_container_params: [u8; 256],
 
-    // OFFFSET = 511
-
-    // Accounts
+    // Accounts Config
     /// The authority of the function which is authorized to make account changes.
     pub authority: Pubkey,
     /// The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements.
@@ -81,7 +95,7 @@ pub struct FunctionAccountData {
     /// The address_lookup_table of the function used to increase the number of accounts we can fit into a function result.
     pub address_lookup_table: Pubkey,
 
-    // Schedule
+    // Schedule Config
     /// The cron schedule to run the function on.
     pub schedule: [u8; 64],
     /// The unix timestamp when the function was last run.
@@ -90,13 +104,14 @@ pub struct FunctionAccountData {
     pub next_allowed_timestamp: i64,
     /// The number of times to trigger the function upon the next invocation.
     pub trigger_count: u64,
-    // pub schedule_container_params: Vec<u8>,
+    /// Time this function has been sitting in an explicitly triggered state
+    pub triggered_since: i64,
 
     // Permission Settings
     /// UNUSED. The unix timestamp when the current permissions expire.
     pub permission_expiration: i64,
 
-    // Request Settings
+    // Requests Config
     /// Number of requests created for this function. Used to prevent closing when there are live requests.
     pub num_requests: u64,
     /// Whether custom requests have been disabled for this function.
@@ -110,33 +125,25 @@ pub struct FunctionAccountData {
     /// The lamports paid to the FunctionAccount escrow on each successful update request.
     pub requests_fee: u64,
 
-    /// An array of permitted mr_enclave measurements for the function.
-    pub mr_enclaves: [[u8; 32]; 32],
-
-    /// PDA bump.
-    pub bump: u8,
-    /// The payer who originally created the function. Cannot change, used to derive PDA.
-    pub creator_seed: [u8; 32],
-
+    // Token Config
     /// The SwitchboardWallet that will handle pre-funding rewards paid out to function runners.
     pub escrow_wallet: Pubkey,
     /// The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners.
     pub escrow_token_wallet: Pubkey,
-
     /// The SwitchboardWallet that will handle acruing rewards from requests.
     /// Defaults to the escrow_wallet.
     pub reward_escrow_wallet: Pubkey,
     /// The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters.
     pub reward_escrow_token_wallet: Pubkey,
 
-    /// The unix timestamp when the function was created.
-    pub created_at: i64,
-
-    /// Time this function has been sitting in an explicitly triggered state
-    pub triggered_since: i64,
-
     /// Reserved.
-    pub _ebuf: [u8; 863],
+    pub _ebuf: [u8; 1024],
+}
+
+impl Default for FunctionAccountData {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
 }
 
 impl anchor_lang::AccountDeserialize for FunctionAccountData {
@@ -256,24 +263,71 @@ impl FunctionAccountData {
         ))
     }
 
-    pub fn get_enclave_pda(fn_key: &Pubkey) -> Pubkey {
-        let (pda_key, _) = Pubkey::find_program_address(
-            &[QUOTE_SEED, &fn_key.to_bytes()],
-            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
-        );
-        pda_key
-    }
+    // /// Validate that the provided accounts correspond to the expected function accounts
+    // ///
+    // /// # Arguments
+    // ///
+    // /// * `function_account_info` - Solana AccountInfo for a FunctionAccountData
+    // /// * `signer` - Solana AccountInfo for a signer
+    // pub fn validate_signer2<'a>(
+    //     function_account_info: &AccountInfo<'a>,
+    //     signer: &AccountInfo<'a>,
+    // ) -> bool {
+    //     let function_loader_result =
+    //         AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone());
+    //     if function_loader_result.is_err() {
+    //         return false;
+    //     }
+    //     let func_loader = function_loader_result.unwrap();
+    //     let func_result = func_loader.load();
+    //     if func_result.is_err() {
+    //         return false;
+    //     }
+    //     let func = func_result.unwrap();
 
-    pub fn get_escrow_key(fn_key: &Pubkey) -> Pubkey {
-        let (ata_key, _) = Pubkey::find_program_address(
-            &[
-                &fn_key.to_bytes(),
-                &anchor_spl::token::ID.to_bytes(),
-                &anchor_spl::token::spl_token::native_mint::ID.to_bytes(),
-            ],
-            &anchor_spl::associated_token::AssociatedToken::id(),
-        );
-        ata_key
+    //     // TODO: validate the seeds and bump
+
+    //     // validate the enclaves enclave is not empty
+    //     if func.enclave.mr_enclave == [0u8; 32] {
+    //         return false;
+    //     }
+
+    //     // validate the enclaves delegated signer matches
+    //     if func.enclave.enclave_signer != signer.key() {
+    //         return false;
+    //     }
+
+    //     // validate the function was verified and it is not expired
+    //     if let Ok(clock) = Clock::get() {
+    //         return func.enclave.is_verified(&clock);
+    //     }
+    //     if func.enclave.verification_status != VerificationStatus::VerificationSuccess as u8 {
+    //         return false;
+    //     }
+
+    //     true
+    // }
+
+    /// Validate that the provided accounts correspond to the expected function accounts
+    ///
+    /// # Arguments
+    ///
+    /// * `signer` - Solana AccountInfo for a signer
+    pub fn validate(&self, signer: &AccountInfo) -> anchor_lang::Result<bool> {
+        // TODO: validate the seeds and bump
+
+        // validate the enclaves enclave is not empty
+        if self.enclave.mr_enclave == [0u8; 32] {
+            return Ok(false);
+        }
+
+        // validate the enclaves delegated signer matches
+        if self.enclave.enclave_signer != signer.key() {
+            return Ok(false);
+        }
+
+        // validate the function was verified and it is not expired
+        Ok(self.enclave.is_verified(&Clock::get()?))
     }
 
     /// Validate that the provided accounts correspond to the expected function accounts
@@ -281,45 +335,31 @@ impl FunctionAccountData {
     /// # Arguments
     ///
     /// * `function_account_info` - Solana AccountInfo for a FunctionAccountData
-    /// * `enclave_account_info` - Solana AccountInfo for a EnclaveAccountData
     /// * `signer` - Solana AccountInfo for a signer
-    pub fn validate_enclave<'a>(
+    pub fn validate_signer<'a>(
         function_account_info: &AccountInfo<'a>,
-        enclave_account_info: &AccountInfo<'a>,
         signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        // validate function PDA matches the expected derivation
-        let expected_enclave_key =
-            EnclaveAccountData::get_pda_pubkey(&function_account_info.key())?;
-        if enclave_account_info.key() != expected_enclave_key {
-            return Ok(false);
-        }
-
         // deserialize accounts and verify the owner
+
         let function_loader =
             AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone())?;
         let func = function_loader.load()?;
 
-        let enclave_loader =
-            AccountLoader::<'_, EnclaveAccountData>::try_from(&enclave_account_info.clone())?;
-        let enclave = enclave_loader.load()?;
+        // TODO: validate the seeds and bump
 
         // validate the enclaves enclave is not empty
-        if enclave.mr_enclave == [0u8; 32] {
-            return Ok(false);
-        }
-
-        // validate the enclaves measurement is present in FunctionAccount config
-        if !func.is_valid_enclave(&enclave.mr_enclave) {
+        if func.enclave.mr_enclave == [0u8; 32] {
             return Ok(false);
         }
 
         // validate the enclaves delegated signer matches
-        if enclave.enclave_signer != signer.key() {
+        if func.enclave.enclave_signer != signer.key() {
             return Ok(false);
         }
 
-        Ok(true)
+        // validate the function was verified and it is not expired
+        Ok(func.enclave.is_verified(&Clock::get()?))
     }
 
     pub fn is_empty_schedule(&self) -> bool {
@@ -354,14 +394,6 @@ impl FunctionAccountData {
         format!("{}:{}", self.get_container(), self.get_version())
     }
 
-    pub fn is_valid_enclave(&self, mr_enclave: &[u8; 32]) -> bool {
-        if *mr_enclave == [0u8; 32] {
-            return false;
-        }
-
-        self.mr_enclaves.contains(mr_enclave)
-    }
-
     cfg_client! {
         pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
             solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
@@ -393,7 +425,7 @@ impl FunctionAccountData {
 
         pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
             solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                543,
+                2553,
                 queue_pubkey.to_bytes().into(),
             ))
         }

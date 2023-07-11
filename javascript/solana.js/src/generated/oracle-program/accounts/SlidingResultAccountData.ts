@@ -1,8 +1,9 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { Connection, PublicKey } from "@solana/web3.js";
+import type { PublicKey } from "@solana/web3.js";
+import { Connection } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SlidingResultAccountDataFields {
@@ -42,14 +43,15 @@ export class SlidingResultAccountData {
 
   static async fetch(
     program: SwitchboardProgram,
-    address: PublicKey
+    address: PublicKey,
+    programId: PublicKey = program.programId
   ): Promise<SlidingResultAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
     if (info === null) {
       return null;
     }
-    if (!info.owner.equals(program.programId)) {
+    if (!info.owner.equals(programId)) {
       throw new Error("account doesn't belong to this program");
     }
 
@@ -58,7 +60,8 @@ export class SlidingResultAccountData {
 
   static async fetchMultiple(
     program: SwitchboardProgram,
-    addresses: PublicKey[]
+    addresses: PublicKey[],
+    programId: PublicKey = program.programId
   ): Promise<Array<SlidingResultAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 
@@ -66,7 +69,7 @@ export class SlidingResultAccountData {
       if (info === null) {
         return null;
       }
-      if (!info.owner.equals(program.programId)) {
+      if (!info.owner.equals(programId)) {
         throw new Error("account doesn't belong to this program");
       }
 

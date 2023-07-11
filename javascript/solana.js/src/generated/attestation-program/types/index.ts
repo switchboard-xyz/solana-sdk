@@ -112,30 +112,30 @@ export { FunctionVerifyParams } from "./FunctionVerifyParams.js";
 export type { QuoteFields, QuoteJSON } from "./Quote.js";
 export { Quote } from "./Quote.js";
 export type {
-  QuoteHeartbeatParamsFields,
-  QuoteHeartbeatParamsJSON,
-} from "./QuoteHeartbeatParams.js";
-export { QuoteHeartbeatParams } from "./QuoteHeartbeatParams.js";
-export type {
-  QuoteInitParamsFields,
-  QuoteInitParamsJSON,
-} from "./QuoteInitParams.js";
-export { QuoteInitParams } from "./QuoteInitParams.js";
-export type {
-  QuoteRotateParamsFields,
-  QuoteRotateParamsJSON,
-} from "./QuoteRotateParams.js";
-export { QuoteRotateParams } from "./QuoteRotateParams.js";
-export type {
-  QuoteVerifyParamsFields,
-  QuoteVerifyParamsJSON,
-} from "./QuoteVerifyParams.js";
-export { QuoteVerifyParams } from "./QuoteVerifyParams.js";
-export type {
   StateInitParamsFields,
   StateInitParamsJSON,
 } from "./StateInitParams.js";
 export { StateInitParams } from "./StateInitParams.js";
+export type {
+  VerifierHeartbeatParamsFields,
+  VerifierHeartbeatParamsJSON,
+} from "./VerifierHeartbeatParams.js";
+export { VerifierHeartbeatParams } from "./VerifierHeartbeatParams.js";
+export type {
+  VerifierInitParamsFields,
+  VerifierInitParamsJSON,
+} from "./VerifierInitParams.js";
+export { VerifierInitParams } from "./VerifierInitParams.js";
+export type {
+  VerifierQuoteRotateParamsFields,
+  VerifierQuoteRotateParamsJSON,
+} from "./VerifierQuoteRotateParams.js";
+export { VerifierQuoteRotateParams } from "./VerifierQuoteRotateParams.js";
+export type {
+  VerifierQuoteVerifyParamsFields,
+  VerifierQuoteVerifyParamsJSON,
+} from "./VerifierQuoteVerifyParams.js";
+export { VerifierQuoteVerifyParams } from "./VerifierQuoteVerifyParams.js";
 export type {
   WalletCloseParamsFields,
   WalletCloseParamsJSON,

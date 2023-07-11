@@ -2,15 +2,13 @@ import { SwitchboardDecimal } from "./generated/index.js";
 import { InsufficientFundsError, NativeMintOnlyError } from "./errors.js";
 import { TransactionObject } from "./TransactionObject.js";
 
-import * as anchor from "@coral-xyz/anchor";
+import type * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
+import type {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Big, BN } from "@switchboard-xyz/common";
 
 export class Mint {

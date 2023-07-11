@@ -1,48 +1,46 @@
 import * as errors from "../errors.js";
-import {
-  AggregatorAccountData,
+import type {
   AggregatorAccountDataFields,
   AggregatorAccountDataJSON,
 } from "../generated/oracle-program/accounts/AggregatorAccountData.js";
-import {
-  JobAccountData,
-  JobAccountDataJSON,
-} from "../generated/oracle-program/accounts/JobAccountData.js";
-import {
-  LeaseAccountData,
-  LeaseAccountDataJSON,
-} from "../generated/oracle-program/accounts/LeaseAccountData.js";
-import { OracleAccountData } from "../generated/oracle-program/accounts/OracleAccountData.js";
-import {
+import { AggregatorAccountData } from "../generated/oracle-program/accounts/AggregatorAccountData.js";
+import type { JobAccountDataJSON } from "../generated/oracle-program/accounts/JobAccountData.js";
+import { JobAccountData } from "../generated/oracle-program/accounts/JobAccountData.js";
+import type { LeaseAccountDataJSON } from "../generated/oracle-program/accounts/LeaseAccountData.js";
+import { LeaseAccountData } from "../generated/oracle-program/accounts/LeaseAccountData.js";
+import type { OracleAccountData } from "../generated/oracle-program/accounts/OracleAccountData.js";
+import type {
   OracleQueueAccountData,
   OracleQueueAccountDataJSON,
 } from "../generated/oracle-program/accounts/OracleQueueAccountData.js";
-import {
-  PermissionAccountData,
-  PermissionAccountDataJSON,
-} from "../generated/oracle-program/accounts/PermissionAccountData.js";
+import type { PermissionAccountDataJSON } from "../generated/oracle-program/accounts/PermissionAccountData.js";
+import { PermissionAccountData } from "../generated/oracle-program/accounts/PermissionAccountData.js";
 import * as ix from "../generated/oracle-program/instructions/index.js";
-import {
+import type {
   AggregatorHistoryRow,
-  AggregatorResolutionMode,
   AggregatorResolutionModeKind,
+} from "../generated/oracle-program/types/index.js";
+import {
+  AggregatorResolutionMode,
   BorshDecimal,
 } from "../generated/oracle-program/types/index.js";
 import { SwitchboardDecimal } from "../generated/oracle-program/types/SwitchboardDecimal.js";
 import { PermitOracleQueueUsage } from "../generated/oracle-program/types/SwitchboardPermission.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
   TransactionPackOptions,
 } from "../TransactionObject.js";
+import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
 import { AggregatorHistoryBuffer } from "./aggregatorHistoryBuffer.js";
 import { CrankAccount } from "./crankAccount.js";
 import { JobAccount } from "./jobAccount.js";
-import { LeaseAccount, LeaseExtendParams } from "./leaseAccount.js";
+import type { LeaseExtendParams } from "./leaseAccount.js";
+import { LeaseAccount } from "./leaseAccount.js";
 import { OracleAccount } from "./oracleAccount.js";
 import { PermissionAccount } from "./permissionAccount.js";
 import { QueueAccount } from "./queueAccount.js";
@@ -50,16 +48,18 @@ import { QueueAccount } from "./queueAccount.js";
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import {
+import type {
   AccountInfo,
   AccountMeta,
   Commitment,
+  TransactionInstruction,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
-  TransactionInstruction,
-  TransactionSignature,
 } from "@solana/web3.js";
 import {
   Big,

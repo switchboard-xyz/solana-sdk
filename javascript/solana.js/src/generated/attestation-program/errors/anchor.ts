@@ -26,6 +26,7 @@ export type AnchorError =
   | ConstraintMintFreezeAuthority
   | ConstraintMintDecimals
   | ConstraintSpace
+  | ConstraintAccountIsNone
   | RequireViolated
   | RequireEqViolated
   | RequireKeysEqViolated
@@ -51,7 +52,6 @@ export type AnchorError =
   | AccountSysvarMismatch
   | AccountReallocExceedsLimit
   | AccountDuplicateReallocs
-  | StateInvalidAddress
   | DeclaredProgramIdMismatch
   | Deprecated;
 
@@ -139,10 +139,10 @@ export class ConstraintHasOne extends Error {
   static readonly code = 2001;
   readonly code = 2001;
   readonly name = "ConstraintHasOne";
-  readonly msg = "A has_one constraint was violated";
+  readonly msg = "A has one constraint was violated";
 
   constructor(readonly logs?: string[]) {
-    super("2001: A has_one constraint was violated");
+    super("2001: A has one constraint was violated");
   }
 }
 
@@ -216,10 +216,10 @@ export class ConstraintState extends Error {
   static readonly code = 2008;
   readonly code = 2008;
   readonly name = "ConstraintState";
-  readonly msg = "A state constraint was violated";
+  readonly msg = "Deprecated Error, feel free to replace with something else";
 
   constructor(readonly logs?: string[]) {
-    super("2008: A state constraint was violated");
+    super("2008: Deprecated Error, feel free to replace with something else");
   }
 }
 
@@ -341,6 +341,17 @@ export class ConstraintSpace extends Error {
 
   constructor(readonly logs?: string[]) {
     super("2019: A space constraint was violated");
+  }
+}
+
+export class ConstraintAccountIsNone extends Error {
+  static readonly code = 2020;
+  readonly code = 2020;
+  readonly name = "ConstraintAccountIsNone";
+  readonly msg = "A required account for the constraint is None";
+
+  constructor(readonly logs?: string[]) {
+    super("2020: A required account for the constraint is None");
   }
 }
 
@@ -625,17 +636,6 @@ export class AccountDuplicateReallocs extends Error {
   }
 }
 
-export class StateInvalidAddress extends Error {
-  static readonly code = 4000;
-  readonly code = 4000;
-  readonly name = "StateInvalidAddress";
-  readonly msg = "The given state account does not have the correct address";
-
-  constructor(readonly logs?: string[]) {
-    super("4000: The given state account does not have the correct address");
-  }
-}
-
 export class DeclaredProgramIdMismatch extends Error {
   static readonly code = 4100;
   readonly code = 4100;
@@ -715,6 +715,8 @@ export function fromCode(code: number, logs?: string[]): AnchorError | null {
       return new ConstraintMintDecimals(logs);
     case 2019:
       return new ConstraintSpace(logs);
+    case 2020:
+      return new ConstraintAccountIsNone(logs);
     case 2500:
       return new RequireViolated(logs);
     case 2501:
@@ -765,8 +767,6 @@ export function fromCode(code: number, logs?: string[]): AnchorError | null {
       return new AccountReallocExceedsLimit(logs);
     case 3017:
       return new AccountDuplicateReallocs(logs);
-    case 4000:
-      return new StateInvalidAddress(logs);
     case 4100:
       return new DeclaredProgramIdMismatch(logs);
     case 5000:

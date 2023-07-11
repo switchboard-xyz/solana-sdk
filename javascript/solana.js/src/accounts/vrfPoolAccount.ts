@@ -1,14 +1,16 @@
 import { VRF_POOL_REQUEST_AMOUNT } from "../const.js";
 import { AccountNotFoundError, InsufficientFundsError } from "../errors.js";
 import * as types from "../generated/oracle-program/index.js";
-import { VrfPoolRequestEvent } from "../SwitchboardEvents.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type { VrfPoolRequestEvent } from "../SwitchboardEvents.js";
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
 import { TransactionObject } from "../TransactionObject.js";
 
-import { Account, OnAccountChangeCallback } from "./account.js";
+import type { OnAccountChangeCallback } from "./account.js";
+import { Account } from "./account.js";
 import { PermissionAccount } from "./permissionAccount.js";
-import { CreateVrfLiteParams, QueueAccount } from "./queueAccount.js";
-import { Callback } from "./vrfAccount.js";
+import type { CreateVrfLiteParams } from "./queueAccount.js";
+import { QueueAccount } from "./queueAccount.js";
+import type { Callback } from "./vrfAccount.js";
 import { VrfLiteAccount } from "./vrfLiteAccount.js";
 
 import {
@@ -16,15 +18,17 @@ import {
   createTransferInstruction,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import {
+import type {
   AccountMeta,
   Commitment,
+  TransactionSignature,
+} from "@solana/web3.js";
+import {
   Keypair,
   PublicKey,
   SystemProgram,
   SYSVAR_RECENT_BLOCKHASHES_PUBKEY,
   SYSVAR_RENT_PUBKEY,
-  TransactionSignature,
 } from "@solana/web3.js";
 import { promiseWithTimeout } from "@switchboard-xyz/common";
 import _ from "lodash";

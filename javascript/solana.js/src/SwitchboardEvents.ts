@@ -1,7 +1,7 @@
-import * as types from "./generated/index.js";
+import type * as types from "./generated/index.js";
 
-import * as anchor from "@coral-xyz/anchor";
-import { BN } from "@switchboard-xyz/common";
+import type * as anchor from "@coral-xyz/anchor";
+import type { BN } from "@switchboard-xyz/common";
 
 export type AggregatorAddJobEvent = {
   feedPubkey: anchor.web3.PublicKey;

@@ -1,12 +1,9 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
+import type { SwitchboardProgram } from "../../../SwitchboardProgram.js";
 import * as types from "../types/index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 import * as borsh from "@coral-xyz/borsh"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import {
-  AccountMeta,
-  PublicKey,
-  TransactionInstruction,
-} from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type { AccountMeta, PublicKey } from "@solana/web3.js";
+import { TransactionInstruction } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface FunctionInitArgs {
@@ -17,13 +14,11 @@ export interface FunctionInitAccounts {
   function: PublicKey;
   addressLookupTable: PublicKey;
   authority: PublicKey;
-  quote: PublicKey;
   attestationQueue: PublicKey;
   payer: PublicKey;
   wallet: PublicKey;
   walletAuthority: PublicKey;
   tokenWallet: PublicKey;
-  state: PublicKey;
   mint: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
@@ -36,19 +31,18 @@ export const layout = borsh.struct([types.FunctionInitParams.layout("params")]);
 export function functionInit(
   program: SwitchboardProgram,
   args: FunctionInitArgs,
-  accounts: FunctionInitAccounts
+  accounts: FunctionInitAccounts,
+  programId: PublicKey = program.attestationProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.function, isSigner: false, isWritable: true },
     { pubkey: accounts.addressLookupTable, isSigner: false, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
-    { pubkey: accounts.quote, isSigner: false, isWritable: true },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
     { pubkey: accounts.wallet, isSigner: false, isWritable: true },
     { pubkey: accounts.walletAuthority, isSigner: true, isWritable: false },
     { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
@@ -72,10 +66,6 @@ export function functionInit(
     buffer
   );
   const data = Buffer.concat([identifier, buffer]).slice(0, 8 + len);
-  const ix = new TransactionInstruction({
-    keys,
-    programId: program.attestationProgramId,
-    data,
-  });
+  const ix = new TransactionInstruction({ keys, programId, data });
   return ix;
 }

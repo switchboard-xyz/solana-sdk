@@ -6,9 +6,11 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-basic_oracle = "CE1HrS25FhvPjcAH4Zjka6uJBbYrDRY7uZ8PPSkiUwAh"
+basic_oracle = "8GHcguBXZEfKaLxRrBvis7LqPcFjBszv4ZYBgKwCUipS"
 
 [provider]
+# cluster = "https://switchbo-switchbo-6225.devnet.rpcpool.com/f6fb9f02-0777-498b-b8f5-67cbb1fc0d14"
+# wallet = "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
 cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 

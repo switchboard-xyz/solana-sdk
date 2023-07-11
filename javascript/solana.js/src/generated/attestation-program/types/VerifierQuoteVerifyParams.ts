@@ -5,24 +5,24 @@ import * as borsh from "@coral-xyz/borsh";
 import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
-export interface QuoteVerifyParamsFields {
+export interface VerifierQuoteVerifyParamsFields {
   timestamp: BN;
   mrEnclave: Array<number>;
   idx: number;
 }
 
-export interface QuoteVerifyParamsJSON {
+export interface VerifierQuoteVerifyParamsJSON {
   timestamp: string;
   mrEnclave: Array<number>;
   idx: number;
 }
 
-export class QuoteVerifyParams {
+export class VerifierQuoteVerifyParams {
   readonly timestamp: BN;
   readonly mrEnclave: Array<number>;
   readonly idx: number;
 
-  constructor(fields: QuoteVerifyParamsFields) {
+  constructor(fields: VerifierQuoteVerifyParamsFields) {
     this.timestamp = fields.timestamp;
     this.mrEnclave = fields.mrEnclave;
     this.idx = fields.idx;
@@ -41,14 +41,14 @@ export class QuoteVerifyParams {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static fromDecoded(obj: any) {
-    return new QuoteVerifyParams({
+    return new VerifierQuoteVerifyParams({
       timestamp: obj.timestamp,
       mrEnclave: obj.mrEnclave,
       idx: obj.idx,
     });
   }
 
-  static toEncodable(fields: QuoteVerifyParamsFields) {
+  static toEncodable(fields: VerifierQuoteVerifyParamsFields) {
     return {
       timestamp: fields.timestamp,
       mrEnclave: fields.mrEnclave,
@@ -56,7 +56,7 @@ export class QuoteVerifyParams {
     };
   }
 
-  toJSON(): QuoteVerifyParamsJSON {
+  toJSON(): VerifierQuoteVerifyParamsJSON {
     return {
       timestamp: this.timestamp.toString(),
       mrEnclave: this.mrEnclave,
@@ -64,8 +64,10 @@ export class QuoteVerifyParams {
     };
   }
 
-  static fromJSON(obj: QuoteVerifyParamsJSON): QuoteVerifyParams {
-    return new QuoteVerifyParams({
+  static fromJSON(
+    obj: VerifierQuoteVerifyParamsJSON
+  ): VerifierQuoteVerifyParams {
+    return new VerifierQuoteVerifyParams({
       timestamp: new BN(obj.timestamp),
       mrEnclave: obj.mrEnclave,
       idx: obj.idx,
@@ -73,6 +75,6 @@ export class QuoteVerifyParams {
   }
 
   toEncodable() {
-    return QuoteVerifyParams.toEncodable(this);
+    return VerifierQuoteVerifyParams.toEncodable(this);
   }
 }

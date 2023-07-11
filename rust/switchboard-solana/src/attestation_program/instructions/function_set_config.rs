@@ -5,22 +5,13 @@ use crate::prelude::*;
 pub struct FunctionSetConfig<'info> {
     #[account(
         mut,
-        seeds = [
-            FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(), 
-            &function.load()?.created_at_slot.to_le_bytes()
-        ],
+        seeds = [FUNCTION_SEED,
+        function.load()?.creator_seed.as_ref(),
+        &function.load()?.created_at_slot.to_le_bytes()],
         bump = function.load()?.bump,
-        has_one = authority @ SwitchboardError::InvalidAuthority
+        has_one = authority
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
-
-    #[account(
-        mut,
-        seeds = [QUOTE_SEED, function.key().as_ref()],
-        bump = quote.load()?.bump,
-    )]
-    pub quote: AccountLoader<'info, EnclaveAccountData>,
 
     pub authority: Signer<'info>,
 }
@@ -91,7 +82,6 @@ impl<'info> FunctionSetConfig<'info> {
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
         let mut account_infos = Vec::new();
         account_infos.extend(self.function.to_account_infos());
-        account_infos.extend(self.quote.to_account_infos());
         account_infos.extend(self.authority.to_account_infos());
         account_infos
     }
@@ -100,7 +90,6 @@ impl<'info> FunctionSetConfig<'info> {
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
         let mut account_metas = Vec::new();
         account_metas.extend(self.function.to_account_metas(None));
-        account_metas.extend(self.quote.to_account_metas(None));
         account_metas.extend(self.authority.to_account_metas(None));
         account_metas
     }

@@ -8,7 +8,7 @@ use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 pub fn load_env_pubkey(key: &str) -> Result<Pubkey, SwitchboardClientError> {
-    Pubkey::from_str(&env::var(key).unwrap())
+    Pubkey::from_str(&env::var(key).unwrap_or_default())
         .map_err(|_| SwitchboardClientError::EnvVariableMissing(key.to_string()))
 }
 

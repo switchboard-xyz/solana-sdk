@@ -1,18 +1,22 @@
+// eslint-disable-next-line node/no-unpublished-import
+import type { BasicOracle } from "../target/types/basic_oracle";
+
+import { printLogs } from "./utils";
+
+import type { Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import { BasicOracle } from "../target/types/basic_oracle";
-import {
-  AttestationQueueAccount,
-  SwitchboardProgram,
-  type BootstrappedAttestationQueue,
-  FunctionAccount,
-  parseMrEnclave,
-  MrEnclave,
-  types,
-  attestationTypes,
-  AttestationProgramStateAccount,
-} from "@switchboard-xyz/solana.js";
 import { sleep } from "@switchboard-xyz/common";
+import type { FunctionAccount, MrEnclave } from "@switchboard-xyz/solana.js";
+import { SwitchboardWallet } from "@switchboard-xyz/solana.js";
+import {
+  AttestationProgramStateAccount,
+  AttestationQueueAccount,
+  attestationTypes,
+  type BootstrappedAttestationQueue,
+  parseMrEnclave,
+  SwitchboardProgram,
+  types,
+} from "@switchboard-xyz/solana.js";
 
 const unixTimestamp = () => Math.floor(Date.now() / 1000);
 
@@ -49,28 +53,47 @@ describe("basic_oracle", () => {
   )[0];
 
   let switchboard: BootstrappedAttestationQueue;
+  let wallet: SwitchboardWallet;
   let functionAccount: FunctionAccount;
 
   before(async () => {
     const switchboardProgram = await SwitchboardProgram.fromProvider(
       program.provider as anchor.AnchorProvider
     );
+
     await AttestationProgramStateAccount.getOrCreate(switchboardProgram);
+
     switchboard = await AttestationQueueAccount.bootstrapNewQueue(
       switchboardProgram
     );
 
-    [functionAccount] = await FunctionAccount.create(
-      switchboard.attestationQueueAccount.program,
-      {
-        container: "switchboardlabs/basic-oracle-function",
-        version: "latest",
-        schedule: "15 * * * * *",
-        mrEnclave: MRENCLAVE,
-        attestationQueue: switchboard.attestationQueueAccount,
-        authority: programStatePubkey,
-      }
+    console.log(`programStatePubkey: ${programStatePubkey}`);
+
+    [wallet] = await SwitchboardWallet.create(
+      switchboard.program,
+      switchboard.attestationQueue.publicKey,
+      payer,
+      "MySharedWallet",
+      16
     );
+
+    console.log(`wallet: ${wallet.publicKey}`);
+
+    [functionAccount] =
+      await switchboard.attestationQueue.account.createFunction(
+        {
+          name: "test function",
+          metadata: "this function handles XYZ for my protocol",
+          schedule: "15 * * * * *",
+          container: "switchboardlabs/basic-oracle-function",
+          version: "latest",
+          mrEnclave: MRENCLAVE,
+          authority: programStatePubkey,
+        },
+        wallet
+      );
+
+    console.log(`functionAccount: ${functionAccount.publicKey}`);
   });
 
   it("Is initialized!", async () => {
@@ -81,7 +104,8 @@ describe("basic_oracle", () => {
         program: programStatePubkey,
         oracle: oraclePubkey,
         authority: payer,
-        function: functionAccount.publicKey,
+        payer: payer,
+        // function: functionAccount.publicKey,
       })
       .rpc()
       .catch((err) => {
@@ -114,13 +138,13 @@ describe("basic_oracle", () => {
     const securedSigner = anchor.web3.Keypair.generate();
 
     const rewardAddress =
-      await switchboard.attestationQueueAccount.program.mint.getOrCreateAssociatedUser(
-        payer
-      );
+      await switchboard.program.mint.getOrCreateAssociatedUser(payer);
+
+    const functionState = await functionAccount.loadData();
 
     // TODO: generate function verify ixn
     const functionVerifyIxn = attestationTypes.functionVerify(
-      switchboard.attestationQueueAccount.program,
+      switchboard.program,
       {
         params: {
           observedTime: new anchor.BN(unixTimestamp()),
@@ -132,16 +156,13 @@ describe("basic_oracle", () => {
       {
         function: functionAccount.publicKey,
         functionEnclaveSigner: securedSigner.publicKey,
-        verifierEnclaveSigner: switchboard.verifier.signer.publicKey,
-        verifierQuote: switchboard.verifier.quoteAccount.publicKey,
-        attestationQueue: switchboard.attestationQueueAccount.publicKey,
-        escrow: functionAccount.getEscrow(),
+        verifier: switchboard.verifier.publicKey,
+        verifierSigner: switchboard.verifier.signer.publicKey,
+        attestationQueue: switchboard.attestationQueue.publicKey,
+        escrowWallet: functionState.escrowWallet,
+        escrowTokenWallet: functionState.escrowTokenWallet,
         receiver: rewardAddress,
         verifierPermission: switchboard.verifier.permissionAccount.publicKey,
-        state:
-          switchboard.attestationQueueAccount.program.attestationProgramState
-            .publicKey,
-        fnQuote: functionAccount.getEnclaveAccount()[0].publicKey,
         tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
       }
     );
@@ -175,21 +196,17 @@ describe("basic_oracle", () => {
         ],
       })
       .accounts({
-        programState: programStatePubkey,
         oracle: oraclePubkey,
         function: functionAccount.publicKey,
-        enclave: functionAccount.getEnclaveAccount()[0].publicKey,
         enclaveSigner: securedSigner.publicKey,
       })
       .preInstructions([functionVerifyIxn])
       .signers([switchboard.verifier.signer, securedSigner])
-      .rpc()
-      .catch((err) => {
-        console.error(err);
-        throw err;
-      });
+      .rpc({ skipPreflight: true });
 
     console.log("Your transaction signature", tx);
+
+    await printLogs(switchboard.program.connection, tx ? tx : "");
 
     await sleep(5000);
 

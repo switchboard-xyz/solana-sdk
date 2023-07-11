@@ -1,12 +1,12 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import { SwitchboardProgram } from "../SwitchboardProgram.js";
-import {
+import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import type {
   SendTransactionObjectOptions,
-  TransactionObject,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
-import { RawBuffer } from "../types.js";
+import { TransactionObject } from "../TransactionObject.js";
+import type { RawBuffer } from "../types.js";
 import { parseMrEnclave, parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
@@ -15,21 +15,19 @@ import {
   AttestationQueueAccount,
 } from "./index.js";
 
-import * as anchor from "@coral-xyz/anchor";
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
+import type * as anchor from "@coral-xyz/anchor";
+import type {
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
+import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 
 export const QUOTE_SEED: string = "QuoteAccountData";
 
 /**
- *  Parameters for initializing an {@linkcode EnclaveAccount}
+ *  Parameters for initializing an {@linkcode VerifierAccount}
  */
-export interface EnclaveAccountInitParams {
+export interface VerifierAccountInitParams {
   /**
    * Key to lookup the buffer data on IPFS or an alternative decentralized storage solution.
    */
@@ -55,7 +53,7 @@ export interface EnclaveAccountInitParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export interface EnclaveHeartbeatSyncParams {
+export interface VerifierHeartbeatSyncParams {
   gcOracle: PublicKey;
   attestationQueue: PublicKey;
   permission: AttestationPermissionAccount;
@@ -65,17 +63,17 @@ export interface EnclaveHeartbeatSyncParams {
 /**
  *  Parameters for an {@linkcode types.quoteHeartbeat} instruction.
  */
-export type EnclaveHeartbeatParams = Partial<EnclaveHeartbeatSyncParams> & {
+export type VerifierHeartbeatParams = Partial<VerifierHeartbeatSyncParams> & {
   enclaveSigner: Keypair;
 } & Partial<{
-    quote: types.EnclaveAccountData;
+    quote: types.VerifierAccountData;
     queue: types.AttestationQueueAccountData;
   }>;
 
 /**
  *  Parameters for an {@linkcode types.quoteVerify} instruction.
  */
-export interface EnclaveVerifyParams {
+export interface QuoteVerifyParams {
   /**
    *  @TODO: Docs for timestamp
    */
@@ -86,16 +84,18 @@ export interface EnclaveVerifyParams {
   mrEnclave: RawBuffer;
 
   /**
-   * Keypair of the secured signer generated in the verifiers secure enclave
+   * Keypair of the enclave signer generated in the verifiers secure enclave
    */
-  verifierSecuredSigner: Keypair;
-  verifier: PublicKey;
+  enclaveSigner?: Keypair;
+
+  quote: VerifierAccount;
+  quoteState?: types.VerifierAccountData;
 }
 
 /**
  *  Parameters for an {@linkcode types.quoteRotate} instruction.
  */
-export interface EnclaveRotateParams {
+export interface VerifierRotateParams {
   authority?: Keypair;
   enclaveSigner: Keypair;
   registryKey: string | Buffer | Uint8Array;
@@ -104,41 +104,41 @@ export interface EnclaveRotateParams {
 /**
  * Account type representing a Switchboard Attestation quote.
  *
- * Data: {@linkcode types.EnclaveAccountData}
+ * Data: {@linkcode types.VerifierAccountData}
  */
-export class EnclaveAccount extends Account<types.EnclaveAccountData> {
-  static accountName = "EnclaveAccountData";
+export class VerifierAccount extends Account<types.VerifierAccountData> {
+  static accountName = "VerifierAccountData";
 
   /**
-   *  Load an existing {@linkcode EnclaveAccount} with its current on-chain state
+   *  Load an existing {@linkcode VerifierAccount} with its current on-chain state
    */
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
-  ): Promise<[EnclaveAccount, types.EnclaveAccountData]> {
+  ): Promise<[VerifierAccount, types.VerifierAccountData]> {
     program.verifyAttestation();
 
-    const enclaveAccount = new EnclaveAccount(program, address);
-    const state = await enclaveAccount.loadData();
-    return [enclaveAccount, state];
+    const verifierAccount = new VerifierAccount(program, address);
+    const state = await verifierAccount.loadData();
+    return [verifierAccount, state];
   }
 
   /**
-   * Finds the {@linkcode EnclaveAccount} from the seed from which it was generated.
+   * Finds the {@linkcode VerifierAccount} from the seed from which it was generated.
    *
-   * Only applicable for EnclaveAccounts tied to a {@linkcode FunctionAccount}. Enclaves can also be generated from a keypair.
+   * Only applicable for VerifierAccounts tied to a {@linkcode FunctionAccount}. Enclaves can also be generated from a keypair.
    *
-   * @return EnclaveAccount and PDA bump tuple.
+   * @return VerifierAccount and PDA bump tuple.
    */
   public static fromSeed(
     program: SwitchboardProgram,
     functionPubkey: PublicKey
-  ): EnclaveAccount {
+  ): VerifierAccount {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from(QUOTE_SEED), functionPubkey.toBytes()],
       program.attestationProgramId
     );
-    return new EnclaveAccount(program, publicKey);
+    return new VerifierAccount(program, publicKey);
   }
 
   /**
@@ -147,13 +147,13 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   public static async createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: EnclaveAccountInitParams,
+    params: VerifierAccountInitParams,
     options?: TransactionObjectOptions
-  ): Promise<[EnclaveAccount, TransactionObject]> {
+  ): Promise<[VerifierAccount, TransactionObject]> {
     program.verifyAttestation();
 
-    const quoteKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(quoteKeypair);
+    const verifierKeypair = params.keypair ?? Keypair.generate();
+    program.verifyNewKeypair(verifierKeypair);
 
     const queueData = await params.queueAccount.loadData();
 
@@ -161,11 +161,11 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
       .concat(Array(64).fill(0))
       .slice(0, 64);
 
-    const instruction = types.quoteInit(
+    const instruction = types.verifierInit(
       program,
       { params: { registryKey } },
       {
-        quote: quoteKeypair.publicKey,
+        verifier: verifierKeypair.publicKey,
         attestationQueue: params.queueAccount.publicKey,
         queueAuthority: queueData.authority,
         authority: params.authority ?? payer,
@@ -174,16 +174,16 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
       }
     );
     return [
-      new EnclaveAccount(program, quoteKeypair.publicKey),
-      new TransactionObject(payer, [instruction], [quoteKeypair], options),
+      new VerifierAccount(program, verifierKeypair.publicKey),
+      new TransactionObject(payer, [instruction], [verifierKeypair], options),
     ];
   }
 
   public static async create(
     program: SwitchboardProgram,
-    params: EnclaveAccountInitParams,
+    params: VerifierAccountInitParams,
     options?: SendTransactionObjectOptions
-  ): Promise<[EnclaveAccount, TransactionSignature]> {
+  ): Promise<[VerifierAccount, TransactionSignature]> {
     const [account, txnObject] = await this.createInstruction(
       program,
       program.walletPubkey,
@@ -208,9 +208,9 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   }
 
   static getVerificationStatus(
-    state: types.EnclaveAccountData
+    state: types.VerifierAccountData
   ): types.VerificationStatusKind {
-    switch (state.verificationStatus) {
+    switch (state.enclave.verificationStatus) {
       case types.VerificationStatus.None.discriminator:
         return new types.VerificationStatus.None();
       case types.VerificationStatus.VerificationPending.discriminator:
@@ -224,27 +224,27 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
     }
 
     throw new Error(
-      `Failed to get the verification status, expected [${types.VerificationStatus.None.discriminator}, ${types.VerificationStatus.VerificationPending.discriminator}, ${types.VerificationStatus.VerificationFailure.discriminator}, ${types.VerificationStatus.VerificationSuccess.discriminator}], or ${types.VerificationStatus.VerificationOverride.discriminator}], received ${state.verificationStatus}`
+      `Failed to get the verification status, expected [${types.VerificationStatus.None.discriminator}, ${types.VerificationStatus.VerificationPending.discriminator}, ${types.VerificationStatus.VerificationFailure.discriminator}, ${types.VerificationStatus.VerificationSuccess.discriminator}], or ${types.VerificationStatus.VerificationOverride.discriminator}], received ${state.enclave.verificationStatus}`
     );
   }
 
   /**
-   * Get the size of an {@linkcode EnclaveAccount} on-chain.
+   * Get the size of an {@linkcode VerifierAccount} on-chain.
    */
   public readonly size =
-    this.program.attestationAccount.enclaveAccountData.size;
+    this.program.attestationAccount.verifierAccountData.size;
 
   /**
-   *  Retrieve and decode the {@linkcode types.EnclaveAccountData} stored in this account.
+   *  Retrieve and decode the {@linkcode types.VerifierAccountData} stored in this account.
    */
-  public async loadData(): Promise<types.EnclaveAccountData> {
+  public async loadData(): Promise<types.VerifierAccountData> {
     this.program.verifyAttestation();
-    const data = await types.EnclaveAccountData.fetch(
+    const data = await types.VerifierAccountData.fetch(
       this.program,
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError("Enclave", this.publicKey);
+    throw new errors.AccountNotFoundError("Verifier", this.publicKey);
   }
 
   public heartbeatInstruction(params: {
@@ -256,12 +256,12 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   }): TransactionInstruction {
     this.program.verifyAttestation();
 
-    const instruction = types.quoteHeartbeat(
+    const instruction = types.verifierHeartbeat(
       this.program,
       { params: {} },
       {
-        quote: this.publicKey,
-        enclaveSigner: params.enclaveSigner,
+        verifier: this.publicKey,
+        verifierSigner: params.enclaveSigner,
         attestationQueue: params.attestationQueue,
         queueAuthority: params.queueAuthority,
         gcNode: params.gcOracle,
@@ -272,7 +272,7 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   }
 
   public async heartbeat(
-    params: EnclaveHeartbeatParams,
+    params: VerifierHeartbeatParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     const quote = params.quote ?? (await this.loadData());
@@ -317,7 +317,7 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
 
   public async rotateInstruction(
     payer: PublicKey,
-    params: EnclaveRotateParams,
+    params: VerifierRotateParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     this.program.verifyAttestation();
@@ -331,13 +331,13 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
       throw new errors.IncorrectAuthority(quoteData.authority, authority);
     }
 
-    const rotateIxn = types.quoteRotate(
+    const rotateIxn = types.verifierQuoteRotate(
       this.program,
       {
         params: { registryKey: [...registryKey].slice(0, 64) },
       },
       {
-        quote: this.publicKey,
+        verifier: this.publicKey,
         authority: authority,
         enclaveSigner: params.enclaveSigner.publicKey,
         attestationQueue: quoteData.attestationQueue,
@@ -356,7 +356,7 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
   }
 
   public async rotate(
-    params: EnclaveRotateParams,
+    params: VerifierRotateParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.rotateInstruction(
@@ -368,26 +368,41 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
 
   public async verifyInstruction(
     payer: PublicKey,
-    params: EnclaveVerifyParams,
+    params: QuoteVerifyParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     this.program.verifyAttestation();
 
-    const quoteData = await this.loadData();
+    const verifierState = await this.loadData();
+
+    const signers: Keypair[] = [];
+    if (params.enclaveSigner) {
+      if (
+        !params.enclaveSigner.publicKey.equals(
+          verifierState.enclave.enclaveSigner
+        )
+      ) {
+        throw new Error(
+          `SignerMismatch, expected ${verifierState.enclave.enclaveSigner}, received ${params.enclaveSigner.publicKey}`
+        );
+      }
+      signers.push(params.enclaveSigner);
+    }
 
     const attestationQueueAccount = new AttestationQueueAccount(
       this.program,
-      quoteData.attestationQueue
+      verifierState.attestationQueue
     );
+
     const attestationQueue = await attestationQueueAccount.loadData();
     const verifierIdx = attestationQueue.data
       .slice(0, attestationQueue.dataLen)
-      .findIndex((pubkey) => pubkey.equals(params.verifier));
+      .findIndex((pubkey) => pubkey.equals(this.publicKey));
     if (verifierIdx === -1) {
       throw new Error(`Verifier not found on the attestation queue`);
     }
 
-    const instruction = types.quoteVerify(
+    const instruction = types.verifierQuoteVerify(
       this.program,
       {
         params: {
@@ -397,23 +412,17 @@ export class EnclaveAccount extends Account<types.EnclaveAccountData> {
         },
       },
       {
-        quote: this.publicKey,
-        quoteSigner: quoteData.enclaveSigner,
-        enclaveSigner: params.verifierSecuredSigner.publicKey,
-        verifier: params.verifier,
-        attestationQueue: quoteData.attestationQueue,
+        quote: params.quote.publicKey,
+        enclaveSigner: verifierState.enclave.enclaveSigner,
+        verifier: this.publicKey,
+        attestationQueue: verifierState.attestationQueue,
       }
     );
-    return new TransactionObject(
-      payer,
-      [instruction],
-      [params.verifierSecuredSigner],
-      options
-    );
+    return new TransactionObject(payer, [instruction], signers, options);
   }
 
   public async verify(
-    params: EnclaveVerifyParams,
+    params: QuoteVerifyParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.verifyInstruction(

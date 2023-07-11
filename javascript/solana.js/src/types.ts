@@ -1,31 +1,31 @@
-import {
-  type AggregatorAccount,
-  type BufferRelayerAccount,
-  type CrankAccount,
-  type JobAccount,
-  type LeaseAccount,
-  type OracleAccount,
-  type PermissionAccount,
-  type ProgramStateAccount,
-  type QueueAccount,
-  type SwitchboardAccount,
-  type SwitchboardAccountData,
-  type VrfAccount,
+import type {
+  AggregatorAccount,
+  BufferRelayerAccount,
+  CrankAccount,
+  JobAccount,
+  LeaseAccount,
+  OracleAccount,
+  PermissionAccount,
+  ProgramStateAccount,
+  QueueAccount,
+  SwitchboardAccount,
+  SwitchboardAccountData,
+  VrfAccount,
 } from "./accounts/index.js";
-import {
-  type AggregatorAccountData,
-  type BufferRelayerAccountData,
-  type CrankAccountData,
-  type JobAccountData,
-  type LeaseAccountData,
-  type OracleAccountData,
-  type OracleQueueAccountData,
-  type PermissionAccountData,
-  type SbState,
-  type VrfAccountData,
+import type {
+  AggregatorAccountData,
+  BufferRelayerAccountData,
+  CrankAccountData,
+  JobAccountData,
+  LeaseAccountData,
+  OracleAccountData,
+  OracleQueueAccountData,
+  PermissionAccountData,
+  SbState,
+  VrfAccountData,
 } from "./generated/index.js";
 
-import { type OracleJob } from "@switchboard-xyz/common";
+import type { OracleJob } from "@switchboard-xyz/common";
 
 export type RawBuffer = string | Buffer | Uint8Array | number[];
 
