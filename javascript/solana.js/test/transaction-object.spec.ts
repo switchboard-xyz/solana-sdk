@@ -1,24 +1,23 @@
 /* eslint-disable no-unused-vars */
 import "mocha";
 
-import {
-  ixnsDeepEqual,
-  ixnsEqual,
-  TransactionObject,
-  TransactionObjectOptions,
-} from "../src/index.js";
+import type { TransactionObjectOptions } from "../src/index.js";
+import { ixnsDeepEqual, ixnsEqual, TransactionObject } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
-import {
+import type {
   AccountMeta,
   Connection,
-  Keypair,
-  NONCE_ACCOUNT_LENGTH,
   NonceAccount,
   NonceInformation,
-  PublicKey,
   RpcResponseAndContext,
+} from "@solana/web3.js";
+import {
+  Keypair,
+  NONCE_ACCOUNT_LENGTH,
+  PublicKey,
   SystemProgram,
   TransactionInstruction,
 } from "@solana/web3.js";

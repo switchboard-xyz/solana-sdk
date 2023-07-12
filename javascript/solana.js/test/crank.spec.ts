@@ -1,18 +1,19 @@
 import "mocha";
 
-import {
-  AggregatorAccount,
+import type {
   AggregatorPdaAccounts,
   CrankAccount,
-  QueueAccount,
-  SolanaClock,
   types,
 } from "../src/index.js";
+import { AggregatorAccount, QueueAccount, SolanaClock } from "../src/index.js";
 
-import { createFeed, createFeeds, setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { createFeed, createFeeds, setupTest } from "./utils.js";
 
-import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { BN, promiseWithTimeout, sleep } from "@switchboard-xyz/common";
+import type { PublicKey } from "@solana/web3.js";
+import { Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import type { BN } from "@switchboard-xyz/common";
+import { promiseWithTimeout, sleep } from "@switchboard-xyz/common";
 import assert from "assert";
 
 describe("Crank Tests", () => {

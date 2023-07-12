@@ -1,16 +1,15 @@
 /* eslint-disable no-unused-vars */
 import "mocha";
 
-import {
+import type {
   AggregatorAccount,
   CrankAccount,
-  PermissionAccount,
   QueueAccount,
-  SwitchboardNetwork,
-  types,
 } from "../src/index.js";
+import { PermissionAccount, SwitchboardNetwork, types } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import { Keypair } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";

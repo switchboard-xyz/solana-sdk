@@ -8,6 +8,7 @@ import { Account, BUFFER_DISCRIMINATOR } from "./account.js";
 import type { AccountInfo, Commitment } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common";
+import _ from "lodash";
 
 /**
  * Account holding a priority queue of aggregators and their next available update time.
@@ -133,8 +134,8 @@ export class CrankDataBuffer extends Account<Array<types.CrankRow>> {
 }
 
 function pqPop<T extends types.CrankRow>(crankData: Array<T>): T | undefined {
-  const ret = crankData[0]!;
-  crankData[0] = crankData.at(-1)!;
+  const ret = _.first(crankData);
+  crankData[0] = _.last(crankData);
   crankData.pop();
   let current = 0;
 

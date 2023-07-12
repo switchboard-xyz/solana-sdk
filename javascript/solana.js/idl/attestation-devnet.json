@@ -279,16 +279,16 @@
       ]
     },
     {
-      "name": "quoteInit",
+      "name": "verifierInit",
       "accounts": [
         {
-          "name": "quote",
+          "name": "verifier",
           "isMut": true,
           "isSigner": true
         },
         {
           "name": "attestationQueue",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -316,16 +316,16 @@
         {
           "name": "params",
           "type": {
-            "defined": "QuoteInitParams"
+            "defined": "VerifierInitParams"
           }
         }
       ]
     },
     {
-      "name": "quoteRotate",
+      "name": "verifierQuoteRotate",
       "accounts": [
         {
-          "name": "quote",
+          "name": "verifier",
           "isMut": true,
           "isSigner": false
         },
@@ -349,22 +349,17 @@
         {
           "name": "params",
           "type": {
-            "defined": "QuoteRotateParams"
+            "defined": "VerifierQuoteRotateParams"
           }
         }
       ]
     },
     {
-      "name": "quoteVerify",
+      "name": "verifierQuoteVerify",
       "accounts": [
         {
           "name": "quote",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quoteSigner",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -387,21 +382,21 @@
         {
           "name": "params",
           "type": {
-            "defined": "QuoteVerifyParams"
+            "defined": "VerifierQuoteVerifyParams"
           }
         }
       ]
     },
     {
-      "name": "quoteHeartbeat",
+      "name": "verifierHeartbeat",
       "accounts": [
         {
-          "name": "quote",
+          "name": "verifier",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "enclaveSigner",
+          "name": "verifierSigner",
           "isMut": false,
           "isSigner": true
         },
@@ -430,7 +425,7 @@
         {
           "name": "params",
           "type": {
-            "defined": "QuoteHeartbeatParams"
+            "defined": "VerifierHeartbeatParams"
           }
         }
       ]
@@ -577,7 +572,7 @@
           "isSigner": false
         },
         {
-          "name": "enclave",
+          "name": "grantee",
           "isMut": false,
           "isSigner": false
         }
@@ -610,11 +605,6 @@
           "isSigner": false
         },
         {
-          "name": "quote",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "attestationQueue",
           "isMut": false,
           "isSigner": false
@@ -638,11 +628,6 @@
         {
           "name": "tokenWallet",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -714,11 +699,6 @@
           "isSigner": false
         },
         {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -748,11 +728,6 @@
       "accounts": [
         {
           "name": "function",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "quote",
           "isMut": true,
           "isSigner": false
         },
@@ -917,11 +892,6 @@
           "isSigner": true
         },
         {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -1034,27 +1004,17 @@
           "isSigner": false
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "functionEnclaveSigner",
           "isMut": false,
           "isSigner": true
         },
         {
-          "name": "fnQuote",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "verifierQuote",
+          "name": "verifier",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "verifierEnclaveSigner",
+          "name": "verifierSigner",
           "isMut": false,
           "isSigner": true
         },
@@ -1076,11 +1036,6 @@
         {
           "name": "receiver",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -1608,6 +1563,25 @@
             }
           },
           {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "creatorSeed",
+            "docs": [
+              "The payer who originally created the function. Cannot change, used to derive PDA."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
             "name": "name",
             "docs": [
               "The name of the function for easier identification."
@@ -1639,11 +1613,44 @@
             "type": "u64"
           },
           {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function was created."
+            ],
+            "type": "i64"
+          },
+          {
             "name": "updatedAt",
             "docs": [
               "The unix timestamp when the function config (container, registry, version, or schedule) was changed."
             ],
             "type": "i64"
+          },
+          {
+            "name": "enclave",
+            "docs": [
+              "The enclave quote"
+            ],
+            "type": {
+              "defined": "Quote"
+            }
+          },
+          {
+            "name": "mrEnclaves",
+            "docs": [
+              "An array of permitted mr_enclave measurements for the function."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                32
+              ]
+            }
           },
           {
             "name": "containerRegistry",
@@ -1678,6 +1685,30 @@
               "array": [
                 "u8",
                 32
+              ]
+            }
+          },
+          {
+            "name": "paramsSchema",
+            "docs": [
+              "The expected schema for the container params."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "defaultContainerParams",
+            "docs": [
+              "The default params passed to the container during scheduled execution."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
               ]
             }
           },
@@ -1743,6 +1774,13 @@
             "type": "u64"
           },
           {
+            "name": "triggeredSince",
+            "docs": [
+              "Time this function has been sitting in an explicitly triggered state"
+            ],
+            "type": "i64"
+          },
+          {
             "name": "permissionExpiration",
             "docs": [
               "UNUSED. The unix timestamp when the current permissions expire."
@@ -1787,42 +1825,6 @@
             "type": "u64"
           },
           {
-            "name": "mrEnclaves",
-            "docs": [
-              "An array of permitted mr_enclave measurements for the function."
-            ],
-            "type": {
-              "array": [
-                {
-                  "array": [
-                    "u8",
-                    32
-                  ]
-                },
-                32
-              ]
-            }
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "PDA bump."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "creatorSeed",
-            "docs": [
-              "The payer who originally created the function. Cannot change, used to derive PDA."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
             "name": "escrowWallet",
             "docs": [
               "The SwitchboardWallet that will handle pre-funding rewards paid out to function runners."
@@ -1852,13 +1854,6 @@
             "type": "publicKey"
           },
           {
-            "name": "createdAt",
-            "docs": [
-              "The unix timestamp when the function was created."
-            ],
-            "type": "i64"
-          },
-          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -1866,7 +1861,7 @@
             "type": {
               "array": [
                 "u8",
-                871
+                1024
               ]
             }
           }
@@ -2006,16 +2001,18 @@
       }
     },
     {
-      "name": "EnclaveAccountData",
+      "name": "VerifierAccountData",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "enclaveSigner",
+            "name": "enclave",
             "docs": [
-              "The address of the signer generated within an enclave."
+              "Represents the state of the quote verifiers enclave."
             ],
-            "type": "publicKey"
+            "type": {
+              "defined": "Quote"
+            }
           },
           {
             "name": "authority",
@@ -2032,68 +2029,11 @@
             "type": "publicKey"
           },
           {
-            "name": "mrEnclave",
-            "docs": [
-              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "verificationStatus",
-            "docs": [
-              "The VerificationStatus of the quote."
-            ],
-            "type": "u8"
-          },
-          {
-            "name": "verificationTimestamp",
-            "docs": [
-              "The unix timestamp when the quote was last verified."
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "validUntil",
-            "docs": [
-              "The unix timestamp when the quotes verification status expires."
-            ],
-            "type": "i64"
-          },
-          {
             "name": "createdAt",
             "docs": [
               "The unix timestamp when the quote was created."
             ],
             "type": "i64"
-          },
-          {
-            "name": "quoteRegistry",
-            "docs": [
-              "The off-chain registry where the verifiers quote can be located."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "registryKey",
-            "docs": [
-              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
           },
           {
             "name": "isOnQueue",
@@ -2108,13 +2048,6 @@
               "The last time the quote heartbeated on-chain."
             ],
             "type": "i64"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "The PDA bump. Only set for FunctionAccount quotes."
-            ],
-            "type": "u8"
           },
           {
             "name": "rewardEscrow",
@@ -2140,7 +2073,7 @@
             "type": {
               "array": [
                 "u8",
-                928
+                1024
               ]
             }
           }
@@ -2657,62 +2590,6 @@
       }
     },
     {
-      "name": "QuoteHeartbeatParams",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
-    {
-      "name": "QuoteInitParams",
-      "type": {
-        "kind": "struct",
-        "fields": []
-      }
-    },
-    {
-      "name": "QuoteRotateParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "registryKey",
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "QuoteVerifyParams",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "timestamp",
-            "type": "i64"
-          },
-          {
-            "name": "mrEnclave",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "idx",
-            "type": "u32"
-          }
-        ]
-      }
-    },
-    {
       "name": "FunctionRequestCloseParams",
       "type": {
         "kind": "struct",
@@ -2860,6 +2737,62 @@
       "type": {
         "kind": "struct",
         "fields": []
+      }
+    },
+    {
+      "name": "VerifierHeartbeatParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VerifierInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VerifierQuoteRotateParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "registryKey",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifierQuoteVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "idx",
+            "type": "u32"
+          }
+        ]
       }
     },
     {
@@ -3057,6 +2990,18 @@
               "array": [
                 "u8",
                 64
+              ]
+            }
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
               ]
             }
           }
@@ -3494,10 +3439,10 @@
       ]
     },
     {
-      "name": "QuoteHeartbeatEvent",
+      "name": "VerifierHeartbeatEvent",
       "fields": [
         {
-          "name": "quote",
+          "name": "verifier",
           "type": "publicKey",
           "index": false
         },
@@ -3509,30 +3454,30 @@
       ]
     },
     {
-      "name": "QuoteInitEvent",
+      "name": "VerifierInitEvent",
       "fields": [
         {
-          "name": "quote",
+          "name": "verifier",
           "type": "publicKey",
           "index": false
         }
       ]
     },
     {
-      "name": "QuoteRotateEvent",
+      "name": "VerifierQuoteRotateEvent",
       "fields": [
         {
-          "name": "quote",
+          "name": "verifier",
           "type": "publicKey",
           "index": false
         }
       ]
     },
     {
-      "name": "QuoteOverrideEvent",
+      "name": "VerifierQuoteOverrideEvent",
       "fields": [
         {
-          "name": "quote",
+          "name": "verifier",
           "type": "publicKey",
           "index": false
         },
@@ -3547,7 +3492,7 @@
       "name": "GarbageCollectionEvent",
       "fields": [
         {
-          "name": "quote",
+          "name": "verifier",
           "type": "publicKey",
           "index": false
         },
@@ -3559,7 +3504,7 @@
       ]
     },
     {
-      "name": "QuoteVerifyEvent",
+      "name": "VerifierQuoteVerifyEvent",
       "fields": [
         {
           "name": "quote",
@@ -3579,7 +3524,7 @@
       ]
     },
     {
-      "name": "QuoteVerifyRequestEvent",
+      "name": "VerifierQuoteVerifyRequestEvent",
       "fields": [
         {
           "name": "quote",
@@ -3601,7 +3546,8 @@
     },
     {
       "code": 6001,
-      "name": "InvalidQuote"
+      "name": "InvalidQuote",
+      "msg": "The provided enclave quote is invalid"
     },
     {
       "code": 6002,

@@ -6,7 +6,8 @@ import {
   TransactionMissingSignerError,
 } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import { Keypair } from "@solana/web3.js";
 import assert from "assert";

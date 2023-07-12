@@ -1,9 +1,0 @@
-{
-  "name": "basic-oracle-function",
-  "scripts": {
-    "build:function": "make"
-  },
-  "dependencies": {
-    "basic-oracle": "workspace:*"
-  }
-}

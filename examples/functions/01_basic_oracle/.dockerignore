@@ -1,6 +1,0 @@
-target/
-Makefile
-README.md
-node_modules
-.turbo
-measurement.txt

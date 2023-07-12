@@ -1,7 +1,0 @@
-packages:
-  - "javascript/*"
-  - "rust/*"
-  - "examples/feeds/*"
-  - "examples/functions/*"
-  - "examples/functions/*/sgx-function"
-  - "examples/vrf/*"

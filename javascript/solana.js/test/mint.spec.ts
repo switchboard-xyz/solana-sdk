@@ -1,9 +1,11 @@
 import "mocha";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import * as anchor from "@coral-xyz/anchor";
-import { Keypair, PublicKey } from "@solana/web3.js";
+import type { PublicKey } from "@solana/web3.js";
+import { Keypair } from "@solana/web3.js";
 import assert from "assert";
 
 describe("Mint Tests", () => {

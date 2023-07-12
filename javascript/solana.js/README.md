@@ -36,15 +36,15 @@ npm i --save @switchboard-xyz/solana.js
 ### Load Switchboard Program
 
 ```ts
-import { Connection } from '@solana/web3.js';
+import { Connection } from "@solana/web3.js";
 import {
   SwitchboardProgram,
   TransactionObject,
-} from '@switchboard-xyz/solana.js';
+} from "@switchboard-xyz/solana.js";
 
 const program = await SwitchboardProgram.load(
-  'mainnet-beta',
-  new Connection('https://api.mainnet-beta.solana.com'),
+  "mainnet-beta",
+  new Connection("https://api.mainnet-beta.solana.com"),
   payerKeypair /** Optional, READ-ONLY if not provided */
 );
 ```
@@ -52,11 +52,11 @@ const program = await SwitchboardProgram.load(
 ### Create a Queue
 
 ```ts
-import { QueueAccount } from '@switchboard-xyz/solana.js';
+import { QueueAccount } from "@switchboard-xyz/solana.js";
 
 const [queueAccount, txnSignature] = await QueueAccount.create(program, {
-  name: 'My Queue',
-  metadata: 'Top Secret',
+  name: "My Queue",
+  metadata: "Top Secret",
   queueSize: 100,
   reward: 0.00001337,
   minStake: 10,
@@ -72,13 +72,13 @@ const queue = await queueAccount.loadData();
 ### Add an Oracle
 
 ```ts
-import { QueueAccount } from '@switchboard-xyz/solana.js';
+import { QueueAccount } from "@switchboard-xyz/solana.js";
 
 const queueAccount = new QueueAccount(program, queuePubkey);
 
 const [oracleAccount, oracleInitSignature] = await queueAccount.createOracle({
-  name: 'My Oracle',
-  metadata: 'Oracle #1',
+  name: "My Oracle",
+  metadata: "Oracle #1",
   stakeAmount: 10,
 });
 const oracle = await oracleAccount.loadData();
@@ -89,8 +89,8 @@ await oracleAccount.heartbeat();
 ### Create a Data Feed
 
 ```ts
-import { QueueAccount } from '@switchboard-xyz/solana.js';
-import { OracleJob } from '@switchboard-xyz/common';
+import { QueueAccount } from "@switchboard-xyz/solana.js";
+import { OracleJob } from "@switchboard-xyz/common";
 
 const queueAccount = new QueueAccount(program, queuePubkey);
 
@@ -125,7 +125,7 @@ const aggregator = await aggregatorAccount.loadData();
 ### Request a New Value
 
 ```ts
-import { AggregatorAccount } from '@switchboard-xyz/solana.js';
+import { AggregatorAccount } from "@switchboard-xyz/solana.js";
 
 const aggregatorAccount = new AggregatorAccount(program, aggregatorPubkey);
 
@@ -137,14 +137,14 @@ await aggregatorAccount.openRound();
 After the oracles respond, read the feed result
 
 ```ts
-import Big from 'big.js';
-import { AggregatorAccount } from '@switchboard-xyz/solana.js';
+import Big from "big.js";
+import { AggregatorAccount } from "@switchboard-xyz/solana.js";
 
 const aggregatorAccount = new AggregatorAccount(program, aggregatorPubkey);
 
 const result: Big | null = await aggregatorAccount.fetchLatestValue();
 if (result === null) {
-  throw new Error('Aggregator holds no value');
+  throw new Error("Aggregator holds no value");
 }
 console.log(result.toString());
 ```
@@ -157,7 +157,7 @@ Optionally, add a history buffer to your feed to store the last N historical sam
 import {
   AggregatorAccount,
   AggregatorHistoryBuffer,
-} from '@switchboard-xyz/solana.js';
+} from "@switchboard-xyz/solana.js";
 
 const aggregatorAccount = new AggregatorAccount(program, aggregatorPubkey);
 const aggregator = await aggregatorAccount.loadData();
@@ -175,12 +175,12 @@ const history = await historyBuffer.loadData();
 Setup a websocket listener to invoke a callback whenever an aggregator is updated
 
 ```ts
-import Big from 'big.js';
-import { AggregatorAccount } from '@switchboard-xyz/solana.js';
+import Big from "big.js";
+import { AggregatorAccount } from "@switchboard-xyz/solana.js";
 
 const aggregatorAccount = new AggregatorAccount(program, aggregatorPubkey);
 
-const ws = aggregatorAccount.onChange(aggregator => {
+const ws = aggregatorAccount.onChange((aggregator) => {
   const result = AggregatorAccount.decodeLatestValue(aggregator);
   if (result !== null) {
     console.log(result.toString());
