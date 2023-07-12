@@ -3,17 +3,17 @@
 import * as sbv2 from "../src";
 import { AggregatorAccount, CrankAccount, QueueAccount } from "../src";
 
+import type { Aggregator, IAggregatorDefinition } from "./utils.js";
 import {
-  Aggregator,
   CHECK_ICON,
   FAILED_ICON,
-  IAggregatorDefinition,
   jsonReplacers,
   PLUS_ICON,
   setupOutputDir,
 } from "./utils.js";
 
-import { clusterApiUrl, Connection, Keypair, PublicKey } from "@solana/web3.js";
+import type { Keypair } from "@solana/web3.js";
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { OracleJob, sleep, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 // import { backOff } from 'exponential-backoff';

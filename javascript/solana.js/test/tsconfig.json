@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "include": [
     "../src",
-    "../test"
+    "../test",
+    "../test/data/**.json"
   ],
   "exclude": [
     "**/node_modules"
@@ -14,6 +15,7 @@
     ],
     "module": "ESNext",
     "allowJs": true,
-    "rootDir": "../"
+    "rootDir": "../",
+    "resolveJsonModule": true
   }
 }

@@ -1,8 +1,15 @@
 {
-  "include": ["./src/**/*"],
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": [
+    "./src/**/*"
+  ],
   "compilerOptions": {
-    "lib": ["ES2022"],
-    "moduleResolution": "node",
+    "lib": [
+      "ES2021",
+      "ES2022.Object",
+      "DOM"
+    ],
+    "moduleResolution": "nodenext",
     "inlineSourceMap": false,
     "inlineSources": false,
     "declaration": true,
@@ -23,10 +30,18 @@
     "noImplicitReturns": true,
     "esModuleInterop": true,
     "paths": {
+      "@switchboard-xyz/common": [
+        "../common"
+      ],
       "@solana/spl-token": [
         "./node_modules/@solana/spl-token",
         "../node_modules/@solana/spl-token"
       ]
     }
-  }
+  },
+  "references": [
+    {
+      "path": "../common"
+    }
+  ]
 }

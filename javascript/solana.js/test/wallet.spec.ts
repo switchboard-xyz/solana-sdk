@@ -1,14 +1,15 @@
 import "mocha";
 
+import type { BootstrappedAttestationQueue } from "../src/index.js";
 import {
   AttestationProgramStateAccount,
   AttestationQueueAccount,
-  type BootstrappedAttestationQueue,
   parseRawBuffer,
   SwitchboardWallet,
 } from "../src/index.js";
 
-import { printLogs, setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { printLogs, setupTest } from "./utils.js";
 
 import assert from "assert";
 
@@ -33,7 +34,7 @@ describe("Switchboard Wallet Tests", () => {
     let walletInitSignature: string;
     [switchboardWallet, walletInitSignature] = await SwitchboardWallet.create(
       ctx.program,
-      switchboard.attestationQueueAccount.publicKey,
+      switchboard.attestationQueue.account.publicKey,
       ctx.payer.publicKey,
       defaulWalletSeed
     );
@@ -50,7 +51,7 @@ describe("Switchboard Wallet Tests", () => {
     );
     assert(
       walletState.attestationQueue.equals(
-        switchboard.attestationQueueAccount.publicKey
+        switchboard.attestationQueue.account.publicKey
       ),
       "QueuePubkeyMismatch"
     );
@@ -100,5 +101,17 @@ describe("Switchboard Wallet Tests", () => {
     const balance = await switchboardWallet.getBalance();
     const diff = ctx.round(balance - initialBalance, 4);
     assert(diff === 0.25, "WalletBalanceMismatch");
+  });
+
+  it("Withdraws all remaining balance when amount is Number.MAX_SAFE_INTEGER", async () => {
+    const initialBalance = await switchboardWallet.getBalance();
+
+    const withdrawTxnSignature = await switchboardWallet.withdraw(
+      Number.MAX_SAFE_INTEGER
+    );
+    await printLogs(ctx.program.connection, withdrawTxnSignature);
+
+    const balance = await switchboardWallet.getBalance();
+    assert(balance === 0, "WalletBalanceMismatch");
   });
 });

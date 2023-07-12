@@ -1,19 +1,19 @@
-import * as sbv2 from './src';
-import { jsonReplacers, setupOutputDir } from './utils';
+import * as sbv2 from "./src";
+import { jsonReplacers, setupOutputDir } from "./utils";
 
-import * as anchor from '@coral-xyz/anchor';
-import * as spl from '@solana/spl-token';
+import * as anchor from "@coral-xyz/anchor";
+import * as spl from "@solana/spl-token";
 import {
   clusterApiUrl,
   Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
-} from '@solana/web3.js';
-import { OracleJob, toUtf8 } from '@switchboard-xyz/common';
+} from "@solana/web3.js";
+import { OracleJob, toUtf8 } from "@switchboard-xyz/common";
 // import { backOff } from 'exponential-backoff';
-import fs from 'fs';
-import _ from 'lodash';
-import path from 'path';
+import fs from "fs";
+import _ from "lodash";
+import path from "path";
 
 const LEASE_THRESHOLD = (10 * 12500) / LAMPORTS_PER_SOL; // must have at least 10 queue rewards in the lease to migrate
 
@@ -47,27 +47,27 @@ async function main() {
   const queuePubkey = new PublicKey(
     process.argv.length > 2
       ? process.argv[2]
-      : 'F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy'
+      : "F8ce7MsckeZAbAGmxjJNetxYXQa9mKr9nnrC3qKubyYy"
   );
   const [dirPath, feedDirPath, jobDirPath] = setupOutputDir(
-    '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+    "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
   );
 
   const devnetConnection = new Connection(
-    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
+    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl("devnet")
   );
   console.log(`rpcUrl: ${devnetConnection.rpcEndpoint}`);
 
   const payer = sbv2.SwitchboardTestContextV2.loadKeypair(
-    '~/.config/solana/id.json'
+    "~/.config/solana/id.json"
   );
   console.log(`payer: ${payer.publicKey.toBase58()}`);
 
   const oldProgram = await sbv2.SwitchboardProgram.load(
-    'devnet',
+    "devnet",
     devnetConnection,
     payer,
-    new PublicKey('2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG')
+    new PublicKey("2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG")
   );
   const oldProgramAccounts = await oldProgram.getProgramAccounts();
 
@@ -271,8 +271,8 @@ async function main() {
         jsonReplacers,
         2
       );
-      if (fileString.includes('twapTask')) {
-        const twapTaskPath = path.join(dirPath, 'twapJobs');
+      if (fileString.includes("twapTask")) {
+        const twapTaskPath = path.join(dirPath, "twapJobs");
         fs.mkdirSync(twapTaskPath, { recursive: true });
         fs.writeFileSync(path.join(twapTaskPath, `${jobKey}.json`), fileString);
       } else {
@@ -282,7 +282,7 @@ async function main() {
       jobPubkeys.push(jobKey);
     } catch (error) {}
   }
-  fs.writeFileSync(path.join(dirPath, 'jobs.txt'), jobPubkeys.join('\n'));
+  fs.writeFileSync(path.join(dirPath, "jobs.txt"), jobPubkeys.join("\n"));
 
   const aggregatorPubkeys: Array<string> = [];
   for (const [aggregatorKey, aggregator] of aggregatorToMigrate.entries()) {
@@ -315,7 +315,7 @@ async function main() {
         authority: aggregator.data.authority.toBase58(),
         historyLimit: aggregator.historyBufferLength,
         slidingWindow:
-          aggregator.data.resolutionMode.kind === 'ModeSlidingResolution',
+          aggregator.data.resolutionMode.kind === "ModeSlidingResolution",
         basePriorityFee: aggregator.data.basePriorityFee,
         priorityFeeBump: aggregator.data.priorityFeeBump,
         priorityFeeBumpPeriod: aggregator.data.priorityFeeBumpPeriod,
@@ -339,11 +339,11 @@ async function main() {
     } catch (error) {}
   }
   fs.writeFileSync(
-    path.join(dirPath, 'aggregators.txt'),
-    aggregatorPubkeys.join('\n')
+    path.join(dirPath, "aggregators.txt"),
+    aggregatorPubkeys.join("\n")
   );
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
 });

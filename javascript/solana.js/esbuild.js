@@ -18,7 +18,7 @@ const isCI =
 
 const tscPath = path.relative(
   process.cwd(),
-  path.join(__dirname, "node_modules", "typescript", "bin", "tsc")
+  path.join(__dirname, "..", "..", "node_modules", "typescript", "bin", "tsc")
 );
 
 const outDir = path.join(__dirname, "lib");

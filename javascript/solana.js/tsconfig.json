@@ -16,9 +16,8 @@
       "ES2022.Object",
       "DOM"
     ],
-    "outDir": "../lib",
+    "outDir": "lib",
     "rootDir": "./src",
-    "baseUrl": "./src",
     "declaration": true,
     "experimentalDecorators": true,
     "noImplicitReturns": true,
@@ -28,8 +27,24 @@
     "useDefineForClassFields": true,
     "strictPropertyInitialization": false,
     "allowJs": true,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@switchboard-xyz/common": [
+        "../common"
+      ],
+      "@switchboard-xyz/oracle": [
+        "../oracle"
+      ]
+    }
   },
+  "references": [
+    {
+      "path": "../common"
+    },
+    {
+      "path": "../oracle"
+    }
+  ],
   "typedocOptions": {
     "entryPoints": [
       "src/index.ts",

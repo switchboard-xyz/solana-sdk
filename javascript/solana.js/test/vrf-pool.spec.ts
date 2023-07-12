@@ -1,7 +1,7 @@
 import "mocha";
 
+import type { OracleAccount } from "../src/index.js";
 import {
-  OracleAccount,
   PermissionAccount,
   QueueAccount,
   TransactionObject,
@@ -10,7 +10,8 @@ import {
   VrfPoolAccount,
 } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import { Keypair, PublicKey } from "@solana/web3.js";
 import { sleep } from "@switchboard-xyz/common";

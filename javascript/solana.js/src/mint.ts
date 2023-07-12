@@ -11,6 +11,9 @@ import type {
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Big, BN } from "@switchboard-xyz/common";
 
+const U64_MAX_BN = new BN("18446744073709551615");
+const U64_MAX_Bigint = BigInt("18446744073709551615");
+
 export class Mint {
   public static native = new PublicKey(
     "So11111111111111111111111111111111111111112"
@@ -38,6 +41,9 @@ export class Mint {
   }
 
   toTokenAmount(amount: number): bigint {
+    if (amount === Number.MAX_SAFE_INTEGER) {
+      return U64_MAX_Bigint;
+    }
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
     // We need to fix tokenAmount to 0 decimal places because the amount in base units must be an integer.
@@ -45,6 +51,9 @@ export class Mint {
   }
 
   toTokenAmountBN(amount: number): BN {
+    if (amount === Number.MAX_SAFE_INTEGER) {
+      return U64_MAX_BN;
+    }
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
     return new BN(tokenAmount.toFixed(0));

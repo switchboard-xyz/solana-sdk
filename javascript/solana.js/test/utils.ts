@@ -1,10 +1,9 @@
-import {
+import type {
   AggregatorAccount,
   CreateQueueFeedParams,
   QueueAccount,
-  SB_V2_PID,
-  TransactionObject,
 } from "../src/index.js";
+import { SB_V2_PID, TransactionObject } from "../src/index.js";
 import * as sbv2 from "../src/index.js";
 
 import {
