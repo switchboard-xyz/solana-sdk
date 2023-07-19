@@ -28,20 +28,6 @@
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
-    "esModuleInterop": true,
-    "paths": {
-      "@switchboard-xyz/common": [
-        "../common"
-      ],
-      "@solana/spl-token": [
-        "./node_modules/@solana/spl-token",
-        "../node_modules/@solana/spl-token"
-      ]
-    }
-  },
-  "references": [
-    {
-      "path": "../common"
-    }
-  ]
+    "esModuleInterop": true
+  }
 }
