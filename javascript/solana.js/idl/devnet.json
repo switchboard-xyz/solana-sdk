@@ -5685,7 +5685,7 @@
       }
     },
     {
-      "name": "EnclaveAccountData",
+      "name": "Quote",
       "type": {
         "kind": "struct",
         "fields": [
@@ -5693,20 +5693,6 @@
             "name": "enclaveSigner",
             "docs": [
               "The address of the signer generated within an enclave."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "The authority of the EnclaveAccount which is permitted to make account changes."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "attestationQueue",
-            "docs": [
-              "Queue used for attestation to verify a MRENCLAVE measurement."
             ],
             "type": "publicKey"
           },
@@ -5744,13 +5730,6 @@
             "type": "i64"
           },
           {
-            "name": "createdAt",
-            "docs": [
-              "The unix timestamp when the quote was created."
-            ],
-            "type": "i64"
-          },
-          {
             "name": "quoteRegistry",
             "docs": [
               "The off-chain registry where the verifiers quote can be located."
@@ -5775,6 +5754,56 @@
             }
           },
           {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifierAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclave",
+            "docs": [
+              "Represents the state of the quote verifiers enclave."
+            ],
+            "type": {
+              "defined": "Quote"
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the EnclaveAccount which is permitted to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "Queue used for attestation to verify a MRENCLAVE measurement."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the quote was created."
+            ],
+            "type": "i64"
+          },
+          {
             "name": "isOnQueue",
             "docs": [
               "Whether the quote is located on the AttestationQueues buffer."
@@ -5787,13 +5816,6 @@
               "The last time the quote heartbeated on-chain."
             ],
             "type": "i64"
-          },
-          {
-            "name": "bump",
-            "docs": [
-              "The PDA bump. Only set for FunctionAccount quotes."
-            ],
-            "type": "u8"
           },
           {
             "name": "rewardEscrow",
@@ -5819,7 +5841,7 @@
             "type": {
               "array": [
                 "u8",
-                928
+                1024
               ]
             }
           }

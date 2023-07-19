@@ -4,8 +4,8 @@ use crate::*;
 
 pub use switchboard_utils::reqwest;
 
+use basic_oracle::{OracleDataBorsh, TradingSymbol};
 use serde::Deserialize;
-use basic_oracle::{TradingSymbol, OracleDataBorsh};
 
 const ONE: i128 = 1000000000;
 
@@ -153,12 +153,12 @@ impl Binance {
                 data: self.eth_usdt.clone().into(),
             },
             // OracleDataWithTradingSymbol {
-                // symbol: TradingSymbol::Sol,
-                // data: self.sol_usdt.clone().into(),
+            // symbol: TradingSymbol::Sol,
+            // data: self.sol_usdt.clone().into(),
             // },
             // OracleDataWithTradingSymbol {
-                // symbol: TradingSymbol::Doge,
-                // data: self.doge_usdt.clone().into(),
+            // symbol: TradingSymbol::Doge,
+            // data: self.doge_usdt.clone().into(),
             // },
         ];
 
@@ -189,7 +189,11 @@ impl Binance {
                     is_writable: false,
                 },
             ],
-            data: [ix_discriminator("refresh_oracles").to_vec(), params.try_to_vec().unwrap()].concat(),
+            data: [
+                ix_discriminator("refresh_oracles").to_vec(),
+                params.try_to_vec().unwrap(),
+            ]
+            .concat(),
         };
 
         vec![ixn]

@@ -1,11 +1,11 @@
 [package]
 name = "switchboard-solana"
-version = "0.9.1"
+version = "0.9.4"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
 keywords = ["switchboard", "oracle", "solana"]
-homepage = "https://docs.switchboard.xyz"
+homepage = "https://switchboard.xyz"
 repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-solana"
 license = "MIT"
 documentation = "https://docs.switchboard.xyz"
@@ -33,7 +33,9 @@ switchboard-common = { version = "0.8.5" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.8.5", features = ["client"] }
+switchboard-common = { version = "0.8.5", features = [
+  "client"
+] }
 anchor-client = { version = "0.28.0" }
 solana-client = ">= 1.16, < 1.17"
 bincode = { version = "^1" }

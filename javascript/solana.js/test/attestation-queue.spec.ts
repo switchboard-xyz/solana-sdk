@@ -2,7 +2,8 @@ import "mocha";
 
 import * as sbv2 from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import { Keypair } from "@solana/web3.js";
 import assert from "assert";
@@ -56,10 +57,10 @@ describe("AttestationQueue Tests", () => {
   });
 
   it("Bootstraps a new attestation queue with a single verifier oracle", async () => {
-    const { attestationQueueAccount, signatures, verifier } =
+    const { attestationQueue, signatures, verifier } =
       await sbv2.AttestationQueueAccount.bootstrapNewQueue(ctx.program);
 
-    const queueData = await attestationQueueAccount.loadData();
+    const queueData = await attestationQueue.account.loadData();
 
     console.log(queueData.toJSON());
   });

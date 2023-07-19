@@ -304,8 +304,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[FunctionAccount, types.FunctionAccountData]> {
-    program.verifyAttestation();
-
     const functionAccount = new FunctionAccount(program, address);
     const state = await functionAccount.loadData();
     return [functionAccount, state];
@@ -318,8 +316,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     wallet?: SwitchboardWallet,
     options?: TransactionObjectOptions
   ): Promise<[FunctionAccount, TransactionObject]> {
-    program.verifyAttestation();
-
     const authorityPubkey = params.authority ?? payer;
 
     const cronSchedule: Buffer = params.schedule
@@ -537,11 +533,11 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: params.requestsDisabled ?? null,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? null,
-          requestsDefaultSlotsUntilExpiration: Number.isFinite(
-            params.requestsDefaultSlotsUntilExpiration
-          )
-            ? new BN(params.requestsDefaultSlotsUntilExpiration)
-            : null,
+          requestsDefaultSlotsUntilExpiration:
+            params.requestsDefaultSlotsUntilExpiration &&
+            Number.isFinite(params.requestsDefaultSlotsUntilExpiration)
+              ? new BN(params.requestsDefaultSlotsUntilExpiration)
+              : null,
           requestsFee: params.requestsFee ? new BN(params.requestsFee) : null,
         },
       },
@@ -560,7 +556,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   }
 
   public async setConfig(
-    params?: FunctionSetConfigParams,
+    params: FunctionSetConfigParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.setConfigInstruction(
@@ -681,8 +677,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     authority?: Keypair,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const functionState = await this.loadData();
 
     const defaultWallet = SwitchboardWallet.fromSeed(
@@ -735,8 +729,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     params: SwitchboardWalletFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const wallet = await this.wallet;
 
     const txn = await wallet.fundInstruction(payer, params, options);
@@ -759,8 +751,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     amount: number,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const wallet = await this.wallet;
 
     const txn = await wallet.wrapInstruction(payer, amount, options);
@@ -784,8 +774,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     destinationWallet?: PublicKey,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const wallet = await this.wallet;
 
     const txn = await wallet.withdrawInstruction(
@@ -854,8 +842,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   public async verifyInstruction(
     params: FunctionVerifyParams
   ): Promise<TransactionInstruction> {
-    this.program.verifyAttestation();
-
     const functionState = params.fnState ?? (await this.loadData());
 
     const wallet = await this.wallet;

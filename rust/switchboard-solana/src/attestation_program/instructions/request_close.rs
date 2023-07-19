@@ -29,7 +29,7 @@ pub struct FunctionRequestClose<'info> {
     )]
     pub escrow_dest: Box<Account<'info, TokenAccount>>,
     #[account(
-        seeds = [STATE_SEED], 
+        seeds = [STATE_SEED],
         bump = state.load()?.bump
     )]
     pub state: AccountLoader<'info, AttestationProgramState>,
@@ -51,24 +51,18 @@ impl Discriminator for FunctionRequestClose<'_> {
 }
 
 impl<'info> FunctionRequestClose<'info> {
-    pub fn get_instruction(
-        &self,
-        program_id: Pubkey,
-    ) -> anchor_lang::Result<Instruction> {
+    pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
         let mut data: Vec<u8> = FunctionRequestClose::discriminator().try_to_vec()?;
-        let params = FunctionRequestCloseParams{};
+        let params = FunctionRequestCloseParams {};
         data.append(&mut params.try_to_vec()?);
 
         let instruction = Instruction::new_with_bytes(program_id, &data, accounts);
         Ok(instruction)
     }
 
-    pub fn invoke(
-        &self,
-        program: AccountInfo<'info>,
-    ) -> ProgramResult {
+    pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
         let instruction = self.get_instruction(*program.key)?;
         let account_infos = self.to_account_infos();
 

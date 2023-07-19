@@ -1,12 +1,15 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
-import type { SwitchboardProgram } from "../SwitchboardProgram.js";
+import {
+  SB_ATTESTATION_PID,
+  type SwitchboardProgram,
+} from "../SwitchboardProgram.js";
 import type {
   SendTransactionObjectOptions,
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import { parseRawBuffer } from "../utils.js";
+import { handleOptionalPubkeys, parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
 
@@ -14,6 +17,7 @@ import * as spl from "@solana/spl-token";
 import type {
   AccountMeta,
   Keypair,
+  TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
@@ -220,7 +224,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
       {
         wallet: switchboardWallet.publicKey,
         mint: program.mint.address,
-        authority: payer,
+        authority: authority,
         attestationQueue: attestationQueue,
         tokenWallet: switchboardWallet.tokenWallet,
         payer: payer,
@@ -263,33 +267,64 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     params: SwitchboardWalletFundParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
+    const ixns: TransactionInstruction[] = [];
+
     let funderPubkey = payer;
     if (params.funderAuthority) {
       funderPubkey = params.funderAuthority.publicKey;
     }
 
+    // let transferAmount: BN | null = null;
+    // if (params.transferAmount) {
+    //   transferAmount = this.program.mint.toTokenAmountBN(params.transferAmount);
+    // }
+
+    // let wrapAmount: BN | null = null;
+    // if (params.wrapAmount) {
+    //   wrapAmount = this.program.mint.toTokenAmountBN(params.wrapAmount);
+    // }
+
     let funderTokenWallet: PublicKey;
     if (params.funderTokenWallet) {
       funderTokenWallet = params.funderTokenWallet;
-    } else {
+    } else if (params.transferAmount && params.transferAmount > 0) {
       funderTokenWallet = this.program.mint.getAssociatedAddress(funderPubkey);
-    }
+      const funderTokenAccount = await this.program.mint.getAccount(
+        funderTokenWallet
+      );
+      if (!funderTokenAccount) {
+        // create ixn if account isnt initialized
 
-    let transferAmount: BN | null = null;
-    if (params.transferAmount) {
-      transferAmount = this.program.mint.toTokenAmountBN(params.transferAmount);
-    }
+        const [tokenWallet, tokenWalletInitIxns] =
+          this.program.mint.createWrappedUserInstructions(
+            payer,
+            params.transferAmount,
+            params.funderAuthority
+              ? params.funderAuthority.publicKey
+              : undefined
+          );
 
-    let wrapAmount: BN | null = null;
-    if (params.wrapAmount) {
-      wrapAmount = this.program.mint.toTokenAmountBN(params.wrapAmount);
+        ixns.push(...tokenWalletInitIxns);
+        funderTokenWallet = tokenWallet; // sanity check
+      }
+    } else {
+      funderTokenWallet = SB_ATTESTATION_PID;
     }
 
     const walletState = await this.loadData();
 
     const ixn = types.walletFund(
       this.program,
-      { params: { transferAmount, wrapAmount } },
+      {
+        params: {
+          transferAmount: params.transferAmount
+            ? this.program.mint.toTokenAmountBN(params.transferAmount)
+            : null,
+          wrapAmount: params.wrapAmount
+            ? this.program.mint.toTokenAmountBN(params.wrapAmount)
+            : null,
+        },
+      },
       {
         wallet: this.publicKey,
         mint: this.program.mint.address,
@@ -303,7 +338,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         systemProgram: SystemProgram.programId,
       }
     );
-
+    // add all resources so we can update their funding statuses
     ixn.keys.push(
       ...walletState.resources
         .filter((r) => !PublicKey.default.equals(r))
@@ -315,10 +350,11 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
           };
         })
     );
+    ixns.push(handleOptionalPubkeys(ixn));
 
     return new TransactionObject(
       payer,
-      [ixn],
+      ixns,
       params.funderAuthority ? [params.funderAuthority] : [],
       options
     );

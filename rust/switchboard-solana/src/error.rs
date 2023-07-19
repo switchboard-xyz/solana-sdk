@@ -41,6 +41,8 @@ pub enum SwitchboardError {
     InvalidQueue,
     #[msg("The provided enclave_signer does not match the expected enclave_signer")]
     InvalidEnclaveSigner,
+    #[msg("The provided mint did not match the wrapped SOL mint address")]
+    InvalidNativeMint,
 }
 
 use crate::cfg_client;

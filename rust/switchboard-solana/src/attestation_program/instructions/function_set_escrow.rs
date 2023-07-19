@@ -7,7 +7,7 @@ pub struct FunctionSetEscrow<'info> {
         mut,
         seeds = [
             FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(), 
+            function.load()?.creator_seed.as_ref(),
             &function.load()?.created_at_slot.to_le_bytes()
         ],
         bump = function.load()?.bump,
@@ -31,8 +31,7 @@ pub struct FunctionSetEscrow<'info> {
 
     #[account(
         mut,
-        constraint = new_escrow.authority == new_escrow_authority.key() 
-            && new_escrow.token_wallet == new_escrow_token_wallet.key()
+        constraint = new_escrow.authority == new_escrow_authority.key() && new_escrow.token_wallet == new_escrow_token_wallet.key()
     )]
     pub new_escrow: Box<Account<'info, SwitchboardWallet>>,
 
@@ -49,15 +48,11 @@ pub struct FunctionSetEscrowParams {}
 impl InstructionData for FunctionSetEscrowParams {}
 
 impl Discriminator for FunctionSetEscrowParams {
-    const DISCRIMINATOR: [u8; 8] = [
-        63, 223, 123, 191, 23, 84, 113, 198
-    ];
+    const DISCRIMINATOR: [u8; 8] = [63, 223, 123, 191, 23, 84, 113, 198];
 }
 
 impl Discriminator for FunctionSetEscrow<'_> {
-    const DISCRIMINATOR: [u8; 8] = [
-        63, 223, 123, 191, 23, 84, 113, 198
-    ];
+    const DISCRIMINATOR: [u8; 8] = [63, 223, 123, 191, 23, 84, 113, 198];
 }
 
 impl<'info> FunctionSetEscrow<'info> {
@@ -121,8 +116,7 @@ impl<'info> FunctionSetEscrow<'info> {
         account_metas.extend(self.escrow_authority.to_account_metas(None));
         account_metas.extend(self.new_escrow.to_account_metas(None));
         account_metas.extend(self.new_escrow_authority.to_account_metas(None));
-        account_metas
-            .extend(self.new_escrow_token_wallet.to_account_metas(None));
+        account_metas.extend(self.new_escrow_token_wallet.to_account_metas(None));
         account_metas
     }
 }

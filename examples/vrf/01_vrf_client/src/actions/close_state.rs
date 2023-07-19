@@ -11,7 +11,7 @@ pub struct CloseState<'info> {
         mut,
         close = sol_dest,
         seeds = [
-            STATE_SEED, 
+            STATE_SEED,
             vrf.key().as_ref(),
             authority.key().as_ref(),
         ],
@@ -28,7 +28,7 @@ pub struct CloseState<'info> {
     #[account(mut)]
     pub vrf: AccountLoader<'info, VrfLiteAccountData>,
     #[account(
-        mut, 
+        mut,
         constraint = escrow.mint == escrow_dest.mint && escrow.owner == program_state.key()
     )]
     pub escrow: Account<'info, TokenAccount>,
@@ -53,7 +53,7 @@ pub struct CloseState<'info> {
     /// CHECK:
     pub queue_authority: AccountInfo<'info>,
     #[account(
-        seeds = [STATE_SEED], 
+        seeds = [STATE_SEED],
         bump = state.load()?.switchboard_state_bump,
         seeds::program = switchboard_program.key()
     )]
@@ -67,8 +67,8 @@ pub struct CloseState<'info> {
 
     /// CHECK:
     #[account(
-        constraint = 
-            switchboard_program.executable == true 
+        constraint =
+            switchboard_program.executable == true
             && *switchboard_program.key == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub switchboard_program: AccountInfo<'info>,
@@ -88,7 +88,9 @@ impl CloseState<'_> {
         // TODO: Validate the current user doesnt have an open request
 
         // 1500 slots, 400ms/slot = about 10min
-        if ctx.accounts.vrf.load()?.request_slot != 0 && ctx.accounts.vrf.load()?.request_slot + 1500 > clock::Clock::get()?.slot {
+        if ctx.accounts.vrf.load()?.request_slot != 0
+            && ctx.accounts.vrf.load()?.request_slot + 1500 > clock::Clock::get()?.slot
+        {
             return Err(error!(VrfErrorCode::VrfCloseNotReady));
         }
 

@@ -158,7 +158,7 @@ export class SwitchboardProgram {
   private readonly _program: Program;
 
   // The anchor program instance for Switchboard's attestation program.
-  private readonly _attestationProgram: Program | undefined;
+  private readonly _attestationProgram: Program;
 
   /** The Solana cluster to load the Switchboard program for. */
   readonly cluster: Cluster | "localnet";
@@ -187,7 +187,7 @@ export class SwitchboardProgram {
    */
   constructor(
     program: Program,
-    attestationProgram: Program | undefined,
+    attestationProgram: Program,
     cluster: Cluster | "localnet",
     mint: NativeMint
   ) {
@@ -314,21 +314,17 @@ export class SwitchboardProgram {
         connection,
         payerKeypair,
         attestationProgramId
-      ).catch((err) => {
-        console.error(`Failed to load AttestationProgram`);
-        console.error(err);
-        return undefined;
-      }),
+      ),
     ]);
     const mint = await NativeMint.load(program.provider as AnchorProvider);
     return new SwitchboardProgram(program, attestationProgram, cluster, mint);
   };
 
-  public verifyAttestation(): void {
-    if (this._attestationProgram === undefined) {
-      throw new Error(`Attestation Program is missing`);
-    }
-  }
+  // public verifyAttestation(): void {
+  //   if (this._attestationProgram === undefined) {
+  //     throw new Error(`Attestation Program is missing`);
+  //   }
+  // }
 
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
@@ -511,6 +507,34 @@ export class SwitchboardProgram {
    */
   public get walletPubkey(): PublicKey {
     return this.wallet.payer.publicKey;
+  }
+
+  /**
+   * Returns a new instance of the SwitchboardProgram class for a new payer keypair
+   * @return A new instance of the SwitchboardProgram class
+   */
+  public newWithPayer(payer: Keypair): SwitchboardProgram {
+    const newProvider: AnchorProvider = new AnchorProvider(
+      this.connection,
+      new AnchorWallet(payer),
+      this.provider.opts
+    );
+    const program = new Program(
+      this._program.idl,
+      this._program.programId,
+      newProvider
+    );
+    const attestationProgram = new Program(
+      this._attestationProgram.idl,
+      this._attestationProgram.programId,
+      newProvider
+    );
+    return new SwitchboardProgram(
+      program,
+      attestationProgram,
+      this.cluster,
+      this.mint
+    );
   }
 
   /**

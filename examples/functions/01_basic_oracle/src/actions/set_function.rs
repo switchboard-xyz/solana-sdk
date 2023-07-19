@@ -18,7 +18,7 @@ pub struct SetFunction<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct SetFunctionParams { }
+pub struct SetFunctionParams {}
 
 impl SetFunction<'_> {
     pub fn validate(

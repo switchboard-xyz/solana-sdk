@@ -1,5 +1,5 @@
 {
-  "name": "basic-oracle",
+  "name": "solana-basic-oracle",
   "private": true,
   "repository": {
     "type": "git",
@@ -7,16 +7,17 @@
     "directory": "examples/functions/01_basic_oracle"
   },
   "scripts": {
-    "build:anchor": "anchor build",
-    "clean": "pnpm exec rimraf node_modules .anchor lib .turbo"
+    "build:cargo": "anchor build",
+    "fix": "cargo fmt && pnpm exec prettier ./tests/*.ts -w",
+    "clean": "pnpm exec rimraf node_modules .anchor .turbo"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.78.0",
-    "@switchboard-xyz/common": "*",
-    "@switchboard-xyz/oracle": "*",
-    "@switchboard-xyz/solana.js": "workspace:*"
+    "@switchboard-xyz/common": "latest",
+    "@switchboard-xyz/oracle": "latest",
+    "@switchboard-xyz/solana.js": "latest"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

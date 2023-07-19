@@ -1,0 +1,8 @@
+{
+  "name": "solana-randomness-callback-function",
+  "scripts": {
+    "build:cargo": "make",
+    "fix": "cargo fmt"
+  },
+  "dependencies": {}
+}

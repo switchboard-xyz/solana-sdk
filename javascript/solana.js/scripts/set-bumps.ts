@@ -1,15 +1,11 @@
-import * as sbv2 from './src';
-import { TransactionObject } from './src';
-import { CHECK_ICON, FAILED_ICON } from './utils';
+import * as sbv2 from "./src";
+import { TransactionObject } from "./src";
+import { CHECK_ICON, FAILED_ICON } from "./utils";
 
-import {
-  AccountMeta,
-  clusterApiUrl,
-  Connection,
-  PublicKey,
-} from '@solana/web3.js';
+import type { AccountMeta } from "@solana/web3.js";
+import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 // import { backOff } from 'exponential-backoff';
-import _ from 'lodash';
+import _ from "lodash";
 
 const VERBOSE = process.env.VERBOSE || false;
 
@@ -17,20 +13,20 @@ const BATCH_SIZE = 20;
 
 async function main() {
   const devnetConnection = new Connection(
-    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
+    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl("devnet")
   );
   console.log(`rpcUrl: ${devnetConnection.rpcEndpoint}`);
 
   const payer = sbv2.SwitchboardTestContextV2.loadKeypair(
-    '~/.config/solana/id.json'
+    "~/.config/solana/id.json"
   );
   console.log(`payer: ${payer.publicKey.toBase58()}`);
 
   const oldProgram = await sbv2.SwitchboardProgram.load(
-    'devnet',
+    "devnet",
     devnetConnection,
     payer,
-    new PublicKey('2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG')
+    new PublicKey("2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG")
   );
 
   const programAccounts = await oldProgram.getProgramAccounts();
@@ -211,6 +207,6 @@ async function main() {
   //   );
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
 });

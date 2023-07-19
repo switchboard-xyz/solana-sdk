@@ -1,41 +1,42 @@
-import * as sbv2 from './src';
-import { FAILED_ICON, Job, setupOutputDir } from './utils';
+import * as sbv2 from "./src";
+import type { Job } from "./utils";
+import { FAILED_ICON, setupOutputDir } from "./utils";
 
-import { clusterApiUrl, Connection } from '@solana/web3.js';
+import { clusterApiUrl, Connection } from "@solana/web3.js";
 // import { backOff } from 'exponential-backoff';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import fs from "fs";
+import os from "os";
+import path from "path";
 
 const VERBOSE = process.env.VERBOSE || false;
 
 const jobMapPath = path.join(
   os.homedir(),
-  'devnet-migration',
+  "devnet-migration",
   sbv2.SB_V2_PID.toBase58(),
-  'job_map.csv'
+  "job_map.csv"
 );
 
 async function main() {
   const [oldDirPath, oldFeedDirPath, oldJobDirPath] = setupOutputDir(
-    '2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG'
+    "2TfB33aLaneQb5TNVwyDz3jSZXS6jdW2ARw1Dgf84XCG"
   );
   const [newDirPath, newFeedDirPath, newJobDirPath] = setupOutputDir(
     sbv2.SB_V2_PID.toBase58()
   );
 
   const devnetConnection = new Connection(
-    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl('devnet')
+    process.env.SOLANA_DEVNET_RPC ?? clusterApiUrl("devnet")
   );
   console.log(`rpcUrl: ${devnetConnection.rpcEndpoint}`);
 
   const payer = sbv2.SwitchboardTestContextV2.loadKeypair(
-    '~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json'
+    "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
   );
   console.log(`payer: ${payer.publicKey.toBase58()}`);
 
   const newProgram = await sbv2.SwitchboardProgram.load(
-    'devnet',
+    "devnet",
     devnetConnection,
     payer,
     sbv2.SB_V2_PID
@@ -43,9 +44,9 @@ async function main() {
 
   const jobs = new Map<string, Job>();
   for (const file of fs.readdirSync(oldJobDirPath)) {
-    const fileName = path.basename(file).replace('.json', '');
+    const fileName = path.basename(file).replace(".json", "");
     const jobDef: Job = JSON.parse(
-      fs.readFileSync(path.join(oldJobDirPath, file), 'utf-8')
+      fs.readFileSync(path.join(oldJobDirPath, file), "utf-8")
     );
     jobs.set(fileName, jobDef);
   }
@@ -71,7 +72,7 @@ async function main() {
         expiration: job.definition.expiration,
       });
       console.log(
-        `${jobKey.padEnd(44, ' ')} -> ${jobAccount.publicKey.toBase58()}`
+        `${jobKey.padEnd(44, " ")} -> ${jobAccount.publicKey.toBase58()}`
       );
       fs.writeFileSync(
         newJobPath,
@@ -96,14 +97,14 @@ async function main() {
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error(error);
 });
 
 function writeJobMap(map: Map<string, string>) {
   const fileString = `oldPubkey, newPubkey\n${Array.from(map.entries())
-    .map(r => r.join(', '))
-    .join('\n')}`;
+    .map((r) => r.join(", "))
+    .join("\n")}`;
   fs.writeFileSync(jobMapPath, fileString);
 }
 
@@ -113,10 +114,10 @@ function loadJobMap(): Map<string, string> {
   }
 
   const map = new Map();
-  const fileString = fs.readFileSync(jobMapPath, 'utf-8');
-  const fileLines = fileString.split('\n').slice(1);
-  fileLines.forEach(r => {
-    const [oldPubkey, newPubkey] = r.split(', ');
+  const fileString = fs.readFileSync(jobMapPath, "utf-8");
+  const fileLines = fileString.split("\n").slice(1);
+  fileLines.forEach((r) => {
+    const [oldPubkey, newPubkey] = r.split(", ");
     map.set(oldPubkey, newPubkey);
   });
 

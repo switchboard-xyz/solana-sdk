@@ -1,0 +1,26 @@
+{
+  "name": "solana-randomness-callback-example",
+  "scripts": {
+    "request": "tsx ./request.ts",
+    "build:anchor": "anchor build",
+    "fix": "cargo fmt && pnpm exec prettier ./tests/*.ts -w",
+    "clean": "pnpm exec rimraf node_modules .anchor .turbo"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.28.0",
+    "@solana/spl-token": "^0.3.8",
+    "@switchboard-xyz/common": "latest",
+    "@switchboard-xyz/solana.js": "latest",
+    "@types/dotenv": "^8.2.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^20.4.2",
+    "chai": "^4.3.4",
+    "mocha": "^9.0.3",
+    "ts-mocha": "^10.0.0"
+  }
+}

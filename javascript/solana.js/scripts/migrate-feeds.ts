@@ -6,8 +6,8 @@ import {
   SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE,
 } from "../src/index.js";
 
+import type { Aggregator } from "./utils.js";
 import {
-  Aggregator,
   CHECK_ICON,
   FAILED_ICON,
   jsonReplacers,

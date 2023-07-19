@@ -13,9 +13,9 @@ pub use crate::oracle_program::{
 
 pub use crate::attestation_program::{
     FunctionCloseParams, FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitParams,
-    FunctionRequestVerifyParams, FunctionSetEscrowParams, FunctionStatus, FunctionTriggerParams,
-    FunctionVerifyParams, MrEnclave, Quote, SwitchboardAttestationPermission, VerificationStatus,
-    WalletFundParams, WalletInitParams,
+    FunctionRequestTriggerRound, FunctionRequestVerifyParams, FunctionSetEscrowParams,
+    FunctionStatus, FunctionTriggerParams, FunctionVerifyParams, MrEnclave, Quote, RequestStatus,
+    SwitchboardAttestationPermission, VerificationStatus, WalletFundParams, WalletInitParams,
 };
 
 cfg_client! {

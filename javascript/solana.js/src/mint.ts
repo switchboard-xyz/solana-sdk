@@ -11,6 +11,9 @@ import type {
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
 import { Big, BN } from "@switchboard-xyz/common";
 
+const U64_MAX_BN = new BN("18446744073709551615");
+const U64_MAX_Bigint = BigInt("18446744073709551615");
+
 export class Mint {
   public static native = new PublicKey(
     "So11111111111111111111111111111111111111112"
@@ -38,6 +41,9 @@ export class Mint {
   }
 
   toTokenAmount(amount: number): bigint {
+    if (amount === Number.MAX_SAFE_INTEGER) {
+      return U64_MAX_Bigint;
+    }
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
     // We need to fix tokenAmount to 0 decimal places because the amount in base units must be an integer.
@@ -45,6 +51,9 @@ export class Mint {
   }
 
   toTokenAmountBN(amount: number): BN {
+    if (amount === Number.MAX_SAFE_INTEGER) {
+      return U64_MAX_BN;
+    }
     const big = new Big(amount);
     const tokenAmount = big.mul(new Big(10).pow(this.mint.decimals));
     return new BN(tokenAmount.toFixed(0));
@@ -274,8 +283,10 @@ export class NativeMint extends Mint {
           ? params.amount
           : 0;
 
-      const userInit = (
-        await this.createWrappedUserInstructions(payer, amount, user)
+      const userInit = this.createWrappedUserTransaction(
+        payer,
+        amount,
+        user
       )[1];
 
       return [associatedToken, userInit];
@@ -318,12 +329,12 @@ export class NativeMint extends Mint {
     throw new Error(`Failed to getOrCreate the users wrapped SOL account`);
   }
 
-  public async createWrappedUserInstructions(
+  public createWrappedUserInstructions(
     payer: PublicKey,
     amount: number,
-    user?: Keypair
-  ): Promise<[PublicKey, TransactionObject]> {
-    const owner = user ? user.publicKey : payer;
+    authority?: PublicKey
+  ): [PublicKey, TransactionInstruction[]] {
+    const owner = authority ?? payer;
     const associatedAddress = this.getAssociatedAddress(owner);
     const associatedAccountInfo =
       this.connection.getAccountInfo(associatedAddress);
@@ -333,55 +344,46 @@ export class NativeMint extends Mint {
       );
     }
 
-    const ephemeralAccount = Keypair.generate();
-    const ephemeralWallet = this.getAssociatedAddress(
-      ephemeralAccount.publicKey
-    );
-
     const wrapAmountLamports = this.toTokenAmount(amount);
 
     return [
       associatedAddress,
-      new TransactionObject(
-        payer,
-        [
-          spl.createAssociatedTokenAccountInstruction(
-            payer,
-            associatedAddress,
-            owner,
-            Mint.native
-          ),
-          // only wrap funds if needed
-          ...(amount > 0
-            ? [
-                spl.createAssociatedTokenAccountInstruction(
-                  payer,
-                  ephemeralWallet,
-                  ephemeralAccount.publicKey,
-                  spl.NATIVE_MINT
-                ),
-                SystemProgram.transfer({
-                  fromPubkey: owner,
-                  toPubkey: ephemeralWallet,
-                  lamports: wrapAmountLamports,
-                }),
-                spl.createSyncNativeInstruction(ephemeralWallet),
-                spl.createTransferInstruction(
-                  ephemeralWallet,
-                  associatedAddress,
-                  ephemeralAccount.publicKey,
-                  wrapAmountLamports
-                ),
-                spl.createCloseAccountInstruction(
-                  ephemeralWallet,
-                  owner,
-                  ephemeralAccount.publicKey
-                ),
-              ]
-            : []),
-        ],
-        user ? [user, ephemeralAccount] : [ephemeralAccount]
-      ),
+      [
+        spl.createAssociatedTokenAccountInstruction(
+          payer,
+          associatedAddress,
+          owner,
+          Mint.native
+        ),
+        // only wrap funds if needed
+        ...(amount > 0
+          ? [
+              SystemProgram.transfer({
+                fromPubkey: payer,
+                toPubkey: associatedAddress,
+                lamports: wrapAmountLamports,
+              }),
+              spl.createSyncNativeInstruction(associatedAddress),
+            ]
+          : []),
+      ],
+    ];
+  }
+
+  public createWrappedUserTransaction(
+    payer: PublicKey,
+    amount: number,
+    user?: Keypair
+  ): [PublicKey, TransactionObject] {
+    const [associatedAddress, ixns] = this.createWrappedUserInstructions(
+      payer,
+      amount,
+      user ? user.publicKey : undefined
+    );
+
+    return [
+      associatedAddress,
+      new TransactionObject(payer, ixns, user ? [user] : []),
     ];
   }
 
@@ -391,7 +393,7 @@ export class NativeMint extends Mint {
     user?: Keypair
   ): Promise<[PublicKey, TransactionSignature]> {
     const [tokenAccount, createWrappedUserTxn] =
-      await this.createWrappedUserInstructions(payer, amount, user);
+      this.createWrappedUserTransaction(payer, amount, user);
     const txSignature = await this.signAndSend(createWrappedUserTxn);
 
     return [tokenAccount, txSignature];
@@ -440,44 +442,18 @@ export class NativeMint extends Mint {
       );
     }
 
-    const ephemeralAccount = Keypair.generate();
-    const ephemeralWallet = this.getAssociatedAddress(
-      ephemeralAccount.publicKey
-    );
-
     const wrapAmountLamports = this.toTokenAmount(wrapAmount.toNumber());
 
     ixns.push(
-      spl.createAssociatedTokenAccountInstruction(
-        payer,
-        ephemeralWallet,
-        ephemeralAccount.publicKey,
-        spl.NATIVE_MINT
-      ),
       SystemProgram.transfer({
         fromPubkey: owner,
-        toPubkey: ephemeralWallet,
+        toPubkey: userTokenAddress,
         lamports: wrapAmountLamports,
       }),
-      spl.createSyncNativeInstruction(ephemeralWallet),
-      spl.createTransferInstruction(
-        ephemeralWallet,
-        userTokenAddress,
-        ephemeralAccount.publicKey,
-        wrapAmountLamports
-      ),
-      spl.createCloseAccountInstruction(
-        ephemeralWallet,
-        owner,
-        ephemeralAccount.publicKey
-      )
+      spl.createSyncNativeInstruction(userTokenAddress)
     );
 
-    return new TransactionObject(
-      payer,
-      ixns,
-      user ? [user, ephemeralAccount] : [ephemeralAccount]
-    );
+    return new TransactionObject(payer, ixns, user ? [user] : []);
   }
 
   public async wrap(

@@ -2,7 +2,8 @@ import "mocha";
 
 import { JobAccount } from "../src/index.js";
 
-import { setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { setupTest } from "./utils.js";
 
 import { OracleJob } from "@switchboard-xyz/common";
 import assert from "assert";
