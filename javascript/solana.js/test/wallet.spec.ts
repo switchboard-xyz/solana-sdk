@@ -1,15 +1,18 @@
 import "mocha";
 
+import type { BootstrappedAttestationQueue } from "../src/index.js";
 import {
   AttestationProgramStateAccount,
   AttestationQueueAccount,
-  type BootstrappedAttestationQueue,
-  parseRawBuffer,
   SwitchboardWallet,
+  TransactionObject,
 } from "../src/index.js";
 
-import { printLogs, setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { printLogs, setupTest } from "./utils.js";
 
+import { Keypair, LAMPORTS_PER_SOL, SystemProgram } from "@solana/web3.js";
+import { sleep } from "@switchboard-xyz/common";
 import assert from "assert";
 
 const defaulWalletSeed = "DefaultSeed";
@@ -33,7 +36,7 @@ describe("Switchboard Wallet Tests", () => {
     let walletInitSignature: string;
     [switchboardWallet, walletInitSignature] = await SwitchboardWallet.create(
       ctx.program,
-      switchboard.attestationQueueAccount.publicKey,
+      switchboard.attestationQueue.account.publicKey,
       ctx.payer.publicKey,
       defaulWalletSeed
     );
@@ -50,7 +53,7 @@ describe("Switchboard Wallet Tests", () => {
     );
     assert(
       walletState.attestationQueue.equals(
-        switchboard.attestationQueueAccount.publicKey
+        switchboard.attestationQueue.account.publicKey
       ),
       "QueuePubkeyMismatch"
     );
@@ -100,5 +103,70 @@ describe("Switchboard Wallet Tests", () => {
     const balance = await switchboardWallet.getBalance();
     const diff = ctx.round(balance - initialBalance, 4);
     assert(diff === 0.25, "WalletBalanceMismatch");
+  });
+
+  it("Withdraws all remaining balance when amount is Number.MAX_SAFE_INTEGER", async () => {
+    const initialBalance = await switchboardWallet.getBalance();
+
+    const withdrawTxnSignature = await switchboardWallet.withdraw(
+      Number.MAX_SAFE_INTEGER
+    );
+    await printLogs(ctx.program.connection, withdrawTxnSignature);
+
+    const balance = await switchboardWallet.getBalance();
+    assert(balance === 0, "WalletBalanceMismatch");
+  });
+
+  it("Funds a wallet with no existing token wallet", async () => {
+    // create new payer
+    const newPayer = Keypair.generate();
+    await ctx.program.signAndSend(
+      new TransactionObject(
+        ctx.payer.publicKey,
+        [
+          SystemProgram.transfer({
+            fromPubkey: ctx.payer.publicKey,
+            toPubkey: newPayer.publicKey,
+            lamports: 2 * LAMPORTS_PER_SOL,
+          }),
+        ],
+        []
+      )
+    );
+    const program = ctx.program.newWithPayer(newPayer);
+
+    // create wallet
+    const [newWallet, newWalletInit] =
+      await SwitchboardWallet.createInstruction(
+        program,
+        newPayer.publicKey,
+        switchboard.attestationQueue.publicKey,
+        newPayer.publicKey,
+        defaulWalletSeed,
+        8
+      );
+    await program.signAndSend(newWalletInit);
+
+    // assert token account is not created
+    const newPayerTokenWallet = program.mint.getAssociatedAddress(
+      newPayer.publicKey
+    );
+    const newPayerTokenAccount = await program.mint.getAccount(
+      newPayerTokenWallet
+    );
+    assert(
+      newPayerTokenAccount === null,
+      "New payer token wallet should not be initialized yet"
+    );
+
+    // fund the wallet
+    const txnSignature = await newWallet.fund({
+      wrapAmount: 0.1,
+      // transferAmount: 0.1,
+    });
+    // const txnSignature = await newWallet.wrap(0.1);
+    await sleep(2000);
+    const balance = await newWallet.getBalance();
+    assert(balance === 0.1, "WalletBalanceMismatch");
   });
 });

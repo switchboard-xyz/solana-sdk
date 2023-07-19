@@ -1,17 +1,17 @@
 use crate::*;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::clock;
-use anchor_lang::{Discriminator};
+use anchor_lang::Discriminator;
 
 #[derive(Accounts)]
 #[instruction(params: UpdateResultParams)] // rpc parameters hint
 pub struct UpdateResult<'info> {
-    #[account(mut, 
+    #[account(mut,
         has_one = vrf @ VrfErrorCode::InvalidVrfAccount
     )]
     pub state: AccountLoader<'info, VrfClient>,
     #[account(
-        constraint = 
+        constraint =
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub vrf: AccountLoader<'info, VrfLiteAccountData>,
@@ -27,7 +27,10 @@ impl Discriminator for UpdateResult<'_> {
 impl UpdateResult<'_> {
     pub fn try_to_vec(params: &UpdateResultParams) -> Result<Vec<u8>> {
         let ix_data = params.try_to_vec()?;
-        let data: Vec<u8> = UpdateResult::discriminator().into_iter().chain(ix_data.into_iter()).collect();
+        let data: Vec<u8> = UpdateResult::discriminator()
+            .into_iter()
+            .chain(ix_data.into_iter())
+            .collect();
         assert_eq!(data.len(), 8 + std::mem::size_of::<UpdateResultParams>());
         Ok(data)
     }
@@ -54,7 +57,7 @@ impl UpdateResult<'_> {
         let callback = Callback {
             program_id,
             accounts,
-            ix_data
+            ix_data,
         };
         Ok(callback)
     }

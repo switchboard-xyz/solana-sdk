@@ -116,8 +116,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[VerifierAccount, types.VerifierAccountData]> {
-    program.verifyAttestation();
-
     const verifierAccount = new VerifierAccount(program, address);
     const state = await verifierAccount.loadData();
     return [verifierAccount, state];
@@ -150,8 +148,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     params: VerifierAccountInitParams,
     options?: TransactionObjectOptions
   ): Promise<[VerifierAccount, TransactionObject]> {
-    program.verifyAttestation();
-
     const verifierKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(verifierKeypair);
 
@@ -238,7 +234,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
    *  Retrieve and decode the {@linkcode types.VerifierAccountData} stored in this account.
    */
   public async loadData(): Promise<types.VerifierAccountData> {
-    this.program.verifyAttestation();
     const data = await types.VerifierAccountData.fetch(
       this.program,
       this.publicKey
@@ -254,8 +249,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     queueAuthority: PublicKey;
     enclaveSigner: PublicKey;
   }): TransactionInstruction {
-    this.program.verifyAttestation();
-
     const instruction = types.verifierHeartbeat(
       this.program,
       { params: {} },
@@ -320,8 +313,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     params: VerifierRotateParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const registryKey = parseRawBuffer(params.registryKey, 64);
 
     const quoteData = await this.loadData();
@@ -371,8 +362,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     params: QuoteVerifyParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const verifierState = await this.loadData();
 
     const signers: Keypair[] = [];

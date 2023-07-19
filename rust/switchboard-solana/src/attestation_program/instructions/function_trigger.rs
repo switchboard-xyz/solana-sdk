@@ -4,10 +4,10 @@ use crate::prelude::*;
 #[instruction(params:FunctionTriggerParams)]
 pub struct FunctionTrigger<'info> {
     #[account(
-        mut, 
+        mut,
         seeds = [
             FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(), 
+            function.load()?.creator_seed.as_ref(),
             &function.load()?.created_at_slot.to_le_bytes()
         ],
         bump = function.load()?.bump,
@@ -17,7 +17,7 @@ pub struct FunctionTrigger<'info> {
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     pub authority: Signer<'info>,
-    
+
     pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
 }
 

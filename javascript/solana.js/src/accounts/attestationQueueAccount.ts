@@ -127,8 +127,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
    *  Retrieve and decode the {@linkcode types.AttestationQueueAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationQueueAccountData> {
-    this.program.verifyAttestation();
-
     const data = await types.AttestationQueueAccountData.fetch(
       this.program,
       this.publicKey
@@ -144,8 +142,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[AttestationQueueAccount, types.AttestationQueueAccountData]> {
-    program.verifyAttestation();
-
     const queueAccount = new AttestationQueueAccount(program, address);
     const state = await queueAccount.loadData();
     return [queueAccount, state];
@@ -157,8 +153,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAccountInitParams,
     options?: TransactionObjectOptions
   ): [AttestationQueueAccount, TransactionObject] {
-    program.verifyAttestation();
-
     const queueKeypair = params.keypair ?? Keypair.generate();
     program.verifyNewKeypair(queueKeypair);
 
@@ -207,8 +201,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: CreateQueueQuoteParams,
     options?: TransactionObjectOptions
   ): Promise<[VerifierAccount, TransactionObject]> {
-    this.program.verifyAttestation();
-
     const authority = params.authority ?? payer;
 
     const queueAuthority =
@@ -270,8 +262,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     wallet?: SwitchboardWallet,
     options?: TransactionObjectOptions
   ): Promise<[FunctionAccount, TransactionObject]> {
-    this.program.verifyAttestation();
-
     const queueAuthority =
       params.queueAuthorityPubkey ?? (await this.loadData()).authority;
 
@@ -343,8 +333,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAddMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueAddMrEnclave(
@@ -371,8 +359,6 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueRemoveMrEnclaveParams,
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    this.program.verifyAttestation();
-
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueRemoveMrEnclave(

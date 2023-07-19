@@ -9,7 +9,7 @@ pub use crate::types::*;
 
 pub use crate::{SWITCHBOARD_ATTESTATION_PROGRAM_ID, SWITCHBOARD_PROGRAM_ID};
 
-pub use switchboard_common::{FunctionResult};
+pub use switchboard_common::FunctionResult;
 
 pub use anchor_spl;
 

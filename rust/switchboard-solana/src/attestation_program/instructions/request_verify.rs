@@ -3,43 +3,42 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestVerifyParams)]
 pub struct FunctionRequestVerify<'info> {
-  #[account(
+    #[account(
       mut,
       has_one = function,
       has_one = escrow,
   )]
-  pub request: Box<Account<'info, FunctionRequestAccountData>>,
+    pub request: Box<Account<'info, FunctionRequestAccountData>>,
 
-  pub function_enclave_signer: Signer<'info>,
+    pub function_enclave_signer: Signer<'info>,
 
-  #[account(
+    #[account(
       mut,
       constraint = escrow.is_native() && escrow.owner == state.key()
   )]
-  pub escrow: Box<Account<'info, TokenAccount>>,
+    pub escrow: Box<Account<'info, TokenAccount>>,
 
-  #[account(
+    #[account(
       mut,
       has_one = attestation_queue,
   )]
-  pub function: AccountLoader<'info, FunctionAccountData>,
+    pub function: AccountLoader<'info, FunctionAccountData>,
 
-  #[account(
+    #[account(
       mut,
       constraint = escrow.is_native() && escrow.owner == state.key()
   )]
-  pub function_escrow: Option<Box<Account<'info, TokenAccount>>>,
+    pub function_escrow: Option<Box<Account<'info, TokenAccount>>>,
 
-  #[account(
+    #[account(
       has_one = attestation_queue,
-      constraint = 
-          verifier_quote.load()?.enclave.enclave_signer == verifier_enclave_signer.key(),
+      constraint = verifier_quote.load()?.enclave.enclave_signer == verifier_enclave_signer.key(),
   )]
-  pub verifier_quote: AccountLoader<'info, VerifierAccountData>,
+    pub verifier_quote: AccountLoader<'info, VerifierAccountData>,
 
-  pub verifier_enclave_signer: Signer<'info>,
+    pub verifier_enclave_signer: Signer<'info>,
 
-  #[account(
+    #[account(
       seeds = [
           PERMISSION_SEED,
           attestation_queue.load()?.authority.as_ref(),
@@ -48,23 +47,23 @@ pub struct FunctionRequestVerify<'info> {
       ],
       bump = verifier_permission.load()?.bump,
   )]
-  pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
+    pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
 
-  #[account(
+    #[account(
       seeds = [STATE_SEED],
       bump = state.load()?.bump,
   )]
-  pub state: AccountLoader<'info, AttestationProgramState>,
+    pub state: AccountLoader<'info, AttestationProgramState>,
 
-  pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
 
-  #[account(
+    #[account(
       mut,
       constraint = receiver.is_native()
   )]
-  pub receiver: Box<Account<'info, TokenAccount>>,
+    pub receiver: Box<Account<'info, TokenAccount>>,
 
-  pub token_program: Program<'info, Token>,
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

@@ -8,11 +8,9 @@
     "directory": "examples/feeds/01_feed_client"
   },
   "scripts": {
-    "lint": "eslint --ext .js,.json,.ts 'src/**' --fix",
-    "build:old": "node ../build.js anchor-vrf-parser 4hfkS97f5P6zauWeJF5dcZDFaJwYwbMPvKrANVAuKN4p",
-    "build": "anchor build",
-    "test": "npm run localnet && npm run network:create && npm run network:start & sleep 60 && anchor test --skip-local-validator",
-    "test:dev": "npm run localnet && npm run network:create && npm run network:start:dev & sleep 15 && anchor test --skip-local-validator"
+    "build:cargo": "anchor build",
+    "fix": "cargo fmt && pnpm exec prettier ./tests/*.ts -w",
+    "clean": "pnpm exec rimraf node_modules .anchor .turbo"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
@@ -20,9 +18,9 @@
     "@project-serum/borsh": "^0.2.5",
     "@solana/spl-token": "^0.3.6",
     "@solana/web3.js": "^1.77.3",
-    "@switchboard-xyz/common": "^2.2.4",
-    "@switchboard-xyz/oracle": "^2.1.13",
-    "@switchboard-xyz/solana.js": "workspace:*",
+    "@switchboard-xyz/common": "latest",
+    "@switchboard-xyz/oracle": "latest",
+    "@switchboard-xyz/solana.js": "latest",
     "chalk": "^4.1.2",
     "dotenv": "^16.0.1",
     "yargs": "^17.5.1"
@@ -30,18 +28,10 @@
   "devDependencies": {
     "@types/chai": "^4.3.0",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^17.0.45",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
-    "@typescript-eslint/parser": "^5.44.0",
     "chai": "^4.3.6",
-    "eslint": "^8.28.0",
     "mocha": "^9.0.3",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.4.1",
     "prettier-plugin-organize-imports": "^2.3.4",
-    "shx": "^0.3.4",
-    "ts-mocha": "^9.0.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.3"
+    "ts-mocha": "^9.0.2"
   }
 }

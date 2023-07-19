@@ -8,7 +8,7 @@ pub struct InitState<'info> {
     #[account(
         init,
         seeds = [
-            STATE_SEED, 
+            STATE_SEED,
             vrf.key().as_ref(),
             authority.key().as_ref(),
         ],
@@ -24,7 +24,7 @@ pub struct InitState<'info> {
     /// CHECK:
     pub payer: AccountInfo<'info>,
     #[account(
-        constraint = 
+        constraint =
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub vrf: AccountLoader<'info, VrfLiteAccountData>,

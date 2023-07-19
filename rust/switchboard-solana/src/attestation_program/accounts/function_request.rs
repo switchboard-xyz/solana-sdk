@@ -199,15 +199,47 @@ impl FunctionRequestAccountData {
 
     // verify if their is a non-expired pending request
     pub fn is_round_active(&self, clock: &Clock) -> bool {
-        if self.status == RequestStatus::RequestPending {
-            if self.active_request.expiration_slot < clock.slot {
-                return false;
-            }
-
+        if self.active_request.status == RequestStatus::RequestPending
+            && self.active_request.expiration_slot > 0
+            && clock.slot >= self.active_request.expiration_slot
+        {
             return true;
         }
 
         false
+    }
+
+    pub fn validate_signer<'a>(
+        &self,
+        function_account_info: &AccountInfo<'a>,
+        signer: &AccountInfo<'a>,
+    ) -> anchor_lang::Result<bool> {
+        if self.function != function_account_info.key() {
+            msg!("function key mismatch");
+            msg!(
+                "expected {}, received {}",
+                self.function,
+                function_account_info.key()
+            );
+            return Ok(false);
+        }
+
+        let function_loader =
+            AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone())?;
+        function_loader.load()?; // check owner/discriminator
+
+        // validate the enclaves delegated signer matches
+        if self.active_request.enclave_signer != signer.key() {
+            msg!("request signer mismatch");
+            msg!(
+                "expected {}, received {}",
+                self.active_request.enclave_signer,
+                signer.key()
+            );
+            return Ok(false);
+        }
+
+        Ok(true)
     }
 
     cfg_client! {

@@ -341,7 +341,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       );
 
     const permissionGrantee = params.teeOracle
-      ? params.authority.publicKey
+      ? params.authority?.publicKey ?? payer
       : oracleAccount.publicKey;
 
     const [permissionAccount, createPermissionTxnObject] =

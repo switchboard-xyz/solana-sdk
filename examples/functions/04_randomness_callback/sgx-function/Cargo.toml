@@ -1,0 +1,17 @@
+[workspace]
+
+[package]
+name = "randomness-function"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "randomness-function"
+path = "src/main.rs"
+
+[dependencies]
+tokio = "^1"
+futures = "0.3"
+# switchboard-utils = { version = "0.8.0" }
+# switchboard-solana = { version = "0.9.4", path = "../../../../rust/switchboard-solana" }
+switchboard-solana = "0.9.4"

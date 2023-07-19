@@ -1,7 +1,7 @@
+pub use switchboard_solana::prelude::*;
+
 pub mod actions;
 pub use actions::*;
-pub use switchboard_solana::prelude::*;
-declare_id!("EF68PJkRqQu2VthTSy19kg6TWynMtRmLpxcMDKEdLC8t");
 
 pub mod error;
 pub use error::*;
@@ -12,7 +12,8 @@ pub use model::*;
 pub mod utils;
 pub use utils::*;
 
-
+// IDL 51F8RoK1RcduTxD8KsFGn4LUuHFnPTCf2PdAF5qEYoMU
+declare_id!("BkTMjFhosJ1xKtLMV2xchGtnTDBABLJ45aXzs7x9FdeX");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 

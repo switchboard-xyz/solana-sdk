@@ -1,33 +1,34 @@
-import * as sbv2 from '../src';
+import * as sbv2 from "../src";
 
-import { PublicKey } from '@solana/web3.js';
-import { Big, BN, IOracleJob, toUtf8 } from '@switchboard-xyz/common';
-import chalk from 'chalk';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import { PublicKey } from "@solana/web3.js";
+import type { IOracleJob } from "@switchboard-xyz/common";
+import { Big, BN, toUtf8 } from "@switchboard-xyz/common";
+import chalk from "chalk";
+import fs from "fs";
+import os from "os";
+import path from "path";
 
-export const CHECK_ICON = chalk.green('\u2714');
+export const CHECK_ICON = chalk.green("\u2714");
 
-export const FAILED_ICON = chalk.red('\u2717');
+export const FAILED_ICON = chalk.red("\u2717");
 
-export const PLUS_ICON = chalk.blue('\u002B');
+export const PLUS_ICON = chalk.blue("\u002B");
 
 const ignoreFields = [
-  'program',
-  'jobHashes',
-  'jobsChecksum',
-  'currentRound',
-  'latestConfirmedRound',
+  "program",
+  "jobHashes",
+  "jobsChecksum",
+  "currentRound",
+  "latestConfirmedRound",
 ];
 
 export function setupOutputDir(programId: string) {
-  const dirPath = path.join(os.homedir(), 'devnet-migration', programId);
-  const feedDirPath = path.join(dirPath, 'feeds');
+  const dirPath = path.join(os.homedir(), "devnet-migration", programId);
+  const feedDirPath = path.join(dirPath, "feeds");
   if (!fs.existsSync(feedDirPath)) {
     fs.mkdirSync(feedDirPath, { recursive: true });
   }
-  const jobDirPath = path.join(dirPath, 'jobs');
+  const jobDirPath = path.join(dirPath, "jobs");
   if (!fs.existsSync(jobDirPath)) {
     fs.mkdirSync(jobDirPath, { recursive: true });
   }
@@ -41,18 +42,18 @@ export function jsonReplacers(key, value) {
   }
   if (
     !value ||
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
+    typeof value === "string" ||
+    typeof value === "number" ||
+    typeof value === "boolean"
   ) {
     return value;
   }
 
   if (
-    key === 'ebuf' ||
-    key === '_ebuf' ||
-    key === 'reserved' ||
-    key === 'reserved1'
+    key === "ebuf" ||
+    key === "_ebuf" ||
+    key === "reserved" ||
+    key === "reserved1"
   ) {
     return;
   }
@@ -61,29 +62,29 @@ export function jsonReplacers(key, value) {
     return value.toBase58();
   }
 
-  if ((key === 'name' || key === 'metadata') && Array.isArray(value)) {
+  if ((key === "name" || key === "metadata") && Array.isArray(value)) {
     return toUtf8(value);
   }
 
   if (Array.isArray(value) && value.length > 0) {
-    if (typeof value[0] === 'number') {
-      if (value.every(item => item === 0)) {
+    if (typeof value[0] === "number") {
+      if (value.every((item) => item === 0)) {
         return [];
       }
 
-      return `[${value.join(',')}]`;
+      return `[${value.join(",")}]`;
     }
 
     if (value[0] instanceof PublicKey) {
       return value.filter(
-        pubkey => !(pubkey as PublicKey).equals(PublicKey.default)
+        (pubkey) => !(pubkey as PublicKey).equals(PublicKey.default)
       );
     }
   }
 
   if (
     value instanceof sbv2.types.SwitchboardDecimal ||
-    ('mantissa' in value && 'scale' in value)
+    ("mantissa" in value && "scale" in value)
   ) {
     const big = sbv2.types.SwitchboardDecimal.from(value).toBig();
     return big.toString();

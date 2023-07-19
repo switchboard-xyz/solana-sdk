@@ -1,10 +1,12 @@
 import "mocha";
 
 import { functionVerify } from "../src/generated/index.js";
+import type { AttestationQueueAccount } from "../src/index.js";
+import type { VerifierAccount } from "../src/index.js";
 import * as sbv2 from "../src/index.js";
-import { AttestationQueueAccount, EnclaveAccount } from "../src/index.js";
 
-import { printLogs, setupTest, TestContext } from "./utils.js";
+import type { TestContext } from "./utils.js";
+import { printLogs, setupTest } from "./utils.js";
 
 import * as anchor from "@coral-xyz/anchor";
 import { NATIVE_MINT } from "@solana/spl-token";
@@ -18,7 +20,7 @@ describe("Function Tests", () => {
   let ctx: TestContext;
 
   let attestationQueueAccount: AttestationQueueAccount;
-  let attestationQuoteVerifierAccount: EnclaveAccount;
+  let attestationQuoteVerifierAccount: VerifierAccount;
   const quoteVerifierKeypair = Keypair.generate();
   const quoteVerifierSigner = Keypair.generate();
 
@@ -62,7 +64,7 @@ describe("Function Tests", () => {
     });
 
     [attestationQuoteVerifierAccount] =
-      await attestationQueueAccount.createQuote({
+      await attestationQueueAccount.createVerifier({
         registryKey: new Uint8Array(Array(64).fill(1)),
         keypair: quoteVerifierKeypair,
         enable: true,
@@ -83,7 +85,7 @@ describe("Function Tests", () => {
 
     const quoteData1 = await attestationQuoteVerifierAccount.loadData();
     assert(
-      quoteData1.enclaveSigner.equals(quoteVerifierSigner.publicKey),
+      quoteData1.enclave.enclaveSigner.equals(quoteVerifierSigner.publicKey),
       "QuoteAuthorityMismatch"
     );
     assert(
@@ -98,10 +100,6 @@ describe("Function Tests", () => {
   });
 
   it("Creates a Function", async () => {
-    // const authorityKeypair = Keypair.generate();
-
-    // console.log(`authorityKeypair: ${authorityKeypair.publicKey}`);
-
     try {
       [functionAccount] = await sbv2.FunctionAccount.create(
         ctx.program,
@@ -142,35 +140,6 @@ describe("Function Tests", () => {
       `Lookup Table\n${lookupTable.state.addresses
         .map((a) => "\t- " + a.toBase58())
         .join("\n")}`
-    );
-  });
-
-  it("Verifies the function's quote", async () => {
-    const functionQuoteAccount = functionAccount.getEnclaveAccount();
-
-    const initialQuoteState = await functionQuoteAccount.loadData();
-    const initialVerificationStatus =
-      EnclaveAccount.getVerificationStatus(initialQuoteState);
-
-    assert(
-      initialVerificationStatus.kind === "None",
-      `Quote account should not be verified yet`
-    );
-
-    await functionQuoteAccount.verify({
-      timestamp: new BN(Math.floor(Date.now() / 1000)),
-      mrEnclave: new Uint8Array(mrEnclave),
-      verifierSecuredSigner: quoteVerifierSigner,
-      verifier: attestationQuoteVerifierAccount.publicKey,
-    });
-
-    const finalQuoteState = await functionQuoteAccount.loadData();
-    const finalVerificationStatus =
-      EnclaveAccount.getVerificationStatus(finalQuoteState);
-
-    assert(
-      finalVerificationStatus.kind === "VerificationSuccess",
-      `Quote account should be verified`
     );
   });
 
@@ -260,8 +229,6 @@ describe("Function Tests", () => {
   // });
 
   it("verifies the function", async () => {
-    const fnQuoteAccount = functionAccount.getEnclaveAccount();
-
     const trustedSigner = anchor.web3.Keypair.generate();
 
     const [receiver] = await ctx.program.mint.getOrCreateWrappedUser(
@@ -271,30 +238,40 @@ describe("Function Tests", () => {
 
     const timestamp = unixTimestamp();
 
-    const nextAllowedTimestamp = timestamp + 100;
+    const nextAllowedTimestamp = timestamp + 1000;
 
-    const txnSignature = await functionAccount.verify({
-      observedTime: new BN(timestamp),
-      nextAllowedTimestamp: new BN(nextAllowedTimestamp),
-      isFailure: false,
-      mrEnclave: new Uint8Array(mrEnclave),
-      verifier: attestationQuoteVerifierAccount,
-      verifierEnclaveSigner: quoteVerifierSigner,
-      functionEnclaveSigner: trustedSigner,
-      receiver,
-    });
+    const txnSignature = await functionAccount.verify(
+      {
+        observedTime: new BN(timestamp),
+        nextAllowedTimestamp: new BN(nextAllowedTimestamp),
+        isFailure: false,
+        mrEnclave: new Uint8Array(mrEnclave),
+        verifier: attestationQuoteVerifierAccount,
+        verifierEnclaveSigner: quoteVerifierSigner,
+        functionEnclaveSigner: trustedSigner,
+        receiver,
+      },
+      { skipPreflight: true }
+    );
 
     // console.log(`functionVerify: ${txnSignature}`);
 
     // await printLogs(ctx.program.connection, txnSignature, true);
 
     await sleep(3000); // wait for rpc to catch up
+    // await printLogs(functionAccount.program.connection, txnSignature, true);
 
     const functionState = await functionAccount.loadData();
-    const quoteState = await fnQuoteAccount.loadData();
 
     assert(
-      quoteState.enclaveSigner.equals(trustedSigner.publicKey),
+      functionState.enclave.verificationStatus ===
+        sbv2.attestationTypes.VerificationStatus.VerificationSuccess
+          .discriminator,
+      "Function VerificationStatus mismatch"
+    );
+
+    assert(
+      functionState.enclave.enclaveSigner.equals(trustedSigner.publicKey),
       "Function EnclaveSigner mismatch"
     );
 
@@ -310,7 +287,7 @@ describe("Function Tests", () => {
     const newName = "NEW_FUNCTION_NAME";
     const newMetadata = "NEW_FUNCTION_METADATA";
     const newContainer = "updatedContainerId";
-    const newContainerRegistry = "updated_container_registry.com";
+    const newContainerRegistry = "dockerhub";
 
     await functionAccount.setConfig({
       name: newName,
@@ -360,6 +337,137 @@ describe("Function Tests", () => {
     assert(
       postFunctionData.isTriggered === 1,
       "Function should have been triggered"
+    );
+  });
+
+  it("Transfers a function authority to a new keypair", async () => {
+    const [myNewFunctionAccount] = await sbv2.FunctionAccount.create(
+      ctx.program,
+      {
+        name: "FUNCTION_NAME",
+        metadata: "FUNCTION_METADATA",
+        schedule: "* * * * *",
+        container: "containerId",
+        version: "1.0.0",
+        mrEnclave,
+        attestationQueue: attestationQueueAccount,
+      },
+      undefined,
+      { skipPreflight: true }
+    );
+    const preFunctionData = await myNewFunctionAccount.loadData();
+    const wallet = await myNewFunctionAccount.wallet;
+
+    assert(
+      preFunctionData.authority.equals(ctx.program.walletPubkey),
+      "Function authority mismatch"
+    );
+    const newAuthority = Keypair.generate();
+
+    const signature = await myNewFunctionAccount.setAuthority({
+      newAuthority: newAuthority.publicKey,
+    });
+
+    await sleep(2000);
+
+    const postFunctionData = await myNewFunctionAccount.loadData();
+    const postWallet = await myNewFunctionAccount.wallet;
+
+    assert(
+      postFunctionData.authority.equals(newAuthority.publicKey),
+      "Function authority mismatch"
+    );
+  });
+
+  it("Tests functionVerify serialized size", async () => {
+    const [myFunctionAccount] = await sbv2.FunctionAccount.create(
+      ctx.program,
+      {
+        name: "FUNCTION_NAME",
+        metadata: "FUNCTION_METADATA",
+        schedule: "* * * * *",
+        container: "containerId",
+        version: "1.0.0",
+        mrEnclave,
+        attestationQueue: attestationQueueAccount,
+        // authority: authorityKeypair.publicKey,
+      },
+      undefined,
+      { skipPreflight: true }
+    );
+    const attestationQueue = await attestationQueueAccount.loadData();
+    const functionState = await myFunctionAccount.loadData();
+
+    const escrowWallet = await myFunctionAccount.wallet;
+    const trustedSigner = anchor.web3.Keypair.generate();
+
+    const [receiver] = await ctx.program.mint.getOrCreateWrappedUser(
+      ctx.payer.publicKey,
+      { fundUpTo: 0 }
+    );
+
+    const timestamp = unixTimestamp();
+
+    const nextAllowedTimestamp = timestamp + 1000;
+
+    const getIxn = () => {
+      return myFunctionAccount.verifyInstructionSync({
+        observedTime: new BN(timestamp),
+        nextAllowedTimestamp: new BN(nextAllowedTimestamp),
+        isFailure: false,
+        mrEnclave: new Uint8Array(mrEnclave),
+        escrowWallet: escrowWallet.publicKey,
+        functionEnclaveSigner: trustedSigner.publicKey,
+        attestationQueue: attestationQueueAccount.publicKey,
+        attestationQueueAuthority: attestationQueue.authority,
+
+        quoteVerifier: attestationQuoteVerifierAccount.publicKey,
+        quoteVerifierEnclaveSigner: quoteVerifierSigner.publicKey,
+
+        receiver,
+      });
+    };
+
+    // LEGACY
+    const legacyTxn = new sbv2.TransactionObject(
+      ctx.payer.publicKey,
+      [getIxn()],
+      [quoteVerifierSigner, trustedSigner]
+    );
+    const serializedLegacyTxn = legacyTxn
+      .sign(await ctx.program.connection.getLatestBlockhash(), [
+        quoteVerifierSigner,
+        trustedSigner,
+        ctx.payer,
+      ])
+      .serialize();
+    console.log(
+      `LEGACY: ${serializedLegacyTxn.byteLength} / 1232 (${
+        1232 - serializedLegacyTxn.byteLength
+      } bytes remaining)`
+    );
+
+    // V0
+    const lookupTable = await ctx.program.connection
+      .getAddressLookupTable(functionState.addressLookupTable)
+      .then((res) => res.value!);
+
+    const messageV0 = new anchor.web3.TransactionMessage({
+      payerKey: ctx.program.walletPubkey,
+      recentBlockhash: (await ctx.program.connection.getLatestBlockhash())
+        .blockhash,
+      instructions: [getIxn()], // note this is an array of instructions
+    }).compileToV0Message([lookupTable]);
+    const transactionV0 = new anchor.web3.VersionedTransaction(messageV0);
+    transactionV0.sign([quoteVerifierSigner]);
+    transactionV0.sign([trustedSigner]);
+    transactionV0.sign([ctx.payer]);
+    const serializedV0Txn = transactionV0.serialize();
+
+    console.log(
+      `V0 TXN: ${serializedV0Txn.byteLength} / 1232 (${
+        1232 - serializedV0Txn.byteLength
+      } bytes remaining)`
     );
   });
 });

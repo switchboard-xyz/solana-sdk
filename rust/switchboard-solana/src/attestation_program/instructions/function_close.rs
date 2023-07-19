@@ -8,7 +8,7 @@ pub struct FunctionClose<'info> {
         close = sol_dest,
         seeds = [
             FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(), 
+            function.load()?.creator_seed.as_ref(),
             &function.load()?.created_at.to_le_bytes()
         ],
         bump = function.load()?.bump,

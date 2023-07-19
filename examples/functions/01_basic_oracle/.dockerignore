@@ -4,3 +4,7 @@ README.md
 node_modules
 .turbo
 measurement.txt
+.anchor
+scripts
+.prettierignore
+.gitignore

@@ -30,8 +30,7 @@ pub struct WalletFund<'info> {
 
     #[account(
         mut,
-        constraint = funder_wallet.mint == token_wallet.mint 
-            && funder_wallet.owner == funder.key(),
+        constraint = funder_wallet.mint == token_wallet.mint && funder_wallet.owner == funder.key(),
     )]
     pub funder_wallet: Option<Box<Account<'info, TokenAccount>>>,
 
@@ -56,15 +55,11 @@ pub struct WalletFundParams {
 impl InstructionData for WalletFundParams {}
 
 impl Discriminator for WalletFundParams {
-    const DISCRIMINATOR: [u8; 8] = [
-        93, 170, 44, 19, 223, 172, 40, 164
-    ];
+    const DISCRIMINATOR: [u8; 8] = [93, 170, 44, 19, 223, 172, 40, 164];
 }
 
 impl Discriminator for WalletFund<'_> {
-    const DISCRIMINATOR: [u8; 8] = [
-        93, 170, 44, 19, 223, 172, 40, 164
-    ];
+    const DISCRIMINATOR: [u8; 8] = [93, 170, 44, 19, 223, 172, 40, 164];
 }
 
 impl<'info> WalletFund<'info> {
@@ -82,11 +77,7 @@ impl<'info> WalletFund<'info> {
         Ok(instruction)
     }
 
-    pub fn invoke(
-        &self,
-        program: AccountInfo<'info>,
-        params: &WalletFundParams,
-    ) -> ProgramResult {
+    pub fn invoke(&self, program: AccountInfo<'info>, params: &WalletFundParams) -> ProgramResult {
         let instruction = self.get_instruction(*program.key, params)?;
         let account_infos = self.to_account_infos();
 

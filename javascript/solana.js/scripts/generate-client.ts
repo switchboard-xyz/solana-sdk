@@ -54,7 +54,7 @@ const ignoreFiles = [
   `${attestationGeneratedPath}/errors/index.ts`,
   `${attestationGeneratedPath}/types/SwitchboardAttestationPermission.ts`,
   `${attestationGeneratedPath}/instructions/functionDeactivateLookup.ts`,
-  `${attestationGeneratedPath}/instructions/functionOverrideClose.ts`,
+  `${attestationGeneratedPath}/instructions/accountCloseOverride.ts`,
   // `${v2GeneratedPath}/types/VerificationStatus.ts`,
 ];
 
@@ -223,8 +223,10 @@ async function main() {
     execSync(`git restore ${file}`, { encoding: "utf-8" });
   }
 
-  // delete the extra VerificationStatus
+  // delete the extra VerifierAccountData structs
   await fs.rm(path.join(v2GeneratedPath, "types", "VerificationStatus.ts"));
+  await fs.rm(path.join(v2GeneratedPath, "types", "VerifierAccountData.ts"));
+  await fs.rm(path.join(v2GeneratedPath, "types", "Quote.ts"));
 
   // run auto fix for import ordering
   execSync(`pnpm fix`, { encoding: "utf-8" });

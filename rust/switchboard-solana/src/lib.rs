@@ -19,6 +19,9 @@ pub mod error;
 pub mod seeds;
 pub use seeds::*;
 
+pub mod utils;
+pub use utils::*;
+
 pub mod accounts;
 pub mod instructions;
 pub mod types;

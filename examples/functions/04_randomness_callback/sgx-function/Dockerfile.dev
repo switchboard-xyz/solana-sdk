@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1.4
+FROM switchboardlabs/sgx-function:main AS builder
+
+ARG CARGO_NAME=switchboard-function
+
+WORKDIR /home/root/solana-sdk
+
+COPY ./rust/switchboard-common/Cargo.toml \
+     ./rust/switchboard-common/Cargo.lock \
+     ./rust/switchboard-common/
+
+# COPY ./rust/switchboard-utils/Cargo.toml \
+#      ./rust/switchboard-utils/Cargo.lock \
+#      ./rust/switchboard-utils/
+
+COPY ./rust/switchboard-solana/Cargo.toml \
+     ./rust/switchboard-solana/Cargo.lock \
+     ./rust/switchboard-solana/
+
+COPY ./chains/solana/examples/functions/04_randomness_callback/sgx-function/Cargo.toml \
+     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/Cargo.lock \
+     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/
+
+COPY ./rust/switchboard-common/src \
+     ./rust/switchboard-common/src/
+
+# COPY ./rust/switchboard-utils/src \
+#      ./rust/switchboard-utils/src/
+
+COPY ./rust/switchboard-solana/src \
+     ./rust/switchboard-solana/src/
+
+COPY ./chains/solana/examples/functions/04_randomness_callback/sgx-function/src \
+     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/src/
+
+WORKDIR /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/sgx-function
+
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
+    cargo build --release && \
+    cargo strip && \
+    mv /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/sgx-function/target/release/${CARGO_NAME} /sgx
+
+FROM switchboardlabs/sgx-function:main
+
+# Copy the binary
+WORKDIR /sgx
+COPY --from=builder /sgx/${CARGO_NAME} /sgx/app
+
+# Get the measurement from the enclave
+RUN /get_measurement.sh
+ENTRYPOINT ["bash", "/boot.sh"]

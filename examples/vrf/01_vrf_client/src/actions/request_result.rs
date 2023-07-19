@@ -13,7 +13,7 @@ pub struct RequestResult<'info> {
     #[account(
         mut,
         seeds = [
-            STATE_SEED, 
+            STATE_SEED,
             vrf.key().as_ref(),
             authority.key().as_ref(),
         ],
@@ -29,14 +29,14 @@ pub struct RequestResult<'info> {
     // SWITCHBOARD ACCOUNTS
     #[account(mut,
         has_one = escrow,
-        constraint = 
+        constraint =
             *vrf.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub vrf: AccountLoader<'info, VrfLiteAccountData>,
     /// CHECK
-    #[account(mut, 
+    #[account(mut,
         has_one = data_buffer,
-        constraint = 
+        constraint =
             oracle_queue.load()?.authority == queue_authority.key()
             && *oracle_queue.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
@@ -44,33 +44,33 @@ pub struct RequestResult<'info> {
     /// CHECK: Will be checked in the CPI instruction
     pub queue_authority: UncheckedAccount<'info>,
     /// CHECK
-    #[account(mut, 
-        constraint = 
+    #[account(mut,
+        constraint =
             *data_buffer.owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub data_buffer: AccountInfo<'info>,
     /// CHECK
-    #[account(mut, 
-        constraint = 
+    #[account(mut,
+        constraint =
             *permission.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub permission: AccountLoader<'info, PermissionAccountData>,
-    #[account(mut, 
-        constraint = 
-            escrow.owner == program_state.key() 
+    #[account(mut,
+        constraint =
+            escrow.owner == program_state.key()
             && escrow.mint == program_state.load()?.token_mint
     )]
     pub escrow: Account<'info, TokenAccount>,
     /// CHECK: Will be checked in the CPI instruction
-    #[account(mut, 
-        constraint = 
+    #[account(mut,
+        constraint =
             *program_state.to_account_info().owner == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub program_state: AccountLoader<'info, SbState>,
     /// CHECK:
     #[account(
-        constraint = 
-            switchboard_program.executable == true 
+        constraint =
+            switchboard_program.executable == true
             && *switchboard_program.key == SWITCHBOARD_PROGRAM_ID @ VrfErrorCode::InvalidSwitchboardAccount
     )]
     pub switchboard_program: AccountInfo<'info>,
@@ -84,8 +84,7 @@ pub struct RequestResult<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct RequestResultParams {
-}
+pub struct RequestResultParams {}
 
 impl RequestResult<'_> {
     pub fn validate(&self, _ctx: &Context<Self>, _params: &RequestResultParams) -> Result<()> {

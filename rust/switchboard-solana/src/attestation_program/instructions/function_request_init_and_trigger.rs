@@ -4,11 +4,12 @@ use crate::prelude::*;
 #[instruction(params:FunctionRequestInitAndTriggerParams)]
 pub struct FunctionRequestInitAndTrigger<'info> {
     #[account(
-        init,
-        payer = payer,
-        space = FunctionRequestAccountData::space(params.max_container_params_len),
+      mut,
+      signer,
+      owner = system_program.key(),
+      constraint = request.data_len() == 0 && request.lamports() == 0,
     )]
-    pub request: Box<Account<'info, FunctionRequestAccountData>>,
+    pub request: AccountInfo<'info>,
 
     #[account(
         mut,
@@ -17,13 +18,11 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     pub function: AccountLoader<'info, FunctionAccountData>,
 
     #[account(
-        init,
-        payer = payer,
-        associated_token::mint = mint,
-        associated_token::authority = request,
-
+      mut,
+      owner = system_program.key(),
+      constraint = request.data_len() == 0 && request.lamports() == 0,
     )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
+    pub escrow: AccountInfo<'info>,
 
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: Account<'info, Mint>,

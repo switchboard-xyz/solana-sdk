@@ -17,12 +17,13 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import type {
+  Commitment,
   PublicKey,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
-import { BN } from "@switchboard-xyz/common";
+import { BN, sleep } from "@switchboard-xyz/common";
 
 /**
  *  Parameters for initializing a {@linkcode FunctionRequestAccount}
@@ -100,15 +101,13 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
       this.publicKey
     );
     if (data) return data;
-    throw new errors.AccountNotFoundError("Function", this.publicKey);
+    throw new errors.AccountNotFoundError("Request", this.publicKey);
   }
 
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
   ): Promise<[FunctionRequestAccount, types.FunctionRequestAccountData]> {
-    program.verifyAttestation();
-
     const functionAccount = new FunctionRequestAccount(program, address);
     const state = await functionAccount.loadData();
     return [functionAccount, state];
@@ -121,8 +120,6 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     options?: TransactionObjectOptions
   ): Promise<[FunctionRequestAccount, TransactionObject]> {
     // TODO: Calculate the max size of data we can support up front then split into multiple txns
-
-    program.verifyAttestation();
 
     // TODO: Add way to make this a PDA
     const requestKeypair = params.keypair ?? Keypair.generate();
@@ -227,12 +224,13 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     return new TransactionObject(
       payer,
       [setConfigIxn],
-      params?.authority ? [params.authority] : []
+      params?.authority ? [params.authority] : [],
+      options
     );
   }
 
   public async setConfig(
-    params?: FunctionRequestSetConfigParams,
+    params: FunctionRequestSetConfigParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.setConfigInstruction(
@@ -338,5 +336,76 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     );
 
     return ixn;
+  }
+
+  /**
+   * Poll a FunctionRequest Account and wait for the status to be set to 'RequestSuccess' or 'RequestFailure'
+   * @param requestSlot
+   * @param maxAttempts
+   * @throws if the round is never closed before maxAttempts
+   * @returns
+   */
+  public async poll(
+    requestSlot?: number,
+    maxAttempts = 60,
+    commitment: Commitment = "processed"
+  ): Promise<types.FunctionRequestTriggerRound> {
+    const slot = requestSlot ?? (await this.program.connection.getSlot());
+
+    const isSettled = (state: types.FunctionRequestAccountData): boolean =>
+      slot >= state.activeRequest.requestSlot.toNumber() &&
+      state.activeRequest.fulfilledSlot.toNumber() > 0;
+
+    let ws: number | undefined = undefined;
+    let requestState: types.FunctionRequestAccountData | undefined = undefined;
+    let shouldPoll = true;
+    let attempts = 0;
+
+    ws = this.program.provider.connection.onAccountChange(
+      this.publicKey,
+      (accountInfo) => {
+        requestState = types.FunctionRequestAccountData.decode(
+          accountInfo.data
+        );
+        if (isSettled(requestState)) {
+          shouldPoll = false;
+          if (ws !== undefined) {
+            this.program.provider.connection
+              .removeAccountChangeListener(ws)
+              .then(() => {
+                ws = undefined;
+              })
+              .catch();
+          }
+        }
+      },
+      commitment
+    );
+
+    while (shouldPoll && attempts < maxAttempts) {
+      await sleep(1000);
+      attempts = attempts + 1;
+    }
+
+    if (ws !== undefined) {
+      this.program.provider.connection
+        .removeAccountChangeListener(ws)
+        .then(() => {
+          ws = undefined;
+        })
+        .catch();
+    }
+
+    if (requestState === undefined) {
+      requestState = await this.loadData();
+    }
+
+    if (isSettled(requestState)) {
+      return requestState.activeRequest;
+    }
+
+    throw new Error(
+      `Function Request failed to verify in ${maxAttempts} attempts. Check the chain for more details.`
+    );
   }
 }
