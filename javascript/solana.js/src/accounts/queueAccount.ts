@@ -553,6 +553,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         jobAuthorities: [], // create lease before adding jobs to skip this step
         jobPubkeys: [],
         disableWrap: params.disableWrap,
+        withdrawAuthority: params.withdrawAuthority ?? payer,
       },
       options
     );
