@@ -1,0 +1,243 @@
+import type { SwitchboardV2 } from "./switchboard_v2";
+
+import * as anchor from "@coral-xyz/anchor";
+import Big from "big.js";
+
+export * from "./switchboard_v2";
+
+// import idl from "./idl.json";
+
+// export const IDL: anchor.Idl = idl;
+
+// export const IDL: anchor.Idl = await import("./idl.json", {
+//   assert: { type: "json" },
+// });
+
+/**
+ * Check if a transaction object is a VersionedTransaction or not
+ *
+ * @param tx
+ * @returns bool
+ */
+export const isVersionedTransaction = (
+  tx
+): tx is anchor.web3.VersionedTransaction => {
+  return "version" in tx;
+};
+
+export class AnchorWallet implements anchor.Wallet {
+  constructor(readonly payer: anchor.web3.Keypair) {}
+
+  get publicKey(): anchor.web3.PublicKey {
+    return this.payer.publicKey;
+  }
+
+  async signTransaction<
+    T extends anchor.web3.Transaction | anchor.web3.VersionedTransaction
+  >(tx: T): Promise<T> {
+    if (isVersionedTransaction(tx)) {
+      tx.sign([this.payer]);
+    } else {
+      tx.partialSign(this.payer);
+    }
+
+    return tx;
+  }
+
+  async signAllTransactions<
+    T extends anchor.web3.Transaction | anchor.web3.VersionedTransaction
+  >(txs: T[]): Promise<T[]> {
+    return txs.map((t) => {
+      if (isVersionedTransaction(t)) {
+        t.sign([this.payer]);
+      } else {
+        t.partialSign(this.payer);
+      }
+      return t;
+    });
+  }
+}
+
+/** A Switchboard V2 wrapper to assist in decoding onchain accounts */
+export default class SwitchboardProgram {
+  /**
+   * Switchboard Mainnet Program ID
+   * SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+   */
+  public static oracleProgramId = new anchor.web3.PublicKey(
+    "SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f"
+  );
+
+  /**
+   * Default confirmation options for fetching Solana data
+   */
+  public static defaultConfirmOptions: anchor.web3.ConfirmOptions = {
+    commitment: "confirmed",
+  };
+
+  /**
+   * Switchboard Anchor program object
+   */
+  public program: anchor.Program<SwitchboardV2>;
+
+  /**
+   * Selected Solana cluster
+   */
+  public cluster: "devnet" | "mainnet-beta";
+
+  constructor(
+    program: anchor.Program<SwitchboardV2>,
+    cluster: "devnet" | "mainnet-beta"
+  ) {
+    this.program = program;
+    this.cluster = cluster;
+  }
+
+  /**
+   * Return the Switchboard program
+   * @param connection optional connection object if not using the default endpoints
+   * @param confirmOptions optional confirmation options. defaults to commitment level 'confirmed'
+   */
+  public static async load(
+    connection = new anchor.web3.Connection(
+      anchor.web3.clusterApiUrl("devnet")
+    ),
+    confirmOptions = SwitchboardProgram.defaultConfirmOptions
+  ): Promise<SwitchboardProgram> {
+    const provider = new anchor.AnchorProvider(
+      connection,
+      new AnchorWallet(
+        anchor.web3.Keypair.fromSeed(new Uint8Array(32).fill(1))
+      ),
+      confirmOptions
+    );
+
+    const anchorIdl = await anchor.Program.fetchIdl(
+      SwitchboardProgram.oracleProgramId,
+      provider
+    );
+    if (!anchorIdl) {
+      throw new Error(
+        `failed to read devnet idl for ${SwitchboardProgram.oracleProgramId}`
+      );
+    }
+
+    const program = new anchor.Program(
+      anchorIdl,
+      SwitchboardProgram.oracleProgramId,
+      provider
+    );
+
+    return new SwitchboardProgram(
+      program as unknown as anchor.Program<SwitchboardV2>,
+      "devnet"
+    );
+  }
+
+  /**
+   * Return the Switchboard mainnet-beta program
+   * @param connection optional connection object if not using the default endpoints
+   * @param confirmOptions optional confirmation options. defaults to commitment level 'confirmed'
+   */
+  public static async loadMainnet(
+    connection = new anchor.web3.Connection(
+      anchor.web3.clusterApiUrl("mainnet-beta")
+    ),
+    confirmOptions = SwitchboardProgram.defaultConfirmOptions
+  ): Promise<SwitchboardProgram> {
+    return SwitchboardProgram.load(connection, confirmOptions);
+  }
+
+  /** Parse an aggregators account data and return the latest confirmed result if valid
+   * @param aggregator an aggregators deserialized account data
+   * @param maxStaleness the maximum duration in seconds before a result is considered invalid. Defaults to 0 which ignores any checks
+   * @returns latest confirmed result as a big.js or null if the latest confirmed round has insufficient oracle responses or data is too stale
+   */
+  private getLatestAggregatorValue(
+    aggregator: any,
+    maxStaleness = 0
+  ): Big | null {
+    if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
+      return null;
+    }
+    if (maxStaleness !== 0) {
+      const now = new anchor.BN(Date.now() / 1000);
+      const latestRoundTimestamp: anchor.BN =
+        aggregator.latestConfirmedRound.roundOpenTimestamp;
+      const staleness = now.sub(latestRoundTimestamp);
+      if (staleness.gt(new anchor.BN(maxStaleness))) {
+        return null;
+      }
+    }
+
+    const mantissa = new Big(
+      aggregator.latestConfirmedRound.result.mantissa.toString()
+    );
+    const scale = aggregator.latestConfirmedRound.result.scale;
+    const oldDp = Big.DP;
+    Big.DP = 20;
+    const result: Big = mantissa.div(new Big(10).pow(scale));
+    Big.DP = oldDp;
+    return result;
+  }
+
+  /** Fetch and decode an aggregator account
+   * @param aggregatorPubkey the aggregator's public key
+   * @param commitment optional connection commitment level
+   * @returns deserialized aggregator account, as specified by the Switchboard IDL
+   */
+  public async fetchAggregator(
+    aggregatorPubkey: anchor.web3.PublicKey,
+    commitment?: anchor.web3.Commitment
+  ): Promise<any> {
+    const aggregator: any =
+      await this.program.account.aggregatorAccountData?.fetch(
+        aggregatorPubkey,
+        commitment
+      );
+    aggregator.ebuf = undefined;
+    return aggregator;
+  }
+
+  /** Fetch and decode an aggregator's latest confirmed value if valid
+   * @param aggregatorPubkey the aggregator's public key
+   * @param commitment optional connection commitment level
+   * @param maxStaleness the maximum duration in seconds before a result is considered invalid. Defaults to 0 which ignores any checks
+   * @returns latest confirmed result as a big.js or null if the latest confirmed round has insufficient oracle responses or data is too stale
+   */
+  public async fetchAggregatorLatestValue(
+    aggregatorPubkey: anchor.web3.PublicKey,
+    commitment?: anchor.web3.Commitment,
+    maxStaleness = 0
+  ): Promise<Big | null> {
+    const aggregator = await this.fetchAggregator(aggregatorPubkey, commitment);
+    return this.getLatestAggregatorValue(aggregator, maxStaleness);
+  }
+
+  /** Decode an aggregator's account info
+   * @param accountInfo the aggregatror's account info
+   * @returns deserialized aggregator account, as specified by the Switchboard IDL
+   */
+  public decodeAggregator(accountInfo: anchor.web3.AccountInfo<Buffer>): any {
+    const coder = new anchor.BorshAccountsCoder(this.program.idl);
+    const aggregator: any = coder.decode(
+      "AggregatorAccountData",
+      accountInfo?.data
+    );
+    aggregator.ebuf = undefined;
+    return aggregator;
+  }
+
+  /** Decode an aggregator and get the latest confirmed round
+   * @param accountInfo the aggregator's account info
+   * @param maxStaleness the maximum duration in seconds before a result is considered invalid. Defaults to 0 which ignores any checks
+   * @returns latest confirmed result as a big.js or null if the latest confirmed round has insufficient oracle responses or data is too stale
+   */
+  public decodeLatestAggregatorValue(
+    accountInfo: anchor.web3.AccountInfo<Buffer>,
+    maxStaleness = 0
+  ): Big | null {
+    const aggregator = this.decodeAggregator(accountInfo);
+    return this.getLatestAggregatorValue(aggregator, maxStaleness);
+  }
+}

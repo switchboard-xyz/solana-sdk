@@ -7,8 +7,6 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import type { RawBuffer } from "../types.js";
-import { parseMrEnclave } from "../utils.js";
 
 import { FunctionAccount } from "./index.js";
 
@@ -23,7 +21,8 @@ import type {
   TransactionSignature,
 } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
-import { BN, sleep } from "@switchboard-xyz/common";
+import type { RawBuffer } from "@switchboard-xyz/common";
+import { BN, parseRawMrEnclave, sleep } from "@switchboard-xyz/common";
 
 /**
  *  Parameters for initializing a {@linkcode FunctionRequestAccount}
@@ -309,13 +308,13 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
               : Math.floor(Date.now() / 1000)
           ),
           isFailure: params.isFailure ?? false,
-          mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
+          mrEnclave: Array.from(parseRawMrEnclave(params.mrEnclave)),
           requestSlot:
             typeof params.requestSlot === "number"
               ? new BN(params.requestSlot)
               : params.requestSlot,
           containerParamsHash: Array.from(
-            parseMrEnclave(params.containerParamsHash)
+            parseRawMrEnclave(params.containerParamsHash)
           ),
         },
       },

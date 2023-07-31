@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "**/tests/**/*.ts", "dist"],
+  "compilerOptions": {
+    "module": "commonjs",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  }
+}

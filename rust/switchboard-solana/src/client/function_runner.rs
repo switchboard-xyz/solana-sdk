@@ -102,22 +102,27 @@ impl FunctionRunner {
     ) -> Result<Instruction, SwitchboardClientError> {
         let current_time = unix_timestamp();
 
-        let fn_data: FunctionAccountData =
-            FunctionAccountData::fetch(&self.client, self.function).await?;
+        // let fn_data: FunctionAccountData =
+        //     FunctionAccountData::fetch(&self.client, self.function).await?;
 
+        println!("Fetching verifier account {}", self.verifier);
         let verifier_quote: VerifierAccountData =
             VerifierAccountData::fetch(&self.client, self.verifier).await?;
 
+        println!(
+            "Fetching attestation queue account {}",
+            self.function_data.attestation_queue
+        );
         let queue_data: AttestationQueueAccountData =
-            crate::client::load_account(&self.client, fn_data.attestation_queue).await?;
+            crate::client::load_account(&self.client, self.function_data.attestation_queue).await?;
 
         let verifier_permission = AttestationPermissionAccountData::get_pda(
             &queue_data.authority,
-            &fn_data.attestation_queue,
+            &self.function_data.attestation_queue,
             &self.verifier,
         );
 
-        let maybe_next_allowed_timestamp = fn_data.get_next_execution_datetime();
+        let maybe_next_allowed_timestamp = self.function_data.get_next_execution_datetime();
         let next_allowed_timestamp: i64 = if maybe_next_allowed_timestamp.is_some() {
             maybe_next_allowed_timestamp.unwrap().timestamp()
         } else {
@@ -137,9 +142,9 @@ impl FunctionRunner {
             verifier_quote: self.verifier,
             verifier_enclave_signer: verifier_quote.enclave.enclave_signer,
             verifier_permission,
-            escrow_wallet: fn_data.escrow_wallet,
-            escrow_token_wallet: fn_data.escrow_token_wallet,
-            attestation_queue: fn_data.attestation_queue,
+            escrow_wallet: self.function_data.escrow_wallet,
+            escrow_token_wallet: self.function_data.escrow_token_wallet,
+            attestation_queue: self.function_data.attestation_queue,
             receiver: self.reward_receiver,
         };
         let ixn: Instruction = accounts.get_instruction(ixn_params)?;
@@ -161,18 +166,18 @@ impl FunctionRunner {
             ));
         }
 
-        let fn_data: FunctionAccountData =
-            FunctionAccountData::fetch(&self.client, self.function).await?;
+        // let fn_data: FunctionAccountData =
+        //     FunctionAccountData::fetch(&self.client, self.function).await?;
 
         let verifier_quote: VerifierAccountData =
             VerifierAccountData::fetch(&self.client, self.verifier).await?;
 
         let queue_data: AttestationQueueAccountData =
-            crate::client::load_account(&self.client, fn_data.attestation_queue).await?;
+            crate::client::load_account(&self.client, self.function_data.attestation_queue).await?;
 
         let verifier_permission = AttestationPermissionAccountData::get_pda(
             &queue_data.authority,
-            &fn_data.attestation_queue,
+            &self.function_data.attestation_queue,
             &self.verifier,
         );
 
@@ -192,12 +197,12 @@ impl FunctionRunner {
             function_enclave_signer: self.signer,
             token_wallet: fn_request_data.escrow,
             function: self.function,
-            function_escrow: fn_data.escrow_token_wallet,
+            function_escrow: self.function_data.escrow_token_wallet,
             verifier_quote: self.verifier,
             verifier_enclave_signer: verifier_quote.enclave.enclave_signer,
             verifier_permission,
             state: state_pubkey,
-            attestation_queue: fn_data.attestation_queue,
+            attestation_queue: self.function_data.attestation_queue,
             receiver: self.reward_receiver,
         };
         let ixn: Instruction = accounts.get_instruction(ixn_params)?;

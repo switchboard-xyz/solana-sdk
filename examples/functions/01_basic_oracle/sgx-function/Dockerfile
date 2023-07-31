@@ -26,6 +26,6 @@ WORKDIR /sgx
 COPY --from=builder /sgx/app /sgx
 
 # Get the measurement from the enclave
-RUN /get_measurement.sh
+RUN /get_measurement.sh && cat /measurement.txt
 
 ENTRYPOINT ["bash", "/boot.sh"]

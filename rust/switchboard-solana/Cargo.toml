@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.9.4"
+version = "0.9.5"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -8,7 +8,6 @@ keywords = ["switchboard", "oracle", "solana"]
 homepage = "https://switchboard.xyz"
 repository = "https://github.com/switchboard-xyz/sbv2-solana/tree/main/rust/switchboard-solana"
 license = "MIT"
-documentation = "https://docs.switchboard.xyz"
 
 [lib]
 crate-type = ["cdylib", "lib"]

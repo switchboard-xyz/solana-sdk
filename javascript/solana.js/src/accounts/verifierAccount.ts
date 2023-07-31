@@ -6,8 +6,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import type { RawBuffer } from "../types.js";
-import { parseMrEnclave, parseRawBuffer } from "../utils.js";
+import { parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
 import {
@@ -21,6 +20,7 @@ import type {
   TransactionSignature,
 } from "@solana/web3.js";
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
+import { parseRawMrEnclave, type RawBuffer } from "@switchboard-xyz/common";
 
 export const QUOTE_SEED: string = "QuoteAccountData";
 
@@ -396,7 +396,7 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
       {
         params: {
           timestamp: params.timestamp,
-          mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
+          mrEnclave: Array.from(parseRawMrEnclave(params.mrEnclave)),
           idx: verifierIdx,
         },
       },
