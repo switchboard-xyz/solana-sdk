@@ -28,24 +28,8 @@
     "strictPropertyInitialization": false,
     "strict": true,
     "strictNullChecks": true,
-    "allowJs": true,
-    "paths": {
-      "@switchboard-xyz/common": [
-        "../common"
-      ],
-      "@switchboard-xyz/oracle": [
-        "../oracle"
-      ]
-    }
+    "allowJs": true
   },
-  "references": [
-    {
-      "path": "../common"
-    },
-    {
-      "path": "../oracle"
-    }
-  ],
   "typedocOptions": {
     "entryPoints": [
       "src/index.ts",
