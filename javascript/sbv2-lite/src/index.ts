@@ -1,17 +1,17 @@
-import type { SwitchboardV2 } from "./switchboard_v2";
+import type { SwitchboardV2 } from "./idl";
 
 import * as anchor from "@coral-xyz/anchor";
 import Big from "big.js";
 
-export * from "./switchboard_v2";
+export * from "./idl";
 
-// import idl from "./idl.json";
-
-// export const IDL: anchor.Idl = idl;
-
-// export const IDL: anchor.Idl = await import("./idl.json", {
-//   assert: { type: "json" },
-// });
+export type Accounts = anchor.IdlAccounts<SwitchboardV2>;
+export type AggregatorAccountData = Accounts["aggregatorAccountData"];
+export type JobAccountData = Accounts["jobAccountData"];
+export type PermissionAccountData = Accounts["permissionAccountData"];
+export type LeaseAccountData = Accounts["leaseAccountData"];
+export type OracleQueueAccountData = Accounts["oracleQueueAccountData"];
+export type OracleAccountData = Accounts["oracleAccountData"];
 
 /**
  * Check if a transaction object is a VersionedTransaction or not
@@ -154,7 +154,7 @@ export default class SwitchboardProgram {
    * @returns latest confirmed result as a big.js or null if the latest confirmed round has insufficient oracle responses or data is too stale
    */
   private getLatestAggregatorValue(
-    aggregator: any,
+    aggregator: AggregatorAccountData,
     maxStaleness = 0
   ): Big | null {
     if ((aggregator.latestConfirmedRound?.numSuccess ?? 0) === 0) {
@@ -189,14 +189,11 @@ export default class SwitchboardProgram {
   public async fetchAggregator(
     aggregatorPubkey: anchor.web3.PublicKey,
     commitment?: anchor.web3.Commitment
-  ): Promise<any> {
-    const aggregator: any =
-      await this.program.account.aggregatorAccountData?.fetch(
-        aggregatorPubkey,
-        commitment
-      );
-    aggregator.ebuf = undefined;
-    return aggregator;
+  ): Promise<AggregatorAccountData> {
+    return await this.program.account.aggregatorAccountData?.fetch(
+      aggregatorPubkey,
+      commitment
+    );
   }
 
   /** Fetch and decode an aggregator's latest confirmed value if valid
@@ -210,7 +207,10 @@ export default class SwitchboardProgram {
     commitment?: anchor.web3.Commitment,
     maxStaleness = 0
   ): Promise<Big | null> {
-    const aggregator = await this.fetchAggregator(aggregatorPubkey, commitment);
+    const aggregator: AggregatorAccountData = await this.fetchAggregator(
+      aggregatorPubkey,
+      commitment
+    );
     return this.getLatestAggregatorValue(aggregator, maxStaleness);
   }
 
@@ -218,13 +218,14 @@ export default class SwitchboardProgram {
    * @param accountInfo the aggregatror's account info
    * @returns deserialized aggregator account, as specified by the Switchboard IDL
    */
-  public decodeAggregator(accountInfo: anchor.web3.AccountInfo<Buffer>): any {
+  public decodeAggregator(
+    accountInfo: anchor.web3.AccountInfo<Buffer>
+  ): AggregatorAccountData {
     const coder = new anchor.BorshAccountsCoder(this.program.idl);
-    const aggregator: any = coder.decode(
+    const aggregator: AggregatorAccountData = coder.decode(
       "AggregatorAccountData",
       accountInfo?.data
     );
-    aggregator.ebuf = undefined;
     return aggregator;
   }
 
@@ -237,7 +238,8 @@ export default class SwitchboardProgram {
     accountInfo: anchor.web3.AccountInfo<Buffer>,
     maxStaleness = 0
   ): Big | null {
-    const aggregator = this.decodeAggregator(accountInfo);
+    const aggregator: AggregatorAccountData =
+      this.decodeAggregator(accountInfo);
     return this.getLatestAggregatorValue(aggregator, maxStaleness);
   }
 }
