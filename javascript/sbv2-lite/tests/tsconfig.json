@@ -1,0 +1,21 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "../src",
+    "../test",
+    "../test/data/**.json"
+  ],
+  "exclude": [
+    "**/node_modules"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node",
+      "mocha"
+    ],
+    "module": "ESNext",
+    "allowJs": true,
+    "rootDir": "../",
+    "resolveJsonModule": true
+  }
+}

@@ -14,7 +14,7 @@ url = "https://api.apr.dev"
 [provider]
 # cluster = "Localnet"
 cluster = "https://api.devnet.solana.com"
-wallet = "~/.config/solana/id.json"
+wallet = "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
 
 [scripts]
 test = "pnpm exec ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

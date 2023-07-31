@@ -12,9 +12,9 @@ basic_oracle = "BkTMjFhosJ1xKtLMV2xchGtnTDBABLJ45aXzs7x9FdeX"
 basic_oracle = "BkTMjFhosJ1xKtLMV2xchGtnTDBABLJ45aXzs7x9FdeX"
 
 [provider]
-# cluster = "https://api.devnet.solana.com"
+cluster = "https://api.devnet.solana.com"
 # wallet = "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
-cluster = "Localnet"
+# cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 # cluster = "devnet"

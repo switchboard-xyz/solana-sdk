@@ -1,7 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./src/**/*.json"
   ],
   "compilerOptions": {
     "lib": [
@@ -18,7 +19,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "resolveJsonModule": true,
-    "composite": true,
     "skipLibCheck": true,
     // strict
     "strict": true,
@@ -28,16 +28,6 @@
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
-    "esModuleInterop": true,
-    "paths": {
-      "@switchboard-xyz/common": [
-        "../common"
-      ]
-    }
-  },
-  "references": [
-    {
-      "path": "../common"
-    }
-  ]
+    "esModuleInterop": true
+  }
 }

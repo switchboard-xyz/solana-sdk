@@ -7,8 +7,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import type { RawBuffer } from "../types.js";
-import { parseMrEnclave, parseRawBuffer } from "../utils.js";
+import { parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
 import type { AttestationPermissionSetParams } from "./attestationPermissionAccount.js";
@@ -25,6 +24,11 @@ import type {
   TransactionSignature,
 } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
+import {
+  parseMrEnclave,
+  parseRawMrEnclave,
+  type RawBuffer,
+} from "@switchboard-xyz/common";
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
  */
@@ -337,7 +341,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueAddMrEnclave(
       this.program,
-      { params: { mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)) } },
+      {
+        params: { mrEnclave: Array.from(parseRawMrEnclave(params.mrEnclave)) },
+      },
       { authority, queue: this.publicKey }
     );
     return new TransactionObject(payer, [instruction], signers, options);
@@ -363,7 +369,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueRemoveMrEnclave(
       this.program,
-      { params: { mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)) } },
+      {
+        params: { mrEnclave: Array.from(parseRawMrEnclave(params.mrEnclave)) },
+      },
       { authority, queue: this.publicKey }
     );
     return new TransactionObject(payer, [instruction], signers, options);
@@ -440,7 +448,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         {
           params: {
             mrEnclave: Array.from(
-              parseMrEnclave(params?.verifierrEnclave ?? "")
+              parseRawMrEnclave(params?.verifierrEnclave ?? "")
             ),
           },
         },

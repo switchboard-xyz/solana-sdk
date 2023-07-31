@@ -27,8 +27,6 @@ import type {
 
 import type { OracleJob } from "@switchboard-xyz/common";
 
-export type RawBuffer = string | Buffer | Uint8Array | number[];
-
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;
 }

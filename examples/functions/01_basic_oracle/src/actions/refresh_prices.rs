@@ -15,10 +15,6 @@ pub struct RefreshPrices<'info> {
             function.load()?.validate(
               &enclave_signer.to_account_info()
             )? @ BasicOracleError::FunctionValidationFailed
-          //   FunctionAccountData::validate(
-          //     &function.to_account_info(),
-          //     &enclave_signer.to_account_info()
-          // )? @ BasicOracleError::FunctionValidationFailed
     )]
     pub function: AccountLoader<'info, FunctionAccountData>,
     pub enclave_signer: Signer<'info>,

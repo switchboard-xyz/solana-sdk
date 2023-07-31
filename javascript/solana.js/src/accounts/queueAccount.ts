@@ -534,7 +534,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           queueAccount: this,
           queueAuthority: queueAuthorityPubkey,
           keypair: params.keypair,
-          authority: payer,
+          authority: params.authority,
         },
         options
       );
@@ -547,13 +547,13 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
       {
         fundAmount: params.fundAmount,
         funderTokenWallet: params.funderTokenWallet ?? userTokenAddress,
-        funderAuthority: params.funderAuthority ?? undefined,
+        funderAuthority: params.funderAuthority,
+        withdrawAuthority: params.withdrawAuthority ?? params.authority,
         aggregatorAccount: aggregatorAccount,
         queueAccount: this,
         jobAuthorities: [], // create lease before adding jobs to skip this step
         jobPubkeys: [],
         disableWrap: params.disableWrap,
-        withdrawAuthority: params.withdrawAuthority ?? payer,
       },
       options
     );

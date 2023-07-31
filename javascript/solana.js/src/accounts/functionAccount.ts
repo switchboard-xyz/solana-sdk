@@ -8,12 +8,10 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import type { RawBuffer } from "../types.js";
 import {
   handleOptionalPubkeys,
   numToBN,
   parseCronSchedule,
-  parseMrEnclave,
   parseRawBuffer,
 } from "../utils.js";
 
@@ -48,7 +46,8 @@ import {
   PublicKey,
   SystemProgram,
 } from "@solana/web3.js";
-import { BN, toUtf8 } from "@switchboard-xyz/common";
+import type { RawBuffer } from "@switchboard-xyz/common";
+import { BN, parseRawMrEnclave, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 
 export type ContainerRegistryType = "dockerhub" | "ipfs";
@@ -69,7 +68,7 @@ export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
   containerRegistry?: ContainerRegistryType;
   schedule?: string;
 
-  mrEnclave: Buffer | Uint8Array | number[];
+  mrEnclave?: Buffer | Uint8Array | number[];
   attestationQueue: AttestationQueueAccount;
 
   requestsDisabled?: boolean;
@@ -392,7 +391,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
             Buffer.from(params.version ?? "latest", "utf8")
           ),
           schedule: new Uint8Array(cronSchedule),
-          mrEnclave: Array.from(parseMrEnclave(params.mrEnclave)),
+          mrEnclave: Array.from(
+            params.mrEnclave ? parseRawMrEnclave(params.mrEnclave) : []
+          ),
           recentSlot: recentSlot,
           requestsDisabled: params.requestsDisabled ?? false,
           requestsRequireAuthorization:

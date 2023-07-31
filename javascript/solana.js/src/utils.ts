@@ -7,11 +7,11 @@ import { JobAccount } from "./accounts/index.js";
 import type { AggregatorAccountData } from "./generated/index.js";
 import { InvalidCronSchedule } from "./errors.js";
 import { TransactionObject } from "./TransactionObject.js";
-import type { RawBuffer } from "./types.js";
 
 import type { AccountMeta } from "@solana/web3.js";
 import { TransactionInstruction } from "@solana/web3.js";
 import { Keypair, PublicKey } from "@solana/web3.js";
+import type { RawBuffer } from "@switchboard-xyz/common";
 import { BN, OracleJob } from "@switchboard-xyz/common";
 import { isValidCron } from "cron-validator";
 import fs from "fs";
@@ -218,7 +218,9 @@ export function parseRawBuffer(rawBuffer: RawBuffer, size = 32): Uint8Array {
       myUint8Array = new Uint8Array(JSON.parse(rawBuffer));
     } else if (hexRegex.test(rawBuffer)) {
       // check if its a hex string '0x1A'
-      myUint8Array = new Uint8Array(Buffer.from(rawBuffer, "hex"));
+      myUint8Array = new Uint8Array(
+        Buffer.from(rawBuffer.replaceAll(/0x|0X/g, ""), "hex")
+      );
     } else if (base64Regex.test(rawBuffer)) {
       // check if its a base64 string
       myUint8Array = new Uint8Array(Buffer.from(rawBuffer, "base64"));
@@ -239,10 +241,6 @@ export function parseRawBuffer(rawBuffer: RawBuffer, size = 32): Uint8Array {
   return new Uint8Array(
     Array.from(myUint8Array).concat(Array(size).fill(0)).slice(0, size)
   );
-}
-
-export function parseMrEnclave(mrEnclave: RawBuffer) {
-  return parseRawBuffer(mrEnclave, 32);
 }
 
 /**
