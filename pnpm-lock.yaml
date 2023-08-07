@@ -1,4 +1,4 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
 
 settings:
   autoInstallPeers: true
@@ -70,7 +70,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -119,7 +119,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
     devDependencies:
       '@types/chai':
         specifier: ^4.3.0
@@ -156,7 +156,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
         specifier: ^5.1.0
@@ -205,7 +205,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
         specifier: ^5.1.0
@@ -254,7 +254,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
         specifier: ^5.1.0
@@ -297,7 +297,7 @@ importers:
         version: 2.2.9(@solana/web3.js@1.78.0)
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
       '@types/dotenv':
         specifier: ^8.2.0
         version: 8.2.0
@@ -354,7 +354,7 @@ importers:
         version: 2.1.13
       '@switchboard-xyz/solana.js':
         specifier: latest
-        version: 2.4.8
+        version: link:../../../javascript/solana.js
       chalk:
         specifier: ^4.1.2
         version: 4.1.2
@@ -445,7 +445,7 @@ importers:
         specifier: ^1.78.0
         version: 1.78.0
       '@switchboard-xyz/common':
-        specifier: ^2.2.8
+        specifier: ^2.2.9
         version: 2.2.9(@solana/web3.js@1.78.0)
       cron-validator:
         specifier: ^1.3.1
@@ -1589,25 +1589,6 @@ packages:
     transitivePeerDependencies:
       - encoding
       - supports-color
-
-  /@switchboard-xyz/solana.js@2.4.8:
-    resolution: {integrity: sha512-WTr+S6+AU36wH1dpwxYQISJFwWpLA+s/mE9ViL0xYue7KXn9W/F9ngR5uxZ46dyR4u60DdrMXPjbVJjB7mI9ug==}
-    engines: {node: '>=16.0.0', npm: '>=7.0.0'}
-    dependencies:
-      '@coral-xyz/anchor': 0.28.0
-      '@coral-xyz/borsh': 0.28.0(@solana/web3.js@1.78.0)
-      '@solana/spl-token': 0.3.8(@solana/web3.js@1.78.0)
-      '@solana/web3.js': 1.78.0
-      '@switchboard-xyz/common': 2.2.9(@solana/web3.js@1.78.0)
-      cron-validator: 1.3.1
-      dotenv: 16.3.1
-      lodash: 4.17.21
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
 
   /@szmarczak/http-timer@4.0.6:
     resolution: {integrity: sha512-4BAffykYOgO+5nzBWYwE3W90sBgLJoUPRWWcL8wlyiM8IB8ipJz3UMJ9KXQd1RKQXpKp8Tutn80HZtWsu2u76w==}
