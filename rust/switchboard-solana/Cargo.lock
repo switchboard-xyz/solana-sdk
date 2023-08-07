@@ -4229,7 +4229,7 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.5"
+version = "0.8.6"
 dependencies = [
  "getrandom 0.2.10",
  "hex",
@@ -4241,7 +4241,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.9.5"
+version = "0.9.6"
 dependencies = [
  "anchor-client",
  "anchor-lang",

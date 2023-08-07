@@ -441,23 +441,25 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       )
     );
 
-    // add mrEnclave
-    ixns.push(
-      types.attestationQueueAddMrEnclave(
-        program,
-        {
-          params: {
-            mrEnclave: Array.from(
-              parseRawMrEnclave(params?.verifierrEnclave ?? "")
-            ),
+    if (params?.verifierEnclave) {
+      // add mrEnclave
+      ixns.push(
+        types.attestationQueueAddMrEnclave(
+          program,
+          {
+            params: {
+              mrEnclave: Array.from(
+                parseRawMrEnclave(params?.verifierEnclave ?? "", true)
+              ),
+            },
           },
-        },
-        {
-          queue: attestationQueueKeypair.publicKey,
-          authority: authority.publicKey,
-        }
-      )
-    );
+          {
+            queue: attestationQueueKeypair.publicKey,
+            authority: authority.publicKey,
+          }
+        )
+      );
+    }
 
     // create quote #1
     ixns.push(
@@ -587,7 +589,7 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
 
 export type CreateBootstrappedQueueParams =
   AttestationQueueAccountInitParams & {
-    verifierrEnclave: RawBuffer;
+    verifierEnclave: RawBuffer;
     registryKey?: RawBuffer;
     enclaveSigner?: Keypair;
   };

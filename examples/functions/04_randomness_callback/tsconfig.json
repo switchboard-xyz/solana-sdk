@@ -21,7 +21,7 @@
     "target": "es6",
     "paths": {
       "@switchboard-xyz/solana.js": [
-        "../../../javascript/solana.js"
+        "../../../../../javascript/solana.js"
       ]
     }
   },

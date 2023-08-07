@@ -58,7 +58,7 @@ pub fn wrap_native<'a>(
 }
 
 pub fn find_associated_token_address(owner: &Pubkey, mint: &Pubkey) -> Pubkey {
-    let (akey, bump) = Pubkey::find_program_address(
+    let (akey, _bump) = Pubkey::find_program_address(
         &[
             owner.as_ref(),
             anchor_spl::token::ID.as_ref(),
