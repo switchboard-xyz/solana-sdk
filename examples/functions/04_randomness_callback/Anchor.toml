@@ -12,8 +12,8 @@ custom_randomness_request = "Csx5AU83fPiaSChJUBZg2cW9GcCVVwZ4rwFqDA2pomX2"
 url = "https://api.apr.dev"
 
 [provider]
-# cluster = "Localnet"
-cluster = "https://api.devnet.solana.com"
+cluster = "Localnet"
+# cluster = "https://api.devnet.solana.com"
 wallet = "~/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json"
 
 [scripts]

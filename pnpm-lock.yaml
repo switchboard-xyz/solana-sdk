@@ -69,7 +69,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
       chalk:
         specifier: ^4.1.2
@@ -118,7 +118,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
     devDependencies:
       '@types/chai':
@@ -155,7 +155,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
@@ -204,7 +204,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
@@ -253,7 +253,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
@@ -296,7 +296,7 @@ importers:
         specifier: latest
         version: 2.2.9(@solana/web3.js@1.78.0)
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
       '@types/dotenv':
         specifier: ^8.2.0
@@ -353,7 +353,7 @@ importers:
         specifier: latest
         version: 2.1.13
       '@switchboard-xyz/solana.js':
-        specifier: latest
+        specifier: workspace:latest
         version: link:../../../javascript/solana.js
       chalk:
         specifier: ^4.1.2

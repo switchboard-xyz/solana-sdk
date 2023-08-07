@@ -10,7 +10,7 @@
     "@coral-xyz/anchor": "^0.28.0",
     "@solana/spl-token": "^0.3.8",
     "@switchboard-xyz/common": "latest",
-    "@switchboard-xyz/solana.js": "latest",
+    "@switchboard-xyz/solana.js": "workspace:latest",
     "@types/dotenv": "^8.2.0",
     "dotenv": "^16.3.1"
   },
