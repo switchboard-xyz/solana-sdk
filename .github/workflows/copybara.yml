@@ -3,7 +3,7 @@ name: Update pnpm lockfile
 on:
   push:
     branches:
-      - copybara-sbv2-solana-push
+      - copybara-solana-sdk-push
 
 jobs:
   update-lockfile:
@@ -46,4 +46,4 @@ jobs:
           commit_message: "chore: Update pnpm lockfile"
           skip_dirty_check: false
           file_pattern: "pnpm-lock.yaml"
-          branch: copybara-sbv2-solana-push
+          branch: copybara-solana-sdk-push
