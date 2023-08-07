@@ -8,7 +8,7 @@ import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
 import type { Connection } from "@solana/web3.js";
 import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
-import { toUtf8 } from "@switchboard-xyz/common";
+import { parseMrEnclave, toUtf8 } from "@switchboard-xyz/common";
 import type {
   FunctionAccount,
   SwitchboardWallet,
@@ -22,13 +22,12 @@ import {
   AttestationQueueAccount,
   type BootstrappedAttestationQueue,
   NativeMint,
-  parseMrEnclave,
   SwitchboardProgram,
 } from "@switchboard-xyz/solana.js";
 import assert from "assert";
 
 const MRENCLAVE = parseMrEnclave(
-  Buffer.from("Y6keo0uTCiWDNcWwGjZ2jfTd4VFhrr6LC/6Mk1aiNCA=", "base64")
+  "Y6keo0uTCiWDNcWwGjZ2jfTd4VFhrr6LC/6Mk1aiNCA="
 );
 const emptyEnclave: number[] = new Array(32).fill(0);
 

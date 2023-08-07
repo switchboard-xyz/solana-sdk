@@ -5,8 +5,14 @@
     }
   },
   "compilerOptions": {
-    "types": ["mocha", "chai", "node"],
-    "typeRoots": ["./node_modules/@types"],
+    "types": [
+      "mocha",
+      "chai",
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "module": "commonjs",
     "noEmit": true,
     "esModuleInterop": true,
@@ -14,14 +20,23 @@
     "strictNullChecks": false,
     "target": "es6",
     "paths": {
-      "@switchboard-xyz/solana.js": ["../../../javascript/solana.js"]
+      "@switchboard-xyz/solana.js": [
+        "../../../../../javascript/solana.js"
+      ]
     }
   },
-  "include": ["tests/**/*", "./cli.ts", "./client/**/*"],
-  "exclude": ["target", "lib"],
+  "include": [
+    "tests/**/*",
+    "./cli.ts",
+    "./client/**/*"
+  ],
+  "exclude": [
+    "target",
+    "lib"
+  ],
   "references": [
     {
-      "path": "../../../javascript/solana.js"
+      "path": "../../../../../javascript/solana.js"
     }
   ]
 }

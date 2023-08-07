@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "anchor-vrf-lite-parser"
 version = "0.1.0"
@@ -17,5 +19,5 @@ cpi = ["no-entrypoint"]
 
 [dependencies]
 bytemuck = "1.13.1"
-switchboard-solana = { path = "../../../rust/switchboard-solana", version = "0.9.5" }
-# switchboard-solana = { version = "^0.9.5", path = "../../../rust/switchboard-solana" }
+# switchboard-solana = "0.28.0"
+switchboard-solana = { version = "0.28.0", path = "../../../rust/switchboard-solana" }

@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "basic_oracle"
 version = "0.1.0"
@@ -17,7 +19,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-switchboard-solana = { version = "0.9.5" }
-# switchboard-solana = { version = "0.9.5", path = "../../../rust/switchboard-solana" }
+# switchboard-solana = "0.28.0"
+switchboard-solana = { version = "0.28.0", path = "../../../rust/switchboard-solana" }
 bytemuck = "^1"
 anchor-lang = { version = "0.28.0" }
