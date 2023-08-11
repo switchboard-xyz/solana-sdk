@@ -4216,9 +4216,7 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c5a03303674fb73b1dbe6cfc83aa8faa0e99264472a47177a1803f7475b318d1"
+version = "0.8.6"
 dependencies = [
  "getrandom 0.2.10",
  "hex",
@@ -4230,9 +4228,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b04503c979165d8ad5efe21bb63b9978cb70103f208fab1339aae7c38e94c62"
+version = "0.28.1"
 dependencies = [
  "anchor-client",
  "anchor-lang",

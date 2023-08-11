@@ -40,7 +40,8 @@ export type CustomError =
   | FunctionCloseNotReady
   | RequestAlreadyInitialized
   | AccountCloseNotPermitted
-  | AccountCloseNotReady;
+  | AccountCloseNotReady
+  | FunctionRequestNotReady;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -509,6 +510,17 @@ export class AccountCloseNotReady extends Error {
   }
 }
 
+export class FunctionRequestNotReady extends Error {
+  static readonly code = 6041;
+  readonly code = 6041;
+  readonly name = "FunctionRequestNotReady";
+  readonly msg = "The FunctionRequestAccount is not ready to be verified";
+
+  constructor(readonly logs?: string[]) {
+    super("6041: The FunctionRequestAccount is not ready to be verified");
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -593,6 +605,8 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new AccountCloseNotPermitted(logs);
     case 6040:
       return new AccountCloseNotReady(logs);
+    case 6041:
+      return new FunctionRequestNotReady(logs);
   }
 
   return null;

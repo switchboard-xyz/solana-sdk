@@ -13,7 +13,6 @@ pub struct SetFunction<'info> {
 
     pub function: AccountLoader<'info, FunctionAccountData>,
 
-    /// CHECK:
     pub authority: Signer<'info>,
 }
 

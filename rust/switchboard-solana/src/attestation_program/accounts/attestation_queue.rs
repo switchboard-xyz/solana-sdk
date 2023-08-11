@@ -77,7 +77,7 @@ impl anchor_lang::AccountDeserialize for AttestationQueueAccountData {
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
         let data: &[u8] = &buf[8..];
         bytemuck::try_from_bytes(data)
-            .map(|r: &Self| r.clone())
+            .map(|r: &Self| *r)
             .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
     }
 }

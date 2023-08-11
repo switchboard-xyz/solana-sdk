@@ -27,7 +27,6 @@ pub struct FunctionSetConfigParams {
     pub mr_enclaves: Option<Vec<[u8; 32]>>,
     pub requests_disabled: Option<bool>,
     pub requests_require_authorization: Option<bool>,
-    pub requests_default_slots_until_expiration: Option<u64>,
     pub requests_fee: Option<u64>,
 }
 

@@ -16,7 +16,6 @@ export interface FunctionInitParamsFields {
   recentSlot: BN;
   requestsDisabled: boolean;
   requestsRequireAuthorization: boolean;
-  requestsDefaultSlotsUntilExpiration: BN;
   requestsFee: BN;
   creatorSeed: Array<number> | null;
 }
@@ -32,7 +31,6 @@ export interface FunctionInitParamsJSON {
   recentSlot: string;
   requestsDisabled: boolean;
   requestsRequireAuthorization: boolean;
-  requestsDefaultSlotsUntilExpiration: string;
   requestsFee: string;
   creatorSeed: Array<number> | null;
 }
@@ -48,7 +46,6 @@ export class FunctionInitParams {
   readonly recentSlot: BN;
   readonly requestsDisabled: boolean;
   readonly requestsRequireAuthorization: boolean;
-  readonly requestsDefaultSlotsUntilExpiration: BN;
   readonly requestsFee: BN;
   readonly creatorSeed: Array<number> | null;
 
@@ -63,8 +60,6 @@ export class FunctionInitParams {
     this.recentSlot = fields.recentSlot;
     this.requestsDisabled = fields.requestsDisabled;
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
-    this.requestsDefaultSlotsUntilExpiration =
-      fields.requestsDefaultSlotsUntilExpiration;
     this.requestsFee = fields.requestsFee;
     this.creatorSeed = fields.creatorSeed;
   }
@@ -82,7 +77,6 @@ export class FunctionInitParams {
         borsh.u64("recentSlot"),
         borsh.bool("requestsDisabled"),
         borsh.bool("requestsRequireAuthorization"),
-        borsh.u64("requestsDefaultSlotsUntilExpiration"),
         borsh.u64("requestsFee"),
         borsh.option(borsh.array(borsh.u8(), 32), "creatorSeed"),
       ],
@@ -127,8 +121,6 @@ export class FunctionInitParams {
       recentSlot: obj.recentSlot,
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        obj.requestsDefaultSlotsUntilExpiration,
       requestsFee: obj.requestsFee,
       creatorSeed: obj.creatorSeed,
     });
@@ -170,8 +162,6 @@ export class FunctionInitParams {
       recentSlot: fields.recentSlot,
       requestsDisabled: fields.requestsDisabled,
       requestsRequireAuthorization: fields.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        fields.requestsDefaultSlotsUntilExpiration,
       requestsFee: fields.requestsFee,
       creatorSeed: fields.creatorSeed,
     };
@@ -189,8 +179,6 @@ export class FunctionInitParams {
       recentSlot: this.recentSlot.toString(),
       requestsDisabled: this.requestsDisabled,
       requestsRequireAuthorization: this.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        this.requestsDefaultSlotsUntilExpiration.toString(),
       requestsFee: this.requestsFee.toString(),
       creatorSeed: this.creatorSeed,
     };
@@ -208,9 +196,6 @@ export class FunctionInitParams {
       recentSlot: new BN(obj.recentSlot),
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration: new BN(
-        obj.requestsDefaultSlotsUntilExpiration
-      ),
       requestsFee: new BN(obj.requestsFee),
       creatorSeed: obj.creatorSeed,
     });

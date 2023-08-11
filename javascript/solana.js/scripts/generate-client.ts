@@ -11,35 +11,32 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const projectRoot = path.join(__dirname, "..");
-// const shx = path.join(projectRoot, 'node_modules', '.bin', 'shx');
+const packageRoot = path.join(__dirname, "..");
+// const shx = path.join(packageRoot, 'node_modules', '.bin', 'shx');
 
-const v2DevnetIdlPath = path.join(projectRoot, "./idl/devnet.json");
-const v2MainnetIdlPath = path.join(projectRoot, "./idl/mainnet.json");
+const v2DevnetIdlPath = path.join(packageRoot, "./idl/devnet.json");
+const v2MainnetIdlPath = path.join(packageRoot, "./idl/mainnet.json");
 const v2GeneratedPath = path.join(
-  projectRoot,
+  packageRoot,
   "./src/generated/oracle-program"
 );
 
 const attestationDevnetIdlPath = path.join(
-  projectRoot,
+  packageRoot,
   "./idl/attestation-devnet.json"
 );
 const attestationGeneratedPath = path.join(
-  projectRoot,
+  packageRoot,
   "./src/generated/attestation-program"
 );
 
-const switchboardCoreDir = path.join(
-  projectRoot,
-  "../../../switchboard-core/switchboard_v2"
-);
+const solanaProgramDir = path.join(packageRoot, "../../chains/solana");
 const switchboardV2IdlPath = path.join(
-  switchboardCoreDir,
+  solanaProgramDir,
   "target/idl/switchboard_v2.json"
 );
 const switchboardAttestationIdlPath = path.join(
-  switchboardCoreDir,
+  solanaProgramDir,
   "target/idl/switchboard_attestation_program.json"
 );
 
@@ -99,7 +96,7 @@ const getAllFiles = async (
 };
 
 async function main() {
-  shell.cd(projectRoot);
+  shell.cd(packageRoot);
 
   // generate IDL types from local directory
   let devMode = false;

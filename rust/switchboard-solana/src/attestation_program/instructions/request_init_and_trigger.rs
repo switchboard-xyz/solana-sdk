@@ -52,6 +52,7 @@ pub struct FunctionRequestInitAndTriggerParams {
     pub max_container_params_len: Option<u32>,
     pub container_params: Option<Vec<u8>>,
     pub garbage_collection_slot: Option<u64>,
+    pub valid_after_slot: Option<u64>,
 }
 
 impl InstructionData for FunctionRequestInitAndTriggerParams {}
@@ -88,6 +89,7 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
         max_container_params_len: Option<u32>,
         container_params: Option<Vec<u8>>,
         garbage_collection_slot: Option<u64>,
+        valid_after_slot: Option<u64>,
     ) -> ProgramResult {
         let instruction = self.get_instruction(
             *program.key,
@@ -97,6 +99,7 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
                 max_container_params_len,
                 container_params,
                 garbage_collection_slot,
+                valid_after_slot,
             },
         )?;
         let account_infos = self.to_account_infos();
@@ -112,6 +115,7 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
         max_container_params_len: Option<u32>,
         container_params: Option<Vec<u8>>,
         garbage_collection_slot: Option<u64>,
+        valid_after_slot: Option<u64>,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
         let instruction = self.get_instruction(
@@ -122,6 +126,7 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
                 max_container_params_len,
                 container_params,
                 garbage_collection_slot,
+                valid_after_slot,
             },
         )?;
         let account_infos = self.to_account_infos();

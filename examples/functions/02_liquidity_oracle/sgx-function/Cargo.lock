@@ -4510,10 +4510,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "switchboard-common"
+version = "0.8.6"
+dependencies = [
+ "getrandom 0.2.10",
+ "hex",
+ "serde",
+ "serde_json",
+ "sgx-quote",
+ "sha2 0.10.7",
+]
+
+[[package]]
 name = "switchboard-solana"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b04503c979165d8ad5efe21bb63b9978cb70103f208fab1339aae7c38e94c62"
+version = "0.28.1"
 dependencies = [
  "anchor-client",
  "anchor-lang",
@@ -4529,7 +4539,7 @@ dependencies = [
  "solana-client",
  "solana-program",
  "superslice",
- "switchboard-common",
+ "switchboard-common 0.8.6",
  "tokio",
 ]
 
@@ -4550,7 +4560,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "switchboard-common",
+ "switchboard-common 0.8.5",
  "tokio",
  "url",
 ]

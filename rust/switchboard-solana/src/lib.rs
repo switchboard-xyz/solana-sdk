@@ -12,12 +12,35 @@
 //! The Switchboard deployment consists of two programs:
 //!
 //! - The Oracle Program: The core Switchboard deployment consisting of Aggregators (data feeds),
-//!   Oracles, and Oracle Queues. Program_ID=SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
+//!   Oracles, and Oracle Queues. Program_ID: `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`
 //! - The Attestation Program (V3): Enables the use of Trusted Execution Environments (TEEs)
 //!   providing verifiable off-chain compute allowing developers to write their own off-chain
 //!   logic and "attest" on-chain whether it was executed within a secure enclave.
-//!   Program_ID=sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx
+//!   Program_ID: `sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx`
 //!
+//! # Accounts
+//!
+//! This SDK provides the following account definitions for the Oracle Program:
+//!
+//! - [OracleQueue](OracleQueueAccountData)
+//! - [Crank](CrankAccountData)
+//! - [Oracle](OracleAccountData)
+//! - [Permission](PermissionAccountData)
+//! - [Aggregator](AggregatorAccountData)
+//! - [Job](JobAccountData)
+//! - [Lease](LeaseAccountData)
+//! - [Vrf](VrfAccountData)
+//! - [VrfLite](VrfLiteAccountData)
+//! - [VrfPool](VrfPoolAccountData)
+//!
+//! This SDK provides the following account definitions for the Attestation Program:
+//!
+//! - [AttestationQueue](AttestationQueueAccountData)
+//! - [Verifier](VerifierAccountData)
+//! - [AttestationPermission](AttestationPermissionAccountData)
+//! - [SwitchboardWallet](SwitchboardWallet)
+//! - [Function](FunctionAccountData)
+//! - [FunctionRequest](FunctionRequestAccountData)
 //! # Usage
 //!
 //! Within an Anchor program you can make use of the AccountLoader trait to deserialize
@@ -69,31 +92,6 @@
 //!     let feed = AggregatorAccountData::new(aggregator)?;
 //! }
 //! ```
-//!
-//!
-//! # Accounts
-//!
-//! This SDK provides the following account definitions for the Oracle Program:
-//!
-//! - [OracleQueue](OracleQueueAccountData)
-//! - [Crank](CrankAccountData)
-//! - [Oracle](OracleAccountData)
-//! - [Permission](PermissionAccountData)
-//! - [Aggregator](AggregatorAccountData)
-//! - [Job](JobAccountData)
-//! - [Lease](LeaseAccountData)
-//! - [Vrf](VrfAccountData)
-//! - [VrfLite](VrfLiteAccountData)
-//! - [VrfPool](VrfPoolAccountData)
-//!
-//! This SDK provides the following account definitions for the Attestation Program:
-//!
-//! - [AttestationQueue](AttestationQueueAccountData)
-//! - [Verifier](VerifierAccountData)
-//! - [AttestationPermission](AttestationPermissionAccountData)
-//! - [SwitchboardWallet](SwitchboardWallet)
-//! - [Function](FunctionAccountData)
-//! - [FunctionRequest](FunctionRequestAccountData)
 
 mod macros;
 

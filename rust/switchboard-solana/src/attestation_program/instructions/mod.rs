@@ -16,11 +16,14 @@ pub use function_verify::*;
 pub mod function_close;
 pub use function_close::*;
 
-pub mod function_request_init_and_trigger;
-pub use function_request_init_and_trigger::*;
+pub mod request_init_and_trigger;
+pub use request_init_and_trigger::*;
 
 pub mod request_init;
 pub use request_init::*;
+
+pub mod request_trigger;
+pub use request_trigger::*;
 
 pub mod request_verify;
 pub use request_verify::*;

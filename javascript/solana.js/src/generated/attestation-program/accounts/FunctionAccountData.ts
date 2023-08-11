@@ -70,11 +70,8 @@ export interface FunctionAccountDataFields {
    * Useful if you want to use CPIs to control request account creation.
    */
   requestsRequireAuthorization: boolean;
-  /**
-   * The number of slots after a request has been verified before allowing a non-authority account to close the account.
-   * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
-   */
-  requestsDefaultSlotsUntilExpiration: BN;
+  /** DEPRECATED. */
+  reserved1: Array<number>;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
   requestsFee: BN;
   /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
@@ -157,11 +154,8 @@ export interface FunctionAccountDataJSON {
    * Useful if you want to use CPIs to control request account creation.
    */
   requestsRequireAuthorization: boolean;
-  /**
-   * The number of slots after a request has been verified before allowing a non-authority account to close the account.
-   * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
-   */
-  requestsDefaultSlotsUntilExpiration: string;
+  /** DEPRECATED. */
+  reserved1: Array<number>;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
   requestsFee: string;
   /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
@@ -244,11 +238,8 @@ export class FunctionAccountData {
    * Useful if you want to use CPIs to control request account creation.
    */
   readonly requestsRequireAuthorization: boolean;
-  /**
-   * The number of slots after a request has been verified before allowing a non-authority account to close the account.
-   * Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
-   */
-  readonly requestsDefaultSlotsUntilExpiration: BN;
+  /** DEPRECATED. */
+  readonly reserved1: Array<number>;
   /** The lamports paid to the FunctionAccount escrow on each successful update request. */
   readonly requestsFee: BN;
   /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
@@ -301,7 +292,7 @@ export class FunctionAccountData {
     borsh.u64("numRequests"),
     borsh.bool("requestsDisabled"),
     borsh.bool("requestsRequireAuthorization"),
-    borsh.u64("requestsDefaultSlotsUntilExpiration"),
+    borsh.array(borsh.u8(), 8, "reserved1"),
     borsh.u64("requestsFee"),
     borsh.publicKey("escrowWallet"),
     borsh.publicKey("escrowTokenWallet"),
@@ -342,8 +333,7 @@ export class FunctionAccountData {
     this.numRequests = fields.numRequests;
     this.requestsDisabled = fields.requestsDisabled;
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
-    this.requestsDefaultSlotsUntilExpiration =
-      fields.requestsDefaultSlotsUntilExpiration;
+    this.reserved1 = fields.reserved1;
     this.requestsFee = fields.requestsFee;
     this.escrowWallet = fields.escrowWallet;
     this.escrowTokenWallet = fields.escrowTokenWallet;
@@ -427,8 +417,7 @@ export class FunctionAccountData {
       numRequests: dec.numRequests,
       requestsDisabled: dec.requestsDisabled,
       requestsRequireAuthorization: dec.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        dec.requestsDefaultSlotsUntilExpiration,
+      reserved1: dec.reserved1,
       requestsFee: dec.requestsFee,
       escrowWallet: dec.escrowWallet,
       escrowTokenWallet: dec.escrowTokenWallet,
@@ -471,8 +460,7 @@ export class FunctionAccountData {
       numRequests: this.numRequests.toString(),
       requestsDisabled: this.requestsDisabled,
       requestsRequireAuthorization: this.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        this.requestsDefaultSlotsUntilExpiration.toString(),
+      reserved1: this.reserved1,
       requestsFee: this.requestsFee.toString(),
       escrowWallet: this.escrowWallet.toString(),
       escrowTokenWallet: this.escrowTokenWallet.toString(),
@@ -515,9 +503,7 @@ export class FunctionAccountData {
       numRequests: new BN(obj.numRequests),
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration: new BN(
-        obj.requestsDefaultSlotsUntilExpiration
-      ),
+      reserved1: obj.reserved1,
       requestsFee: new BN(obj.requestsFee),
       escrowWallet: new PublicKey(obj.escrowWallet),
       escrowTokenWallet: new PublicKey(obj.escrowTokenWallet),

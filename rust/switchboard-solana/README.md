@@ -7,7 +7,7 @@
 > A Rust library to interact with Switchboard accounts on Solana.
 
   <p>
-	  <a href="https://crates.io/crates/switchboard-solana">
+   <a href="https://crates.io/crates/switchboard-solana">
       <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-solana?label=switchboard-solana&logo=rust" />
     </a>
   </p>
@@ -25,7 +25,7 @@
     <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana">docs.rs/switchboard-solana</a>
   </h4>
   <h4>
-    <strong>Sbv2 Solana SDK: </strong><a href="https://github.com/switchboard-xyz/sbv2-solana">github.com/switchboard-xyz/sbv2-solana</a>
+    <strong>Solana SDK: </strong><a href="https://github.com/switchboard-xyz/solana-sdk">github.com/switchboard-xyz/solana-sdk</a>
   </h4>
 </div>
 
@@ -41,10 +41,59 @@ Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-solana = "0.5.0"
+switchboard-solana = "0.28"
 ```
 
+**NOTE**: The minor version corresponds to the anchor-lang dependency. Version `0.28.*` of this crate uses anchor-lang `0.28.0` while version `0.27.*` of this crate uses anchor-lang `0.27.0`.
+
+## Accounts
+
+This SDK provides the following account definitions for the Oracle Program:
+
+- [OracleQueue](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/queue/struct.OracleQueueAccountData.html)
+- [Crank](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/crank/struct.CrankAccountData.html)
+- [Oracle](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/oracle/struct.OracleAccountData.html)
+- [Permission](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/permission/struct.PermissionAccountData.html)
+- [Aggregator](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/aggregator/struct.AggregatorAccountData.html)
+- [Job](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/job/struct.JobAccountData.html)
+- [Lease](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/lease/struct.LeaseAccountData.html)
+- [Vrf](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/vrf/struct.VrfAccountData.html)
+- [VrfLite](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/vrf_lite/struct.VrfLiteAccountData.html)
+- [VrfPool](https://docs.rs/switchboard-solana/latest/switchboard_solana/oracle_program/accounts/vrf_pool/struct.VrfPoolAccountData.html)
+
+This SDK provides the following account definitions for the Attestation Program:
+
+- [AttestationQueue](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/attestation_queue/struct.AttestationQueueAccountData.html)
+- [Verifier](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/verifier/struct.VerifierAccountData.html)
+- [AttestationPermission](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/attestation_permission/struct.AttestationPermissionAccountData.html)
+- [SwitchboardWallet](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/switchboard_wallet/struct.SwitchboardWallet.html)
+- [Function](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/function/struct.FunctionAccountData.html)
+- [FunctionRequest](https://docs.rs/switchboard-solana/latest/switchboard_solana/attestation_program/accounts/function_request/struct.FunctionRequestAccountData.html)
+
 ## Usage
+
+### Functions
+
+You will need to validate your function's enclave_signer before allowing your program to modify its state.
+
+```rust
+use switchboard_solana::FunctionAccountData;
+
+#[derive(Accounts)]
+pub struct SaveDataInstruction<'info> {
+    // ... your required accounts to modify your program's state
+
+    // We use this to derive and verify the functions enclave state
+    #[account(
+        constraint =
+            function.load()?.validate(
+              &enclave_signer.to_account_info()
+            )?
+    )]
+    pub function: AccountLoader<'info, FunctionAccountData>,
+    pub enclave_signer: Signer<'info>,
+}
+```
 
 ### Aggregator
 
@@ -76,10 +125,6 @@ feed.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
 feed.check_confidence_interval(SwitchboardDecimal::from_f64(0.80))?;
 ```
 
-**Example(s)**:
-[anchor-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-feed-parser/src/lib.rs),
-[native-feed-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/native-feed-parser/src/lib.rs)
-
 #### Read Aggregator History
 
 **_Note: The Aggregator must have a history buffer initialized before using_**
@@ -95,7 +140,7 @@ let one_hour_ago: f64 = history_buffer.lower_bound(current_timestamp - 3600).unw
 
 ### VRF Account
 
-#### Read Latest Result
+#### Read VRF Result
 
 ```rust
 use switchboard_solana::VrfAccountData;
@@ -110,9 +155,6 @@ let result_buffer = vrf.get_result()?;
 let value: &[u128] = bytemuck::cast_slice(&result_buffer[..]);
 let result = value[0] % 256000 as u128;
 ```
-
-**Example**:
-[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/update_result.rs)
 
 #### RequestRandomness CPI
 
@@ -154,59 +196,3 @@ vrf_request_randomness.invoke_signed(
 )?;
 
 ```
-
-**Example**:
-[anchor-vrf-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-vrf-parser/src/actions/request_result.rs)
-
-### Buffer Relayer Account
-
-#### Read Latest Result
-
-```rust
-use anchor_lang::solana_program::clock;
-use std::convert::TryInto;
-use switchboard_solana::{BufferRelayerAccountData, SWITCHBOARD_PROGRAM_ID};
-
-// check feed owner
-let owner = *aggregator.owner;
-if owner != SWITCHBOARD_PROGRAM_ID {
-    return Err(error!(ErrorCode::InvalidSwitchboardAccount));
-}
-
-// deserialize account info
-let buffer = BufferRelayerAccountData::new(feed_account_info)?;
-
-// get result
-let buffer_result = buffer.get_result();
-
-// check if feed has been updated in the last 5 minutes
-buffer.check_staleness(clock::Clock::get().unwrap().unix_timestamp, 300)?;
-
-// convert buffer to a string
-let result_string = String::from_utf8(buffer.result)
-    .map_err(|_| error!(ErrorCode::StringConversionFailed))?;
-msg!("Buffer string {:?}!", result_string);
-```
-
-**Example**:
-[anchor-buffer-parser](https://github.com/switchboard-xyz/sbv2-solana/blob/main/programs/anchor-buffer-parser/src/lib.rs)
-
-## Supported CPI Calls
-
-| Instruction                 | is supported |
-| --------------------------- | ------------ |
-| permission_set              | true         |
-| vrf_request_randomness      | true         |
-| vrf_set_callback            | true         |
-| vrf_close                   | true         |
-| vrf_lite_request_randomness | true         |
-| vrf_lite_close              | true         |
-| vrf_pool_request_randomness | true         |
-| vrf_pool_remove             | true         |
-| vrf_pool_add                | TODO         |
-| aggregator_open_round       | TODO         |
-| buffer_relayer_open_round   | TODO         |
-
-See
-[https://docs.switchboard.xyz/solana/idl](https://docs.switchboard.xyz/solana/idl)
-for a list of all program instructions.
