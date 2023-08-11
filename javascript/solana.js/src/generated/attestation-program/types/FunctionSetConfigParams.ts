@@ -15,7 +15,6 @@ export interface FunctionSetConfigParamsFields {
   mrEnclaves: Array<Array<number>> | null;
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
-  requestsDefaultSlotsUntilExpiration: BN | null;
   requestsFee: BN | null;
 }
 
@@ -29,7 +28,6 @@ export interface FunctionSetConfigParamsJSON {
   mrEnclaves: Array<Array<number>> | null;
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
-  requestsDefaultSlotsUntilExpiration: string | null;
   requestsFee: string | null;
 }
 
@@ -43,7 +41,6 @@ export class FunctionSetConfigParams {
   readonly mrEnclaves: Array<Array<number>> | null;
   readonly requestsDisabled: boolean | null;
   readonly requestsRequireAuthorization: boolean | null;
-  readonly requestsDefaultSlotsUntilExpiration: BN | null;
   readonly requestsFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
@@ -56,8 +53,6 @@ export class FunctionSetConfigParams {
     this.mrEnclaves = fields.mrEnclaves;
     this.requestsDisabled = fields.requestsDisabled;
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
-    this.requestsDefaultSlotsUntilExpiration =
-      fields.requestsDefaultSlotsUntilExpiration;
     this.requestsFee = fields.requestsFee;
   }
 
@@ -73,7 +68,6 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.vec(borsh.array(borsh.u8(), 32)), "mrEnclaves"),
         borsh.option(borsh.bool(), "requestsDisabled"),
         borsh.option(borsh.bool(), "requestsRequireAuthorization"),
-        borsh.option(borsh.u64(), "requestsDefaultSlotsUntilExpiration"),
         borsh.option(borsh.u64(), "requestsFee"),
       ],
       property
@@ -134,8 +128,6 @@ export class FunctionSetConfigParams {
       mrEnclaves: obj.mrEnclaves,
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        obj.requestsDefaultSlotsUntilExpiration,
       requestsFee: obj.requestsFee,
     });
   }
@@ -193,8 +185,6 @@ export class FunctionSetConfigParams {
       mrEnclaves: fields.mrEnclaves,
       requestsDisabled: fields.requestsDisabled,
       requestsRequireAuthorization: fields.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        fields.requestsDefaultSlotsUntilExpiration,
       requestsFee: fields.requestsFee,
     };
   }
@@ -214,10 +204,6 @@ export class FunctionSetConfigParams {
       mrEnclaves: this.mrEnclaves,
       requestsDisabled: this.requestsDisabled,
       requestsRequireAuthorization: this.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        (this.requestsDefaultSlotsUntilExpiration &&
-          this.requestsDefaultSlotsUntilExpiration.toString()) ||
-        null,
       requestsFee: (this.requestsFee && this.requestsFee.toString()) || null,
     };
   }
@@ -235,10 +221,6 @@ export class FunctionSetConfigParams {
       mrEnclaves: obj.mrEnclaves,
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsDefaultSlotsUntilExpiration:
-        (obj.requestsDefaultSlotsUntilExpiration &&
-          new BN(obj.requestsDefaultSlotsUntilExpiration)) ||
-        null,
       requestsFee: (obj.requestsFee && new BN(obj.requestsFee)) || null,
     });
   }

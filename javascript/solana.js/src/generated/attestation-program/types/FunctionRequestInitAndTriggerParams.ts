@@ -11,6 +11,7 @@ export interface FunctionRequestInitAndTriggerParamsFields {
   maxContainerParamsLen: number | null;
   containerParams: Uint8Array | null;
   garbageCollectionSlot: BN | null;
+  validAfterSlot: BN | null;
 }
 
 export interface FunctionRequestInitAndTriggerParamsJSON {
@@ -19,6 +20,7 @@ export interface FunctionRequestInitAndTriggerParamsJSON {
   maxContainerParamsLen: number | null;
   containerParams: Array<number> | null;
   garbageCollectionSlot: string | null;
+  validAfterSlot: string | null;
 }
 
 export class FunctionRequestInitAndTriggerParams {
@@ -27,6 +29,7 @@ export class FunctionRequestInitAndTriggerParams {
   readonly maxContainerParamsLen: number | null;
   readonly containerParams: Uint8Array | null;
   readonly garbageCollectionSlot: BN | null;
+  readonly validAfterSlot: BN | null;
 
   constructor(fields: FunctionRequestInitAndTriggerParamsFields) {
     this.bounty = fields.bounty;
@@ -34,6 +37,7 @@ export class FunctionRequestInitAndTriggerParams {
     this.maxContainerParamsLen = fields.maxContainerParamsLen;
     this.containerParams = fields.containerParams;
     this.garbageCollectionSlot = fields.garbageCollectionSlot;
+    this.validAfterSlot = fields.validAfterSlot;
   }
 
   static layout(property?: string) {
@@ -44,6 +48,7 @@ export class FunctionRequestInitAndTriggerParams {
         borsh.option(borsh.u32(), "maxContainerParamsLen"),
         borsh.option(borsh.vecU8(), "containerParams"),
         borsh.option(borsh.u64(), "garbageCollectionSlot"),
+        borsh.option(borsh.u64(), "validAfterSlot"),
       ],
       property
     );
@@ -64,6 +69,7 @@ export class FunctionRequestInitAndTriggerParams {
           )) ||
         null,
       garbageCollectionSlot: obj.garbageCollectionSlot,
+      validAfterSlot: obj.validAfterSlot,
     });
   }
 
@@ -81,6 +87,7 @@ export class FunctionRequestInitAndTriggerParams {
           )) ||
         null,
       garbageCollectionSlot: fields.garbageCollectionSlot,
+      validAfterSlot: fields.validAfterSlot,
     };
   }
 
@@ -97,6 +104,8 @@ export class FunctionRequestInitAndTriggerParams {
       garbageCollectionSlot:
         (this.garbageCollectionSlot && this.garbageCollectionSlot.toString()) ||
         null,
+      validAfterSlot:
+        (this.validAfterSlot && this.validAfterSlot.toString()) || null,
     };
   }
 
@@ -113,6 +122,8 @@ export class FunctionRequestInitAndTriggerParams {
       garbageCollectionSlot:
         (obj.garbageCollectionSlot && new BN(obj.garbageCollectionSlot)) ||
         null,
+      validAfterSlot:
+        (obj.validAfterSlot && new BN(obj.validAfterSlot)) || null,
     });
   }
 

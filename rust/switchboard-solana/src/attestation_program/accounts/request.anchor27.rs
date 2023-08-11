@@ -37,7 +37,7 @@ impl From<u8> for RequestStatus {
     }
 }
 
-#[derive(Copy, Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct FunctionRequestTriggerRound {
     /// The status of the request.
     pub status: RequestStatus,
@@ -54,17 +54,74 @@ pub struct FunctionRequestTriggerRound {
     /// The keypair generated in the enclave and required to sign any
     /// valid transactions processed by the function.
     pub enclave_signer: Pubkey,
+
+    /// The slot when the request can first be executed.
+    pub valid_after_slot: u64,
+
     /// Reserved.
-    pub _ebuf: [u8; 64],
+    pub _ebuf: [u8; 56],
 }
 impl Default for FunctionRequestTriggerRound {
     fn default() -> Self {
         unsafe { std::mem::zeroed() }
     }
 }
+impl borsh::ser::BorshSerialize for FunctionRequestTriggerRound
+where
+    RequestStatus: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+{
+    fn serialize<W: borsh::maybestd::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> ::core::result::Result<(), borsh::maybestd::io::Error> {
+        borsh::BorshSerialize::serialize(&self.status, writer)?;
+        borsh::BorshSerialize::serialize(&self.bounty, writer)?;
+        borsh::BorshSerialize::serialize(&self.request_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.fulfilled_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.expiration_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.verifier, writer)?;
+        borsh::BorshSerialize::serialize(&self.enclave_signer, writer)?;
+        borsh::BorshSerialize::serialize(&self.valid_after_slot, writer)?;
+        writer.write_all(&[0u8; 56])?;
+        // borsh::BorshSerialize::serialize(&[0u8; 56], writer)?;
+        Ok(())
+    }
+}
+impl borsh::de::BorshDeserialize for FunctionRequestTriggerRound
+where
+    RequestStatus: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+{
+    fn deserialize(buf: &mut &[u8]) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
+        Ok(Self {
+            status: borsh::BorshDeserialize::deserialize(buf)?,
+            bounty: borsh::BorshDeserialize::deserialize(buf)?,
+            request_slot: borsh::BorshDeserialize::deserialize(buf)?,
+            fulfilled_slot: borsh::BorshDeserialize::deserialize(buf)?,
+            expiration_slot: borsh::BorshDeserialize::deserialize(buf)?,
+            verifier: borsh::BorshDeserialize::deserialize(buf)?,
+            enclave_signer: borsh::BorshDeserialize::deserialize(buf)?,
+            valid_after_slot: borsh::BorshDeserialize::deserialize(buf)?,
+            _ebuf: [0u8; 56],
+        })
+    }
+}
 
 // #[account]
-#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+#[derive(AnchorDeserialize, AnchorSerialize, Clone, PartialEq)]
 pub struct FunctionRequestAccountData {
     // Up-Front Params for RPC filtering
     /// Whether the request is ready to be processed.

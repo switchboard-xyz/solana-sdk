@@ -73,7 +73,6 @@ export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
 
   requestsDisabled?: boolean;
   requestsRequireAuthorization?: boolean;
-  requestsDefaultSlotsUntilExpiration?: number;
   requestsFee?: number;
 
   /**
@@ -97,7 +96,6 @@ export interface FunctionSetConfigParams {
   mrEnclaves?: Array<RawBuffer>;
   requestsDisabled?: boolean;
   requestsRequireAuthorization?: boolean;
-  requestsDefaultSlotsUntilExpiration?: number;
   requestsFee?: number;
 
   authority?: Keypair;
@@ -398,10 +396,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: params.requestsDisabled ?? false,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? false,
-          requestsDefaultSlotsUntilExpiration: numToBN(
-            params.requestsDefaultSlotsUntilExpiration,
-            1000
-          ),
           requestsFee: numToBN(params.requestsFee),
           creatorSeed: Array.from(creatorSeed),
         },
@@ -534,11 +528,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           requestsDisabled: params.requestsDisabled ?? null,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? null,
-          requestsDefaultSlotsUntilExpiration:
-            params.requestsDefaultSlotsUntilExpiration &&
-            Number.isFinite(params.requestsDefaultSlotsUntilExpiration)
-              ? new BN(params.requestsDefaultSlotsUntilExpiration)
-              : null,
           requestsFee: params.requestsFee ? new BN(params.requestsFee) : null,
         },
       },

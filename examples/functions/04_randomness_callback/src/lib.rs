@@ -6,10 +6,10 @@ pub use utils::*;
 pub mod error;
 pub use error::*;
 
-pub use switchboard_solana::prelude::anchor_lang;
-pub use switchboard_solana::prelude::anchor_spl;
+// pub use switchboard_solana::prelude::anchor_lang;
+// pub use switchboard_solana::prelude::anchor_spl;
 
-pub use anchor_lang::*;
+// pub use anchor_lang::*;
 
 declare_id!("Csx5AU83fPiaSChJUBZg2cW9GcCVVwZ4rwFqDA2pomX2");
 
@@ -105,6 +105,7 @@ pub mod custom_randomness_request {
             Some(1000),
             Some(512),
             Some(request_params.into_bytes()),
+            None,
             None,
         )?;
 

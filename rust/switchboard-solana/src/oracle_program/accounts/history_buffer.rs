@@ -40,7 +40,7 @@ impl<'a> AggregatorHistoryBuffer<'a> {
             return Err(SwitchboardError::AccountDiscriminatorMismatch.into());
         }
 
-        let insertion_idx: u32 = try_from_bytes::<u32>(&data[8..12]).unwrap().clone();
+        let insertion_idx: u32 = *try_from_bytes::<u32>(&data[8..12]).unwrap();
         return Ok(Self {
             insertion_idx: insertion_idx as usize,
             rows: Ref::map(data, |data| try_cast_slice(&data[12..]).unwrap()),
@@ -100,7 +100,7 @@ impl<'a> Owner for AggregatorHistoryBuffer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
+
     impl<'info, 'a> Default for AggregatorHistoryBuffer<'a> {
         fn default() -> Self {
             unsafe { std::mem::zeroed() }
@@ -142,7 +142,7 @@ mod tests {
 
     #[test]
     fn test_history_buffer() {
-        let mut history_data = HISTORY_BUFFER_DATA.clone();
+        let mut history_data = HISTORY_BUFFER_DATA;
         let mut lamports = 0;
         let history_account_info = AccountInfo::new(
             &HISTORY_BUFFER_PUBKEY,
@@ -280,7 +280,7 @@ mod tests {
         };
 
         // Get past result
-        match history_buffer.lower_bound(0646249911) {
+        match history_buffer.lower_bound(646249911) {
             None => (),
             Some(row) => panic!("retrieved row when no value was expected {:?}", row.value),
         };

@@ -6,9 +6,11 @@ import { printLogs } from "./utils";
 import type { Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
 import * as spl from "@solana/spl-token";
-import type { Connection } from "@solana/web3.js";
-import { Keypair, PublicKey, SystemProgram } from "@solana/web3.js";
-import { parseMrEnclave, toUtf8 } from "@switchboard-xyz/common";
+import {
+  parseMrEnclave,
+  parseRawMrEnclave,
+  toUtf8,
+} from "@switchboard-xyz/common";
 import type {
   FunctionAccount,
   SwitchboardWallet,
@@ -26,8 +28,9 @@ import {
 } from "@switchboard-xyz/solana.js";
 import assert from "assert";
 
-const MRENCLAVE = parseMrEnclave(
-  "Y6keo0uTCiWDNcWwGjZ2jfTd4VFhrr6LC/6Mk1aiNCA="
+const MRENCLAVE = parseRawMrEnclave(
+  "0x0162074de74faf6e896b6c0b60341e0edc5470adee26fce7297ccbed306537db",
+  true
 );
 const emptyEnclave: number[] = new Array(32).fill(0);
 
@@ -38,8 +41,10 @@ describe("custom_randomness_request", () => {
   const program = anchor.workspace
     .CustomRandomnessRequest as Program<CustomRandomnessRequest>;
 
+  console.log(`ProgramID: ${program.programId}`);
+
   const payer = (program.provider as anchor.AnchorProvider).publicKey;
-  const [housePubkey, houseBump] = PublicKey.findProgramAddressSync(
+  const [housePubkey, houseBump] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("CUSTOMRANDOMNESS")],
     program.programId
   );
@@ -53,7 +58,7 @@ describe("custom_randomness_request", () => {
   let requestAccount: FunctionRequestAccount;
   let wallet: SwitchboardWallet;
 
-  const [userPubkey, userBump] = PublicKey.findProgramAddressSync(
+  const [userPubkey, userBump] = anchor.web3.PublicKey.findProgramAddressSync(
     [Buffer.from("CUSTOMRANDOMNESS"), payer.toBytes()],
     program.programId
   );
@@ -106,8 +111,9 @@ describe("custom_randomness_request", () => {
           mint: switchboard.program.mint.address,
           houseTokenWallet: houseTokenWallet,
         })
-        .rpc();
+        .rpc({ skipPreflight: true });
       console.log("house_init transaction signature", tx);
+      await printLogs(program.provider.connection, tx);
     }
 
     const houseState = await program.account.houseState.fetch(housePubkey);
@@ -178,7 +184,7 @@ describe("custom_randomness_request", () => {
   });
 
   it("user_guess", async () => {
-    const requestKeypair = Keypair.generate();
+    const requestKeypair = anchor.web3.Keypair.generate();
 
     requestAccount = new FunctionRequestAccount(
       switchboard.program,
@@ -241,7 +247,7 @@ describe("custom_randomness_request", () => {
   });
 
   it("user_settle", async () => {
-    const enclaveSigner = Keypair.generate();
+    const enclaveSigner = anchor.web3.Keypair.generate();
 
     const requestState = await requestAccount.loadData();
 
@@ -310,7 +316,7 @@ describe("custom_randomness_request", () => {
   });
 });
 
-function writeHouseState(pubkey: PublicKey, houseState: any) {
+function writeHouseState(pubkey: anchor.web3.PublicKey, houseState: any) {
   console.log(`## House ${pubkey}`);
   console.log(`\tbump: ${houseState.bump}`);
   console.log(`\tmaxGuess: ${houseState.maxGuess}`);
@@ -319,7 +325,7 @@ function writeHouseState(pubkey: PublicKey, houseState: any) {
   console.log(`\ttokenWallet: ${houseState.tokenWallet}`);
 }
 
-function writeUserState(pubkey: PublicKey, userState: any) {
+function writeUserState(pubkey: anchor.web3.PublicKey, userState: any) {
   console.log(`## User ${pubkey}`);
   console.log(`\tbump: ${userState.bump}`);
   console.log(`\tauthority: ${userState.authority}`);
@@ -346,7 +352,10 @@ function writeUserRound(round: any) {
   console.log(`\t\twager: ${(round.wager as anchor.BN).toNumber()}`);
 }
 
-async function handleFailedTxnLogs(connection: Connection, error: unknown) {
+async function handleFailedTxnLogs(
+  connection: anchor.web3.Connection,
+  error: unknown
+) {
   const errorString = `${error}`;
   const regex = /Raw transaction (\S+)/;
   const match = errorString.match(regex);

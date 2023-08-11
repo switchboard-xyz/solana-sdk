@@ -5,7 +5,7 @@ import { printLogs } from "./utils";
 
 import type { Program } from "@coral-xyz/anchor";
 import * as anchor from "@coral-xyz/anchor";
-import { sleep } from "@switchboard-xyz/common";
+import { parseRawMrEnclave, sleep } from "@switchboard-xyz/common";
 import type { FunctionAccount, MrEnclave } from "@switchboard-xyz/solana.js";
 import { SwitchboardWallet } from "@switchboard-xyz/solana.js";
 import {
@@ -13,7 +13,6 @@ import {
   AttestationQueueAccount,
   attestationTypes,
   type BootstrappedAttestationQueue,
-  parseMrEnclave,
   SwitchboardProgram,
   types,
 } from "@switchboard-xyz/solana.js";
@@ -22,23 +21,19 @@ const unixTimestamp = () => Math.floor(Date.now() / 1000);
 
 // vv1gTnfuUiroqgJHS4xsRASsRQqqixCv1su85VWvcP9
 
-const MRENCLAVE = parseMrEnclave(
-  Buffer.from("Y6keo0uTCiWDNcWwGjZ2jfTd4VFhrr6LC/6Mk1aiNCA=", "base64")
+const MRENCLAVE = parseRawMrEnclave(
+  "0x44e8f2f806229322780fbddff3e46dd23896e3f00d630fbf026ce36314c0fee1",
+  true
 );
 const emptyEnclave: number[] = new Array(32).fill(0);
-
-function has_mr_enclave(
-  enclaves: Array<MrEnclave>,
-  unknown_enclave: MrEnclave
-) {
-  return enclaves.includes(unknown_enclave);
-}
 
 describe("basic_oracle", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
   const program = anchor.workspace.BasicOracle as Program<BasicOracle>;
+
+  console.log(`ProgramID: ${program.programId}`);
 
   const payer = (program.provider as anchor.AnchorProvider).publicKey;
 

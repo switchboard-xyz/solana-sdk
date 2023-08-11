@@ -1,11 +1,11 @@
 /* eslint node/no-unpublished-require: 0 */
 /* eslint no-unused-vars: 0 */
 
-import { build } from "esbuild";
-import path from "path";
-import fs from "fs";
-import shell from "shelljs";
 import { execSync } from "child_process";
+import { build } from "esbuild";
+import fs from "fs";
+import path from "path";
+import shell from "shelljs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);

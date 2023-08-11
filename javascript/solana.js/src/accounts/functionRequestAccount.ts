@@ -57,6 +57,7 @@ export interface FunctionRequestSetConfigParams {
 export interface FunctionRequestTriggerParams {
   bounty?: number | BN;
   slotsUntilExpiration?: BN;
+  validAfterSlot?: BN;
   authority?: Keypair;
 }
 
@@ -261,6 +262,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
               : params.bounty
             : null,
           slotsUntilExpiration: params?.slotsUntilExpiration ?? null,
+          validAfterSlot: params?.validAfterSlot ?? null,
         },
       },
       {

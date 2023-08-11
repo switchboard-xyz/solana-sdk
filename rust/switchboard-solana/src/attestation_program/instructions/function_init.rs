@@ -65,7 +65,6 @@ pub struct FunctionInitParams {
     pub recent_slot: u64,
     pub requests_disabled: bool,
     pub requests_require_authorization: bool,
-    pub requests_default_slots_until_expiration: u64,
     pub requests_fee: u64,
     pub creator_seed: Option<[u8; 32]>,
 }

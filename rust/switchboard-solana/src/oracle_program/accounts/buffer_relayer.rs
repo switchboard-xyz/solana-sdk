@@ -71,8 +71,8 @@ impl BufferRelayerAccountData {
     ///
     /// let buffer_account = BufferRelayerAccountData::new(buffer_account_info)?;
     /// ```
-    pub fn new<'a>(
-        switchboard_buffer: &'a AccountInfo,
+    pub fn new(
+        switchboard_buffer: &AccountInfo,
     ) -> anchor_lang::Result<Box<BufferRelayerAccountData>> {
         let data = switchboard_buffer.try_borrow_data()?;
 
@@ -87,7 +87,7 @@ impl BufferRelayerAccountData {
     }
 
     pub fn get_result(&self) -> &Vec<u8> {
-        return &self.result;
+        &self.result
     }
 
     /// Check whether the buffer relayer has been updated in the last max_staleness seconds

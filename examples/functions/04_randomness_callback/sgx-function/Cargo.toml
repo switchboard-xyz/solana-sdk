@@ -12,5 +12,5 @@ path = "src/main.rs"
 [dependencies]
 tokio = "^1"
 futures = "0.3"
-switchboard-solana = "0.28.0"
-# switchboard-solana = { version = "0.28.0", path = "../../../../rust/switchboard-solana" }
+switchboard-solana = "0.28.4"
+# switchboard-solana = { version = "0.28.4", path = "../../../../rust/switchboard-solana" }

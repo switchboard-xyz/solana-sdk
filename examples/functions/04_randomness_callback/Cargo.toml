@@ -1,13 +1,24 @@
 [workspace]
-members = [
-    "programs/*"
-]
 
-[profile.release]
-overflow-checks = true
-lto = "fat"
-codegen-units = 1
-[profile.release.build-override]
-opt-level = 3
-incremental = false
-codegen-units = 1
+[package]
+name = "custom-randomness-request"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "custom_randomness_request"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+bytemuck = "^1"
+anchor-spl = "0.28.0"
+switchboard-solana = "0.28.4"
+# switchboard-solana = { version = "0.28.4", path = "../../../rust/switchboard-solana" }

@@ -303,27 +303,29 @@ mod tests {
     }
 
     fn create_aggregator(lastest_round: AggregatorRound) -> AggregatorAccountData {
-        let mut aggregator = AggregatorAccountData::default();
-        aggregator.min_update_delay_seconds = 10;
-        aggregator.latest_confirmed_round = lastest_round;
-        aggregator.min_job_results = 10;
-        aggregator.min_oracle_results = 10;
-        return aggregator;
+        AggregatorAccountData {
+            min_update_delay_seconds: 10,
+            latest_confirmed_round: lastest_round,
+            min_job_results: 10,
+            min_oracle_results: 10,
+            ..Default::default()
+        }
     }
 
     fn create_round(value: f64, num_success: u32, num_error: u32) -> AggregatorRound {
-        let mut result = AggregatorRound::default();
-        result.num_success = num_success;
-        result.num_error = num_error;
-        result.result = SwitchboardDecimal::from_f64(value);
-        return result;
+        AggregatorRound {
+            num_success,
+            num_error,
+            result: SwitchboardDecimal::from_f64(value),
+            ..Default::default()
+        }
     }
 
     #[test]
     fn test_accept_current_on_sucess_count() {
         let lastest_round = create_round(100.0, 30, 0); // num success 30 > 10 min oracle result
 
-        let aggregator = create_aggregator(lastest_round.clone());
+        let aggregator = create_aggregator(lastest_round);
         assert_eq!(
             aggregator.get_result().unwrap(),
             lastest_round.result.clone()
@@ -333,7 +335,7 @@ mod tests {
     #[test]
     fn test_reject_current_on_sucess_count() {
         let lastest_round = create_round(100.0, 5, 0); // num success 30 < 10 min oracle result
-        let aggregator = create_aggregator(lastest_round.clone());
+        let aggregator = create_aggregator(lastest_round);
 
         assert!(
             aggregator.get_result().is_err(),

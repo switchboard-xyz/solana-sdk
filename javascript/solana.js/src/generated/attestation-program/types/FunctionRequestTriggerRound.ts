@@ -23,6 +23,8 @@ export interface FunctionRequestTriggerRoundFields {
    * valid transactions processed by the function.
    */
   enclaveSigner: PublicKey;
+  /** The slot when the request can first be executed. */
+  validAfterSlot: BN;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -45,6 +47,8 @@ export interface FunctionRequestTriggerRoundJSON {
    * valid transactions processed by the function.
    */
   enclaveSigner: string;
+  /** The slot when the request can first be executed. */
+  validAfterSlot: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -67,6 +71,8 @@ export class FunctionRequestTriggerRound {
    * valid transactions processed by the function.
    */
   readonly enclaveSigner: PublicKey;
+  /** The slot when the request can first be executed. */
+  readonly validAfterSlot: BN;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -78,6 +84,7 @@ export class FunctionRequestTriggerRound {
     this.expirationSlot = fields.expirationSlot;
     this.verifier = fields.verifier;
     this.enclaveSigner = fields.enclaveSigner;
+    this.validAfterSlot = fields.validAfterSlot;
     this.ebuf = fields.ebuf;
   }
 
@@ -91,7 +98,8 @@ export class FunctionRequestTriggerRound {
         borsh.u64("expirationSlot"),
         borsh.publicKey("verifier"),
         borsh.publicKey("enclaveSigner"),
-        borsh.array(borsh.u8(), 64, "ebuf"),
+        borsh.u64("validAfterSlot"),
+        borsh.array(borsh.u8(), 56, "ebuf"),
       ],
       property
     );
@@ -107,6 +115,7 @@ export class FunctionRequestTriggerRound {
       expirationSlot: obj.expirationSlot,
       verifier: obj.verifier,
       enclaveSigner: obj.enclaveSigner,
+      validAfterSlot: obj.validAfterSlot,
       ebuf: obj.ebuf,
     });
   }
@@ -120,6 +129,7 @@ export class FunctionRequestTriggerRound {
       expirationSlot: fields.expirationSlot,
       verifier: fields.verifier,
       enclaveSigner: fields.enclaveSigner,
+      validAfterSlot: fields.validAfterSlot,
       ebuf: fields.ebuf,
     };
   }
@@ -133,6 +143,7 @@ export class FunctionRequestTriggerRound {
       expirationSlot: this.expirationSlot.toString(),
       verifier: this.verifier.toString(),
       enclaveSigner: this.enclaveSigner.toString(),
+      validAfterSlot: this.validAfterSlot.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -148,6 +159,7 @@ export class FunctionRequestTriggerRound {
       expirationSlot: new BN(obj.expirationSlot),
       verifier: new PublicKey(obj.verifier),
       enclaveSigner: new PublicKey(obj.enclaveSigner),
+      validAfterSlot: new BN(obj.validAfterSlot),
       ebuf: obj.ebuf,
     });
   }

@@ -12,11 +12,10 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
-    "@solana/spl-token": "^0.3.6",
-    "@solana/web3.js": "^1.78.0",
-    "@switchboard-xyz/common": "latest",
-    "@switchboard-xyz/oracle": "latest",
-    "@switchboard-xyz/solana.js": "workspace:latest"
+    "@solana/spl-token": "^0.3.8",
+    "@solana/web3.js": "^1.78.3",
+    "@switchboard-xyz/common": "^2.3.0",
+    "@switchboard-xyz/solana.js": "^2.5.0"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

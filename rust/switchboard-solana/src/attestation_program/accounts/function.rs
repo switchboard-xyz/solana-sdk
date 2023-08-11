@@ -40,7 +40,7 @@ impl From<u8> for FunctionStatus {
 }
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq)]
 pub struct FunctionAccountData {
     // Easy Filtering Config
     /// Whether the function is invoked on a schedule or by request
@@ -119,9 +119,8 @@ pub struct FunctionAccountData {
     /// Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
     /// Useful if you want to use CPIs to control request account creation.
     pub requests_require_authorization: bool,
-    /// The number of slots after a request has been verified before allowing a non-authority account to close the account.
-    /// Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots.
-    pub requests_default_slots_until_expiration: u64,
+    /// DEPRECATED.
+    pub reserved1: [u8; 8],
     /// The lamports paid to the FunctionAccount escrow on each successful update request.
     pub requests_fee: u64,
 
@@ -177,7 +176,7 @@ impl anchor_lang::AccountDeserialize for FunctionAccountData {
     fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
         let data: &[u8] = &buf[8..];
         bytemuck::try_from_bytes(data)
-            .map(|r: &Self| r.clone())
+            .map(|r: &Self| *r)
             .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize.into())
     }
 }
