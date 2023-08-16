@@ -1810,12 +1810,16 @@
             "type": "bool"
           },
           {
-            "name": "requestsDefaultSlotsUntilExpiration",
+            "name": "reserved1",
             "docs": [
-              "The number of slots after a request has been verified before allowing a non-authority account to close the account.",
-              "Useful if you want to submit multiple txns in your custom function and need the account to be kept alive for multiple slots."
+              "DEPRECATED."
             ],
-            "type": "u64"
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
           },
           {
             "name": "requestsFee",
@@ -2341,10 +2345,6 @@
             "type": "bool"
           },
           {
-            "name": "requestsDefaultSlotsUntilExpiration",
-            "type": "u64"
-          },
-          {
             "name": "requestsFee",
             "type": "u64"
           },
@@ -2440,12 +2440,6 @@
             "name": "requestsRequireAuthorization",
             "type": {
               "option": "bool"
-            }
-          },
-          {
-            "name": "requestsDefaultSlotsUntilExpiration",
-            "type": {
-              "option": "u64"
             }
           },
           {
@@ -2654,6 +2648,12 @@
             "type": {
               "option": "u64"
             }
+          },
+          {
+            "name": "validAfterSlot",
+            "type": {
+              "option": "u64"
+            }
           }
         ]
       }
@@ -2687,6 +2687,12 @@
           },
           {
             "name": "slotsUntilExpiration",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "validAfterSlot",
             "type": {
               "option": "u64"
             }
@@ -2910,6 +2916,13 @@
             "type": "publicKey"
           },
           {
+            "name": "validAfterSlot",
+            "docs": [
+              "The slot when the request can first be executed."
+            ],
+            "type": "u64"
+          },
+          {
             "name": "ebuf",
             "docs": [
               "Reserved."
@@ -2917,7 +2930,7 @@
             "type": {
               "array": [
                 "u8",
-                64
+                56
               ]
             }
           }
@@ -3724,6 +3737,11 @@
     {
       "code": 6040,
       "name": "AccountCloseNotReady"
+    },
+    {
+      "code": 6041,
+      "name": "FunctionRequestNotReady",
+      "msg": "The FunctionRequestAccount is not ready to be verified"
     }
   ]
 }

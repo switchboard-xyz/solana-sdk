@@ -465,6 +465,8 @@ describe("Aggregator Tests", () => {
         enable: true,
         fundAmount: 0.25,
         historyLimit: 25,
+        forceReportPeriod: 3600,
+        varianceThreshold: 0.25,
         jobs: [
           { pubkey: jobAccount.publicKey },
           {
@@ -491,6 +493,18 @@ describe("Aggregator Tests", () => {
     assert(
       agg1.authority.equals(myAuth.publicKey),
       `AggregatorAuthorityMismatch, expected ${myAuth.publicKey}, received ${agg1.authority}`
+    );
+    const forceReportPeriod = agg1.forceReportPeriod.toNumber();
+    console.log(`forceReportPeriod: ${forceReportPeriod}`);
+    assert(
+      forceReportPeriod === 3600,
+      `AggregatorForceReportPeriodMismatch, expected 3600, received ${forceReportPeriod}`
+    );
+    const varianceThreshold = agg1.varianceThreshold.toBig().toNumber();
+    console.log(`varianceThreshold: ${varianceThreshold}`);
+    assert(
+      varianceThreshold === 0.25,
+      `AggregatorVarianceThresholdMismatch, expected 0.25 %, received ${varianceThreshold}`
     );
   });
 });

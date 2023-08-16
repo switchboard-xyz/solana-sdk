@@ -149,7 +149,7 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
     options?: TransactionObjectOptions
   ): Promise<[VerifierAccount, TransactionObject]> {
     const verifierKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(verifierKeypair);
+    await program.verifyNewKeypair(verifierKeypair);
 
     const queueData = await params.queueAccount.loadData();
 

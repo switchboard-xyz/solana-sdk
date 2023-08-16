@@ -1,8 +1,9 @@
 {
   "name": "solana-raffle-program",
   "scripts": {
-    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "build:cargo": "anchor build",
+    "fix": "cargo fmt && pnpm exec prettier ./tests/*.ts -w",
+    "clean": "pnpm exec rimraf node_modules .anchor .turbo"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",

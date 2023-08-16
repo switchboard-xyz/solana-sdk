@@ -574,6 +574,25 @@ export class SwitchboardProgram {
   }
 
   /**
+   * Verifies that a new keypair has been provided and the corresponding account does not already exist.
+   *
+   * **NOTE:** Creating new accounts without this check may prevent the ability to withdraw any existing funds.
+   *
+   * @param keypair - The Keypair to be verified.
+   * @throws Will throw an error if the account for the keypair already exists.
+   */
+  public async verifyNewKeypairs(...keypairs: Keypair[]): Promise<void> {
+    const accounts = await this.connection.getMultipleAccountsInfo(
+      keypairs.map((k) => k.publicKey)
+    );
+    for (const [n, account] of accounts.entries()) {
+      if (account) {
+        throw new errors.ExistingKeypair();
+      }
+    }
+  }
+
+  /**
    * Retrieves the account namespace for the Switchboard V2 Program.
    * @return The AccountNamespace instance for the Switchboard V2 Program.
    */

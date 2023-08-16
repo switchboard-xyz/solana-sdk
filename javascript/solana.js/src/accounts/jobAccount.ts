@@ -6,6 +6,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
+import type { WithRequired } from "../types.js";
 
 import { Account } from "./account.js";
 
@@ -145,7 +146,6 @@ export class JobAccount extends Account<types.JobAccountData> {
     }
 
     const jobKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(jobKeypair);
 
     const authority = params.authority ? params.authority.publicKey : payer;
 
@@ -255,10 +255,12 @@ export class JobAccount extends Account<types.JobAccountData> {
     params: JobInitParams,
     options?: SendTransactionObjectOptions
   ): Promise<[JobAccount, Array<TransactionSignature>]> {
+    const keypair = params.keypair ?? Keypair.generate();
+    await program.verifyNewKeypair(keypair);
     const [account, transactions] = JobAccount.createInstructions(
       program,
       program.walletPubkey,
-      params,
+      { ...params, keypair },
       options
     );
     const txSignature = await program.signAndSendAll(transactions, options);

@@ -2,6 +2,7 @@ use crate::prelude::*;
 use anchor_lang::solana_program::instruction::Instruction;
 use anchor_lang::solana_program::message::Message;
 use anchor_lang::solana_program::pubkey::Pubkey;
+use anchor_lang::AnchorDeserialize;
 use hex;
 use sgx_quote::Quote;
 use solana_client::rpc_client::RpcClient;
@@ -290,12 +291,12 @@ impl FunctionRunner {
             ));
         }
 
-        let function_data = self.load_function_data().await?;
+        let function_data: FunctionAccountData = *bytemuck::try_from_bytes(
+            &hex::decode(std::env::var("FUNCTION_DATA").unwrap()).unwrap()
+        ).unwrap();
 
-        let queue_authority = self
-            .load_queue_authority(function_data.attestation_queue)
-            .await?;
-        let verifier_enclave_signer = self.load_verifier_signer(self.verifier).await?;
+        let queue_authority = Pubkey::from_str(&std::env::var("QUEUE_AUTHORITY").unwrap()).unwrap();
+        let verifier_enclave_signer = Pubkey::from_str(&std::env::var("VERIFIER_ENCLAVE_SIGNER").unwrap()).unwrap();
 
         let verifier_permission = AttestationPermissionAccountData::get_pda(
             &queue_authority,
@@ -346,6 +347,7 @@ impl FunctionRunner {
             )));
         }
 
+        // TODO: replace with variables
         let function_data = self.load_function_data().await?;
 
         let queue_authority = self
@@ -419,6 +421,7 @@ impl FunctionRunner {
             fn_key: self.function.to_bytes().into(),
             signer: self.signer.to_bytes().into(),
             fn_request_key,
+            // TODO: hash should be checked against
             fn_request_hash: Vec::new(),
             chain_result_info: Solana(SOLFunctionResult {
                 serialized_tx: bincode::serialize(&tx).unwrap(),

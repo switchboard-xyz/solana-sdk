@@ -2,36 +2,12 @@
 
 ![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# anchor-vrf-lite-parser
-
-> An example program written in Anchor demonstrating how to integrate Switchboard Functions and verify attestation on-chain.
-
-[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
-
-</div>
-
-<!-- install -->
-
-<!-- installstop -->
-
 ## Usage
 
-Build the example program
+Deploy function:
 
 ```bash
-anchor build
-```
+sb solana function create "CkvizjVnm2zA5Wuwan34NhVT3zFc7vqUyGnA6tuEF5aE" --container ${CONTAINER_NAME} --cluster devnet --schedule "15 * * * * *" --containerRegistry dockerhub --keypair /Users/mgild/switchboard_environments_v2/devnet/upgrade_authority/upgrade_authority.json --mrEnclave 0x63ba8df478b4a74795a79a73b8f0a6f792f88e95f9ed6202289091e6e1b65fa1 --fundAmount 0.25
 
-Get your program ID and update `Anchor.toml` and `src/lib.rs` with your pubkey
-
-```bash
-export ANCHOR_VRF_LITE_PARSER_PUBKEY=$(solana-keygen pubkey target/deploy/anchor_vrf_lite_parser-keypair.json)
-sed -i '' s/5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb/"$ANCHOR_VRF_LITE_PARSER_PUBKEY"/g Anchor.toml
-sed -i '' s/5Hhm5xKDiThfidbpqjJpKmMJEcKmjj5tEUNFpi2DzSvb/"$ANCHOR_VRF_LITE_PARSER_PUBKEY"/g src/lib.rs
-```
-
-Then run Anchor test
-
-```bash
-anchor test
+sb solana function create "2ie3JZfKcvsRLsJaP5fSo43gUo1vsurnUAtAgUdUAiDG" --container ${CONTAINER_NAME} --schedule "30 * * * * *" --containerRegistry dockerhub --keypair /Users/mgild/switchboard_environments_v2/mainnet/upgrade_authority/upgrade_authority.json --mainnetBeta --mrEnclave 0x63ba8df478b4a74795a79a73b8f0a6f792f88e95f9ed6202289091e6e1b65fa1 --fundAmount 0.25
 ```
