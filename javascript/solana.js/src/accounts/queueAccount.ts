@@ -166,10 +166,8 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
     options?: TransactionObjectOptions
   ): Promise<[QueueAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(keypair);
-
     const dataBuffer = params.dataBufferKeypair ?? Keypair.generate();
-    program.verifyNewKeypair(dataBuffer);
+    await program.verifyNewKeypairs(keypair, dataBuffer);
 
     const queueAccount = new QueueAccount(program, keypair.publicKey);
     queueAccount.dataBuffer = new QueueDataBuffer(
@@ -509,7 +507,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
               authority: job.authority,
               expiration: job.expiration,
               variables: job.variables,
-              keypair: job.keypair,
+              keypair: job.keypair ?? Keypair.generate(),
             },
             options
           );
@@ -534,7 +532,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           queueAccount: this,
           queueAuthority: queueAuthorityPubkey,
           keypair: params.keypair,
-          authority: params.authority,
+          authority: payer, // payer is authority until end of the instruction
         },
         options
       );
@@ -548,7 +546,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
         fundAmount: params.fundAmount,
         funderTokenWallet: params.funderTokenWallet ?? userTokenAddress,
         funderAuthority: params.funderAuthority,
-        withdrawAuthority: params.withdrawAuthority ?? params.authority,
+        withdrawAuthority: params.withdrawAuthority ?? params.authority, // make sure we set this correctly
         aggregatorAccount: aggregatorAccount,
         queueAccount: this,
         jobAuthorities: [], // create lease before adding jobs to skip this step
@@ -606,10 +604,12 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
 
     // set priority fees
     if (
-      params.basePriorityFee !== undefined ||
-      params.priorityFeeBump !== undefined ||
-      params.priorityFeeBumpPeriod !== undefined ||
-      params.maxPriorityFeeMultiplier !== undefined
+      (params.basePriorityFee !== undefined && params.basePriorityFee > 0) ||
+      (params.priorityFeeBump !== undefined && params.priorityFeeBump > 0) ||
+      (params.priorityFeeBumpPeriod !== undefined &&
+        params.priorityFeeBumpPeriod > 0) ||
+      (params.maxPriorityFeeMultiplier !== undefined &&
+        params.maxPriorityFeeMultiplier > 0)
     ) {
       const setAggregatorConfig = await aggregatorAccount.setConfigInstruction(
         payer,
@@ -1028,7 +1028,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           authority: params.job.authority,
           expiration: params.job.expiration,
           variables: params.job.variables,
-          keypair: params.job.keypair,
+          keypair: params.job.keypair ?? Keypair.generate(),
         }
       );
       txns.push(...jobInit);

@@ -116,8 +116,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
     }
   ): Promise<[BufferRelayerAccount, TransactionObject]> {
     const keypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(keypair);
-
+    await program.verifyNewKeypair(keypair);
     const size = 2048;
 
     const ixns: TransactionInstruction[] = [];

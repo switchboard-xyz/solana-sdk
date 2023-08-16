@@ -7,6 +7,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
+import type { WithRequired } from "../types.js";
 import { parseRawBuffer } from "../utils.js";
 
 import { Account } from "./account.js";
@@ -154,12 +155,9 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
   public static createInstruction(
     program: SwitchboardProgram,
     payer: PublicKey,
-    params: AttestationQueueAccountInitParams,
+    params: WithRequired<AttestationQueueAccountInitParams, "keypair">,
     options?: TransactionObjectOptions
   ): [AttestationQueueAccount, TransactionObject] {
-    const queueKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(queueKeypair);
-
     const instruction = types.attestationQueueInit(
       program,
       {
@@ -174,15 +172,15 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
         },
       },
       {
-        queue: queueKeypair.publicKey,
+        queue: params.keypair.publicKey,
         authority: params.authority ? params.authority.publicKey : payer,
         payer: payer,
         systemProgram: SystemProgram.programId,
       }
     );
     return [
-      new AttestationQueueAccount(program, queueKeypair.publicKey),
-      new TransactionObject(payer, [instruction], [queueKeypair], options),
+      new AttestationQueueAccount(program, params.keypair.publicKey),
+      new TransactionObject(payer, [instruction], [params.keypair], options),
     ];
   }
 
@@ -191,10 +189,13 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAccountInitParams,
     options?: SendTransactionObjectOptions
   ): Promise<[AttestationQueueAccount, TransactionSignature]> {
+    const queueKeypair = params.keypair ?? Keypair.generate();
+    await program.verifyNewKeypair(queueKeypair);
+
     const [account, txnObject] = this.createInstruction(
       program,
       program.walletPubkey,
-      params,
+      { ...params, keypair: queueKeypair },
       options
     );
     return [account, await program.signAndSend(txnObject, options)];

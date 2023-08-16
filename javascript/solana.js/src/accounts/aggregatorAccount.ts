@@ -256,7 +256,7 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
     }
 
     const keypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(keypair);
+    await program.verifyNewKeypair(keypair);
 
     const ixns: TransactionInstruction[] = [];
     const signers: Keypair[] = [keypair];
@@ -1237,7 +1237,6 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
       });
     }
 
-    const varianceThreshold = params.varianceThreshold ?? 0;
     const setConfigIxn = ix.aggregatorSetConfig(
       this.program,
       {
@@ -1258,9 +1257,10 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
           minJobResults: params.minJobResults ?? null,
           forceReportPeriod: params.forceReportPeriod ?? null,
           varianceThreshold:
-            varianceThreshold >= 0
+            params.varianceThreshold !== undefined &&
+            params.varianceThreshold !== null
               ? new BorshDecimal(
-                  SwitchboardDecimal.fromBig(new Big(varianceThreshold))
+                  SwitchboardDecimal.fromBig(new Big(params.varianceThreshold))
                 )
               : null,
           basePriorityFee: params.basePriorityFee ?? null,

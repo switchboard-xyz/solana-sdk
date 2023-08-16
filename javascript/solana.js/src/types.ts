@@ -27,6 +27,8 @@ import type {
 
 import type { OracleJob } from "@switchboard-xyz/common";
 
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+
 export interface AccountDefinition<T extends SwitchboardAccount> {
   account: T;
 }

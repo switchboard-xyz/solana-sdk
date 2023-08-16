@@ -14,16 +14,12 @@
       "./node_modules/@types"
     ],
     "module": "commonjs",
+    "moduleResolution": "node",
     "noEmit": true,
     "esModuleInterop": true,
     "strict": false,
     "strictNullChecks": false,
-    "target": "es6",
-    "paths": {
-      "@switchboard-xyz/solana.js": [
-        "../../../../../javascript/solana.js"
-      ]
-    }
+    "target": "es6"
   },
   "include": [
     "tests/**/*",
@@ -32,10 +28,5 @@
   "exclude": [
     "target",
     "lib"
-  ],
-  "references": [
-    {
-      "path": "../../../../../javascript/solana.js"
-    }
   ]
 }

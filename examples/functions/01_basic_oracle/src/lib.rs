@@ -12,7 +12,7 @@ pub use model::*;
 pub mod utils;
 pub use utils::*;
 
-declare_id!("APWppEwwfddbooTUijn3oAVnQH6jkLDxW4JrTMbBoQXJ");
+declare_id!("EF68PJkRqQu2VthTSy19kg6TWynMtRmLpxcMDKEdLC8t");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 

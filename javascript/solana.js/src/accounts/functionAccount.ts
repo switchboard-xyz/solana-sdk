@@ -328,7 +328,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
             await program.connection.getLatestBlockhashAndContext({
               commitment: "finalized",
             })
-          ).context.slot
+          ).context.slot - 1
         );
 
     const creatorSeed = params.creatorSeed

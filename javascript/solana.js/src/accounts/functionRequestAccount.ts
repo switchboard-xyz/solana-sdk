@@ -123,7 +123,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
 
     // TODO: Add way to make this a PDA
     const requestKeypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(requestKeypair);
+    await program.verifyNewKeypair(requestKeypair);
 
     const escrow = program.mint.getAssociatedAddress(requestKeypair.publicKey);
 

@@ -106,7 +106,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
     params: VrfInitParams,
     options?: TransactionObjectOptions
   ): Promise<[VrfAccount, TransactionObject]> {
-    program.verifyNewKeypair(params.vrfKeypair);
+    await program.verifyNewKeypair(params.vrfKeypair);
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
     const size = program.account.vrfAccountData.size;
 

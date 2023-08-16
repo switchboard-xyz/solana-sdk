@@ -151,6 +151,7 @@ export async function updateStaticFeed(
     aggregatorAccount.program,
     aggregatorAccount.program.walletPubkey,
     {
+      keypair: Keypair.generate(),
       data: OracleJob.encodeDelimited(
         OracleJob.create({
           tasks: [

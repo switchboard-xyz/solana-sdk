@@ -6,6 +6,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
+import type { WithRequired } from "../types.js";
 
 import type { OnAccountChangeCallback } from "./account.js";
 import { Account } from "./account.js";
@@ -104,14 +105,13 @@ export class CrankAccount extends Account<types.CrankAccountData> {
     params: CrankInitParams,
     options?: TransactionObjectOptions
   ): Promise<[CrankAccount, TransactionObject]> {
-    const keypair = params.keypair ?? Keypair.generate();
-    program.verifyNewKeypair(keypair);
-
-    const buffer = params.dataBufferKeypair ?? anchor.web3.Keypair.generate();
-    program.verifyNewKeypair(buffer);
-
     const maxRows = params.maxRows ?? 500;
     const crankSize = CrankDataBuffer.getAccountSize(maxRows);
+
+    const keypair = params.keypair ?? Keypair.generate();
+    const buffer = params.dataBufferKeypair ?? anchor.web3.Keypair.generate();
+
+    await program.verifyNewKeypairs(keypair, buffer);
 
     const crankInit = new TransactionObject(
       payer,

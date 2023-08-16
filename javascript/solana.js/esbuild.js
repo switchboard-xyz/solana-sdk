@@ -1,6 +1,7 @@
 /* eslint node/no-unpublished-require: 0 */
 /* eslint no-unused-vars: 0 */
 
+import * as utils from "@switchboard-xyz/common/esm-utils";
 import { execSync } from "child_process";
 import { build } from "esbuild";
 import fs from "fs";
@@ -146,9 +147,7 @@ async function main() {
   execSync(`${tscPath} --outDir lib-cjs -p tsconfig.cjs.json`, {
     encoding: "utf-8",
   });
-  execSync(`tsx scripts/move-cjs-to-lib`, {
-    encoding: "utf-8",
-  });
+  utils.moveCjsFiles("lib-cjs", "lib");
   fs.rmSync("lib-cjs", { recursive: true });
 
   console.log(`Generating entrypoints ...`);
