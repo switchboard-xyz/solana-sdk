@@ -8,8 +8,8 @@ pub struct Initialize<'info> {
         space = 8 + std::mem::size_of::<RaffleAccount>(),
         payer = payer,
         seeds = [
-          b"MY_RAFFLE", 
-          authority.key().as_ref(), 
+          b"MY_RAFFLE",
+          authority.key().as_ref(),
           params.recent_slot.to_le_bytes().as_ref()
         ],
         bump
@@ -46,7 +46,6 @@ impl Initialize<'_> {
     pub fn actuate(ctx: &Context<Self>, params: &InitializeParams) -> Result<()> {
         let mut raffle = ctx.accounts.raffle.load_init()?;
         raffle.bump = *ctx.bumps.get("raffle").unwrap();
-
 
         // accounts
         raffle.authority = ctx.accounts.authority.key();
