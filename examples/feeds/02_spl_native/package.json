@@ -19,7 +19,7 @@
     "@solana/web3.js": "^1.77.3",
     "@switchboard-xyz/common": "^2.3.2",
     "@switchboard-xyz/oracle": "latest",
-    "@switchboard-xyz/solana.js": "^2.5.0"
+    "@switchboard-xyz/solana.js": "^2.5.4"
   },
   "devDependencies": {
     "@types/chai": "^4.3.0",
