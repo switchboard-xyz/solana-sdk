@@ -1,31 +1,25 @@
 <div align="center">
 
-![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
+![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
 # switchboard-solana
 
 > A Rust library to interact with Switchboard accounts on Solana.
 
-  <p>
-   <a href="https://crates.io/crates/switchboard-solana">
-      <img alt="Crates.io" src="https://img.shields.io/crates/v/switchboard-solana?label=switchboard-solana&logo=rust" />
-    </a>
-  </p>
+[![Crates.io Badge](https://img.shields.io/crates/v/switchboard-solana?label=switchboard-solana&logo=rust)](https://crates.io/crates/switchboard-solana)
 
-  <p>
-    <a href="https://discord.gg/switchboardxyz">
-      <img alt="Discord" src="https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white" />
-    </a>
-    <a href="https://twitter.com/switchboardxyz">
-      <img alt="Twitter" src="https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard" />
-    </a>
-  </p>
+[![Discord Badge](https://img.shields.io/discord/841525135311634443?color=blueviolet&logo=discord&logoColor=white)](https://discord.gg/switchboardxyz)
+
+[![Twitter Badge](https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard)](https://twitter.com/switchboardxyz)
 
   <h4>
     <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana">docs.rs/switchboard-solana</a>
   </h4>
   <h4>
     <strong>Solana SDK: </strong><a href="https://github.com/switchboard-xyz/solana-sdk">github.com/switchboard-xyz/solana-sdk</a>
+  </h4>
+  <h4>
+    <strong>Switchboard Documentation: </strong><a href="https://docs.switchboard.xyz">docs.switchboard.xyz</a>
   </h4>
 </div>
 

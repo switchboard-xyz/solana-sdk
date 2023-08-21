@@ -28,16 +28,14 @@
     "strictNullChecks": false,
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
-    "esModuleInterop": true,
-    "paths": {
-      "@switchboard-xyz/common": [
-        "../common"
-      ]
-    }
+    "esModuleInterop": true
   },
   "references": [
     {
       "path": "../common"
+    },
+    {
+      "path": "../oracle"
     }
   ]
 }
