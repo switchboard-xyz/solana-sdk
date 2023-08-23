@@ -609,6 +609,17 @@ export class OracleAccount extends Account<types.OracleAccountData> {
     );
 
     if (params.unwrap) {
+      const withdrawDestination = params.withdrawAccount ?? payer;
+      const withdrawDestinationAccountInfo =
+        await this.program.connection.getAccountInfo(withdrawDestination);
+      if (
+        !withdrawDestinationAccountInfo?.owner.equals(SystemProgram.programId)
+      ) {
+        throw new Error(
+          `'withdrawAccount' must be owned by the SystemProgram if 'unwrap' is true`
+        );
+      }
+
       const ephemeralWallet = Keypair.generate();
 
       const ixns = [
@@ -654,7 +665,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
         ),
         spl.createCloseAccountInstruction(
           ephemeralWallet.publicKey,
-          oracle.oracleAuthority,
+          withdrawDestination,
           payer
         ),
       ];
@@ -674,6 +685,19 @@ export class OracleAccount extends Account<types.OracleAccountData> {
       "withdrawAccount" in params && params.withdrawAccount
         ? params.withdrawAccount
         : this.program.mint.getAssociatedAddress(payer);
+
+    const withdrawAccountInfo = await this.program.mint.getAccount(
+      withdrawAccount
+    );
+
+    if (
+      !withdrawAccountInfo ||
+      !withdrawAccountInfo.owner.equals(spl.TOKEN_PROGRAM_ID)
+    ) {
+      throw new Error(
+        `'withdrawAccount' must be initialized and owned by the TokenProgram if 'unwrap' is false`
+      );
+    }
 
     const withdrawIxn = types.oracleWithdraw(
       this.program,
@@ -852,6 +876,8 @@ export interface OracleWithdrawBaseParams {
 
 export interface OracleWithdrawUnwrapParams extends OracleWithdrawBaseParams {
   unwrap: true;
+  /** System account where the unwrapped tokens will be sent. Defaults to the payer. */
+  withdrawAccount?: PublicKey;
 }
 
 export interface OracleWithdrawWalletParams extends OracleWithdrawBaseParams {

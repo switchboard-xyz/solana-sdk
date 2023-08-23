@@ -37,7 +37,9 @@ export interface ITransactionObject extends Required<TransactionObjectOptions> {
 
 export interface TransactionObjectOptions {
   enableDurableNonce?: boolean;
+  /** The number of lamports to affix to the transaction. */
   computeUnitPrice?: number;
+  /** The number of compute units for the transaction. */
   computeUnitLimit?: number;
 }
 
@@ -127,7 +129,8 @@ export class TransactionObject implements ITransactionObject {
     }
 
     const priorityTxn = TransactionObject.getComputeUnitPriceIxn(
-      options?.computeUnitPrice
+      options?.computeUnitPrice,
+      options?.computeUnitLimit
     );
     if (
       priorityTxn !== undefined &&
@@ -178,11 +181,18 @@ export class TransactionObject implements ITransactionObject {
   }
 
   static getComputeUnitPriceIxn(
-    computeUnitPrice?: number
+    computeUnitPrice?: number, // lamports
+    _computeUnitLimit?: number
   ): TransactionInstruction | undefined {
+    // calculatePriorityFee = 100 Lamports
+    // computeUnitLimit = 250,000 CUs
+    // lamports / CU = 100 / 250,000 = 0.0004 Lamports / CUs
+    // microLamports = 0.0004 * 10e6 = 4000 microLamports / CU
     if (computeUnitPrice && computeUnitPrice > 0) {
       return ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: computeUnitPrice,
+        microLamports: Math.round(
+          (computeUnitPrice / (_computeUnitLimit ?? 250000)) * 1000000
+        ),
       });
     }
 

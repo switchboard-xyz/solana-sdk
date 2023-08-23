@@ -11,6 +11,7 @@ import {
   ProgramStateAccount,
   QueueAccount,
 } from "./accounts/index.js";
+import { viewVersion as viewAttestationVersion } from "./generated/attestation-program/instructions/viewVersion.js";
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -24,6 +25,7 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from "./generated/index.js";
+import { viewVersion as viewSbVersion } from "./generated/oracle-program/instructions/viewVersion.js";
 import {
   DEVNET_GENESIS_HASH,
   MAINNET_GENESIS_HASH,
@@ -46,6 +48,7 @@ import type { LoadedJobDefinition } from "./types.js";
 import type { AccountNamespace, Idl, Wallet } from "@coral-xyz/anchor";
 import {
   ACCOUNT_DISCRIMINATOR_SIZE,
+  AnchorError,
   AnchorProvider,
   BorshAccountsCoder,
   Program,
@@ -60,9 +63,13 @@ import type {
   SendOptions,
   Transaction,
   TransactionSignature,
+} from "@solana/web3.js";
+import {
+  Keypair,
+  PublicKey,
+  TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { Keypair, PublicKey } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
@@ -428,6 +435,53 @@ export class SwitchboardProgram {
     );
     return program;
   };
+
+  public async getGitVersion(): Promise<string> {
+    const messageV0 = new TransactionMessage({
+      payerKey: this.walletPubkey,
+      instructions: [
+        await this._program.methods.viewVersion().accounts({}).instruction(),
+      ],
+      recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
+    }).compileToLegacyMessage();
+    const simulationResult = await this.connection.simulateTransaction(
+      new VersionedTransaction(messageV0),
+      { sigVerify: false }
+    );
+    const logs = (simulationResult.value?.logs ?? []).join("\n");
+    const version = extractVersion(logs);
+    if (version) {
+      return version;
+    }
+    throw new Error(
+      `Failed to yield the git version in the view_version simulation result`
+    );
+  }
+
+  public async getAttestationGitVersion(): Promise<string> {
+    const messageV0 = new TransactionMessage({
+      payerKey: this.walletPubkey,
+      instructions: [
+        await this._attestationProgram.methods
+          .viewVersion()
+          .accounts({})
+          .instruction(),
+      ],
+      recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
+    }).compileToLegacyMessage();
+    const simulationResult = await this.connection.simulateTransaction(
+      new VersionedTransaction(messageV0),
+      { sigVerify: false }
+    );
+    const logs = (simulationResult.value?.logs ?? []).join("\n");
+    const version = extractVersion(logs);
+    if (version) {
+      return version;
+    }
+    throw new Error(
+      `Failed to yield the git version in the view_version simulation result`
+    );
+  }
 
   /**
    * Retrieves the Switchboard V2 Program ID for the currently connected cluster.
@@ -1039,4 +1093,10 @@ export class AnchorWallet implements Wallet {
 interface AccountInfoResponse {
   pubkey: PublicKey;
   account: AccountInfo<Buffer>;
+}
+
+function extractVersion(input: string): string | null {
+  const regex = /VERSION: (\S+)/;
+  const match = input.match(regex);
+  return match ? match[1] : null;
 }

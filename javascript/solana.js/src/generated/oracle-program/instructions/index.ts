@@ -160,6 +160,7 @@ export type {
   VaultTransferArgs,
 } from "./vaultTransfer.js";
 export { vaultTransfer } from "./vaultTransfer.js";
+export { viewVersion } from "./viewVersion.js";
 export type {
   VrfCloseActionAccounts,
   VrfCloseActionArgs,

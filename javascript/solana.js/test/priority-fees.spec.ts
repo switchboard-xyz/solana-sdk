@@ -1,85 +1,48 @@
 /* eslint-disable no-unused-vars */
 import "mocha";
 
-import { AggregatorAccount, types } from "../src/index.js";
+import { calculatePriorityFee } from "../src/index.js";
 
-import { BN } from "@switchboard-xyz/common";
 import assert from "assert";
 
 describe("Priority Fees Tests", () => {
-  const defaultState = AggregatorAccount.default();
-
-  const startingTimestamp = 100;
-  const basePriorityFee = 1000; // always bump fee by 1000 lamports
-  const priorityFeeBump = 500; // bump fee by 500 lamports for every period the feed is stale
-  const priorityFeeBumpPeriod = 30; // bump fee by priorityFeeBump every 30s
-  const maxPriorityFeeMultiplier = 10; // the max fee multiplier is 10 * 500 lamports
-
-  const aggregatorFields: types.AggregatorAccountDataFields = {
-    ...defaultState,
-    basePriorityFee: basePriorityFee,
-    priorityFeeBump: priorityFeeBump,
-    priorityFeeBumpPeriod: priorityFeeBumpPeriod,
-    maxPriorityFeeMultiplier: maxPriorityFeeMultiplier,
-    latestConfirmedRound: {
-      ...defaultState.latestConfirmedRound,
-      roundOpenTimestamp: new BN(startingTimestamp),
-    },
-  };
-  const aggregator = new types.AggregatorAccountData(aggregatorFields);
-
-  it("Calculates the priority fee with no staleness", async () => {
-    // no staleness
-    const noStalenessFee = AggregatorAccount.calculatePriorityFee(
-      aggregator,
-      startingTimestamp
-    );
-    const expectedNoStalenessFee = Math.round(basePriorityFee);
-    assert(
-      expectedNoStalenessFee === noStalenessFee,
-      `priorityFee mismatch with no staleness, expected ${expectedNoStalenessFee}, received ${noStalenessFee}`
-    );
+  it("Calculates priority fee with empty values", async () => {
+    const fee = calculatePriorityFee(10000000, 0, 0, 0, 0, 0);
+    assert(fee === 0, "PriorityFeeMismatch");
   });
 
-  it("Calculates the priority fee with staleness multiplier", async () => {
-    // with staleness
-    const multipliers = [0.5, 1, 1.33333, 1.8323232, 2, 5, 10];
-    for (const multiplier of multipliers) {
-      const priorityFee = AggregatorAccount.calculatePriorityFee(
-        aggregator,
-        startingTimestamp + multiplier * priorityFeeBumpPeriod
-      );
-      const expectedPriorityFee = Math.round(
-        basePriorityFee + multiplier * priorityFeeBump
-      );
-      assert(
-        expectedPriorityFee === priorityFee,
-        `priorityFee mismatch for multiplier ${multiplier}, expected ${expectedPriorityFee}, received ${priorityFee}`
-      );
-    }
+  it("Calculates priority fee with empty max multiplier", async () => {
+    const fee = calculatePriorityFee(10_500, 10_000, 100, 10, 60, 0);
+    assert(fee === 100, "PriorityFeeMismatch");
   });
 
-  it("Calculates the priority fee with max multiplier", async () => {
-    // with max multiplier
-    const expectedPriorityFee = Math.round(
-      basePriorityFee + maxPriorityFeeMultiplier * priorityFeeBump
-    ); // should never exceed this
+  it("Calculates priority fee with empty bump period", async () => {
+    const fee = calculatePriorityFee(10_500, 10_000, 100, 10, 0, 10);
+    assert(fee === 100, "PriorityFeeMismatch");
+  });
 
-    const multipliers = [
-      maxPriorityFeeMultiplier + 1,
-      maxPriorityFeeMultiplier * 2,
-      maxPriorityFeeMultiplier * 10,
-    ];
+  it("Calculates priority fee when not stale", async () => {
+    const fee = calculatePriorityFee(10_500, 10_500, 100, 10, 60, 10);
+    assert(fee === 100, "PriorityFeeMismatch");
+  });
 
-    for (const multiplier of multipliers) {
-      const priorityFee = AggregatorAccount.calculatePriorityFee(
-        aggregator,
-        startingTimestamp + multiplier * priorityFeeBumpPeriod
-      );
-      assert(
-        expectedPriorityFee === priorityFee,
-        `priorityFee mismatch for max multiplier, expected ${expectedPriorityFee}, received ${priorityFee}`
-      );
-    }
+  it("Calculates priority fee when barely stale", async () => {
+    const fee = calculatePriorityFee(10_510, 10_500, 100, 10, 60, 10);
+    assert(fee === 100, "PriorityFeeMismatch");
+  });
+
+  it("Calculates priority fee when stale for 1 period", async () => {
+    const fee = calculatePriorityFee(10_621, 10_500, 100, 10, 60, 10);
+    assert(fee === 110, "PriorityFeeMismatch");
+  });
+
+  it("Calculates priority fee when stale for 5 periods", async () => {
+    const fee = calculatePriorityFee(10_861, 10_500, 100, 10, 60, 10);
+    assert(fee === 150, "PriorityFeeMismatch");
+  });
+
+  it("Calculates priority fee when max multiplier exceeded", async () => {
+    const fee = calculatePriorityFee(10_861, 0, 100, 10, 60, 10);
+    assert(fee === 200, "PriorityFeeMismatch");
   });
 });

@@ -57,7 +57,7 @@ impl FunctionRunner {
         let signer = signer_to_pubkey(signer_keypair.clone())?;
 
         let env = SolanaFunctionEnvironment::parse()?;
-        msg!("ENV: {:?}", env);
+        msg!("ENV: {:#?}", env);
 
         // required to run
         let function = Pubkey::from_str(&env.function_key).unwrap();
@@ -175,8 +175,7 @@ impl FunctionRunner {
     }
 
     pub fn from_env(commitment: Option<CommitmentConfig>) -> Result<Self, SwitchboardClientError> {
-        let cluster = Cluster::from_str(&std::env::var("CLUSTER").unwrap_or("devnet".to_string()))
-            .unwrap_or(Cluster::Devnet);
+        let cluster = Cluster::from_str(&std::env::var("CLUSTER").unwrap()).unwrap();
         Self::new_from_cluster(cluster, commitment)
     }
 

@@ -3,6 +3,11 @@
   "name": "switchboard_v2",
   "instructions": [
     {
+      "name": "viewVersion",
+      "accounts": [],
+      "args": []
+    },
+    {
       "name": "aggregatorClose",
       "accounts": [
         {

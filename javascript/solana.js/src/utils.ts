@@ -278,3 +278,31 @@ export function numToBN(num?: number | BN, defaultVal = 0): BN {
 
   return num;
 }
+
+export function calculatePriorityFee(
+  timestamp: number,
+  roundOpenTimestamp: number,
+  basePriorityFee: number,
+  priorityFeeBump: number,
+  priorityFeeBumpPeriod: number,
+  maxPriorityFeeMultiplier: number
+): number {
+  if (priorityFeeBumpPeriod <= 0) {
+    return basePriorityFee;
+  }
+
+  if (maxPriorityFeeMultiplier <= 0) {
+    return basePriorityFee;
+  }
+
+  const staleness = Math.round(timestamp - roundOpenTimestamp);
+  if (staleness <= 0) {
+    return basePriorityFee;
+  }
+
+  const feeMultiplier = Math.floor(staleness / priorityFeeBumpPeriod) - 1;
+  const multiplier =
+    feeMultiplier > 0 ? Math.min(feeMultiplier, maxPriorityFeeMultiplier) : 0;
+
+  return Math.floor(priorityFeeBump * multiplier + basePriorityFee);
+}
