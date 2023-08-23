@@ -3,6 +3,11 @@
   "name": "switchboard_attestation_program",
   "instructions": [
     {
+      "name": "viewVersion",
+      "accounts": [],
+      "args": []
+    },
+    {
       "name": "stateInit",
       "accounts": [
         {

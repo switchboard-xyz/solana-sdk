@@ -47,11 +47,14 @@ const ignoreFiles = [
   `${v2GeneratedPath}/types/Lanes.ts`, // anchor-client-gen struggles with dual exports
   `${v2GeneratedPath}/types/index.ts`, // TODO: Need a better way to handle this. anchor-client-gen adds multiple, broken exports (for VRF builder)
   `${v2GeneratedPath}/errors/index.ts`, // need to revert the program ID check,
+  `${v2GeneratedPath}/instructions/viewVersion.ts`,
   `${attestationGeneratedPath}/types/VerificationStatus.ts`,
   `${attestationGeneratedPath}/errors/index.ts`,
   `${attestationGeneratedPath}/types/SwitchboardAttestationPermission.ts`,
   `${attestationGeneratedPath}/instructions/functionDeactivateLookup.ts`,
   `${attestationGeneratedPath}/instructions/accountCloseOverride.ts`,
+  `${attestationGeneratedPath}/instructions/viewVersion.ts`,
+  `${attestationGeneratedPath}/instructions/index.ts`, // make sure to disable this if adding more attestation program instructions. used to avoid name conflict on viewVersion ixn
   // `${v2GeneratedPath}/types/VerificationStatus.ts`,
 ];
 

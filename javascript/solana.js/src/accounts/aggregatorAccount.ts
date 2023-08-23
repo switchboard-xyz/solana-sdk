@@ -33,6 +33,7 @@ import type {
   TransactionPackOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
+import { calculatePriorityFee } from "../utils.js";
 
 import type { OnAccountChangeCallback } from "./account.js";
 import { Account } from "./account.js";
@@ -2272,32 +2273,28 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
     timestamp = Math.round(Date.now() / 1000),
     baseFee = 0 // base compute unit price
   ): number {
-    // parse defaults
+    const currentRoundOpenTimestamp =
+      aggregator.currentRound.roundOpenTimestamp.toNumber();
+    const latestConfirmedOpenTimestamp =
+      aggregator.latestConfirmedRound.roundOpenTimestamp.toNumber();
+
     const lastUpdateTimestamp =
-      aggregator.latestConfirmedRound.roundOpenTimestamp.gt(new BN(0))
-        ? aggregator.latestConfirmedRound.roundOpenTimestamp.toNumber()
-        : timestamp; // on first update this would cause max multiplier
-    const priorityFeeBumpPeriod = Math.max(1, aggregator.priorityFeeBumpPeriod); // cant divide by 0
-    const maxPriorityFeeMultiplier = Math.max(
-      1,
+      latestConfirmedOpenTimestamp === 0
+        ? timestamp
+        : // if we use the latest confirmed timestamp then its a race to confirm first
+        // only the first responder will be fully reimbursed for their priority fee
+        aggregator.resolutionMode.kind === "ModeSlidingResolution"
+        ? Math.min(currentRoundOpenTimestamp, latestConfirmedOpenTimestamp)
+        : latestConfirmedOpenTimestamp;
+
+    return calculatePriorityFee(
+      timestamp,
+      lastUpdateTimestamp,
+      aggregator.basePriorityFee + baseFee,
+      aggregator.priorityFeeBump,
+      aggregator.priorityFeeBumpPeriod,
       aggregator.maxPriorityFeeMultiplier
     );
-
-    // calculate staleness multiplier
-    const multiplier = Math.min(
-      (timestamp - lastUpdateTimestamp) / priorityFeeBumpPeriod,
-      maxPriorityFeeMultiplier
-    );
-
-    const feeBump = aggregator.priorityFeeBump * multiplier;
-    const fee = baseFee + aggregator.basePriorityFee + feeBump;
-    if (Number.isNaN(fee)) {
-      return 0;
-    }
-
-    // Should we enforce some upper limit? Like 1 SOL?
-    // Probably not, gives MEV bots a floor
-    return Math.round(fee);
   }
 
   /** Fetch the balance of an aggregator's lease */
