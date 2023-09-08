@@ -3,43 +3,29 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionSetEscrowParams)]
 pub struct FunctionSetEscrow<'info> {
-    #[account(
-        mut,
-        seeds = [
-            FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(),
-            &function.load()?.created_at_slot.to_le_bytes()
-        ],
-        bump = function.load()?.bump,
-        has_one = authority @ SwitchboardError::InvalidAuthority,
-        has_one = escrow_wallet,
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
 
-    pub authority: Signer<'info>,
+    #[account(signer)]
+    pub authority: AccountInfo<'info>,
 
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+    pub attestation_queue: AccountInfo<'info>,
 
-    #[account(
-        mut,
-        constraint = escrow_wallet.authority == escrow_authority.key()
-    )]
-    pub escrow_wallet: Box<Account<'info, SwitchboardWallet>>,
+    #[account(mut)]
+    pub escrow_wallet: AccountInfo<'info>,
 
     /// CHECK:
     pub escrow_authority: AccountInfo<'info>,
 
-    #[account(
-        mut,
-        constraint = new_escrow.authority == new_escrow_authority.key() && new_escrow.token_wallet == new_escrow_token_wallet.key()
-    )]
-    pub new_escrow: Box<Account<'info, SwitchboardWallet>>,
+    #[account(mut)]
+    pub new_escrow: AccountInfo<'info>,
 
     /// CHECK:
-    pub new_escrow_authority: Signer<'info>,
+    #[account(signer)]
+    pub new_escrow_authority: AccountInfo<'info>,
 
     /// CHECK:
-    pub new_escrow_token_wallet: Box<Account<'info, TokenAccount>>,
+    pub new_escrow_token_wallet: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

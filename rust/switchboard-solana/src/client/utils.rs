@@ -12,6 +12,8 @@ pub fn load_env_pubkey(key: &str) -> Result<Pubkey, SwitchboardClientError> {
         .map_err(|_| SwitchboardClientError::EnvVariableMissing(key.to_string()))
 }
 
+/// Creates a signing keypair generated from randomness sourced from the enclave
+/// runtime.
 pub fn generate_signer() -> Arc<Keypair> {
     let mut randomness = [0; 32];
     switchboard_common::Gramine::read_rand(&mut randomness).unwrap();

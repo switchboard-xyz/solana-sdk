@@ -7,11 +7,11 @@
     "clean": "pnpm exec rimraf node_modules .anchor .turbo"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.27.0",
+    "@coral-xyz/anchor": "^0.28.0",
     "@solana/spl-token": "^0.3.8",
-    "@solana/web3.js": "^1.78.3",
-    "@switchboard-xyz/common": "^2.3.4",
-    "@switchboard-xyz/solana.js": "^2.5.6",
+    "@solana/web3.js": "^1.78.4",
+    "@switchboard-xyz/common": "^2.3.3",
+    "@switchboard-xyz/solana.js": "^2.5.0",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

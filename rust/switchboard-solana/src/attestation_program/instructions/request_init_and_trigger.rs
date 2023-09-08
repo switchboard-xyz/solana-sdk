@@ -11,11 +11,8 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     )]
     pub request: AccountInfo<'info>,
 
-    #[account(
-        mut,
-        has_one = attestation_queue,
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
 
     #[account(
       mut,
@@ -25,24 +22,21 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     pub escrow: AccountInfo<'info>,
 
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
-    pub mint: Account<'info, Mint>,
+    pub mint: AccountInfo<'info>,
 
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump,
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
+    pub state: AccountInfo<'info>,
 
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+    pub attestation_queue: AccountInfo<'info>,
 
-    #[account(mut)]
-    pub payer: Signer<'info>,
+    #[account(mut, signer)]
+    pub payer: AccountInfo<'info>,
 
-    pub system_program: Program<'info, System>,
-
-    pub token_program: Program<'info, Token>,
-
-    pub associated_token_program: Program<'info, AssociatedToken>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = anchor_spl::associated_token::ID)]
+    pub associated_token_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

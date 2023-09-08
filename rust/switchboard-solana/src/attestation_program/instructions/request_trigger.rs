@@ -3,50 +3,28 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestTriggerParams)]
 pub struct FunctionRequestTrigger<'info> {
-    #[account(
-      mut,
-      has_one = function,
-      has_one = escrow,
-      has_one = authority,
-    )]
-    pub request: Box<Account<'info, FunctionRequestAccountData>>,
-
-    /// CHECK: the request authority must authorize new requests
-    pub authority: Signer<'info>,
-
-    #[account(
-      mut,
-      constraint = escrow.is_native() && escrow.owner == state.key()
-    )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
-
-    #[account(
-      mut,
-      has_one = attestation_queue @ SwitchboardError::InvalidQueue,
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
-
-    #[account(
-      seeds = [STATE_SEED],
-      bump = state.load()?.bump,
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
-
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
     #[account(mut)]
-    pub payer: Signer<'info>,
-
-    pub token_program: Program<'info, Token>,
-
-    pub system_program: Program<'info, System>,
+    pub request: AccountInfo<'info>,
+    #[account(signer)]
+    pub authority: AccountInfo<'info>,
+    #[account(mut)]
+    pub escrow: AccountInfo<'info>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
+    pub state: AccountInfo<'info>,
+    pub attestation_queue: AccountInfo<'info>,
+    #[account(mut, signer)]
+    pub payer: AccountInfo<'info>,
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionRequestTriggerParams {
     pub bounty: Option<u64>,
     pub slots_until_expiration: Option<u64>,
-    // TODO: maybe add param to force transfer from function escrow if authority signs
     pub valid_after_slot: Option<u64>,
 }
 

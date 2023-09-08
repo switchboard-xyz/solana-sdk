@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.28.6"
+version = "0.28.12"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -19,6 +19,7 @@ default = ["cpi"]
 no-entrypoint = []
 cpi = ["no-entrypoint"]
 
+
 [dependencies]
 anchor-spl = "0.28.0"
 solana-program = ">= 1.16, < 1.17"
@@ -28,11 +29,11 @@ bytemuck = "^1"
 superslice = "1"
 
 [target.'cfg(target_os = "solana")'.dependencies]
-switchboard-common = { version = "0.8.7" }
+switchboard-common = { version = "0.8.14" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.8.7", features = [
+switchboard-common = { version = "0.8.15", features = [
   "client",
   "solana",
 ] }
@@ -45,6 +46,11 @@ chrono = { version = "0.4.25" }
 hex = "0.4.3"
 tokio = "1"
 url = "2.4"
+rsa = { version = "0.5.0" }
+serde = { version = "^1", features = ["derive"] }
+serde_json = "^1"
+reqwest = { version = "0.11", features = ["json"] }
+rand = { version = "0.8.5" }
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--cfg", "doc_cfg"]

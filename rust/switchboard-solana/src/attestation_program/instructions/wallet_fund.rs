@@ -3,47 +3,24 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:WalletFundParams)]
 pub struct WalletFund<'info> {
-    #[account(
-        mut,
-        seeds = [
-            mint.key().as_ref(),
-            attestation_queue.key().as_ref(),
-            authority.key().as_ref(),
-            &wallet.name,
-        ],
-        bump = wallet.bump,
-        has_one = token_wallet,
-    )]
-    pub wallet: Box<Account<'info, SwitchboardWallet>>,
-
+    #[account(mut)]
+    pub wallet: AccountInfo<'info>, // SwitchboardWallet
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
-    pub mint: Account<'info, Mint>,
-
+    pub mint: AccountInfo<'info>, // TokenMint
     /// CHECK:
     pub authority: AccountInfo<'info>,
-
-    // allows us to pull mint from the queue if we ever need to
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
+    pub attestation_queue: AccountInfo<'info>, // AttestationQueueAccountData
     #[account(mut)]
-    pub token_wallet: Box<Account<'info, TokenAccount>>,
-
-    #[account(
-        mut,
-        constraint = funder_wallet.mint == token_wallet.mint && funder_wallet.owner == funder.key(),
-    )]
-    pub funder_wallet: Option<Box<Account<'info, TokenAccount>>>,
-
-    pub funder: Signer<'info>,
-
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
-
-    pub token_program: Program<'info, Token>,
-    pub system_program: Program<'info, System>,
+    pub token_wallet: AccountInfo<'info>, // TokenAccount
+    #[account(mut)]
+    pub funder_wallet: Option<AccountInfo<'info>>, // TokenAccount
+    #[account(signer)]
+    pub funder: AccountInfo<'info>, // Signer
+    pub state: AccountInfo<'info>,             // AttestationProgramState
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

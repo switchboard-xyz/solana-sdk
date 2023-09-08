@@ -3,22 +3,13 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionTriggerParams)]
 pub struct FunctionTrigger<'info> {
-    #[account(
-        mut,
-        seeds = [
-            FUNCTION_SEED,
-            function.load()?.creator_seed.as_ref(),
-            &function.load()?.created_at_slot.to_le_bytes()
-        ],
-        bump = function.load()?.bump,
-        has_one = authority,
-        has_one = attestation_queue,
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
 
-    pub authority: Signer<'info>,
+    #[account(signer)]
+    pub authority: AccountInfo<'info>,
 
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+    pub attestation_queue: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

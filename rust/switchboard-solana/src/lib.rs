@@ -106,6 +106,8 @@ pub use oracle_program::*;
 pub mod attestation_program;
 pub use attestation_program::*;
 
+pub use switchboard_common::*;
+
 pub mod error;
 
 pub mod seeds;
@@ -123,6 +125,8 @@ pub mod prelude;
 cfg_client! {
     pub mod client;
     pub use client::*;
+    pub mod secrets;
+    pub use secrets::*;
 }
 
 /// Program id for the Switchboard oracle program

@@ -15,6 +15,10 @@ use switchboard_common::ChainResultInfo::Solana;
 use switchboard_common::SOLFunctionResult;
 use switchboard_common::SolanaFunctionEnvironment;
 
+/// A management object for structured runtime for Switchboard Functions on
+/// solana. Inititlizing this object will load all required variables
+/// from the runtime to execute and sign an output transaction to be verified
+/// and committed by the switchboard network.
 #[derive(Clone)]
 pub struct FunctionRunner {
     pub client: Arc<RpcClient>,
@@ -57,7 +61,6 @@ impl FunctionRunner {
         let signer = signer_to_pubkey(signer_keypair.clone())?;
 
         let env = SolanaFunctionEnvironment::parse()?;
-        msg!("ENV: {:#?}", env);
 
         // required to run
         let function = Pubkey::from_str(&env.function_key).unwrap();
@@ -174,11 +177,14 @@ impl FunctionRunner {
         Self::new(cluster.url(), commitment)
     }
 
+    /// Loads the FunctionRunner from runtime settings
     pub fn from_env(commitment: Option<CommitmentConfig>) -> Result<Self, SwitchboardClientError> {
         let cluster = Cluster::from_str(&std::env::var("CLUSTER").unwrap()).unwrap();
         Self::new_from_cluster(cluster, commitment)
     }
 
+    /// Loads the queue authority provided by the QUEUE_AUTHORITY environment
+    /// variable
     async fn load_queue_authority(
         &self,
         attestation_queue_pubkey: Pubkey,
@@ -207,6 +213,8 @@ impl FunctionRunner {
         }
     }
 
+    /// Loads the oracle signing key provided by the VERIFIER_ENCLAVE_SIGNER
+    /// environment variable
     async fn load_verifier_signer(
         &self,
         verifier_pubkey: Pubkey,
@@ -232,6 +240,8 @@ impl FunctionRunner {
         }
     }
 
+    /// Loads the data of the function account provided by the FUNCTION_DATA
+    /// environment variable.
     pub async fn load_function_data(
         &self,
     ) -> Result<Box<FunctionAccountData>, SwitchboardClientError> {
@@ -252,6 +262,8 @@ impl FunctionRunner {
         }
     }
 
+    /// If this execution is tied to a function request, load the data of the
+    /// execution function request account.
     pub async fn load_request_data(
         &self,
     ) -> Result<Box<FunctionRequestAccountData>, SwitchboardClientError> {
@@ -280,6 +292,9 @@ impl FunctionRunner {
         }
     }
 
+    /// Builds the callback instruction to send to the Switchboard oracle network.
+    /// This will execute the instruction to validate the output transaction
+    /// was produced in your switchboard enclave.
     async fn build_fn_verify_ixn(
         &self,
         mr_enclave: MrEnclave,
@@ -332,6 +347,9 @@ impl FunctionRunner {
         Ok(ixn)
     }
 
+    /// Builds the callback instruction to send to the Switchboard oracle network.
+    /// This will execute the instruction to validate the output transaction
+    /// as well as validate the request parameters used in this run.
     async fn build_fn_request_verify_ixn(
         &self,
         mr_enclave: MrEnclave,
@@ -388,6 +406,10 @@ impl FunctionRunner {
         Ok(ixn)
     }
 
+    /// Generates a FunctionResult object to be emitted at the end of this
+    /// function run. This function result will be used be the quote verification
+    /// sidecar to verify the output was run inside the function's enclave
+    /// and sign the transaction to send back on chain.
     async fn get_result(
         &self,
         mut ixs: Vec<Instruction>,
@@ -428,6 +450,8 @@ impl FunctionRunner {
         })
     }
 
+    /// Emits a serialized FunctionResult object to send to the quote verification
+    /// sidecar.
     pub async fn emit(&self, ixs: Vec<Instruction>) -> Result<(), SwitchboardClientError> {
         self.get_result(ixs)
             .await
@@ -442,6 +466,8 @@ impl FunctionRunner {
 }
 
 // Useful for building ixns on the client side
+/// Implements the instruction schema for serialization the
+/// function_verify instruction
 pub struct FunctionVerifyAccounts {
     pub function: Pubkey,
     pub function_enclave_signer: Pubkey,
@@ -454,6 +480,7 @@ pub struct FunctionVerifyAccounts {
     pub attestation_queue: Pubkey,
 }
 impl FunctionVerifyAccounts {
+    /// Generates an instruction to verify the provided function call
     pub fn get_instruction(
         &self,
         params: FunctionVerifyParams,
@@ -493,6 +520,8 @@ impl ToAccountMetas for FunctionVerifyAccounts {
         ]
     }
 }
+/// Implements the instruction schema for serialization the
+/// function_request_verify instruction
 pub struct FunctionRequestVerifyAccounts {
     pub request: Pubkey,
     pub function_enclave_signer: Pubkey,
@@ -507,6 +536,7 @@ pub struct FunctionRequestVerifyAccounts {
     pub attestation_queue: Pubkey,
 }
 impl FunctionRequestVerifyAccounts {
+    /// Generates an instruction to verify the provided request call
     pub fn get_instruction(
         &self,
         params: FunctionRequestVerifyParams,

@@ -16,20 +16,23 @@ pub use function_verify::*;
 pub mod function_close;
 pub use function_close::*;
 
+pub mod request_close;
+pub use request_close::*;
+
 pub mod request_init_and_trigger;
 pub use request_init_and_trigger::*;
 
 pub mod request_init;
 pub use request_init::*;
 
+pub mod request_set_config;
+pub use request_set_config::*;
+
 pub mod request_trigger;
 pub use request_trigger::*;
 
 pub mod request_verify;
 pub use request_verify::*;
-
-pub mod request_close;
-pub use request_close::*;
 
 pub mod wallet_init;
 pub use wallet_init::*;
