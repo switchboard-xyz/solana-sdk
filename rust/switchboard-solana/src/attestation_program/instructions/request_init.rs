@@ -4,54 +4,44 @@ use crate::prelude::*;
 #[instruction(params:FunctionRequestInitParams)]
 pub struct FunctionRequestInit<'info> {
     #[account(
-        init,
-        payer = payer,
-        space = FunctionRequestAccountData::space(params.max_container_params_len)
+        mut,
+        signer,
+        owner = system_program.key(),
+        constraint = request.data_len() == 0 && request.lamports() == 0,
     )]
-    pub request: Box<Account<'info, FunctionRequestAccountData>>,
+    pub request: AccountInfo<'info>,
 
     /// CHECK: the authority of the request
     pub authority: AccountInfo<'info>,
 
-    #[account(
-        mut, // write lock issues ??
-        has_one = attestation_queue,
-        // has_one = authority @ SwitchboardError::InvalidAuthority,
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
 
     /// CHECK: function authority required to permit new requests
     #[account(mut)]
     pub function_authority: Option<AccountInfo<'info>>,
 
     #[account(
-        init,
-        payer = payer,
-        associated_token::mint = mint,
-        associated_token::authority = request,
-
+        mut,
+        owner = system_program.key(),
+        constraint = request.data_len() == 0 && request.lamports() == 0,
     )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
+    pub escrow: AccountInfo<'info>,
 
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
-    pub mint: Account<'info, Mint>,
+    pub mint: AccountInfo<'info>,
 
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
+    pub state: AccountInfo<'info>,
+    pub attestation_queue: AccountInfo<'info>,
 
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    pub system_program: Program<'info, System>,
-
-    pub token_program: Program<'info, Token>,
-
-    pub associated_token_program: Program<'info, AssociatedToken>,
+    #[account(mut, signer)]
+    pub payer: AccountInfo<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = anchor_spl::associated_token::ID)]
+    pub associated_token_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

@@ -7,6 +7,7 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
+import { parseRawBuffer } from "../utils.js";
 
 import { FunctionAccount } from "./index.js";
 
@@ -71,6 +72,7 @@ export interface FunctionRequestVerifyParams {
   // accounts
   functionEnclaveSigner: PublicKey;
   function: PublicKey;
+  functionEscrow: PublicKey;
   verifierQuote: PublicKey;
   verifierEnclaveSigner: PublicKey;
   verifierPermission: PublicKey;
@@ -316,7 +318,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
               ? new BN(params.requestSlot)
               : params.requestSlot,
           containerParamsHash: Array.from(
-            parseRawMrEnclave(params.containerParamsHash)
+            parseRawBuffer(params.containerParamsHash)
           ),
         },
       },
@@ -325,7 +327,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
         functionEnclaveSigner: params.functionEnclaveSigner,
         escrow: this.program.mint.getAssociatedAddress(this.publicKey),
         function: params.function,
-        functionEscrow: this.program.mint.getAssociatedAddress(params.function),
+        functionEscrow: params.functionEscrow,
         verifierQuote: params.verifierQuote,
         verifierEnclaveSigner: params.verifierEnclaveSigner,
         verifierPermission: params.verifierPermission,

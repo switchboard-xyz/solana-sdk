@@ -12,7 +12,14 @@ async fn main() {
     let runner = FunctionRunner::new_from_cluster(Cluster::Devnet, None).unwrap();
 
     // parse and validate user provided request params
-    let params = ContainerParams::decode(&runner.fn_request_data.container_params).unwrap();
+    let params = ContainerParams::decode(
+        &runner
+            .function_request_data
+            .as_ref()
+            .unwrap()
+            .container_params,
+    )
+    .unwrap();
 
     // Determine the final result
     let mut bytes: [u8; 1] = [0u8; 1];
@@ -39,7 +46,7 @@ async fn main() {
             AccountMeta::new_readonly(house_pubkey, false),
             AccountMeta::new(params.user_key, false),
             AccountMeta::new_readonly(runner.function, false),
-            AccountMeta::new_readonly(runner.fn_request_key, false),
+            AccountMeta::new_readonly(runner.function_request_key.unwrap(), false),
             AccountMeta::new_readonly(runner.signer, true),
             AccountMeta::new_readonly(anchor_spl::token::ID, false),
             AccountMeta::new_readonly(mint, false),

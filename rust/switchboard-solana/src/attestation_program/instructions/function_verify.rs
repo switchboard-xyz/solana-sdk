@@ -3,48 +3,22 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params: FunctionVerifyParams)] // rpc parameters hint
 pub struct FunctionVerify<'info> {
-    #[account(
-      mut,
-      seeds = [FUNCTION_SEED,
-      function.load()?.creator_seed.as_ref(),
-      &function.load()?.created_at_slot.to_le_bytes()],
-      bump = function.load()?.bump,
-      has_one = attestation_queue,
-      has_one = escrow_token_wallet,
-      has_one = escrow_wallet,
-  )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
-
-    pub function_enclave_signer: Signer<'info>,
-
-    #[account(
-      has_one = attestation_queue,
-      constraint = verifier.load()?.enclave.enclave_signer == verifier_signer.key(),
-  )]
-    pub verifier: AccountLoader<'info, VerifierAccountData>,
-
-    pub verifier_signer: Signer<'info>,
-
-    #[account(
-      seeds = [PERMISSION_SEED,
-      attestation_queue.load()?.authority.as_ref(),
-      attestation_queue.key().as_ref(),
-      verifier.key().as_ref()],
-      bump = verifier_permission.load()?.bump,
-  )]
-    pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
-
-    pub escrow_wallet: Box<Account<'info, SwitchboardWallet>>,
-
-    #[account(mut, constraint = escrow_token_wallet.is_native())]
-    pub escrow_token_wallet: Box<Account<'info, TokenAccount>>,
-
-    #[account(mut, constraint = receiver.is_native())]
-    pub receiver: Box<Account<'info, TokenAccount>>,
-
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
-    pub token_program: Program<'info, Token>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>, // FunctionAccountData
+    #[account(signer)]
+    pub function_enclave_signer: AccountInfo<'info>, // SystemProgram keypair
+    pub verifier: AccountInfo<'info>, // VerifierAccountData
+    #[account(signer)]
+    pub verifier_signer: AccountInfo<'info>,
+    pub verifier_permission: AccountInfo<'info>, // AttestationPermissionAccountData
+    pub escrow_wallet: AccountInfo<'info>,       // SwitchboardWallet
+    #[account(mut)]
+    pub escrow_token_wallet: AccountInfo<'info>, // TokenAccount
+    #[account(mut)]
+    pub receiver: AccountInfo<'info>, // TokenAccount
+    pub attestation_queue: AccountInfo<'info>,   // AttestationQueueAccountData
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

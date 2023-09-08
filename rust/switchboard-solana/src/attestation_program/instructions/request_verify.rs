@@ -3,67 +3,26 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestVerifyParams)]
 pub struct FunctionRequestVerify<'info> {
-    #[account(
-      mut,
-      has_one = function,
-      has_one = escrow,
-  )]
-    pub request: Box<Account<'info, FunctionRequestAccountData>>,
-
-    pub function_enclave_signer: Signer<'info>,
-
-    #[account(
-      mut,
-      constraint = escrow.is_native() && escrow.owner == state.key()
-  )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
-
-    #[account(
-      mut,
-      has_one = attestation_queue,
-  )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
-
-    #[account(
-      mut,
-      constraint = escrow.is_native() && escrow.owner == state.key()
-  )]
-    pub function_escrow: Option<Box<Account<'info, TokenAccount>>>,
-
-    #[account(
-      has_one = attestation_queue,
-      constraint = verifier_quote.load()?.enclave.enclave_signer == verifier_enclave_signer.key(),
-  )]
-    pub verifier_quote: AccountLoader<'info, VerifierAccountData>,
-
-    pub verifier_enclave_signer: Signer<'info>,
-
-    #[account(
-      seeds = [
-          PERMISSION_SEED,
-          attestation_queue.load()?.authority.as_ref(),
-          attestation_queue.key().as_ref(),
-          verifier_quote.key().as_ref()
-      ],
-      bump = verifier_permission.load()?.bump,
-  )]
-    pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
-
-    #[account(
-      seeds = [STATE_SEED],
-      bump = state.load()?.bump,
-  )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
-
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
-
-    #[account(
-      mut,
-      constraint = receiver.is_native()
-  )]
-    pub receiver: Box<Account<'info, TokenAccount>>,
-
-    pub token_program: Program<'info, Token>,
+    #[account(mut)]
+    pub request: AccountInfo<'info>, // FunctionRequestAccount
+    #[account(signer)]
+    pub function_enclave_signer: AccountInfo<'info>, // SystemProgram keypair
+    #[account(mut)]
+    pub escrow: AccountInfo<'info>, // TokenAccount
+    #[account(mut)]
+    pub function: AccountInfo<'info>, // FunctionAccount
+    #[account(mut)]
+    pub function_escrow: Option<AccountInfo<'info>>, // TokenAccount
+    pub verifier_quote: AccountInfo<'info>, // VerifierAccountData
+    #[account(signer)]
+    pub verifier_enclave_signer: AccountInfo<'info>, // SystemProgram keypair
+    pub verifier_permission: AccountInfo<'info>, // AttestationPermissionAccount
+    pub state: AccountInfo<'info>,          // AttestationProgramState
+    pub attestation_queue: AccountInfo<'info>, // AttestationQueueAccount
+    #[account(mut)]
+    pub receiver: AccountInfo<'info>, // TokenAccount
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

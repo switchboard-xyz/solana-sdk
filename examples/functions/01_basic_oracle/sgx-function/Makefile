@@ -2,7 +2,7 @@
 
 # Variables
 CARGO_NAME=basic-oracle-function
-DOCKER_IMAGE_NAME=${CONTAINER_NAME?}
+DOCKER_IMAGE_NAME=${CONTAINER_NAME}
 
 DOCKER_BUILD_COMMAND=DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 --build-arg CARGO_NAME=${CARGO_NAME}
 

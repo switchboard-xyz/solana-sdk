@@ -3,17 +3,11 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionSetConfigParams)]
 pub struct FunctionSetConfig<'info> {
-    #[account(
-        mut,
-        seeds = [FUNCTION_SEED,
-        function.load()?.creator_seed.as_ref(),
-        &function.load()?.created_at_slot.to_le_bytes()],
-        bump = function.load()?.bump,
-        has_one = authority
-    )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    #[account(mut)]
+    pub function: AccountInfo<'info>,
 
-    pub authority: Signer<'info>,
+    #[account(signer)]
+    pub authority: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]

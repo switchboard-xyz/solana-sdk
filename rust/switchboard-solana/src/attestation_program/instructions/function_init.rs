@@ -4,15 +4,12 @@ use crate::prelude::*;
 #[instruction(params:FunctionInitParams)]
 pub struct FunctionInit<'info> {
     #[account(
-      init,
-      space = FunctionAccountData::size(),
-      payer = payer,
-      seeds = [FUNCTION_SEED,
-      params.creator_seed.unwrap_or(payer.key().to_bytes()).as_ref(),
-      params.recent_slot.to_le_bytes().as_ref()],
-      bump,
-  )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+        mut,
+        signer,
+        owner = system_program.key(),
+        constraint = function.data_len() == 0 && function.lamports() == 0,
+    )]
+    pub function: AccountInfo<'info>,
 
     /// CHECK: todo
     #[account(mut)]
@@ -21,35 +18,36 @@ pub struct FunctionInit<'info> {
     /// CHECK:
     pub authority: AccountInfo<'info>,
 
-    pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
+    pub attestation_queue: AccountInfo<'info>,
 
-    #[account(mut)]
-    pub payer: Signer<'info>,
+    #[account(mut, signer)]
+    pub payer: AccountInfo<'info>,
 
     /// CHECK: handle this manually because the PDA seed can vary
     #[account(mut)]
     pub wallet: AccountInfo<'info>,
 
-    pub wallet_authority: Option<Signer<'info>>,
+    #[account(signer)]
+    pub wallet_authority: Option<AccountInfo<'info>>,
 
     /// CHECK: handle this manually because the PDA seed can vary
     #[account(mut)]
     pub token_wallet: AccountInfo<'info>,
 
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
-    pub mint: Account<'info, Mint>,
-
-    pub token_program: Program<'info, Token>,
-
-    pub associated_token_program: Program<'info, AssociatedToken>,
-
-    pub system_program: Program<'info, System>,
+    pub mint: AccountInfo<'info>,
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = anchor_spl::associated_token::ID)]
+    pub associated_token_program: AccountInfo<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
 
     /// CHECK:
     #[account(
       constraint = address_lookup_program.executable,
       address = solana_address_lookup_table_program::id(),
-  )]
+    )]
     pub address_lookup_program: AccountInfo<'info>,
 }
 

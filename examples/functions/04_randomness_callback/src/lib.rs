@@ -89,15 +89,15 @@ pub mod custom_randomness_request {
 
         let request_init_ctx = FunctionRequestInitAndTrigger {
             request: ctx.accounts.request.clone(),
-            function: ctx.accounts.function.clone(),
+            function: ctx.accounts.function.to_account_info(),
             escrow: ctx.accounts.request_escrow.clone(),
-            mint: ctx.accounts.mint.clone(),
-            state: ctx.accounts.state.clone(),
-            attestation_queue: ctx.accounts.attestation_queue.clone(),
-            payer: ctx.accounts.payer.clone(),
-            system_program: ctx.accounts.system_program.clone(),
-            token_program: ctx.accounts.token_program.clone(),
-            associated_token_program: ctx.accounts.associated_token_program.clone(),
+            mint: ctx.accounts.mint.to_account_info(),
+            state: ctx.accounts.state.to_account_info(),
+            attestation_queue: ctx.accounts.attestation_queue.to_account_info(),
+            payer: ctx.accounts.payer.to_account_info(),
+            system_program: ctx.accounts.system_program.to_account_info(),
+            token_program: ctx.accounts.token_program.to_account_info(),
+            associated_token_program: ctx.accounts.associated_token_program.to_account_info(),
         };
         request_init_ctx.invoke(
             ctx.accounts.switchboard.clone(),

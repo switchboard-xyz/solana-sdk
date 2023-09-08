@@ -3,38 +3,24 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestCloseParams)]
 pub struct FunctionRequestClose<'info> {
-    #[account(
-        mut,
-        close = authority,
-        has_one = function,
-        has_one = escrow,
-        has_one = authority,
-    )]
-    pub request: Box<Account<'info, FunctionRequestAccountData>>,
+    #[account(mut)]
+    pub request: AccountInfo<'info>,
     /// CHECK: Only needs to sign if request.garbage_collection_slot has not elapsed
     pub authority: AccountInfo<'info>,
-    #[account(
-        mut,
-        constraint = escrow.is_native() && escrow.owner == state.key()
-    )]
-    pub escrow: Box<Account<'info, TokenAccount>>,
+    #[account(mut)]
+    pub escrow: AccountInfo<'info>,
     /// CHECK: we need to load_mut and remove_request
     #[account(mut)]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    pub function: AccountInfo<'info>,
     /// CHECK: allow partial funds to be sent to the claimer only if request.garbage_collection_slot has elapsed
     pub sol_dest: AccountInfo<'info>,
-    #[account(
-        mut,
-        constraint = escrow_dest.is_native() && escrow_dest.owner == request.authority
-    )]
-    pub escrow_dest: Box<Account<'info, TokenAccount>>,
-    #[account(
-        seeds = [STATE_SEED],
-        bump = state.load()?.bump
-    )]
-    pub state: AccountLoader<'info, AttestationProgramState>,
-    pub token_program: Program<'info, Token>,
-    pub system_program: Program<'info, System>,
+    #[account(mut)]
+    pub escrow_dest: AccountInfo<'info>,
+    pub state: AccountInfo<'info>,
+    #[account(address = anchor_spl::token::ID)]
+    pub token_program: AccountInfo<'info>,
+    #[account(address = solana_program::system_program::ID)]
+    pub system_program: AccountInfo<'info>,
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
