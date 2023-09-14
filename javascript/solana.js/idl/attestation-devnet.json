@@ -3041,10 +3041,43 @@
             "name": "NonExecutable"
           },
           {
+            "name": "None3"
+          },
+          {
             "name": "Expired"
           },
           {
+            "name": "None5"
+          },
+          {
+            "name": "None6"
+          },
+          {
+            "name": "None7"
+          },
+          {
             "name": "OutOfFunds"
+          },
+          {
+            "name": "None9"
+          },
+          {
+            "name": "None10"
+          },
+          {
+            "name": "None11"
+          },
+          {
+            "name": "None12"
+          },
+          {
+            "name": "None13"
+          },
+          {
+            "name": "None14"
+          },
+          {
+            "name": "None15"
           },
           {
             "name": "InvalidPermissions"
@@ -3107,7 +3140,19 @@
             "name": "VerificationFailure"
           },
           {
+            "name": "None3"
+          },
+          {
             "name": "VerificationSuccess"
+          },
+          {
+            "name": "None5"
+          },
+          {
+            "name": "None6"
+          },
+          {
+            "name": "None7"
           },
           {
             "name": "VerificationOverride"
