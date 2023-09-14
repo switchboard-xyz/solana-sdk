@@ -9,6 +9,7 @@ import type {
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
 import {
+  containsMrEnclave,
   handleOptionalPubkeys,
   numToBN,
   parseCronSchedule,
@@ -225,10 +226,14 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     creatorSeed: Uint8Array,
     recentSlot: BN
   ): FunctionAccount {
+    if (creatorSeed.length > 32) {
+      throw new Error("Creator seed must be 32 bytes or less");
+    }
+
     const functionPubkey = anchor.web3.PublicKey.findProgramAddressSync(
       [
         Buffer.from("FunctionAccountData"),
-        creatorSeed,
+        creatorSeed.length < 32 ? parseRawBuffer(creatorSeed, 32) : creatorSeed,
         recentSlot.toBuffer("le", 8),
       ],
       program.attestationProgramId
@@ -284,10 +289,12 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       throw new errors.AccountNotFoundError("Function", PublicKey.default);
     }
 
+    assert(data.creatorSeed.length === 32);
+
     const functionAccount = FunctionAccount.fromSeed(
       program,
       new Uint8Array(data.creatorSeed),
-      data.createdAt
+      data.createdAtSlot
     );
 
     functionAccount._wallet = Promise.resolve(
@@ -551,6 +558,138 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   ): Promise<TransactionSignature> {
     return await this.setConfigInstruction(
       this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public static hasMrEnclave(
+    mrEnclaves: Array<number[]>,
+    targetMrEnclave: number[] | Uint8Array
+  ): boolean {
+    return containsMrEnclave(mrEnclaves, targetMrEnclave);
+  }
+
+  public async addMrEnclaveInstruction(
+    payer: PublicKey,
+    mrEnclave: number[] | Uint8Array,
+    params?: {
+      // Optional authority if needing to change config and payer is not the authority
+      authority?: Keypair;
+      // Pre-fetched account state to reduce network calls
+      functionState?: types.FunctionAccountData;
+      // Force remove a MrEnclave if full
+      force?: boolean;
+    },
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const force = params?.force ?? false;
+    const functionState = params?.functionState ?? (await this.loadData());
+
+    if (FunctionAccount.hasMrEnclave(functionState.mrEnclaves, mrEnclave)) {
+      throw new errors.FunctionMrEnclaveAlreadySet();
+    }
+
+    const filteredMrEnclaves = functionState.mrEnclaves.filter(
+      (arr) => !arr.every((num) => num === 0)
+    );
+    if (filteredMrEnclaves.length >= 32 && !force) {
+      throw new errors.FunctionMrEnclavesFull();
+    }
+
+    const newMrEnclaves = [
+      ...(filteredMrEnclaves.length >= 32
+        ? filteredMrEnclaves.slice(filteredMrEnclaves.length - 32 + 1)
+        : filteredMrEnclaves),
+      Array.from(mrEnclave),
+    ];
+
+    if (params?.authority) {
+      if (!params.authority.publicKey.equals(functionState.authority)) {
+        throw new errors.IncorrectAuthority(
+          functionState.authority,
+          params.authority.publicKey
+        );
+      }
+    } else {
+      if (!payer.equals(functionState.authority)) {
+        throw new errors.IncorrectAuthority(functionState.authority, payer);
+      }
+    }
+
+    const setConfigIxn = types.functionSetConfig(
+      this.program,
+      {
+        params: {
+          name: null,
+          metadata: null,
+          container: null,
+          containerRegistry: null,
+          version: null,
+          schedule: null,
+          mrEnclaves: newMrEnclaves,
+          requestsDisabled: null,
+          requestsRequireAuthorization: null,
+          requestsFee: null,
+        },
+      },
+      {
+        function: this.publicKey,
+        authority: functionState.authority,
+      }
+    );
+
+    return new TransactionObject(
+      payer,
+      [setConfigIxn],
+      params?.authority ? [params.authority] : [],
+      options
+    );
+  }
+
+  public async addMrEnclave(
+    mrEnclave: number[] | Uint8Array,
+    params?: {
+      // Optional authority if needing to change config and payer is not the authority
+      authority?: Keypair;
+      // Pre-fetched account state to reduce network calls
+      functionState?: types.FunctionAccountData;
+      // Force remove a MrEnclave if full
+      force?: boolean;
+    },
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.addMrEnclaveInstruction(
+      this.program.walletPubkey,
+      mrEnclave,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  /**
+   * Try to add a MrEnclave to the function config, if it is not already present. Returns undefined
+   * if MrEnclave is already in the config.
+   */
+  public async tryAddMrEnclave(
+    mrEnclave: number[] | Uint8Array,
+    params?: {
+      // Optional authority if needing to change config and payer is not the authority
+      authority?: Keypair;
+      // Pre-fetched account state to reduce network calls
+      functionState?: types.FunctionAccountData;
+      // Force remove a MrEnclave if full
+      force?: boolean;
+    },
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature | undefined> {
+    const functionState = params?.functionState ?? (await this.loadData());
+    if (FunctionAccount.hasMrEnclave(functionState.mrEnclaves, mrEnclave)) {
+      return undefined;
+    }
+    return await this.addMrEnclaveInstruction(
+      this.program.walletPubkey,
+      mrEnclave,
       params,
       options
     ).then((txn) => this.program.signAndSend(txn, options));

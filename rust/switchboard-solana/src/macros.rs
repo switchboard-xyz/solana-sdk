@@ -13,6 +13,17 @@ macro_rules! cfg_client {
 }
 
 #[macro_export]
+macro_rules! cfg_secrets {
+    ($($item:item)*) => {
+        $(
+            #[cfg(feature = "secrets")]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "secrets")))]
+            $item
+        )*
+    }
+}
+
+#[macro_export]
 macro_rules! cfg_program {
     ($($item:item)*) => {
         $(

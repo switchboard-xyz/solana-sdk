@@ -1,10 +1,6 @@
-import { SwitchboardProgram } from "../../../SwitchboardProgram.js";
-
-import type * as types from "./index.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
+import type * as types from "./index.js";
 
 import * as borsh from "@coral-xyz/borsh";
-import { PublicKey } from "@solana/web3.js"; // eslint-disable-line @typescript-eslint/no-unused-vars
-import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface NoneJSON {
   kind: "None";
@@ -75,6 +71,29 @@ export class VerificationFailure {
   }
 }
 
+export interface None3JSON {
+  kind: "None3";
+}
+
+export class None3 {
+  static readonly discriminator = 3;
+  static readonly kind = "None3";
+  readonly discriminator = 3;
+  readonly kind = "None3";
+
+  toJSON(): None3JSON {
+    return {
+      kind: "None3",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None3: {},
+    };
+  }
+}
+
 export interface VerificationSuccessJSON {
   kind: "VerificationSuccess";
 }
@@ -94,6 +113,75 @@ export class VerificationSuccess {
   toEncodable() {
     return {
       VerificationSuccess: {},
+    };
+  }
+}
+
+export interface None5JSON {
+  kind: "None5";
+}
+
+export class None5 {
+  static readonly discriminator = 5;
+  static readonly kind = "None5";
+  readonly discriminator = 5;
+  readonly kind = "None5";
+
+  toJSON(): None5JSON {
+    return {
+      kind: "None5",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None5: {},
+    };
+  }
+}
+
+export interface None6JSON {
+  kind: "None6";
+}
+
+export class None6 {
+  static readonly discriminator = 6;
+  static readonly kind = "None6";
+  readonly discriminator = 6;
+  readonly kind = "None6";
+
+  toJSON(): None6JSON {
+    return {
+      kind: "None6",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None6: {},
+    };
+  }
+}
+
+export interface None7JSON {
+  kind: "None7";
+}
+
+export class None7 {
+  static readonly discriminator = 7;
+  static readonly kind = "None7";
+  readonly discriminator = 7;
+  readonly kind = "None7";
+
+  toJSON(): None7JSON {
+    return {
+      kind: "None7",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None7: {},
     };
   }
 }
@@ -136,8 +224,20 @@ export function fromDecoded(obj: any): types.VerificationStatusKind {
   if ("VerificationFailure" in obj) {
     return new VerificationFailure();
   }
+  if ("None3" in obj) {
+    return new None3();
+  }
   if ("VerificationSuccess" in obj) {
     return new VerificationSuccess();
+  }
+  if ("None5" in obj) {
+    return new None5();
+  }
+  if ("None6" in obj) {
+    return new None6();
+  }
+  if ("None7" in obj) {
+    return new None7();
   }
   if ("VerificationOverride" in obj) {
     return new VerificationOverride();
@@ -159,8 +259,20 @@ export function fromJSON(
     case "VerificationFailure": {
       return new VerificationFailure();
     }
+    case "None3": {
+      return new None3();
+    }
     case "VerificationSuccess": {
       return new VerificationSuccess();
+    }
+    case "None5": {
+      return new None5();
+    }
+    case "None6": {
+      return new None6();
+    }
+    case "None7": {
+      return new None7();
     }
     case "VerificationOverride": {
       return new VerificationOverride();
@@ -173,7 +285,11 @@ export function layout(property?: string) {
     borsh.struct([], "None"),
     borsh.struct([], "VerificationPending"),
     borsh.struct([], "VerificationFailure"),
+    borsh.struct([], "None3"),
     borsh.struct([], "VerificationSuccess"),
+    borsh.struct([], "None5"),
+    borsh.struct([], "None6"),
+    borsh.struct([], "None7"),
     borsh.struct([], "VerificationOverride"),
   ]);
   if (property !== undefined) {

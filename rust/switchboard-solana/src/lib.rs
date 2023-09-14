@@ -125,8 +125,12 @@ pub mod prelude;
 cfg_client! {
     pub mod client;
     pub use client::*;
-    pub mod secrets;
-    pub use secrets::*;
+
+    // Only enable this feature if client is already enabled
+    cfg_secrets! {
+        pub mod secrets;
+        pub use secrets::*;
+    }
 }
 
 /// Program id for the Switchboard oracle program
