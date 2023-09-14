@@ -162,15 +162,37 @@ export type FunctionStatusKind =
   | FunctionStatus.None
   | FunctionStatus.Active
   | FunctionStatus.NonExecutable
+  | FunctionStatus.None3
   | FunctionStatus.Expired
+  | FunctionStatus.None5
+  | FunctionStatus.None6
+  | FunctionStatus.None7
   | FunctionStatus.OutOfFunds
+  | FunctionStatus.None9
+  | FunctionStatus.None10
+  | FunctionStatus.None11
+  | FunctionStatus.None12
+  | FunctionStatus.None13
+  | FunctionStatus.None14
+  | FunctionStatus.None15
   | FunctionStatus.InvalidPermissions;
 export type FunctionStatusJSON =
   | FunctionStatus.NoneJSON
   | FunctionStatus.ActiveJSON
   | FunctionStatus.NonExecutableJSON
+  | FunctionStatus.None3JSON
   | FunctionStatus.ExpiredJSON
+  | FunctionStatus.None5JSON
+  | FunctionStatus.None6JSON
+  | FunctionStatus.None7JSON
   | FunctionStatus.OutOfFundsJSON
+  | FunctionStatus.None9JSON
+  | FunctionStatus.None10JSON
+  | FunctionStatus.None11JSON
+  | FunctionStatus.None12JSON
+  | FunctionStatus.None13JSON
+  | FunctionStatus.None14JSON
+  | FunctionStatus.None15JSON
   | FunctionStatus.InvalidPermissionsJSON;
 
 export { FundingStatus };
@@ -203,13 +225,21 @@ export type VerificationStatusKind =
   | VerificationStatus.None
   | VerificationStatus.VerificationPending
   | VerificationStatus.VerificationFailure
+  | VerificationStatus.None3
   | VerificationStatus.VerificationSuccess
+  | VerificationStatus.None5
+  | VerificationStatus.None6
+  | VerificationStatus.None7
   | VerificationStatus.VerificationOverride;
 export type VerificationStatusJSON =
   | VerificationStatus.NoneJSON
   | VerificationStatus.VerificationPendingJSON
   | VerificationStatus.VerificationFailureJSON
+  | VerificationStatus.None3JSON
   | VerificationStatus.VerificationSuccessJSON
+  | VerificationStatus.None5JSON
+  | VerificationStatus.None6JSON
+  | VerificationStatus.None7JSON
   | VerificationStatus.VerificationOverrideJSON;
 
 export { SwitchboardAttestationPermission };

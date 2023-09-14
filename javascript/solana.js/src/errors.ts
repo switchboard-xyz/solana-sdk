@@ -106,6 +106,24 @@ export class InvalidCronSchedule extends Error {
     super(
       `invalid cron schedule, expected format: '* * * * * *', received: ${schedule}`
     );
-    Object.setPrototypeOf(this, IncorrectOwner.prototype);
+    Object.setPrototypeOf(this, InvalidCronSchedule.prototype);
+  }
+}
+
+export class FunctionMrEnclaveAlreadySet extends Error {
+  constructor() {
+    super(
+      `Function already has this mrEnclave in its config, no action needed`
+    );
+    Object.setPrototypeOf(this, FunctionMrEnclaveAlreadySet.prototype);
+  }
+}
+
+export class FunctionMrEnclavesFull extends Error {
+  constructor() {
+    super(
+      `Function already has the maximum number of mrEnclaves in its config - try removing one or using force to remove the first MrEnclave in its config`
+    );
+    Object.setPrototypeOf(this, FunctionMrEnclavesFull.prototype);
   }
 }

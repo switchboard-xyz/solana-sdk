@@ -74,14 +74,37 @@ export class NonExecutable {
   }
 }
 
+export interface None3JSON {
+  kind: "None3";
+}
+
+export class None3 {
+  static readonly discriminator = 3;
+  static readonly kind = "None3";
+  readonly discriminator = 3;
+  readonly kind = "None3";
+
+  toJSON(): None3JSON {
+    return {
+      kind: "None3",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None3: {},
+    };
+  }
+}
+
 export interface ExpiredJSON {
   kind: "Expired";
 }
 
 export class Expired {
-  static readonly discriminator = 3;
+  static readonly discriminator = 4;
   static readonly kind = "Expired";
-  readonly discriminator = 3;
+  readonly discriminator = 4;
   readonly kind = "Expired";
 
   toJSON(): ExpiredJSON {
@@ -97,14 +120,83 @@ export class Expired {
   }
 }
 
+export interface None5JSON {
+  kind: "None5";
+}
+
+export class None5 {
+  static readonly discriminator = 5;
+  static readonly kind = "None5";
+  readonly discriminator = 5;
+  readonly kind = "None5";
+
+  toJSON(): None5JSON {
+    return {
+      kind: "None5",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None5: {},
+    };
+  }
+}
+
+export interface None6JSON {
+  kind: "None6";
+}
+
+export class None6 {
+  static readonly discriminator = 6;
+  static readonly kind = "None6";
+  readonly discriminator = 6;
+  readonly kind = "None6";
+
+  toJSON(): None6JSON {
+    return {
+      kind: "None6",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None6: {},
+    };
+  }
+}
+
+export interface None7JSON {
+  kind: "None7";
+}
+
+export class None7 {
+  static readonly discriminator = 7;
+  static readonly kind = "None7";
+  readonly discriminator = 7;
+  readonly kind = "None7";
+
+  toJSON(): None7JSON {
+    return {
+      kind: "None7",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None7: {},
+    };
+  }
+}
+
 export interface OutOfFundsJSON {
   kind: "OutOfFunds";
 }
 
 export class OutOfFunds {
-  static readonly discriminator = 4;
+  static readonly discriminator = 8;
   static readonly kind = "OutOfFunds";
-  readonly discriminator = 4;
+  readonly discriminator = 8;
   readonly kind = "OutOfFunds";
 
   toJSON(): OutOfFundsJSON {
@@ -120,14 +212,175 @@ export class OutOfFunds {
   }
 }
 
+export interface None9JSON {
+  kind: "None9";
+}
+
+export class None9 {
+  static readonly discriminator = 9;
+  static readonly kind = "None9";
+  readonly discriminator = 9;
+  readonly kind = "None9";
+
+  toJSON(): None9JSON {
+    return {
+      kind: "None9",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None9: {},
+    };
+  }
+}
+
+export interface None10JSON {
+  kind: "None10";
+}
+
+export class None10 {
+  static readonly discriminator = 10;
+  static readonly kind = "None10";
+  readonly discriminator = 10;
+  readonly kind = "None10";
+
+  toJSON(): None10JSON {
+    return {
+      kind: "None10",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None10: {},
+    };
+  }
+}
+
+export interface None11JSON {
+  kind: "None11";
+}
+
+export class None11 {
+  static readonly discriminator = 11;
+  static readonly kind = "None11";
+  readonly discriminator = 11;
+  readonly kind = "None11";
+
+  toJSON(): None11JSON {
+    return {
+      kind: "None11",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None11: {},
+    };
+  }
+}
+
+export interface None12JSON {
+  kind: "None12";
+}
+
+export class None12 {
+  static readonly discriminator = 12;
+  static readonly kind = "None12";
+  readonly discriminator = 12;
+  readonly kind = "None12";
+
+  toJSON(): None12JSON {
+    return {
+      kind: "None12",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None12: {},
+    };
+  }
+}
+
+export interface None13JSON {
+  kind: "None13";
+}
+
+export class None13 {
+  static readonly discriminator = 13;
+  static readonly kind = "None13";
+  readonly discriminator = 13;
+  readonly kind = "None13";
+
+  toJSON(): None13JSON {
+    return {
+      kind: "None13",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None13: {},
+    };
+  }
+}
+
+export interface None14JSON {
+  kind: "None14";
+}
+
+export class None14 {
+  static readonly discriminator = 14;
+  static readonly kind = "None14";
+  readonly discriminator = 14;
+  readonly kind = "None14";
+
+  toJSON(): None14JSON {
+    return {
+      kind: "None14",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None14: {},
+    };
+  }
+}
+
+export interface None15JSON {
+  kind: "None15";
+}
+
+export class None15 {
+  static readonly discriminator = 15;
+  static readonly kind = "None15";
+  readonly discriminator = 15;
+  readonly kind = "None15";
+
+  toJSON(): None15JSON {
+    return {
+      kind: "None15",
+    };
+  }
+
+  toEncodable() {
+    return {
+      None15: {},
+    };
+  }
+}
+
 export interface InvalidPermissionsJSON {
   kind: "InvalidPermissions";
 }
 
 export class InvalidPermissions {
-  static readonly discriminator = 5;
+  static readonly discriminator = 16;
   static readonly kind = "InvalidPermissions";
-  readonly discriminator = 5;
+  readonly discriminator = 16;
   readonly kind = "InvalidPermissions";
 
   toJSON(): InvalidPermissionsJSON {
@@ -158,11 +411,44 @@ export function fromDecoded(obj: any): types.FunctionStatusKind {
   if ("NonExecutable" in obj) {
     return new NonExecutable();
   }
+  if ("None3" in obj) {
+    return new None3();
+  }
   if ("Expired" in obj) {
     return new Expired();
   }
+  if ("None5" in obj) {
+    return new None5();
+  }
+  if ("None6" in obj) {
+    return new None6();
+  }
+  if ("None7" in obj) {
+    return new None7();
+  }
   if ("OutOfFunds" in obj) {
     return new OutOfFunds();
+  }
+  if ("None9" in obj) {
+    return new None9();
+  }
+  if ("None10" in obj) {
+    return new None10();
+  }
+  if ("None11" in obj) {
+    return new None11();
+  }
+  if ("None12" in obj) {
+    return new None12();
+  }
+  if ("None13" in obj) {
+    return new None13();
+  }
+  if ("None14" in obj) {
+    return new None14();
+  }
+  if ("None15" in obj) {
+    return new None15();
   }
   if ("InvalidPermissions" in obj) {
     return new InvalidPermissions();
@@ -184,11 +470,44 @@ export function fromJSON(
     case "NonExecutable": {
       return new NonExecutable();
     }
+    case "None3": {
+      return new None3();
+    }
     case "Expired": {
       return new Expired();
     }
+    case "None5": {
+      return new None5();
+    }
+    case "None6": {
+      return new None6();
+    }
+    case "None7": {
+      return new None7();
+    }
     case "OutOfFunds": {
       return new OutOfFunds();
+    }
+    case "None9": {
+      return new None9();
+    }
+    case "None10": {
+      return new None10();
+    }
+    case "None11": {
+      return new None11();
+    }
+    case "None12": {
+      return new None12();
+    }
+    case "None13": {
+      return new None13();
+    }
+    case "None14": {
+      return new None14();
+    }
+    case "None15": {
+      return new None15();
     }
     case "InvalidPermissions": {
       return new InvalidPermissions();
@@ -201,8 +520,19 @@ export function layout(property?: string) {
     borsh.struct([], "None"),
     borsh.struct([], "Active"),
     borsh.struct([], "NonExecutable"),
+    borsh.struct([], "None3"),
     borsh.struct([], "Expired"),
+    borsh.struct([], "None5"),
+    borsh.struct([], "None6"),
+    borsh.struct([], "None7"),
     borsh.struct([], "OutOfFunds"),
+    borsh.struct([], "None9"),
+    borsh.struct([], "None10"),
+    borsh.struct([], "None11"),
+    borsh.struct([], "None12"),
+    borsh.struct([], "None13"),
+    borsh.struct([], "None14"),
+    borsh.struct([], "None15"),
     borsh.struct([], "InvalidPermissions"),
   ]);
   if (property !== undefined) {

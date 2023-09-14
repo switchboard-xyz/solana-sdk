@@ -244,6 +244,19 @@ export function parseRawBuffer(rawBuffer: RawBuffer, size = 32): Uint8Array {
   );
 }
 
+export function containsMrEnclave(
+  mrEnclaves: number[][],
+  targetMrEnclave: number[] | Uint8Array
+): boolean {
+  return mrEnclaves.some((arr) => {
+    if (arr.length !== targetMrEnclave.length) return false;
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] !== targetMrEnclave[i]) return false;
+    }
+    return true;
+  });
+}
+
 /**
  * Validate a cron schedule and return a valid 6 element cron string which includes seconds
  * @param cronSchedule - the cron string to validate
