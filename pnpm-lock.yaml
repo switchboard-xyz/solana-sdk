@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -149,7 +149,7 @@ importers:
         specifier: ^1.78.0
         version: 1.78.3
       '@switchboard-xyz/solana.js':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../../javascript/solana.js
     devDependencies:
       '@types/bn.js':
@@ -173,12 +173,6 @@ importers:
       ts-mocha:
         specifier: ^10.0.0
         version: 10.0.0(mocha@9.2.2)
-
-  examples/functions/01_basic_oracle/sgx-function:
-    dependencies:
-      solana-basic-oracle:
-        specifier: latest
-        version: link:..
 
   examples/functions/02_liquidity_oracle:
     dependencies:
@@ -220,12 +214,6 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0(mocha@9.2.2)
 
-  examples/functions/02_liquidity_oracle/sgx-function:
-    dependencies:
-      solana-liquidity-oracle:
-        specifier: latest
-        version: link:..
-
   examples/functions/03_candles_oracle:
     dependencies:
       '@coral-xyz/anchor':
@@ -265,12 +253,6 @@ importers:
       ts-mocha:
         specifier: ^10.0.0
         version: 10.0.0(mocha@9.2.2)
-
-  examples/functions/03_candles_oracle/sgx-function:
-    dependencies:
-      solana-candles-oracle-example:
-        specifier: latest
-        version: link:..
 
   examples/functions/04_randomness_callback:
     dependencies:
@@ -317,8 +299,6 @@ importers:
       ts-mocha:
         specifier: ^10.0.0
         version: 10.0.0(mocha@9.2.2)
-
-  examples/functions/04_randomness_callback/sgx-function: {}
 
   examples/functions/05_raffle_program:
     dependencies:
