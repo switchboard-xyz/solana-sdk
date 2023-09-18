@@ -37,7 +37,7 @@ export function functionRequestClose(
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.solDest, isSigner: false, isWritable: false },
+    { pubkey: accounts.solDest, isSigner: false, isWritable: true },
     { pubkey: accounts.escrowDest, isSigner: false, isWritable: true },
     { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },

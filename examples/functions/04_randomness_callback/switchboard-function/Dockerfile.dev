@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1.4
 FROM switchboardlabs/sgx-function:main AS builder
 
+ENV CARGO_NAME
 ARG CARGO_NAME=switchboard-function
 
 WORKDIR /home/root/solana-sdk
@@ -17,9 +18,9 @@ COPY ./rust/switchboard-solana/Cargo.toml \
      ./rust/switchboard-solana/Cargo.lock \
      ./rust/switchboard-solana/
 
-COPY ./chains/solana/examples/functions/04_randomness_callback/sgx-function/Cargo.toml \
-     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/Cargo.lock \
-     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/
+COPY ./chains/solana/examples/functions/04_randomness_callback/switchboard-function/Cargo.toml \
+     ./chains/solana/examples/functions/04_randomness_callback/switchboard-function/Cargo.lock \
+     ./chains/solana/examples/functions/04_randomness_callback/switchboard-function/
 
 COPY ./rust/switchboard-common/src \
      ./rust/switchboard-common/src/
@@ -30,15 +31,15 @@ COPY ./rust/switchboard-common/src \
 COPY ./rust/switchboard-solana/src \
      ./rust/switchboard-solana/src/
 
-COPY ./chains/solana/examples/functions/04_randomness_callback/sgx-function/src \
-     ./chains/solana/examples/functions/04_randomness_callback/sgx-function/src/
+COPY ./chains/solana/examples/functions/04_randomness_callback/switchboard-function/src \
+     ./chains/solana/examples/functions/04_randomness_callback/switchboard-function/src/
 
-WORKDIR /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/sgx-function
+WORKDIR /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/switchboard-function
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
     cargo build --release && \
     cargo strip && \
-    mv /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/sgx-function/target/release/${CARGO_NAME} /sgx
+    mv /home/root/solana-sdk/chains/solana/examples/functions/04_randomness_callback/switchboard-function/target/release/${CARGO_NAME} /sgx
 
 FROM switchboardlabs/sgx-function:main
 

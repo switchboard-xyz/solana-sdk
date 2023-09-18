@@ -178,7 +178,7 @@
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "attestationQueue",
@@ -1111,8 +1111,8 @@
         },
         {
           "name": "functionAuthority",
-          "isMut": true,
-          "isSigner": false,
+          "isMut": false,
+          "isSigner": true,
           "isOptional": true
         },
         {
@@ -1255,9 +1255,20 @@
           "isSigner": true
         },
         {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "function",
           "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "functionAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
         },
         {
           "name": "escrow",
@@ -1408,7 +1419,7 @@
         },
         {
           "name": "solDest",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {

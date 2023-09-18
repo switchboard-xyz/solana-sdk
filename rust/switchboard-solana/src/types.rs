@@ -16,7 +16,7 @@ pub use crate::attestation_program::{
     FunctionRequestSetConfigParams, FunctionRequestTriggerRound, FunctionRequestVerifyParams,
     FunctionSetEscrowParams, FunctionStatus, FunctionTriggerParams, FunctionVerifyParams,
     MrEnclave, Quote, RequestStatus, SwitchboardAttestationPermission, VerificationStatus,
-    WalletFundParams, WalletInitParams,
+    WalletFundParams, WalletInitParams, WalletWithdrawParams,
 };
 
 cfg_client! {

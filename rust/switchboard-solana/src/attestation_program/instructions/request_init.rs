@@ -18,7 +18,7 @@ pub struct FunctionRequestInit<'info> {
     pub function: AccountInfo<'info>,
 
     /// CHECK: function authority required to permit new requests
-    #[account(mut)]
+    #[account(signer)]
     pub function_authority: Option<AccountInfo<'info>>,
 
     #[account(
@@ -65,7 +65,7 @@ impl<'info> FunctionRequestInit<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,
-        params: &FunctionRequestInitParams,
+        params: FunctionRequestInitParams,
     ) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
@@ -77,24 +77,84 @@ impl<'info> FunctionRequestInit<'info> {
         Ok(instruction)
     }
 
+    /// Invokes the instruction using a signed authority.
+    ///
+    /// # Arguments
+    ///
+    /// * `program`: The Switchboard Attestation program AccountInfo.
+    ///
+    /// * `max_container_params_len`: The maximum length of the vector containing the container parameters.
+    ///   - Default: 256 bytes.
+    ///   - Example: `Some(512)`.
+    ///
+    /// * `container_params`: The parameters for the container.
+    ///   - Default: Empty vector.
+    ///   - Example: `Some(request_params.into_bytes())`.
+    ///
+    /// * `garbage_collection_slot`: The slot when the request can be closed by anyone and is considered expired.
+    ///   - Default: None, meaning only the authority can close the request.
+    ///
+    /// # Returns
+    ///
+    /// * `ProgramResult`: Indicates the result of the instruction execution.
     pub fn invoke(
         &self,
         program: AccountInfo<'info>,
-        params: &FunctionRequestInitParams,
+        max_container_params_len: Option<u32>,
+        container_params: Option<Vec<u8>>,
+        garbage_collection_slot: Option<u64>,
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, params)?;
+        let instruction = self.get_instruction(
+            *program.key,
+            FunctionRequestInitParams {
+                max_container_params_len,
+                container_params: container_params.unwrap_or_default(),
+                garbage_collection_slot,
+            },
+        )?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
     }
 
+    /// Invokes the instruction using a signed authority.
+    ///
+    /// # Arguments
+    ///
+    /// * `program`: The Switchboard Attestation program AccountInfo.
+    ///
+    /// * `max_container_params_len`: The maximum length of the vector containing the container parameters.
+    ///   - Default: 256 bytes.
+    ///   - Example: `Some(512)`.
+    ///
+    /// * `container_params`: The parameters for the container.
+    ///   - Default: Empty vector.
+    ///   - Example: `Some(request_params.into_bytes())`.
+    ///
+    /// * `garbage_collection_slot`: The slot when the request can be closed by anyone and is considered expired.
+    ///   - Default: None, meaning only the authority can close the request.
+    ///
+    /// * `signer_seeds`: Seeds used for signing.
+    ///
+    /// # Returns
+    ///
+    /// * `ProgramResult`: Indicates the result of the instruction execution.
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
-        params: &FunctionRequestInitParams,
+        max_container_params_len: Option<u32>,
+        container_params: Option<Vec<u8>>,
+        garbage_collection_slot: Option<u64>,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, params)?;
+        let instruction = self.get_instruction(
+            *program.key,
+            FunctionRequestInitParams {
+                max_container_params_len,
+                container_params: container_params.unwrap_or_default(),
+                garbage_collection_slot,
+            },
+        )?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
@@ -124,7 +184,7 @@ impl<'info> FunctionRequestInit<'info> {
         account_metas.extend(self.authority.to_account_metas(None));
         account_metas.extend(self.function.to_account_metas(None));
         if let Some(function_authority) = &self.function_authority {
-            account_metas.extend(function_authority.to_account_metas(None));
+            account_metas.extend(function_authority.to_account_metas(Some(true)));
         } else {
             account_metas.push(AccountMeta::new_readonly(
                 SWITCHBOARD_ATTESTATION_PROGRAM_ID,

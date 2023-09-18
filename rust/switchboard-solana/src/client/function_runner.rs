@@ -40,6 +40,11 @@ pub struct FunctionRunner {
     // only used for requests
     pub function_request_key: Option<Pubkey>,
     pub function_request_data: Option<Box<FunctionRequestAccountData>>,
+
+    // convienence for building ixns
+    pub attestation_queue: Option<Pubkey>,
+    pub switchboard_state: Pubkey,
+    pub switchboard: Pubkey,
 }
 
 impl std::fmt::Display for FunctionRunner {
@@ -68,24 +73,28 @@ impl FunctionRunner {
         let verifier = Pubkey::from_str(&env.verifier).unwrap();
         let reward_receiver = Pubkey::from_str(&env.reward_receiver).unwrap();
 
+        let mut attestation_queue: Option<Pubkey> = None;
+
         // can be manually populated from client if missing
-        let function_data: Option<Box<FunctionAccountData>> = if let Some(function_data_encoded) =
-            env.function_data.as_ref()
-        {
-            match bytemuck::try_from_bytes(&hex::decode(function_data_encoded).unwrap_or_default())
-            {
-                Ok(function_data) => {
-                    if function_data != &FunctionAccountData::default() {
-                        Some(Box::new(*function_data))
-                    } else {
-                        None
+        let function_data: Option<Box<FunctionAccountData>> =
+            if let Some(function_data_encoded) = env.function_data.as_ref() {
+                // match bytemuck::try_from_bytes<FunctionAccountData>(&)
+                match bytemuck::try_from_bytes::<FunctionAccountData>(
+                    &hex::decode(function_data_encoded).unwrap_or_default(),
+                ) {
+                    Ok(function_data) => {
+                        attestation_queue = Some(function_data.attestation_queue);
+                        if function_data != &FunctionAccountData::default() {
+                            Some(Box::new(*function_data))
+                        } else {
+                            None
+                        }
                     }
+                    Err(_) => None,
                 }
-                Err(_) => None,
-            }
-        } else {
-            None
-        };
+            } else {
+                None
+            };
         let verifier_enclave_signer: Option<Pubkey> =
             if let Some(verifier_enclave_signer) = env.verifier_enclave_signer {
                 match Pubkey::from_str(&verifier_enclave_signer) {
@@ -137,12 +146,22 @@ impl FunctionRunner {
                 match FunctionRequestAccountData::try_from_slice(
                     &hex::decode(function_request_data_encoded).unwrap_or_default(),
                 ) {
-                    Ok(function_request_data) => Some(Box::new(function_request_data)),
+                    Ok(function_request_data) => {
+                        if attestation_queue.is_none() {
+                            attestation_queue = Some(function_request_data.attestation_queue);
+                        }
+
+                        Some(Box::new(function_request_data))
+                    }
                     Err(_) => None,
                 }
             } else {
                 None
             };
+
+        let switchboard: Pubkey =
+            load_env_pubkey("SWITCHBOARD").unwrap_or(SWITCHBOARD_ATTESTATION_PROGRAM_ID);
+        let switchboard_state = AttestationProgramState::get_program_pda(Some(switchboard));
 
         Ok(Self {
             client: Arc::new(client),
@@ -157,6 +176,9 @@ impl FunctionRunner {
             reward_receiver,
             verifier_enclave_signer,
             queue_authority,
+            attestation_queue,
+            switchboard,
+            switchboard_state,
         })
     }
 
@@ -211,6 +233,13 @@ impl FunctionRunner {
             ))),
             Ok(attestation_queue) => Ok(attestation_queue.authority),
         }
+    }
+
+    pub fn get_associated_token_address(owner: Pubkey, mint: Option<Pubkey>) -> Pubkey {
+        anchor_spl::associated_token::get_associated_token_address(
+            &owner,
+            &mint.unwrap_or(anchor_spl::token::spl_token::native_mint::ID),
+        )
     }
 
     /// Loads the oracle signing key provided by the VERIFIER_ENCLAVE_SIGNER
@@ -306,11 +335,13 @@ impl FunctionRunner {
         }
 
         let function_data: FunctionAccountData = *bytemuck::try_from_bytes(
-            &hex::decode(std::env::var("FUNCTION_DATA").unwrap()).unwrap()
-        ).unwrap();
+            &hex::decode(std::env::var("FUNCTION_DATA").unwrap()).unwrap(),
+        )
+        .unwrap();
 
         let queue_authority = Pubkey::from_str(&std::env::var("QUEUE_AUTHORITY").unwrap()).unwrap();
-        let verifier_enclave_signer = Pubkey::from_str(&std::env::var("VERIFIER_ENCLAVE_SIGNER").unwrap()).unwrap();
+        let verifier_enclave_signer =
+            Pubkey::from_str(&std::env::var("VERIFIER_ENCLAVE_SIGNER").unwrap()).unwrap();
 
         let verifier_permission = AttestationPermissionAccountData::get_pda(
             &queue_authority,
@@ -364,7 +395,6 @@ impl FunctionRunner {
             )));
         }
 
-        // TODO: replace with variables
         let function_data = self.load_function_data().await?;
 
         let queue_authority = self

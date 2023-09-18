@@ -15,8 +15,7 @@ tokio = "^1"
 futures = "0.3"
 serde = "^1"
 serde_json = "^1"
-switchboard-utils = { version = "0.8.0" }
-switchboard-solana = "0.28.4"
-# switchboard-solana = { version = "0.28.4", path = "../../../../rust/switchboard-solana" }
-bytemuck = "1.13.1"
-rust_decimal = "1.30.0"
+switchboard-utils = "0.8.0"
+switchboard-solana = { version = "0.28.19" }
+# switchboard-solana = { version = "0.28.19", path = "../../../../rust/switchboard-solana" }
+# switchboard-utils = { version = "0.8.0", path = "../../../../../../rust/switchboard-utils" }

@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.28.18"
+version = "0.28.19"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"

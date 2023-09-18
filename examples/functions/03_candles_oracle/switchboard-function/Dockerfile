@@ -8,13 +8,13 @@ WORKDIR /home/root/switchboard-function
 COPY ./Anchor.toml ./Cargo.lock ./Cargo.toml ./
 COPY ./src ./src
 
-WORKDIR /home/root/switchboard-function/sgx-function
-COPY ./sgx-function/Cargo.lock ./sgx-function/Cargo.toml  ./
-COPY ./sgx-function/src ./src
+WORKDIR /home/root/switchboard-function/switchboard-function
+COPY ./switchboard-function/Cargo.lock ./switchboard-function/Cargo.toml  ./
+COPY ./switchboard-function/src ./src
 
 RUN --mount=target=/home/root/.cargo/git,type=cache \
     --mount=target=/home/root/.cargo/registry,type=cache \
-    --mount=type=cache,target=/home/root/switchboard-function/sgx-function/target \
+    --mount=type=cache,target=/home/root/switchboard-function/switchboard-function/target \
     cargo build --release && \
     cargo strip && \
     mv target/release/basic-oracle-function /sgx/app

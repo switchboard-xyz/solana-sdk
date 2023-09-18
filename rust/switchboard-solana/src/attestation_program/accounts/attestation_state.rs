@@ -72,6 +72,14 @@ impl AttestationProgramState {
         pda_key
     }
 
+    pub fn get_program_pda(program_id: Option<Pubkey>) -> Pubkey {
+        let (pda_key, _) = Pubkey::find_program_address(
+            &[STATE_SEED],
+            &program_id.unwrap_or(SWITCHBOARD_ATTESTATION_PROGRAM_ID),
+        );
+        pda_key
+    }
+
     pub fn verify_pda(expected: &Pubkey) -> Result<()> {
         let key = Self::get_pda();
         if key != *expected {

@@ -11,8 +11,14 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     )]
     pub request: AccountInfo<'info>,
 
+    pub authority: AccountInfo<'info>,
+
     #[account(mut)]
     pub function: AccountInfo<'info>,
+
+    /// CHECK: function authority required to permit new requests
+    #[account(signer)]
+    pub function_authority: Option<AccountInfo<'info>>,
 
     #[account(
       mut,
@@ -75,6 +81,36 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
         Ok(instruction)
     }
 
+    /// Invokes the instruction.
+    ///
+    /// # Arguments
+    ///
+    /// * `program`: The Switchboard Attestation program AccountInfo.
+    ///
+    /// * `max_container_params_len`: The maximum length of the vector containing the container parameters.
+    ///   - Default: 256 bytes.
+    ///   - Example: `Some(512)`.
+    ///
+    /// * `container_params`: The parameters for the container.
+    ///   - Default: Empty vector.
+    ///   - Example: `Some(request_params.into_bytes())`.
+    ///
+    /// * `garbage_collection_slot`: The slot when the request can be closed by anyone and is considered expired.
+    ///   - Default: None, meaning only the authority can close the request.
+    ///
+    /// * `bounty`: An optional fee to reward oracles for priority processing.
+    ///   - Default: 0 lamports.
+    ///
+    /// * `slots_until_expiration`: An optional specification for the max number of slots the request can be processed in.
+    ///   - Default: 2250 slots (roughly 15 minutes at 400 ms/slot).
+    ///   - Minimum: 150 slots (approximately 1 minute at 400 ms/slot).
+    ///
+    /// * `valid_after_slot`: Schedule when the request should be valid for processing.
+    ///   - Default: 0 slots, meaning the request is valid immediately for oracles to process.
+    ///
+    /// # Returns
+    ///
+    /// * `ProgramResult`: Indicates the result of the instruction execution.
     pub fn invoke(
         &self,
         program: AccountInfo<'info>,
@@ -101,6 +137,38 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
         invoke(&instruction, &account_infos[..])
     }
 
+    /// Invokes the instruction using a signed authority.
+    ///
+    /// # Arguments
+    ///
+    /// * `program`: The Switchboard Attestation program AccountInfo.
+    ///
+    /// * `max_container_params_len`: The maximum length of the vector containing the container parameters.
+    ///   - Default: 256 bytes.
+    ///   - Example: `Some(512)`.
+    ///
+    /// * `container_params`: The parameters for the container.
+    ///   - Default: Empty vector.
+    ///   - Example: `Some(request_params.into_bytes())`.
+    ///
+    /// * `garbage_collection_slot`: The slot when the request can be closed by anyone and is considered expired.
+    ///   - Default: None, meaning only the authority can close the request.
+    ///
+    /// * `bounty`: An optional fee to reward oracles for priority processing.
+    ///   - Default: 0 lamports.
+    ///
+    /// * `slots_until_expiration`: An optional specification for the max number of slots the request can be processed in.
+    ///   - Default: 2250 slots (roughly 15 minutes at 400 ms/slot).
+    ///   - Minimum: 150 slots (approximately 1 minute at 400 ms/slot).
+    ///
+    /// * `valid_after_slot`: Schedule when the request should be valid for processing.
+    ///   - Default: 0 slots, meaning the request is valid immediately for oracles to process.
+    ///
+    /// * `signer_seeds`: Seeds used for signing.
+    ///
+    /// # Returns
+    ///
+    /// * `ProgramResult`: Indicates the result of the instruction execution.
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
@@ -131,7 +199,9 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
     fn to_account_infos(&self) -> Vec<AccountInfo<'info>> {
         let mut account_infos = Vec::new();
         account_infos.extend(self.request.to_account_infos());
+        account_infos.extend(self.authority.to_account_infos());
         account_infos.extend(self.function.to_account_infos());
+        account_infos.extend(self.function_authority.to_account_infos());
         account_infos.extend(self.escrow.to_account_infos());
         account_infos.extend(self.mint.to_account_infos());
         account_infos.extend(self.state.to_account_infos());
@@ -147,7 +217,16 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
         let mut account_metas = Vec::new();
         account_metas.extend(self.request.to_account_metas(Some(true)));
+        account_metas.extend(self.authority.to_account_metas(None));
         account_metas.extend(self.function.to_account_metas(None));
+        if let Some(function_authority) = &self.function_authority {
+            account_metas.extend(function_authority.to_account_metas(Some(true)));
+        } else {
+            account_metas.push(AccountMeta::new_readonly(
+                SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                false,
+            ));
+        }
         account_metas.extend(self.escrow.to_account_metas(None));
         account_metas.extend(self.mint.to_account_metas(None));
         account_metas.extend(self.state.to_account_metas(None));

@@ -8,6 +8,6 @@ edition = "2021"
 [dependencies]
 tokio = "^1"
 futures = "0.3"
-# switchboard-solana = "0.28.4"
-switchboard-solana = { version = "0.28.4", path = "../../../../rust/switchboard-solana" }
+# switchboard-solana = "0.28.19"
+switchboard-solana = { version = "0.28.19", path = "../../../../rust/switchboard-solana" }
 switchboard-utils = { version = "0.8", path = "../../../../../../rust/switchboard-utils" }
