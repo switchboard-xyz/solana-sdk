@@ -1,22 +1,21 @@
 .PHONY: build clean publish
 
 # Variables
-CARGO_NAME=basic-oracle-function
-DOCKER_IMAGE_NAME=${CONTAINER_NAME}
+DOCKER_IMAGE_NAME ?= gallynaut/basic-oracle-function
 
-DOCKER_BUILD_COMMAND=DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 --build-arg CARGO_NAME=${CARGO_NAME}
+DOCKER_BUILD_COMMAND=docker buildx build --platform linux/amd64
 
 # Default make task
 all: build
 
 docker_build:
-	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile -t ${DOCKER_IMAGE_NAME}:latest --load ../
+	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile -t ${DOCKER_IMAGE_NAME}:latest ../
 
 docker_publish:
 	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile -t ${DOCKER_IMAGE_NAME}:latest --push ../
 
 dev_docker_build:
-	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile.dev -t ${DOCKER_IMAGE_NAME}:latest --load ../../../../../../
+	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile.dev -t ${DOCKER_IMAGE_NAME}:latest ../../../../../../
 
 dev_docker_publish:
 	${DOCKER_BUILD_COMMAND} --pull -f Dockerfile.dev -t ${DOCKER_IMAGE_NAME}:latest --push ../../../../../../

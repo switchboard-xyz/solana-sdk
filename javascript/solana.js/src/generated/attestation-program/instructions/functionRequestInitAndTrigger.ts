@@ -12,7 +12,9 @@ export interface FunctionRequestInitAndTriggerArgs {
 
 export interface FunctionRequestInitAndTriggerAccounts {
   request: PublicKey;
+  authority: PublicKey;
   function: PublicKey;
+  functionAuthority: PublicKey;
   escrow: PublicKey;
   mint: PublicKey;
   state: PublicKey;
@@ -35,7 +37,9 @@ export function functionRequestInitAndTrigger(
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.request, isSigner: true, isWritable: true },
+    { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.function, isSigner: false, isWritable: true },
+    { pubkey: accounts.functionAuthority, isSigner: true, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.state, isSigner: false, isWritable: false },

@@ -89,7 +89,9 @@ pub mod custom_randomness_request {
 
         let request_init_ctx = FunctionRequestInitAndTrigger {
             request: ctx.accounts.request.clone(),
+            authority: ctx.accounts.user.to_account_info(),
             function: ctx.accounts.function.to_account_info(),
+            function_authority: None,
             escrow: ctx.accounts.request_escrow.clone(),
             mint: ctx.accounts.mint.to_account_info(),
             state: ctx.accounts.state.to_account_info(),

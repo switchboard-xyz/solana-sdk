@@ -21,7 +21,7 @@ pub struct TriggerFunction<'info> {
 }
 
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
-pub struct TriggerFunctionParams { }
+pub struct TriggerFunctionParams {}
 
 impl TriggerFunction<'_> {
     pub fn validate(
@@ -32,12 +32,16 @@ impl TriggerFunction<'_> {
         Ok(())
     }
 
-    pub fn actuate(ctx: &Context<Self>, _params: &TriggerFunctionParams) -> anchor_lang::Result<()> {
+    pub fn actuate(
+        ctx: &Context<Self>,
+        _params: &TriggerFunctionParams,
+    ) -> anchor_lang::Result<()> {
         FunctionTrigger {
-            function: ctx.accounts.function.clone(),
-            authority: ctx.accounts.authority.clone(),
-            attestation_queue: ctx.accounts.attestation_queue.clone(),
-        }.invoke(ctx.accounts.attestation_program.clone())?;
+            function: ctx.accounts.function.to_account_info(),
+            authority: ctx.accounts.authority.to_account_info(),
+            attestation_queue: ctx.accounts.attestation_queue.to_account_info(),
+        }
+        .invoke(ctx.accounts.attestation_program.clone())?;
         Ok(())
     }
 }

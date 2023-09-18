@@ -1,5 +1,6 @@
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
+import { Mint } from "../mint.js";
 import {
   SB_ATTESTATION_PID,
   type SwitchboardProgram,
@@ -437,10 +438,33 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     options?: TransactionObjectOptions
   ): Promise<TransactionObject> {
     const walletState = await this.loadData();
+    const mint = await Mint.load(this.program.provider, walletState.mint);
 
-    const destinationTokenWallet =
-      destinationWallet ??
-      (await this.program.mint.getOrCreateAssociatedUser(payer));
+    let createTokenWalletIxn: TransactionInstruction | undefined = undefined;
+
+    // If the destination wallet doesnt exist, lets use the users associated token account
+    let destinationTokenWallet = destinationWallet;
+    if (!destinationTokenWallet) {
+      destinationTokenWallet = mint.getAssociatedAddress(payer);
+
+      const tokenAccount = await mint.getAccount(destinationTokenWallet);
+
+      if (!tokenAccount) {
+        createTokenWalletIxn = spl.createAssociatedTokenAccountInstruction(
+          payer,
+          destinationTokenWallet,
+          payer,
+          mint.address
+        );
+      }
+    } else {
+      const tokenAccount = await mint.getAccount(destinationTokenWallet);
+      if (!tokenAccount) {
+        throw new Error(
+          `Destination wallet ${destinationTokenWallet.toBase58()} does not exist.`
+        );
+      }
+    }
 
     const ixn = types.walletWithdraw(
       this.program,
@@ -469,7 +493,12 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         })
     );
 
-    return new TransactionObject(payer, [ixn], [], options);
+    return new TransactionObject(
+      payer,
+      createTokenWalletIxn ? [createTokenWalletIxn, ixn] : [ixn],
+      [],
+      options
+    );
   }
 
   public async withdraw(

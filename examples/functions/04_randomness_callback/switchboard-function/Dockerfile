@@ -4,7 +4,7 @@ FROM switchboardlabs/sgx-function AS builder
 ARG CARGO_NAME=switchboard-function
 ENV CARGO_NAME=$CARGO_NAME
 
-WORKDIR /home/root/switchboard-function/sgx-function
+WORKDIR /home/root/switchboard-function/switchboard-function
 COPY ./Cargo.lock ./Cargo.toml  ./
 COPY ./src ./src
 

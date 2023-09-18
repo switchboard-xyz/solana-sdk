@@ -1,9 +1,6 @@
 # syntax=docker/dockerfile:1.4
 FROM switchboardlabs/sgx-function AS builder
 
-ARG CARGO_NAME=switchboard-function
-ENV CARGO_NAME=$CARGO_NAME
-
 WORKDIR /home/root/solana-sdk
 
 COPY ./rust/switchboard-common/Cargo.toml \
@@ -18,9 +15,9 @@ COPY ./chains/solana/examples/functions/01_basic_oracle/Cargo.toml \
      ./chains/solana/examples/functions/01_basic_oracle/Cargo.lock \
      ./chains/solana/examples/functions/01_basic_oracle/
 
-COPY ./chains/solana/examples/functions/01_basic_oracle/sgx-function/Cargo.toml \
-     ./chains/solana/examples/functions/01_basic_oracle/sgx-function/Cargo.lock \
-     ./chains/solana/examples/functions/01_basic_oracle/sgx-function/
+COPY ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/Cargo.toml \
+     ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/Cargo.lock \
+     ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/
 
 COPY ./rust/switchboard-common/src \
      ./rust/switchboard-common/src/
@@ -31,15 +28,15 @@ COPY ./rust/switchboard-solana/src \
 COPY ./chains/solana/examples/functions/01_basic_oracle/src \
      ./chains/solana/examples/functions/01_basic_oracle/src/
 
-COPY ./chains/solana/examples/functions/01_basic_oracle/sgx-function/src \
-     ./chains/solana/examples/functions/01_basic_oracle/sgx-function/src/
+COPY ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/src \
+     ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/src/
 
-WORKDIR /home/root/solana-sdk/chains/solana/examples/functions/01_basic_oracle/sgx-function
+WORKDIR /home/root/solana-sdk/chains/solana/examples/functions/01_basic_oracle/switchboard-function
 
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=${TARGETPLATFORM} --mount=type=cache,target=target,id=${TARGETPLATFORM} \
     cargo build --release && \
     cargo strip && \
-    mv target/release/${CARGO_NAME} /sgx/app
+    mv target/release/basic-oracle-function /sgx/app
 
 FROM switchboardlabs/sgx-function
 

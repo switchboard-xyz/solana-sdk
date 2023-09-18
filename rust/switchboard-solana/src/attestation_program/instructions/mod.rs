@@ -39,3 +39,6 @@ pub use wallet_init::*;
 
 pub mod wallet_fund;
 pub use wallet_fund::*;
+
+pub mod wallet_withdraw;
+pub use wallet_withdraw::*;

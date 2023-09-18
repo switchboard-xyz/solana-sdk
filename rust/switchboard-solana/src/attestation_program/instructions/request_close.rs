@@ -12,7 +12,7 @@ pub struct FunctionRequestClose<'info> {
     /// CHECK: we need to load_mut and remove_request
     #[account(mut)]
     pub function: AccountInfo<'info>,
-    /// CHECK: allow partial funds to be sent to the claimer only if request.garbage_collection_slot has elapsed
+    #[account(mut)]
     pub sol_dest: AccountInfo<'info>,
     #[account(mut)]
     pub escrow_dest: AccountInfo<'info>,

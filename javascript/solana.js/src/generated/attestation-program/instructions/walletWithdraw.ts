@@ -34,7 +34,7 @@ export function walletWithdraw(
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.wallet, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
-    { pubkey: accounts.authority, isSigner: false, isWritable: false },
+    { pubkey: accounts.authority, isSigner: true, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.destinationWallet, isSigner: false, isWritable: true },

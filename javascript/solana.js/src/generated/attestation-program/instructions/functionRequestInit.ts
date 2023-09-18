@@ -39,7 +39,7 @@ export function functionRequestInit(
     { pubkey: accounts.request, isSigner: true, isWritable: true },
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.function, isSigner: false, isWritable: true },
-    { pubkey: accounts.functionAuthority, isSigner: false, isWritable: true },
+    { pubkey: accounts.functionAuthority, isSigner: true, isWritable: false },
     { pubkey: accounts.escrow, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.state, isSigner: false, isWritable: false },

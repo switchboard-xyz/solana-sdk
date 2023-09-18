@@ -7,5 +7,5 @@ pub use crate::attestation_program::instructions::{
     FunctionClose, FunctionInit, FunctionRequestClose, FunctionRequestInit,
     FunctionRequestInitAndTrigger, FunctionRequestSetConfig, FunctionRequestTrigger,
     FunctionRequestVerify, FunctionSetEscrow, FunctionTrigger, FunctionVerify, WalletFund,
-    WalletInit,
+    WalletInit, WalletWithdraw,
 };
