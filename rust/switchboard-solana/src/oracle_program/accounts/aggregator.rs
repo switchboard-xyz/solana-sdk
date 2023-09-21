@@ -296,7 +296,7 @@ impl AggregatorAccountData {
 #[cfg(test)]
 mod tests {
     use super::*;
-    impl<'info> Default for AggregatorAccountData {
+    impl Default for AggregatorAccountData {
         fn default() -> Self {
             unsafe { std::mem::zeroed() }
         }

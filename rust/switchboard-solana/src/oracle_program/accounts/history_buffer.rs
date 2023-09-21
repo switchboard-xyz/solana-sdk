@@ -101,7 +101,7 @@ impl<'a> Owner for AggregatorHistoryBuffer<'a> {
 mod tests {
     use super::*;
 
-    impl<'info, 'a> Default for AggregatorHistoryBuffer<'a> {
+    impl<'a> Default for AggregatorHistoryBuffer<'a> {
         fn default() -> Self {
             unsafe { std::mem::zeroed() }
         }

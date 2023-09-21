@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-solana"
-version = "0.28.19"
+version = "0.28.21"
 edition = "2021"
 description = "A Rust library to interact with Switchboard accounts."
 readme = "README.md"
@@ -29,11 +29,11 @@ bytemuck = "^1"
 superslice = "1"
 
 [target.'cfg(target_os = "solana")'.dependencies]
-switchboard-common = { version = "0.8.18" }
+switchboard-common = { version = "0.8.20" }
 anchor-lang = { version = "0.28.0" }
 
 [target.'cfg(not(target_os = "solana"))'.dependencies]
-switchboard-common = { version = "0.8.18", features = [
+switchboard-common = { version = "0.8.20", features = [
   "client",
   "solana",
 ] }

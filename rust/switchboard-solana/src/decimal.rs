@@ -182,13 +182,13 @@ mod tests {
             scale: 0,
         };
         let b: bool = swb_decimal.into();
-        assert_eq!(b, false);
+        assert!(!b);
         let swb_decimal_neg = SwitchboardDecimal {
             mantissa: -0,
             scale: 0,
         };
         let b: bool = swb_decimal_neg.into();
-        assert_eq!(b, false);
+        assert!(!b);
     }
 
     #[test]

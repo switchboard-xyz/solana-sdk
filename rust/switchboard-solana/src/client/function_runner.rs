@@ -182,6 +182,19 @@ impl FunctionRunner {
         })
     }
 
+    pub fn assert_mr_enclave(&self) -> Result<(), SwitchboardClientError> {
+        if let Some(function_data) = self.function_data.clone() {
+            let quote_raw = Gramine::generate_quote(&self.signer.to_bytes()).unwrap_or_default();
+            if let Ok(quote) = Quote::parse(&quote_raw) {
+                let mr_enclave: MrEnclave = quote.isv_report.mrenclave.try_into().unwrap();
+                if !function_data.mr_enclaves.contains(&mr_enclave) {
+                    return Err(SwitchboardClientError::MrEnclaveMismatch);
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn new(
         url: &str,
         commitment: Option<CommitmentConfig>,
@@ -327,6 +340,7 @@ impl FunctionRunner {
     async fn build_fn_verify_ixn(
         &self,
         mr_enclave: MrEnclave,
+        error_code: u8,
     ) -> Result<Instruction, SwitchboardClientError> {
         if self.function == Pubkey::default() {
             return Err(SwitchboardClientError::CustomMessage(
@@ -359,7 +373,7 @@ impl FunctionRunner {
         let ixn_params = FunctionVerifyParams {
             observed_time: unix_timestamp(),
             next_allowed_timestamp,
-            is_failure: false,
+            error_code,
             mr_enclave,
         };
 
@@ -384,9 +398,16 @@ impl FunctionRunner {
     async fn build_fn_request_verify_ixn(
         &self,
         mr_enclave: MrEnclave,
+        error_code: u8,
     ) -> Result<Instruction, SwitchboardClientError> {
-        let function_request_data = self.load_request_data().await?;
-        let function_request_key = self.function_request_key.unwrap_or_default(); // verified in load_request_data
+        if self.function_request_data.is_none() || self.function_request_key.is_none() {
+            return Err(SwitchboardClientError::CustomMessage(
+                "function_request_verify instruction needs request environment present."
+                    .to_string(),
+            ));
+        }
+        let function_request_data = self.function_request_data.clone().unwrap_or_default();
+        let function_request_key = self.function_request_key.unwrap_or_default();
 
         if function_request_data.function != self.function {
             return Err(SwitchboardClientError::CustomMessage(format!(
@@ -408,12 +429,14 @@ impl FunctionRunner {
             &self.verifier,
         );
 
+        let container_params_hash =
+            solana_program::hash::hash(&function_request_data.container_params).to_bytes();
         let ixn_params = FunctionRequestVerifyParams {
             observed_time: unix_timestamp(),
-            is_failure: false,
+            error_code,
             mr_enclave,
             request_slot: function_request_data.active_request.request_slot,
-            container_params_hash: function_request_data.container_params_hash,
+            container_params_hash,
         };
 
         let (state_pubkey, _state_bump) =
@@ -443,6 +466,7 @@ impl FunctionRunner {
     async fn get_result(
         &self,
         mut ixs: Vec<Instruction>,
+        error_code: u8,
     ) -> Result<FunctionResult, SwitchboardClientError> {
         let quote_raw = Gramine::generate_quote(&self.signer.to_bytes()).unwrap();
         let quote = Quote::parse(&quote_raw).unwrap();
@@ -450,9 +474,10 @@ impl FunctionRunner {
 
         let function_request_key = self.function_request_key.unwrap_or_default();
         let verify_ixn = if function_request_key == Pubkey::default() {
-            self.build_fn_verify_ixn(mr_enclave).await?
+            self.build_fn_verify_ixn(mr_enclave, error_code).await?
         } else {
-            self.build_fn_request_verify_ixn(mr_enclave).await?
+            self.build_fn_request_verify_ixn(mr_enclave, error_code)
+                .await?
         };
         ixs.insert(0, verify_ixn);
         let message = Message::new(&ixs, Some(&self.payer));
@@ -477,13 +502,14 @@ impl FunctionRunner {
             chain_result_info: Solana(SOLFunctionResult {
                 serialized_tx: bincode::serialize(&tx).unwrap(),
             }),
+            error_code,
         })
     }
 
     /// Emits a serialized FunctionResult object to send to the quote verification
     /// sidecar.
     pub async fn emit(&self, ixs: Vec<Instruction>) -> Result<(), SwitchboardClientError> {
-        self.get_result(ixs)
+        self.get_result(ixs, 0)
             .await
             .map_err(|e| {
                 SwitchboardClientError::CustomMessage(format!("failed to get verify ixn: {}", e))
@@ -491,6 +517,11 @@ impl FunctionRunner {
             .unwrap()
             .emit();
 
+        Ok(())
+    }
+
+    pub async fn emit_error(&self, error_code: u8) -> Result<(), SwitchboardClientError> {
+        self.get_result(vec![], error_code).await.unwrap().emit();
         Ok(())
     }
 }

@@ -25,7 +25,7 @@ pub struct FunctionVerify<'info> {
 pub struct FunctionVerifyParams {
     pub observed_time: i64,
     pub next_allowed_timestamp: i64,
-    pub is_failure: bool,
+    pub error_code: u8,
     pub mr_enclave: [u8; 32],
 }
 impl InstructionData for FunctionVerifyParams {}
@@ -57,13 +57,13 @@ impl<'info> FunctionVerify<'info> {
         program: AccountInfo<'info>,
         observed_time: i64,
         next_allowed_timestamp: i64,
-        is_failure: bool,
+        error_code: u8,
         mr_enclave: [u8; 32],
     ) -> ProgramResult {
         let cpi_params = FunctionVerifyParams {
             observed_time,
             next_allowed_timestamp,
-            is_failure,
+            error_code,
             mr_enclave,
         };
         let instruction = self.get_instruction(*program.key, cpi_params)?;
@@ -77,14 +77,14 @@ impl<'info> FunctionVerify<'info> {
         program: AccountInfo<'info>,
         observed_time: i64,
         next_allowed_timestamp: i64,
-        is_failure: bool,
+        error_code: u8,
         mr_enclave: [u8; 32],
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
         let cpi_params = FunctionVerifyParams {
             observed_time,
             next_allowed_timestamp,
-            is_failure,
+            error_code,
             mr_enclave,
         };
         let instruction = self.get_instruction(*program.key, cpi_params)?;

@@ -37,8 +37,12 @@ impl Discriminator for FunctionRequestClose<'_> {
 }
 
 impl<'info> FunctionRequestClose<'info> {
-    pub fn get_instruction(&self, program_id: Pubkey) -> anchor_lang::Result<Instruction> {
-        let accounts = self.to_account_metas(None);
+    pub fn get_instruction(
+        &self,
+        program_id: Pubkey,
+        is_authority_signer: Option<bool>,
+    ) -> anchor_lang::Result<Instruction> {
+        let accounts = self.to_account_metas(is_authority_signer);
 
         let mut data: Vec<u8> = FunctionRequestClose::discriminator().try_to_vec()?;
         let params = FunctionRequestCloseParams {};
@@ -48,8 +52,12 @@ impl<'info> FunctionRequestClose<'info> {
         Ok(instruction)
     }
 
-    pub fn invoke(&self, program: AccountInfo<'info>) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+    pub fn invoke(
+        &self,
+        program: AccountInfo<'info>,
+        is_authority_signer: Option<bool>,
+    ) -> ProgramResult {
+        let instruction = self.get_instruction(*program.key, is_authority_signer)?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
@@ -58,9 +66,10 @@ impl<'info> FunctionRequestClose<'info> {
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
+        is_authority_signer: Option<bool>,
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key)?;
+        let instruction = self.get_instruction(*program.key, is_authority_signer)?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
@@ -84,7 +93,7 @@ impl<'info> FunctionRequestClose<'info> {
     fn to_account_metas(&self, is_signer: Option<bool>) -> Vec<AccountMeta> {
         let mut account_metas = Vec::new();
         account_metas.extend(self.request.to_account_metas(None));
-        account_metas.extend(self.authority.to_account_metas(None));
+        account_metas.extend(self.authority.to_account_metas(is_signer));
         account_metas.extend(self.escrow.to_account_metas(None));
         account_metas.extend(self.function.to_account_metas(None));
         account_metas.extend(self.sol_dest.to_account_metas(None));

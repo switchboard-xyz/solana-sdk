@@ -593,7 +593,7 @@ dependencies = [
  "futures",
  "serde",
  "serde_json",
- "switchboard-solana",
+ "switchboard-solana 0.28.20",
  "switchboard-utils",
  "tokio",
 ]
@@ -603,7 +603,7 @@ name = "basic_oracle"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "switchboard-solana",
+ "switchboard-solana 0.28.20 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1433,6 +1433,15 @@ dependencies = [
  "log",
  "regex",
  "termcolor",
+]
+
+[[package]]
+name = "envy"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -4514,10 +4523,24 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.6"
+version = "0.8.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eaa7b85e2005ce058c626ce0d4d618dc18ca8f45a24bd66f3e11a6bf43f20082"
+checksum = "1c9e28848b864786d8b1835f1f0c4c7e65190d9c17b246e5e21cc2457a70b176"
 dependencies = [
+ "envy",
+ "getrandom 0.2.10",
+ "hex",
+ "serde",
+ "serde_json",
+ "sgx-quote",
+ "sha2 0.10.7",
+]
+
+[[package]]
+name = "switchboard-common"
+version = "0.8.19"
+dependencies = [
+ "envy",
  "getrandom 0.2.10",
  "hex",
  "serde",
@@ -4528,9 +4551,7 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793a8429875a9386f07c10324119dfd20455cd9f22ee4a101a4731e94d122184"
+version = "0.28.20"
 dependencies = [
  "anchor-client",
  "anchor-lang",
@@ -4546,8 +4567,34 @@ dependencies = [
  "solana-client",
  "solana-program",
  "superslice",
- "switchboard-common",
+ "switchboard-common 0.8.19",
  "tokio",
+ "url",
+]
+
+[[package]]
+name = "switchboard-solana"
+version = "0.28.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a978513e0d3f54444698efb1737c8bcf366e2131e03ccfdf24c22210b8d755c"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-spl",
+ "bincode",
+ "bytemuck",
+ "chrono",
+ "cron",
+ "hex",
+ "rust_decimal",
+ "sgx-quote",
+ "solana-address-lookup-table-program",
+ "solana-client",
+ "solana-program",
+ "superslice",
+ "switchboard-common 0.8.18",
+ "tokio",
+ "url",
 ]
 
 [[package]]
@@ -4567,7 +4614,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "switchboard-common",
+ "switchboard-common 0.8.18",
  "tokio",
  "url",
 ]

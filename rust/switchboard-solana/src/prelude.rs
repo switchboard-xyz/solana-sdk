@@ -41,7 +41,8 @@ cfg_program! {
 
 pub use anchor_lang::prelude::*;
 pub use anchor_lang::{
-    AnchorDeserialize, AnchorSerialize, Discriminator, InstructionData, Owner, ZeroCopy,
+    AccountDeserialize, AccountSerialize, AnchorDeserialize, AnchorSerialize, Discriminator,
+    InstructionData, Owner, ZeroCopy,
 };
 pub use anchor_spl::associated_token::AssociatedToken;
 pub use anchor_spl::token::{Mint, Token, TokenAccount};
