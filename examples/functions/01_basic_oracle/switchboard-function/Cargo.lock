@@ -593,7 +593,7 @@ dependencies = [
  "futures",
  "serde",
  "serde_json",
- "switchboard-solana 0.28.20",
+ "switchboard-solana 0.28.21",
  "switchboard-utils",
  "tokio",
 ]
@@ -603,7 +603,7 @@ name = "basic_oracle"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "switchboard-solana 0.28.20 (registry+https://github.com/rust-lang/crates.io-index)",
+ "switchboard-solana 0.28.20",
 ]
 
 [[package]]
@@ -2946,9 +2946,9 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f31999cfc7927c4e212e60fd50934ab40e8e8bfd2d493d6095d2d306bc0764d9"
+checksum = "c956be1b23f4261676aed05a0046e204e8a6836e50203902683a718af0797989"
 dependencies = [
  "bytes",
  "rand 0.8.5",
@@ -4523,9 +4523,9 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.18"
+version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c9e28848b864786d8b1835f1f0c4c7e65190d9c17b246e5e21cc2457a70b176"
+checksum = "bfd44010d7cc59eb0d70c2547b3f5ad144bac1cccf6bdcdb390efaf95cee9aae"
 dependencies = [
  "envy",
  "getrandom 0.2.10",
@@ -4534,42 +4534,6 @@ dependencies = [
  "serde_json",
  "sgx-quote",
  "sha2 0.10.7",
-]
-
-[[package]]
-name = "switchboard-common"
-version = "0.8.19"
-dependencies = [
- "envy",
- "getrandom 0.2.10",
- "hex",
- "serde",
- "serde_json",
- "sgx-quote",
- "sha2 0.10.7",
-]
-
-[[package]]
-name = "switchboard-solana"
-version = "0.28.20"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "anchor-spl",
- "bincode",
- "bytemuck",
- "chrono",
- "cron",
- "hex",
- "rust_decimal",
- "sgx-quote",
- "solana-address-lookup-table-program",
- "solana-client",
- "solana-program",
- "superslice",
- "switchboard-common 0.8.19",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -4592,7 +4556,30 @@ dependencies = [
  "solana-client",
  "solana-program",
  "superslice",
- "switchboard-common 0.8.18",
+ "switchboard-common",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "switchboard-solana"
+version = "0.28.21"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-spl",
+ "bincode",
+ "bytemuck",
+ "chrono",
+ "cron",
+ "hex",
+ "rust_decimal",
+ "sgx-quote",
+ "solana-address-lookup-table-program",
+ "solana-client",
+ "solana-program",
+ "superslice",
+ "switchboard-common",
  "tokio",
  "url",
 ]
@@ -4614,7 +4601,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "switchboard-common 0.8.18",
+ "switchboard-common",
  "tokio",
  "url",
 ]
