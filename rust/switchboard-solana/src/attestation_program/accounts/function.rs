@@ -135,8 +135,11 @@ pub struct FunctionAccountData {
     /// The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters.
     pub reward_escrow_token_wallet: Pubkey,
 
+    /// The last reported error code if the most recent response was a failure
+    pub error_status: u8,
+
     /// Reserved.
-    pub _ebuf: [u8; 1024],
+    pub _ebuf: [u8; 1023],
 }
 
 impl Default for FunctionAccountData {

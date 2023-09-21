@@ -171,14 +171,14 @@ impl Default for FieldElementZC {
 }
 unsafe impl Pod for FieldElementZC {}
 unsafe impl Zeroable for FieldElementZC {}
-impl Into<FieldElementZC> for FieldElement51 {
-    fn into(self) -> FieldElementZC {
-        FieldElementZC { bytes: self.0 }
+impl From<FieldElement51> for FieldElementZC {
+    fn from(val: FieldElement51) -> Self {
+        FieldElementZC { bytes: val.0 }
     }
 }
-impl Into<FieldElement51> for FieldElementZC {
-    fn into(self) -> FieldElement51 {
-        FieldElement51(self.bytes)
+impl From<FieldElementZC> for FieldElement51 {
+    fn from(val: FieldElementZC) -> Self {
+        FieldElement51(val.bytes)
     }
 }
 
@@ -213,23 +213,23 @@ impl Default for CompletedPointZC {
 }
 unsafe impl Pod for CompletedPoint {}
 unsafe impl Zeroable for CompletedPoint {}
-impl Into<CompletedPointZC> for CompletedPoint {
-    fn into(self) -> CompletedPointZC {
+impl From<CompletedPoint> for CompletedPointZC {
+    fn from(val: CompletedPoint) -> Self {
         CompletedPointZC {
-            X: self.X.into(),
-            Y: self.Y.into(),
-            Z: self.Z.into(),
-            T: self.T.into(),
+            X: val.X.into(),
+            Y: val.Y.into(),
+            Z: val.Z.into(),
+            T: val.T.into(),
         }
     }
 }
-impl Into<CompletedPoint> for CompletedPointZC {
-    fn into(self) -> CompletedPoint {
+impl From<CompletedPointZC> for CompletedPoint {
+    fn from(val: CompletedPointZC) -> Self {
         CompletedPoint {
-            X: self.X.into(),
-            Y: self.Y.into(),
-            Z: self.Z.into(),
-            T: self.T.into(),
+            X: val.X.into(),
+            Y: val.Y.into(),
+            Z: val.Z.into(),
+            T: val.T.into(),
         }
     }
 }
@@ -286,21 +286,21 @@ impl Default for ProjectivePointZC {
 }
 unsafe impl Pod for ProjectivePoint {}
 unsafe impl Zeroable for ProjectivePoint {}
-impl Into<ProjectivePointZC> for ProjectivePoint {
-    fn into(self) -> ProjectivePointZC {
+impl From<ProjectivePoint> for ProjectivePointZC {
+    fn from(val: ProjectivePoint) -> Self {
         ProjectivePointZC {
-            X: self.X.into(),
-            Y: self.Y.into(),
-            Z: self.Z.into(),
+            X: val.X.into(),
+            Y: val.Y.into(),
+            Z: val.Z.into(),
         }
     }
 }
-impl Into<ProjectivePoint> for ProjectivePointZC {
-    fn into(self) -> ProjectivePoint {
+impl From<ProjectivePointZC> for ProjectivePoint {
+    fn from(val: ProjectivePointZC) -> Self {
         ProjectivePoint {
-            X: self.X.into(),
-            Y: self.Y.into(),
-            Z: self.Z.into(),
+            X: val.X.into(),
+            Y: val.Y.into(),
+            Z: val.Z.into(),
         }
     }
 }

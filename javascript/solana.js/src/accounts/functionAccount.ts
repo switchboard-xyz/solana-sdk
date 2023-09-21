@@ -51,6 +51,10 @@ import type { RawBuffer } from "@switchboard-xyz/common";
 import { BN, parseRawMrEnclave, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 
+const addressLookupProgram = new PublicKey(
+  "AddressLookupTab1e1111111111111111111111111"
+);
+
 export type ContainerRegistryType = "dockerhub" | "ipfs";
 
 export type FunctionAccountInitSeeds = {
@@ -121,9 +125,15 @@ export interface FunctionSetAuthorityParams {
 }
 
 /**
+ *  Parameters for setting a {@linkcode types.functionClose} authority
+ */
+export interface FunctionCloseAccountParams {
+  authority?: Keypair;
+}
+
+/**
  *  Parameters for an {@linkcode types.functionVerify} instruction.
  */
-
 export interface FunctionVerifySyncParams {
   observedTime: anchor.BN;
   nextAllowedTimestamp: anchor.BN;
@@ -145,7 +155,6 @@ export interface FunctionVerifySyncParams {
 /**
  *  Parameters for an {@linkcode types.functionVerify} instruction.
  */
-
 export interface FunctionVerifyParams {
   observedTime: anchor.BN;
   nextAllowedTimestamp: anchor.BN;
@@ -163,7 +172,6 @@ export interface FunctionVerifyParams {
 /**
  *  Parameters for an {@linkcode types.functionTrigger} instruction.
  */
-
 export interface FunctionTriggerParams {
   authority?: Keypair;
 }
@@ -172,8 +180,6 @@ export type CreateFunctionRequestParams = Omit<
   FunctionRequestAccountInitParams,
   "functionAccount"
 > & { user?: Keypair };
-
-/**
 
 /**
  * Account type representing a Switchboard Function.
@@ -196,10 +202,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
    */
   public static getMetadata = (functionState: types.FunctionAccountData) =>
     toUtf8(functionState.metadata);
-
-  /**
-   *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
-   */
 
   /**
    * Get the size of an {@linkcode FunctionAccount} on-chain.
@@ -304,6 +306,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [functionAccount, data];
   }
 
+  /**
+   *  Load an existing {@linkcode FunctionAccount} with its current on-chain state
+   */
   public static async load(
     program: SwitchboardProgram,
     address: PublicKey | string
@@ -347,10 +352,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       creatorSeed,
       recentSlot
-    );
-
-    const addressLookupProgram = new PublicKey(
-      "AddressLookupTab1e1111111111111111111111111"
     );
 
     const [addressLookupTable] = PublicKey.findProgramAddressSync(
@@ -924,6 +925,48 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program.walletPubkey,
       amount,
       destinationWallet,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public async closeAccountInstruction(
+    payer: PublicKey,
+    params: FunctionCloseAccountParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const signers: Keypair[] = [];
+    if (params.authority) {
+      signers.push(params.authority);
+    }
+
+    const functionState = await this.loadData();
+    const wallet = await this.wallet;
+
+    const functionCloseIxn = types.functionClose(
+      this.program,
+      { params: {} },
+      {
+        function: this.publicKey,
+        authority: functionState.authority,
+        addressLookupProgram: addressLookupProgram,
+        addressLookupTable: functionState.addressLookupTable,
+        escrowWallet: wallet.publicKey,
+        solDest: payer,
+        escrowDest: this.program.mint.getAssociatedAddress(payer),
+        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      }
+    );
+    return new TransactionObject(payer, [functionCloseIxn], signers, options);
+  }
+
+  public async closeAccount(
+    params: FunctionCloseAccountParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.closeAccountInstruction(
+      this.program.walletPubkey,
+      params,
       options
     ).then((txn) => this.program.signAndSend(txn, options));
   }

@@ -28,7 +28,7 @@ pub struct FunctionRequestVerify<'info> {
 #[derive(Clone, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionRequestVerifyParams {
     pub observed_time: i64,
-    pub is_failure: bool,
+    pub error_code: u8,
     pub mr_enclave: [u8; 32],
     pub request_slot: u64,
     pub container_params_hash: [u8; 32],
