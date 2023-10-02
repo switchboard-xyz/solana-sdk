@@ -1426,6 +1426,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "envy"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "errno"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4511,8 +4520,11 @@ dependencies = [
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.6"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "736f68ec1e444e96c99f0161e5b80d977e1ab5e4c1a30a31c6cf1f53dfd9769c"
 dependencies = [
+ "envy",
  "getrandom 0.2.10",
  "hex",
  "serde",
@@ -4523,7 +4535,9 @@ dependencies = [
 
 [[package]]
 name = "switchboard-solana"
-version = "0.28.1"
+version = "0.28.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcae2502d5ec73285dd855486ff54d9f169fbee8c8ab355ac74a7f809782e275"
 dependencies = [
  "anchor-client",
  "anchor-lang",
@@ -4539,8 +4553,9 @@ dependencies = [
  "solana-client",
  "solana-program",
  "superslice",
- "switchboard-common 0.8.6",
+ "switchboard-common 0.9.0",
  "tokio",
+ "url",
 ]
 
 [[package]]
@@ -5185,9 +5200,9 @@ dependencies = [
 
 [[package]]
 name = "webpki"
-version = "0.22.0"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f095d78192e208183081cc07bc5515ef55216397af48b873e5edcd72637fa1bd"
+checksum = "07ecc0cd7cac091bf682ec5efa18b1cff79d617b84181f38b3951dbe135f607f"
 dependencies = [
  "ring",
  "untrusted",
