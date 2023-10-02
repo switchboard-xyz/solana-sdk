@@ -593,7 +593,7 @@ dependencies = [
  "futures",
  "serde",
  "serde_json",
- "switchboard-solana 0.28.20",
+ "switchboard-solana 0.28.21",
  "switchboard-utils",
  "tokio",
 ]
@@ -603,7 +603,7 @@ name = "basic_oracle"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
- "switchboard-solana 0.28.20 (registry+https://github.com/rust-lang/crates.io-index)",
+ "switchboard-solana 0.28.20",
 ]
 
 [[package]]
@@ -4523,9 +4523,9 @@ checksum = "ab16ced94dbd8a46c82fd81e3ed9a8727dac2977ea869d217bcc4ea1f122e81f"
 
 [[package]]
 name = "switchboard-common"
-version = "0.8.18"
+version = "0.8.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c9e28848b864786d8b1835f1f0c4c7e65190d9c17b246e5e21cc2457a70b176"
+checksum = "f21c3c98373c155477b84d64241640516061cd37fc7ebbd71e68cf9eb9c280de"
 dependencies = [
  "envy",
  "getrandom 0.2.10",
@@ -4534,42 +4534,6 @@ dependencies = [
  "serde_json",
  "sgx-quote",
  "sha2 0.10.7",
-]
-
-[[package]]
-name = "switchboard-common"
-version = "0.8.19"
-dependencies = [
- "envy",
- "getrandom 0.2.10",
- "hex",
- "serde",
- "serde_json",
- "sgx-quote",
- "sha2 0.10.7",
-]
-
-[[package]]
-name = "switchboard-solana"
-version = "0.28.20"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "anchor-spl",
- "bincode",
- "bytemuck",
- "chrono",
- "cron",
- "hex",
- "rust_decimal",
- "sgx-quote",
- "solana-address-lookup-table-program",
- "solana-client",
- "solana-program",
- "superslice",
- "switchboard-common 0.8.19",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -4592,7 +4556,30 @@ dependencies = [
  "solana-client",
  "solana-program",
  "superslice",
- "switchboard-common 0.8.18",
+ "switchboard-common",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "switchboard-solana"
+version = "0.28.21"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-spl",
+ "bincode",
+ "bytemuck",
+ "chrono",
+ "cron",
+ "hex",
+ "rust_decimal",
+ "sgx-quote",
+ "solana-address-lookup-table-program",
+ "solana-client",
+ "solana-program",
+ "superslice",
+ "switchboard-common",
  "tokio",
  "url",
 ]
@@ -4614,7 +4601,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "switchboard-common 0.8.18",
+ "switchboard-common",
  "tokio",
  "url",
 ]
@@ -5238,9 +5225,9 @@ dependencies = [
 
 [[package]]
 name = "webpki"
-version = "0.22.0"
+version = "0.22.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f095d78192e208183081cc07bc5515ef55216397af48b873e5edcd72637fa1bd"
+checksum = "07ecc0cd7cac091bf682ec5efa18b1cff79d617b84181f38b3951dbe135f607f"
 dependencies = [
  "ring",
  "untrusted",
