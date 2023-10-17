@@ -1,3 +1,4 @@
+import { Idl, Program } from "@coral-xyz/anchor";
 import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
@@ -16,6 +17,7 @@ import {
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import type {
+  AccountMeta,
   Commitment,
   PublicKey,
   TransactionInstruction,
@@ -42,6 +44,12 @@ export interface FunctionRequestAccountInitParams {
   keypair?: Keypair;
 
   authority?: PublicKey;
+
+  /**
+   * An optional keypair to be used to sign the transaction if the function requires
+   * authorization on request initialization.
+   */
+  functionAuthority?: Keypair;
 }
 
 /**
@@ -121,9 +129,6 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     params: FunctionRequestAccountInitParams,
     options?: TransactionObjectOptions
   ): Promise<[FunctionRequestAccount, TransactionObject]> {
-    // TODO: Calculate the max size of data we can support up front then split into multiple txns
-
-    // TODO: Add way to make this a PDA
     const requestKeypair = params.keypair ?? Keypair.generate();
     await program.verifyNewKeypair(requestKeypair);
 
@@ -147,7 +152,9 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
       {
         request: requestKeypair.publicKey,
         function: params.functionAccount.publicKey,
-        functionAuthority: functionState.authority,
+        functionAuthority: params.functionAuthority
+          ? params.functionAuthority.publicKey
+          : program.attestationProgramId,
         attestationQueue: functionState.attestationQueue,
         escrow,
         mint: program.mint.address,
@@ -159,9 +166,28 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       }
     );
+
+    instruction.keys = instruction.keys.map(
+      (accountMeta): AccountMeta =>
+        accountMeta.pubkey.equals(program.programId)
+          ? {
+              pubkey: accountMeta.pubkey,
+              isSigner: false,
+              isWritable: accountMeta.isWritable,
+            }
+          : accountMeta
+    );
+
     return [
       new FunctionRequestAccount(program, requestKeypair.publicKey),
-      new TransactionObject(payer, [instruction], [requestKeypair], options),
+      new TransactionObject(
+        payer,
+        [instruction],
+        params.functionAuthority
+          ? [requestKeypair, params.functionAuthority]
+          : [requestKeypair],
+        options
+      ),
     ];
   }
 
