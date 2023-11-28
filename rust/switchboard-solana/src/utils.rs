@@ -8,7 +8,7 @@ pub fn transfer<'a>(
     authority: &AccountInfo<'a>,
     auth_seed: &[&[&[u8]]],
     amount: u64,
-) -> Result<()> {
+) -> anchor_lang::Result<()> {
     if amount == 0 {
         return Ok(());
     }
@@ -30,7 +30,7 @@ pub fn wrap_native<'a>(
     payer: &AccountInfo<'a>,
     auth_seed: &[&[&[u8]]],
     amount: u64,
-) -> Result<()> {
+) -> anchor_lang::Result<()> {
     if amount == 0 {
         return Ok(());
     }
@@ -76,4 +76,16 @@ pub fn get_ixn_discriminator(ixn_name: &str) -> [u8; 8] {
         &anchor_lang::solana_program::hash::hash(preimage.as_bytes()).to_bytes()[..8],
     );
     sighash
+}
+
+pub fn build_ix<A: ToAccountMetas, I: InstructionData + Discriminator>(
+    program_id: &Pubkey,
+    accounts: &A,
+    params: &I,
+) -> Instruction {
+    Instruction {
+        program_id: *program_id,
+        accounts: accounts.to_account_metas(None),
+        data: params.data(),
+    }
 }

@@ -11,11 +11,14 @@ export interface FunctionSetConfigParamsFields {
   container: Uint8Array | null;
   containerRegistry: Uint8Array | null;
   version: Uint8Array | null;
-  schedule: Uint8Array | null;
   mrEnclaves: Array<Array<number>> | null;
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
-  requestsFee: BN | null;
+  requestsDevFee: BN | null;
+  routinesDisabled: boolean | null;
+  lockRoutinesDisabled: boolean | null;
+  routinesRequireAuthorization: boolean | null;
+  routinesDevFee: BN | null;
 }
 
 export interface FunctionSetConfigParamsJSON {
@@ -24,11 +27,14 @@ export interface FunctionSetConfigParamsJSON {
   container: Array<number> | null;
   containerRegistry: Array<number> | null;
   version: Array<number> | null;
-  schedule: Array<number> | null;
   mrEnclaves: Array<Array<number>> | null;
   requestsDisabled: boolean | null;
   requestsRequireAuthorization: boolean | null;
-  requestsFee: string | null;
+  requestsDevFee: string | null;
+  routinesDisabled: boolean | null;
+  lockRoutinesDisabled: boolean | null;
+  routinesRequireAuthorization: boolean | null;
+  routinesDevFee: string | null;
 }
 
 export class FunctionSetConfigParams {
@@ -37,11 +43,14 @@ export class FunctionSetConfigParams {
   readonly container: Uint8Array | null;
   readonly containerRegistry: Uint8Array | null;
   readonly version: Uint8Array | null;
-  readonly schedule: Uint8Array | null;
   readonly mrEnclaves: Array<Array<number>> | null;
   readonly requestsDisabled: boolean | null;
   readonly requestsRequireAuthorization: boolean | null;
-  readonly requestsFee: BN | null;
+  readonly requestsDevFee: BN | null;
+  readonly routinesDisabled: boolean | null;
+  readonly lockRoutinesDisabled: boolean | null;
+  readonly routinesRequireAuthorization: boolean | null;
+  readonly routinesDevFee: BN | null;
 
   constructor(fields: FunctionSetConfigParamsFields) {
     this.name = fields.name;
@@ -49,11 +58,14 @@ export class FunctionSetConfigParams {
     this.container = fields.container;
     this.containerRegistry = fields.containerRegistry;
     this.version = fields.version;
-    this.schedule = fields.schedule;
     this.mrEnclaves = fields.mrEnclaves;
     this.requestsDisabled = fields.requestsDisabled;
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
-    this.requestsFee = fields.requestsFee;
+    this.requestsDevFee = fields.requestsDevFee;
+    this.routinesDisabled = fields.routinesDisabled;
+    this.lockRoutinesDisabled = fields.lockRoutinesDisabled;
+    this.routinesRequireAuthorization = fields.routinesRequireAuthorization;
+    this.routinesDevFee = fields.routinesDevFee;
   }
 
   static layout(property?: string) {
@@ -64,11 +76,14 @@ export class FunctionSetConfigParams {
         borsh.option(borsh.vecU8(), "container"),
         borsh.option(borsh.vecU8(), "containerRegistry"),
         borsh.option(borsh.vecU8(), "version"),
-        borsh.option(borsh.vecU8(), "schedule"),
         borsh.option(borsh.vec(borsh.array(borsh.u8(), 32)), "mrEnclaves"),
         borsh.option(borsh.bool(), "requestsDisabled"),
         borsh.option(borsh.bool(), "requestsRequireAuthorization"),
-        borsh.option(borsh.u64(), "requestsFee"),
+        borsh.option(borsh.u64(), "requestsDevFee"),
+        borsh.option(borsh.bool(), "routinesDisabled"),
+        borsh.option(borsh.bool(), "lockRoutinesDisabled"),
+        borsh.option(borsh.bool(), "routinesRequireAuthorization"),
+        borsh.option(borsh.u64(), "routinesDevFee"),
       ],
       property
     );
@@ -117,18 +132,14 @@ export class FunctionSetConfigParams {
             obj.version.length
           )) ||
         null,
-      schedule:
-        (obj.schedule &&
-          new Uint8Array(
-            obj.schedule.buffer,
-            obj.schedule.byteOffset,
-            obj.schedule.length
-          )) ||
-        null,
       mrEnclaves: obj.mrEnclaves,
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsFee: obj.requestsFee,
+      requestsDevFee: obj.requestsDevFee,
+      routinesDisabled: obj.routinesDisabled,
+      lockRoutinesDisabled: obj.lockRoutinesDisabled,
+      routinesRequireAuthorization: obj.routinesRequireAuthorization,
+      routinesDevFee: obj.routinesDevFee,
     });
   }
 
@@ -174,18 +185,14 @@ export class FunctionSetConfigParams {
             fields.version.length
           )) ||
         null,
-      schedule:
-        (fields.schedule &&
-          Buffer.from(
-            fields.schedule.buffer,
-            fields.schedule.byteOffset,
-            fields.schedule.length
-          )) ||
-        null,
       mrEnclaves: fields.mrEnclaves,
       requestsDisabled: fields.requestsDisabled,
       requestsRequireAuthorization: fields.requestsRequireAuthorization,
-      requestsFee: fields.requestsFee,
+      requestsDevFee: fields.requestsDevFee,
+      routinesDisabled: fields.routinesDisabled,
+      lockRoutinesDisabled: fields.lockRoutinesDisabled,
+      routinesRequireAuthorization: fields.routinesRequireAuthorization,
+      routinesDevFee: fields.routinesDevFee,
     };
   }
 
@@ -200,11 +207,16 @@ export class FunctionSetConfigParams {
           Array.from(this.containerRegistry.values())) ||
         null,
       version: (this.version && Array.from(this.version.values())) || null,
-      schedule: (this.schedule && Array.from(this.schedule.values())) || null,
       mrEnclaves: this.mrEnclaves,
       requestsDisabled: this.requestsDisabled,
       requestsRequireAuthorization: this.requestsRequireAuthorization,
-      requestsFee: (this.requestsFee && this.requestsFee.toString()) || null,
+      requestsDevFee:
+        (this.requestsDevFee && this.requestsDevFee.toString()) || null,
+      routinesDisabled: this.routinesDisabled,
+      lockRoutinesDisabled: this.lockRoutinesDisabled,
+      routinesRequireAuthorization: this.routinesRequireAuthorization,
+      routinesDevFee:
+        (this.routinesDevFee && this.routinesDevFee.toString()) || null,
     };
   }
 
@@ -217,11 +229,16 @@ export class FunctionSetConfigParams {
         (obj.containerRegistry && Uint8Array.from(obj.containerRegistry)) ||
         null,
       version: (obj.version && Uint8Array.from(obj.version)) || null,
-      schedule: (obj.schedule && Uint8Array.from(obj.schedule)) || null,
       mrEnclaves: obj.mrEnclaves,
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
-      requestsFee: (obj.requestsFee && new BN(obj.requestsFee)) || null,
+      requestsDevFee:
+        (obj.requestsDevFee && new BN(obj.requestsDevFee)) || null,
+      routinesDisabled: obj.routinesDisabled,
+      lockRoutinesDisabled: obj.lockRoutinesDisabled,
+      routinesRequireAuthorization: obj.routinesRequireAuthorization,
+      routinesDevFee:
+        (obj.routinesDevFee && new BN(obj.routinesDevFee)) || null,
     });
   }
 

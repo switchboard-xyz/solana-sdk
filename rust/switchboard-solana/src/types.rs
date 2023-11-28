@@ -12,13 +12,24 @@ pub use crate::oracle_program::{
 };
 
 pub use crate::attestation_program::{
-    FunctionCloseParams, FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitParams,
-    FunctionRequestSetConfigParams, FunctionRequestTriggerRound, FunctionRequestVerifyParams,
+    AttestationPermissionInitParams, AttestationPermissionSetParams,
+    AttestationQueueAddMrEnclaveParams, AttestationQueueInitParams, FunctionCloseParams,
+    FunctionInitParams, FunctionRequestCloseParams, FunctionRequestInitAndTriggerParams,
+    FunctionRequestInitParams, FunctionRequestSetConfigParams, FunctionRequestTriggerRound,
+    FunctionRequestVerifyParams, FunctionRoutineInitParams, FunctionRoutineVerifyParams,
     FunctionSetEscrowParams, FunctionStatus, FunctionTriggerParams, FunctionVerifyParams,
-    MrEnclave, Quote, RequestStatus, SwitchboardAttestationPermission, VerificationStatus,
-    WalletFundParams, WalletInitParams, WalletWithdrawParams,
+    MrEnclave, Quote, RequestStatus, ResourceLevel, SwitchboardAttestationPermission,
+    VerificationStatus, VerifierQuoteVerifyParams, WalletFundParams, WalletInitParams,
+    WalletWithdrawParams,
 };
 
 cfg_client! {
-    pub use crate::client::function_runner::FunctionVerifyAccounts;
+    pub use crate::attestation_program::{
+        AttestationPermissionInitAccounts, AttestationPermissionSetAccounts,
+        FunctionRequestInitAndTriggerAccounts, FunctionRequestVerifyAccounts,
+        FunctionRoutineVerifyAccounts, FunctionVerifyAccounts,
+        SwitchboardWalletInitAccounts, VerifierHeartbeatAccounts, VerifierHeartbeatArgs,
+        VerifierInitAccounts, VerifierQuoteRotateAccounts, VerifierQuoteVerifyAccounts,
+        VerifierQuoteVerifyArgs,
+    };
 }

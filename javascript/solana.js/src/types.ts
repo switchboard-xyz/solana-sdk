@@ -124,13 +124,13 @@ export type LoadedJobDefinition = LoadedAccountDefinition<
   job: OracleJob;
 };
 
-export class MrEnclave {
-  public readonly mrEnclave: Uint8Array;
+// export class MrEnclave {
+//   public readonly mrEnclave: Uint8Array;
 
-  public constructor(mrEnclave: string | Buffer | Uint8Array | number[]) {
-    this.mrEnclave =
-      typeof mrEnclave === "string"
-        ? new Uint8Array(Buffer.from(mrEnclave))
-        : new Uint8Array(mrEnclave);
-  }
-}
+//   public constructor(mrEnclave: string | Buffer | Uint8Array | number[]) {
+//     this.mrEnclave =
+//       typeof mrEnclave === "string"
+//         ? new Uint8Array(Buffer.from(mrEnclave))
+//         : new Uint8Array(mrEnclave);
+//   }
+// }

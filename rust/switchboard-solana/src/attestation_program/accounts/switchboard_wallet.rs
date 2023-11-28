@@ -1,6 +1,4 @@
-use crate::cfg_client;
 use crate::prelude::*;
-use solana_program::borsh::get_instance_packed_len;
 
 #[derive(AnchorDeserialize, AnchorSerialize, Clone)]
 pub struct SwitchboardWallet {
@@ -101,8 +99,8 @@ impl Owner for SwitchboardWallet {
 impl SwitchboardWallet {
     pub fn space(len: Option<u32>) -> usize {
         let base: usize = 8  // discriminator
-            + get_instance_packed_len(&SwitchboardWallet::default()).unwrap();
-        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_USERS_CONTAINER_PARAMS_LEN) as usize;
+            + solana_program::borsh::get_instance_packed_len(&SwitchboardWallet::default()).unwrap();
+        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_MAX_CONTAINER_PARAMS_LEN) as usize;
         base + vec_elements
     }
 
@@ -131,7 +129,7 @@ impl SwitchboardWallet {
         )?))
     }
 
-    pub fn add_resource(&mut self, resource: Pubkey) -> Result<()> {
+    pub fn add_resource(&mut self, resource: Pubkey) -> anchor_lang::Result<()> {
         self.resource_count += 1;
         self.resources.push(resource);
 
@@ -142,7 +140,11 @@ impl SwitchboardWallet {
         Ok(())
     }
 
-    pub fn remove_resource(&mut self, resource: Pubkey, idx: Option<u32>) -> Result<()> {
+    pub fn remove_resource(
+        &mut self,
+        resource: Pubkey,
+        idx: Option<u32>,
+    ) -> anchor_lang::Result<()> {
         self.resource_count -= 1;
 
         if let Some(index) = idx {
@@ -174,10 +176,8 @@ impl SwitchboardWallet {
                 authority.as_ref(),
                 &SwitchboardWallet::parse_name(&name),
             ],
-            &crate::id(),
+            &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
         );
         pda_key
     }
-
-    cfg_client! {}
 }

@@ -6,14 +6,26 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript-eslint/no-unused-vars
 
 export interface SwitchboardWalletFields {
+  /** The bump used to derive the PDA. */
   bump: number;
+  /** Flag dictating whether the wallet has been initialized already. */
   initialized: number;
+  /** The public key of the mint used for this wallet. */
   mint: PublicKey;
+  /** The attestation queue pubkey. */
   attestationQueue: PublicKey;
+  /** The wallet authority that is permitted to make account changes. */
   authority: PublicKey;
+  /** The name of the wallet for easier identification. */
   name: Array<number>;
+  /** The number of resources tied to this wallet. */
   resourceCount: number;
+  /**
+   * The pubkey of the account that is permitted to withdraw funds from the wallet.
+   * Setting this to the default pubkey will lock deposited funds.
+   */
   withdrawAuthority: PublicKey;
+  /** The associated token account pubkey. */
   tokenWallet: PublicKey;
   resources: Array<PublicKey>;
   resourcesMaxLen: number;
@@ -22,14 +34,26 @@ export interface SwitchboardWalletFields {
 }
 
 export interface SwitchboardWalletJSON {
+  /** The bump used to derive the PDA. */
   bump: number;
+  /** Flag dictating whether the wallet has been initialized already. */
   initialized: number;
+  /** The public key of the mint used for this wallet. */
   mint: string;
+  /** The attestation queue pubkey. */
   attestationQueue: string;
+  /** The wallet authority that is permitted to make account changes. */
   authority: string;
+  /** The name of the wallet for easier identification. */
   name: Array<number>;
+  /** The number of resources tied to this wallet. */
   resourceCount: number;
+  /**
+   * The pubkey of the account that is permitted to withdraw funds from the wallet.
+   * Setting this to the default pubkey will lock deposited funds.
+   */
   withdrawAuthority: string;
+  /** The associated token account pubkey. */
   tokenWallet: string;
   resources: Array<string>;
   resourcesMaxLen: number;
@@ -38,14 +62,26 @@ export interface SwitchboardWalletJSON {
 }
 
 export class SwitchboardWallet {
+  /** The bump used to derive the PDA. */
   readonly bump: number;
+  /** Flag dictating whether the wallet has been initialized already. */
   readonly initialized: number;
+  /** The public key of the mint used for this wallet. */
   readonly mint: PublicKey;
+  /** The attestation queue pubkey. */
   readonly attestationQueue: PublicKey;
+  /** The wallet authority that is permitted to make account changes. */
   readonly authority: PublicKey;
+  /** The name of the wallet for easier identification. */
   readonly name: Array<number>;
+  /** The number of resources tied to this wallet. */
   readonly resourceCount: number;
+  /**
+   * The pubkey of the account that is permitted to withdraw funds from the wallet.
+   * Setting this to the default pubkey will lock deposited funds.
+   */
   readonly withdrawAuthority: PublicKey;
+  /** The associated token account pubkey. */
   readonly tokenWallet: PublicKey;
   readonly resources: Array<PublicKey>;
   readonly resourcesMaxLen: number;

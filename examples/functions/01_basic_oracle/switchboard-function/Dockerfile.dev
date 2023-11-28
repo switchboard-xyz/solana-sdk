@@ -7,6 +7,10 @@ COPY ./rust/switchboard-common/Cargo.toml \
      ./rust/switchboard-common/Cargo.lock \
      ./rust/switchboard-common/
 
+COPY ./rust/switchboard-utils/Cargo.toml \
+     ./rust/switchboard-utils/Cargo.lock \
+     ./rust/switchboard-utils/
+
 COPY ./rust/switchboard-solana/Cargo.toml \
      ./rust/switchboard-solana/Cargo.lock \
      ./rust/switchboard-solana/
@@ -21,6 +25,9 @@ COPY ./chains/solana/examples/functions/01_basic_oracle/switchboard-function/Car
 
 COPY ./rust/switchboard-common/src \
      ./rust/switchboard-common/src/
+
+COPY ./rust/switchboard-utils/src \
+     ./rust/switchboard-utils/src/
 
 COPY ./rust/switchboard-solana/src \
      ./rust/switchboard-solana/src/

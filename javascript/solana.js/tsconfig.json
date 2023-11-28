@@ -9,7 +9,7 @@
     "src/**/*"
   ],
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "NodeNext",
     "target": "es2022",
     "lib": [
       "ES2021",
@@ -37,6 +37,7 @@
       "src/TransactionObject.ts",
       "src/accounts/AggregatorAccount.ts",
       "src/generated/index.ts",
+      "src/runner/index.ts",
       "src/generated/accounts.ts",
       "src/generated/instructions.ts",
       "src/generated/types.ts",

@@ -1,7 +1,7 @@
 .PHONY: build clean publish
 
 # Variables
-DOCKER_IMAGE_NAME ?= gallynaut/basic-oracle-function
+DOCKER_IMAGE_NAME ?= gallynaut/basic-oracle-function-v1
 
 DOCKER_BUILD_COMMAND=docker buildx build --platform linux/amd64
 

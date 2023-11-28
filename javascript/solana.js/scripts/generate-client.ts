@@ -25,6 +25,10 @@ const attestationDevnetIdlPath = path.join(
   packageRoot,
   "./idl/attestation-devnet.json"
 );
+const attestationMainnetIdlPath = path.join(
+  packageRoot,
+  "./idl/attestation-mainnet.json"
+);
 const attestationGeneratedPath = path.join(
   packageRoot,
   "./src/generated/attestation-program"
@@ -51,6 +55,8 @@ const ignoreFiles = [
   `${attestationGeneratedPath}/types/VerificationStatus.ts`,
   `${attestationGeneratedPath}/errors/index.ts`,
   `${attestationGeneratedPath}/types/SwitchboardAttestationPermission.ts`,
+  `${attestationGeneratedPath}/types/FunctionStatus.ts`,
+  `${attestationGeneratedPath}/types/index.ts`, // TODO: may need to comment out when adding new types and manually fix errors
   `${attestationGeneratedPath}/instructions/functionDeactivateLookup.ts`,
   `${attestationGeneratedPath}/instructions/accountCloseOverride.ts`,
   `${attestationGeneratedPath}/instructions/viewVersion.ts`,
@@ -131,6 +137,12 @@ async function main() {
     ),
     runCommandAsync(
       `anchor idl fetch -o ${attestationDevnetIdlPath} sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx --provider.cluster devnet`,
+      {
+        encoding: "utf-8",
+      }
+    ),
+    runCommandAsync(
+      `anchor idl fetch -o ${attestationMainnetIdlPath} sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx --provider.cluster mainnet`,
       {
         encoding: "utf-8",
       }
@@ -297,7 +309,7 @@ const processFile = async (file: string) => {
         )
         // remove this import, using SwitchboardProgram
         .replace(`import { PROGRAM_ID } from "../programId"`, ``)
-        .replaceAll(`PROGRAM_ID`, `program.programId`)
+        .replaceAll(`PROGRAM_ID`, `program.oracleProgramId`)
         .replaceAll(`c: Connection,`, `program: SwitchboardProgram,`)
         .replaceAll(`c.getAccountInfo`, `program.connection.getAccountInfo`)
         .replaceAll(
@@ -314,7 +326,7 @@ const processFile = async (file: string) => {
 
       if (file.includes("/attestation-program/")) {
         updatedFileString = updatedFileString.replaceAll(
-          `program.programId`,
+          `program.oracleProgramId`,
           `program.attestationProgramId`
         );
       }

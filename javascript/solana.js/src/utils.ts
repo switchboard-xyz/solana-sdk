@@ -18,6 +18,12 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+export {
+  combineMrEnclaveSets,
+  containsMrEnclave,
+  filterEmptyMrEnclaves,
+} from "@switchboard-xyz/common";
+
 export function handleOptionalPubkeys(
   ixn: TransactionInstruction
 ): TransactionInstruction {
@@ -242,19 +248,6 @@ export function parseRawBuffer(rawBuffer: RawBuffer, size = 32): Uint8Array {
   return new Uint8Array(
     Array.from(myUint8Array).concat(Array(size).fill(0)).slice(0, size)
   );
-}
-
-export function containsMrEnclave(
-  mrEnclaves: number[][],
-  targetMrEnclave: number[] | Uint8Array
-): boolean {
-  return mrEnclaves.some((arr) => {
-    if (arr.length !== targetMrEnclave.length) return false;
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i] !== targetMrEnclave[i]) return false;
-    }
-    return true;
-  });
 }
 
 /**

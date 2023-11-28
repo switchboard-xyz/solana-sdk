@@ -27,7 +27,7 @@ export function permissionInit(
   program: SwitchboardProgram,
   args: PermissionInitArgs,
   accounts: PermissionInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.permission, isSigner: false, isWritable: true },

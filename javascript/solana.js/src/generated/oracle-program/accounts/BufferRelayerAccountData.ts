@@ -118,7 +118,7 @@ export class BufferRelayerAccountData {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey,
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<BufferRelayerAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
@@ -135,7 +135,7 @@ export class BufferRelayerAccountData {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[],
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<Array<BufferRelayerAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 

@@ -29,6 +29,7 @@ export const layout = borsh.struct([
   types.FunctionRequestInitParams.layout("params"),
 ]);
 
+/** Request Actions */
 export function functionRequestInit(
   program: SwitchboardProgram,
   args: FunctionRequestInitArgs,

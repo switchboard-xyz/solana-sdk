@@ -108,17 +108,10 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
   /**
    * Get the size of an {@linkcode AggregatorAccount} on-chain.
    */
-  public size = this.program.account.aggregatorAccountData.size;
+  public size = 3851;
 
   public decode(data: Buffer): AggregatorAccountData {
-    try {
-      return AggregatorAccountData.decode(data);
-    } catch {
-      return this.program.coder.decode<AggregatorAccountData>(
-        AggregatorAccount.accountName,
-        data
-      );
-    }
+    return AggregatorAccountData.decode(data);
   }
 
   /**
@@ -197,7 +190,7 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
   public get slidingWindowKey(): PublicKey {
     return PublicKey.findProgramAddressSync(
       [Buffer.from("SlidingResultAccountData"), this.publicKey.toBytes()],
-      this.program.programId
+      this.program.oracleProgramId
     )[0];
   }
 
@@ -266,11 +259,11 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
       SystemProgram.createAccount({
         fromPubkey: payer,
         newAccountPubkey: keypair.publicKey,
-        space: program.account.aggregatorAccountData.size,
+        space: AggregatorAccount.size,
         lamports: await program.connection.getMinimumBalanceForRentExemption(
-          program.account.aggregatorAccountData.size
+          AggregatorAccount.size
         ),
-        programId: program.programId,
+        programId: program.oracleProgramId,
       })
     );
 
@@ -984,17 +977,14 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
             `Failed to fetch account data for job ${j?.publicKey}`
           );
         }
-        if (!j.account.owner.equals(this.program.programId)) {
+        if (!j.account.owner.equals(this.program.oracleProgramId)) {
           throw new errors.IncorrectOwner(
-            this.program.programId,
+            this.program.oracleProgramId,
             j.account.owner
           );
         }
         const jobAccount = new JobAccount(this.program, j.publicKey);
-        const jobState: JobAccountData = this.program.coder.decode(
-          "JobAccountData",
-          j.account.data
-        );
+        const jobState: JobAccountData = JobAccountData.decode(j.account.data);
         return {
           account: jobAccount,
           state: jobState,
@@ -2425,7 +2415,7 @@ export class AggregatorAccount extends Account<AggregatorAccountData> {
     },
     opts?: TransactionObjectOptions
   ): Promise<TransactionObject> {
-    if (this.program.cluster === "mainnet-beta") {
+    if ((await this.program.cluster) === "mainnet-beta") {
       throw new Error(
         `Aggregators can only be closed with the devnet version of Switchboard`
       );

@@ -33,7 +33,7 @@ export function bufferRelayerInit(
   program: SwitchboardProgram,
   args: BufferRelayerInitArgs,
   accounts: BufferRelayerInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.bufferRelayer, isSigner: false, isWritable: true },

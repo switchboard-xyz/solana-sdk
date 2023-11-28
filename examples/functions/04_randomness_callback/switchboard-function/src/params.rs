@@ -7,7 +7,7 @@ pub struct ContainerParams {
 }
 
 impl ContainerParams {
-    pub fn decode(container_params: &Vec<u8>) -> std::result::Result<Self, SwitchboardClientError> {
+    pub fn decode(container_params: &Vec<u8>) -> std::result::Result<Self, SbFunctionError> {
         let params = String::from_utf8(container_params.clone()).unwrap();
 
         let mut program_id: Pubkey = Pubkey::default();
@@ -18,28 +18,28 @@ impl ContainerParams {
             let pair: Vec<&str> = env_pair.splitn(2, '=').collect();
             if pair.len() == 2 {
                 match pair[0] {
-                    "PID" => program_id = Pubkey::from_str(pair[1]).unwrap(),
-                    "MAX_GUESS" => max_guess = pair[1].parse::<u8>().unwrap(),
-                    "USER" => user_key = Pubkey::from_str(pair[1]).unwrap(),
+                    "PID" => {
+                        program_id = Pubkey::from_str(pair[1]).unwrap();
+                    }
+                    "MAX_GUESS" => {
+                        max_guess = pair[1].parse::<u8>().unwrap();
+                    }
+                    "USER" => {
+                        user_key = Pubkey::from_str(pair[1]).unwrap();
+                    }
                     _ => {}
                 }
             }
         }
 
         if program_id == Pubkey::default() {
-            return Err(SwitchboardClientError::CustomMessage(
-                "PID cannot be undefined".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(100));
         }
         if max_guess == 0 {
-            return Err(SwitchboardClientError::CustomMessage(
-                "MAX_GUESS must be greater than 0".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(101));
         }
         if user_key == Pubkey::default() {
-            return Err(SwitchboardClientError::CustomMessage(
-                "USER_KEY cannot be undefined".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(102));
         }
 
         Ok(Self {

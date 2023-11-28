@@ -1,0 +1,3808 @@
+{
+  "version": "0.1.0",
+  "name": "switchboard_attestation_program",
+  "instructions": [
+    {
+      "name": "viewVersion",
+      "accounts": [],
+      "args": []
+    },
+    {
+      "name": "stateInit",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "StateInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletInit",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletFund",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "funderWallet",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "funder",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletFundParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletWithdraw",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletWithdrawParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "walletClose",
+      "accounts": [
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "WalletCloseParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifierInit",
+      "accounts": [
+        {
+          "name": "verifier",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VerifierInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifierQuoteRotate",
+      "accounts": [
+        {
+          "name": "verifier",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "enclaveSigner",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VerifierQuoteRotateParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifierQuoteVerify",
+      "accounts": [
+        {
+          "name": "quote",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "verifier",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "enclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VerifierQuoteVerifyParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verifierHeartbeat",
+      "accounts": [
+        {
+          "name": "verifier",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "verifierSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "gcNode",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "permission",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "VerifierHeartbeatParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestationQueueInit",
+      "accounts": [
+        {
+          "name": "queue",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AttestationQueueInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestationQueueAddMrEnclave",
+      "accounts": [
+        {
+          "name": "queue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AttestationQueueAddMrEnclaveParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestationQueueRemoveMrEnclave",
+      "accounts": [
+        {
+          "name": "queue",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AttestationQueueRemoveMrEnclaveParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestationPermissionInit",
+      "accounts": [
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "node",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AttestationPermissionInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "attestationPermissionSet",
+      "accounts": [
+        {
+          "name": "permission",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "grantee",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "AttestationPermissionSetParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionInit",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "wallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "walletAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionClose",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionCloseParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionSetConfig",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetConfigParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionSetAuthority",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "walletAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetAuthorityParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionSetEscrow",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "newEscrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "newEscrowAuthority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "newEscrowTokenWallet",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionSetEscrowParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionResetEscrow",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "defaultWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionResetEscrowParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionExtendLookup",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionExtendLookupParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionDeactivateLookup",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupTable",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "addressLookupProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "functionVerify",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionEnclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "verifier",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "verifierSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "verifierPermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionVerifyParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionTrigger",
+      "accounts": [
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionTriggerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestInit",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionAuthority",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestSetConfig",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestSetConfigParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestTrigger",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestTriggerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestInitAndTrigger",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionAuthority",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestInitAndTriggerParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestVerify",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionEnclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionEscrow",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "verifierQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "verifierEnclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "verifierPermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestVerifyParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRequestClose",
+      "accounts": [
+        {
+          "name": "request",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "solDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowDest",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRequestCloseParams"
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AttestationProgramState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "type": {
+              "array": [
+                "u8",
+                2048
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwitchboardWallet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "initialized",
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "resourceCount",
+            "type": "u32"
+          },
+          {
+            "name": "withdrawAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenWallet",
+            "type": "publicKey"
+          },
+          {
+            "name": "resources",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "resourcesMaxLen",
+            "type": "u32"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "isScheduled",
+            "docs": [
+              "Whether the function is invoked on a schedule or by request"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "isTriggered",
+            "docs": [
+              "Whether the function has been manually triggered with the function_trigger instruction"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "permissions",
+            "docs": [
+              "The function permissions granted by the attestation_queue.authority"
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": "FunctionStatus"
+            }
+          },
+          {
+            "name": "bump",
+            "docs": [
+              "PDA bump."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "creatorSeed",
+            "docs": [
+              "The payer who originally created the function. Cannot change, used to derive PDA."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the function for easier identification."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "metadata",
+            "docs": [
+              "The metadata of the function for easier identification."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "createdAtSlot",
+            "docs": [
+              "The Solana slot when the function was created. (PDA)"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "updatedAt",
+            "docs": [
+              "The unix timestamp when the function config (container, registry, version, or schedule) was changed."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "enclave",
+            "docs": [
+              "The enclave quote"
+            ],
+            "type": {
+              "defined": "Quote"
+            }
+          },
+          {
+            "name": "mrEnclaves",
+            "docs": [
+              "An array of permitted mr_enclave measurements for the function."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                32
+              ]
+            }
+          },
+          {
+            "name": "containerRegistry",
+            "docs": [
+              "The off-chain registry to fetch the function container from."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "container",
+            "docs": [
+              "The identifier of the container in the given container_registry."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "version",
+            "docs": [
+              "The version tag of the container to pull."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "paramsSchema",
+            "docs": [
+              "The expected schema for the container params."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "defaultContainerParams",
+            "docs": [
+              "The default params passed to the container during scheduled execution."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the function which is authorized to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The address of the AttestationQueueAccountData that will be processing function requests and verifying the function measurements."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "queueIdx",
+            "docs": [
+              "An incrementer used to rotate through an AttestationQueue's verifiers."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "addressLookupTable",
+            "docs": [
+              "The address_lookup_table of the function used to increase the number of accounts we can fit into a function result."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "schedule",
+            "docs": [
+              "The cron schedule to run the function on."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "lastExecutionTimestamp",
+            "docs": [
+              "The unix timestamp when the function was last run."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "nextAllowedTimestamp",
+            "docs": [
+              "The unix timestamp when the function is allowed to run next."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "triggerCount",
+            "docs": [
+              "The number of times to trigger the function upon the next invocation."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "triggeredSince",
+            "docs": [
+              "Time this function has been sitting in an explicitly triggered state"
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "permissionExpiration",
+            "docs": [
+              "UNUSED. The unix timestamp when the current permissions expire."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "numRequests",
+            "docs": [
+              "Number of requests created for this function. Used to prevent closing when there are live requests."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "requestsDisabled",
+            "docs": [
+              "Whether custom requests have been disabled for this function."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "requestsRequireAuthorization",
+            "docs": [
+              "Whether new requests need to be authorized by the FunctionAccount authority before being initialized.",
+              "Useful if you want to use CPIs to control request account creation."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "reserved1",
+            "docs": [
+              "DEPRECATED."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "requestsFee",
+            "docs": [
+              "The lamports paid to the FunctionAccount escrow on each successful update request."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "escrowWallet",
+            "docs": [
+              "The SwitchboardWallet that will handle pre-funding rewards paid out to function runners."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrowTokenWallet",
+            "docs": [
+              "The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "rewardEscrowWallet",
+            "docs": [
+              "The SwitchboardWallet that will handle acruing rewards from requests.",
+              "Defaults to the escrow_wallet."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "rewardEscrowTokenWallet",
+            "docs": [
+              "The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "isTriggered",
+            "docs": [
+              "Whether the request is ready to be processed."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "The status of the current request."
+            ],
+            "type": {
+              "defined": "RequestStatus"
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Signer allowed to cancel the request."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "payer",
+            "docs": [
+              "The default destination for rent exemption when the account is closed."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "function",
+            "docs": [
+              "The function that can process this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "docs": [
+              "The tokenAccount escrow"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The Attestation Queue for this request."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "activeRequest",
+            "docs": [
+              "The current active request."
+            ],
+            "type": {
+              "defined": "FunctionRequestTriggerRound"
+            }
+          },
+          {
+            "name": "previousRequest",
+            "docs": [
+              "The previous request."
+            ],
+            "type": {
+              "defined": "FunctionRequestTriggerRound"
+            }
+          },
+          {
+            "name": "maxContainerParamsLen",
+            "docs": [
+              "The maximum number of bytes to pass to the container params."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "containerParamsHash",
+            "docs": [
+              "Hash of the serialized container_params to prevent RPC tampering.",
+              "Should be verified within your function to ensure you are using the correct parameters."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "containerParams",
+            "docs": [
+              "The stringified container params to pass to the function."
+            ],
+            "type": "bytes"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "garbageCollectionSlot",
+            "docs": [
+              "The slot when the account can be garbage collected and closed by anyone for a portion of the rent."
+            ],
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifierAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclave",
+            "docs": [
+              "Represents the state of the quote verifiers enclave."
+            ],
+            "type": {
+              "defined": "Quote"
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the EnclaveAccount which is permitted to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "Queue used for attestation to verify a MRENCLAVE measurement."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the quote was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "isOnQueue",
+            "docs": [
+              "Whether the quote is located on the AttestationQueues buffer."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "lastHeartbeat",
+            "docs": [
+              "The last time the quote heartbeated on-chain."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "rewardEscrow",
+            "docs": [
+              "The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.",
+              "We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "stakeWallet",
+            "docs": [
+              "The SwitchboardWallet account containing the queues required min_stake.",
+              "Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationQueueAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "docs": [
+              "The address of the authority which is permitted to add/remove allowed enclave measurements."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mrEnclaves",
+            "docs": [
+              "Allowed enclave measurements."
+            ],
+            "type": {
+              "array": [
+                {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                },
+                32
+              ]
+            }
+          },
+          {
+            "name": "mrEnclavesLen",
+            "docs": [
+              "The number of allowed enclave measurements."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "data",
+            "docs": [
+              "The addresses of the quote verifiers who have a valid",
+              "verification status and have heartbeated on-chain recently."
+            ],
+            "type": {
+              "array": [
+                "publicKey",
+                128
+              ]
+            }
+          },
+          {
+            "name": "dataLen",
+            "docs": [
+              "The length of valid quote verifiers for the given attestation queue."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "allowAuthorityOverrideAfter",
+            "docs": [
+              "Allow authority to force add a node after X seconds with no heartbeat."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "requireAuthorityHeartbeatPermission",
+            "docs": [
+              "Even if a heartbeating machine quote verifies with proper measurement,",
+              "require authority signoff."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "requireUsagePermissions",
+            "docs": [
+              "Require FunctionAccounts to have PermitQueueUsage before they are executed."
+            ],
+            "type": "bool"
+          },
+          {
+            "name": "maxQuoteVerificationAge",
+            "docs": [
+              "The maximum allowable time until a EnclaveAccount needs to be re-verified on-chain."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "reward",
+            "docs": [
+              "The reward paid to quote verifiers for attesting on-chain."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "lastHeartbeat",
+            "docs": [
+              "The unix timestamp when the last quote verifier heartbeated on-chain."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "nodeTimeout",
+            "type": "i64"
+          },
+          {
+            "name": "currIdx",
+            "docs": [
+              "Incrementer used to track the current quote verifier permitted to run any available functions."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "gcIdx",
+            "docs": [
+              "Incrementer used to garbage collect and remove stale quote verifiers."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "verifierMinStake",
+            "docs": [
+              "The minimum number of lamports a quote verifier needs to lock-up in order to heartbeat and verify other quotes."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "functionMinStake",
+            "docs": [
+              "The minimum number of lamports a function needs to lock-up in order to use a queues resources."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1008
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationPermissionAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "permissions",
+            "type": "u32"
+          },
+          {
+            "name": "granter",
+            "type": "publicKey"
+          },
+          {
+            "name": "grantee",
+            "type": "publicKey"
+          },
+          {
+            "name": "expiration",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "FunctionCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionExtendLookupParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "newAddresses",
+            "type": {
+              "vec": "publicKey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "metadata",
+            "type": "bytes"
+          },
+          {
+            "name": "container",
+            "type": "bytes"
+          },
+          {
+            "name": "containerRegistry",
+            "type": "bytes"
+          },
+          {
+            "name": "version",
+            "type": "bytes"
+          },
+          {
+            "name": "schedule",
+            "type": "bytes"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "recentSlot",
+            "type": "u64"
+          },
+          {
+            "name": "requestsDisabled",
+            "type": "bool"
+          },
+          {
+            "name": "requestsRequireAuthorization",
+            "type": "bool"
+          },
+          {
+            "name": "requestsFee",
+            "type": "u64"
+          },
+          {
+            "name": "creatorSeed",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionResetEscrowParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionSetAuthorityParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionSetConfigParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "container",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "containerRegistry",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "version",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "schedule",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "mrEnclaves",
+            "type": {
+              "option": {
+                "vec": {
+                  "array": [
+                    "u8",
+                    32
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "name": "requestsDisabled",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "requestsRequireAuthorization",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "requestsFee",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionSetEscrowParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionTriggerParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "observedTime",
+            "type": "i64"
+          },
+          {
+            "name": "nextAllowedTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "isFailure",
+            "type": "bool"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationPermissionInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "AttestationPermissionSetParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "permission",
+            "type": "u32"
+          },
+          {
+            "name": "enable",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationQueueAddMrEnclaveParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationQueueInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "allowAuthorityOverrideAfter",
+            "type": "u32"
+          },
+          {
+            "name": "requireAuthorityHeartbeatPermission",
+            "type": "bool"
+          },
+          {
+            "name": "requireUsagePermissions",
+            "type": "bool"
+          },
+          {
+            "name": "maxQuoteVerificationAge",
+            "type": "u32"
+          },
+          {
+            "name": "reward",
+            "type": "u32"
+          },
+          {
+            "name": "nodeTimeout",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationQueueRemoveMrEnclaveParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "FunctionRequestInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "maxContainerParamsLen",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "containerParams",
+            "type": "bytes"
+          },
+          {
+            "name": "garbageCollectionSlot",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestInitAndTriggerParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "slotsUntilExpiration",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "maxContainerParamsLen",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "containerParams",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "garbageCollectionSlot",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "validAfterSlot",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestSetConfigParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "containerParams",
+            "type": "bytes"
+          },
+          {
+            "name": "appendContainerParams",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestTriggerParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "slotsUntilExpiration",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "validAfterSlot",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "observedTime",
+            "type": "i64"
+          },
+          {
+            "name": "isFailure",
+            "type": "bool"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "requestSlot",
+            "type": "u64"
+          },
+          {
+            "name": "containerParamsHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "StateInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VerifierHeartbeatParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VerifierInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "VerifierQuoteRotateParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "registryKey",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifierQuoteVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "idx",
+            "type": "u32"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WalletCloseParams",
+      "type": {
+        "kind": "struct",
+        "fields": []
+      }
+    },
+    {
+      "name": "WalletFundParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "transferAmount",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "wrapAmount",
+            "type": {
+              "option": "u64"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WalletInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "maxLen",
+            "type": {
+              "option": "u32"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WalletWithdrawParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRequestTriggerRound",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "docs": [
+              "The status of the request."
+            ],
+            "type": {
+              "defined": "RequestStatus"
+            }
+          },
+          {
+            "name": "bounty",
+            "docs": [
+              "The SOL bounty in lamports used to incentivize a verifier to expedite the request."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "requestSlot",
+            "docs": [
+              "The slot the request was published"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fulfilledSlot",
+            "docs": [
+              "The slot when the request was fulfilled"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "expirationSlot",
+            "docs": [
+              "The slot when the request will expire and be able to be closed by the non-authority account"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "verifier",
+            "docs": [
+              "The EnclaveAccount who verified the enclave for this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The keypair generated in the enclave and required to sign any",
+              "valid transactions processed by the function."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "validAfterSlot",
+            "docs": [
+              "The slot when the request can first be executed."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                56
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Quote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The address of the signer generated within an enclave."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "mrEnclave",
+            "docs": [
+              "The quotes MRENCLAVE measurement dictating the contents of the secure enclave."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "verificationStatus",
+            "docs": [
+              "The VerificationStatus of the quote."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "verificationTimestamp",
+            "docs": [
+              "The unix timestamp when the quote was last verified."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "validUntil",
+            "docs": [
+              "The unix timestamp when the quotes verification status expires."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "quoteRegistry",
+            "docs": [
+              "The off-chain registry where the verifiers quote can be located."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "registryKey",
+            "docs": [
+              "Key to lookup the buffer data on IPFS or an alternative decentralized storage solution."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "NonExecutable"
+          },
+          {
+            "name": "None3"
+          },
+          {
+            "name": "Expired"
+          },
+          {
+            "name": "None5"
+          },
+          {
+            "name": "None6"
+          },
+          {
+            "name": "None7"
+          },
+          {
+            "name": "OutOfFunds"
+          },
+          {
+            "name": "None9"
+          },
+          {
+            "name": "None10"
+          },
+          {
+            "name": "None11"
+          },
+          {
+            "name": "None12"
+          },
+          {
+            "name": "None13"
+          },
+          {
+            "name": "None14"
+          },
+          {
+            "name": "None15"
+          },
+          {
+            "name": "InvalidPermissions"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Inactive"
+          },
+          {
+            "name": "Active"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RequestStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "RequestPending"
+          },
+          {
+            "name": "RequestCancelled"
+          },
+          {
+            "name": "RequestFailure"
+          },
+          {
+            "name": "RequestExpired"
+          },
+          {
+            "name": "RequestSuccess"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerificationStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "VerificationPending"
+          },
+          {
+            "name": "VerificationFailure"
+          },
+          {
+            "name": "None3"
+          },
+          {
+            "name": "VerificationSuccess"
+          },
+          {
+            "name": "None5"
+          },
+          {
+            "name": "None6"
+          },
+          {
+            "name": "None7"
+          },
+          {
+            "name": "VerificationOverride"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwitchboardAttestationPermission",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "PermitNodeheartbeat"
+          },
+          {
+            "name": "PermitQueueUsage"
+          }
+        ]
+      }
+    }
+  ],
+  "events": [
+    {
+      "name": "FunctionFundEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRequestInitEvent",
+      "fields": [
+        {
+          "name": "attestationQueue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "request",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRequestTriggerEvent",
+      "fields": [
+        {
+          "name": "attestationQueue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "request",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "bounty",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "requestSlot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "expirationSlot",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "containerParamsHash",
+          "type": "bytes",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRequestVerifyEvent",
+      "fields": [
+        {
+          "name": "request",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRequestCloseEvent",
+      "fields": [
+        {
+          "name": "request",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "slot",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionTriggerEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionInitEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "schedule",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": "bytes",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionSetConfigEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "version",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "schedule",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "mrEnclaves",
+          "type": {
+            "vec": "bytes"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionBootedEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionVerifyEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionWithdrawEvent",
+      "fields": [
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PermissionInitEvent",
+      "fields": [
+        {
+          "name": "permission",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "PermissionSetEvent",
+      "fields": [
+        {
+          "name": "permission",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueAddMrEnclaveEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueInitEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "QueueRemoveMrEnclaveEvent",
+      "fields": [
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierHeartbeatEvent",
+      "fields": [
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierInitEvent",
+      "fields": [
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierQuoteRotateEvent",
+      "fields": [
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierQuoteOverrideEvent",
+      "fields": [
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "GarbageCollectionEvent",
+      "fields": [
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierQuoteVerifyEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "queue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "VerifierQuoteVerifyRequestEvent",
+      "fields": [
+        {
+          "name": "quote",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        }
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "GenericError"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidQuote",
+      "msg": "The provided enclave quote is invalid"
+    },
+    {
+      "code": 6002,
+      "name": "QuoteExpired",
+      "msg": "The EnclaveAccount has expired and needs to be reverified"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidNode"
+    },
+    {
+      "code": 6004,
+      "name": "InsufficientQueue"
+    },
+    {
+      "code": 6005,
+      "name": "QueueFull",
+      "msg": "The provided queue is full and cannot support new verifiers"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidEnclaveSigner",
+      "msg": "The provided enclave_signer does not match the expected enclave_signer on the EnclaveAccount"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidSigner"
+    },
+    {
+      "code": 6008,
+      "name": "MrEnclavesEmpty",
+      "msg": "This account has zero mr_enclaves defined"
+    },
+    {
+      "code": 6009,
+      "name": "MrEnclaveAlreadyExists",
+      "msg": "The MrEnclave value already exists in the array"
+    },
+    {
+      "code": 6010,
+      "name": "MrEnclaveDoesntExist",
+      "msg": "The MrEnclave value was not found in the whitelist"
+    },
+    {
+      "code": 6011,
+      "name": "MrEnclaveAtCapacity",
+      "msg": "This account has a full mr_enclaves array. Remove some measurements to make room for new ones"
+    },
+    {
+      "code": 6012,
+      "name": "PermissionDenied",
+      "msg": "The PermissionAccount is missing the required flags for this action. Check the queues config to see which permissions are required"
+    },
+    {
+      "code": 6013,
+      "name": "InvalidConstraint"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidTimestamp"
+    },
+    {
+      "code": 6015,
+      "name": "InvalidMrEnclave"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidReportData"
+    },
+    {
+      "code": 6017,
+      "name": "InsufficientLoadAmount"
+    },
+    {
+      "code": 6018,
+      "name": "IncorrectObservedTime"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidQuoteMode"
+    },
+    {
+      "code": 6020,
+      "name": "InvalidVerifierIdx"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidSelfVerifyRequest"
+    },
+    {
+      "code": 6022,
+      "name": "IncorrectMrEnclave"
+    },
+    {
+      "code": 6023,
+      "name": "InvalidResponder"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidAddressLookupAddress",
+      "msg": "The provided address_lookup_address did not match the expected address on-chain"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidQueue",
+      "msg": "The provided attestation queue address did not match the expected address on-chain"
+    },
+    {
+      "code": 6026,
+      "name": "IllegalVerifier"
+    },
+    {
+      "code": 6027,
+      "name": "InvalidEscrow"
+    },
+    {
+      "code": 6028,
+      "name": "InvalidAuthority",
+      "msg": "The provided authority account does not match the expected value on-chain"
+    },
+    {
+      "code": 6029,
+      "name": "IllegalExecuteAttempt"
+    },
+    {
+      "code": 6030,
+      "name": "RequestExpired",
+      "msg": "The requests expirationSlot has expired"
+    },
+    {
+      "code": 6031,
+      "name": "InsufficientFunds",
+      "msg": "The escrow has insufficient funds for this action"
+    },
+    {
+      "code": 6032,
+      "name": "MissingFunctionEscrow",
+      "msg": "The FunctionAccount escrow is required if function.requests_fee is greater than zero"
+    },
+    {
+      "code": 6033,
+      "name": "InvalidRequest",
+      "msg": "The provided requestSlot did not match the expected requestSlot on-chain. The request may have already been processed"
+    },
+    {
+      "code": 6034,
+      "name": "FunctionNotReady",
+      "msg": "The FunctionAccount status is not active (1)"
+    },
+    {
+      "code": 6035,
+      "name": "UserRequestsDisabled",
+      "msg": "The FunctionAccount has set requests_disabled to true and disabled this action"
+    },
+    {
+      "code": 6036,
+      "name": "MissingFunctionAuthority",
+      "msg": "The FunctionAccount authority is required to sign if function.requests_require_authorization is enabled"
+    },
+    {
+      "code": 6037,
+      "name": "FunctionCloseNotReady",
+      "msg": "The FunctionAccount must have no requests before it can be closed"
+    },
+    {
+      "code": 6038,
+      "name": "RequestAlreadyInitialized",
+      "msg": "Attempting to initialize an already created FunctionRequestAccount"
+    },
+    {
+      "code": 6039,
+      "name": "AccountCloseNotPermitted"
+    },
+    {
+      "code": 6040,
+      "name": "AccountCloseNotReady"
+    },
+    {
+      "code": 6041,
+      "name": "FunctionRequestNotReady",
+      "msg": "The FunctionRequestAccount is not ready to be verified"
+    }
+  ]
+}

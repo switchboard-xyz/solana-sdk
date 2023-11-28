@@ -7,28 +7,21 @@ import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript
 
 export interface WalletInitParamsFields {
   name: Uint8Array;
-  maxLen: number | null;
 }
 
 export interface WalletInitParamsJSON {
   name: Array<number>;
-  maxLen: number | null;
 }
 
 export class WalletInitParams {
   readonly name: Uint8Array;
-  readonly maxLen: number | null;
 
   constructor(fields: WalletInitParamsFields) {
     this.name = fields.name;
-    this.maxLen = fields.maxLen;
   }
 
   static layout(property?: string) {
-    return borsh.struct(
-      [borsh.vecU8("name"), borsh.option(borsh.u32(), "maxLen")],
-      property
-    );
+    return borsh.struct([borsh.vecU8("name")], property);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,7 +32,6 @@ export class WalletInitParams {
         obj.name.byteOffset,
         obj.name.length
       ),
-      maxLen: obj.maxLen,
     });
   }
 
@@ -50,21 +42,18 @@ export class WalletInitParams {
         fields.name.byteOffset,
         fields.name.length
       ),
-      maxLen: fields.maxLen,
     };
   }
 
   toJSON(): WalletInitParamsJSON {
     return {
       name: Array.from(this.name.values()),
-      maxLen: this.maxLen,
     };
   }
 
   static fromJSON(obj: WalletInitParamsJSON): WalletInitParams {
     return new WalletInitParams({
       name: Uint8Array.from(obj.name),
-      maxLen: obj.maxLen,
     });
   }
 

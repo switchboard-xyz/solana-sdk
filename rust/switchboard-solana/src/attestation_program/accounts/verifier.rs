@@ -192,7 +192,7 @@ impl VerifierAccountData {
         self.enclave.enclave_signer
     }
 
-    pub fn assert_signer(&self, signer: &AccountInfo) -> Result<()> {
+    pub fn assert_signer(&self, signer: &AccountInfo) -> anchor_lang::Result<()> {
         if self.enclave.enclave_signer != signer.key() {
             return Err(error!(SwitchboardError::InvalidEnclaveSigner));
         }
@@ -210,7 +210,7 @@ impl VerifierAccountData {
         }
     }
 
-    pub fn verify(&self, clock: &Clock) -> Result<()> {
+    pub fn verify(&self, clock: &Clock) -> anchor_lang::Result<()> {
         if !self.is_verified(clock) {
             return Err(error!(SwitchboardError::InvalidQuote));
         }
@@ -219,11 +219,25 @@ impl VerifierAccountData {
     }
 
     cfg_client! {
-        pub async fn fetch(
+        pub fn fetch(
             client: &solana_client::rpc_client::RpcClient,
             pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::Error> {
-            crate::client::load_account(client, pubkey).await
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account(client, pubkey)
+        }
+
+        pub async fn fetch_async(
+            client: &solana_client::nonblocking::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account_async(client, pubkey).await
+        }
+
+        pub fn fetch_sync<T: solana_sdk::client::SyncClient>(
+            client: &T,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account_sync(client, pubkey)
         }
     }
 }

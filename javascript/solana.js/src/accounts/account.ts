@@ -48,11 +48,6 @@ export abstract class Account<T> {
   }
 
   /**
-   * @return on-chain account size.
-   */
-  public abstract get size(): number;
-
-  /**
    * Retrieve and decode the data in this account.
    */
   public abstract loadData(): Promise<T>;

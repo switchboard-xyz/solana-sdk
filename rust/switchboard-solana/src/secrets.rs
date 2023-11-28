@@ -1,11 +1,11 @@
 use crate::*;
 use rand::rngs::OsRng;
-use serde_json::{json};
-use std::collections::HashMap;
-use serde_json;
+use rsa::{pkcs8::ToPublicKey, PaddingScheme, RsaPrivateKey, RsaPublicKey};
 use serde::Deserialize;
+use serde_json;
+use serde_json::json;
+use std::collections::HashMap;
 use std::result::Result;
-use rsa::{RsaPrivateKey, RsaPublicKey, PaddingScheme, pkcs8::ToPublicKey};
 
 #[allow(dead_code)]
 #[allow(non_snake_case)]
@@ -29,30 +29,32 @@ pub struct Secrets {
 ///
 /// # Returns
 /// - `Map<String, String>`: The key-value store of your secrets.
-pub async fn fetch_secrets(url: &str) -> Result<Secrets, SwitchboardClientError> {
+pub async fn fetch_secrets(url: &str) -> Result<Secrets, SbError> {
     let mut os_rng = OsRng::default();
-    let priv_key = RsaPrivateKey::new(&mut os_rng, 2048)
-        .map_err(|_| SwitchboardClientError::KeyParseError)?;
-    let pub_key = RsaPublicKey::from(&priv_key).to_public_key_der()
-        .map_err(|_| SwitchboardClientError::KeyParseError)?;
+    let priv_key = RsaPrivateKey::new(&mut os_rng, 2048).map_err(|_| SbError::KeyParseError)?;
+    let pub_key = RsaPublicKey::from(&priv_key)
+        .to_public_key_der()
+        .map_err(|_| SbError::KeyParseError)?;
     let pub_key: &[u8] = pub_key.as_ref();
-    let secrets_quote = Gramine::generate_quote(pub_key)
-        .map_err(|_| SwitchboardClientError::SgxError)?;
+    let secrets_quote = Gramine::generate_quote(pub_key).map_err(|_| SbError::SgxError)?;
     let client = reqwest::Client::new();
-    let res = client.post(url)
+    let res = client
+        .post(url)
         .json(&json!({
             "quote": &secrets_quote,
             "pubkey": pub_key,
         }))
         .send()
         .await
-        .map_err(|_| SwitchboardClientError::NetworkError)?;
-    let ciphertext = res.bytes().await.map_err(|_| SwitchboardClientError::NetworkError)?;
+        .map_err(|_| SbError::NetworkError)?;
+    let ciphertext = res.bytes().await.map_err(|_| SbError::NetworkError)?;
     let secrets: Secrets;
     let padding = PaddingScheme::new_pkcs1v15_encrypt();
     secrets = serde_json::from_slice(
-        &priv_key.decrypt(padding, &ciphertext).map_err(|_| SwitchboardClientError::DecryptError)?
-    ).map_err(|_| SwitchboardClientError::ParseError)?;
+        &priv_key
+            .decrypt(padding, &ciphertext)
+            .map_err(|_| SbError::DecryptError)?,
+    )
+    .map_err(|_| SbError::ParseError)?;
     Ok(secrets)
 }
-

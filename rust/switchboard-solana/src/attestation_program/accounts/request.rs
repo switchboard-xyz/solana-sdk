@@ -1,5 +1,5 @@
-use crate::{cfg_client, prelude::*};
-use solana_program::borsh0_10::get_instance_packed_len;
+use crate::prelude::*;
+use solana_program::borsh::get_instance_packed_len;
 
 #[repr(u8)]
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
@@ -11,6 +11,11 @@ pub enum RequestStatus {
     RequestFailure = 3,
     RequestExpired = 4,
     RequestSuccess = 5,
+}
+impl RequestStatus {
+    pub fn is_active(&self) -> bool {
+        matches!(self, RequestStatus::RequestPending)
+    }
 }
 impl From<RequestStatus> for u8 {
     fn from(value: RequestStatus) -> Self {
@@ -37,7 +42,17 @@ impl From<u8> for RequestStatus {
     }
 }
 
-#[derive(Copy, Clone, AnchorDeserialize, AnchorSerialize, PartialEq)]
+fn serialize_slice<W: borsh::maybestd::io::Write, T: borsh::ser::BorshSerialize>(
+    slice: &[T],
+    writer: &mut W,
+) -> std::result::Result<(), std::io::Error> {
+    for item in slice {
+        item.serialize(writer)?;
+    }
+    Ok(())
+}
+
+#[derive(Copy, Clone, PartialEq)]
 pub struct FunctionRequestTriggerRound {
     /// The status of the request.
     pub status: RequestStatus,
@@ -58,70 +73,100 @@ pub struct FunctionRequestTriggerRound {
     /// The slot when the request can first be executed.
     pub valid_after_slot: u64,
 
+    /// The index of the verifier assigned to this request.
+    pub queue_idx: u32,
+
     /// Reserved.
-    pub _ebuf: [u8; 56],
+    pub _ebuf: [u8; 52],
 }
 impl Default for FunctionRequestTriggerRound {
     fn default() -> Self {
         unsafe { std::mem::zeroed() }
     }
 }
-// impl borsh::ser::BorshSerialize for FunctionRequestTriggerRound
-// where
-//     RequestStatus: borsh::ser::BorshSerialize,
-//     u64: borsh::ser::BorshSerialize,
-//     u64: borsh::ser::BorshSerialize,
-//     u64: borsh::ser::BorshSerialize,
-//     u64: borsh::ser::BorshSerialize,
-//     Pubkey: borsh::ser::BorshSerialize,
-//     Pubkey: borsh::ser::BorshSerialize,
-//     u64: borsh::ser::BorshSerialize,
-// {
-//     fn serialize<W: borsh::maybestd::io::Write>(
-//         &self,
-//         writer: &mut W,
-//     ) -> ::core::result::Result<(), borsh::maybestd::io::Error> {
-//         borsh::BorshSerialize::serialize(&self.status, writer)?;
-//         borsh::BorshSerialize::serialize(&self.bounty, writer)?;
-//         borsh::BorshSerialize::serialize(&self.request_slot, writer)?;
-//         borsh::BorshSerialize::serialize(&self.fulfilled_slot, writer)?;
-//         borsh::BorshSerialize::serialize(&self.expiration_slot, writer)?;
-//         borsh::BorshSerialize::serialize(&self.verifier, writer)?;
-//         borsh::BorshSerialize::serialize(&self.enclave_signer, writer)?;
-//         borsh::BorshSerialize::serialize(&self.valid_after_slot, writer)?;
-//         writer.write_all(&[0u8; 56])?;
-//         // borsh::BorshSerialize::serialize(&[0u8; 56], writer)?;
-//         Ok(())
-//     }
-// }
-// impl borsh::de::BorshDeserialize for FunctionRequestTriggerRound
-// where
-//     RequestStatus: borsh::BorshDeserialize,
-//     u64: borsh::BorshDeserialize,
-//     u64: borsh::BorshDeserialize,
-//     u64: borsh::BorshDeserialize,
-//     u64: borsh::BorshDeserialize,
-//     Pubkey: borsh::BorshDeserialize,
-//     Pubkey: borsh::BorshDeserialize,
-//     u64: borsh::BorshDeserialize,
-// {
-//     fn deserialize(buf: &mut &[u8]) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
-//         Ok(Self {
-//             status: borsh::BorshDeserialize::deserialize(buf)?,
-//             bounty: borsh::BorshDeserialize::deserialize(buf)?,
-//             request_slot: borsh::BorshDeserialize::deserialize(buf)?,
-//             fulfilled_slot: borsh::BorshDeserialize::deserialize(buf)?,
-//             expiration_slot: borsh::BorshDeserialize::deserialize(buf)?,
-//             verifier: borsh::BorshDeserialize::deserialize(buf)?,
-//             enclave_signer: borsh::BorshDeserialize::deserialize(buf)?,
-//             valid_after_slot: borsh::BorshDeserialize::deserialize(buf)?,
-//             _ebuf: [0u8; 56],
-//         })
-//     }
-// }
+
+fn deserialize_round_ebuf_slice<R: borsh::maybestd::io::Read>(
+    reader: &mut R,
+) -> std::result::Result<[u8; 52], std::io::Error> {
+    let mut buffer = [0u8; 52];
+    reader.read_exact(&mut buffer)?;
+    Ok(buffer)
+}
+
+impl borsh::ser::BorshSerialize for FunctionRequestTriggerRound
+where
+    RequestStatus: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+{
+    fn serialize<W: borsh::maybestd::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> ::core::result::Result<(), borsh::maybestd::io::Error> {
+        borsh::BorshSerialize::serialize(&self.status, writer)?;
+        borsh::BorshSerialize::serialize(&self.bounty, writer)?;
+        borsh::BorshSerialize::serialize(&self.request_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.fulfilled_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.expiration_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.verifier, writer)?;
+        borsh::BorshSerialize::serialize(&self.enclave_signer, writer)?;
+        borsh::BorshSerialize::serialize(&self.valid_after_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.queue_idx, writer)?;
+        serialize_slice(&self._ebuf, writer)?;
+        Ok(())
+    }
+}
+impl borsh::de::BorshDeserialize for FunctionRequestTriggerRound
+where
+    RequestStatus: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+{
+    // fn deserialize(buf: &mut &[u8]) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
+    //     Ok(Self {
+    //         status: borsh::BorshDeserialize::deserialize(buf)?,
+    //         bounty: borsh::BorshDeserialize::deserialize(buf)?,
+    //         request_slot: borsh::BorshDeserialize::deserialize(buf)?,
+    //         fulfilled_slot: borsh::BorshDeserialize::deserialize(buf)?,
+    //         expiration_slot: borsh::BorshDeserialize::deserialize(buf)?,
+    //         verifier: borsh::BorshDeserialize::deserialize(buf)?,
+    //         enclave_signer: borsh::BorshDeserialize::deserialize(buf)?,
+    //         valid_after_slot: borsh::BorshDeserialize::deserialize(buf)?,
+    //         queue_idx: borsh::BorshDeserialize::deserialize(buf)?,
+    //         _ebuf: deserialize_round_ebuf_slice(buf)?,
+    //     })
+    // }
+
+    fn deserialize_reader<R: borsh::maybestd::io::Read>(
+        reader: &mut R,
+    ) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
+        Ok(Self {
+            status: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            bounty: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            request_slot: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            fulfilled_slot: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            expiration_slot: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            verifier: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            enclave_signer: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            valid_after_slot: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            queue_idx: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            _ebuf: borsh::BorshDeserialize::deserialize_reader(reader)?,
+        })
+    }
+}
 
 // #[account]
-#[derive(AnchorDeserialize, AnchorSerialize, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct FunctionRequestAccountData {
     // Up-Front Params for RPC filtering
     /// Whether the request is ready to be processed.
@@ -191,6 +236,107 @@ impl Default for FunctionRequestAccountData {
     }
 }
 
+fn deserialize_ebuf_slice<R: borsh::maybestd::io::Read>(
+    reader: &mut R,
+) -> std::result::Result<[u8; 255], std::io::Error> {
+    let mut buffer = [0u8; 255];
+    reader.read_exact(&mut buffer)?;
+    Ok(buffer)
+}
+
+impl borsh::ser::BorshSerialize for FunctionRequestAccountData
+where
+    RequestStatus: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    Pubkey: borsh::ser::BorshSerialize,
+    u64: borsh::ser::BorshSerialize,
+    FunctionRequestTriggerRound: borsh::ser::BorshSerialize,
+    Vec<u8>: borsh::ser::BorshSerialize,
+{
+    fn serialize<W: borsh::maybestd::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> ::core::result::Result<(), borsh::maybestd::io::Error> {
+        borsh::BorshSerialize::serialize(&self.is_triggered, writer)?;
+        borsh::BorshSerialize::serialize(&self.status, writer)?;
+        borsh::BorshSerialize::serialize(&self.authority, writer)?;
+        borsh::BorshSerialize::serialize(&self.payer, writer)?;
+        borsh::BorshSerialize::serialize(&self.function, writer)?;
+        borsh::BorshSerialize::serialize(&self.escrow, writer)?;
+        borsh::BorshSerialize::serialize(&self.attestation_queue, writer)?;
+        borsh::BorshSerialize::serialize(&self.active_request, writer)?;
+        borsh::BorshSerialize::serialize(&self.previous_request, writer)?;
+        borsh::BorshSerialize::serialize(&self.max_container_params_len, writer)?;
+        borsh::BorshSerialize::serialize(&self.container_params_hash, writer)?;
+        borsh::BorshSerialize::serialize(&self.container_params, writer)?;
+        borsh::BorshSerialize::serialize(&self.created_at, writer)?;
+        borsh::BorshSerialize::serialize(&self.garbage_collection_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.error_status, writer)?;
+        serialize_slice(&self._ebuf, writer)?;
+        Ok(())
+    }
+}
+impl borsh::de::BorshDeserialize for FunctionRequestAccountData
+where
+    RequestStatus: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    Pubkey: borsh::BorshDeserialize,
+    u64: borsh::BorshDeserialize,
+    FunctionRequestTriggerRound: borsh::BorshDeserialize,
+{
+    // fn deserialize(buf: &mut &[u8]) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
+    //     Ok(Self {
+    //         is_triggered: borsh::BorshDeserialize::deserialize(buf)?,
+    //         status: borsh::BorshDeserialize::deserialize(buf)?,
+    //         authority: borsh::BorshDeserialize::deserialize(buf)?,
+    //         payer: borsh::BorshDeserialize::deserialize(buf)?,
+    //         function: borsh::BorshDeserialize::deserialize(buf)?,
+    //         escrow: borsh::BorshDeserialize::deserialize(buf)?,
+    //         attestation_queue: borsh::BorshDeserialize::deserialize(buf)?,
+    //         active_request: borsh::BorshDeserialize::deserialize(buf)?,
+    //         previous_request: borsh::BorshDeserialize::deserialize(buf)?,
+    //         max_container_params_len: borsh::BorshDeserialize::deserialize(buf)?,
+    //         container_params_hash: borsh::BorshDeserialize::deserialize(buf)?,
+    //         container_params: borsh::BorshDeserialize::deserialize(buf)?,
+    //         created_at: borsh::BorshDeserialize::deserialize(buf)?,
+    //         garbage_collection_slot: borsh::BorshDeserialize::deserialize(buf)?,
+    //         error_status: borsh::BorshDeserialize::deserialize(buf)?,
+    //         _ebuf: deserialize_ebuf_slice(buf)?,
+    //     })
+    // }
+
+    fn deserialize_reader<R: borsh::maybestd::io::Read>(
+        reader: &mut R,
+    ) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
+        Ok(Self {
+            is_triggered: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            status: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            authority: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            payer: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            function: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            escrow: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            attestation_queue: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            active_request: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            previous_request: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            max_container_params_len: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            container_params_hash: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            container_params: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            created_at: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            garbage_collection_slot: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            error_status: borsh::BorshDeserialize::deserialize_reader(reader)?,
+            _ebuf: borsh::BorshDeserialize::deserialize_reader(reader)?,
+        })
+    }
+}
+
 impl anchor_lang::AccountSerialize for FunctionRequestAccountData {
     fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
         if writer
@@ -254,46 +400,99 @@ impl FunctionRequestAccountData {
     pub fn space(len: Option<u32>) -> usize {
         let base: usize = 8  // discriminator
             + get_instance_packed_len(&FunctionRequestAccountData::default()).unwrap();
-        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_USERS_CONTAINER_PARAMS_LEN) as usize;
+        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_MAX_CONTAINER_PARAMS_LEN) as usize;
         base + vec_elements
     }
 
     // verify if their is a non-expired pending request
     pub fn is_round_active(&self, clock: &Clock) -> bool {
-        if self.active_request.status == RequestStatus::RequestPending
-            && self.active_request.expiration_slot > 0
-            && clock.slot >= self.active_request.expiration_slot
-        {
-            return true;
+        // 1. check status enum
+        if !self.active_request.status.is_active() {
+            return false;
         }
 
-        false
+        // 2. check valid after slot
+        // TODO: we should throw a more descriptive error for this
+        if clock.slot < self.active_request.valid_after_slot {
+            return false;
+        }
+
+        // 3. check expiration
+        if self.active_request.expiration_slot > 0
+            && clock.slot >= self.active_request.expiration_slot
+        {
+            return false;
+        }
+
+        true
     }
 
+    /// Validates the given `signer` account against the `function_account_info` and the `active_request`
+    /// stored in this `FunctionRequestAccountData`.
+    ///
+    /// # Arguments
+    ///
+    /// * `function_account_info` - The `AccountInfo` of the function account.
+    /// * `signer` - The `AccountInfo` of the account to validate.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the function account data cannot be loaded or if the `signer` account does not match
+    /// the expected `enclave_signer` stored in the `active_request`.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(true)` if the validation succeeds, `Ok(false)` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::FunctionRequestAccountData;
+    ///
+    /// #[derive(Accounts)]
+    /// pub struct Settle<'info> {
+    ///     // YOUR PROGRAM ACCOUNTS
+    ///     #[account(
+    ///         mut,
+    ///         has_one = switchboard_request,
+    ///     )]
+    ///     pub user: AccountLoader<'info, UserState>,
+    ///
+    ///     // SWITCHBOARD ACCOUNTS
+    ///     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
+    ///     #[account(
+    ///         constraint = switchboard_request.validate_signer(
+    ///             &switchboard_function.to_account_info(),
+    ///             &enclave_signer.to_account_info()
+    ///         )?
+    ///     )]
+    ///     pub switchboard_request: Box<Account<'info, FunctionRequestAccountData>>,
+    ///     pub enclave_signer: Signer<'info>,
+    /// }
+    /// ```
     pub fn validate_signer<'a>(
         &self,
-        function_account_info: &AccountInfo<'a>,
+        function_account_info: &'a AccountInfo<'a>,
         signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        if self.function != function_account_info.key() {
-            msg!("function key mismatch");
+        let function_loader =
+            AccountLoader::<'a, FunctionAccountData>::try_from(function_account_info)?;
+
+        if self.function != function_loader.key() {
             msg!(
-                "expected {}, received {}",
+                "FunctionMismatch: expected {}, received {}",
                 self.function,
-                function_account_info.key()
+                function_loader.key()
             );
             return Ok(false);
         }
 
-        let function_loader =
-            AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone())?;
         function_loader.load()?; // check owner/discriminator
 
         // validate the enclaves delegated signer matches
         if self.active_request.enclave_signer != signer.key() {
-            msg!("request signer mismatch");
             msg!(
-                "expected {}, received {}",
+                "SignerMismatch: expected {}, received {}",
                 self.active_request.enclave_signer,
                 signer.key()
             );
@@ -301,52 +500,6 @@ impl FunctionRequestAccountData {
         }
 
         Ok(true)
-    }
-
-    cfg_client! {
-        pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                0,
-                FunctionRequestAccountData::discriminator().to_vec(),
-            ))
-        }
-
-        pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                8,
-                vec![1u8],
-            ))
-        }
-
-        pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                9,
-                vec![RequestStatus::RequestPending as u8],
-            ))
-        }
-
-        pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                138,
-                queue_pubkey.to_bytes().into(),
-            ))
-        }
-
-        pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
-            vec![
-                FunctionRequestAccountData::get_discriminator_filter(),
-                FunctionRequestAccountData::get_is_triggered_filter(),
-                FunctionRequestAccountData::get_is_active_filter(),
-                FunctionRequestAccountData::get_queue_filter(queue_pubkey),
-            ]
-        }
-
-        pub async fn fetch(
-            client: &solana_client::rpc_client::RpcClient,
-            pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::Error> {
-            crate::client::fetch_anchor_account(client, pubkey).await
-        }
     }
 }
 
@@ -422,9 +575,6 @@ mod tests {
         let container_params = std::str::from_utf8(&request.container_params)
             .unwrap()
             .to_string();
-
-        println!("Max params Len: {}", request.max_container_params_len);
-        println!("Params Len: {}", request.container_params.len());
 
         assert_eq!(container_params, EXPECTED_CONTAINER_PARAMS.to_string());
         assert_eq!(

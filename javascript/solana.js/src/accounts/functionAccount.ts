@@ -18,6 +18,7 @@ import {
 
 import type {
   FunctionRequestAccountInitParams,
+  FunctionRoutineAccountInitParams,
   SwitchboardWalletFundParams,
   VerifierAccount,
 } from "./index.js";
@@ -25,6 +26,7 @@ import {
   AttestationPermissionAccount,
   AttestationQueueAccount,
   FunctionRequestAccount,
+  FunctionRoutineAccount,
   SwitchboardWallet,
 } from "./index.js";
 
@@ -66,19 +68,28 @@ export type FunctionAccountInitSeeds = {
  *  Parameters for initializing a {@linkcode FunctionAccount}
  */
 export type FunctionAccountInitParams = FunctionAccountInitSeeds & {
+  // Metadata Config
   name?: string;
   metadata?: string;
+
+  // Container Config
   container: string;
   version?: string;
   containerRegistry?: ContainerRegistryType;
-  schedule?: string;
-
   mrEnclave?: Buffer | Uint8Array | number[];
-  attestationQueue: AttestationQueueAccount;
 
+  // Request Config
   requestsDisabled?: boolean;
   requestsRequireAuthorization?: boolean;
   requestsFee?: number;
+
+  // Routines Config
+  routinesDisabled?: boolean;
+  routinesRequireAuthorization?: boolean;
+  routinesFee?: number;
+
+  // Accounts
+  attestationQueue: AttestationQueueAccount;
 
   /**
    *  An authority to be used to control this account.
@@ -179,7 +190,12 @@ export interface FunctionTriggerParams {
 export type CreateFunctionRequestParams = Omit<
   FunctionRequestAccountInitParams,
   "functionAccount"
-> & { user?: Keypair };
+> & { keypair?: Keypair };
+
+export type CreateFunctionRoutineParams = Omit<
+  FunctionRoutineAccountInitParams,
+  "functionAccount"
+> & { keypair?: Keypair };
 
 /**
  * Account type representing a Switchboard Function.
@@ -202,12 +218,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
    */
   public static getMetadata = (functionState: types.FunctionAccountData) =>
     toUtf8(functionState.metadata);
-
-  /**
-   * Get the size of an {@linkcode FunctionAccount} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.functionAccountData.size;
 
   public get wallet(): Promise<SwitchboardWallet> {
     if (!this._wallet) {
@@ -327,10 +337,6 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
   ): Promise<[FunctionAccount, TransactionObject]> {
     const authorityPubkey = params.authority ?? payer;
 
-    const cronSchedule: Buffer = params.schedule
-      ? Buffer.from(parseCronSchedule(params.schedule), "utf-8")
-      : Buffer.from(Array(64).fill(0));
-
     const attestationQueueAccount = params.attestationQueue;
 
     const recentSlot: BN = params.recentSlot
@@ -387,8 +393,15 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       program,
       {
         params: {
+          // PDA Config
+          recentSlot: recentSlot,
+          creatorSeed: Array.from(creatorSeed),
+
+          // Metadata Config
           name: new Uint8Array(Buffer.from(params.name ?? "", "utf8")),
           metadata: new Uint8Array(Buffer.from(params.metadata ?? "", "utf8")),
+
+          // Container Config
           container: new Uint8Array(Buffer.from(params.container, "utf8")),
           containerRegistry: new Uint8Array(
             Buffer.from(params.containerRegistry ?? "dockerhub", "utf8")
@@ -396,16 +409,20 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
           version: new Uint8Array(
             Buffer.from(params.version ?? "latest", "utf8")
           ),
-          schedule: new Uint8Array(cronSchedule),
           mrEnclave: Array.from(
             params.mrEnclave ? parseRawMrEnclave(params.mrEnclave) : []
           ),
-          recentSlot: recentSlot,
+
+          // Requests Config
           requestsDisabled: params.requestsDisabled ?? false,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? false,
-          requestsFee: numToBN(params.requestsFee),
-          creatorSeed: Array.from(creatorSeed),
+          requestsDevFee: numToBN(params.requestsFee),
+
+          // Routines Config
+          routinesDisabled: false,
+          routinesDevFee: new BN(0),
+          routinesRequireAuthorization: false,
         },
       },
       {
@@ -414,9 +431,9 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         authority: authorityPubkey,
         attestationQueue: attestationQueueAccount.publicKey,
         payer,
-        wallet: escrowWallet.publicKey,
-        walletAuthority: escrowWalletAuthority,
-        tokenWallet: escrowWallet.tokenWallet,
+        escrowWallet: escrowWallet.publicKey,
+        escrowWalletAuthority: escrowWalletAuthority,
+        escrowTokenWallet: escrowWallet.tokenWallet,
         mint: program.mint.address,
         tokenProgram: TOKEN_PROGRAM_ID,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -494,6 +511,42 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
     return [account, txSignature];
   }
 
+  public async createRoutineInstruction(
+    payer: PublicKey,
+    params: CreateFunctionRoutineParams,
+    wallet?: SwitchboardWallet,
+    options?: TransactionObjectOptions
+  ): Promise<[FunctionRoutineAccount, TransactionObject]> {
+    const [routineAccount, txnObject] =
+      await FunctionRoutineAccount.createInstruction(
+        this.program,
+        payer,
+        {
+          ...params,
+          functionAccount: this,
+        },
+        wallet,
+        options
+      );
+
+    return [routineAccount, txnObject];
+  }
+
+  public async createRoutine(
+    params: CreateFunctionRoutineParams,
+    wallet?: SwitchboardWallet,
+    options?: SendTransactionObjectOptions
+  ): Promise<[FunctionRoutineAccount, TransactionSignature]> {
+    const [account, txnObject] = await this.createRoutineInstruction(
+      this.program.walletPubkey,
+      params,
+      wallet,
+      options
+    );
+    const txSignature = await this.program.signAndSend(txnObject, options);
+    return [account, txSignature];
+  }
+
   public async setConfigInstruction(
     payer: PublicKey,
     params: FunctionSetConfigParams,
@@ -522,21 +575,33 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program,
       {
         params: {
+          // Metadata Config
           name: toOptionalBytes(params.name),
           metadata: toOptionalBytes(params.metadata),
+
+          // Container Config
           container: toOptionalBytes(params.container),
           containerRegistry: toOptionalBytes(params.containerRegistry),
           version: toOptionalBytes(params.version),
-          schedule: toOptionalBytes(params.schedule),
           mrEnclaves: params.mrEnclaves
             ? params.mrEnclaves.map((mrEnclave) =>
                 Array.from(parseRawBuffer(mrEnclave))
               )
             : null,
+
+          // Requests Config
           requestsDisabled: params.requestsDisabled ?? null,
           requestsRequireAuthorization:
             params.requestsRequireAuthorization ?? null,
-          requestsFee: params.requestsFee ? new BN(params.requestsFee) : null,
+          requestsDevFee: params.requestsFee
+            ? new BN(params.requestsFee)
+            : null,
+
+          // Routines Config
+          routinesDisabled: null,
+          lockRoutinesDisabled: null,
+          routinesDevFee: null,
+          routinesRequireAuthorization: null,
         },
       },
       {
@@ -622,16 +687,26 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
       this.program,
       {
         params: {
+          // Metadata Config
           name: null,
           metadata: null,
+
+          // Container Config
           container: null,
           containerRegistry: null,
           version: null,
-          schedule: null,
           mrEnclaves: newMrEnclaves,
+
+          // Requests Config
           requestsDisabled: null,
           requestsRequireAuthorization: null,
-          requestsFee: null,
+          requestsDevFee: null,
+
+          // Routines Config
+          routinesDisabled: null,
+          lockRoutinesDisabled: null,
+          routinesDevFee: null,
+          routinesRequireAuthorization: null,
         },
       },
       {
@@ -983,7 +1058,7 @@ export class FunctionAccount extends Account<types.FunctionAccountData> {
         params: {
           observedTime: params.observedTime,
           nextAllowedTimestamp: params.nextAllowedTimestamp,
-          isFailure: params.isFailure,
+          errorCode: params.isFailure ? 1 : 0,
           mrEnclave: Array.from(params.mrEnclave),
         },
       },

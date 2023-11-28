@@ -8,7 +8,7 @@ pub struct ContainerParams {
 }
 
 impl ContainerParams {
-    pub fn decode(container_params: &[u8]) -> std::result::Result<Self, SwitchboardClientError> {
+    pub fn decode(container_params: &[u8]) -> Result<Self, SbFunctionError> {
         let params = String::from_utf8(container_params.to_vec()).unwrap();
 
         let mut program_id: Pubkey = Pubkey::default();
@@ -19,30 +19,30 @@ impl ContainerParams {
             let pair: Vec<&str> = env_pair.splitn(2, '=').collect();
             if pair.len() == 2 {
                 match pair[0] {
-                    "PID" => program_id = Pubkey::from_str(pair[1]).unwrap(),
-                    "RAFFLE" => raffle_key = Pubkey::from_str(pair[1]).unwrap(),
-                    "ROUND_CLOSE_SLOT" => round_close_slot = pair[1].parse::<u64>().unwrap(),
+                    "PID" => {
+                        program_id = Pubkey::from_str(pair[1]).unwrap();
+                    }
+                    "RAFFLE" => {
+                        raffle_key = Pubkey::from_str(pair[1]).unwrap();
+                    }
+                    "ROUND_CLOSE_SLOT" => {
+                        round_close_slot = pair[1].parse::<u64>().unwrap();
+                    }
                     _ => {}
                 }
             }
         }
 
         if program_id == Pubkey::default() {
-            return Err(SwitchboardClientError::CustomMessage(
-                "PID cannot be undefined".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(100));
         }
 
         if raffle_key == Pubkey::default() {
-            return Err(SwitchboardClientError::CustomMessage(
-                "RAFFLE cannot be undefined".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(101));
         }
 
         if round_close_slot == 0 {
-            return Err(SwitchboardClientError::CustomMessage(
-                "ROUND_CLOSE_SLOT must be greater than 0".to_string(),
-            ));
+            return Err(SbFunctionError::FunctionError(102));
         }
 
         Ok(Self {
@@ -63,7 +63,7 @@ mod tests {
             "PID={},RAFFLE={},ROUND_CLOSE_SLOT={}",
             anchor_spl::token::ID,
             anchor_spl::token::ID,
-            8,
+            8
         );
         let request_params_bytes = request_params_string.into_bytes();
 

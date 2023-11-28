@@ -79,7 +79,6 @@ describe("basic_oracle", () => {
         {
           name: "test function",
           metadata: "this function handles XYZ for my protocol",
-          schedule: "15 * * * * *",
           container: "switchboardlabs/basic-oracle-function",
           version: "latest",
           mrEnclave: MRENCLAVE,

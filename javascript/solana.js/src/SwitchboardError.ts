@@ -11,8 +11,20 @@ export class SwitchboardError {
    * @param code Error code to convert to a SwitchboardError object.
    * @return SwitchboardError
    */
-  static fromCode(program: SwitchboardProgram, code: number): SwitchboardError {
-    for (const e of program.idl.errors ?? []) {
+  static async fromCode(
+    program: SwitchboardProgram,
+    code: number
+  ): Promise<SwitchboardError> {
+    const [oracleProgram, attestationProgram] = await Promise.all([
+      program.oracleProgram,
+      program.attestationProgram,
+    ]);
+    const errors = [
+      ...(oracleProgram.idl.errors ?? []),
+      ...(attestationProgram.idl.errors ?? []),
+    ];
+
+    for (const e of errors ?? []) {
       if (code === e.code) {
         return new SwitchboardError(program, e.name, e.code, e.msg);
       }

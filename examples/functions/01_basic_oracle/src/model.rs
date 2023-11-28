@@ -5,7 +5,8 @@ use bytemuck::{Pod, Zeroable};
 pub struct MyProgramState {
     pub bump: u8,
     pub authority: Pubkey,
-    pub function: Pubkey,
+    pub switchboard_function: Pubkey,
+    pub switchboard_routine: Pubkey,
 }
 
 #[repr(packed)]

@@ -225,12 +225,6 @@ export class VerifierAccount extends Account<types.VerifierAccountData> {
   }
 
   /**
-   * Get the size of an {@linkcode VerifierAccount} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.verifierAccountData.size;
-
-  /**
    *  Retrieve and decode the {@linkcode types.VerifierAccountData} stored in this account.
    */
   public async loadData(): Promise<types.VerifierAccountData> {

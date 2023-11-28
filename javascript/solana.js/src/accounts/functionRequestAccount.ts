@@ -1,4 +1,3 @@
-import { Idl, Program } from "@coral-xyz/anchor";
 import { Account } from "../accounts/account.js";
 import * as errors from "../errors.js";
 import * as types from "../generated/attestation-program/index.js";
@@ -10,14 +9,15 @@ import type {
 import { TransactionObject } from "../TransactionObject.js";
 import { parseRawBuffer } from "../utils.js";
 
-import { FunctionAccount } from "./index.js";
+import type { SwitchboardWalletFundParams } from "./index.js";
+import { FunctionAccount, SwitchboardWallet } from "./index.js";
 
+import * as spl from "@solana/spl-token";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import type {
-  AccountMeta,
   Commitment,
   PublicKey,
   TransactionInstruction,
@@ -44,12 +44,6 @@ export interface FunctionRequestAccountInitParams {
   keypair?: Keypair;
 
   authority?: PublicKey;
-
-  /**
-   * An optional keypair to be used to sign the transaction if the function requires
-   * authorization on request initialization.
-   */
-  functionAuthority?: Keypair;
 }
 
 /**
@@ -88,6 +82,12 @@ export interface FunctionRequestVerifyParams {
   receiver: PublicKey;
 }
 
+export interface FunctionRequestFundParams {
+  funderTokenWallet?: PublicKey; // defaults to payer tokenWallet
+  funderAuthority?: Keypair; // defaults to payer
+  transferAmount: number;
+}
+
 /**
  * Account type representing a Switchboard Function.
  *
@@ -95,12 +95,6 @@ export interface FunctionRequestVerifyParams {
  */
 export class FunctionRequestAccount extends Account<types.FunctionRequestAccountData> {
   static accountName = "FunctionRequestAccountData";
-
-  /**
-   * Get the size of an {@linkcode FunctionRequestAccount} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.functionAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.FunctionRequestAccountData} stored in this account.
@@ -129,6 +123,9 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     params: FunctionRequestAccountInitParams,
     options?: TransactionObjectOptions
   ): Promise<[FunctionRequestAccount, TransactionObject]> {
+    // TODO: Calculate the max size of data we can support up front then split into multiple txns
+
+    // TODO: Add way to make this a PDA
     const requestKeypair = params.keypair ?? Keypair.generate();
     await program.verifyNewKeypair(requestKeypair);
 
@@ -152,9 +149,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
       {
         request: requestKeypair.publicKey,
         function: params.functionAccount.publicKey,
-        functionAuthority: params.functionAuthority
-          ? params.functionAuthority.publicKey
-          : program.attestationProgramId,
+        functionAuthority: functionState.authority,
         attestationQueue: functionState.attestationQueue,
         escrow,
         mint: program.mint.address,
@@ -166,28 +161,9 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
       }
     );
-
-    instruction.keys = instruction.keys.map(
-      (accountMeta): AccountMeta =>
-        accountMeta.pubkey.equals(program.programId)
-          ? {
-              pubkey: accountMeta.pubkey,
-              isSigner: false,
-              isWritable: accountMeta.isWritable,
-            }
-          : accountMeta
-    );
-
     return [
       new FunctionRequestAccount(program, requestKeypair.publicKey),
-      new TransactionObject(
-        payer,
-        [instruction],
-        params.functionAuthority
-          ? [requestKeypair, params.functionAuthority]
-          : [requestKeypair],
-        options
-      ),
+      new TransactionObject(payer, [instruction], [requestKeypair], options),
     ];
   }
 
@@ -206,7 +182,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     return [account, txSignature];
   }
 
-  public getEscrow(): PublicKey {
+  public get tokenAccount(): PublicKey {
     return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 
@@ -217,7 +193,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     if (balance === null) {
       throw new errors.AccountNotFoundError(
         `Function escrow`,
-        this.getEscrow()
+        this.tokenAccount
       );
     }
     return balance;
@@ -262,6 +238,51 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
     return await this.setConfigInstruction(
+      this.program.walletPubkey,
+      params,
+      options
+    ).then((txn) => this.program.signAndSend(txn, options));
+  }
+
+  public async fundInstruction(
+    payer: PublicKey,
+    params: FunctionRequestFundParams,
+    options?: TransactionObjectOptions
+  ): Promise<TransactionObject> {
+    const wrapTxn = (
+      await this.program.mint.getOrCreateWrappedUserInstructions(payer, {
+        fundUpTo: params.transferAmount,
+      })
+    )[1];
+
+    const funderAuthority = params.funderAuthority?.publicKey ?? payer;
+    const source =
+      params.funderTokenWallet ??
+      this.program.mint.getAssociatedAddress(funderAuthority);
+    const destination = this.tokenAccount;
+
+    const transferAmount = this.program.mint.toTokenAmount(
+      params.transferAmount
+    );
+
+    const signers = params.funderAuthority ? [params.funderAuthority] : [];
+    const ixn = spl.createTransferInstruction(
+      source,
+      destination,
+      funderAuthority,
+      transferAmount,
+      signers
+    );
+    const transferTxn = new TransactionObject(payer, [ixn], signers, options);
+
+    return wrapTxn?.combine(transferTxn) ?? transferTxn;
+  }
+
+  public async fund(
+    params: FunctionRequestFundParams,
+    options?: SendTransactionObjectOptions
+  ): Promise<TransactionSignature> {
+    return await this.fundInstruction(
       this.program.walletPubkey,
       params,
       options
@@ -337,7 +358,7 @@ export class FunctionRequestAccount extends Account<types.FunctionRequestAccount
               ? params.observedTime
               : Math.floor(Date.now() / 1000)
           ),
-          isFailure: params.isFailure ?? false,
+          errorCode: params.isFailure ? 1 : 0,
           mrEnclave: Array.from(parseRawMrEnclave(params.mrEnclave)),
           requestSlot:
             typeof params.requestSlot === "number"

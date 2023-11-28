@@ -35,10 +35,10 @@ Or add the following line to your Cargo.toml:
 
 ```toml
 [dependencies]
-switchboard-solana = "0.28"
+switchboard-solana = "0.29"
 ```
 
-**NOTE**: The minor version corresponds to the anchor-lang dependency. Version `0.28.*` of this crate uses anchor-lang `0.28.0` while version `0.27.*` of this crate uses anchor-lang `0.27.0`.
+**NOTE**: The minor version corresponds to the anchor-lang dependency. Version `0.29.*` of this crate uses anchor-lang `0.29.0` while version `0.27.*` of this crate uses anchor-lang `0.27.0`. We currently support Anchor 29, 28, and 27.
 
 ## Accounts
 

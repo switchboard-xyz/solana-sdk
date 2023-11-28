@@ -138,11 +138,25 @@ impl VrfLiteAccountData {
     }
 
     cfg_client! {
-        pub async fn fetch(
+        pub fn fetch(
             client: &solana_client::rpc_client::RpcClient,
             pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::Error> {
-            crate::client::load_account(client, pubkey).await
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account(client, pubkey)
+        }
+
+        pub async fn fetch_async(
+            client: &solana_client::nonblocking::rpc_client::RpcClient,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account_async(client, pubkey).await
+        }
+
+        pub fn fetch_sync<T: solana_sdk::client::SyncClient>(
+            client: &T,
+            pubkey: Pubkey,
+        ) -> std::result::Result<Self, switchboard_common::SbError> {
+            crate::client::fetch_zerocopy_account_sync(client, pubkey)
         }
     }
 }

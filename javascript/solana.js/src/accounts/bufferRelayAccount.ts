@@ -40,22 +40,8 @@ import { BN, promiseWithTimeout } from "@switchboard-xyz/common";
 export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData> {
   static accountName = "BufferRelayerAccountData";
 
-  /**
-   * Returns the size of an on-chain {@linkcode BufferRelayerAccount}.
-   */
-  public get size(): number {
-    return this.program.account.bufferRelayerAccountData.size;
-  }
-
   public decode(data: Buffer): types.BufferRelayerAccountData {
-    try {
-      return types.BufferRelayerAccountData.decode(data);
-    } catch {
-      return this.program.coder.decode<types.BufferRelayerAccountData>(
-        BufferRelayerAccount.accountName,
-        data
-      );
-    }
+    return types.BufferRelayerAccountData.decode(data);
   }
 
   /**
@@ -132,7 +118,7 @@ export class BufferRelayerAccount extends Account<types.BufferRelayerAccountData
           await program.provider.connection.getMinimumBalanceForRentExemption(
             size
           ),
-        programId: program.programId,
+        programId: program.oracleProgramId,
       })
     );
 

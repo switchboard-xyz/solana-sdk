@@ -30,7 +30,7 @@ export function oracleTeeHeartbeat(
   program: SwitchboardProgram,
   args: OracleTeeHeartbeatArgs,
   accounts: OracleTeeHeartbeatAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.oracle, isSigner: false, isWritable: true },

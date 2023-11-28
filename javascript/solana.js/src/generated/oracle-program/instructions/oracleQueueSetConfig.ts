@@ -23,7 +23,7 @@ export function oracleQueueSetConfig(
   program: SwitchboardProgram,
   args: OracleQueueSetConfigArgs,
   accounts: OracleQueueSetConfigAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.queue, isSigner: false, isWritable: true },

@@ -99,7 +99,10 @@ impl<'info> WalletFund<'info> {
         if let Some(funder_wallet) = &self.funder_wallet {
             account_metas.extend(funder_wallet.to_account_metas(None));
         } else {
-            account_metas.push(AccountMeta::new_readonly(crate::ID, false));
+            account_metas.push(AccountMeta::new_readonly(
+                SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                false,
+            ));
         }
         account_metas.extend(self.funder.to_account_metas(None));
         account_metas.extend(self.state.to_account_metas(None));

@@ -41,10 +41,6 @@ export class JobAccount extends Account<types.JobAccountData> {
    */
   public static getMetadata = (job: types.JobAccountData) =>
     toUtf8(job.metadata);
-  /**
-   * Get the size of an {@linkcode JobAccount} on-chain.
-   */
-  public size = this.program.account.jobAccountData.size;
 
   public static getAccountSize(byteLength: number): number {
     return 181 + byteLength;
@@ -268,14 +264,7 @@ export class JobAccount extends Account<types.JobAccountData> {
   }
 
   decode(data: Buffer): types.JobAccountData {
-    try {
-      return types.JobAccountData.decode(data);
-    } catch {
-      return this.program.coder.decode<types.JobAccountData>(
-        JobAccount.accountName,
-        data
-      );
-    }
+    return types.JobAccountData.decode(data);
   }
 
   static decode(
@@ -285,7 +274,8 @@ export class JobAccount extends Account<types.JobAccountData> {
     if (!accountInfo || accountInfo.data === null) {
       throw new Error("Cannot decode empty JobAccountData");
     }
-    return program.coder.decode(JobAccount.accountName, accountInfo?.data);
+
+    return types.JobAccountData.decode(accountInfo.data);
   }
 
   static decodeJob(

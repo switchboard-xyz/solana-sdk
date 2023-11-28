@@ -28,7 +28,7 @@ export function leaseExtend(
   program: SwitchboardProgram,
   args: LeaseExtendArgs,
   accounts: LeaseExtendAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.lease, isSigner: false, isWritable: true },

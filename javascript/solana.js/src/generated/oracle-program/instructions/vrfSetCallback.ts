@@ -23,7 +23,7 @@ export function vrfSetCallback(
   program: SwitchboardProgram,
   args: VrfSetCallbackArgs,
   accounts: VrfSetCallbackAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.vrf, isSigner: false, isWritable: true },

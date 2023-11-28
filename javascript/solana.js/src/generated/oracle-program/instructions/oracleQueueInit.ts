@@ -27,7 +27,7 @@ export function oracleQueueInit(
   program: SwitchboardProgram,
   args: OracleQueueInitArgs,
   accounts: OracleQueueInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.oracleQueue, isSigner: true, isWritable: true },

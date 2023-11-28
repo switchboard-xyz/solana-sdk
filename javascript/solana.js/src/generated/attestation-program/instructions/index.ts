@@ -73,6 +73,26 @@ export type {
 } from "./functionResetEscrow.js";
 export { functionResetEscrow } from "./functionResetEscrow.js";
 export type {
+  FunctionRoutineDisableAccounts,
+  FunctionRoutineDisableArgs,
+} from "./functionRoutineDisable.js";
+export { functionRoutineDisable } from "./functionRoutineDisable.js";
+export type {
+  FunctionRoutineInitAccounts,
+  FunctionRoutineInitArgs,
+} from "./functionRoutineInit.js";
+export { functionRoutineInit } from "./functionRoutineInit.js";
+export type {
+  FunctionRoutineSetConfigAccounts,
+  FunctionRoutineSetConfigArgs,
+} from "./functionRoutineSetConfig.js";
+export { functionRoutineSetConfig } from "./functionRoutineSetConfig.js";
+export type {
+  FunctionRoutineVerifyAccounts,
+  FunctionRoutineVerifyArgs,
+} from "./functionRoutineVerify.js";
+export { functionRoutineVerify } from "./functionRoutineVerify.js";
+export type {
   FunctionSetAuthorityAccounts,
   FunctionSetAuthorityArgs,
 } from "./functionSetAuthority.js";
@@ -116,8 +136,6 @@ export type {
   VerifierQuoteVerifyArgs,
 } from "./verifierQuoteVerify.js";
 export { verifierQuoteVerify } from "./verifierQuoteVerify.js";
-export type { WalletCloseAccounts, WalletCloseArgs } from "./walletClose.js";
-export { walletClose } from "./walletClose.js";
 export type { WalletFundAccounts, WalletFundArgs } from "./walletFund.js";
 export { walletFund } from "./walletFund.js";
 export type { WalletInitAccounts, WalletInitArgs } from "./walletInit.js";

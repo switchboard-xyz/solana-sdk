@@ -16,9 +16,9 @@ export interface FunctionInitAccounts {
   authority: PublicKey;
   attestationQueue: PublicKey;
   payer: PublicKey;
-  wallet: PublicKey;
-  walletAuthority: PublicKey;
-  tokenWallet: PublicKey;
+  escrowWallet: PublicKey;
+  escrowWalletAuthority: PublicKey;
+  escrowTokenWallet: PublicKey;
   mint: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
@@ -40,9 +40,13 @@ export function functionInit(
     { pubkey: accounts.authority, isSigner: false, isWritable: false },
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.wallet, isSigner: false, isWritable: true },
-    { pubkey: accounts.walletAuthority, isSigner: true, isWritable: false },
-    { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
+    { pubkey: accounts.escrowWallet, isSigner: false, isWritable: true },
+    {
+      pubkey: accounts.escrowWalletAuthority,
+      isSigner: true,
+      isWritable: false,
+    },
+    { pubkey: accounts.escrowTokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.mint, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {

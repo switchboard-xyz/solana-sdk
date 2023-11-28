@@ -6,7 +6,6 @@ import type {
   TransactionObjectOptions,
 } from "../TransactionObject.js";
 import { TransactionObject } from "../TransactionObject.js";
-import type { WithRequired } from "../types.js";
 
 import type { OnAccountChangeCallback } from "./account.js";
 import { Account } from "./account.js";
@@ -36,11 +35,6 @@ export class CrankAccount extends Account<types.CrankAccountData> {
 
   /** The public key of the crank's data buffer storing a priority queue of {@linkcode AggregatorAccount}'s and their next available update timestamp */
   dataBuffer?: CrankDataBuffer;
-
-  /**
-   * Get the size of an {@linkcode CrankAccount} on-chain.
-   */
-  public size = this.program.account.crankAccountData.size;
 
   /**
    * Return a crank account initialized to the default values.
@@ -123,7 +117,7 @@ export class CrankAccount extends Account<types.CrankAccountData> {
           lamports: await program.connection.getMinimumBalanceForRentExemption(
             crankSize
           ),
-          programId: program.programId,
+          programId: program.oracleProgramId,
         }),
         types.crankInit(
           program,

@@ -29,7 +29,7 @@ export function vrfCloseAction(
   program: SwitchboardProgram,
   args: VrfCloseActionArgs,
   accounts: VrfCloseActionAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },

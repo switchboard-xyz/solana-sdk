@@ -30,7 +30,7 @@ export function vrfProveAndVerify(
   program: SwitchboardProgram,
   args: VrfProveAndVerifyArgs,
   accounts: VrfProveAndVerifyAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.vrf, isSigner: false, isWritable: true },

@@ -60,11 +60,6 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   public static size = 1269;
 
   /**
-   * Get the size of an {@linkcode QueueAccount} on-chain.
-   */
-  public readonly size = this.program.account.oracleQueueAccountData.size;
-
-  /**
    * Returns the queue's name buffer in a stringified format.
    */
   public static getName = (queue: types.OracleQueueAccountData) =>
@@ -124,7 +119,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
   /**
    * Get the spl Mint associated with this {@linkcode QueueAccount}.
    */
-  public get mint(): spl.Mint {
+  public get mint(): { address: PublicKey; decimals: number } {
     return this.program.mint.mint;
   }
 
@@ -191,7 +186,7 @@ export class QueueAccount extends Account<types.OracleQueueAccountData> {
           lamports: await program.connection.getMinimumBalanceForRentExemption(
             queueDataSize
           ),
-          programId: program.programId,
+          programId: program.oracleProgramId,
         }),
         types.oracleQueueInit(
           program,

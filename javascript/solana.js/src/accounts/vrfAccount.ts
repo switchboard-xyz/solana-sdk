@@ -41,11 +41,6 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   static accountName = "VrfAccountData";
 
   /**
-   * Returns the size of an on-chain {@linkcode VrfAccount}.
-   */
-  public readonly size = this.program.account.vrfAccountData.size;
-
-  /**
    * Return a vrf account state initialized to the default values.
    */
   public static default(): types.VrfAccountData {
@@ -108,7 +103,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
   ): Promise<[VrfAccount, TransactionObject]> {
     await program.verifyNewKeypair(params.vrfKeypair);
     const vrfAccount = new VrfAccount(program, params.vrfKeypair.publicKey);
-    const size = program.account.vrfAccountData.size;
+    const size = (await program.oracleProgram).account.vrfAccountData.size;
 
     const escrow = program.mint.getAssociatedAddress(vrfAccount.publicKey);
 
@@ -132,7 +127,7 @@ export class VrfAccount extends Account<types.VrfAccountData> {
         lamports: await program.connection.getMinimumBalanceForRentExemption(
           size
         ),
-        programId: program.programId,
+        programId: program.oracleProgramId,
       }),
       types.vrfInit(
         program,

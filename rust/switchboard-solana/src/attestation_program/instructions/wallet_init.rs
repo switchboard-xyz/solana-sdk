@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{cfg_client, prelude::*};
 
 #[derive(Accounts)]
 #[instruction(params:WalletInitParams)]
@@ -15,7 +15,7 @@ pub struct WalletInit<'info> {
     pub token_wallet: AccountInfo<'info>, // TokenAccount
     #[account(mut, signer)]
     pub payer: AccountInfo<'info>,
-    pub state: AccountInfo<'info>, // AttestationProgramState
+    pub state: AccountInfo<'info>, // TODO: remove AttestationProgramState
     #[account(address = anchor_spl::token::ID)]
     pub token_program: AccountInfo<'info>,
     #[account(address = anchor_spl::associated_token::ID)]
@@ -24,10 +24,11 @@ pub struct WalletInit<'info> {
     pub system_program: AccountInfo<'info>,
 }
 
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Clone, Default, AnchorSerialize, AnchorDeserialize)]
 pub struct WalletInitParams {
     pub name: Vec<u8>,
-    pub max_len: Option<u32>,
+    // TODO: remove
+    pub max_len: [u8; 4],
 }
 
 impl InstructionData for WalletInitParams {}
@@ -44,19 +45,24 @@ impl<'info> WalletInit<'info> {
     pub fn get_instruction(
         &self,
         program_id: Pubkey,
-        params: &WalletInitParams,
+        name: &[u8],
+        // params: &WalletInitParams,
     ) -> anchor_lang::Result<Instruction> {
         let accounts = self.to_account_metas(None);
 
         let mut data: Vec<u8> = WalletInit::discriminator().try_to_vec()?;
+        let params = WalletInitParams {
+            name: name.to_vec(),
+            max_len: [0, 0, 0, 0],
+        };
         data.append(&mut params.try_to_vec()?);
 
         let instruction = Instruction::new_with_bytes(program_id, &data, accounts);
         Ok(instruction)
     }
 
-    pub fn invoke(&self, program: AccountInfo<'info>, params: &WalletInitParams) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, params)?;
+    pub fn invoke(&self, program: AccountInfo<'info>, name: &[u8]) -> ProgramResult {
+        let instruction = self.get_instruction(*program.key, name)?;
         let account_infos = self.to_account_infos();
 
         invoke(&instruction, &account_infos[..])
@@ -65,10 +71,10 @@ impl<'info> WalletInit<'info> {
     pub fn invoke_signed(
         &self,
         program: AccountInfo<'info>,
-        params: &WalletInitParams,
+        name: &[u8],
         signer_seeds: &[&[&[u8]]],
     ) -> ProgramResult {
-        let instruction = self.get_instruction(*program.key, params)?;
+        let instruction = self.get_instruction(*program.key, name)?;
         let account_infos = self.to_account_infos();
 
         invoke_signed(&instruction, &account_infos[..], signer_seeds)
@@ -103,5 +109,18 @@ impl<'info> WalletInit<'info> {
         account_metas.extend(self.associated_token_program.to_account_metas(None));
         account_metas.extend(self.system_program.to_account_metas(None));
         account_metas
+    }
+
+    cfg_client! {
+        pub fn build_ix(
+            accounts: &SwitchboardWalletInitAccounts,
+            params: &WalletInitParams,
+        ) -> Result<Instruction, SbError> {
+            Ok(crate::utils::build_ix(
+                &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                accounts,
+                params,
+            ))
+        }
     }
 }

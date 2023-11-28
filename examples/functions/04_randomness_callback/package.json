@@ -10,8 +10,8 @@
     "@coral-xyz/anchor": "^0.28.0",
     "@solana/spl-token": "^0.3.8",
     "@solana/web3.js": "^1.78.4",
-    "@switchboard-xyz/common": "^2.3.3",
-    "@switchboard-xyz/solana.js": "^2.5.0",
+    "@switchboard-xyz/common": "*",
+    "@switchboard-xyz/solana.js": "*",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {

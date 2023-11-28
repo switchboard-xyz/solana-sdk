@@ -19,17 +19,14 @@ import type { SwitchboardWallet } from "./switchboardWallet.js";
 import type { VerifierAccountInitParams } from "./verifierAccount.js";
 import { VerifierAccount } from "./verifierAccount.js";
 
+import * as anchor from "@coral-xyz/anchor";
 import type {
   PublicKey,
   TransactionInstruction,
   TransactionSignature,
 } from "@solana/web3.js";
 import { Keypair, SystemProgram } from "@solana/web3.js";
-import {
-  parseMrEnclave,
-  parseRawMrEnclave,
-  type RawBuffer,
-} from "@switchboard-xyz/common";
+import { parseRawMrEnclave, type RawBuffer } from "@switchboard-xyz/common";
 /**
  *  Parameters for initializing an {@linkcode QueueAccount}
  */
@@ -121,12 +118,6 @@ export type CreateFunctionParams = Omit<
  */
 export class AttestationQueueAccount extends Account<types.AttestationQueueAccountData> {
   static accountName = "AttestationQueueAccountData";
-
-  /**
-   * Get the size of an {@linkcode types.AttestationQueueAccountData} on-chain.
-   */
-  public readonly size =
-    this.program.attestationAccount.attestationQueueAccountData.size;
 
   /**
    *  Retrieve and decode the {@linkcode types.AttestationQueueAccountData} stored in this account.
@@ -333,11 +324,11 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     return -1;
   }
 
-  public async addMrEnclaveInstruction(
+  public addMrEnclaveInstruction(
     payer: PublicKey,
     params: AttestationQueueAddMrEnclaveParams,
     options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
+  ): TransactionObject {
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueAddMrEnclave(
@@ -354,18 +345,17 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueAddMrEnclaveParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
-    return await this.addMrEnclaveInstruction(
-      this.program.walletPubkey,
-      params,
+    return await this.program.signAndSend(
+      this.addMrEnclaveInstruction(this.program.walletPubkey, params, options),
       options
-    ).then((txn) => this.program.signAndSend(txn, options));
+    );
   }
 
-  public async removeMrEnclaveInstruction(
+  public removeMrEnclaveInstruction(
     payer: PublicKey,
     params: AttestationQueueRemoveMrEnclaveParams,
     options?: TransactionObjectOptions
-  ): Promise<TransactionObject> {
+  ): TransactionObject {
     const authority = params.authority?.publicKey ?? payer;
     const signers = params.authority ? [params.authority] : [];
     const instruction = types.attestationQueueRemoveMrEnclave(
@@ -382,11 +372,14 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
     params: AttestationQueueRemoveMrEnclaveParams,
     options?: SendTransactionObjectOptions
   ): Promise<TransactionSignature> {
-    return await this.removeMrEnclaveInstruction(
-      this.program.walletPubkey,
-      params,
+    return await this.program.signAndSend(
+      this.removeMrEnclaveInstruction(
+        this.program.walletPubkey,
+        params,
+        options
+      ),
       options
-    ).then((txn) => this.program.signAndSend(txn, options));
+    );
   }
 
   /**
@@ -586,7 +579,43 @@ export class AttestationQueueAccount extends Account<types.AttestationQueueAccou
       signatures,
     };
   }
+
+  public async loadVerifierOracles(
+    _attestationQueue?: types.AttestationQueueAccountData
+  ): Promise<VerifierAccountAndState[]> {
+    const attestationQueue = _attestationQueue ?? (await this.loadData());
+    const verifierPubkeys = attestationQueue.data.slice(
+      0,
+      attestationQueue.dataLen
+    );
+    if (verifierPubkeys.length === 0) {
+      return [];
+    }
+
+    const data: VerifierAccountAndState[] = [];
+
+    const accounts = await anchor.utils.rpc.getMultipleAccounts(
+      this.program.provider.connection,
+      verifierPubkeys
+    );
+
+    for (const account of accounts) {
+      if (!account) continue;
+
+      data.push({
+        publicKey: account.publicKey,
+        state: types.VerifierAccountData.decode(account.account.data),
+      });
+    }
+
+    return data;
+  }
 }
+
+type VerifierAccountAndState = {
+  publicKey: PublicKey;
+  state: types.VerifierAccountData;
+};
 
 export type CreateBootstrappedQueueParams =
   AttestationQueueAccountInitParams & {

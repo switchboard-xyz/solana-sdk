@@ -24,6 +24,11 @@ export type {
 } from "./FunctionRequestAccountData.js";
 export { FunctionRequestAccountData } from "./FunctionRequestAccountData.js";
 export type {
+  FunctionRoutineAccountDataFields,
+  FunctionRoutineAccountDataJSON,
+} from "./FunctionRoutineAccountData.js";
+export { FunctionRoutineAccountData } from "./FunctionRoutineAccountData.js";
+export type {
   SwitchboardWalletFields,
   SwitchboardWalletJSON,
 } from "./SwitchboardWallet.js";

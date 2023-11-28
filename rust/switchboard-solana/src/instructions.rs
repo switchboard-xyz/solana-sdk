@@ -4,8 +4,10 @@ pub use crate::oracle_program::instructions::{
 };
 
 pub use crate::attestation_program::instructions::{
-    FunctionClose, FunctionInit, FunctionRequestClose, FunctionRequestInit,
+    AttestationPermissionInit, AttestationPermissionSet, AttestationQueueAddMrEnclave,
+    AttestationQueueInit, FunctionClose, FunctionInit, FunctionRequestClose, FunctionRequestInit,
     FunctionRequestInitAndTrigger, FunctionRequestSetConfig, FunctionRequestTrigger,
-    FunctionRequestVerify, FunctionSetEscrow, FunctionTrigger, FunctionVerify, WalletFund,
-    WalletInit, WalletWithdraw,
+    FunctionRequestVerify, FunctionRoutineInit, FunctionRoutineVerify, FunctionSetEscrow,
+    FunctionTrigger, FunctionVerify, VerifierHeartbeat, VerifierInit, VerifierQuoteRotate,
+    VerifierQuoteVerify, WalletFund, WalletInit, WalletWithdraw,
 };

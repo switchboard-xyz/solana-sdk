@@ -1,26 +1,89 @@
+use crate::cfg_client;
+use crate::find_associated_token_address;
 use crate::prelude::*;
 
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestVerifyParams)]
 pub struct FunctionRequestVerify<'info> {
+    /// #[account(
+    ///     mut,
+    ///     has_one = function,
+    ///     has_one = escrow @ SwitchboardError::InvalidEscrow,
+    /// )]
+    /// pub request: Box<Account<'info, FunctionRequestAccountData>>,
     #[account(mut)]
     pub request: AccountInfo<'info>, // FunctionRequestAccount
+
     #[account(signer)]
     pub function_enclave_signer: AccountInfo<'info>, // SystemProgram keypair
+
+    /// #[account(
+    ///     mut,
+    ///     constraint = escrow.is_native() && escrow.owner == state.key()
+    /// )]
+    /// pub escrow: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub escrow: AccountInfo<'info>, // TokenAccount
+
+    /// #[account(
+    ///     mut,
+    ///     has_one = attestation_queue @ SwitchboardError::InvalidQueue,
+    /// )]
+    /// pub function: AccountLoader<'info, FunctionAccountData>,
     #[account(mut)]
     pub function: AccountInfo<'info>, // FunctionAccount
+
+    /// #[account(
+    ///     mut,
+    ///     constraint = escrow.is_native() && escrow.owner == state.key()
+    /// )]
+    /// pub function_escrow: Option<Box<Account<'info, TokenAccount>>>,
     #[account(mut)]
     pub function_escrow: Option<AccountInfo<'info>>, // TokenAccount
+
+    /// #[account(
+    ///     has_one = attestation_queue @ SwitchboardError::InvalidQueue,
+    ///     constraint =
+    ///         verifier_quote.load()?.enclave.enclave_signer == verifier_enclave_signer.key()
+    ///             @ SwitchboardError::InvalidEnclaveSigner,
+    /// )]
+    /// pub verifier_quote: AccountLoader<'info, VerifierAccountData>,
     pub verifier_quote: AccountInfo<'info>, // VerifierAccountData
+
     #[account(signer)]
     pub verifier_enclave_signer: AccountInfo<'info>, // SystemProgram keypair
+
+    /// #[account(
+    ///     seeds = [
+    ///         PERMISSION_SEED,
+    ///         attestation_queue.load()?.authority.as_ref(),
+    ///         attestation_queue.key().as_ref(),
+    ///         verifier_quote.key().as_ref()
+    ///     ],
+    ///     bump = verifier_permission.load()?.bump,
+    /// )]
+    /// pub verifier_permission: AccountLoader<'info, AttestationPermissionAccountData>,
     pub verifier_permission: AccountInfo<'info>, // AttestationPermissionAccount
-    pub state: AccountInfo<'info>,          // AttestationProgramState
+
+    /// #[account(
+    ///     seeds = [STATE_SEED],
+    ///     bump = state.load()?.bump,
+    /// )]
+    /// pub state: AccountLoader<'info, AttestationProgramState>,
+    pub state: AccountInfo<'info>, // AttestationProgramState
+
+    /// pub attestation_queue: AccountLoader<'info, AttestationQueueAccountData>,
     pub attestation_queue: AccountInfo<'info>, // AttestationQueueAccount
+
+    /// #[account(
+    ///     mut,
+    ///     constraint = receiver.is_native()
+    /// )]
+    /// pub receiver: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub receiver: AccountInfo<'info>, // TokenAccount
+
+    /// pub token_program: Program<'info, Token>,
     #[account(address = anchor_spl::token::ID)]
     pub token_program: AccountInfo<'info>,
 }
@@ -42,6 +105,60 @@ impl Discriminator for FunctionRequestVerifyParams {
 
 impl Discriminator for FunctionRequestVerify<'_> {
     const DISCRIMINATOR: [u8; 8] = [179, 6, 88, 97, 232, 112, 143, 253];
+}
+
+cfg_client! {
+
+    pub struct FunctionRequestVerifyAccounts {
+        /// The FunctionRequestAccount pubkey to verify.
+        pub request: Pubkey,
+        /// The pubkey of the enclave generated keypair that will be set after verification.
+        /// This keypair must sign any subsequent instructions to prove the instructions
+        /// were generated within an enclave.
+        pub function_enclave_signer: Pubkey,
+
+        /// The FunctionAccount for the request being verified.
+        pub function: Pubkey,
+        /// The FunctionAccount escrow token wallet. Only used if the FunctionAccount has a request_fee set.
+        pub function_escrow_token_wallet: Option<Pubkey>,
+
+        /// The VerifierAccount pubkey that is verifying the request.
+        pub verifier: Pubkey,
+        /// The VerifierAccount's enclave generated signer that must approve verifications.
+        pub verifier_enclave_signer: Pubkey,
+        /// THe VerifierAccount's token wallet to receive a reward for verifying the request.
+        pub reward_receiver: Pubkey,
+
+        /// The AttestationQueueAccount that the request is being verified for.
+        pub attestation_queue: Pubkey,
+        /// The AttestationQueueAccount's authority. Used to derive the VerifierAccount's permission account.
+        pub queue_authority: Pubkey,
+    }
+    impl ToAccountMetas for FunctionRequestVerifyAccounts {
+        fn to_account_metas(&self, _: Option<bool>) -> Vec<AccountMeta> {
+            vec![
+                AccountMeta::new(self.request, false),
+                AccountMeta::new_readonly(self.function_enclave_signer, true),
+                AccountMeta::new(find_associated_token_address(&self.request, &NativeMint::id()), false),
+                AccountMeta::new(self.function, false),
+                AccountMeta::new(self.function_escrow_token_wallet.unwrap_or(SWITCHBOARD_ATTESTATION_PROGRAM_ID), false),
+                AccountMeta::new_readonly(self.verifier, false),
+                AccountMeta::new_readonly(self.verifier_enclave_signer, true),
+                AccountMeta::new_readonly(
+                    AttestationPermissionAccountData::get_pda(
+                        &self.queue_authority,
+                        &self.attestation_queue,
+                        &self.verifier
+                    ),
+                    false
+                ),
+                AccountMeta::new_readonly(AttestationProgramState::get_pda(), false),
+                AccountMeta::new_readonly(self.attestation_queue, false),
+                AccountMeta::new(self.reward_receiver, false),
+                AccountMeta::new_readonly(anchor_spl::token::ID, false),
+            ]
+        }
+    }
 }
 
 impl<'info> FunctionRequestVerify<'info> {
@@ -123,5 +240,20 @@ impl<'info> FunctionRequestVerify<'info> {
         account_metas.extend(self.receiver.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas
+    }
+
+    cfg_client! {
+        pub fn build_ix(
+            accounts: &FunctionRequestVerifyAccounts,
+            params: &FunctionRequestVerifyParams,
+        ) -> Result<Instruction, SbError> {
+            Ok(
+                crate::utils::build_ix(
+                    &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                    accounts,
+                    params,
+                )
+            )
+        }
     }
 }

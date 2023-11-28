@@ -30,7 +30,7 @@ export function leaseInit(
   program: SwitchboardProgram,
   args: LeaseInitArgs,
   accounts: LeaseInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.lease, isSigner: false, isWritable: true },

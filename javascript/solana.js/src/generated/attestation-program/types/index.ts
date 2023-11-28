@@ -1,6 +1,9 @@
+import * as BoolWithLock from "./BoolWithLock.js";
 import * as FunctionStatus from "./FunctionStatus.js";
 import * as FundingStatus from "./FundingStatus.js";
 import * as RequestStatus from "./RequestStatus.js";
+import * as ResourceLevel from "./ResourceLevel.js";
+import * as RoutineStatus from "./RoutineStatus.js";
 import * as SwitchboardAttestationPermission from "./SwitchboardAttestationPermission.js";
 import * as VerificationStatus from "./VerificationStatus.js";
 
@@ -85,6 +88,26 @@ export type {
 } from "./FunctionResetEscrowParams.js";
 export { FunctionResetEscrowParams } from "./FunctionResetEscrowParams.js";
 export type {
+  FunctionRoutineDisableParamsFields,
+  FunctionRoutineDisableParamsJSON,
+} from "./FunctionRoutineDisableParams.js";
+export { FunctionRoutineDisableParams } from "./FunctionRoutineDisableParams.js";
+export type {
+  FunctionRoutineInitParamsFields,
+  FunctionRoutineInitParamsJSON,
+} from "./FunctionRoutineInitParams.js";
+export { FunctionRoutineInitParams } from "./FunctionRoutineInitParams.js";
+export type {
+  FunctionRoutineSetConfigParamsFields,
+  FunctionRoutineSetConfigParamsJSON,
+} from "./FunctionRoutineSetConfigParams.js";
+export { FunctionRoutineSetConfigParams } from "./FunctionRoutineSetConfigParams.js";
+export type {
+  FunctionRoutineVerifyParamsFields,
+  FunctionRoutineVerifyParamsJSON,
+} from "./FunctionRoutineVerifyParams.js";
+export { FunctionRoutineVerifyParams } from "./FunctionRoutineVerifyParams.js";
+export type {
   FunctionSetAuthorityParamsFields,
   FunctionSetAuthorityParamsJSON,
 } from "./FunctionSetAuthorityParams.js";
@@ -156,13 +179,56 @@ export type {
   WalletWithdrawParamsJSON,
 } from "./WalletWithdrawParams.js";
 export { WalletWithdrawParams } from "./WalletWithdrawParams.js";
+export { BoolWithLock };
+
+/**
+ * An enum representing a boolean flag which can be locked.
+ * Byte #0: 0 = Disabled, 1 = Enabled
+ * Byte #1: 0 = Unlocked, 1 = Locked
+ */
+export type BoolWithLockKind =
+  | BoolWithLock.Disabled
+  | BoolWithLock.Enabled
+  | BoolWithLock.DisabledLocked
+  | BoolWithLock.EnabledLocked;
+export type BoolWithLockJSON =
+  | BoolWithLock.DisabledJSON
+  | BoolWithLock.EnabledJSON
+  | BoolWithLock.DisabledLockedJSON
+  | BoolWithLock.EnabledLockedJSON;
+
+export { ResourceLevel };
+
+/** An enum representing a heirarchy of resources that can modify a field. */
+export type ResourceLevelKind =
+  | ResourceLevel.None
+  | ResourceLevel.Authority
+  | ResourceLevel.Function
+  | ResourceLevel.Queue;
+export type ResourceLevelJSON =
+  | ResourceLevel.NoneJSON
+  | ResourceLevel.AuthorityJSON
+  | ResourceLevel.FunctionJSON
+  | ResourceLevel.QueueJSON;
+
+export { RoutineStatus };
+
+export type RoutineStatusKind =
+  | RoutineStatus.None
+  | RoutineStatus.Active
+  | RoutineStatus.NonExecutable;
+export type RoutineStatusJSON =
+  | RoutineStatus.NoneJSON
+  | RoutineStatus.ActiveJSON
+  | RoutineStatus.NonExecutableJSON;
+
 export { FunctionStatus };
 
 export type FunctionStatusKind =
   | FunctionStatus.None
   | FunctionStatus.Active
   | FunctionStatus.NonExecutable
-  | FunctionStatus.None3
+  | FunctionStatus.ErrorKind
   | FunctionStatus.Expired
   | FunctionStatus.None5
   | FunctionStatus.None6
@@ -180,7 +246,7 @@ export type FunctionStatusJSON =
   | FunctionStatus.NoneJSON
   | FunctionStatus.ActiveJSON
   | FunctionStatus.NonExecutableJSON
-  | FunctionStatus.None3JSON
+  | FunctionStatus.ErrorKindJSON
   | FunctionStatus.ExpiredJSON
   | FunctionStatus.None5JSON
   | FunctionStatus.None6JSON

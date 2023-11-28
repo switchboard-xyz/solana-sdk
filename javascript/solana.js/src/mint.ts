@@ -21,7 +21,7 @@ export class Mint {
 
   constructor(
     readonly provider: anchor.AnchorProvider,
-    readonly mint: spl.Mint
+    readonly mint: { address: PublicKey; decimals: number }
   ) {}
 
   get address() {
@@ -233,11 +233,18 @@ export class Mint {
 export class NativeMint extends Mint {
   public static address = Mint.native;
 
+  constructor(provider: anchor.AnchorProvider) {
+    const splMint = {
+      address: new PublicKey("So11111111111111111111111111111111111111112"),
+      decimals: 9,
+    };
+    super(provider, splMint);
+  }
+
   public static async load(
     provider: anchor.AnchorProvider
   ): Promise<NativeMint> {
-    const splMint = await spl.getMint(provider.connection, Mint.native);
-    return new NativeMint(provider, splMint);
+    return new NativeMint(provider);
   }
 
   public async getOrCreateWrappedUser(

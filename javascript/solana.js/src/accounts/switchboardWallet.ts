@@ -67,20 +67,8 @@ export type SwitchboardWalletWithEscrow = SwitchboardWalletState & {
 export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
   static accountName = "SwitchboardWallet";
 
-  private _tokenWallet: PublicKey | undefined = undefined;
-
-  /**
-   * Returns the size of an on-chain {@linkcode SwitchboardWallet}.
-   */
-  public readonly size = this.program.attestationAccount.switchboardWallet.size;
-
   public get tokenWallet(): PublicKey {
-    if (!this._tokenWallet) {
-      this._tokenWallet = this.program.mint.getAssociatedAddress(
-        this.publicKey
-      );
-    }
-    return this._tokenWallet;
+    return this.program.mint.getAssociatedAddress(this.publicKey);
   }
 
   public static parseName(name: string | PublicKey | Uint8Array): Uint8Array {
@@ -130,7 +118,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
     const tokenAccountInfo = accountInfos.shift();
     if (!tokenAccountInfo) {
       throw new errors.AccountNotFoundError(
-        "SwitchboardWallet tokenWallet",
+        "SwitchboardWallet tokenAccount",
         this.tokenWallet
       );
     }
@@ -221,7 +209,7 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
 
     const walletInitIxn = types.walletInit(
       program,
-      { params: { name: Buffer.from(nameSeed), maxLen: maxLen ?? null } },
+      { params: { name: Buffer.from(nameSeed) } },
       {
         wallet: switchboardWallet.publicKey,
         mint: program.mint.address,
@@ -229,7 +217,6 @@ export class SwitchboardWallet extends Account<SwitchboardWalletWithEscrow> {
         attestationQueue: attestationQueue,
         tokenWallet: switchboardWallet.tokenWallet,
         payer: payer,
-        state: program.attestationProgramState.publicKey,
         tokenProgram: spl.TOKEN_PROGRAM_ID,
         associatedTokenProgram: spl.ASSOCIATED_TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,

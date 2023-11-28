@@ -69,11 +69,6 @@
           "isSigner": true
         },
         {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -211,74 +206,6 @@
           "name": "params",
           "type": {
             "defined": "WalletWithdrawParams"
-          }
-        }
-      ]
-    },
-    {
-      "name": "walletClose",
-      "accounts": [
-        {
-          "name": "wallet",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "mint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "attestationQueue",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenWallet",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "destinationWallet",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "state",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "solDest",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "escrowDest",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "params",
-          "type": {
-            "defined": "WalletCloseParams"
           }
         }
       ]
@@ -620,18 +547,18 @@
           "isSigner": true
         },
         {
-          "name": "wallet",
+          "name": "escrowWallet",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "walletAuthority",
+          "name": "escrowWalletAuthority",
           "isMut": false,
           "isSigner": true,
           "isOptional": true
         },
         {
-          "name": "tokenWallet",
+          "name": "escrowTokenWallet",
           "isMut": true,
           "isSigner": false
         },
@@ -1002,6 +929,25 @@
     },
     {
       "name": "functionVerify",
+      "docs": [
+        "Verifies a function was executed within an enclave and sets the enclave signer",
+        "on the function account for downstream instructions to verify.",
+        "",
+        "# Errors",
+        "",
+        "* `InsufficientQueue` - If the attestation queue has no active verifier oracles",
+        "* `InvalidQuote` - If the verifier oracle has an invalid or expired quote",
+        "* `IncorrectMrEnclave` - If the verifiers mr_enclave is not found in the attestation queue's enclave set",
+        "* `IllegalVerifier` - If the incorrect verifier has responded and the routine is less than 30 seconds stale.",
+        "",
+        "* `FunctionNotReady` - If the function status is not Active",
+        "* `InvalidMrEnclave` - If the measured mr_enclave value is not null",
+        "* `MrEnclavesEmpty` - If the function has 0 mr_enclaves whitelisted",
+        "* `IncorrectMrEnclave` - If the measured mr_enclave is not found in the functions enclave set",
+        "",
+        "* `IncorrectObservedTime` - If the oracles observed time has drifted by 20 seconds",
+        ""
+      ],
       "accounts": [
         {
           "name": "function",
@@ -1093,6 +1039,9 @@
     },
     {
       "name": "functionRequestInit",
+      "docs": [
+        "Request Actions"
+      ],
       "accounts": [
         {
           "name": "request",
@@ -1322,6 +1271,33 @@
     },
     {
       "name": "functionRequestVerify",
+      "docs": [
+        "Verifies a function request was executed within an enclave and sets",
+        "the enclave signer on the request account for downstream instructions to verify.",
+        "",
+        "# Errors",
+        "",
+        "* `InsufficientQueue` - If the attestation queue has no active verifier oracles",
+        "* `InvalidQuote` - If the verifier oracle has an invalid or expired quote",
+        "* `IncorrectMrEnclave` - If the verifiers mr_enclave is not found in the attestation queue's enclave set",
+        "",
+        "* `RequestRoundNotActive` - If there is no active round for the request",
+        "* `FunctionRequestNotReady` - If the request is not active yet",
+        "* `UserRequestsDisabled` - If the function has disabled routines",
+        "* `FunctionNotReady` - If the function status is not Active",
+        "* `InvalidMrEnclave` - If the measured mr_enclave value is not null",
+        "* `MrEnclavesEmpty` - If the function has 0 mr_enclaves whitelisted",
+        "* `IncorrectMrEnclave` - If the measured mr_enclave is not found in the functions enclave set",
+        "",
+        "* `InvalidRequest` - If the provided params.request_slot does not match the active round request_slot",
+        "* `IllegalExecuteAttempt` - If the request slot is 0 or greater than the current slot",
+        "",
+        "* `InvalidEscrow` - If the function escrow was provided but incorrect.",
+        "* `MissingFunctionEscrow` - If the function escrow was not provided but required because func.routines_dev_fee > 0",
+        "* `IncorrectObservedTime` - If the oracles observed time has drifted by 20 seconds",
+        "* `InvalidParamsHash` If the container params hash is not the same as the routine params hash. Used to mitigate malicous RPCs.",
+        ""
+      ],
       "accounts": [
         {
           "name": "request",
@@ -1451,101 +1427,265 @@
           }
         }
       ]
+    },
+    {
+      "name": "functionRoutineInit",
+      "docs": [
+        "Routine Actions",
+        "Initializes a Function routine account",
+        "",
+        "# Errors",
+        "",
+        "* `MissingSbWalletAuthoritySigner` - If the provided SbWallet authority does not match the routine",
+        "authority and the wallet authority did not sign the transaction."
+      ],
+      "accounts": [
+        {
+          "name": "routine",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowWalletAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "escrowTokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRoutineInitParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRoutineSetConfig",
+      "accounts": [
+        {
+          "name": "routine",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRoutineSetConfigParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRoutineDisable",
+      "accounts": [
+        {
+          "name": "routine",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "functionAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        },
+        {
+          "name": "queueAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "isOptional": true
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRoutineDisableParams"
+          }
+        }
+      ]
+    },
+    {
+      "name": "functionRoutineVerify",
+      "docs": [
+        "Verifies a function routine was executed within an enclave and sets",
+        "the enclave signer on the routine account for downstream instructions to verify.",
+        "",
+        "# Errors",
+        "",
+        "* `InsufficientQueue` - If the attestation queue has no active verifier oracles",
+        "* `InvalidQuote` - If the verifier oracle has an invalid or expired quote",
+        "* `IncorrectMrEnclave` - If the verifiers mr_enclave is not found in the attestation queue's enclave set",
+        "* `IllegalVerifier` - If the incorrect verifier has responded and the routine is less than 30 seconds stale.",
+        "",
+        "* `RoutineDisabled` - If the routine has been disabled",
+        "* `FunctionRoutinesDisabled` - If the function has disabled routines",
+        "* `FunctionNotReady` - If the function status is not Active",
+        "* `InvalidMrEnclave` - If the measured mr_enclave value is not null",
+        "* `MrEnclavesEmpty` - If the function has 0 mr_enclaves whitelisted",
+        "* `IncorrectMrEnclave` - If the measured mr_enclave is not found in the functions enclave set",
+        "",
+        "* `InvalidEscrow` - If the function escrow was provided but incorrect.",
+        "* `MissingFunctionEscrow` - If the function escrow was not provided but required because func.routines_dev_fee > 0",
+        "* `IncorrectObservedTime` - If the oracles observed time has drifted by 20 seconds",
+        "* `InvalidParamsHash` If the container params hash is not the same as the routine params hash. Used to mitigate malicous RPCs.",
+        ""
+      ],
+      "accounts": [
+        {
+          "name": "routine",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionEnclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "escrowWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "escrowTokenWallet",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "function",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "functionEscrowTokenWallet",
+          "isMut": true,
+          "isSigner": false,
+          "isOptional": true
+        },
+        {
+          "name": "verifierQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "verifierEnclaveSigner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "verifierPermission",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "attestationQueue",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "receiver",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "params",
+          "type": {
+            "defined": "FunctionRoutineVerifyParams"
+          }
+        }
+      ]
     }
   ],
   "accounts": [
-    {
-      "name": "AttestationProgramState",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "ebuf",
-            "type": {
-              "array": [
-                "u8",
-                2048
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "SwitchboardWallet",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "type": "u8"
-          },
-          {
-            "name": "initialized",
-            "type": "u8"
-          },
-          {
-            "name": "mint",
-            "type": "publicKey"
-          },
-          {
-            "name": "attestationQueue",
-            "type": "publicKey"
-          },
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "name",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "resourceCount",
-            "type": "u32"
-          },
-          {
-            "name": "withdrawAuthority",
-            "type": "publicKey"
-          },
-          {
-            "name": "tokenWallet",
-            "type": "publicKey"
-          },
-          {
-            "name": "resources",
-            "type": {
-              "vec": "publicKey"
-            }
-          },
-          {
-            "name": "resourcesMaxLen",
-            "type": "u32"
-          },
-          {
-            "name": "ebuf",
-            "docs": [
-              "Reserved."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                64
-              ]
-            }
-          }
-        ]
-      }
-    },
     {
       "name": "FunctionAccountData",
       "type": {
@@ -1815,7 +1955,7 @@
             "docs": [
               "Whether custom requests have been disabled for this function."
             ],
-            "type": "bool"
+            "type": "u8"
           },
           {
             "name": "requestsRequireAuthorization",
@@ -1823,7 +1963,7 @@
               "Whether new requests need to be authorized by the FunctionAccount authority before being initialized.",
               "Useful if you want to use CPIs to control request account creation."
             ],
-            "type": "bool"
+            "type": "u8"
           },
           {
             "name": "reserved1",
@@ -1838,16 +1978,18 @@
             }
           },
           {
-            "name": "requestsFee",
+            "name": "requestsDevFee",
             "docs": [
-              "The lamports paid to the FunctionAccount escrow on each successful update request."
+              "The dev fee that is paid out from the request's escrow to the function's escrow on each successful invocation.",
+              "This is used to reward the function maintainer for providing the function.",
+              "0 = No Fee. Sender = requests's escrow_token_wallet. Receiver = function's reward_token_wallet."
             ],
             "type": "u64"
           },
           {
             "name": "escrowWallet",
             "docs": [
-              "The SwitchboardWallet that will handle pre-funding rewards paid out to function runners."
+              "The SwitchboardWallet that will handle pre-funding rewards paid out to function verifiers."
             ],
             "type": "publicKey"
           },
@@ -1874,106 +2016,49 @@
             "type": "publicKey"
           },
           {
-            "name": "ebuf",
+            "name": "errorStatus",
             "docs": [
-              "Reserved."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                1024
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "FunctionRequestAccountData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "isTriggered",
-            "docs": [
-              "Whether the request is ready to be processed."
+              "The last reported error code if the most recent response was a failure"
             ],
             "type": "u8"
           },
           {
-            "name": "status",
+            "name": "numRoutines",
             "docs": [
-              "The status of the current request."
+              "Number of routines created for this function. Used to prevent closing when there are live routines."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "routinesDisabled",
+            "docs": [
+              "Whether custom routines have been disabled for this function."
             ],
             "type": {
-              "defined": "RequestStatus"
+              "defined": "BoolWithLock"
             }
           },
           {
-            "name": "authority",
+            "name": "routinesRequireAuthorization",
             "docs": [
-              "Signer allowed to cancel the request."
+              "Whether new routines need to be authorized by the FunctionAccount authority before being initialized.",
+              "Useful if you want to provide AccessControl and only allow certain parties to run routines."
             ],
-            "type": "publicKey"
+            "type": "u8"
           },
           {
-            "name": "payer",
+            "name": "routinesDevFee",
             "docs": [
-              "The default destination for rent exemption when the account is closed."
+              "The fee that is paid out from the routine's escrow to the function's escrow on each successful invocation.",
+              "This is used to reward the function maintainer for providing the function.",
+              "0 = No Fee. Sender = routine's escrow_token_wallet. Receiver = function's reward_token_wallet."
             ],
-            "type": "publicKey"
+            "type": "u64"
           },
           {
-            "name": "function",
+            "name": "mrEnclave",
             "docs": [
-              "The function that can process this request"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "escrow",
-            "docs": [
-              "The tokenAccount escrow"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "attestationQueue",
-            "docs": [
-              "The Attestation Queue for this request."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "activeRequest",
-            "docs": [
-              "The current active request."
-            ],
-            "type": {
-              "defined": "FunctionRequestTriggerRound"
-            }
-          },
-          {
-            "name": "previousRequest",
-            "docs": [
-              "The previous request."
-            ],
-            "type": {
-              "defined": "FunctionRequestTriggerRound"
-            }
-          },
-          {
-            "name": "maxContainerParamsLen",
-            "docs": [
-              "The maximum number of bytes to pass to the container params."
-            ],
-            "type": "u32"
-          },
-          {
-            "name": "containerParamsHash",
-            "docs": [
-              "Hash of the serialized container_params to prevent RPC tampering.",
-              "Should be verified within your function to ensure you are using the correct parameters."
+              "The functions MRENCLAVE measurement dictating the contents of the secure enclave."
             ],
             "type": {
               "array": [
@@ -1983,33 +2068,72 @@
             }
           },
           {
-            "name": "containerParams",
+            "name": "verificationStatus",
             "docs": [
-              "The stringified container params to pass to the function."
+              "The VerificationStatus of the quote."
             ],
-            "type": "bytes"
+            "type": "u8"
           },
           {
-            "name": "createdAt",
+            "name": "verificationTimestamp",
             "docs": [
-              "The unix timestamp when the function was created."
+              "The unix timestamp when the quote was last verified."
             ],
             "type": "i64"
           },
           {
-            "name": "garbageCollectionSlot",
+            "name": "validUntil",
             "docs": [
-              "The slot when the account can be garbage collected and closed by anyone for a portion of the rent."
+              "The unix timestamp when the quotes verification status expires."
             ],
-            "type": {
-              "option": "u64"
-            }
+            "type": "i64"
           },
           {
             "name": "ebuf",
             "docs": [
               "Reserved."
             ],
+            "type": {
+              "array": [
+                "u8",
+                956
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationPermissionAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "permissions",
+            "type": "u32"
+          },
+          {
+            "name": "granter",
+            "type": "publicKey"
+          },
+          {
+            "name": "grantee",
+            "type": "publicKey"
+          },
+          {
+            "name": "expiration",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
             "type": {
               "array": [
                 "u8",
@@ -2021,87 +2145,17 @@
       }
     },
     {
-      "name": "VerifierAccountData",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "enclave",
-            "docs": [
-              "Represents the state of the quote verifiers enclave."
-            ],
-            "type": {
-              "defined": "Quote"
-            }
-          },
-          {
-            "name": "authority",
-            "docs": [
-              "The authority of the EnclaveAccount which is permitted to make account changes."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "attestationQueue",
-            "docs": [
-              "Queue used for attestation to verify a MRENCLAVE measurement."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "createdAt",
-            "docs": [
-              "The unix timestamp when the quote was created."
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "isOnQueue",
-            "docs": [
-              "Whether the quote is located on the AttestationQueues buffer."
-            ],
-            "type": "bool"
-          },
-          {
-            "name": "lastHeartbeat",
-            "docs": [
-              "The last time the quote heartbeated on-chain."
-            ],
-            "type": "i64"
-          },
-          {
-            "name": "rewardEscrow",
-            "docs": [
-              "The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.",
-              "We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "stakeWallet",
-            "docs": [
-              "The SwitchboardWallet account containing the queues required min_stake.",
-              "Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "ebuf",
-            "docs": [
-              "Reserved."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                1024
-              ]
-            }
-          }
-        ]
-      }
-    },
-    {
       "name": "AttestationQueueAccountData",
+      "docs": [
+        "An AttestationQueue represents a round-robin queue of verifier oracles who attest on-chain",
+        "whether a Switchboard Function was executed within an enclave against an expected set of",
+        "enclave measurements.",
+        "",
+        "For an oracle to join the queue, the oracle must first submit their enclave quote on-chain and",
+        "wait for an existing verifier to attest their quote. If the oracle's quote matches an expected",
+        "measurement within the queues mr_enclaves config, it is granted permissions and will start",
+        "being assigned update requests."
+      ],
       "type": {
         "kind": "struct",
         "fields": [
@@ -2247,30 +2301,373 @@
       }
     },
     {
-      "name": "AttestationPermissionAccountData",
+      "name": "FunctionRequestAccountData",
       "type": {
         "kind": "struct",
         "fields": [
           {
+            "name": "isTriggered",
+            "docs": [
+              "Whether the request is ready to be processed."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "The status of the current request."
+            ],
+            "type": {
+              "defined": "RequestStatus"
+            }
+          },
+          {
             "name": "authority",
+            "docs": [
+              "Signer allowed to cancel the request."
+            ],
             "type": "publicKey"
           },
           {
-            "name": "permissions",
+            "name": "payer",
+            "docs": [
+              "The default destination for rent exemption when the account is closed."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "function",
+            "docs": [
+              "The function that can process this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrow",
+            "docs": [
+              "The tokenAccount escrow"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The Attestation Queue for this request."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "activeRequest",
+            "docs": [
+              "The current active request."
+            ],
+            "type": {
+              "defined": "FunctionRequestTriggerRound"
+            }
+          },
+          {
+            "name": "previousRequest",
+            "docs": [
+              "The previous request."
+            ],
+            "type": {
+              "defined": "FunctionRequestTriggerRound"
+            }
+          },
+          {
+            "name": "maxContainerParamsLen",
+            "docs": [
+              "The maximum number of bytes to pass to the container params."
+            ],
             "type": "u32"
           },
           {
-            "name": "granter",
-            "type": "publicKey"
+            "name": "containerParamsHash",
+            "docs": [
+              "Hash of the serialized container_params to prevent RPC tampering.",
+              "Should be verified within your function to ensure you are using the correct parameters."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
-            "name": "grantee",
-            "type": "publicKey"
+            "name": "containerParams",
+            "docs": [
+              "The stringified container params to pass to the function."
+            ],
+            "type": "bytes"
           },
           {
-            "name": "expiration",
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function was created."
+            ],
             "type": "i64"
           },
+          {
+            "name": "garbageCollectionSlot",
+            "docs": [
+              "The slot when the account can be garbage collected and closed by anyone for a portion of the rent."
+            ],
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "errorStatus",
+            "docs": [
+              "The last recorded error code if most recent response was an error."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                255
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRoutineAccountData",
+      "docs": [
+        "The function routine account provides scheduled execution of Switchboard Functions",
+        "with a configurable cron-based schedule and container parameters.",
+        "",
+        "Function routines maintain their own queue_idx to provide round-robin assignment of",
+        "verifiers for each settled execution. This is incremented after each invocation.",
+        "",
+        "Function routines can share a SwitchboardWallet as long as the escrow authority has",
+        "signed the transaction."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "docs": [
+              "The name of the function routine for easier identification."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "metadata",
+            "docs": [
+              "The metadata of the function routine for easier identification."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                256
+              ]
+            }
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the function routine was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "updatedAt",
+            "docs": [
+              "The unix timestamp when the function routine config was changed."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "isDisabled",
+            "docs": [
+              "Flag to disable the function and prevent new verification requests."
+            ],
+            "type": {
+              "defined": "ResourceLevel"
+            }
+          },
+          {
+            "name": "status",
+            "docs": [
+              "The type of resource that disabled the routine."
+            ],
+            "type": {
+              "defined": "RoutineStatus"
+            }
+          },
+          {
+            "name": "errorStatus",
+            "docs": [
+              "The last reported error code if the most recent response was a failure"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The enclave generated signer for this routine."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "verifier",
+            "docs": [
+              "The verifier oracle who signed this verification."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "bounty",
+            "docs": [
+              "The SOL bounty in lamports used to incentivize a verifier to expedite the request. 0 = no bounty. Receiver = verifier oracle."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "Signer allowed to manage the routine."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "payer",
+            "docs": [
+              "The default destination for rent exemption when the account is closed."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "function",
+            "docs": [
+              "The function that manages the mr_enclave set for this routine."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The Attestation Queue for this request."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrowWallet",
+            "docs": [
+              "The tokenAccount escrow"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "escrowTokenWallet",
+            "docs": [
+              "The TokenAccount with funds for the escrow."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "queueIdx",
+            "docs": [
+              "The index of the verifier on the queue that is assigned to process the next invocation.",
+              "This is incremented after each invocation in a round-robin fashion."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "schedule",
+            "docs": [
+              "The cron schedule to run the function on."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          },
+          {
+            "name": "maxContainerParamsLen",
+            "docs": [
+              "The maximum number of bytes to pass to the container params."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "containerParamsHash",
+            "docs": [
+              "Hash of the serialized container_params to prevent RPC tampering.",
+              "Should be verified within your function to ensure you are using the correct parameters."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "containerParams",
+            "docs": [
+              "The stringified container params to pass to the function."
+            ],
+            "type": "bytes"
+          },
+          {
+            "name": "lastExecutionTimestamp",
+            "docs": [
+              "The unix timestamp when the function was last run."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "lastSuccessfulExecutionTimestamp",
+            "docs": [
+              "The unix timestamp when the function was last run successfully."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "nextAllowedTimestamp",
+            "docs": [
+              "The unix timestamp when the function is allowed to run next."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                512
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttestationProgramState",
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "bump",
             "type": "u8"
@@ -2280,7 +2677,186 @@
             "type": {
               "array": [
                 "u8",
-                256
+                2048
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VerifierAccountData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enclave",
+            "docs": [
+              "Represents the state of the quote verifiers enclave."
+            ],
+            "type": {
+              "defined": "Quote"
+            }
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The authority of the EnclaveAccount which is permitted to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "Queue used for attestation to verify a MRENCLAVE measurement."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "createdAt",
+            "docs": [
+              "The unix timestamp when the quote was created."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "isOnQueue",
+            "docs": [
+              "Whether the quote is located on the AttestationQueues buffer."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "lastHeartbeat",
+            "docs": [
+              "The last time the quote heartbeated on-chain."
+            ],
+            "type": "i64"
+          },
+          {
+            "name": "rewardEscrow",
+            "docs": [
+              "The SwitchboardWallet account containing the reward escrow for verifying quotes on-chain.",
+              "We should set this whenever the operator changes so we dont need to pass another account and can verify with has_one."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "stakeWallet",
+            "docs": [
+              "The SwitchboardWallet account containing the queues required min_stake.",
+              "Needs to be separate from the reward_escrow. Allows easier 3rd party management of stake from rewards."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1024
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwitchboardWallet",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "The bump used to derive the PDA."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "initialized",
+            "docs": [
+              "Flag dictating whether the wallet has been initialized already."
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "mint",
+            "docs": [
+              "The public key of the mint used for this wallet."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "attestationQueue",
+            "docs": [
+              "The attestation queue pubkey."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The wallet authority that is permitted to make account changes."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "docs": [
+              "The name of the wallet for easier identification."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "resourceCount",
+            "docs": [
+              "The number of resources tied to this wallet."
+            ],
+            "type": "u32"
+          },
+          {
+            "name": "withdrawAuthority",
+            "docs": [
+              "The pubkey of the account that is permitted to withdraw funds from the wallet.",
+              "Setting this to the default pubkey will lock deposited funds."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenWallet",
+            "docs": [
+              "The associated token account pubkey."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "resources",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "resourcesMaxLen",
+            "type": "u32"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                64
               ]
             }
           }
@@ -2316,6 +2892,21 @@
         "kind": "struct",
         "fields": [
           {
+            "name": "recentSlot",
+            "type": "u64"
+          },
+          {
+            "name": "creatorSeed",
+            "type": {
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
+            }
+          },
+          {
             "name": "name",
             "type": "bytes"
           },
@@ -2336,21 +2927,15 @@
             "type": "bytes"
           },
           {
-            "name": "schedule",
-            "type": "bytes"
-          },
-          {
             "name": "mrEnclave",
             "type": {
-              "array": [
-                "u8",
-                32
-              ]
+              "option": {
+                "array": [
+                  "u8",
+                  32
+                ]
+              }
             }
-          },
-          {
-            "name": "recentSlot",
-            "type": "u64"
           },
           {
             "name": "requestsDisabled",
@@ -2361,19 +2946,20 @@
             "type": "bool"
           },
           {
-            "name": "requestsFee",
+            "name": "requestsDevFee",
             "type": "u64"
           },
           {
-            "name": "creatorSeed",
-            "type": {
-              "option": {
-                "array": [
-                  "u8",
-                  32
-                ]
-              }
-            }
+            "name": "routinesDisabled",
+            "type": "bool"
+          },
+          {
+            "name": "routinesRequireAuthorization",
+            "type": "bool"
+          },
+          {
+            "name": "routinesDevFee",
+            "type": "u64"
           }
         ]
       }
@@ -2428,12 +3014,6 @@
             }
           },
           {
-            "name": "schedule",
-            "type": {
-              "option": "bytes"
-            }
-          },
-          {
             "name": "mrEnclaves",
             "type": {
               "option": {
@@ -2459,7 +3039,31 @@
             }
           },
           {
-            "name": "requestsFee",
+            "name": "requestsDevFee",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "routinesDisabled",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "lockRoutinesDisabled",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "routinesRequireAuthorization",
+            "type": {
+              "option": "bool"
+            }
+          },
+          {
+            "name": "routinesDevFee",
             "type": {
               "option": "u64"
             }
@@ -2495,8 +3099,8 @@
             "type": "i64"
           },
           {
-            "name": "isFailure",
-            "type": "bool"
+            "name": "errorCode",
+            "type": "u8"
           },
           {
             "name": "mrEnclave",
@@ -2726,8 +3330,8 @@
             "type": "i64"
           },
           {
-            "name": "isFailure",
-            "type": "bool"
+            "name": "errorCode",
+            "type": "u8"
           },
           {
             "name": "mrEnclave",
@@ -2741,6 +3345,140 @@
           {
             "name": "requestSlot",
             "type": "u64"
+          },
+          {
+            "name": "containerParamsHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRoutineDisableParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "enable",
+            "type": {
+              "option": "bool"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRoutineInitParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "bounty",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "schedule",
+            "type": "bytes"
+          },
+          {
+            "name": "maxContainerParamsLen",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "containerParams",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRoutineSetConfigParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "metadata",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "bounty",
+            "type": {
+              "option": "u64"
+            }
+          },
+          {
+            "name": "schedule",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "containerParams",
+            "type": {
+              "option": "bytes"
+            }
+          },
+          {
+            "name": "appendContainerParams",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FunctionRoutineVerifyParams",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "observedTime",
+            "type": "i64"
+          },
+          {
+            "name": "nextAllowedTimestamp",
+            "type": "i64"
+          },
+          {
+            "name": "errorCode",
+            "type": "u8"
+          },
+          {
+            "name": "mrEnclave",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
           },
           {
             "name": "containerParamsHash",
@@ -2852,12 +3590,6 @@
           {
             "name": "name",
             "type": "bytes"
-          },
-          {
-            "name": "maxLen",
-            "type": {
-              "option": "u32"
-            }
           }
         ]
       }
@@ -2870,85 +3602,6 @@
           {
             "name": "amount",
             "type": "u64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "FunctionRequestTriggerRound",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "status",
-            "docs": [
-              "The status of the request."
-            ],
-            "type": {
-              "defined": "RequestStatus"
-            }
-          },
-          {
-            "name": "bounty",
-            "docs": [
-              "The SOL bounty in lamports used to incentivize a verifier to expedite the request."
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "requestSlot",
-            "docs": [
-              "The slot the request was published"
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "fulfilledSlot",
-            "docs": [
-              "The slot when the request was fulfilled"
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "expirationSlot",
-            "docs": [
-              "The slot when the request will expire and be able to be closed by the non-authority account"
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "verifier",
-            "docs": [
-              "The EnclaveAccount who verified the enclave for this request"
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "enclaveSigner",
-            "docs": [
-              "The keypair generated in the enclave and required to sign any",
-              "valid transactions processed by the function."
-            ],
-            "type": "publicKey"
-          },
-          {
-            "name": "validAfterSlot",
-            "docs": [
-              "The slot when the request can first be executed."
-            ],
-            "type": "u64"
-          },
-          {
-            "name": "ebuf",
-            "docs": [
-              "Reserved."
-            ],
-            "type": {
-              "array": [
-                "u8",
-                56
-              ]
-            }
           }
         ]
       }
@@ -3038,6 +3691,154 @@
       }
     },
     {
+      "name": "FunctionRequestTriggerRound",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "status",
+            "docs": [
+              "The status of the request."
+            ],
+            "type": {
+              "defined": "RequestStatus"
+            }
+          },
+          {
+            "name": "bounty",
+            "docs": [
+              "The SOL bounty in lamports used to incentivize a verifier to expedite the request."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "requestSlot",
+            "docs": [
+              "The slot the request was published"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "fulfilledSlot",
+            "docs": [
+              "The slot when the request was fulfilled"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "expirationSlot",
+            "docs": [
+              "The slot when the request will expire and be able to be closed by the non-authority account"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "verifier",
+            "docs": [
+              "The EnclaveAccount who verified the enclave for this request"
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "enclaveSigner",
+            "docs": [
+              "The keypair generated in the enclave and required to sign any",
+              "valid transactions processed by the function."
+            ],
+            "type": "publicKey"
+          },
+          {
+            "name": "validAfterSlot",
+            "docs": [
+              "The slot when the request can first be executed."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "queueIdx",
+            "type": "u32"
+          },
+          {
+            "name": "ebuf",
+            "docs": [
+              "Reserved."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                52
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BoolWithLock",
+      "docs": [
+        "An enum representing a boolean flag which can be locked.",
+        "Byte #0: 0 = Disabled, 1 = Enabled",
+        "Byte #1: 0 = Unlocked, 1 = Locked"
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Disabled"
+          },
+          {
+            "name": "Enabled"
+          },
+          {
+            "name": "DisabledLocked"
+          },
+          {
+            "name": "EnabledLocked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ResourceLevel",
+      "docs": [
+        "An enum representing a heirarchy of resources that can modify a field."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Authority"
+          },
+          {
+            "name": "Function"
+          },
+          {
+            "name": "Queue"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RoutineStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None"
+          },
+          {
+            "name": "Active"
+          },
+          {
+            "name": "NonExecutable"
+          }
+        ]
+      }
+    },
+    {
       "name": "FunctionStatus",
       "type": {
         "kind": "enum",
@@ -3052,7 +3853,7 @@
             "name": "NonExecutable"
           },
           {
-            "name": "None3"
+            "name": "Error"
           },
           {
             "name": "Expired"
@@ -3311,6 +4112,46 @@
       ]
     },
     {
+      "name": "FunctionRequestVerifyErrorEvent",
+      "fields": [
+        {
+          "name": "request",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "errorCode",
+          "type": "u8",
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "FunctionRequestCloseEvent",
       "fields": [
         {
@@ -3321,6 +4162,121 @@
         {
           "name": "slot",
           "type": "u64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRoutineInitEvent",
+      "fields": [
+        {
+          "name": "attestationQueue",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "routine",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "schedule",
+          "type": {
+            "array": [
+              "u8",
+              64
+            ]
+          },
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRoutineVerifyEvent",
+      "fields": [
+        {
+          "name": "routine",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "FunctionRoutineVerifyErrorEvent",
+      "fields": [
+        {
+          "name": "routine",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "function",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "verifier",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "mrEnclave",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "containerRegistry",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "container",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "params",
+          "type": "bytes",
+          "index": false
+        },
+        {
+          "name": "errorCode",
+          "type": "u8",
           "index": false
         }
       ]
@@ -3634,7 +4590,8 @@
     },
     {
       "code": 6004,
-      "name": "InsufficientQueue"
+      "name": "InsufficientQueue",
+      "msg": "The provided queue is empty and has no verifier oracles heartbeating on-chain."
     },
     {
       "code": 6005,
@@ -3697,7 +4654,8 @@
     },
     {
       "code": 6018,
-      "name": "IncorrectObservedTime"
+      "name": "IncorrectObservedTime",
+      "msg": "The provided timestamp is not within the expected range. This may be indicative of an unhealthy enclave."
     },
     {
       "code": 6019,
@@ -3713,7 +4671,8 @@
     },
     {
       "code": 6022,
-      "name": "IncorrectMrEnclave"
+      "name": "IncorrectMrEnclave",
+      "msg": "The provided mr_enclave measurement did not match a value in its enclave settings. If you recently modified your function container, you may need to update the measurement in your FunctionAccount config."
     },
     {
       "code": 6023,
@@ -3749,7 +4708,7 @@
     {
       "code": 6030,
       "name": "RequestExpired",
-      "msg": "The requests expirationSlot has expired"
+      "msg": "The requests expiration_slot has expired"
     },
     {
       "code": 6031,
@@ -3803,6 +4762,59 @@
       "code": 6041,
       "name": "FunctionRequestNotReady",
       "msg": "The FunctionRequestAccount is not ready to be verified"
+    },
+    {
+      "code": 6042,
+      "name": "InvalidParamsHash",
+      "msg": "The container params hash does not match the expected hash on-chain. The parameters may have been modified in-flight; the assigned oracle may need to pickup the account change before re-verifying the function."
+    },
+    {
+      "code": 6043,
+      "name": "RequestInvalidStatus"
+    },
+    {
+      "code": 6044,
+      "name": "ContainerParamsTooLong",
+      "msg": "Please ensure your parameters length is <= your account max length"
+    },
+    {
+      "code": 6045,
+      "name": "RoutineDisabled",
+      "msg": "The routine has been disabled. Please check the routin's is_disabled status for more information."
+    },
+    {
+      "code": 6046,
+      "name": "FunctionRoutinesDisabled",
+      "msg": "The function authority has disabled routine execution for this function"
+    },
+    {
+      "code": 6047,
+      "name": "ConfigParameterLocked",
+      "msg": "The configuration parameter has been locked and cannot be changed"
+    },
+    {
+      "code": 6048,
+      "name": "RequestBufferFull"
+    },
+    {
+      "code": 6049,
+      "name": "RequestRoundNotActive",
+      "msg": "The request does not have an active round to verify"
+    },
+    {
+      "code": 6050,
+      "name": "EmptyEscrow",
+      "msg": "The resources escrow token account has a balance of 0 and the queue reward is greater than 0"
+    },
+    {
+      "code": 6051,
+      "name": "MissingSbWalletAuthoritySigner",
+      "msg": "The SwitchboardWallet authority must sign this request in order to use its escrow wallet"
+    },
+    {
+      "code": 6052,
+      "name": "RequestRoundAlreadyClosed",
+      "msg": "The verifier is attempting to respond to an already closed request round with the same request_slot"
     }
   ]
 }

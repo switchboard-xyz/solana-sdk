@@ -10,13 +10,14 @@ pub struct RefreshPrices<'info> {
     pub oracle: AccountLoader<'info, MyOracleState>,
 
     // We use this to verify the functions enclave state
+    pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
     #[account(
-        constraint =
-            function.load()?.validate(
-              &enclave_signer.to_account_info()
-            )? @ BasicOracleError::FunctionValidationFailed
+        // constraint = switchboard_routine.validate_signer(
+        //     switchboard_function.to_account_info().as_ref(),
+        //     enclave_signer.to_account_info().as_ref()
+        // )?
     )]
-    pub function: AccountLoader<'info, FunctionAccountData>,
+    pub switchboard_routine: Box<Account<'info, FunctionRoutineAccountData>>,
     pub enclave_signer: Signer<'info>,
 }
 
@@ -29,7 +30,7 @@ impl RefreshPrices<'_> {
     pub fn validate(
         &self,
         _ctx: &Context<Self>,
-        _params: &RefreshPricesParams,
+        _params: &RefreshPricesParams
     ) -> anchor_lang::Result<()> {
         Ok(())
     }

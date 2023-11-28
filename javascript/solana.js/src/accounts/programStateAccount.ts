@@ -26,11 +26,6 @@ export class ProgramStateAccount extends Account<types.SbState> {
   public static size = 1128;
 
   /**
-   * @return account size of the global {@linkcode ProgramStateAccount}.
-   */
-  public readonly size = this.program.account.sbState.size;
-
-  /**
    * Finds the {@linkcode ProgramStateAccount} from the static seed from which it was generated.
    * @return ProgramStateAccount and PDA bump tuple.
    */
@@ -39,7 +34,7 @@ export class ProgramStateAccount extends Account<types.SbState> {
   ): [ProgramStateAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from("STATE")],
-      program.programId
+      program.oracleProgramId
     );
     return [new ProgramStateAccount(program, publicKey), bump];
   }

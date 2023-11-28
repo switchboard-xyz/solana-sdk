@@ -95,7 +95,7 @@
 
 mod macros;
 
-use solana_program::{declare_id, pubkey, pubkey::Pubkey};
+use solana_program::pubkey;
 
 pub mod decimal;
 pub use decimal::*;
@@ -116,6 +116,12 @@ pub use seeds::*;
 pub mod utils;
 pub use utils::*;
 
+pub mod events;
+pub use events::*;
+
+pub mod program_id;
+pub use program_id::*;
+
 pub mod accounts;
 pub mod instructions;
 pub mod types;
@@ -123,8 +129,14 @@ pub mod types;
 pub mod prelude;
 
 cfg_client! {
-    pub mod client;
+    mod client;
     pub use client::*;
+}
+
+cfg_ipfs! {
+    pub mod ipfs {
+        pub use switchboard_common::ipfs::*;
+    }
 }
 
 cfg_secrets! {
@@ -132,14 +144,13 @@ cfg_secrets! {
     pub use secrets::*;
 }
 
-/// Program id for the Switchboard oracle program
-/// SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f
-pub const SWITCHBOARD_PROGRAM_ID: Pubkey = pubkey!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");
-
-/// Program id for the Switchboard oracle program
-/// sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx
-pub const SWITCHBOARD_ATTESTATION_PROGRAM_ID: Pubkey =
-    pubkey!("sbattyXrzedoNATfc4L31wC9Mhxsi1BmFhTiN8gDshx");
+cfg_macros! {
+    // Futures crate is needed by the proc_macro
+    pub use futures;
+    pub use futures::Future;
+    pub use switchboard_solana_macros::switchboard_function;
+    pub use switchboard_solana_macros::sb_error;
+}
 
 /// The minimum number of slots before a request is considered expired.
 pub const MINIMUM_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 150; // 1 min at 400ms/slot
@@ -147,6 +158,6 @@ pub const MINIMUM_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 150; // 1 min at 400ms
 /// The default number of slots before a request expires.
 pub const DEFAULT_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 2250; // 15 min at 400ms/slot
 
-pub const DEFAULT_USERS_CONTAINER_PARAMS_LEN: u32 = 256;
+pub const DEFAULT_MAX_CONTAINER_PARAMS_LEN: u32 = 256;
 
 declare_id!(SWITCHBOARD_PROGRAM_ID);

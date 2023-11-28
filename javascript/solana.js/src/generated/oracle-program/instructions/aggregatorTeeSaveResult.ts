@@ -39,7 +39,7 @@ export function aggregatorTeeSaveResult(
   program: SwitchboardProgram,
   args: AggregatorTeeSaveResultArgs,
   accounts: AggregatorTeeSaveResultAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.aggregator, isSigner: false, isWritable: true },

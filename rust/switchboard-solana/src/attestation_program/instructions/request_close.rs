@@ -3,22 +3,57 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestCloseParams)]
 pub struct FunctionRequestClose<'info> {
+    /// #[account(
+    ///     mut,
+    ///     close = sol_dest,
+    ///     has_one = function,
+    ///     has_one = escrow @ SwitchboardError::InvalidEscrow,
+    ///     has_one = authority @ SwitchboardError::InvalidAuthority,
+    /// )]
+    /// pub request: Box<Account<'info, FunctionRequestAccountData>>,
     #[account(mut)]
     pub request: AccountInfo<'info>,
+
     /// CHECK: Only needs to sign if request.garbage_collection_slot has not elapsed
     pub authority: AccountInfo<'info>,
+
+    /// #[account(
+    ///     mut,
+    ///     constraint = escrow.is_native() && escrow.owner == state.key()
+    /// )]
+    /// pub escrow: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub escrow: AccountInfo<'info>,
+
+    /// pub function: AccountLoader<'info, FunctionAccountData>,
     /// CHECK: we need to load_mut and remove_request
     #[account(mut)]
     pub function: AccountInfo<'info>,
+
     #[account(mut)]
     pub sol_dest: AccountInfo<'info>,
+
+    /// #[account(
+    ///     mut,
+    ///     constraint = escrow_dest.is_native() &&
+    ///             escrow_dest.owner == request.authority // can only send funds to the account owner
+    /// )]
+    /// pub escrow_dest: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub escrow_dest: AccountInfo<'info>,
+
+    /// #[account(
+    ///     seeds = [STATE_SEED],
+    ///     bump = state.load()?.bump,
+    /// )]
+    /// pub state: AccountLoader<'info, AttestationProgramState>,
     pub state: AccountInfo<'info>,
+
+    /// pub token_program: Program<'info, Token>,
     #[account(address = anchor_spl::token::ID)]
     pub token_program: AccountInfo<'info>,
+
+    /// pub system_program: Program<'info, System>,
     #[account(address = solana_program::system_program::ID)]
     pub system_program: AccountInfo<'info>,
 }

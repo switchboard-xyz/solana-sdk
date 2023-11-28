@@ -90,7 +90,7 @@ export class CrankAccountData {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey,
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<CrankAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
@@ -107,7 +107,7 @@ export class CrankAccountData {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[],
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<Array<CrankAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 

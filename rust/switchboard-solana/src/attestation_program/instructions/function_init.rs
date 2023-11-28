@@ -25,14 +25,14 @@ pub struct FunctionInit<'info> {
 
     /// CHECK: handle this manually because the PDA seed can vary
     #[account(mut)]
-    pub wallet: AccountInfo<'info>,
+    pub escrow_wallet: AccountInfo<'info>,
 
     #[account(signer)]
-    pub wallet_authority: Option<AccountInfo<'info>>,
+    pub escrow_wallet_authority: Option<AccountInfo<'info>>,
 
     /// CHECK: handle this manually because the PDA seed can vary
     #[account(mut)]
-    pub token_wallet: AccountInfo<'info>,
+    pub escrow_token_wallet: AccountInfo<'info>,
 
     #[account(address = anchor_spl::token::spl_token::native_mint::ID)]
     pub mint: AccountInfo<'info>,
@@ -51,20 +51,33 @@ pub struct FunctionInit<'info> {
     pub address_lookup_program: AccountInfo<'info>,
 }
 
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Clone, Default, AnchorSerialize, AnchorDeserialize)]
 pub struct FunctionInitParams {
+    // PDA fields
+    pub recent_slot: u64,
+    pub creator_seed: Option<[u8; 32]>,
+
+    // Metadata
     pub name: Vec<u8>,
     pub metadata: Vec<u8>,
+
+    // Container Config
     pub container: Vec<u8>,
     pub container_registry: Vec<u8>,
     pub version: Vec<u8>,
-    pub schedule: Vec<u8>,
-    pub mr_enclave: [u8; 32],
-    pub recent_slot: u64,
+    pub mr_enclave: Option<[u8; 32]>,
+
+    // pub schedule: Vec<u8>,
+
+    // Request Config
     pub requests_disabled: bool,
     pub requests_require_authorization: bool,
-    pub requests_fee: u64,
-    pub creator_seed: Option<[u8; 32]>,
+    pub requests_dev_fee: u64,
+
+    // Routines Config
+    pub routines_disabled: bool,
+    pub routines_require_authorization: bool,
+    pub routines_dev_fee: u64,
 }
 
 impl InstructionData for FunctionInitParams {}
@@ -122,9 +135,9 @@ impl<'info> FunctionInit<'info> {
         account_infos.extend(self.authority.to_account_infos());
         account_infos.extend(self.attestation_queue.to_account_infos());
         account_infos.extend(self.payer.to_account_infos());
-        account_infos.extend(self.wallet.to_account_infos());
-        account_infos.extend(self.wallet_authority.to_account_infos());
-        account_infos.extend(self.token_wallet.to_account_infos());
+        account_infos.extend(self.escrow_wallet.to_account_infos());
+        account_infos.extend(self.escrow_wallet_authority.to_account_infos());
+        account_infos.extend(self.escrow_token_wallet.to_account_infos());
         account_infos.extend(self.mint.to_account_infos());
         account_infos.extend(self.token_program.to_account_infos());
         account_infos.extend(self.associated_token_program.to_account_infos());
@@ -140,14 +153,17 @@ impl<'info> FunctionInit<'info> {
         account_metas.extend(self.address_lookup_table.to_account_metas(None));
         account_metas.extend(self.authority.to_account_metas(None));
         account_metas.extend(self.attestation_queue.to_account_metas(None));
-        account_metas.extend(self.payer.to_account_metas(None));
-        account_metas.extend(self.wallet.to_account_metas(None));
-        if let Some(wallet_authority) = &self.wallet_authority {
-            account_metas.extend(wallet_authority.to_account_metas(None));
+        account_metas.extend(self.payer.to_account_metas(Some(true)));
+        account_metas.extend(self.escrow_wallet.to_account_metas(None));
+        if let Some(escrow_wallet_authority) = &self.escrow_wallet_authority {
+            account_metas.extend(escrow_wallet_authority.to_account_metas(Some(true)));
         } else {
-            account_metas.push(AccountMeta::new_readonly(crate::ID, false));
+            account_metas.push(AccountMeta::new_readonly(
+                SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                false,
+            ));
         }
-        account_metas.extend(self.token_wallet.to_account_metas(None));
+        account_metas.extend(self.escrow_token_wallet.to_account_metas(None));
         account_metas.extend(self.mint.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas.extend(self.associated_token_program.to_account_metas(None));

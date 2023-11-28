@@ -261,7 +261,7 @@ export class AggregatorHistoryBuffer extends Account<
         lamports: await program.connection.getMinimumBalanceForRentExemption(
           size
         ),
-        programId: program.programId,
+        programId: program.oracleProgramId,
       }),
       types.aggregatorSetHistoryBuffer(
         program,

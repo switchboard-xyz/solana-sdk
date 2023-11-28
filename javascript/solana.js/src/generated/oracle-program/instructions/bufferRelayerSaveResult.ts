@@ -32,7 +32,7 @@ export function bufferRelayerSaveResult(
   program: SwitchboardProgram,
   args: BufferRelayerSaveResultArgs,
   accounts: BufferRelayerSaveResultAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.bufferRelayer, isSigner: false, isWritable: true },

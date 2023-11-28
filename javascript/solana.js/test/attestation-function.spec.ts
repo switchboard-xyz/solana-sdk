@@ -1,6 +1,5 @@
 import "mocha";
 
-import { functionVerify } from "../src/generated/index.js";
 import type { AttestationQueueAccount } from "../src/index.js";
 import type { VerifierAccount } from "../src/index.js";
 import * as sbv2 from "../src/index.js";
@@ -9,8 +8,7 @@ import type { TestContext } from "./utils.js";
 import { printLogs, setupTest } from "./utils.js";
 
 import * as anchor from "@coral-xyz/anchor";
-import { NATIVE_MINT } from "@solana/spl-token";
-import { Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
+import { Keypair } from "@solana/web3.js";
 import { BN, sleep, toUtf8 } from "@switchboard-xyz/common";
 import assert from "assert";
 
@@ -106,7 +104,6 @@ describe("Function Tests", () => {
         {
           name: "FUNCTION_NAME",
           metadata: "FUNCTION_METADATA",
-          schedule: "* * * * *",
           container: "containerId",
           version: "1.0.0",
           mrEnclave,
@@ -346,7 +343,6 @@ describe("Function Tests", () => {
       {
         name: "FUNCTION_NAME",
         metadata: "FUNCTION_METADATA",
-        schedule: "* * * * *",
         container: "containerId",
         version: "1.0.0",
         mrEnclave,
@@ -385,7 +381,6 @@ describe("Function Tests", () => {
       {
         name: "FUNCTION_NAME",
         metadata: "FUNCTION_METADATA",
-        schedule: "* * * * *",
         container: "containerId",
         version: "1.0.0",
         mrEnclave,
