@@ -31,7 +31,7 @@ export function vrfPoolRequest(
   program: SwitchboardProgram,
   args: VrfPoolRequestArgs,
   accounts: VrfPoolRequestAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },

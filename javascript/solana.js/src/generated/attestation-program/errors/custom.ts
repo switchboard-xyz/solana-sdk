@@ -41,7 +41,18 @@ export type CustomError =
   | RequestAlreadyInitialized
   | AccountCloseNotPermitted
   | AccountCloseNotReady
-  | FunctionRequestNotReady;
+  | FunctionRequestNotReady
+  | InvalidParamsHash
+  | RequestInvalidStatus
+  | ContainerParamsTooLong
+  | RoutineDisabled
+  | FunctionRoutinesDisabled
+  | ConfigParameterLocked
+  | RequestBufferFull
+  | RequestRoundNotActive
+  | EmptyEscrow
+  | MissingSbWalletAuthoritySigner
+  | RequestRoundAlreadyClosed;
 
 export class GenericError extends Error {
   static readonly code = 6000;
@@ -89,9 +100,13 @@ export class InsufficientQueue extends Error {
   static readonly code = 6004;
   readonly code = 6004;
   readonly name = "InsufficientQueue";
+  readonly msg =
+    "The provided queue is empty and has no verifier oracles heartbeating on-chain.";
 
   constructor(readonly logs?: string[]) {
-    super("6004: ");
+    super(
+      "6004: The provided queue is empty and has no verifier oracles heartbeating on-chain."
+    );
   }
 }
 
@@ -245,9 +260,13 @@ export class IncorrectObservedTime extends Error {
   static readonly code = 6018;
   readonly code = 6018;
   readonly name = "IncorrectObservedTime";
+  readonly msg =
+    "The provided timestamp is not within the expected range. This may be indicative of an unhealthy enclave.";
 
   constructor(readonly logs?: string[]) {
-    super("6018: ");
+    super(
+      "6018: The provided timestamp is not within the expected range. This may be indicative of an unhealthy enclave."
+    );
   }
 }
 
@@ -285,9 +304,13 @@ export class IncorrectMrEnclave extends Error {
   static readonly code = 6022;
   readonly code = 6022;
   readonly name = "IncorrectMrEnclave";
+  readonly msg =
+    "The provided mr_enclave measurement did not match a value in its enclave settings. If you recently modified your function container, you may need to update the measurement in your FunctionAccount config.";
 
   constructor(readonly logs?: string[]) {
-    super("6022: ");
+    super(
+      "6022: The provided mr_enclave measurement did not match a value in its enclave settings. If you recently modified your function container, you may need to update the measurement in your FunctionAccount config."
+    );
   }
 }
 
@@ -377,10 +400,10 @@ export class RequestExpired extends Error {
   static readonly code = 6030;
   readonly code = 6030;
   readonly name = "RequestExpired";
-  readonly msg = "The requests expirationSlot has expired";
+  readonly msg = "The requests expiration_slot has expired";
 
   constructor(readonly logs?: string[]) {
-    super("6030: The requests expirationSlot has expired");
+    super("6030: The requests expiration_slot has expired");
   }
 }
 
@@ -521,6 +544,149 @@ export class FunctionRequestNotReady extends Error {
   }
 }
 
+export class InvalidParamsHash extends Error {
+  static readonly code = 6042;
+  readonly code = 6042;
+  readonly name = "InvalidParamsHash";
+  readonly msg =
+    "The container params hash does not match the expected hash on-chain. The parameters may have been modified in-flight; the assigned oracle may need to pickup the account change before re-verifying the function.";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6042: The container params hash does not match the expected hash on-chain. The parameters may have been modified in-flight; the assigned oracle may need to pickup the account change before re-verifying the function."
+    );
+  }
+}
+
+export class RequestInvalidStatus extends Error {
+  static readonly code = 6043;
+  readonly code = 6043;
+  readonly name = "RequestInvalidStatus";
+
+  constructor(readonly logs?: string[]) {
+    super("6043: ");
+  }
+}
+
+export class ContainerParamsTooLong extends Error {
+  static readonly code = 6044;
+  readonly code = 6044;
+  readonly name = "ContainerParamsTooLong";
+  readonly msg =
+    "Please ensure your parameters length is <= your account max length";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6044: Please ensure your parameters length is <= your account max length"
+    );
+  }
+}
+
+export class RoutineDisabled extends Error {
+  static readonly code = 6045;
+  readonly code = 6045;
+  readonly name = "RoutineDisabled";
+  readonly msg =
+    "The routine has been disabled. Please check the routin's is_disabled status for more information.";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6045: The routine has been disabled. Please check the routin's is_disabled status for more information."
+    );
+  }
+}
+
+export class FunctionRoutinesDisabled extends Error {
+  static readonly code = 6046;
+  readonly code = 6046;
+  readonly name = "FunctionRoutinesDisabled";
+  readonly msg =
+    "The function authority has disabled routine execution for this function";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6046: The function authority has disabled routine execution for this function"
+    );
+  }
+}
+
+export class ConfigParameterLocked extends Error {
+  static readonly code = 6047;
+  readonly code = 6047;
+  readonly name = "ConfigParameterLocked";
+  readonly msg =
+    "The configuration parameter has been locked and cannot be changed";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6047: The configuration parameter has been locked and cannot be changed"
+    );
+  }
+}
+
+export class RequestBufferFull extends Error {
+  static readonly code = 6048;
+  readonly code = 6048;
+  readonly name = "RequestBufferFull";
+
+  constructor(readonly logs?: string[]) {
+    super("6048: ");
+  }
+}
+
+export class RequestRoundNotActive extends Error {
+  static readonly code = 6049;
+  readonly code = 6049;
+  readonly name = "RequestRoundNotActive";
+  readonly msg = "The request does not have an active round to verify";
+
+  constructor(readonly logs?: string[]) {
+    super("6049: The request does not have an active round to verify");
+  }
+}
+
+export class EmptyEscrow extends Error {
+  static readonly code = 6050;
+  readonly code = 6050;
+  readonly name = "EmptyEscrow";
+  readonly msg =
+    "The resources escrow token account has a balance of 0 and the queue reward is greater than 0";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6050: The resources escrow token account has a balance of 0 and the queue reward is greater than 0"
+    );
+  }
+}
+
+export class MissingSbWalletAuthoritySigner extends Error {
+  static readonly code = 6051;
+  readonly code = 6051;
+  readonly name = "MissingSbWalletAuthoritySigner";
+  readonly msg =
+    "The SwitchboardWallet authority must sign this request in order to use its escrow wallet";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6051: The SwitchboardWallet authority must sign this request in order to use its escrow wallet"
+    );
+  }
+}
+
+export class RequestRoundAlreadyClosed extends Error {
+  static readonly code = 6052;
+  readonly code = 6052;
+  readonly name = "RequestRoundAlreadyClosed";
+  readonly msg =
+    "The verifier is attempting to respond to an already closed request round with the same request_slot";
+
+  constructor(readonly logs?: string[]) {
+    super(
+      "6052: The verifier is attempting to respond to an already closed request round with the same request_slot"
+    );
+  }
+}
+
 export function fromCode(code: number, logs?: string[]): CustomError | null {
   switch (code) {
     case 6000:
@@ -607,6 +773,28 @@ export function fromCode(code: number, logs?: string[]): CustomError | null {
       return new AccountCloseNotReady(logs);
     case 6041:
       return new FunctionRequestNotReady(logs);
+    case 6042:
+      return new InvalidParamsHash(logs);
+    case 6043:
+      return new RequestInvalidStatus(logs);
+    case 6044:
+      return new ContainerParamsTooLong(logs);
+    case 6045:
+      return new RoutineDisabled(logs);
+    case 6046:
+      return new FunctionRoutinesDisabled(logs);
+    case 6047:
+      return new ConfigParameterLocked(logs);
+    case 6048:
+      return new RequestBufferFull(logs);
+    case 6049:
+      return new RequestRoundNotActive(logs);
+    case 6050:
+      return new EmptyEscrow(logs);
+    case 6051:
+      return new MissingSbWalletAuthoritySigner(logs);
+    case 6052:
+      return new RequestRoundAlreadyClosed(logs);
   }
 
   return null;

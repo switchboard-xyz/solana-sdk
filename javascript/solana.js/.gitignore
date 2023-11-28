@@ -13,6 +13,9 @@ AggregatorAccount.d.ts
 generated.cjs
 generated.js
 generated.d.ts
+runner.cjs
+runner.js
+runner.d.ts
 generated/accounts.cjs
 generated/accounts.js
 generated/accounts.d.ts

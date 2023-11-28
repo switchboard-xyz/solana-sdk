@@ -24,7 +24,7 @@ export function jobInit(
   program: SwitchboardProgram,
   args: JobInitArgs,
   accounts: JobInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.job, isSigner: true, isWritable: true },

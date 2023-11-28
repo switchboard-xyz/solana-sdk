@@ -17,7 +17,6 @@ export interface WalletInitAccounts {
   attestationQueue: PublicKey;
   tokenWallet: PublicKey;
   payer: PublicKey;
-  state: PublicKey;
   tokenProgram: PublicKey;
   associatedTokenProgram: PublicKey;
   systemProgram: PublicKey;
@@ -38,7 +37,6 @@ export function walletInit(
     { pubkey: accounts.attestationQueue, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenWallet, isSigner: false, isWritable: true },
     { pubkey: accounts.payer, isSigner: true, isWritable: true },
-    { pubkey: accounts.state, isSigner: false, isWritable: false },
     { pubkey: accounts.tokenProgram, isSigner: false, isWritable: false },
     {
       pubkey: accounts.associatedTokenProgram,

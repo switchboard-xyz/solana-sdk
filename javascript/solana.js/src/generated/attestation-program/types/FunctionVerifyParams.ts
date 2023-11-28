@@ -8,27 +8,27 @@ import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript
 export interface FunctionVerifyParamsFields {
   observedTime: BN;
   nextAllowedTimestamp: BN;
-  isFailure: boolean;
+  errorCode: number;
   mrEnclave: Array<number>;
 }
 
 export interface FunctionVerifyParamsJSON {
   observedTime: string;
   nextAllowedTimestamp: string;
-  isFailure: boolean;
+  errorCode: number;
   mrEnclave: Array<number>;
 }
 
 export class FunctionVerifyParams {
   readonly observedTime: BN;
   readonly nextAllowedTimestamp: BN;
-  readonly isFailure: boolean;
+  readonly errorCode: number;
   readonly mrEnclave: Array<number>;
 
   constructor(fields: FunctionVerifyParamsFields) {
     this.observedTime = fields.observedTime;
     this.nextAllowedTimestamp = fields.nextAllowedTimestamp;
-    this.isFailure = fields.isFailure;
+    this.errorCode = fields.errorCode;
     this.mrEnclave = fields.mrEnclave;
   }
 
@@ -37,7 +37,7 @@ export class FunctionVerifyParams {
       [
         borsh.i64("observedTime"),
         borsh.i64("nextAllowedTimestamp"),
-        borsh.bool("isFailure"),
+        borsh.u8("errorCode"),
         borsh.array(borsh.u8(), 32, "mrEnclave"),
       ],
       property
@@ -49,7 +49,7 @@ export class FunctionVerifyParams {
     return new FunctionVerifyParams({
       observedTime: obj.observedTime,
       nextAllowedTimestamp: obj.nextAllowedTimestamp,
-      isFailure: obj.isFailure,
+      errorCode: obj.errorCode,
       mrEnclave: obj.mrEnclave,
     });
   }
@@ -58,7 +58,7 @@ export class FunctionVerifyParams {
     return {
       observedTime: fields.observedTime,
       nextAllowedTimestamp: fields.nextAllowedTimestamp,
-      isFailure: fields.isFailure,
+      errorCode: fields.errorCode,
       mrEnclave: fields.mrEnclave,
     };
   }
@@ -67,7 +67,7 @@ export class FunctionVerifyParams {
     return {
       observedTime: this.observedTime.toString(),
       nextAllowedTimestamp: this.nextAllowedTimestamp.toString(),
-      isFailure: this.isFailure,
+      errorCode: this.errorCode,
       mrEnclave: this.mrEnclave,
     };
   }
@@ -76,7 +76,7 @@ export class FunctionVerifyParams {
     return new FunctionVerifyParams({
       observedTime: new BN(obj.observedTime),
       nextAllowedTimestamp: new BN(obj.nextAllowedTimestamp),
-      isFailure: obj.isFailure,
+      errorCode: obj.errorCode,
       mrEnclave: obj.mrEnclave,
     });
   }

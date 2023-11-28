@@ -1,18 +1,16 @@
 {
   "name": "@switchboard-xyz/sbv2-lite",
   "version": "0.2.2",
-  "description": "",
   "private": false,
+  "description": "",
+  "homepage": "https://docs.switchboard.xyz",
   "repository": {
     "type": "git",
     "url": "https://github.com/switchboard-xyz/sbv2-solana",
     "directory": "javascript/sbv2-lite"
   },
-  "homepage": "https://docs.switchboard.xyz",
-  "files": [
-    "lib",
-    "src"
-  ],
+  "license": "ISC",
+  "author": "",
   "exports": {
     ".": {
       "import": "./lib/esm/index.js",
@@ -22,15 +20,20 @@
   "main": "lib/cjs/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/cjs/index.d.ts",
+  "files": [
+    "lib",
+    "src"
+  ],
   "scripts": {
-    "docgen": "typedoc --entryPoints src/index.ts --out ../../website/static/api/ts-lite",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
     "build": "shx rm -rf lib && tsc && tsc -p tsconfig.cjs.json",
-    "watch": "tsc -p tsconfig.cjs.json --watch",
-    "prepublishOnly": "pnpm build && pnpm test"
+    "docgen": "typedoc --entryPoints src/index.ts --out ../../website/static/api/ts-lite",
+    "prepublishOnly": "pnpm build && pnpm test",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'",
+    "watch": "tsc -p tsconfig.cjs.json --watch"
   },
-  "author": "",
-  "license": "ISC",
+  "pre-commit": [
+    "build"
+  ],
   "dependencies": {
     "@coral-xyz/anchor": "^0.28.0",
     "big.js": "^6.1.1"
@@ -48,11 +51,8 @@
     "typedoc": "^0.23.8",
     "typescript": "^5.1.6"
   },
-  "pre-commit": [
-    "build"
-  ],
   "engines": {
-    "npm": ">=7.0.0",
-    "node": ">=16.0.0"
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   }
 }

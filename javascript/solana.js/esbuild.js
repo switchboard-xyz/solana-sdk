@@ -46,6 +46,7 @@ async function main() {
     TransactionObject: "TransactionObject",
     AggregatorAccount: "accounts/AggregatorAccount",
     generated: "generated/index",
+    runner: "runner/index",
     "generated/accounts": "generated/accounts",
     "generated/instructions": "generated/instructions",
     "generated/types": "generated/types",

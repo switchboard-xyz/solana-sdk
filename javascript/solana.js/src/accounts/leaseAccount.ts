@@ -37,51 +37,6 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
 
   public static size = 453;
 
-  /**
-   * Get the size of an {@linkcode LeaseAccount} on-chain.
-   */
-  public size = this.program.account.leaseAccountData.size;
-
-  /**
-   * Return a lease account state initialized to the default values.
-   */
-  public static default(): types.LeaseAccountData {
-    const buffer = Buffer.alloc(LeaseAccount.size, 0);
-    types.LeaseAccountData.discriminator.copy(buffer, 0);
-    return types.LeaseAccountData.decode(buffer);
-  }
-
-  /**
-   * Create a mock account info for a given lease config. Useful for test integrations.
-   */
-  public static createMock(
-    programId: PublicKey,
-    data: Partial<types.LeaseAccountData>,
-    options?: {
-      lamports?: number;
-      rentEpoch?: number;
-    }
-  ): AccountInfo<Buffer> {
-    const fields: types.LeaseAccountDataFields = {
-      ...LeaseAccount.default(),
-      ...data,
-      // any cleanup actions here
-    };
-    const state = new types.LeaseAccountData(fields);
-
-    const buffer = Buffer.alloc(LeaseAccount.size, 0);
-    types.LeaseAccountData.discriminator.copy(buffer, 0);
-    types.LeaseAccountData.layout.encode(state, buffer, 8);
-
-    return {
-      executable: false,
-      owner: programId,
-      lamports: options?.lamports ?? 1 * LAMPORTS_PER_SOL,
-      data: buffer,
-      rentEpoch: options?.rentEpoch ?? 0,
-    };
-  }
-
   /** Load an existing LeaseAccount with its current on-chain state */
   public static async load(
     program: SwitchboardProgram,
@@ -111,7 +66,7 @@ export class LeaseAccount extends Account<types.LeaseAccountData> {
   ): [LeaseAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from("LeaseAccountData"), queue.toBytes(), aggregator.toBytes()],
-      program.programId
+      program.oracleProgramId
     );
     return [new LeaseAccount(program, publicKey), bump];
   }

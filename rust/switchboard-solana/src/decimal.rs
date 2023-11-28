@@ -100,9 +100,7 @@ impl Ord for SwitchboardDecimal {
 
 impl PartialOrd for SwitchboardDecimal {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let s: Decimal = self.try_into().unwrap();
-        let other: Decimal = other.try_into().unwrap();
-        s.partial_cmp(&other)
+        Some(self.cmp(other))
     }
     fn lt(&self, other: &Self) -> bool {
         let s: Decimal = self.try_into().unwrap();

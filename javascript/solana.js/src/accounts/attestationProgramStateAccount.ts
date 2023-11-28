@@ -24,12 +24,6 @@ export class AttestationProgramStateAccount extends Account<types.AttestationPro
   public static size = 1128;
 
   /**
-   * @return account size of the global {@linkcode AttestationProgramStateAccount}.
-   */
-  public readonly size =
-    this.program.attestationAccount.attestationProgramState.size;
-
-  /**
    * Finds the {@linkcode AttestationProgramStateAccount} from the static seed from which it was generated.
    * @return AttestationProgramStateAccount and PDA bump tuple.
    */

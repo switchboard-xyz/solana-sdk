@@ -28,7 +28,7 @@ export function oracleHeartbeat(
   program: SwitchboardProgram,
   args: OracleHeartbeatArgs,
   accounts: OracleHeartbeatAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.oracle, isSigner: false, isWritable: true },

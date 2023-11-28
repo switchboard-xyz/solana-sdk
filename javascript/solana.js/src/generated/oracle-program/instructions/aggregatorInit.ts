@@ -25,7 +25,7 @@ export function aggregatorInit(
   program: SwitchboardProgram,
   args: AggregatorInitArgs,
   accounts: AggregatorInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.aggregator, isSigner: false, isWritable: true },

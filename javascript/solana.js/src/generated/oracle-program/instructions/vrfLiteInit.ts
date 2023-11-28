@@ -32,7 +32,7 @@ export function vrfLiteInit(
   program: SwitchboardProgram,
   args: VrfLiteInitArgs,
   accounts: VrfLiteInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: false, isWritable: false },

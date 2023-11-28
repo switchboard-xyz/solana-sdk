@@ -26,7 +26,7 @@ export function oracleInit(
   program: SwitchboardProgram,
   args: OracleInitArgs,
   accounts: OracleInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.oracle, isSigner: false, isWritable: true },

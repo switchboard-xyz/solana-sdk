@@ -13,7 +13,7 @@
       "node",
       "mocha"
     ],
-    "module": "ESNext",
+    "module": "NodeNext",
     "allowJs": true,
     "rootDir": "../",
     "resolveJsonModule": true

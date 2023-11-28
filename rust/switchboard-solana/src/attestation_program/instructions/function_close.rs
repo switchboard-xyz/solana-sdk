@@ -3,8 +3,23 @@ use crate::prelude::*;
 #[derive(Accounts)]
 #[instruction(params:FunctionCloseParams)]
 pub struct FunctionClose<'info> {
+    /// #[account(
+    ///     mut,
+    ///     close = sol_dest,
+    ///     seeds = [
+    ///         FUNCTION_SEED,
+    ///         function.load()?.creator_seed.as_ref(),
+    ///         &function.load()?.created_at_slot.to_le_bytes()
+    ///     ],
+    ///     bump = function.load()?.bump,
+    ///     has_one = authority @ SwitchboardError::InvalidAuthority,
+    ///     has_one = address_lookup_table,
+    ///     has_one = escrow_wallet,
+    /// )]
+    /// pub function: AccountLoader<'info, FunctionAccountData>,
     #[account(mut)]
     pub function: AccountInfo<'info>,
+
     #[account(signer)]
     pub authority: AccountInfo<'info>,
 
@@ -15,17 +30,26 @@ pub struct FunctionClose<'info> {
     )]
     pub address_lookup_table: AccountInfo<'info>,
 
+    /// pub escrow_wallet: Box<Account<'info, SwitchboardWallet>>,
     #[account(mut)]
     pub escrow_wallet: AccountInfo<'info>, // SwitchboardWallet
 
     /// CHECK:
     pub sol_dest: AccountInfo<'info>,
 
+    /// #[account(
+    ///     mut,
+    ///     constraint = escrow_dest.is_native()
+    /// )]
+    /// pub escrow_dest: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub escrow_dest: AccountInfo<'info>,
-    pub state: AccountInfo<'info>,
+
+    /// pub token_program: Program<'info, Token>,
     #[account(address = anchor_spl::token::ID)]
     pub token_program: AccountInfo<'info>,
+
+    /// pub system_program: Program<'info, System>,
     #[account(address = solana_program::system_program::ID)]
     pub system_program: AccountInfo<'info>,
 
@@ -88,7 +112,6 @@ impl<'info> FunctionClose<'info> {
         account_infos.extend(self.escrow_wallet.to_account_infos());
         account_infos.extend(self.sol_dest.to_account_infos());
         account_infos.extend(self.escrow_dest.to_account_infos());
-        account_infos.extend(self.state.to_account_infos());
         account_infos.extend(self.token_program.to_account_infos());
         account_infos.extend(self.system_program.to_account_infos());
         account_infos.extend(self.address_lookup_program.to_account_infos());
@@ -104,7 +127,6 @@ impl<'info> FunctionClose<'info> {
         account_metas.extend(self.escrow_wallet.to_account_metas(None));
         account_metas.extend(self.sol_dest.to_account_metas(None));
         account_metas.extend(self.escrow_dest.to_account_metas(None));
-        account_metas.extend(self.state.to_account_metas(None));
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas.extend(self.system_program.to_account_metas(None));
         account_metas.extend(self.address_lookup_program.to_account_metas(None));

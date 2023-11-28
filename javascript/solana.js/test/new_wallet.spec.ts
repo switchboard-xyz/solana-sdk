@@ -77,7 +77,6 @@ describe("NEW Switchboard Wallet Tests", () => {
       program,
       {
         container: "",
-        schedule: "* * * * * *",
         attestationQueue: switchboard.attestationQueue.account,
       },
       undefined,

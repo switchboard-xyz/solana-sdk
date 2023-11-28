@@ -62,8 +62,6 @@ export interface VrfLiteCloseParams {
 }
 
 export class VrfLiteAccount extends Account<types.VrfLiteAccountData> {
-  public size = this.program.account.vrfLiteAccountData.size;
-
   /**
    * Invoke a callback each time a VrfAccount's data has changed on-chain.
    * @param callback - the callback invoked when the vrf state changes

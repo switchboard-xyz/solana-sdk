@@ -64,17 +64,21 @@ export interface FunctionAccountDataFields {
   /** Number of requests created for this function. Used to prevent closing when there are live requests. */
   numRequests: BN;
   /** Whether custom requests have been disabled for this function. */
-  requestsDisabled: boolean;
+  requestsDisabled: number;
   /**
    * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
    * Useful if you want to use CPIs to control request account creation.
    */
-  requestsRequireAuthorization: boolean;
+  requestsRequireAuthorization: number;
   /** DEPRECATED. */
   reserved1: Array<number>;
-  /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  requestsFee: BN;
-  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  /**
+   * The dev fee that is paid out from the request's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = requests's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  requestsDevFee: BN;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function verifiers. */
   escrowWallet: PublicKey;
   /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
   escrowTokenWallet: PublicKey;
@@ -85,6 +89,31 @@ export interface FunctionAccountDataFields {
   rewardEscrowWallet: PublicKey;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   rewardEscrowTokenWallet: PublicKey;
+  /** The last reported error code if the most recent response was a failure */
+  errorStatus: number;
+  /** Number of routines created for this function. Used to prevent closing when there are live routines. */
+  numRoutines: BN;
+  /** Whether custom routines have been disabled for this function. */
+  routinesDisabled: types.BoolWithLockKind;
+  /**
+   * Whether new routines need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to provide AccessControl and only allow certain parties to run routines.
+   */
+  routinesRequireAuthorization: number;
+  /**
+   * The fee that is paid out from the routine's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = routine's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  routinesDevFee: BN;
+  /** The functions MRENCLAVE measurement dictating the contents of the secure enclave. */
+  mrEnclave: Array<number>;
+  /** The VerificationStatus of the quote. */
+  verificationStatus: number;
+  /** The unix timestamp when the quote was last verified. */
+  verificationTimestamp: BN;
+  /** The unix timestamp when the quotes verification status expires. */
+  validUntil: BN;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -148,17 +177,21 @@ export interface FunctionAccountDataJSON {
   /** Number of requests created for this function. Used to prevent closing when there are live requests. */
   numRequests: string;
   /** Whether custom requests have been disabled for this function. */
-  requestsDisabled: boolean;
+  requestsDisabled: number;
   /**
    * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
    * Useful if you want to use CPIs to control request account creation.
    */
-  requestsRequireAuthorization: boolean;
+  requestsRequireAuthorization: number;
   /** DEPRECATED. */
   reserved1: Array<number>;
-  /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  requestsFee: string;
-  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  /**
+   * The dev fee that is paid out from the request's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = requests's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  requestsDevFee: string;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function verifiers. */
   escrowWallet: string;
   /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
   escrowTokenWallet: string;
@@ -169,6 +202,31 @@ export interface FunctionAccountDataJSON {
   rewardEscrowWallet: string;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   rewardEscrowTokenWallet: string;
+  /** The last reported error code if the most recent response was a failure */
+  errorStatus: number;
+  /** Number of routines created for this function. Used to prevent closing when there are live routines. */
+  numRoutines: string;
+  /** Whether custom routines have been disabled for this function. */
+  routinesDisabled: types.BoolWithLockJSON;
+  /**
+   * Whether new routines need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to provide AccessControl and only allow certain parties to run routines.
+   */
+  routinesRequireAuthorization: number;
+  /**
+   * The fee that is paid out from the routine's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = routine's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  routinesDevFee: string;
+  /** The functions MRENCLAVE measurement dictating the contents of the secure enclave. */
+  mrEnclave: Array<number>;
+  /** The VerificationStatus of the quote. */
+  verificationStatus: number;
+  /** The unix timestamp when the quote was last verified. */
+  verificationTimestamp: string;
+  /** The unix timestamp when the quotes verification status expires. */
+  validUntil: string;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -232,17 +290,21 @@ export class FunctionAccountData {
   /** Number of requests created for this function. Used to prevent closing when there are live requests. */
   readonly numRequests: BN;
   /** Whether custom requests have been disabled for this function. */
-  readonly requestsDisabled: boolean;
+  readonly requestsDisabled: number;
   /**
    * Whether new requests need to be authorized by the FunctionAccount authority before being initialized.
    * Useful if you want to use CPIs to control request account creation.
    */
-  readonly requestsRequireAuthorization: boolean;
+  readonly requestsRequireAuthorization: number;
   /** DEPRECATED. */
   readonly reserved1: Array<number>;
-  /** The lamports paid to the FunctionAccount escrow on each successful update request. */
-  readonly requestsFee: BN;
-  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function runners. */
+  /**
+   * The dev fee that is paid out from the request's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = requests's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  readonly requestsDevFee: BN;
+  /** The SwitchboardWallet that will handle pre-funding rewards paid out to function verifiers. */
   readonly escrowWallet: PublicKey;
   /** The escrow_wallet TokenAccount that handles pre-funding rewards paid out to function runners. */
   readonly escrowTokenWallet: PublicKey;
@@ -253,6 +315,31 @@ export class FunctionAccountData {
   readonly rewardEscrowWallet: PublicKey;
   /** The reward_escrow_wallet TokenAccount used to acrue rewards from requests made with custom parameters. */
   readonly rewardEscrowTokenWallet: PublicKey;
+  /** The last reported error code if the most recent response was a failure */
+  readonly errorStatus: number;
+  /** Number of routines created for this function. Used to prevent closing when there are live routines. */
+  readonly numRoutines: BN;
+  /** Whether custom routines have been disabled for this function. */
+  readonly routinesDisabled: types.BoolWithLockKind;
+  /**
+   * Whether new routines need to be authorized by the FunctionAccount authority before being initialized.
+   * Useful if you want to provide AccessControl and only allow certain parties to run routines.
+   */
+  readonly routinesRequireAuthorization: number;
+  /**
+   * The fee that is paid out from the routine's escrow to the function's escrow on each successful invocation.
+   * This is used to reward the function maintainer for providing the function.
+   * 0 = No Fee. Sender = routine's escrow_token_wallet. Receiver = function's reward_token_wallet.
+   */
+  readonly routinesDevFee: BN;
+  /** The functions MRENCLAVE measurement dictating the contents of the secure enclave. */
+  readonly mrEnclave: Array<number>;
+  /** The VerificationStatus of the quote. */
+  readonly verificationStatus: number;
+  /** The unix timestamp when the quote was last verified. */
+  readonly verificationTimestamp: BN;
+  /** The unix timestamp when the quotes verification status expires. */
+  readonly validUntil: BN;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -290,15 +377,24 @@ export class FunctionAccountData {
     borsh.i64("triggeredSince"),
     borsh.i64("permissionExpiration"),
     borsh.u64("numRequests"),
-    borsh.bool("requestsDisabled"),
-    borsh.bool("requestsRequireAuthorization"),
+    borsh.u8("requestsDisabled"),
+    borsh.u8("requestsRequireAuthorization"),
     borsh.array(borsh.u8(), 8, "reserved1"),
-    borsh.u64("requestsFee"),
+    borsh.u64("requestsDevFee"),
     borsh.publicKey("escrowWallet"),
     borsh.publicKey("escrowTokenWallet"),
     borsh.publicKey("rewardEscrowWallet"),
     borsh.publicKey("rewardEscrowTokenWallet"),
-    borsh.array(borsh.u8(), 1024, "ebuf"),
+    borsh.u8("errorStatus"),
+    borsh.u64("numRoutines"),
+    types.BoolWithLock.layout("routinesDisabled"),
+    borsh.u8("routinesRequireAuthorization"),
+    borsh.u64("routinesDevFee"),
+    borsh.array(borsh.u8(), 32, "mrEnclave"),
+    borsh.u8("verificationStatus"),
+    borsh.i64("verificationTimestamp"),
+    borsh.i64("validUntil"),
+    borsh.array(borsh.u8(), 956, "ebuf"),
   ]);
 
   constructor(fields: FunctionAccountDataFields) {
@@ -334,11 +430,20 @@ export class FunctionAccountData {
     this.requestsDisabled = fields.requestsDisabled;
     this.requestsRequireAuthorization = fields.requestsRequireAuthorization;
     this.reserved1 = fields.reserved1;
-    this.requestsFee = fields.requestsFee;
+    this.requestsDevFee = fields.requestsDevFee;
     this.escrowWallet = fields.escrowWallet;
     this.escrowTokenWallet = fields.escrowTokenWallet;
     this.rewardEscrowWallet = fields.rewardEscrowWallet;
     this.rewardEscrowTokenWallet = fields.rewardEscrowTokenWallet;
+    this.errorStatus = fields.errorStatus;
+    this.numRoutines = fields.numRoutines;
+    this.routinesDisabled = fields.routinesDisabled;
+    this.routinesRequireAuthorization = fields.routinesRequireAuthorization;
+    this.routinesDevFee = fields.routinesDevFee;
+    this.mrEnclave = fields.mrEnclave;
+    this.verificationStatus = fields.verificationStatus;
+    this.verificationTimestamp = fields.verificationTimestamp;
+    this.validUntil = fields.validUntil;
     this.ebuf = fields.ebuf;
   }
 
@@ -418,11 +523,20 @@ export class FunctionAccountData {
       requestsDisabled: dec.requestsDisabled,
       requestsRequireAuthorization: dec.requestsRequireAuthorization,
       reserved1: dec.reserved1,
-      requestsFee: dec.requestsFee,
+      requestsDevFee: dec.requestsDevFee,
       escrowWallet: dec.escrowWallet,
       escrowTokenWallet: dec.escrowTokenWallet,
       rewardEscrowWallet: dec.rewardEscrowWallet,
       rewardEscrowTokenWallet: dec.rewardEscrowTokenWallet,
+      errorStatus: dec.errorStatus,
+      numRoutines: dec.numRoutines,
+      routinesDisabled: types.BoolWithLock.fromDecoded(dec.routinesDisabled),
+      routinesRequireAuthorization: dec.routinesRequireAuthorization,
+      routinesDevFee: dec.routinesDevFee,
+      mrEnclave: dec.mrEnclave,
+      verificationStatus: dec.verificationStatus,
+      verificationTimestamp: dec.verificationTimestamp,
+      validUntil: dec.validUntil,
       ebuf: dec.ebuf,
     });
   }
@@ -461,11 +575,20 @@ export class FunctionAccountData {
       requestsDisabled: this.requestsDisabled,
       requestsRequireAuthorization: this.requestsRequireAuthorization,
       reserved1: this.reserved1,
-      requestsFee: this.requestsFee.toString(),
+      requestsDevFee: this.requestsDevFee.toString(),
       escrowWallet: this.escrowWallet.toString(),
       escrowTokenWallet: this.escrowTokenWallet.toString(),
       rewardEscrowWallet: this.rewardEscrowWallet.toString(),
       rewardEscrowTokenWallet: this.rewardEscrowTokenWallet.toString(),
+      errorStatus: this.errorStatus,
+      numRoutines: this.numRoutines.toString(),
+      routinesDisabled: this.routinesDisabled.toJSON(),
+      routinesRequireAuthorization: this.routinesRequireAuthorization,
+      routinesDevFee: this.routinesDevFee.toString(),
+      mrEnclave: this.mrEnclave,
+      verificationStatus: this.verificationStatus,
+      verificationTimestamp: this.verificationTimestamp.toString(),
+      validUntil: this.validUntil.toString(),
       ebuf: this.ebuf,
     };
   }
@@ -504,11 +627,20 @@ export class FunctionAccountData {
       requestsDisabled: obj.requestsDisabled,
       requestsRequireAuthorization: obj.requestsRequireAuthorization,
       reserved1: obj.reserved1,
-      requestsFee: new BN(obj.requestsFee),
+      requestsDevFee: new BN(obj.requestsDevFee),
       escrowWallet: new PublicKey(obj.escrowWallet),
       escrowTokenWallet: new PublicKey(obj.escrowTokenWallet),
       rewardEscrowWallet: new PublicKey(obj.rewardEscrowWallet),
       rewardEscrowTokenWallet: new PublicKey(obj.rewardEscrowTokenWallet),
+      errorStatus: obj.errorStatus,
+      numRoutines: new BN(obj.numRoutines),
+      routinesDisabled: types.BoolWithLock.fromJSON(obj.routinesDisabled),
+      routinesRequireAuthorization: obj.routinesRequireAuthorization,
+      routinesDevFee: new BN(obj.routinesDevFee),
+      mrEnclave: obj.mrEnclave,
+      verificationStatus: obj.verificationStatus,
+      verificationTimestamp: new BN(obj.verificationTimestamp),
+      validUntil: new BN(obj.validUntil),
       ebuf: obj.ebuf,
     });
   }

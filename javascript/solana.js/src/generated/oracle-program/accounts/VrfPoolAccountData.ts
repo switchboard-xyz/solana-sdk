@@ -74,7 +74,7 @@ export class VrfPoolAccountData {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey,
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<VrfPoolAccountData | null> {
     const info = await program.connection.getAccountInfo(address);
 
@@ -91,7 +91,7 @@ export class VrfPoolAccountData {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[],
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<Array<VrfPoolAccountData | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 

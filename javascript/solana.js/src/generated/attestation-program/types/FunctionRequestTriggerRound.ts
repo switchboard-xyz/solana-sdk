@@ -25,6 +25,7 @@ export interface FunctionRequestTriggerRoundFields {
   enclaveSigner: PublicKey;
   /** The slot when the request can first be executed. */
   validAfterSlot: BN;
+  queueIdx: number;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -49,6 +50,7 @@ export interface FunctionRequestTriggerRoundJSON {
   enclaveSigner: string;
   /** The slot when the request can first be executed. */
   validAfterSlot: string;
+  queueIdx: number;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -73,6 +75,7 @@ export class FunctionRequestTriggerRound {
   readonly enclaveSigner: PublicKey;
   /** The slot when the request can first be executed. */
   readonly validAfterSlot: BN;
+  readonly queueIdx: number;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -85,6 +88,7 @@ export class FunctionRequestTriggerRound {
     this.verifier = fields.verifier;
     this.enclaveSigner = fields.enclaveSigner;
     this.validAfterSlot = fields.validAfterSlot;
+    this.queueIdx = fields.queueIdx;
     this.ebuf = fields.ebuf;
   }
 
@@ -99,7 +103,8 @@ export class FunctionRequestTriggerRound {
         borsh.publicKey("verifier"),
         borsh.publicKey("enclaveSigner"),
         borsh.u64("validAfterSlot"),
-        borsh.array(borsh.u8(), 56, "ebuf"),
+        borsh.u32("queueIdx"),
+        borsh.array(borsh.u8(), 52, "ebuf"),
       ],
       property
     );
@@ -116,6 +121,7 @@ export class FunctionRequestTriggerRound {
       verifier: obj.verifier,
       enclaveSigner: obj.enclaveSigner,
       validAfterSlot: obj.validAfterSlot,
+      queueIdx: obj.queueIdx,
       ebuf: obj.ebuf,
     });
   }
@@ -130,6 +136,7 @@ export class FunctionRequestTriggerRound {
       verifier: fields.verifier,
       enclaveSigner: fields.enclaveSigner,
       validAfterSlot: fields.validAfterSlot,
+      queueIdx: fields.queueIdx,
       ebuf: fields.ebuf,
     };
   }
@@ -144,6 +151,7 @@ export class FunctionRequestTriggerRound {
       verifier: this.verifier.toString(),
       enclaveSigner: this.enclaveSigner.toString(),
       validAfterSlot: this.validAfterSlot.toString(),
+      queueIdx: this.queueIdx,
       ebuf: this.ebuf,
     };
   }
@@ -160,6 +168,7 @@ export class FunctionRequestTriggerRound {
       verifier: new PublicKey(obj.verifier),
       enclaveSigner: new PublicKey(obj.enclaveSigner),
       validAfterSlot: new BN(obj.validAfterSlot),
+      queueIdx: obj.queueIdx,
       ebuf: obj.ebuf,
     });
   }

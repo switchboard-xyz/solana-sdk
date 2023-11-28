@@ -5,7 +5,12 @@ import * as anchor from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import * as sb from "@switchboard-xyz/solana.js";
 
-const functionPubkey = "Accb21tUCWocJea6Uk3DgrNZawgmKegDVeHw8cGMDPi5";
+const functionPubkey = "HL2jSHrxCprnmLHdY4rGSZ6pRGieBREcPHFbvzniYWYp";
+const routinePubkey = "ACcdtN6xVn1D82jH7fyK3F68CYXS6aVZTZ3NwYvrMuUt";
+
+const PROGRAM_SEED = "BASICORACLE";
+
+const ORACLE_SEED = "ORACLE_V1_SEED";
 
 const rpcUrl =
   "https://api.devnet.solana.com";
@@ -28,12 +33,12 @@ async function main() {
   const payer = (program.provider as anchor.AnchorProvider).publicKey;
 
   const programStatePubkey = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("BASICORACLE")],
+    [Buffer.from(PROGRAM_SEED)],
     program.programId
   )[0];
 
   const oraclePubkey = anchor.web3.PublicKey.findProgramAddressSync(
-    [Buffer.from("ORACLE_V1_SEED")],
+    [Buffer.from(ORACLE_SEED)],
     program.programId
   )[0];
 
@@ -55,7 +60,8 @@ async function main() {
     .setFunction({})
     .accounts({
       program: programStatePubkey,
-      function: new PublicKey(functionPubkey),
+      switchboardFunction: new PublicKey(functionPubkey),
+      switchboardRoutine: new PublicKey(routinePubkey),
       authority: payer,
     })
     .rpc();

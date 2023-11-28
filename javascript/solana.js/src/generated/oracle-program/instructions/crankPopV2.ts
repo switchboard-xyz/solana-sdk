@@ -28,7 +28,7 @@ export function crankPopV2(
   program: SwitchboardProgram,
   args: CrankPopV2Args,
   accounts: CrankPopV2Accounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.crank, isSigner: false, isWritable: true },

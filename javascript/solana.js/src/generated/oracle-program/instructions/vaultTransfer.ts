@@ -26,7 +26,7 @@ export function vaultTransfer(
   program: SwitchboardProgram,
   args: VaultTransferArgs,
   accounts: VaultTransferAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.state, isSigner: false, isWritable: false },

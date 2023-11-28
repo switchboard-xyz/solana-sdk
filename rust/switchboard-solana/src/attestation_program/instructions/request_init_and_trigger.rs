@@ -1,4 +1,6 @@
+use crate::cfg_client;
 use crate::prelude::*;
+use crate::*;
 
 #[derive(Accounts)]
 #[instruction(params:FunctionRequestInitAndTriggerParams)]
@@ -45,7 +47,7 @@ pub struct FunctionRequestInitAndTrigger<'info> {
     pub associated_token_program: AccountInfo<'info>,
 }
 
-#[derive(Clone, AnchorSerialize, AnchorDeserialize)]
+#[derive(Clone, AnchorSerialize, AnchorDeserialize, Default)]
 pub struct FunctionRequestInitAndTriggerParams {
     pub bounty: Option<u64>,
     pub slots_until_expiration: Option<u64>,
@@ -63,6 +65,44 @@ impl Discriminator for FunctionRequestInitAndTriggerParams {
 
 impl Discriminator for FunctionRequestInitAndTrigger<'_> {
     const DISCRIMINATOR: [u8; 8] = [86, 151, 134, 172, 35, 218, 207, 154];
+}
+
+cfg_client! {
+
+    pub struct FunctionRequestInitAndTriggerAccounts {
+        pub request: Pubkey,
+        pub authority: Pubkey,
+        /// The FunctionAccount for the request
+        pub function: Pubkey,
+        pub function_authority: Option<Pubkey>,
+        /// The AttestationQueueAccount that the request is being verified for.
+        pub attestation_queue: Pubkey,
+        pub payer: Pubkey,
+    }
+    impl ToAccountMetas for FunctionRequestInitAndTriggerAccounts {
+        fn to_account_metas(&self, _: Option<bool>) -> Vec<AccountMeta> {
+            let func_authority = if let Some(function_authority) = &self.function_authority {
+                AccountMeta::new_readonly(*function_authority, true)
+            } else {
+                AccountMeta::new_readonly(SWITCHBOARD_ATTESTATION_PROGRAM_ID, false)
+            };
+
+            vec![
+                AccountMeta::new(self.request, true),
+                AccountMeta::new_readonly(self.authority, true),
+                AccountMeta::new(self.function, false),
+                func_authority,
+                AccountMeta::new(find_associated_token_address(&self.request, &NativeMint::id()), false),
+                AccountMeta::new(NativeMint::id(), false),
+                AccountMeta::new_readonly(AttestationProgramState::get_pda(), false),
+                AccountMeta::new_readonly(self.attestation_queue, false),
+                AccountMeta::new(self.payer, true),
+                AccountMeta::new_readonly(anchor_lang::system_program::ID, false),
+                AccountMeta::new_readonly(anchor_spl::token::ID, false),
+                AccountMeta::new_readonly(anchor_spl::associated_token::ID, false),
+            ]
+        }
+    }
 }
 
 impl<'info> FunctionRequestInitAndTrigger<'info> {
@@ -236,5 +276,21 @@ impl<'info> FunctionRequestInitAndTrigger<'info> {
         account_metas.extend(self.token_program.to_account_metas(None));
         account_metas.extend(self.associated_token_program.to_account_metas(None));
         account_metas
+    }
+
+    cfg_client! {
+        pub fn build_ix(
+            accounts: &FunctionRequestInitAndTriggerAccounts,
+            params: &FunctionRequestInitAndTriggerParams,
+        ) -> Result<Instruction, SbError> {
+
+            Ok(
+                crate::utils::build_ix(
+                    &SWITCHBOARD_ATTESTATION_PROGRAM_ID,
+                    accounts,
+                    params,
+                )
+            )
+        }
     }
 }

@@ -52,11 +52,6 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
   public static size = 372;
 
   /**
-   * Returns the size of an on-chain {@linkcode PermissionAccount}.
-   */
-  public readonly size = this.program.account.permissionAccountData.size;
-
-  /**
    * Retrieve and decode the {@linkcode types.PermissionAccountData} stored in this account.
    */
   public async loadData(): Promise<types.PermissionAccountData> {
@@ -166,7 +161,7 @@ export class PermissionAccount extends Account<types.PermissionAccountData> {
         granter.toBytes(),
         grantee.toBytes(),
       ],
-      program.programId
+      program.oracleProgramId
     );
     return [new PermissionAccount(program, publicKey), bump];
   }

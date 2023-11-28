@@ -1,17 +1,17 @@
 import type {
+  CrankAccount,
+  QueueAccount,
   SwitchboardAccountData,
   SwitchboardAccountType,
 } from "./accounts/index.js";
 import {
   AttestationProgramStateAccount,
   BUFFER_DISCRIMINATOR,
-  CrankAccount,
   DISCRIMINATOR_MAP,
   JobAccount,
   ProgramStateAccount,
-  QueueAccount,
 } from "./accounts/index.js";
-import { viewVersion as viewAttestationVersion } from "./generated/attestation-program/instructions/viewVersion.js";
+import { viewVersion as viewAttestationProgramVersion } from "./generated/attestation-program/instructions/viewVersion.js";
 import {
   AggregatorAccountData,
   BufferRelayerAccountData,
@@ -25,7 +25,7 @@ import {
   SlidingResultAccountData,
   VrfAccountData,
 } from "./generated/index.js";
-import { viewVersion as viewSbVersion } from "./generated/oracle-program/instructions/viewVersion.js";
+import { viewVersion as viewOracleProgramVersion } from "./generated/oracle-program/instructions/viewVersion.js";
 import {
   DEVNET_GENESIS_HASH,
   MAINNET_GENESIS_HASH,
@@ -64,12 +64,8 @@ import type {
   Transaction,
   TransactionSignature,
 } from "@solana/web3.js";
-import {
-  Keypair,
-  PublicKey,
-  TransactionMessage,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { VersionedTransaction } from "@solana/web3.js";
+import { Keypair, PublicKey, TransactionMessage } from "@solana/web3.js";
 import { OracleJob } from "@switchboard-xyz/common";
 
 export type SendTransactionOptions = (ConfirmOptions | SendOptions) & {
@@ -161,14 +157,26 @@ export class SwitchboardProgram {
   // The read-only keypair for the Switchboard program.
   private static readonly _readOnlyKeypair = READ_ONLY_KEYPAIR;
 
-  // The anchor program instance.
-  private readonly _program: Program;
+  // // The anchor program instance.
+  // private readonly _program: Program;
 
-  // The anchor program instance for Switchboard's attestation program.
-  private readonly _attestationProgram: Program;
+  // // The anchor program instance for Switchboard's attestation program.
+  // private readonly _attestationProgram: Program;
+
+  /** Lazy load */
+  private _oracleProgram: Promise<Program> | undefined = undefined;
+
+  /** Lazy load */
+  private _attestationProgram: Promise<Program> | undefined = undefined;
 
   /** The Solana cluster to load the Switchboard program for. */
-  readonly cluster: Cluster | "localnet";
+  private _cluster: Promise<Cluster | "localnet"> | undefined = undefined;
+
+  /**
+   * The anchor Provider used by this program to connect with the Solana cluster.
+   * @return The AnchorProvider instance for the Switchboard Program.
+   */
+  public readonly provider: AnchorProvider;
 
   // The pubkey and bump of the Switchboard program state account.
   readonly programState: {
@@ -186,56 +194,111 @@ export class SwitchboardProgram {
   readonly mint: NativeMint;
 
   /**
+   * Retrieves the Switchboard V2 Program ID for the currently connected cluster.
+   * @return The PublicKey of the Switchboard V2 Program ID.
+   */
+  public readonly oracleProgramId: PublicKey;
+
+  /**
+   * Retrieves the Switchboard Attestation Program ID for the currently connected cluster.
+   * @return The PublicKey of the Switchboard Attestation Program ID.
+   */
+  public readonly attestationProgramId: PublicKey;
+  /**
    * Constructor for the SwitchboardProgram class.
    *
-   * @param program - The anchor program instance.
-   * @param cluster - The Solana cluster to load the Switchboard program for.
+   * @param provider - The AnchorProvider containing the RPC and wallet connection.
    * @param mint - The native mint for the Switchboard program.
+   * @param oracleProgramId - The Switchboard V2 Oracle Program ID.
+   * @param attestationProgramId - The Switchboard Attestation Program ID.
    */
   constructor(
-    program: Program,
-    attestationProgram: Program,
-    cluster: Cluster | "localnet",
-    mint: NativeMint
+    provider: AnchorProvider,
+    mint: NativeMint = new NativeMint(provider),
+    oracleProgramId: PublicKey = SB_V2_PID,
+    attestationProgramId: PublicKey = SB_ATTESTATION_PID,
+    /** Lazy loading parameters to pass-through */
+    oracleProgram?: Promise<Program>,
+    attestationProgram?: Promise<Program>
   ) {
-    this._program = program;
-    this._attestationProgram = attestationProgram;
-    this.cluster = cluster;
-
-    // Derive the state account from the seed.
-    const stateAccount = ProgramStateAccount.fromSeed(this);
-    this.programState = {
-      publicKey: stateAccount[0].publicKey,
-      bump: stateAccount[1],
-    };
-
-    this.programState = {
-      publicKey: stateAccount[0].publicKey,
-      bump: stateAccount[1],
-    };
-
-    // TODO: produce the attestation state account from the seed.
-    if (this._attestationProgram) {
-      const attestationStateAccount =
-        AttestationProgramStateAccount.fromSeed(this);
-      this.attestationProgramState = {
-        publicKey: attestationStateAccount[0].publicKey,
-        bump: attestationStateAccount[1],
-      };
-    } else {
-      const [attestationProgramStatePubkey, attestationProgramStateBump] =
-        PublicKey.findProgramAddressSync(
-          [Buffer.from("STATE")],
-          SB_ATTESTATION_PID
-        );
-
-      this.attestationProgramState = {
-        publicKey: attestationProgramStatePubkey,
-        bump: attestationProgramStateBump,
-      };
+    this.provider = provider;
+    this.mint = mint;
+    this.oracleProgramId = oracleProgramId;
+    this.attestationProgramId = attestationProgramId;
+    if (oracleProgram) {
+      this._oracleProgram = oracleProgram;
+    }
+    if (attestationProgram) {
+      this._attestationProgram = attestationProgram;
     }
 
-    this.mint = mint;
+    // Derive the state account from the seed.
+    const [programStatePubkey, programStateBump] =
+      PublicKey.findProgramAddressSync([Buffer.from("STATE")], oracleProgramId);
+    this.programState = {
+      publicKey: programStatePubkey,
+      bump: programStateBump,
+    };
+
+    const [attestationProgramStatePubkey, attestationProgramStateBump] =
+      PublicKey.findProgramAddressSync(
+        [Buffer.from("STATE")],
+        attestationProgramId
+      );
+    this.attestationProgramState = {
+      publicKey: attestationProgramStatePubkey,
+      bump: attestationProgramStateBump,
+    };
+  }
+
+  /**
+   * Create and initialize a {@linkcode SwitchboardProgram} connection object.
+   *
+   * @dev This method is synchronous but will return a promise for consistency with past be.
+   *
+   * @param connection - the Solana connection object used to connect to an RPC node.
+   *
+   * @param payerKeypair - optional, payer keypair used to pay for on-chain transactions.
+   *
+   * @param oracleProgramId - optional, override the default oracleProgramId.
+   *
+   * @param attestationProgramId - optional, override the default attestationProgramId.
+   *
+   * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
+   *
+   * Basic usage example:
+   *
+   * ```ts
+   * import { Connection } from "@solana/web3.js";
+   * import { SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
+   *
+   * const program = SwitchboardProgram.from(
+   *    new Connection("https://api.mainnet-beta.solana.com"),
+   *    payerKeypair
+   * );
+   *
+   * const txn = new TransactionObject(program.walletPubkey, [], []);
+   * const txnSignature = await program.signAndSend(txn);
+   * ```
+   */
+  public static from(
+    connection: Connection,
+    payerKeypair = READ_ONLY_KEYPAIR,
+    oracleProgramId = SB_V2_PID,
+    attestationProgramId = SB_ATTESTATION_PID
+  ): SwitchboardProgram {
+    const provider = new AnchorProvider(
+      connection,
+      new AnchorWallet(payerKeypair),
+      {}
+    );
+    const mint = new NativeMint(provider);
+    return new SwitchboardProgram(
+      provider,
+      mint,
+      oracleProgramId,
+      attestationProgramId
+    );
   }
 
   /**
@@ -244,31 +307,28 @@ export class SwitchboardProgram {
    * This method fetches the IDL for the Switchboard program, and initializes an anchor program
    * instance using the fetched IDL, provided program ID, and provider.
    *
-   * @param cluster - The Solana cluster to load the Switchboard program for.
    * @param connection - The Solana connection object used to connect to an RPC node.
+   * @param programId - The programID to load the Anchor program for. The program must have an IDL deployed.
    * @param payerKeypair - Optional payer keypair used to pay for on-chain transactions.
-   * @param programId - Optional program ID to override the cluster's default programId.
    *
-   * @returns The initialized anchor program instance for the Switchboard.
+   * @returns The initialized anchor program instance.
    */
   static async loadAnchorProgram(
-    cluster: Cluster | "localnet",
     connection: Connection,
-    payerKeypair: Keypair = READ_ONLY_KEYPAIR,
-    programId?: PublicKey
+    programId: PublicKey,
+    payerKeypair: Keypair = READ_ONLY_KEYPAIR
   ): Promise<Program> {
-    const pid = programId ?? getSwitchboardProgramId(cluster);
     const provider = new AnchorProvider(
       connection,
       // If no keypair is provided, default to dummy keypair
       new AnchorWallet(payerKeypair ?? SwitchboardProgram._readOnlyKeypair),
       { commitment: "confirmed" }
     );
-    const anchorIdl = await Program.fetchIdl(pid, provider);
+    const anchorIdl = await Program.fetchIdl(programId, provider);
     if (!anchorIdl) {
-      throw new Error(`Failed to find IDL for ${pid.toBase58()}`);
+      throw new Error(`Failed to find IDL for ${programId.toBase58()}`);
     }
-    const program = new Program(anchorIdl, pid, provider);
+    const program = new Program(anchorIdl, programId, provider);
 
     return program;
   }
@@ -276,13 +336,11 @@ export class SwitchboardProgram {
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
    *
-   * @param cluster - the solana cluster to load the Switchboard program for.
+   * @dev This method is synchronous but will return a promise for consistency with past be.
    *
    * @param connection - the Solana connection object used to connect to an RPC node.
-   *
    * @param payerKeypair - optional, payer keypair used to pay for on-chain transactions.
-   *
-   * @param programId - optional, override the cluster's default programId.
+   * @param oracleProgramId - optional, override the cluster's default oracleProgramId.
    *
    * @return the {@linkcode SwitchboardProgram} used to create and interact with Switchboard accounts.
    *
@@ -293,7 +351,6 @@ export class SwitchboardProgram {
    * import { SwitchboardProgram, TransactionObject } from '@switchboard-xyz/solana.js';
    *
    * const program = await SwitchboardProgram.load(
-   *    "mainnet-beta",
    *    new Connection("https://api.mainnet-beta.solana.com"),
    *    payerKeypair
    * );
@@ -303,38 +360,29 @@ export class SwitchboardProgram {
    * ```
    */
   static load = async (
-    cluster: Cluster | "localnet",
     connection: Connection,
     payerKeypair = READ_ONLY_KEYPAIR,
-    programId = getSwitchboardProgramId(cluster),
-    attestationProgramId = getSwitchboardAttestationProgramId(cluster)
+    oracleProgramId = SB_V2_PID,
+    attestationProgramId = SB_ATTESTATION_PID
   ): Promise<SwitchboardProgram> => {
-    const [program, attestationProgram] = await Promise.all([
-      SwitchboardProgram.loadAnchorProgram(
-        cluster,
-        connection,
-        payerKeypair,
-        programId
-      ),
-      SwitchboardProgram.loadAnchorProgram(
-        cluster,
-        connection,
-        payerKeypair,
-        attestationProgramId
-      ),
-    ]);
-    const mint = await NativeMint.load(program.provider as AnchorProvider);
-    return new SwitchboardProgram(program, attestationProgram, cluster, mint);
+    const provider = new AnchorProvider(
+      connection,
+      new AnchorWallet(payerKeypair),
+      {}
+    );
+    const mint = new NativeMint(provider);
+    return new SwitchboardProgram(
+      provider,
+      mint,
+      oracleProgramId,
+      attestationProgramId
+    );
   };
-
-  // public verifyAttestation(): void {
-  //   if (this._attestationProgram === undefined) {
-  //     throw new Error(`Attestation Program is missing`);
-  //   }
-  // }
 
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
+   *
+   * @dev This method is synchronous but will return a promise for consistency with past behavior.
    *
    * @param provider - The anchor provider containing the RPC and wallet connection.
    *
@@ -361,25 +409,26 @@ export class SwitchboardProgram {
    */
   static fromProvider = async (
     provider: AnchorProvider,
-    programId?: PublicKey,
-    attestationProgramId?: PublicKey
+    oracleProgramId: PublicKey = SB_V2_PID,
+    attestationProgramId: PublicKey = SB_ATTESTATION_PID
   ): Promise<SwitchboardProgram> => {
-    const payer = (provider.wallet as AnchorWallet).payer;
-    const program = await SwitchboardProgram.fromConnection(
-      provider.connection,
-      payer,
-      programId,
+    const mint = new NativeMint(provider);
+    return new SwitchboardProgram(
+      provider,
+      mint,
+      oracleProgramId,
       attestationProgramId
     );
-    return program;
   };
 
   /**
    * Create and initialize a {@linkcode SwitchboardProgram} connection object.
    *
+   * @dev This method is synchronous but will return a promise for consistency with past behavior.
+   *
    * @param connection - The Solana connection object used to connect to an RPC node.
    * @param payer - Optional, payer keypair used to pay for on-chain transactions (defaults to READ_ONLY_KEYPAIR).
-   * @param programId - Optional, override the cluster's default programId.
+   * @param oracleProgramId - Optional, override the cluster's default oracleProgramId.
    *
    * @return The {@linkcode SwitchboardProgram} instance used to create and interact with Switchboard accounts.
    *
@@ -397,72 +446,102 @@ export class SwitchboardProgram {
   static fromConnection = async (
     connection: Connection,
     payer = READ_ONLY_KEYPAIR,
-    programId?: PublicKey,
-    attestationProgramId?: PublicKey
+    oracleProgramId: PublicKey = SB_V2_PID,
+    attestationProgramId: PublicKey = SB_ATTESTATION_PID
   ): Promise<SwitchboardProgram> => {
-    const genesisHash = await connection.getGenesisHash();
-    const cluster =
-      genesisHash === MAINNET_GENESIS_HASH
-        ? "mainnet-beta"
-        : genesisHash === DEVNET_GENESIS_HASH
-        ? "devnet"
-        : "localnet";
-
-    const pid = programId ?? SB_V2_PID;
-    const programAccountInfo = await connection.getAccountInfo(pid);
-    if (programAccountInfo === null) {
-      throw new Error(
-        `Failed to load Switchboard V2 program at ${pid}, try manually providing a programId`
-      );
-    }
-
-    const attestationPid = attestationProgramId ?? SB_ATTESTATION_PID;
-    const attestationProgramAccountInfo = await connection.getAccountInfo(
-      attestationPid
-    );
-    if (attestationProgramAccountInfo === null) {
-      throw new Error(
-        `Failed to load Switchboard Attestation program at ${attestationPid}, try manually providing a programId`
-      );
-    }
-
     const program = await SwitchboardProgram.load(
-      cluster,
       connection,
       payer,
-      pid,
-      attestationPid
+      oracleProgramId,
+      attestationProgramId
     );
     return program;
   };
+
+  public get cluster(): Promise<Omit<Cluster, "testnet"> | "localnet"> {
+    if (!this._cluster) {
+      this._cluster = this.connection
+        .getGenesisHash()
+        .then((genesisHash) => {
+          switch (genesisHash) {
+            case MAINNET_GENESIS_HASH:
+              return "mainnet-beta";
+            case DEVNET_GENESIS_HASH:
+              return "devnet";
+            default:
+              return "localnet";
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          this._cluster = undefined;
+          throw err;
+        });
+    }
+
+    return this._cluster;
+  }
+
+  public get oracleProgram(): Promise<Program> {
+    if (!this._oracleProgram) {
+      this._oracleProgram = this.getOracleProgram().catch((err) => {
+        console.error(err);
+        this._oracleProgram = undefined;
+        throw err;
+      });
+    }
+    return this._oracleProgram;
+  }
+
+  private async getOracleProgram(retryCount = 3): Promise<Program> {
+    const anchorIdl = await Program.fetchIdl(
+      this.oracleProgramId,
+      this.provider
+    );
+    if (!anchorIdl) {
+      throw new Error(
+        `Failed to find IDL for ${this.oracleProgramId.toBase58()}`
+      );
+    }
+    return new Program(anchorIdl, this.oracleProgramId, this.provider);
+  }
+
+  public get attestationProgram(): Promise<Program> {
+    if (!this._attestationProgram) {
+      this._attestationProgram = this.getAttestationProgram().catch((err) => {
+        console.error(err);
+        this._attestationProgram = undefined;
+        throw err;
+      });
+    }
+    return this._attestationProgram;
+  }
+
+  private async getAttestationProgram(retryCount = 3): Promise<Program> {
+    try {
+      const anchorIdl = await Program.fetchIdl(
+        this.attestationProgramId,
+        this.provider
+      );
+      if (!anchorIdl) {
+        throw new Error(
+          `Failed to find IDL for ${this.attestationProgramId.toBase58()}`
+        );
+      }
+      return new Program(anchorIdl, this.attestationProgramId, this.provider);
+    } catch (error) {
+      if (0 >= retryCount) {
+        throw error;
+      }
+      return this.getAttestationProgram(retryCount - 1);
+    }
+  }
 
   public async getGitVersion(): Promise<string> {
     const messageV0 = new TransactionMessage({
       payerKey: this.walletPubkey,
       instructions: [
-        await this._program.methods.viewVersion().accounts({}).instruction(),
-      ],
-      recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
-    }).compileToLegacyMessage();
-    const simulationResult = await this.connection.simulateTransaction(
-      new VersionedTransaction(messageV0),
-      { sigVerify: false }
-    );
-    const logs = (simulationResult.value?.logs ?? []).join("\n");
-    const version = extractVersion(logs);
-    if (version) {
-      return version;
-    }
-    throw new Error(
-      `Failed to yield the git version in the view_version simulation result`
-    );
-  }
-
-  public async getAttestationGitVersion(): Promise<string> {
-    const messageV0 = new TransactionMessage({
-      payerKey: this.walletPubkey,
-      instructions: [
-        await this._attestationProgram.methods
+        await (await this.oracleProgram).methods
           .viewVersion()
           .accounts({})
           .instruction(),
@@ -478,65 +557,53 @@ export class SwitchboardProgram {
     if (version) {
       return version;
     }
+    console.error(logs);
+    throw new Error(
+      `Failed to yield the git version in the view_version simulation result`
+    );
+  }
+
+  public async getAttestationGitVersion(): Promise<string> {
+    const messageV0 = new TransactionMessage({
+      payerKey: this.walletPubkey,
+      instructions: [
+        await (await this.attestationProgram).methods
+          .viewVersion()
+          .accounts({})
+          .instruction(),
+      ],
+      recentBlockhash: (await this.connection.getLatestBlockhash()).blockhash,
+    }).compileToLegacyMessage();
+    const simulationResult = await this.connection.simulateTransaction(
+      new VersionedTransaction(messageV0),
+      { sigVerify: false }
+    );
+    console.error(simulationResult);
+    const logs = (simulationResult.value?.logs ?? []).join("\n");
+    const version = extractVersion(logs);
+    if (version) {
+      return version;
+    }
+    console.error(logs);
     throw new Error(
       `Failed to yield the git version in the view_version simulation result`
     );
   }
 
   /**
-   * Retrieves the Switchboard V2 Program ID for the currently connected cluster.
-   * @return The PublicKey of the Switchboard V2 Program ID.
-   */
-  public get programId(): PublicKey {
-    return this._program.programId;
-  }
-
-  /**
-   * Retrieves the Switchboard Attestation Program ID for the currently connected cluster.
-   * @return The PublicKey of the Switchboard Attestation Program ID.
-   */
-  public get attestationProgramId(): PublicKey {
-    return this._attestationProgram.programId;
-  }
-
-  /**
    * Retrieves the Switchboard V2 Program IDL.
-   * @return The IDL of the Switchboard V2 Program.
+   * @return A promise that resolves to the IDL of the Switchboard V2 Program.
    */
-  public get idl(): Idl {
-    return this._program.idl;
+  public get oracleProgramIdl(): Promise<Idl> {
+    return this.oracleProgram.then((program) => program.idl);
   }
 
   /**
    * Retrieves the Switchboard Attestation Program IDL.
-   * @return The IDL of the Switchboard Attestation Program.
+   * @return A promise that resolves to the IDL of the Switchboard Attestation Program.
    */
-  public get attestationIdl(): Idl {
-    return this._program.idl;
-  }
-
-  /**
-   * Retrieves the Switchboard V2 Borsh Accounts Coder.
-   * @return The BorshAccountsCoder for the Switchboard V2 Program.
-   */
-  public get coder(): BorshAccountsCoder {
-    return new BorshAccountsCoder(this._program.idl);
-  }
-
-  /**
-   * Retrieves the Switchboard Attestatio Borsh Accounts Coder.
-   * @return The BorshAccountsCoder for the Switchboard Attestation Program.
-   */
-  public get attestationCoder(): BorshAccountsCoder {
-    return new BorshAccountsCoder(this._attestationProgram.idl);
-  }
-
-  /**
-   * Retrieves the anchor Provider used by this program to connect with the Solana cluster.
-   * @return The AnchorProvider instance for the Switchboard Program.
-   */
-  public get provider(): AnchorProvider {
-    return this._program.provider as AnchorProvider;
+  public get attestationIdl(): Promise<Idl> {
+    return this.attestationProgram.then((program) => program.idl);
   }
 
   /**
@@ -573,21 +640,13 @@ export class SwitchboardProgram {
       new AnchorWallet(payer),
       this.provider.opts
     );
-    const program = new Program(
-      this._program.idl,
-      this._program.programId,
-      newProvider
-    );
-    const attestationProgram = new Program(
-      this._attestationProgram.idl,
-      this._attestationProgram.programId,
-      newProvider
-    );
     return new SwitchboardProgram(
-      program,
-      attestationProgram,
-      this.cluster,
-      this.mint
+      newProvider,
+      this.mint,
+      this.oracleProgramId,
+      this.attestationProgramId,
+      this._oracleProgram,
+      this._attestationProgram
     );
   }
 
@@ -650,16 +709,16 @@ export class SwitchboardProgram {
    * Retrieves the account namespace for the Switchboard V2 Program.
    * @return The AccountNamespace instance for the Switchboard V2 Program.
    */
-  public get account(): AccountNamespace {
-    return this._program.account;
+  public get oracleProgramAccount(): Promise<AccountNamespace> {
+    return this.oracleProgram.then((program) => program.account);
   }
 
   /**
    * Retrieves the account namespace for the Switchboard Attestation Program.
    * @return The AccountNamespace instance for the Switchboard Attestation Program.
    */
-  public get attestationAccount(): AccountNamespace {
-    return this._attestationProgram.account;
+  public get attestationAccount(): Promise<AccountNamespace> {
+    return this.attestationProgram.then((program) => program.account);
   }
 
   /**
@@ -676,33 +735,8 @@ export class SwitchboardProgram {
     crankAccount: CrankAccount;
     crank: CrankAccountData;
   }> {
-    const queueKey =
-      this.cluster === "mainnet-beta"
-        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_QUEUE
-        : this.cluster === "devnet"
-        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_QUEUE
-        : null;
-    if (!queueKey) {
-      throw new Error(
-        `Failed to load the permissionless queue for cluster ${this.cluster}`
-      );
-    }
-    const [queueAccount, queue] = await QueueAccount.load(this, queueKey);
-
-    const crankKey =
-      this.cluster === "mainnet-beta"
-        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONLESS_CRANK
-        : this.cluster === "devnet"
-        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONLESS_CRANK
-        : null;
-    if (!crankKey) {
-      throw new Error(
-        `Failed to load the permissionless queue for cluster ${this.cluster}`
-      );
-    }
-    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
-
-    return { queueAccount, queue, crankAccount, crank };
+    // TODO: make this load from common network configs
+    throw new Error(`Not implemented yet`);
   }
 
   /**
@@ -719,38 +753,8 @@ export class SwitchboardProgram {
     crankAccount: CrankAccount;
     crank: CrankAccountData;
   }> {
-    const queueKey =
-      this.cluster === "mainnet-beta"
-        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
-        : this.cluster === "devnet"
-        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
-        : null;
-    if (!queueKey) {
-      throw new Error(
-        `Failed to load the permissioned queue for cluster ${this.cluster}`
-      );
-    }
-    const [queueAccount, queue] = await QueueAccount.load(
-      this,
-      this.cluster === "mainnet-beta"
-        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_QUEUE
-        : SWITCHBOARD_LABS_DEVNET_PERMISSIONED_QUEUE
-    );
-
-    const crankKey =
-      this.cluster === "mainnet-beta"
-        ? SWITCHBOARD_LABS_MAINNET_PERMISSIONED_CRANK
-        : this.cluster === "devnet"
-        ? SWITCHBOARD_LABS_DEVNET_PERMISSIONED_CRANK
-        : null;
-    if (!crankKey) {
-      throw new Error(
-        `Failed to load the permissionless queue for cluster ${this.cluster}`
-      );
-    }
-    const [crankAccount, crank] = await CrankAccount.load(this, crankKey);
-
-    return { queueAccount, queue, crankAccount, crank };
+    // TODO: make this load from common network configs
+    throw new Error(`Not implemented yet`);
   }
 
   /**
@@ -761,15 +765,18 @@ export class SwitchboardProgram {
    * @param callback - A callback function to handle the event data, slot, and signature.
    * @return A unique listener ID that can be used to remove the event listener.
    */
-  public addEventListener<EventName extends keyof SwitchboardEvents>(
+  public async addEventListener<EventName extends keyof SwitchboardEvents>(
     eventName: EventName,
     callback: (
       data: SwitchboardEvents[EventName],
       slot: number,
       signature: string
     ) => void | Promise<void>
-  ): number {
-    return this._program.addEventListener(eventName as string, callback);
+  ): Promise<number> {
+    return (await this.oracleProgram).addEventListener(
+      eventName as string,
+      callback
+    );
   }
 
   /**
@@ -778,7 +785,7 @@ export class SwitchboardProgram {
    * @param listenerId - The unique ID of the event listener to be removed.
    */
   public async removeEventListener(listenerId: number) {
-    return await this._program.removeEventListener(listenerId);
+    return await (await this.oracleProgram).removeEventListener(listenerId);
   }
 
   /**
@@ -789,15 +796,17 @@ export class SwitchboardProgram {
    * @param callback - A callback function to handle the event data, slot, and signature.
    * @return A unique listener ID that can be used to remove the event listener.
    */
-  public addAttestationEventListener<EventName extends keyof SwitchboardEvents>(
+  public async addAttestationEventListener<
+    EventName extends keyof SwitchboardEvents
+  >(
     eventName: EventName,
     callback: (
       data: SwitchboardEvents[EventName],
       slot: number,
       signature: string
     ) => void | Promise<void>
-  ): number {
-    return this._attestationProgram.addEventListener(
+  ): Promise<number> {
+    return (await this.attestationProgram).addEventListener(
       eventName as string,
       callback
     );
@@ -809,7 +818,9 @@ export class SwitchboardProgram {
    * @param listenerId - The unique ID of the event listener to be removed.
    */
   public async removeAttestationEventListener(listenerId: number) {
-    return await this._attestationProgram.removeEventListener(listenerId);
+    return await (
+      await this.attestationProgram
+    ).removeEventListener(listenerId);
   }
 
   public async signAndSendAll(
@@ -839,7 +850,7 @@ export class SwitchboardProgram {
 
   async getProgramJobAccounts(): Promise<Map<Uint8Array, LoadedJobDefinition>> {
     const accountInfos = await this.connection
-      .getProgramAccounts(this.programId, {
+      .getProgramAccounts(this.oracleProgramId, {
         filters: [
           {
             memcmp: {
@@ -892,7 +903,7 @@ export class SwitchboardProgram {
     vrfs: Map<string, VrfAccountData>;
   }> {
     const accountInfos: GetProgramAccountsResponse =
-      await this.connection.getProgramAccounts(this.programId);
+      await this.connection.getProgramAccounts(this.oracleProgramId);
 
     // buffer - [42, 55, 46, 46, 45, 52, 78, 78]
     // bufferRelayer - [50, 35, 51, 115, 169, 219, 158, 52]

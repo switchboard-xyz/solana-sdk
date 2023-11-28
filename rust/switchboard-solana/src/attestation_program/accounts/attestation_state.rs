@@ -80,7 +80,7 @@ impl AttestationProgramState {
         pda_key
     }
 
-    pub fn verify_pda(expected: &Pubkey) -> Result<()> {
+    pub fn verify_pda(expected: &Pubkey) -> anchor_lang::Result<()> {
         let key = Self::get_pda();
         if key != *expected {
             return Err(error!(SwitchboardError::PdaDerivationError));

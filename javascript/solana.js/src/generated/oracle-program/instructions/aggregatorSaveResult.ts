@@ -34,7 +34,7 @@ export function aggregatorSaveResult(
   program: SwitchboardProgram,
   args: AggregatorSaveResultArgs,
   accounts: AggregatorSaveResultAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.aggregator, isSigner: false, isWritable: true },

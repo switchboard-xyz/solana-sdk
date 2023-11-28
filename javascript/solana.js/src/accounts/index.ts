@@ -9,6 +9,7 @@ export * from "./crankAccount.js";
 export * from "./crankDataBuffer.js";
 export * from "./functionAccount.js";
 export * from "./functionRequestAccount.js";
+export * from "./functionRoutineAccount.js";
 export * from "./jobAccount.js";
 export * from "./leaseAccount.js";
 export * from "./oracleAccount.js";

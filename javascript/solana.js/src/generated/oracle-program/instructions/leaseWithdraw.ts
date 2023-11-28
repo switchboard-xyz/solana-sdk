@@ -30,7 +30,7 @@ export function leaseWithdraw(
   program: SwitchboardProgram,
   args: LeaseWithdrawArgs,
   accounts: LeaseWithdrawAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.lease, isSigner: false, isWritable: true },

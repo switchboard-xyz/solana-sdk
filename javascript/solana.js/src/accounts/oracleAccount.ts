@@ -41,11 +41,6 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   public static size = 636;
 
   /**
-   * Get the size of an {@linkcode OracleAccount} on-chain.
-   */
-  public size = this.program.account.oracleAccountData.size;
-
-  /**
    * Return an oracle account state initialized to the default values.
    */
   public static default(): types.OracleAccountData {
@@ -99,14 +94,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   }
 
   decode(data: Buffer): types.OracleAccountData {
-    try {
-      return types.OracleAccountData.decode(data);
-    } catch {
-      return this.program.coder.decode<types.OracleAccountData>(
-        OracleAccount.accountName,
-        data
-      );
-    }
+    return types.OracleAccountData.decode(data);
   }
 
   /**
@@ -171,7 +159,7 @@ export class OracleAccount extends Account<types.OracleAccountData> {
   ): [OracleAccount, number] {
     const [publicKey, bump] = PublicKey.findProgramAddressSync(
       [Buffer.from("OracleAccountData"), queue.toBuffer(), wallet.toBuffer()],
-      program.programId
+      program.oracleProgramId
     );
     return [new OracleAccount(program, publicKey), bump];
   }

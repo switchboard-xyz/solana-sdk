@@ -1,15 +1,5 @@
-use crate::{cfg_client, prelude::*};
+use crate::prelude::*;
 use solana_program::borsh::get_instance_packed_len;
-
-fn serialize_slice<W: borsh::maybestd::io::Write, T: borsh::ser::BorshSerialize>(
-    slice: &[T],
-    writer: &mut W,
-) -> std::result::Result<(), std::io::Error> {
-    for item in slice {
-        item.serialize(writer)?;
-    }
-    Ok(())
-}
 
 #[repr(u8)]
 #[derive(Copy, Clone, Default, Debug, Eq, PartialEq, AnchorSerialize, AnchorDeserialize)]
@@ -21,6 +11,11 @@ pub enum RequestStatus {
     RequestFailure = 3,
     RequestExpired = 4,
     RequestSuccess = 5,
+}
+impl RequestStatus {
+    pub fn is_active(&self) -> bool {
+        matches!(self, RequestStatus::RequestPending)
+    }
 }
 impl From<RequestStatus> for u8 {
     fn from(value: RequestStatus) -> Self {
@@ -47,6 +42,16 @@ impl From<u8> for RequestStatus {
     }
 }
 
+fn serialize_slice<W: borsh::maybestd::io::Write, T: borsh::ser::BorshSerialize>(
+    slice: &[T],
+    writer: &mut W,
+) -> std::result::Result<(), std::io::Error> {
+    for item in slice {
+        item.serialize(writer)?;
+    }
+    Ok(())
+}
+
 #[derive(Copy, Clone, PartialEq)]
 pub struct FunctionRequestTriggerRound {
     /// The status of the request.
@@ -68,8 +73,11 @@ pub struct FunctionRequestTriggerRound {
     /// The slot when the request can first be executed.
     pub valid_after_slot: u64,
 
+    /// The index of the verifier assigned to this request.
+    pub queue_idx: u32,
+
     /// Reserved.
-    pub _ebuf: [u8; 56],
+    pub _ebuf: [u8; 52],
 }
 impl Default for FunctionRequestTriggerRound {
     fn default() -> Self {
@@ -79,8 +87,8 @@ impl Default for FunctionRequestTriggerRound {
 
 fn deserialize_round_ebuf_slice<R: borsh::maybestd::io::Read>(
     reader: &mut R,
-) -> std::result::Result<[u8; 56], std::io::Error> {
-    let mut buffer = [0u8; 56];
+) -> std::result::Result<[u8; 52], std::io::Error> {
+    let mut buffer = [0u8; 52];
     reader.read_exact(&mut buffer)?;
     Ok(buffer)
 }
@@ -108,9 +116,8 @@ where
         borsh::BorshSerialize::serialize(&self.verifier, writer)?;
         borsh::BorshSerialize::serialize(&self.enclave_signer, writer)?;
         borsh::BorshSerialize::serialize(&self.valid_after_slot, writer)?;
+        borsh::BorshSerialize::serialize(&self.queue_idx, writer)?;
         serialize_slice(&self._ebuf, writer)?;
-        // writer.write_all(&[0u8; 56])?;
-        // borsh::BorshSerialize::serialize(&[0u8; 56], writer)?;
         Ok(())
     }
 }
@@ -135,9 +142,12 @@ where
             verifier: borsh::BorshDeserialize::deserialize(buf)?,
             enclave_signer: borsh::BorshDeserialize::deserialize(buf)?,
             valid_after_slot: borsh::BorshDeserialize::deserialize(buf)?,
+            queue_idx: borsh::BorshDeserialize::deserialize(buf)?,
             _ebuf: deserialize_round_ebuf_slice(buf)?,
         })
     }
+
+ 
 }
 
 // #[account]
@@ -182,6 +192,7 @@ pub struct FunctionRequestAccountData {
     /// The slot when the account can be garbage collected and closed by anyone for a portion of the rent.
     pub garbage_collection_slot: Option<u64>,
 
+    /// The last recorded error code if most recent response was an error.
     pub error_status: u8,
 
     /// Reserved.
@@ -209,29 +220,6 @@ impl Default for FunctionRequestAccountData {
         }
     }
 }
-
-// pub struct U8Array255([u8; 255]);
-
-// impl borsh::de::BorshDeserialize for U8Array255 {
-//     // fn deserialize_reader<R: borsh::maybestd::io::Read>(
-//     //     reader: &mut R,
-//     // ) -> ::core::result::Result<Self, borsh::maybestd::io::Error> {
-//     //     let mut buffer = [0u8; 255];
-//     //     reader.read_exact(&mut buffer)?;
-//     //     Ok(U8Array255(buffer))
-//     // }
-
-//     fn deserialize(reader: &mut &[u8]) -> std::result::Result<U8Array255, std::io::Error> {
-//         // Ok([0u8; 255])
-//         Ok(U8Array255([0u8; 255]))
-//     }
-// }
-
-// fn deserialize_ebuf_slice<R: borsh::maybestd::io::Read>(
-//     reader: &mut R,
-// ) -> std::result::Result<[u8; 255], std::io::Error> {
-//     Ok([0u8; 255])
-// }
 
 fn deserialize_ebuf_slice<R: borsh::maybestd::io::Read>(
     reader: &mut R,
@@ -309,6 +297,8 @@ where
             _ebuf: deserialize_ebuf_slice(buf)?,
         })
     }
+
+ 
 }
 
 impl anchor_lang::AccountSerialize for FunctionRequestAccountData {
@@ -374,46 +364,99 @@ impl FunctionRequestAccountData {
     pub fn space(len: Option<u32>) -> usize {
         let base: usize = 8  // discriminator
             + get_instance_packed_len(&FunctionRequestAccountData::default()).unwrap();
-        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_USERS_CONTAINER_PARAMS_LEN) as usize;
+        let vec_elements: usize = len.unwrap_or(crate::DEFAULT_MAX_CONTAINER_PARAMS_LEN) as usize;
         base + vec_elements
     }
 
     // verify if their is a non-expired pending request
     pub fn is_round_active(&self, clock: &Clock) -> bool {
-        if self.active_request.status == RequestStatus::RequestPending
-            && self.active_request.expiration_slot > 0
-            && clock.slot >= self.active_request.expiration_slot
-        {
-            return true;
+        // 1. check status enum
+        if !self.active_request.status.is_active() {
+            return false;
         }
 
-        false
+        // 2. check valid after slot
+        // TODO: we should throw a more descriptive error for this
+        if clock.slot < self.active_request.valid_after_slot {
+            return false;
+        }
+
+        // 3. check expiration
+        if self.active_request.expiration_slot > 0
+            && clock.slot >= self.active_request.expiration_slot
+        {
+            return false;
+        }
+
+        true
     }
 
+    /// Validates the given `signer` account against the `function_account_info` and the `active_request`
+    /// stored in this `FunctionRequestAccountData`.
+    ///
+    /// # Arguments
+    ///
+    /// * `function_account_info` - The `AccountInfo` of the function account.
+    /// * `signer` - The `AccountInfo` of the account to validate.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the function account data cannot be loaded or if the `signer` account does not match
+    /// the expected `enclave_signer` stored in the `active_request`.
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(true)` if the validation succeeds, `Ok(false)` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::FunctionRequestAccountData;
+    ///
+    /// #[derive(Accounts)]
+    /// pub struct Settle<'info> {
+    ///     // YOUR PROGRAM ACCOUNTS
+    ///     #[account(
+    ///         mut,
+    ///         has_one = switchboard_request,
+    ///     )]
+    ///     pub user: AccountLoader<'info, UserState>,
+    ///
+    ///     // SWITCHBOARD ACCOUNTS
+    ///     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
+    ///     #[account(
+    ///         constraint = switchboard_request.validate_signer(
+    ///             &switchboard_function.to_account_info(),
+    ///             &enclave_signer.to_account_info()
+    ///         )?
+    ///     )]
+    ///     pub switchboard_request: Box<Account<'info, FunctionRequestAccountData>>,
+    ///     pub enclave_signer: Signer<'info>,
+    /// }
+    /// ```
     pub fn validate_signer<'a>(
         &self,
-        function_account_info: &AccountInfo<'a>,
+        function_account_info: &'a AccountInfo<'a>,
         signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        if self.function != function_account_info.key() {
-            msg!("function key mismatch");
+        let function_loader =
+            AccountLoader::<'a, FunctionAccountData>::try_from(function_account_info)?;
+
+        if self.function != function_loader.key() {
             msg!(
-                "expected {}, received {}",
+                "FunctionMismatch: expected {}, received {}",
                 self.function,
-                function_account_info.key()
+                function_loader.key()
             );
             return Ok(false);
         }
 
-        let function_loader =
-            AccountLoader::<'_, FunctionAccountData>::try_from(&function_account_info.clone())?;
         function_loader.load()?; // check owner/discriminator
 
         // validate the enclaves delegated signer matches
         if self.active_request.enclave_signer != signer.key() {
-            msg!("request signer mismatch");
             msg!(
-                "expected {}, received {}",
+                "SignerMismatch: expected {}, received {}",
                 self.active_request.enclave_signer,
                 signer.key()
             );
@@ -421,52 +464,6 @@ impl FunctionRequestAccountData {
         }
 
         Ok(true)
-    }
-
-    cfg_client! {
-        pub fn get_discriminator_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                0,
-                FunctionRequestAccountData::discriminator().to_vec(),
-            ))
-        }
-
-        pub fn get_is_triggered_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                8,
-                vec![1u8],
-            ))
-        }
-
-        pub fn get_is_active_filter() -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                9,
-                vec![RequestStatus::RequestPending as u8],
-            ))
-        }
-
-        pub fn get_queue_filter(queue_pubkey: &Pubkey) -> solana_client::rpc_filter::RpcFilterType {
-            solana_client::rpc_filter::RpcFilterType::Memcmp(solana_client::rpc_filter::Memcmp::new_raw_bytes(
-                138,
-                queue_pubkey.to_bytes().into(),
-            ))
-        }
-
-        pub fn get_is_ready_filters(queue_pubkey: &Pubkey) -> Vec<solana_client::rpc_filter::RpcFilterType> {
-            vec![
-                FunctionRequestAccountData::get_discriminator_filter(),
-                FunctionRequestAccountData::get_is_triggered_filter(),
-                FunctionRequestAccountData::get_is_active_filter(),
-                FunctionRequestAccountData::get_queue_filter(queue_pubkey),
-            ]
-        }
-
-        pub async fn fetch(
-            client: &solana_client::rpc_client::RpcClient,
-            pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::Error> {
-            crate::client::fetch_anchor_account(client, pubkey).await
-        }
     }
 }
 
@@ -531,9 +528,6 @@ mod tests {
 
     const REQUEST_DATA_HEX: &str = "080eb155904194f60004bfa35f95fbc43d26aa1ec0d2eed279fb735088b7745807c37fe104b1a7fad6620000000000000000000000000000000000000000000000000000000000000000c85b2185fb4d042d2158a0db4afdbf38bf3482572cc54e2f40010931172ef87643fed7bbb351c65427f4107159382985424744eec622e2db4196fcf3e58c9970aeb146e749c4d6c2bedb9f18a2779f107835ef66e1f142616c90982f354cf2d7040000000000000000d4999a0e00000000e1999a0e000000000000000000000000d6b01e18eceef561dac92214195eeb58eb3072c1907edce98eee20bfe9dcaf1750e9e4c05724b46b05b6467d598b440576dad1a7cf34144cd9f15c326a35fd3c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200009f36664d43eb1a5e90ac12412d367f3b64d5ce5b2865f8bdc313a5be7be336677d0000005049443d45354d41737a6a7a38715a5a44484b715132316735775975684d546a4d626b314c344c346a4246584d6771472c4d494e5f524553554c543d312c4d41585f524553554c543d31302c555345523d4475354d6f34594646464c7154394b5a514b504d7734436d656f355666474c75726a63526878686233706a4b82c00865000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
-    // Already has discriminator removed
-    const REQUEST_DATA_HEX_NO_DISC: &str = "0004bfa35f95fbc43d26aa1ec0d2eed279fb735088b7745807c37fe104b1a7fad6620000000000000000000000000000000000000000000000000000000000000000c85b2185fb4d042d2158a0db4afdbf38bf3482572cc54e2f40010931172ef87643fed7bbb351c65427f4107159382985424744eec622e2db4196fcf3e58c9970aeb146e749c4d6c2bedb9f18a2779f107835ef66e1f142616c90982f354cf2d7040000000000000000d4999a0e00000000e1999a0e000000000000000000000000d6b01e18eceef561dac92214195eeb58eb3072c1907edce98eee20bfe9dcaf1750e9e4c05724b46b05b6467d598b440576dad1a7cf34144cd9f15c326a35fd3c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200009f36664d43eb1a5e90ac12412d367f3b64d5ce5b2865f8bdc313a5be7be336677d0000005049443d45354d41737a6a7a38715a5a44484b715132316735775975684d546a4d626b314c344c346a4246584d6771472c4d494e5f524553554c543d312c4d41585f524553554c543d31302c555345523d4475354d6f34594646464c7154394b5a514b504d7734436d656f355666474c75726a63526878686233706a4b82c00865000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-
     const EXPECTED_CONTAINER_PARAMS: &str = "PID=E5MAszjz8qZZDHKqQ21g5wYuhMTjMbk1L4L4jBFXMgqG,MIN_RESULT=1,MAX_RESULT=10,USER=Du5Mo4YFFFLqT9KZQKPMw4Cmeo5VfGLurjcRhxhb3pjK";
 
     #[test]
@@ -545,9 +539,6 @@ mod tests {
         let container_params = std::str::from_utf8(&request.container_params)
             .unwrap()
             .to_string();
-
-        println!("Max params Len: {}", request.max_container_params_len);
-        println!("Params Len: {}", request.container_params.len());
 
         assert_eq!(container_params, EXPECTED_CONTAINER_PARAMS.to_string());
         assert_eq!(

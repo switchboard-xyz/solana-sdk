@@ -27,6 +27,25 @@ export const layout = borsh.struct([
   types.FunctionVerifyParams.layout("params"),
 ]);
 
+/**
+ * Verifies a function was executed within an enclave and sets the enclave signer
+ * on the function account for downstream instructions to verify.
+ *
+ * # Errors
+ *
+ * * `InsufficientQueue` - If the attestation queue has no active verifier oracles
+ * * `InvalidQuote` - If the verifier oracle has an invalid or expired quote
+ * * `IncorrectMrEnclave` - If the verifiers mr_enclave is not found in the attestation queue's enclave set
+ * * `IllegalVerifier` - If the incorrect verifier has responded and the routine is less than 30 seconds stale.
+ *
+ * * `FunctionNotReady` - If the function status is not Active
+ * * `InvalidMrEnclave` - If the measured mr_enclave value is not null
+ * * `MrEnclavesEmpty` - If the function has 0 mr_enclaves whitelisted
+ * * `IncorrectMrEnclave` - If the measured mr_enclave is not found in the functions enclave set
+ *
+ * * `IncorrectObservedTime` - If the oracles observed time has drifted by 20 seconds
+ *
+ */
 export function functionVerify(
   program: SwitchboardProgram,
   args: FunctionVerifyArgs,

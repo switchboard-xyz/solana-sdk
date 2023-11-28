@@ -8,7 +8,7 @@ macro_rules! cfg_client {
             #[cfg_attr(doc_cfg, doc(cfg(not(target_os = "solana"))))]
             $item
         )*
-    }
+    };
 }
 
 /// Macro used to include code only if the target_os is 'solana'.
@@ -21,7 +21,7 @@ macro_rules! cfg_program {
             #[cfg_attr(doc_cfg, doc(cfg(target_os = "solana")))]
             $item
         )*
-    }
+    };
 }
 
 /// Macro used to include code if the feature 'secrets' is enabled.
@@ -30,11 +30,33 @@ macro_rules! cfg_program {
 macro_rules! cfg_secrets {
     ($($item:item)*) => {
         $(
-            #[cfg(not(target_os = "solana"))]
-            #[cfg(feature = "secrets")]
-            #[cfg_attr(doc_cfg, doc(cfg(not(target_os = "solana"))))]
-            #[cfg_attr(doc_cfg, doc(cfg(feature = "secrets")))]
+            #[cfg(all(feature = "secrets", not(target_os = "solana")))]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "secrets", not(target_os = "solana"))))]
             $item
         )*
-    }
+    };
+}
+
+/// Macro used to include code if the feature 'macros' is enabled.
+#[macro_export]
+macro_rules! cfg_macros {
+    ($($item:item)*) => {
+        $(
+            #[cfg(all(feature = "macros", not(target_os = "solana")))]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "macros", not(target_os = "solana"))))]
+            $item
+        )*
+    };
+}
+
+/// Macro used to include IPFS code if the feature 'ipfs' is enabled.
+#[macro_export]
+macro_rules! cfg_ipfs {
+    ($($item:item)*) => {
+        $(
+            #[cfg(all(feature = "ipfs", not(target_os = "solana")))]
+            #[cfg_attr(doc_cfg, doc(cfg(feature = "ipfs", not(target_os = "solana"))))]
+            $item
+        )*
+    };
 }

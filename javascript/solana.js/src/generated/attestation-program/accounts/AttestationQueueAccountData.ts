@@ -89,6 +89,16 @@ export interface AttestationQueueAccountDataJSON {
   ebuf: Array<number>;
 }
 
+/**
+ * An AttestationQueue represents a round-robin queue of verifier oracles who attest on-chain
+ * whether a Switchboard Function was executed within an enclave against an expected set of
+ * enclave measurements.
+ *
+ * For an oracle to join the queue, the oracle must first submit their enclave quote on-chain and
+ * wait for an existing verifier to attest their quote. If the oracle's quote matches an expected
+ * measurement within the queues mr_enclaves config, it is granted permissions and will start
+ * being assigned update requests.
+ */
 export class AttestationQueueAccountData {
   /** The address of the authority which is permitted to add/remove allowed enclave measurements. */
   readonly authority: PublicKey;

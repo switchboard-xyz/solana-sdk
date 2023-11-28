@@ -74,25 +74,25 @@ export class NonExecutable {
   }
 }
 
-export interface None3JSON {
-  kind: "None3";
+export interface ErrorKindJSON {
+  kind: "Error";
 }
 
-export class None3 {
+export class ErrorKind {
   static readonly discriminator = 3;
-  static readonly kind = "None3";
+  static readonly kind = "Error";
   readonly discriminator = 3;
-  readonly kind = "None3";
+  readonly kind = "Error";
 
-  toJSON(): None3JSON {
+  toJSON(): ErrorKindJSON {
     return {
-      kind: "None3",
+      kind: "Error",
     };
   }
 
   toEncodable() {
     return {
-      None3: {},
+      Error: {},
     };
   }
 }
@@ -411,8 +411,8 @@ export function fromDecoded(obj: any): types.FunctionStatusKind {
   if ("NonExecutable" in obj) {
     return new NonExecutable();
   }
-  if ("None3" in obj) {
-    return new None3();
+  if ("Error" in obj) {
+    return new ErrorKind();
   }
   if ("Expired" in obj) {
     return new Expired();
@@ -470,8 +470,8 @@ export function fromJSON(
     case "NonExecutable": {
       return new NonExecutable();
     }
-    case "None3": {
-      return new None3();
+    case "Error": {
+      return new ErrorKind();
     }
     case "Expired": {
       return new Expired();
@@ -520,7 +520,7 @@ export function layout(property?: string) {
     borsh.struct([], "None"),
     borsh.struct([], "Active"),
     borsh.struct([], "NonExecutable"),
-    borsh.struct([], "None3"),
+    borsh.struct([], "Error"),
     borsh.struct([], "Expired"),
     borsh.struct([], "None5"),
     borsh.struct([], "None6"),

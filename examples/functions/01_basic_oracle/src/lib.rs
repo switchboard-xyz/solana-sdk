@@ -12,7 +12,7 @@ pub use model::*;
 pub mod utils;
 pub use utils::*;
 
-declare_id!("EF68PJkRqQu2VthTSy19kg6TWynMtRmLpxcMDKEdLC8t");
+declare_id!("8cagvrMvnhcVpVuAxYajqBGSrrjCbhJBL3954UjttwuJ");
 
 pub const PROGRAM_SEED: &[u8] = b"BASICORACLE";
 
@@ -31,14 +31,6 @@ pub mod basic_oracle {
     }
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]
-    pub fn refresh_oracles(
-        ctx: Context<RefreshPrices>,
-        params: RefreshPricesParams,
-    ) -> anchor_lang::Result<()> {
-        RefreshPrices::actuate(&ctx, &params)
-    }
-
-    #[access_control(ctx.accounts.validate(&ctx, &params))]
     pub fn set_function(
         ctx: Context<SetFunction>,
         params: SetFunctionParams,
@@ -47,10 +39,10 @@ pub mod basic_oracle {
     }
 
     #[access_control(ctx.accounts.validate(&ctx, &params))]
-    pub fn trigger_function(
-        ctx: Context<TriggerFunction>,
-        params: TriggerFunctionParams,
+    pub fn refresh_oracles(
+        ctx: Context<RefreshPrices>,
+        params: RefreshPricesParams,
     ) -> anchor_lang::Result<()> {
-        TriggerFunction::actuate(&ctx, &params)
+        RefreshPrices::actuate(&ctx, &params)
     }
 }

@@ -43,10 +43,23 @@ pub enum SwitchboardError {
     InvalidEnclaveSigner,
     #[msg("The provided mint did not match the wrapped SOL mint address")]
     InvalidNativeMint,
+    #[msg("This account has zero mr_enclaves defined")]
+    MrEnclavesEmpty,
+    InvalidMrEnclave,
+    #[msg("The FunctionAccount status is not active (1)")]
+    FunctionNotReady,
+    #[msg("The FunctionAccount has set requests_disabled to true and disabled this action")]
+    UserRequestsDisabled,
+    FunctionRoutinesDisabled,
+    #[msg(
+        "The PermissionAccount is missing the required flags for this action. Check the queues config to see which permissions are required"
+    )]
+    PermissionDenied,
+    ConfigParameterLocked,
 }
 
 use crate::cfg_client;
 
 cfg_client! {
-    pub use switchboard_common::{Error as SwitchboardClientError};
+    pub use switchboard_common::{ SbError, SbFunctionError };
 }

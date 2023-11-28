@@ -78,8 +78,6 @@ export type VrfPoolAccountData = types.VrfPoolAccountData & {
 };
 
 export class VrfPoolAccount extends Account<VrfPoolAccountData> {
-  public size = this.program.account.vrfPoolAccountData.size;
-
   /**
    * Invoke a callback each time a VrfAccount's data has changed on-chain.
    * @param callback - the callback invoked when the vrf state changes
@@ -131,7 +129,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
     if (info === null) {
       throw new AccountNotFoundError("VrfPool", this.publicKey);
     }
-    if (!info.owner.equals(this.program.programId)) {
+    if (!info.owner.equals(this.program.oracleProgramId)) {
       throw new Error("account doesn't belong to this program");
     }
 
@@ -169,7 +167,7 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
             space
           ),
           space: space,
-          programId: program.programId,
+          programId: program.oracleProgramId,
         }),
         types.vrfPoolInit(
           program,
@@ -637,8 +635,8 @@ export class VrfPoolAccount extends Account<VrfPoolAccountData> {
 
     const eventPromise: Promise<VrfPoolRequestEvent> = promiseWithTimeout(
       timeout,
-      new Promise((resolve: (result: VrfPoolRequestEvent) => void) => {
-        ws = this.program.addEventListener(
+      new Promise(async (resolve: (result: VrfPoolRequestEvent) => void) => {
+        ws = await this.program.addEventListener(
           "VrfPoolRequestEvent",
           (event, slot, signature) => {
             if (event.vrfPoolPubkey.equals(this.publicKey)) {

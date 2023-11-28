@@ -24,7 +24,7 @@ export function aggregatorAddJob(
   program: SwitchboardProgram,
   args: AggregatorAddJobArgs,
   accounts: AggregatorAddJobAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.aggregator, isSigner: false, isWritable: true },

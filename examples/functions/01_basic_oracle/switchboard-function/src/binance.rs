@@ -79,7 +79,7 @@ pub struct Binance {
 
 impl Binance {
     // Fetch data from the Binance API
-    pub async fn fetch() -> std::result::Result<Binance, SwitchboardClientError> {
+    pub async fn fetch() -> std::result::Result<Binance, SbFunctionError> {
         let symbols = ["BTCUSDT", "USDCUSDT", "ETHUSDT", "SOLUSDT", "DOGEUSDT"];
 
         let tickers_1hr = reqwest::get(format!(
@@ -151,20 +151,19 @@ impl Binance {
             OracleDataWithTradingSymbol {
                 symbol: TradingSymbol::Eth,
                 data: self.eth_usdt.clone().into(),
-            },
-            // OracleDataWithTradingSymbol {
-            // symbol: TradingSymbol::Sol,
-            // data: self.sol_usdt.clone().into(),
-            // },
-            // OracleDataWithTradingSymbol {
-            // symbol: TradingSymbol::Doge,
-            // data: self.doge_usdt.clone().into(),
-            // },
+            }, // OracleDataWithTradingSymbol {
+               // symbol: TradingSymbol::Sol,
+               // data: self.sol_usdt.clone().into(),
+               // },
+               // OracleDataWithTradingSymbol {
+               // symbol: TradingSymbol::Doge,
+               // data: self.doge_usdt.clone().into(),
+               // },
         ];
 
         let params = RefreshPricesParams { rows };
 
-        let (program_state_pubkey, _state_bump) =
+        let (_program_state_pubkey, _state_bump) =
             Pubkey::find_program_address(&[b"BASICORACLE"], &PROGRAM_ID);
 
         let (oracle_pubkey, _oracle_bump) =
@@ -180,6 +179,11 @@ impl Binance {
                 },
                 AccountMeta {
                     pubkey: runner.function,
+                    is_signer: false,
+                    is_writable: false,
+                },
+                AccountMeta {
+                    pubkey: runner.function_routine_key.unwrap(),
                     is_signer: false,
                     is_writable: false,
                 },

@@ -20,7 +20,7 @@ export function setBumps(
   program: SwitchboardProgram,
   args: SetBumpsArgs,
   accounts: SetBumpsAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.state, isSigner: false, isWritable: true },

@@ -30,7 +30,7 @@ export class TaskSpecRecord {
   static async fetch(
     program: SwitchboardProgram,
     address: PublicKey,
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<TaskSpecRecord | null> {
     const info = await program.connection.getAccountInfo(address);
 
@@ -47,7 +47,7 @@ export class TaskSpecRecord {
   static async fetchMultiple(
     program: SwitchboardProgram,
     addresses: PublicKey[],
-    programId: PublicKey = program.programId
+    programId: PublicKey = program.oracleProgramId
   ): Promise<Array<TaskSpecRecord | null>> {
     const infos = await program.connection.getMultipleAccountsInfo(addresses);
 

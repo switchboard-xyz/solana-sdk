@@ -25,7 +25,7 @@ export function vrfInit(
   program: SwitchboardProgram,
   args: VrfInitArgs,
   accounts: VrfInitAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.vrf, isSigner: false, isWritable: true },

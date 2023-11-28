@@ -24,7 +24,7 @@ export function aggregatorSetAuthority(
   program: SwitchboardProgram,
   args: AggregatorSetAuthorityArgs,
   accounts: AggregatorSetAuthorityAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.aggregator, isSigner: false, isWritable: true },

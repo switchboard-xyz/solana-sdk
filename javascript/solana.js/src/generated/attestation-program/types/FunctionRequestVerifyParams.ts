@@ -7,7 +7,7 @@ import { BN } from "@switchboard-xyz/common"; // eslint-disable-line @typescript
 
 export interface FunctionRequestVerifyParamsFields {
   observedTime: BN;
-  isFailure: boolean;
+  errorCode: number;
   mrEnclave: Array<number>;
   requestSlot: BN;
   containerParamsHash: Array<number>;
@@ -15,7 +15,7 @@ export interface FunctionRequestVerifyParamsFields {
 
 export interface FunctionRequestVerifyParamsJSON {
   observedTime: string;
-  isFailure: boolean;
+  errorCode: number;
   mrEnclave: Array<number>;
   requestSlot: string;
   containerParamsHash: Array<number>;
@@ -23,14 +23,14 @@ export interface FunctionRequestVerifyParamsJSON {
 
 export class FunctionRequestVerifyParams {
   readonly observedTime: BN;
-  readonly isFailure: boolean;
+  readonly errorCode: number;
   readonly mrEnclave: Array<number>;
   readonly requestSlot: BN;
   readonly containerParamsHash: Array<number>;
 
   constructor(fields: FunctionRequestVerifyParamsFields) {
     this.observedTime = fields.observedTime;
-    this.isFailure = fields.isFailure;
+    this.errorCode = fields.errorCode;
     this.mrEnclave = fields.mrEnclave;
     this.requestSlot = fields.requestSlot;
     this.containerParamsHash = fields.containerParamsHash;
@@ -40,7 +40,7 @@ export class FunctionRequestVerifyParams {
     return borsh.struct(
       [
         borsh.i64("observedTime"),
-        borsh.bool("isFailure"),
+        borsh.u8("errorCode"),
         borsh.array(borsh.u8(), 32, "mrEnclave"),
         borsh.u64("requestSlot"),
         borsh.array(borsh.u8(), 32, "containerParamsHash"),
@@ -53,7 +53,7 @@ export class FunctionRequestVerifyParams {
   static fromDecoded(obj: any) {
     return new FunctionRequestVerifyParams({
       observedTime: obj.observedTime,
-      isFailure: obj.isFailure,
+      errorCode: obj.errorCode,
       mrEnclave: obj.mrEnclave,
       requestSlot: obj.requestSlot,
       containerParamsHash: obj.containerParamsHash,
@@ -63,7 +63,7 @@ export class FunctionRequestVerifyParams {
   static toEncodable(fields: FunctionRequestVerifyParamsFields) {
     return {
       observedTime: fields.observedTime,
-      isFailure: fields.isFailure,
+      errorCode: fields.errorCode,
       mrEnclave: fields.mrEnclave,
       requestSlot: fields.requestSlot,
       containerParamsHash: fields.containerParamsHash,
@@ -73,7 +73,7 @@ export class FunctionRequestVerifyParams {
   toJSON(): FunctionRequestVerifyParamsJSON {
     return {
       observedTime: this.observedTime.toString(),
-      isFailure: this.isFailure,
+      errorCode: this.errorCode,
       mrEnclave: this.mrEnclave,
       requestSlot: this.requestSlot.toString(),
       containerParamsHash: this.containerParamsHash,
@@ -85,7 +85,7 @@ export class FunctionRequestVerifyParams {
   ): FunctionRequestVerifyParams {
     return new FunctionRequestVerifyParams({
       observedTime: new BN(obj.observedTime),
-      isFailure: obj.isFailure,
+      errorCode: obj.errorCode,
       mrEnclave: obj.mrEnclave,
       requestSlot: new BN(obj.requestSlot),
       containerParamsHash: obj.containerParamsHash,

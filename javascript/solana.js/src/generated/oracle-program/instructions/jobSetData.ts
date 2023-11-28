@@ -21,7 +21,7 @@ export function jobSetData(
   program: SwitchboardProgram,
   args: JobSetDataArgs,
   accounts: JobSetDataAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.job, isSigner: false, isWritable: true },

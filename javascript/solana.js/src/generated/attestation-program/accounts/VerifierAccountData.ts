@@ -15,7 +15,7 @@ export interface VerifierAccountDataFields {
   /** The unix timestamp when the quote was created. */
   createdAt: BN;
   /** Whether the quote is located on the AttestationQueues buffer. */
-  isOnQueue: boolean;
+  isOnQueue: number;
   /** The last time the quote heartbeated on-chain. */
   lastHeartbeat: BN;
   /**
@@ -42,7 +42,7 @@ export interface VerifierAccountDataJSON {
   /** The unix timestamp when the quote was created. */
   createdAt: string;
   /** Whether the quote is located on the AttestationQueues buffer. */
-  isOnQueue: boolean;
+  isOnQueue: number;
   /** The last time the quote heartbeated on-chain. */
   lastHeartbeat: string;
   /**
@@ -69,7 +69,7 @@ export class VerifierAccountData {
   /** The unix timestamp when the quote was created. */
   readonly createdAt: BN;
   /** Whether the quote is located on the AttestationQueues buffer. */
-  readonly isOnQueue: boolean;
+  readonly isOnQueue: number;
   /** The last time the quote heartbeated on-chain. */
   readonly lastHeartbeat: BN;
   /**
@@ -94,7 +94,7 @@ export class VerifierAccountData {
     borsh.publicKey("authority"),
     borsh.publicKey("attestationQueue"),
     borsh.i64("createdAt"),
-    borsh.bool("isOnQueue"),
+    borsh.u8("isOnQueue"),
     borsh.i64("lastHeartbeat"),
     borsh.publicKey("rewardEscrow"),
     borsh.publicKey("stakeWallet"),

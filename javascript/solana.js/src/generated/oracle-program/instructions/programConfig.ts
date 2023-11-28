@@ -24,7 +24,7 @@ export function programConfig(
   program: SwitchboardProgram,
   args: ProgramConfigArgs,
   accounts: ProgramConfigAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.authority, isSigner: true, isWritable: false },

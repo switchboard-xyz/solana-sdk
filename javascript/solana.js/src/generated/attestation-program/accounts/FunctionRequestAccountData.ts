@@ -37,6 +37,8 @@ export interface FunctionRequestAccountDataFields {
   createdAt: BN;
   /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
   garbageCollectionSlot: BN | null;
+  /** The last recorded error code if most recent response was an error. */
+  errorStatus: number;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -73,6 +75,8 @@ export interface FunctionRequestAccountDataJSON {
   createdAt: string;
   /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
   garbageCollectionSlot: string | null;
+  /** The last recorded error code if most recent response was an error. */
+  errorStatus: number;
   /** Reserved. */
   ebuf: Array<number>;
 }
@@ -109,6 +113,8 @@ export class FunctionRequestAccountData {
   readonly createdAt: BN;
   /** The slot when the account can be garbage collected and closed by anyone for a portion of the rent. */
   readonly garbageCollectionSlot: BN | null;
+  /** The last recorded error code if most recent response was an error. */
+  readonly errorStatus: number;
   /** Reserved. */
   readonly ebuf: Array<number>;
 
@@ -131,7 +137,8 @@ export class FunctionRequestAccountData {
     borsh.vecU8("containerParams"),
     borsh.i64("createdAt"),
     borsh.option(borsh.u64(), "garbageCollectionSlot"),
-    borsh.array(borsh.u8(), 256, "ebuf"),
+    borsh.u8("errorStatus"),
+    borsh.array(borsh.u8(), 255, "ebuf"),
   ]);
 
   constructor(fields: FunctionRequestAccountDataFields) {
@@ -153,6 +160,7 @@ export class FunctionRequestAccountData {
     this.containerParams = fields.containerParams;
     this.createdAt = fields.createdAt;
     this.garbageCollectionSlot = fields.garbageCollectionSlot;
+    this.errorStatus = fields.errorStatus;
     this.ebuf = fields.ebuf;
   }
 
@@ -222,6 +230,7 @@ export class FunctionRequestAccountData {
       ),
       createdAt: dec.createdAt,
       garbageCollectionSlot: dec.garbageCollectionSlot,
+      errorStatus: dec.errorStatus,
       ebuf: dec.ebuf,
     });
   }
@@ -244,6 +253,7 @@ export class FunctionRequestAccountData {
       garbageCollectionSlot:
         (this.garbageCollectionSlot && this.garbageCollectionSlot.toString()) ||
         null,
+      errorStatus: this.errorStatus,
       ebuf: this.ebuf,
     };
   }
@@ -272,6 +282,7 @@ export class FunctionRequestAccountData {
       garbageCollectionSlot:
         (obj.garbageCollectionSlot && new BN(obj.garbageCollectionSlot)) ||
         null,
+      errorStatus: obj.errorStatus,
       ebuf: obj.ebuf,
     });
   }

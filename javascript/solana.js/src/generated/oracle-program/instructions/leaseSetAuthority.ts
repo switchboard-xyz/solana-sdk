@@ -24,7 +24,7 @@ export function leaseSetAuthority(
   program: SwitchboardProgram,
   args: LeaseSetAuthorityArgs,
   accounts: LeaseSetAuthorityAccounts,
-  programId: PublicKey = program.programId
+  programId: PublicKey = program.oracleProgramId
 ) {
   const keys: Array<AccountMeta> = [
     { pubkey: accounts.lease, isSigner: false, isWritable: true },

@@ -143,12 +143,6 @@ export class AttestationPermissionAccount extends Account<types.AttestationPermi
   }
 
   /**
-   *  Returns the size of an on-chain {@linkcode AttestationPermissionAccount}.
-   */
-  public readonly size =
-    this.program.attestationAccount.attestationPermissionAccountData.size;
-
-  /**
    *  Retrieve and decode the {@linkcode types.AttestationPermissionAccountData} stored in this account.
    */
   public async loadData(): Promise<types.AttestationPermissionAccountData> {
