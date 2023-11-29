@@ -371,32 +371,192 @@ impl FunctionAccountData {
     ///
     /// # Arguments
     ///
-    /// * `function_account_info` - Solana AccountInfo for a FunctionAccountData
-    /// * `signer` - Solana AccountInfo for a signer
-    pub fn validate_signer<'a>(
-        function_account_info: &'a AccountInfo<'a>,
-        signer: &AccountInfo<'a>,
-    ) -> anchor_lang::Result<bool> {
+    /// * `signer` - Solana AccountInfo for a signer\
+    #[deprecated(
+        since = "0.28.35",
+        note = "please use a `FunctionRoutineAccountData` for all scheduled executions"
+    )]
+    pub fn validate_signer<'a>(&self, signer: &AccountInfo<'a>) -> anchor_lang::Result<bool> {
         // deserialize accounts and verify the owner
-
-        let function_loader =
-            AccountLoader::<'_, FunctionAccountData>::try_from(function_account_info)?;
-        let func = function_loader.load()?;
 
         // TODO: validate the seeds and bump
 
         // validate the enclaves enclave is not empty
-        if func.enclave.mr_enclave == [0u8; 32] {
+        if self.enclave.mr_enclave == [0u8; 32] {
             return Ok(false);
         }
 
         // validate the enclaves delegated signer matches
-        if func.enclave.enclave_signer != signer.key() {
+        if self.enclave.enclave_signer != signer.key() {
             return Ok(false);
         }
 
         // validate the function was verified and it is not expired
-        Ok(func.enclave.is_verified(&Clock::get()?))
+        Ok(self.enclave.is_verified(&Clock::get()?))
+    }
+
+    /// Validates that the provided request is assigned to the same `AttestationQueueAccountData` as the function and the
+    /// provided `enclave_signer` matches the `enclave_signer` stored in the request's `active_request` field.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - The `FunctionRequestAccountData` being validated.
+    /// * `enclave_signer` - The `AccountInfo` of the enclave signer to validate.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// * the function and request have different attestation queues
+    /// * the request's verified signer does not match the provided `enclave_signer`
+    /// * the `enclave_signer` did not sign the transaction
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(true)` if the validation succeeds, `Ok(false)` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::FunctionRequestAccountData;
+    ///
+    /// #[derive(Accounts)]
+    /// pub struct Settle<'info> {
+    ///     // YOUR PROGRAM ACCOUNTS
+    ///     #[account(
+    ///         mut,
+    ///         has_one = switchboard_request,
+    ///     )]
+    ///     pub user: AccountLoader<'info, UserState>,
+    ///
+    ///     // SWITCHBOARD ACCOUNTS
+    ///     #[account(
+    ///         constraint = function.load()?.validate_request(
+    ///             &request,
+    ///             &enclave_signer.to_account_info()
+    ///         )?
+    ///     )]
+    ///     pub function: AccountLoader<'info, FunctionAccountData>,
+    ///     #[account(
+    ///         has_one = function,
+    ///     )]
+    ///     pub request: Box<Account<'info, FunctionRequestAccountData>>,
+    ///     pub enclave_signer: Signer<'info>,
+    /// }
+    /// ```
+    pub fn validate_request(
+        &self,
+        request: &FunctionRequestAccountData,
+        enclave_signer: &AccountInfo,
+    ) -> anchor_lang::Result<bool> {
+        if request.attestation_queue != self.attestation_queue {
+            msg!(
+                "AttestationQueueMismatch: fn: {}, request: {}",
+                self.attestation_queue,
+                request.attestation_queue
+            );
+            return Ok(false);
+        }
+
+        if request.active_request.enclave_signer != enclave_signer.key() {
+            msg!(
+                "SignerMismatch: expected {}, received {}",
+                request.active_request.enclave_signer,
+                enclave_signer.key()
+            );
+            return Ok(false);
+        }
+
+        // Verify the enclave signer signed the transaction
+        if enclave_signer.signer_key().is_none() {
+            msg!(
+                "enclave_signer ({}) did not sign the transaction",
+                enclave_signer.key()
+            );
+            return Ok(false);
+        }
+
+        Ok(true)
+    }
+
+    /// Validates that the provided routine is assigned to the same `AttestationQueueAccountData` as the function and the
+    /// provided `enclave_signer` matches the `enclave_signer` stored in the routine's `enclave_signer` field.
+    ///
+    /// # Arguments
+    ///
+    /// * `routine` - The `FunctionRoutineAccountData` being validated.
+    /// * `enclave_signer` - The `AccountInfo` of the enclave signer to validate.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// * the function and routine have different attestation queues
+    /// * the routine's verified signer does not match the provided `enclave_signer`
+    /// * the `enclave_signer` did not sign the transaction
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(true)` if the validation succeeds, `Ok(false)` otherwise.
+    ///
+    /// # Examples
+    ///
+    /// ```ignore
+    /// use switchboard_solana::FunctionRoutineAccountData;
+    ///
+    /// #[derive(Accounts)]
+    /// pub struct Settle<'info> {
+    ///     // YOUR PROGRAM ACCOUNTS
+    ///     #[account(
+    ///         mut,
+    ///         has_one = switchboard_routine,
+    ///     )]
+    ///     pub user: AccountLoader<'info, UserState>,
+    ///
+    ///     // SWITCHBOARD ACCOUNTS
+    ///     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
+    ///     #[account(
+    ///         constraint = switchboard_routine.validate_signer(
+    ///             &switchboard_function.to_account_info(),
+    ///             &enclave_signer.to_account_info()
+    ///         )?
+    ///     )]
+    ///     pub switchboard_routine: Box<Account<'info, FunctionRoutineAccountData>>,
+    ///     pub enclave_signer: Signer<'info>,
+    /// }
+    /// ```
+    pub fn validate_routine(
+        &self,
+        routine: &FunctionRoutineAccountData,
+        enclave_signer: &AccountInfo,
+    ) -> anchor_lang::Result<bool> {
+        if routine.attestation_queue != self.attestation_queue {
+            msg!(
+                "AttestationQueueMismatch: fn: {}, routine: {}",
+                self.attestation_queue,
+                routine.attestation_queue
+            );
+            return Ok(false);
+        }
+
+        // validate the enclaves delegated signer matches
+        if routine.enclave_signer != enclave_signer.key() {
+            msg!(
+                "EnclaveSignerMismatch: expected {}, received {}",
+                routine.enclave_signer,
+                enclave_signer.key()
+            );
+            return Ok(false);
+        }
+
+        // Verify the enclave signer signed the transaction
+        if enclave_signer.signer_key().is_none() {
+            msg!(
+                "enclave_signer ({}) did not sign the transaction",
+                enclave_signer.key()
+            );
+            return Ok(false);
+        }
+
+        Ok(true)
     }
 
     #[deprecated(
