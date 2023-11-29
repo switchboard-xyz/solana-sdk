@@ -286,18 +286,22 @@ impl FunctionRoutineAccountData {
         self.is_disabled.into()
     }
 
-    /// Validates the given `signer` account against the `function_account_info` and the enclave_signer
+    /// Validates the given `signer` account against the `function_loader` and the enclave_signer
     /// stored in this `FunctionRoutineAccountData`.
     ///
     /// # Arguments
     ///
-    /// * `function_account_info` - The `AccountInfo` of the function account.
-    /// * `signer` - The `AccountInfo` of the account to validate.
+    /// * `function_loader` - The `AccountLoader` of the function account to validate.
+    /// * `enclave_signer` - The `AccountInfo` of the enclave signer to validate.
     ///
     /// # Errors
     ///
-    /// Returns an error if the function account data cannot be loaded or if the `signer` account does not match
-    /// the expected `enclave_signer`.
+    /// Returns an error if:
+    /// * the function cannot be deserialized
+    /// * the routine is not assigned to the function
+    /// * the function and routine have different attestation queues
+    /// * the routine's verified signer does not match the provided `enclave_signer`
+    /// * the `enclave_signer` did not sign the transaction
     ///
     /// # Returns
     ///
@@ -321,7 +325,7 @@ impl FunctionRoutineAccountData {
     ///     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
     ///     #[account(
     ///         constraint = switchboard_routine.validate_signer(
-    ///             &switchboard_function.to_account_info(),
+    ///             &switchboard_function,
     ///             &enclave_signer.to_account_info()
     ///         )?
     ///     )]
@@ -331,12 +335,9 @@ impl FunctionRoutineAccountData {
     /// ```
     pub fn validate_signer<'a>(
         &self,
-        function_account_info: &'a AccountInfo<'a>,
-        signer: &AccountInfo<'a>,
+        function_loader: &AccountLoader<'a, FunctionAccountData>,
+        enclave_signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        let function_loader =
-            AccountLoader::<'a, FunctionAccountData>::try_from(function_account_info)?;
-
         if self.function != function_loader.key() {
             msg!(
                 "FunctionMismatch: expected {}, received {}",
@@ -348,26 +349,7 @@ impl FunctionRoutineAccountData {
 
         let func = function_loader.load()?; // check owner/discriminator
 
-        if self.attestation_queue != func.attestation_queue {
-            msg!(
-                "QueueMismatch: expected {}, received {}",
-                self.attestation_queue,
-                func.attestation_queue
-            );
-            return Ok(false);
-        }
-
-        // validate the enclaves delegated signer matches
-        if self.enclave_signer != signer.key() {
-            msg!(
-                "SignerMismatch: expected {}, received {}",
-                self.enclave_signer,
-                signer.key()
-            );
-            return Ok(false);
-        }
-
-        Ok(true)
+        func.validate_routine(self, enclave_signer)
     }
 
     pub fn get_name(&self) -> String {

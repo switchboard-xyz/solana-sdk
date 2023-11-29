@@ -11,7 +11,11 @@ pub struct SetFunction<'info> {
     )]
     pub program: AccountLoader<'info, MyProgramState>,
 
+    // Make sure the function has at least one MrEnclave measurement defined.
     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
+    #[account(
+        constraint = switchboard_routine.function == switchboard_function.key()
+    )]
     pub switchboard_routine: Box<Account<'info, FunctionRoutineAccountData>>,
 
     pub authority: Signer<'info>,

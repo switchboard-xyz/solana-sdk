@@ -236,18 +236,22 @@ impl FunctionRequestAccountData {
         true
     }
 
-    /// Validates the given `signer` account against the `function_account_info` and the `active_request`
-    /// stored in this `FunctionRequestAccountData`.
+    /// Validates that the provided request is assigned to the same `AttestationQueueAccountData` as the function and the
+    /// provided `enclave_signer` matches the `enclave_signer` stored in the request's `active_request` field.
     ///
     /// # Arguments
     ///
-    /// * `function_account_info` - The `AccountInfo` of the function account.
-    /// * `signer` - The `AccountInfo` of the account to validate.
+    /// * `request` - The `FunctionRequestAccountData` being validated.
+    /// * `enclave_signer` - The `AccountInfo` of the enclave signer to validate.
     ///
     /// # Errors
     ///
-    /// Returns an error if the function account data cannot be loaded or if the `signer` account does not match
-    /// the expected `enclave_signer` stored in the `active_request`.
+    /// Returns an error if:
+    /// * the function cannot be deserialized
+    /// * the function is not assigned to the request
+    /// * the function and request have different attestation queues
+    /// * the request's verified signer does not match the provided `enclave_signer`
+    /// * the `enclave_signer` did not sign the transaction
     ///
     /// # Returns
     ///
@@ -271,7 +275,7 @@ impl FunctionRequestAccountData {
     ///     pub switchboard_function: AccountLoader<'info, FunctionAccountData>,
     ///     #[account(
     ///         constraint = switchboard_request.validate_signer(
-    ///             &switchboard_function.to_account_info(),
+    ///             &switchboard_function,
     ///             &enclave_signer.to_account_info()
     ///         )?
     ///     )]
@@ -281,33 +285,21 @@ impl FunctionRequestAccountData {
     /// ```
     pub fn validate_signer<'a>(
         &self,
-        function_account_info: &'a AccountInfo<'a>,
-        signer: &AccountInfo<'a>,
+        function_loader: &AccountLoader<'a, FunctionAccountData>,
+        enclave_signer: &AccountInfo<'a>,
     ) -> anchor_lang::Result<bool> {
-        if self.function != function_account_info.key() {
+        if self.function != function_loader.key() {
             msg!(
                 "FunctionMismatch: expected {}, received {}",
                 self.function,
-                function_account_info.key()
+                function_loader.key()
             );
             return Ok(false);
         }
 
-        let function_loader =
-            AccountLoader::<'_, FunctionAccountData>::try_from(function_account_info)?;
-        function_loader.load()?; // check owner/discriminator
+        let func = function_loader.load()?; // check owner/discriminator
 
-        // validate the enclaves delegated signer matches
-        if self.active_request.enclave_signer != signer.key() {
-            msg!(
-                "SignerMismatch: expected {}, received {}",
-                self.active_request.enclave_signer,
-                signer.key()
-            );
-            return Ok(false);
-        }
-
-        Ok(true)
+        func.validate_request(self, enclave_signer)
     }
 }
 

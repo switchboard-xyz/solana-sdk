@@ -6,6 +6,9 @@ pub use utils::*;
 pub mod error;
 pub use error::*;
 
+// use std::cell::Ref;
+// use std::ops::Deref;
+
 // pub use switchboard_solana::prelude::anchor_lang;
 // pub use switchboard_solana::prelude::anchor_spl;
 
@@ -26,7 +29,8 @@ pub mod custom_randomness_request {
 
     pub fn house_init(ctx: Context<HouseInit>, max_guess: u8) -> Result<()> {
         let mut house = ctx.accounts.house.load_init()?;
-        house.bump = *ctx.bumps.get("house").unwrap();
+        // house.bump = *ctx.bumps.get("house").unwrap();
+        house.bump = ctx.bumps.house;
         house.authority = ctx.accounts.authority.key();
         house.function = ctx.accounts.function.key();
         house.token_wallet = ctx.accounts.house_token_wallet.key();
@@ -44,7 +48,8 @@ pub mod custom_randomness_request {
 
     pub fn user_init(ctx: Context<UserInit>) -> Result<()> {
         let mut user = ctx.accounts.user.load_init()?;
-        user.bump = *ctx.bumps.get("user").unwrap();
+        // user.bump = *ctx.bumps.get("user").unwrap();
+        user.bump = ctx.bumps.user;
         user.authority = ctx.accounts.payer.key();
         user.token_wallet = ctx.accounts.user_token_wallet.key();
 
@@ -341,10 +346,10 @@ pub struct UserSettle<'info> {
     // SWITCHBOARD ACCOUNTS
     pub function: AccountLoader<'info, FunctionAccountData>,
     #[account(
-      constraint = request.validate_signer(
-          &function.to_account_info(),
-          &enclave_signer.to_account_info()
-        )? @ RandomnessRequestError::FunctionValidationFailed,
+        constraint = request.validate_signer(
+            &function,
+            &enclave_signer.to_account_info(),
+        )?
     )]
     pub request: Box<Account<'info, FunctionRequestAccountData>>,
     pub enclave_signer: Signer<'info>,

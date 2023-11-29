@@ -12,7 +12,7 @@ path = "src/main.rs"
 [dependencies]
 tokio = "^1"
 futures = "0.3"
-# switchboard-solana = "0.28.43"
+# switchboard-solana = "0.29.70"
 switchboard-solana = { path = "../../../../rust/switchboard-solana", features = [
     "macros",
 ] }

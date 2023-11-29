@@ -19,6 +19,6 @@ default = []
 
 [dependencies]
 bytemuck = "^1"
-anchor-spl = "0.28.0"
-switchboard-solana = "0.28.43"
-# switchboard-solana = { path = "../../../rust/switchboard-solana" }
+anchor-spl = "0.29.0"
+# switchboard-solana = "0.29.70"
+switchboard-solana = { path = "../../../rust/switchboard-solana" }
