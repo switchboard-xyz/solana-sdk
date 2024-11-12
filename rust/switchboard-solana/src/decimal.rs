@@ -3,29 +3,59 @@ use crate::prelude::*;
 use core::cmp::Ordering;
 use rust_decimal::prelude::{FromPrimitive, ToPrimitive};
 use rust_decimal::Decimal;
-use std::convert::{From, TryInto};
 
-// #[derive(Default, Eq, PartialEq, Copy, Clone, AnchorSerialize, AnchorDeserialize)]
-// pub struct BorshDecimal {
-//     pub mantissa: i128,
-//     pub scale: u32,
-// }
-// impl From<SwitchboardDecimal> for BorshDecimal {
-//     fn from(s: SwitchboardDecimal) -> Self {
-//         Self {
-//             mantissa: s.mantissa,
-//             scale: s.scale,
-//         }
-//     }
-// }
-// impl From<BorshDecimal> for SwitchboardDecimal {
-//     fn from(val: BorshDecimal) -> Self {
-//         SwitchboardDecimal {
-//             mantissa: val.mantissa,
-//             scale: val.scale,
-//         }
-//     }
-// }
+#[derive(Default, Eq, PartialEq, Copy, Clone, AnchorSerialize, AnchorDeserialize)]
+pub struct BorshDecimal {
+    pub mantissa: i128,
+    pub scale: u32,
+}
+impl From<Decimal> for BorshDecimal {
+    fn from(s: Decimal) -> Self {
+        Self {
+            mantissa: s.mantissa(),
+            scale: s.scale(),
+        }
+    }
+}
+impl From<&Decimal> for BorshDecimal {
+    fn from(s: &Decimal) -> Self {
+        Self {
+            mantissa: s.mantissa(),
+            scale: s.scale(),
+        }
+    }
+}
+impl From<SwitchboardDecimal> for BorshDecimal {
+    fn from(s: SwitchboardDecimal) -> Self {
+        Self {
+            mantissa: s.mantissa,
+            scale: s.scale,
+        }
+    }
+}
+impl From<BorshDecimal> for SwitchboardDecimal {
+    fn from(val: BorshDecimal) -> Self {
+        SwitchboardDecimal {
+            mantissa: val.mantissa,
+            scale: val.scale,
+        }
+    }
+}
+impl TryInto<Decimal> for &BorshDecimal {
+    type Error = anchor_lang::error::Error;
+    fn try_into(self) -> anchor_lang::Result<Decimal> {
+        Decimal::try_from_i128_with_scale(self.mantissa, self.scale)
+            .map_err(|_| error!(SwitchboardError::DecimalConversionError))
+    }
+}
+
+impl TryInto<Decimal> for BorshDecimal {
+    type Error = anchor_lang::error::Error;
+    fn try_into(self) -> anchor_lang::Result<Decimal> {
+        Decimal::try_from_i128_with_scale(self.mantissa, self.scale)
+            .map_err(|_| error!(SwitchboardError::DecimalConversionError))
+    }
+}
 
 #[zero_copy(unsafe)]
 #[repr(packed)]

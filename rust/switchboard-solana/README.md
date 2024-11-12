@@ -13,7 +13,7 @@
 [![Twitter Badge](https://img.shields.io/twitter/follow/switchboardxyz?label=Follow+Switchboard)](https://twitter.com/switchboardxyz)
 
   <h4>
-    <strong>Typedocs: </strong><a href="https://docs.rs/switchboard-solana">docs.rs/switchboard-solana</a>
+    <strong>Docs: </strong><a href="https://switchboard-solana-rust-docs.web.app">switchboard-solana-rust-docs.web.app</a>
   </h4>
   <h4>
     <strong>Solana SDK: </strong><a href="https://github.com/switchboard-xyz/solana-sdk">github.com/switchboard-xyz/solana-sdk</a>

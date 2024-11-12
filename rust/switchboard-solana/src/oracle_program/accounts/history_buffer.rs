@@ -5,7 +5,7 @@ use std::cell::Ref;
 use superslice::*;
 
 #[zero_copy(unsafe)]
-#[derive(Default)]
+#[derive(Default, Debug)]
 #[repr(packed)]
 pub struct AggregatorHistoryRow {
     /// The timestamp of the sample.
@@ -93,7 +93,7 @@ impl<'a> Discriminator for AggregatorHistoryBuffer<'a> {
 
 impl<'a> Owner for AggregatorHistoryBuffer<'a> {
     fn owner() -> Pubkey {
-        SWITCHBOARD_PROGRAM_ID
+        *SWITCHBOARD_PROGRAM_ID
     }
 }
 
@@ -101,11 +101,11 @@ impl<'a> Owner for AggregatorHistoryBuffer<'a> {
 mod tests {
     use super::*;
 
-    impl<'a> Default for AggregatorHistoryBuffer<'a> {
-        fn default() -> Self {
-            unsafe { std::mem::zeroed() }
-        }
-    }
+    // impl<'a> Default for AggregatorHistoryBuffer<'a> {
+    // fn default() -> Self {
+    // unsafe { std::mem::zeroed() }
+    // }
+    // }
 
     // insertion_idx = 1
     // 1646249940   - 100.6022611525

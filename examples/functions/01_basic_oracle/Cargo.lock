@@ -4491,7 +4491,9 @@ dependencies = [
 
 [[package]]
 name = "switchboard-common"
-version = "0.11.0"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b26494bcb327187cc56f836a13188b02bfecadcf267923286cca7af78490b239"
 dependencies = [
  "async-trait",
  "base64 0.21.5",

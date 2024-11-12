@@ -56,10 +56,17 @@ pub enum SwitchboardError {
     )]
     PermissionDenied,
     ConfigParameterLocked,
+    #[msg("The function authority has disabled service execution for this function")]
+    FunctionServicesDisabled,
+    #[msg("The service has been disabled. Please check the service's is_disabled status for more information.")]
+    ServiceDisabled,
+    #[msg("The service worker already has the maximum number of services (128)")]
+    ServiceWorkerFull,
+    #[msg("The service worker is already using its max enclave space for a set of services")]
+    ServiceWorkerEnclaveFull,
+    #[msg("Service is already being executed by a worker. Please remove the service before adding to a new service worker")]
+    ServiceAlreadyAssignedToWorker,
+    NetworkError,
 }
 
-use crate::cfg_client;
-
-cfg_client! {
-    pub use switchboard_common::{ SbError, SbFunctionError };
-}
+impl std::error::Error for SwitchboardError {}

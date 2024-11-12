@@ -127,6 +127,6 @@ impl Discriminator for FunctionRequestAccountData {
 
 impl Owner for FunctionRequestAccountData {
     fn owner() -> Pubkey {
-        SWITCHBOARD_ATTESTATION_PROGRAM_ID
+        *SWITCHBOARD_ATTESTATION_PROGRAM_ID
     }
 }

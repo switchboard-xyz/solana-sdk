@@ -1,4 +1,3 @@
-use crate::cfg_client;
 use crate::prelude::*;
 use rust_decimal::Decimal;
 use std::cell::Ref;
@@ -13,7 +12,7 @@ pub struct Hash {
 
 #[zero_copy(unsafe)]
 #[repr(packed)]
-#[derive(Default, PartialEq, Eq)]
+#[derive(Default, Debug, PartialEq, Eq)]
 pub struct AggregatorRound {
     /// Maintains the number of successful responses received from nodes.
     /// Nodes can submit one successful response per round.
@@ -56,7 +55,7 @@ pub enum AggregatorResolutionMode {
 // #[zero_copy(unsafe)]
 #[account(zero_copy(unsafe))]
 #[repr(packed)]
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub struct AggregatorAccountData {
     /// Name of the aggregator to store on-chain.
     pub name: [u8; 32],
@@ -119,11 +118,36 @@ pub struct AggregatorAccountData {
     pub job_weights: [u8; 16],
     /// Unix timestamp when the feed was created.
     pub creation_timestamp: i64,
-    /// Use sliding windoe or round based resolution
+    /// Use sliding window or round based resolution
     /// NOTE: This changes result propogation in latest_round_result
     pub resolution_mode: AggregatorResolutionMode,
+    pub base_priority_fee: u32,
+    pub priority_fee_bump: u32,
+    pub priority_fee_bump_period: u32,
+    pub max_priority_fee_multiplier: u32,
+    pub parent_function: Pubkey,
     /// Reserved for future info.
-    pub _ebuf: [u8; 138],
+    pub _ebuf: [u8; 90],
+}
+
+impl Default for AggregatorAccountData {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
+
+impl TryInto<AggregatorAccountData> for Option<Vec<u8>> {
+    type Error = SwitchboardError;
+
+    fn try_into(self) -> std::result::Result<AggregatorAccountData, Self::Error> {
+        if let Some(data) = self {
+            bytemuck::try_from_bytes(&data)
+                .map(|&x| x)
+                .map_err(|_| SwitchboardError::AccountDeserializationError)
+        } else {
+            Err(SwitchboardError::AccountDeserializationError)
+        }
+    }
 }
 
 impl AggregatorAccountData {
@@ -237,7 +261,7 @@ impl AggregatorAccountData {
 
     /// Check the variance (as a percentage difference from the max delivered
     /// oracle value) from all oracles.
-    pub fn check_variace(&self, max_variance: Decimal) -> anchor_lang::Result<()> {
+    pub fn check_variance(&self, max_variance: Decimal) -> anchor_lang::Result<()> {
         if max_variance > Decimal::ONE {
             return Err(SwitchboardError::InvalidFunctionInput.into());
         }
@@ -282,39 +306,11 @@ impl AggregatorAccountData {
         }
         Ok(Clock::get()?.unix_timestamp < self.expiration)
     }
-
-    cfg_client! {
-        pub fn fetch(
-            client: &solana_client::rpc_client::RpcClient,
-            pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::SbError> {
-            crate::client::fetch_zerocopy_account(client, pubkey)
-        }
-
-        pub async fn fetch_async(
-            client: &solana_client::nonblocking::rpc_client::RpcClient,
-            pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::SbError> {
-            crate::client::fetch_zerocopy_account_async(client, pubkey).await
-        }
-
-        pub fn fetch_sync<T: solana_sdk::client::SyncClient>(
-            client: &T,
-            pubkey: Pubkey,
-        ) -> std::result::Result<Self, switchboard_common::SbError> {
-            crate::client::fetch_zerocopy_account_sync(client, pubkey)
-        }
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    impl Default for AggregatorAccountData {
-        fn default() -> Self {
-            unsafe { std::mem::zeroed() }
-        }
-    }
 
     fn create_aggregator(lastest_round: AggregatorRound) -> AggregatorAccountData {
         AggregatorAccountData {

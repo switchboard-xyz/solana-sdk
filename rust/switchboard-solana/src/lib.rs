@@ -1,3 +1,6 @@
+#![allow(unused_doc_comments)]
+#![allow(ambiguous_glob_reexports)]
+#![allow(unexpected_cfgs)]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(clippy::result_large_err)]
 
@@ -38,7 +41,7 @@
 //! - [AttestationQueue](AttestationQueueAccountData)
 //! - [Verifier](VerifierAccountData)
 //! - [AttestationPermission](AttestationPermissionAccountData)
-//! - [SwitchboardWallet](SwitchboardWallet)
+//! - [SwitchboardWallet]
 //! - [Function](FunctionAccountData)
 //! - [FunctionRequest](FunctionRequestAccountData)
 //! # Usage
@@ -95,18 +98,11 @@
 
 mod macros;
 
-use solana_program::pubkey;
-
 pub mod decimal;
 pub use decimal::*;
 
 pub mod oracle_program;
 pub use oracle_program::*;
-
-pub mod attestation_program;
-pub use attestation_program::*;
-
-pub use switchboard_common::*;
 
 pub mod error;
 
@@ -117,7 +113,6 @@ pub mod utils;
 pub use utils::*;
 
 pub mod events;
-pub use events::*;
 
 pub mod program_id;
 pub use program_id::*;
@@ -127,22 +122,6 @@ pub mod instructions;
 pub mod types;
 
 pub mod prelude;
-
-cfg_client! {
-    mod client;
-    pub use client::*;
-}
-
-cfg_ipfs! {
-    pub mod ipfs {
-        pub use switchboard_common::ipfs::*;
-    }
-}
-
-cfg_secrets! {
-    pub mod secrets;
-    pub use secrets::*;
-}
 
 cfg_macros! {
     // Futures crate is needed by the proc_macro
@@ -160,4 +139,4 @@ pub const DEFAULT_USERS_NUM_SLOTS_UNTIL_EXPIRATION: u64 = 2250; // 15 min at 400
 
 pub const DEFAULT_MAX_CONTAINER_PARAMS_LEN: u32 = 256;
 
-declare_id!(SWITCHBOARD_PROGRAM_ID);
+anchor_lang::prelude::declare_id!("SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f");

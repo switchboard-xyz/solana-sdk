@@ -26,9 +26,28 @@ pub struct LeaseAccountData {
     // Reserved for future info.
     pub _ebuf: [u8; 255],
 }
+impl Default for LeaseAccountData {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
+}
 
 impl LeaseAccountData {
     pub fn size() -> usize {
         8 + std::mem::size_of::<LeaseAccountData>()
+    }
+}
+
+impl TryInto<LeaseAccountData> for Option<Vec<u8>> {
+    type Error = SwitchboardError;
+
+    fn try_into(self) -> std::result::Result<LeaseAccountData, Self::Error> {
+        if let Some(data) = self {
+            bytemuck::try_from_bytes(&data)
+                .map(|&x| x)
+                .map_err(|_| SwitchboardError::AccountDeserializationError)
+        } else {
+            Err(SwitchboardError::AccountDeserializationError)
+        }
     }
 }
