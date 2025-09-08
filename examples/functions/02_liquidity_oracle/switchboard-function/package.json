@@ -1,9 +1,0 @@
-{
-  "name": "solana-liquidity-oracle-function",
-  "scripts": {
-    "build:function": "make"
-  },
-  "dependencies": {
-    "solana-liquidity-oracle": "latest"
-  }
-}

@@ -1,83 +1,67 @@
 <div align="center">
 
-![Switchboard Logo](https://github.com/switchboard-xyz/sbv2-core/raw/main/website/static/img/icons/switchboard/avatar.png)
+![Switchboard Logo](https://github.com/switchboard-xyz/core-sdk/raw/main/website/static/img/icons/switchboard/avatar.png)
 
-# Switchboard x Solana
+# switchboard-on-demand
 
-> A collection of libraries and examples for interacting with Switchboard V2 on
-> Solana.
+> A Rust library for seamless interaction with Switchboard Oracle accounts on the Solana blockchain.
 
-[![Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/solana-js-test.yml)
-[![Anchor Test Status](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml/badge.svg)](https://github.com/switchboard-xyz/sbv2-solana/actions/workflows/anchor-test.yml)
+[![Crates.io](https://img.shields.io/crates/v/switchboard-solana.svg?style=flat-square&logo=rust)](https://crates.io/crates/switchboard-solana)
+[![Discord](https://img.shields.io/discord/841525135311634443?label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/switchboardxyz)
+[![Twitter Follow](https://img.shields.io/twitter/follow/switchboardxyz?style=social)](https://twitter.com/switchboardxyz)
 
-[![Crates.io](https://img.shields.io/crates/v/switchboard-v2?label=switchboard-v2&logo=rust)](https://crates.io/crates/switchboard-v2)
-[![NPM Badge](https://img.shields.io/github/package-json/v/switchboard-xyz/sbv2-solana?color=red&filename=javascript%2Fsolana.js%2Fpackage.json&label=%40switchboard-xyz%2Fsolana.js&logo=npm)](https://www.npmjs.com/package/@switchboard-xyz/solana.js)
+<h4>
+    <strong>Switchboard Documentation:</strong> <a href="https://docs.switchboard.xyz">docs.switchboard.xyz</a>
+    <br>
+    <strong>Rustdoc:</strong> <a href="https://switchboard-on-demand-rust-docs.web.app">switchboard-on-demand-rust-docs.web.app</a>
+</h4>
 
 </div>
 
+## Overview
+
+`switchboard-on-demand` provides Rust developers with an efficient and easy-to-use client for integrating Solana-based oracles from Switchboard into their applications. This library empowers developers to leverage decentralized, trustless, and highly reliable oracle data for various applications, particularly in the DeFi and Web3 spaces.
+
+## Features
+
+- **On-Demand Oracle Data**: Fetch real-time, accurate, and tamper-proof data for blockchain applications.
+- **Custom Oracle Creation**: Design and deploy your own oracles tailored to your specific data needs.
+- **High Fidelity Financial Data**: Ideal for applications requiring precise and dependable financial data.
+- **Privacy-Focused**: Operates within confidential runtimes to ensure data integrity and security.
+
 ## Getting Started
 
-To get started, clone the
-[sbv2-solana](https://github.com/switchboard-xyz/sbv2-solana) repository.
+### Prerequisites
 
-```bash
-git clone https://github.com/switchboard-xyz/sbv2-solana
+Ensure you have the following installed:
+- Rust (latest stable version)
+- Cargo
+- Solana CLI tools (if interacting directly with the Solana blockchain)
+
+### Installation
+
+Add `switchboard-on-demand` to your `Cargo.toml`:
+
+```toml
+[dependencies]
+switchboard-on-demand = "0.1.0"
 ```
 
-Then install the dependencies
+### Using on chain
 
-```bash
-cd sbv2-solana
-pnpm install
-pnpm build
+```rust
+use switchboard_on_demand::PullFeedAccountData;
+use rust_decimal::Decimal;
+
+pub fn solana_ix<'a>(mut ctx: Context<YourAccounts<'a>>, params: Params) -> Result<()> {
+    // Assume `account_info` is obtained from the Solana blockchain
+    let feed = PullFeedAccountData::parse(ctx.accounts.sb_feed)?;
+    let max_stale_slots = 100; // Define the maximum number of slots before data is considered stale
+    let min_samples = 5; // Set the minimum number of samples for data accuracy
+    let price: Decimal = feed.get_value(&Clock::get()?, max_stale_slots, min_samples, true)?;
+
+    msg!("Oracle Price: {}", price);
+
+    Ok(())
+}
 ```
-
-## Addresses
-
-The following addresses can be used with the Switchboard deployment on Solana
-
-### Mainnet
-
-| Account              | Address                                        |
-| -------------------- | ---------------------------------------------- |
-| Program ID           | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
-| Program Authority    | `2NvGRFswVx3GXxURNSfjbsWY4iP1ufj8LvAKJWGXSm4D` |
-| IdlAddress           | `Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk` |
-| Permissioned Queue   | `3HBb2DQqDfuMdzWxNk1Eo9RTMkFYmuEAd32RiLKn9pAn` |
-| Permissionless Queue | `5JYwqvKkqp35w8Nq3ba4z1WYUeJQ1rB36V8XvaGp6zn1` |
-
-### Devnet
-
-| Account              | Address                                        |
-| -------------------- | ---------------------------------------------- |
-| Program ID           | `SW1TCH7qEPTdLsDHRgPuMQjbQxKdH2aBStViMFnt64f`  |
-| Program Authority    | `2KgowxogBrGqRcgXQEmqFvC3PGtCu66qERNJevYW8Ajh` |
-| IdlAddress           | `Fi8vncGpNKbq62gPo56G4toCehWNy77GgqGkTaAF5Lkk` |
-| Permissioned Queue   | `PeRMnAqNqHQYHUuCBEjhm1XPeVTh4BxjY4t4TPan1pG`  |
-| Permissionless Queue | `uPeRMdfPmrPqgRWSrjAnAkH78RqAhe5kXoW6vBYRqFX`  |
-
-## Clients
-
-| **Lang**   | **Name**                                           | **Description**                                                    |
-| ---------- | -------------------------------------------------- | ------------------------------------------------------------------ |
-| Rust       | [switchboard-v2](rust/switchboard-v2)              | A Rust library to interact with Switchboard V2 accounts on Solana. |
-| Javascript | [@switchboard-xyz/solana.js](javascript/solana.js) | A Typescript client to interact with Switchboard on Solana.        |
-
-## Examples
-
-| **Lang**   | **Name**                                                   | **Description**                                                                                                 |
-| ---------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Rust       | [native-feed-parser](programs/native-feed-parser)          | Read a Switchboard feed using Solana's native program library                                                   |
-| Anchor     | [anchor-feed-parser](programs/anchor-feed-parser)          | Read a Switchboard feed using Anchor                                                                            |
-| Anchor     | [anchor-history-parser](programs/anchor-history-parser)    | Read a data feeds history buffer and get the closest historical sample to a given timestamp                     |
-| Anchor     | [anchor-vrf-parser](programs/anchor-vrf-parser)            | Read a Switchboard VRF account and make a Cross Program Invocation (CPI) to request a new randomness value      |
-| Anchor     | [anchor-vrf-lite-parser](programs/anchor-vrf-lite-parser)  | Read a Switchboard VRF Lite account and make a Cross Program Invocation (CPI) to request a new randomness value |
-| Anchor     | [anchor-buffer-parser](programs/anchor-buffer-parser)      | Read a Switchboard buffer relayer using Anchor                                                                  |
-| Javascript | [javascript-feed-walkthrough](javascript/feed-walkthrough) | Create a private Switchboard queue and oracle and fulfill your own oracle updates                               |
-
-## Troubleshooting
-
-1. File a
-   [GitHub Issue](https://github.com/switchboard-xyz/sbv2-solana/issues/new)
-2. Ask a question in
-   [Discord #dev-support](https://discord.com/channels/841525135311634443/984343400377647144)

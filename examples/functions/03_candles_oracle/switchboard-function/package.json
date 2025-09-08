@@ -1,9 +1,0 @@
-{
-  "name": "solana-candles-oracle-function",
-  "scripts": {
-    "build:function": "make"
-  },
-  "dependencies": {
-    "solana-candles-oracle-example": "latest"
-  }
-}

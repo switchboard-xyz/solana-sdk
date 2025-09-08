@@ -1,41 +1,12 @@
 {
-  "name": "solana-sdk",
-  "private": true,
+  "name": "switchboard-on-demand-rust-docs",
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "fix": "pnpm -r fix",
-    "clean": "turbo run clean && rm -rf node_modules",
-    "clean:cargo": "find . -type d \\( -name \"target\" -o -name \"test-ledger\" -o -name \".anchor\" \\) -exec rm -rf {} +",
-    "clean:js": "find . -type d -name \"node_modules\" -exec rm -rf {} +",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "turbo run build --filter=docs^... && changeset publish"
+    "docgen": "cargo doc --all-features --no-deps",
+    "docgen:compile": "pnpm docgen && ts-node ./scripts/compile_docs.ts",
+    "docgen:deploy": "pnpm docgen:compile && cd target && firebase deploy --project docs --only hosting:switchboard-on-demand-rust-docs"
   },
-  "devDependencies": {
-    "@changesets/cli": "^2.26.1",
-    "@commitlint/config-conventional": "^17.4.4",
-    "@switchboard-xyz/eslint-config": "latest",
-    "@types/node": "^20.2.5",
-    "commitlint": "^17.4.4",
-    "eslint": "^8.42.0",
-    "shelljs": "^0.8.5",
-    "shx": "^0.3.4",
-    "ts-node": "^10.9.1",
-    "tsx": "^3.12.7",
-    "turbo": "^1.10.3",
-    "typescript": "^5.0.4"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/switchboard-xyz/solana-sdk.git"
-  },
-  "packageManager": "pnpm@8.6.0"
+  "dependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "fs-extra": "^11.2.0"
+  }
 }
