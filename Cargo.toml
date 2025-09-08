@@ -1,0 +1,65 @@
+[package]
+name = "switchboard-on-demand"
+version = "0.7.2"
+# docs.rs autobuild has difficulty with ahash dep. Host yuorself at https://tiiny.host/
+documentation = "https://docs.rs/switchboard-on-demand/latest/switchboard_on_demand"
+edition = "2021"
+resolver = "2"
+description = "A Rust library to interact with the Switchboard Solana program."
+readme = "README.md"
+keywords = ["switchboard", "oracle", "solana"]
+homepage = "https://switchboard.xyz"
+repository = "https://github.com/switchboard-xyz/solana-sdk/tree/main/rust/switchboard-solana"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "switchboard_on_demand"
+doctest = false
+
+[features]
+default = ["cpi"]
+no-entrypoint = []
+cpi = ["no-entrypoint"]
+ipfs = []
+all-features = ["ipfs", "cpi", "no-entrypoint", "client"]
+pid_override = []
+client = ["solana-client", "solana-sdk", "anchor-lang", "anchor-client", "tokio", "tokio-util", "futures", "arc-swap"]
+devnet = []
+doc_cfg = ["switchboard-common/doc_cfg"]
+anchor = ["anchor-lang"]
+anchor_legacy = ["anchor", "anchor-lang"]
+secrets = []
+test_only_ignore_singers = []
+
+[build-dependencies]
+cc = "1.0"
+
+[dependencies]
+anyhow = "1.0.97"
+arc-swap = { version = "1.6", optional = true }
+arrayref = "0.3.9"
+bincode = { version = "^1" }
+borsh = { version = "1.5.7" }
+bytemuck = "^1"
+libsecp256k1 = "0.7.1"
+rust_decimal = "^1"
+serde = { version = "^1", features = ["derive"] }
+sha2 = "0.10.8"
+solana-program = "=2.2.1"
+solana-sdk-ids = ">=1.18"
+spl-associated-token-account = { version = ">=3", features = ["no-entrypoint"] }
+spl-token = { version = ">=4", features = ["no-entrypoint"] }
+switchboard-common = { version = "0.11.5", features = [] }
+anchor-client = { version = ">=0.31.1", optional = true }
+anchor-lang = { version = ">=0.31.1", optional = true, features = ["idl-build"] }
+futures = { version = "0.3.31", optional = true }
+solana-client = { version = "=2.2.1", optional = true }
+solana-sdk = { version = "=2.2.1", optional = true }
+tokio = { version = "^1.41", features = ["full", "tracing"], optional = true }
+tokio-util = { version = "0.7.10", features = ["time"], optional = true }
+faster-hex = "0.10.0"
+solana-program-ed25519-dalek-bump = "1.16.3"
+solana-program-memory = "3.0.0"
+solana-define-syscall = "3.0.0"
+
