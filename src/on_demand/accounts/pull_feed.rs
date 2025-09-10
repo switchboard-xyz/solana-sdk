@@ -17,7 +17,6 @@ use anchor_lang::{AnchorDeserialize, AnchorSerialize, Discriminator, Owner, Zero
 use bytemuck;
 use rust_decimal::Decimal;
 use sha2::{Digest, Sha256};
-use solana_program::clock::Clock;
 #[cfg(not(feature = "anchor"))]
 use solana_program::pubkey::Pubkey;
 
@@ -249,8 +248,8 @@ impl OracleSubmission {
 impl PullFeedAccountData {
     /// Returns true if the value in the current result is within
     /// staleness threshold
-    pub fn is_result_vaild(&self, clock: &Clock) -> bool {
-        self.result.slot >= clock.slot - self.max_staleness as u64
+    pub fn is_result_vaild(&self, clock_slot: u64) -> bool {
+        self.result.slot >= clock_slot - self.max_staleness as u64
     }
 
     /// Returns the oracle submission that was used for the current result
@@ -369,11 +368,11 @@ impl PullFeedAccountData {
     /// * `clock` - the clock to use for the current slot
     /// * `max_staleness` - the maximum number of slots to consider
     /// * `min_samples` - the minimum number of samples required to return a value
-    /// **returns**
+    ///   **returns**
     /// * `Ok(Decimal)` - the median value of the submissions in the last `max_staleness` slots
     pub fn get_value(
         &self,
-        clock: &Clock,
+        clock_slot: u64,
         max_staleness: u64,
         min_samples: u32,
         only_positive: bool,
@@ -382,7 +381,7 @@ impl PullFeedAccountData {
             .submissions
             .iter()
             .take_while(|s| !s.is_empty())
-            .filter(|s| s.slot >= clock.slot - max_staleness)
+            .filter(|s| s.slot >= clock_slot - max_staleness)
             .collect::<Vec<_>>();
         if submissions.len() < min_samples as usize {
             return Err(OnDemandError::NotEnoughSamples);
@@ -398,11 +397,11 @@ impl PullFeedAccountData {
     }
 
     /// List of samples that are valid for the current slot
-    pub fn valid_samples(&self, clock: &Clock) -> Vec<&OracleSubmission> {
+    pub fn valid_samples(&self, clock_slot: u64) -> Vec<&OracleSubmission> {
         self.submissions
             .iter()
             .take_while(|s| !s.is_empty())
-            .filter(|s| s.slot >= clock.slot - self.max_staleness as u64)
+            .filter(|s| s.slot >= clock_slot - self.max_staleness as u64)
             .collect()
     }
 
@@ -441,8 +440,8 @@ impl PullFeedAccountData {
 
     /// The median value of the submissions needed for quorom size
     /// Fails if the result is not valid or stale.
-    pub fn value(&self, clock: &Clock) -> Result<Decimal, OnDemandError> {
-        if self.result.result_slot().unwrap_or(0) < clock.slot - self.max_staleness as u64 {
+    pub fn value(&self, clock_slot: u64) -> Result<Decimal, OnDemandError> {
+        if self.result.result_slot().unwrap_or(0) < clock_slot - self.max_staleness as u64 {
             return Err(OnDemandError::StaleResult);
         }
         self.result.value().ok_or(OnDemandError::StaleResult)
@@ -482,10 +481,7 @@ impl Owner for PullFeedAccountData {
 }
 const DISCRIMINATOR: [u8; 8] = [196, 27, 108, 196, 10, 215, 219, 40];
 impl Discriminator for PullFeedAccountData {
-    #[cfg(not(feature = "anchor_legacy"))]
     const DISCRIMINATOR: &[u8] = &DISCRIMINATOR;
-    #[cfg(feature = "anchor_legacy")]
-    const DISCRIMINATOR: [u8; 8] = DISCRIMINATOR;
 }
 
 /// Type alias for PullFeedAccountData for backward compatibility

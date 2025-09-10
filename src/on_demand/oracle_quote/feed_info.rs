@@ -87,7 +87,6 @@ impl PackedFeedInfo {
 
 #[cfg(test)]
 mod tests {
-    use rust_decimal::Decimal;
 
     use super::*;
 

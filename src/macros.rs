@@ -122,7 +122,7 @@ macro_rules! impl_account_deserialize {
 
         impl anchor_client::anchor_lang::AccountDeserialize for $struct_name {
             fn try_deserialize(buf: &mut &[u8]) -> Result<Self, Error> {
-                use crate::anchor_traits::Discriminator;
+                use $crate::anchor_traits::Discriminator;
                 if buf.len() < $struct_name::discriminator().len() {
                     return Err(ErrorCode::AccountDiscriminatorMismatch.into());
                 }

@@ -41,7 +41,6 @@
 //! - `anchor` - Enable Anchor framework integration
 
 #![doc(html_logo_url = "https://i.imgur.com/2cZloJp.png")]
-#![warn(missing_docs)]
 #![allow(unexpected_cfgs)]
 #![allow(unused_attributes)]
 #![allow(clippy::result_large_err)]

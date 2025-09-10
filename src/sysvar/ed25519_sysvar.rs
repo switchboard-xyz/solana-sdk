@@ -214,6 +214,7 @@ impl Ed25519Sysvar {
             // Process first signature (i=0) outside the loop
             let first_signature_offset = first_offsets.signature_offset as usize;
             let first_pubkey_offset = first_offsets.public_key_offset as usize;
+            let first_message_instruction_index = first_offsets.message_instruction_index;
 
             let first_pubkey = &*(message_data_ptr.add(first_pubkey_offset)
                 as *const [u8; ED25519_PUBKEY_SERIALIZED_SIZE]);
@@ -250,6 +251,20 @@ impl Ed25519Sysvar {
                 // Verify all messages are identical
                 if message_offset != first_message_offset || message_size != first_message_size {
                     bail!("Inconsistent message offsets or sizes");
+                }
+
+                // Validate that all instruction indexes match the first signature's message_instruction_index
+                if offsets.signature_instruction_index != first_message_instruction_index {
+                    bail!("Signature instruction index mismatch: expected {}, got {}", 
+                          first_message_instruction_index, offsets.signature_instruction_index);
+                }
+                if offsets.public_key_instruction_index != first_message_instruction_index {
+                    bail!("Public key instruction index mismatch: expected {}, got {}", 
+                          first_message_instruction_index, offsets.public_key_instruction_index);
+                }
+                if offsets.message_instruction_index != first_message_instruction_index {
+                    bail!("Message instruction index mismatch: expected {}, got {}", 
+                          first_message_instruction_index, offsets.message_instruction_index);
                 }
 
                 // Zero-copy references - no copying or allocation

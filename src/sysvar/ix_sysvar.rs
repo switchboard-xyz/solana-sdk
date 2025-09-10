@@ -3,6 +3,7 @@ use core::ptr::read_unaligned;
 use solana_program::account_info::AccountInfo;
 use solana_program::pubkey::Pubkey;
 use solana_program::sysvar::instructions::ID as INSTRUCTIONS_SYSVAR_ID;
+use solana_program::ed25519_program::ID as ED25519_PROGRAM_ID;
 
 use crate::check_pubkey_eq;
 
@@ -13,6 +14,19 @@ use crate::check_pubkey_eq;
 #[derive(Clone, Default)]
 #[cfg_attr(feature = "anchor", derive(serde::Serialize, serde::Deserialize))]
 pub struct Instructions;
+
+/*
+#[repr(C)]
+pub struct Ed25519SignatureOffsets {
+    pub signature_offset: u16,
+    pub signature_instruction_index: u16,
+    pub public_key_offset: u16,
+    pub public_key_instruction_index: u16,
+    pub message_data_offset: u16,
+    pub message_data_size: u16,
+    pub message_instruction_index: u16,
+}
+*/
 
 impl Instructions {
     /// Extracts instruction data and program ID at the specified index.
@@ -30,14 +44,17 @@ impl Instructions {
     #[inline(always)]
     pub fn extract_ix_data<'a>(
         ix_sysvar: &AccountInfo<'a>,
-        mut idx: usize,
-    ) -> (&'a Pubkey, &'a [u8]) {
+        idx: usize,
+    ) -> &'a [u8] {
         assert!(check_pubkey_eq(ix_sysvar.key, &INSTRUCTIONS_SYSVAR_ID));
         unsafe {
             let base = (*ix_sysvar.data.as_ptr()).as_ptr();
 
-            // Read num_instructions from offset, modulo to handle out-of-bounds
-            idx %= read_unaligned(base as *const u16) as usize;
+            // Read num_instructions from offset
+            let num_instructions = read_unaligned(base as *const u16) as usize;
+
+            // Ensure idx is within bounds - all instruction indexes MUST match idx
+            assert!(idx < num_instructions, "Instruction index {} out of bounds (max: {})", idx, num_instructions);
 
             // Read instruction offset from offset table at position (2 + idx * 2)
             let start_offset = read_unaligned(base.add(2 + (idx << 1)) as *const u16) as usize;
@@ -55,11 +72,38 @@ impl Instructions {
             // Read data length
             let instruction_data_len = read_unaligned(p.add(32) as *const u16) as usize;
 
-            // Return program ID reference and instruction data slice
-            (
-                program_id,
-                core::slice::from_raw_parts(p.add(34), instruction_data_len),
-            )
+            let ix_data_ptr = p.add(34);
+            let instruction_data = core::slice::from_raw_parts(ix_data_ptr, instruction_data_len);
+
+            // Validate Ed25519SignatureOffsets if this appears to be an Ed25519 instruction
+            assert!(check_pubkey_eq(program_id, &ED25519_PROGRAM_ID));
+            assert!(instruction_data_len >= 16);
+            // Read the first Ed25519SignatureOffsets from instruction data
+            // Skip 2-byte header (num_signatures + padding), then read offsets struct
+            // This only checks the first header, the verify call checks that the rest of the
+            // signatures match this index.
+            let signature_instruction_index = read_unaligned(ix_data_ptr.add(4) as *const u16) as usize;
+            let public_key_instruction_index = read_unaligned(ix_data_ptr.add(8) as *const u16) as usize;
+            let message_instruction_index = read_unaligned(ix_data_ptr.add(14) as *const u16) as usize;
+
+            // All instruction indexes MUST match the current instruction index
+            assert!(
+                signature_instruction_index == idx,
+                "Signature instruction index {} does not match current instruction index {}",
+                signature_instruction_index, idx
+            );
+            assert!(
+                public_key_instruction_index == idx,
+                "Public key instruction index {} does not match current instruction index {}",
+                public_key_instruction_index, idx
+            );
+            assert!(
+                message_instruction_index == idx,
+                "Message instruction index {} does not match current instruction index {}",
+                message_instruction_index, idx
+            );
+
+            instruction_data
         }
     }
 }

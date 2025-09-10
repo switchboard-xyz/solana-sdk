@@ -18,14 +18,14 @@
 //! pub fn verify_oracle_data(ctx: Context<VerifyCtx>) -> Result<()> {
 //!     // Destructure accounts - works without lifetime issues
 //!     let VerifyCtx { queue, oracle, sysvars, .. } = ctx.accounts;
-//!     let clock = switchboard_on_demand::clock::parse_clock(&sysvars.clock);
+//!     let clock_slot = switchboard_on_demand::clock::get_slot(&sysvars.clock);
 //!
 //!     // Build and verify - accepts Anchor wrapper types directly
 //!     let quote = QuoteVerifier::new()
 //!         .queue(&queue)                    // Works with AccountLoader<QueueAccountData>
 //!         .slothash_sysvar(&sysvars.slothashes)     // Works with Sysvar<SlotHashes>
 //!         .ix_sysvar(&sysvars.instructions)         // Works with Sysvar<Instructions>
-//!         .clock(clock)                     // Uses parsed Clock reference
+//!         .clock_slot(clock_slot)           // Uses clock slot
 //!         .max_age(150)
 //!         .verify_account(&oracle)?;        // Works with AccountLoader<SwitchboardQuote>
 //!

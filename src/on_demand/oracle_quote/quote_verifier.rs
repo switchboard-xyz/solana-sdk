@@ -43,13 +43,13 @@ const SYSVAR_SLOT_LEN: u64 = 512;
 ///
 /// pub fn verify(ctx: Context<VerifyCtx>) -> Result<()> {
 ///     let VerifyCtx { queue, oracle, sysvars, .. } = ctx.accounts;
-///     let clock = switchboard_on_demand::clock::parse_clock(&sysvars.clock);
+///     let clock_slot = switchboard_on_demand::clock::get_slot(&sysvars.clock);
 ///
 ///     let quote = QuoteVerifier::new()
 ///         .queue(&queue)
 ///         .slothash_sysvar(&sysvars.slothashes)
 ///         .ix_sysvar(&sysvars.instructions)
-///         .clock(clock)
+///         .clock_slot(clock_slot)
 ///         .verify_account(&oracle)
 ///         .unwrap();
 ///
@@ -65,7 +65,7 @@ pub struct QuoteVerifier<'a> {
     queue: Option<AccountInfo<'a>>,
     slothash_sysvar: Option<AccountInfo<'a>>,
     ix_sysvar: Option<AccountInfo<'a>>,
-    clock: Option<&'a solana_program::sysvar::clock::Clock>,
+    clock_slot: Option<u64>,
     max_age: u64,
 }
 
@@ -83,7 +83,7 @@ impl<'a> QuoteVerifier<'a> {
             queue: None,
             slothash_sysvar: None,
             ix_sysvar: None,
-            clock: None,
+            clock_slot: None,
             max_age: 0,
         }
     }
@@ -154,10 +154,10 @@ impl<'a> QuoteVerifier<'a> {
         self
     }
 
-    /// Sets the clock sysvar for freshness validation.
+    /// Sets the clock slot for freshness validation.
     #[inline(always)]
-    pub fn clock(&mut self, clock: &'a solana_program::sysvar::clock::Clock) -> &mut Self {
-        self.clock = Some(clock);
+    pub fn clock_slot(&mut self, clock_slot: u64) -> &mut Self {
+        self.clock_slot = Some(clock_slot);
         self
     }
 
@@ -181,7 +181,7 @@ impl<'a> QuoteVerifier<'a> {
     ///
     /// # Arguments
     /// * `oracle_account` - Any type that implements `AsRef<AccountInfo>` containing the oracle quote data
-    ///                      (e.g., `AccountLoader<SwitchboardQuote>`, direct `AccountInfo` reference)
+    ///   (e.g., `AccountLoader<SwitchboardQuote>`, direct `AccountInfo` reference)
     ///
     /// # Returns
     /// * `Ok(OracleQuote)` - Successfully verified oracle quote with feed data
@@ -241,7 +241,7 @@ impl<'a> QuoteVerifier<'a> {
     /// * `Err(AnyError)` - Verification failed with detailed error message
     ///
     /// # Errors
-    /// - Clock sysvar not set
+    /// - Clock slot not set
     /// - No signatures provided
     /// - Invalid oracle signing keys
     /// - Slot hash mismatch
@@ -260,14 +260,7 @@ impl<'a> QuoteVerifier<'a> {
         // - The bounds check ensures we don't read beyond the data buffer
         // - Data slice is guaranteed valid for the function duration
         unsafe {
-            let len = (data.as_ptr() as *const u16).read_unaligned() as usize;
-            if len + 2 > data.len() {
-                bail!(
-                    "Invalid delimited length: {} exceeds buffer size {}",
-                    len + 2,
-                    data.len()
-                );
-            }
+            let len = read_unaligned(data.as_ptr() as *const u16) as usize;
             self.verify(&data[2..len + 2])
         }
     }
@@ -288,16 +281,15 @@ impl<'a> QuoteVerifier<'a> {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("Slothash sysvar not set"))?;
 
-        // Validate quote freshness - clock is required for all verifications
-        let clock = self
-            .clock
-            .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("Clock sysvar not set"))?;
-        if self.max_age > 0 && clock.slot.saturating_sub(recent_slot) > self.max_age {
+        // Validate quote freshness - clock slot is required for all verifications
+        let clock_slot = self
+            .clock_slot
+            .ok_or_else(|| anyhow::anyhow!("Clock slot not set"))?;
+        if clock_slot < recent_slot || clock_slot - recent_slot > self.max_age {
             bail!(
                 "Quote is too old: recent_slot={}, current_slot={}, max_age={}",
                 recent_slot,
-                clock.slot,
+                clock_slot,
                 self.max_age
             );
         }
@@ -309,7 +301,7 @@ impl<'a> QuoteVerifier<'a> {
         // Get queue data for oracle signing keys
         // Safely access queue data using RefCell borrow and try_from_bytes
         let queue_buf = queue.data.borrow();
-        if queue_buf.len() < 8 + std::mem::size_of::<QueueAccountData>() {
+        if queue_buf.len() < 6280 {
             bail!("Queue account too small: {} bytes", queue_buf.len());
         }
         let queue_data: &QueueAccountData = bytemuck::try_from_bytes(&queue_buf[8..])
@@ -323,17 +315,6 @@ impl<'a> QuoteVerifier<'a> {
         let target_slothash = &header.signed_slothash as *const _ as *const u64;
         let found_slothash = &Self::find_slothash_in_sysvar(recent_slot, &slothash_sysvar)?
             as *const _ as *const u64;
-
-        // Account keys validation (64 bytes) - use pre-computed expected data
-        if crate::utils::is_devnet() {
-            assert!(check_pubkey_eq(queue.owner, &ON_DEMAND_DEVNET_PID));
-        } else {
-            assert!(check_pubkey_eq(queue.owner, &ON_DEMAND_MAINNET_PID));
-        }
-        assert!(check_pubkey_eq(
-            slothash_sysvar.key,
-            &solana_program::sysvar::slot_hashes::ID
-        ));
 
         assert!(unsafe { check_p64_eq(found_slothash, target_slothash) });
 
@@ -387,8 +368,6 @@ impl<'a> QuoteVerifier<'a> {
     /// - Verification of the quote data fails
     #[inline(always)]
     pub fn verify_instruction_at(&self, instruction_idx: i64) -> Result<OracleQuote<'a>, AnyError> {
-        use solana_program::ed25519_program::ID as ED25519_PROGRAM_ID;
-        use solana_program::sysvar::instructions::ID as INSTRUCTIONS_SYSVAR_ID;
 
         use crate::Instructions;
 
@@ -398,14 +377,8 @@ impl<'a> QuoteVerifier<'a> {
             .ok_or_else(|| anyhow::anyhow!("Instructions sysvar not set"))?;
 
         // Extract instruction data and validate program ID using the existing helper
-        let (program_id, data) =
+        let data =
             Instructions::extract_ix_data(&ix_sysvar, instruction_idx as usize);
-
-        // Validate accounts and program ID
-        assert!(
-            check_pubkey_eq(ix_sysvar.key, &INSTRUCTIONS_SYSVAR_ID)
-                && check_pubkey_eq(program_id, &ED25519_PROGRAM_ID)
-        );
 
         // Verify the instruction data
         self.verify(data)
@@ -432,12 +405,12 @@ impl<'a> QuoteVerifier<'a> {
         target_slot: u64,
         slothash_sysvar: &AccountInfo,
     ) -> Result<[u8; 32], AnyError> {
-        let slothash_data = slothash_sysvar.data.borrow();
 
-        // Verify sysvar has minimum required size for SlotHash array
-        if slothash_data.len() < 8 {
-            bail!("Slothash sysvar too small: {} bytes", slothash_data.len());
-        }
+        assert!(check_pubkey_eq(
+            slothash_sysvar.key,
+            &solana_program::sysvar::slot_hashes::ID
+        ));
+        let slothash_data = slothash_sysvar.data.borrow();
 
         // # Safety
         //

@@ -1,6 +1,6 @@
 [package]
 name = "switchboard-on-demand"
-version = "0.7.2"
+version = "0.8.0"
 # docs.rs autobuild has difficulty with ahash dep. Host yuorself at https://tiiny.host/
 documentation = "https://docs.rs/switchboard-on-demand/latest/switchboard_on_demand"
 edition = "2021"
@@ -9,7 +9,7 @@ description = "A Rust library to interact with the Switchboard Solana program."
 readme = "README.md"
 keywords = ["switchboard", "oracle", "solana"]
 homepage = "https://switchboard.xyz"
-repository = "https://github.com/switchboard-xyz/solana-sdk/tree/main/rust/switchboard-solana"
+repository = "https://github.com/switchboard-xyz/solana-sdk/tree/main"
 license = "MIT"
 
 [lib]

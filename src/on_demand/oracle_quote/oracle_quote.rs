@@ -9,10 +9,8 @@ use core::ptr::read_unaligned;
 use anyhow::{Context, Error as AnyError};
 use solana_define_syscall::definitions::sol_memcpy_;
 use solana_program::account_info::AccountInfo;
-use solana_program::ed25519_program::ID as ED25519_PROGRAM_ID;
-use solana_program::sysvar::clock::Clock;
 
-use crate::{check_pubkey_eq, Instructions};
+use crate::{Instructions};
 
 #[allow(unused)]
 const SLOTS_PER_EPOCH: u64 = 432_000;
@@ -240,7 +238,7 @@ impl<'a> OracleQuote<'a> {
     ///
     /// # Arguments
     ///
-    /// * `clock` - Solana clock for slot validation
+    /// * `clock_slot` - Current slot for validation
     /// * `source` - ED25519 instruction data slice containing oracle quote
     /// * `dst` - Mutable destination buffer (will be prefixed with 2-byte length)
     ///
@@ -269,9 +267,9 @@ impl<'a> OracleQuote<'a> {
     /// - Slot regression detected (replay attack prevention)
     /// - Destination buffer too small for prefixed data
     #[inline(always)]
-    pub fn store_delimited(clock: &Clock, source: &[u8], dst: &mut [u8]) {
+    pub fn store_delimited(clock_slot: u64, source: &[u8], dst: &mut [u8]) {
         // Validate slot progression before writing
-        Self::validate_slot_progression(clock, source, dst);
+        Self::validate_slot_progression(clock_slot, source, dst);
 
         // 79 Compute units with safety checks and sequencing
         unsafe {
@@ -292,14 +290,14 @@ impl<'a> OracleQuote<'a> {
     /// - New slot < current clock slot (no stale data)
     ///
     /// # Arguments
-    /// * `clock` - Current Solana clock
+    /// * `clock_slot` - Current slot
     /// * `source` - New oracle data to write
     /// * `existing_data` - Current account data (may be empty)
     ///
     /// # Panics
     /// Panics if slot validation fails
     #[inline(always)]
-    fn validate_slot_progression(clock: &Clock, source: &[u8], existing_data: &[u8]) {
+    fn validate_slot_progression(clock_slot: u64, source: &[u8], existing_data: &[u8]) {
         let source_len = source.len();
         if source_len < 13 {
             panic!("Invalid source data length: {}", source_len);
@@ -312,10 +310,10 @@ impl<'a> OracleQuote<'a> {
 
             // Validate new slot is not stale
             assert!(
-                new_slot < clock.slot,
+                new_slot < clock_slot,
                 "SB oracle slot is stale new_slot: {}, clock.slot: {}",
                 new_slot,
-                clock.slot
+                clock_slot
             );
 
             // Check existing data for slot regression - always calculate from the back
@@ -345,7 +343,7 @@ impl<'a> OracleQuote<'a> {
     ///
     /// # Arguments
     ///
-    /// * `clock` - Solana Clock for slot validation and freshness checks
+    /// * `clock_slot` - Current slot for validation and freshness checks
     /// * `source` - ED25519 instruction data containing oracle quote
     /// * `oracle_account` - Target oracle account to write the data to
     ///
@@ -366,13 +364,13 @@ impl<'a> OracleQuote<'a> {
     ///
     /// Panics if the oracle account buffer is too small or slot validation fails.
     #[inline(always)]
-    pub fn write(clock: &Clock, source: &[u8], oracle_account: &AccountInfo) {
+    pub fn write(clock_slot: u64, source: &[u8], oracle_account: &AccountInfo) {
         unsafe {
             let dst: &mut [u8] = *oracle_account.data.as_ptr();
             assert!(dst.len() >= 23); // discriminator + u16 + minimum data (13 bytes)
             let dst_ptr = dst.as_mut_ptr();
             *(dst_ptr as *mut u64) = QUOTE_DISCRIMINATOR_U64_LE;
-            Self::store_delimited(clock, source, &mut dst[8..]);
+            Self::store_delimited(clock_slot, source, &mut dst[8..]);
         }
     }
 
@@ -384,7 +382,7 @@ impl<'a> OracleQuote<'a> {
     /// # Arguments
     /// * `ix_sysvar` - Any type that implements `AsRef<AccountInfo>` (e.g., `Sysvar<Instructions>`, direct `AccountInfo` reference)
     /// * `oracle_account` - Any type that implements `AsRef<AccountInfo>` (e.g., `AccountLoader<SwitchboardQuote>`, direct `AccountInfo` reference)
-    /// * `clock` - Reference to a Clock (use `&clock` where `clock` is `Sysvar<Clock>` or direct `Clock`)
+    /// * `clock_slot` - Current slot value
     /// * `instruction_index` - Index of the ED25519 instruction to extract (typically 0)
     ///
     /// # Example with Anchor
@@ -394,10 +392,10 @@ impl<'a> OracleQuote<'a> {
     ///
     /// pub fn update_oracle(ctx: Context<UpdateCtx>) -> Result<()> {
     ///     let UpdateCtx { oracle, sysvars, .. } = ctx.accounts;
-    ///     let clock = switchboard_on_demand::clock::parse_clock(&sysvars.clock);
+    ///     let clock_slot = switchboard_on_demand::clock::get_slot(&sysvars.clock);
     ///
-    ///     // Works directly with Anchor wrapper types and parsed clock
-    ///     OracleQuote::write_from_ix(&sysvars.instructions, &oracle, clock, 0);
+    ///     // Works directly with Anchor wrapper types and clock slot
+    ///     OracleQuote::write_from_ix(&sysvars.instructions, &oracle, clock_slot, 0);
     ///     Ok(())
     /// }
     /// ```
@@ -414,7 +412,7 @@ impl<'a> OracleQuote<'a> {
     pub fn write_from_ix<I, O>(
         ix_sysvar: I,
         oracle_account: O,
-        clock: &Clock,
+        curr_slot: u64,
         instruction_index: usize,
     ) where
         I: AsRef<AccountInfo<'a>>,
@@ -423,8 +421,7 @@ impl<'a> OracleQuote<'a> {
         let ix_sysvar = ix_sysvar.as_ref();
         let oracle_account = oracle_account.as_ref();
 
-        let (program_id, data) = Instructions::extract_ix_data(ix_sysvar, instruction_index);
-        assert!(check_pubkey_eq(program_id, &ED25519_PROGRAM_ID));
-        Self::write(clock, data, oracle_account);
+        let data = Instructions::extract_ix_data(ix_sysvar, instruction_index);
+        Self::write(curr_slot, data, oracle_account);
     }
 }

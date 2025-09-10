@@ -1,6 +1,5 @@
 use std::cell::Ref;
 
-use solana_program::clock::Clock;
 
 use crate::pubkey::Pubkey;
 use crate::*;
@@ -52,16 +51,16 @@ impl RandomnessAccountData {
     }
 
     /// Gets the random value if it's current (matches reveal slot)
-    pub fn get_value(&self, clock: &Clock) -> std::result::Result<[u8; 32], OnDemandError> {
-        if clock.slot != self.reveal_slot {
+    pub fn get_value(&self, clock_slot: u64) -> std::result::Result<[u8; 32], OnDemandError> {
+        if clock_slot != self.reveal_slot {
             return Err(OnDemandError::SwitchboardRandomnessTooOld);
         }
         Ok(self.value)
     }
 
     /// Returns true if randomness can be revealed at current slot
-    pub fn is_revealable(&self, clock: &Clock) -> bool {
-        self.seed_slot < clock.slot
+    pub fn is_revealable(&self, clock_slot: u64) -> bool {
+        self.seed_slot < clock_slot
     }
 
     /// Parses randomness account data from raw bytes
