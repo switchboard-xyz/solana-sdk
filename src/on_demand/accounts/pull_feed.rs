@@ -373,18 +373,35 @@ impl PullFeedAccountData {
         min_samples: u32,
         only_positive: bool,
     ) -> Result<Decimal, OnDemandError> {
-        let submissions = self
-            .submissions
-            .iter()
-            .take_while(|s| !s.is_empty())
-            .filter(|s| s.slot >= clock_slot - max_staleness)
-            .collect::<Vec<_>>();
-        if submissions.len() < min_samples as usize {
+        // use stack array to avoid heap allocation
+        let mut values: [i128; 32] = [0; 32];
+        let mut count = 0;
+
+        // saturating_sub to stay safe from slot underflows
+        let threshold = clock_slot.saturating_sub(max_staleness);
+
+        for submission in self.submissions.iter() {
+            if submission.is_empty() {
+                break;
+            }
+            if submission.slot >= threshold {
+                if count < 32 {
+                    values[count] = submission.value;
+                    count += 1;
+                }
+            }
+        }
+
+        if count < min_samples as usize {
             return Err(OnDemandError::NotEnoughSamples);
         }
-        let median =
-            lower_bound_median(&mut submissions.iter().map(|s| s.value).collect::<Vec<_>>())
-                .ok_or(OnDemandError::NotEnoughSamples)?;
+
+        // in-place sort on the stack slice
+        let active_values = &mut values[..count];
+        active_values.sort_unstable();
+
+        let median = active_values[count / 2];
+
         if only_positive && median <= 0 {
             return Err(OnDemandError::IllegalFeedValue);
         }
@@ -413,16 +430,38 @@ impl PullFeedAccountData {
             .collect()
     }
 
-    /// Gets the minimum timestamp of the submissions used in the current result
+    /// Gets the minimum and maximum timestamp of the submissions used in the current result
     pub fn current_result_ts_range(&self) -> (i64, i64) {
-        let samples = self.current_result_samples();
-        let timestamps = samples
-            .iter()
-            .map(|(idx, _)| self.submission_timestamps[*idx])
-            .collect::<Vec<_>>();
-        let min_ts = *timestamps.iter().min().unwrap_or(&0);
-        let max_ts = *timestamps.iter().max().unwrap_or(&0);
-        (min_ts, max_ts)
+        let last_update_slot = self.last_update_slot();
+        let slot_threshold = last_update_slot.saturating_sub(self.max_staleness as u64);
+
+        let mut min_ts = i64::MAX;
+        let mut max_ts = i64::MIN;
+        let mut found = false;
+
+        // one-pass iteration to find min/max without any heap allocations
+        for (i, s) in self.submissions.iter().enumerate() {
+            if s.is_empty() {
+                break;
+            }
+
+            if s.slot >= slot_threshold {
+                let ts = self.submission_timestamps[i];
+                if ts < min_ts {
+                    min_ts = ts;
+                }
+                if ts > max_ts {
+                    max_ts = ts;
+                }
+                found = true;
+            }
+        }
+
+        if !found {
+            (0, 0)
+        } else {
+            (min_ts, max_ts)
+        }
     }
 
     /// Returns the slot of the most recent submission
@@ -493,4 +532,37 @@ pub fn lower_bound_median(numbers: &mut [i128]) -> Option<i128> {
         return None; // Return None for an empty list.
     }
     Some(numbers[len / 2])
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_value_and_ts_range_logic() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        feed.max_staleness = 100;
+        feed.min_sample_size = 3;
+
+        // setup 5 submissions: 10, 20, 30, 40, 50 (Scaled by 10^18)
+        let scale_factor = 10i128.pow(PRECISION);
+        for i in 0..5 {
+            feed.submissions[i] = OracleSubmission {
+                oracle: Pubkey::default(),
+                slot: 100,
+                landed_at: 100,
+                value: ((i + 1) * 10) as i128 * scale_factor,
+            };
+            feed.submission_timestamps[i] = ((i + 1) * 1000) as i64;
+        }
+
+        // test get_value median logic
+        let price = feed.get_value(100, 10, 3, true).unwrap();
+        // Now mantissa will correctly be 30 * 10^18
+        assert_eq!(price.mantissa(), 30 * scale_factor);
+
+        // test timestamp range logic
+        let (min_ts, max_ts) = feed.current_result_ts_range();
+        assert_eq!(min_ts, 1000);
+        assert_eq!(max_ts, 5000);
+    }
 }
