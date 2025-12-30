@@ -400,7 +400,8 @@ impl PullFeedAccountData {
         let active_values = &mut values[..count];
         active_values.sort_unstable();
 
-        let median = active_values[count / 2];
+        // Use a lower-bound median to match the legacy implementation (picks lower of two middle values if count is even).
+        let median = active_values[(count - 1) / 2];
 
         if only_positive && median <= 0 {
             return Err(OnDemandError::IllegalFeedValue);
@@ -538,12 +539,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_value_and_ts_range_logic() {
+    fn test_get_value_happy_path() {
         let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
         feed.max_staleness = 100;
         feed.min_sample_size = 3;
 
-        // setup 5 submissions: 10, 20, 30, 40, 50 (Scaled by 10^18)
         let scale_factor = 10i128.pow(PRECISION);
         for i in 0..5 {
             feed.submissions[i] = OracleSubmission {
@@ -555,14 +555,149 @@ mod tests {
             feed.submission_timestamps[i] = ((i + 1) * 1000) as i64;
         }
 
-        // test get_value median logic
-        let price = feed.get_value(100, 10, 3, true).unwrap();
-        // Now mantissa will correctly be 30 * 10^18
+        let price = feed.get_value(150, 100, 3, true).unwrap();
         assert_eq!(price.mantissa(), 30 * scale_factor);
 
-        // test timestamp range logic
         let (min_ts, max_ts) = feed.current_result_ts_range();
         assert_eq!(min_ts, 1000);
         assert_eq!(max_ts, 5000);
+    }
+
+    #[test]
+    fn test_get_value_staleness_filtering() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let scale_factor = 10i128.pow(PRECISION);
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 50,
+            landed_at: 50,
+            value: 10 * scale_factor,
+        };
+        feed.submissions[1] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 90,
+            landed_at: 90,
+            value: 20 * scale_factor,
+        };
+        feed.submissions[2] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 95,
+            landed_at: 95,
+            value: 30 * scale_factor,
+        };
+
+        let price = feed.get_value(100, 20, 2, false).unwrap();
+        assert_eq!(price.mantissa(), 20 * scale_factor);
+    }
+
+    #[test]
+    fn test_get_value_insufficient_samples() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let scale_factor = 10i128.pow(PRECISION);
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 10 * scale_factor,
+        };
+        feed.submissions[1] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 20 * scale_factor,
+        };
+
+        let result = feed.get_value(150, 100, 3, false);
+        assert!(matches!(result, Err(OnDemandError::NotEnoughSamples)));
+    }
+
+    #[test]
+    fn test_get_value_empty_submissions() {
+        let feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let result = feed.get_value(100, 50, 1, false);
+        assert!(matches!(result, Err(OnDemandError::NotEnoughSamples)));
+    }
+
+    #[test]
+    fn test_get_value_median_lower_bound_even_count() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let scale_factor = 10i128.pow(PRECISION);
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 100 * scale_factor,
+        };
+        feed.submissions[1] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 200 * scale_factor,
+        };
+
+        let price = feed.get_value(150, 100, 2, false).unwrap();
+        assert_eq!(price.mantissa(), 100 * scale_factor);
+    }
+
+    #[test]
+    fn test_get_value_median_lower_bound_odd_count() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let scale_factor = 10i128.pow(PRECISION);
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 50 * scale_factor,
+        };
+
+        let price = feed.get_value(150, 100, 1, false).unwrap();
+        assert_eq!(price.mantissa(), 50 * scale_factor);
+    }
+
+    #[test]
+    fn test_get_value_only_positive_check_negative() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+        let scale_factor = 10i128.pow(PRECISION);
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: -10 * scale_factor,
+        };
+        feed.submissions[1] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: -20 * scale_factor,
+        };
+        feed.submissions[2] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: -30 * scale_factor,
+        };
+
+        let result = feed.get_value(150, 100, 3, true);
+        assert!(matches!(result, Err(OnDemandError::IllegalFeedValue)));
+    }
+
+    #[test]
+    fn test_get_value_only_positive_check_zero() {
+        let mut feed: PullFeedAccountData = unsafe { std::mem::zeroed() };
+
+        feed.submissions[0] = OracleSubmission {
+            oracle: Pubkey::default(),
+            slot: 100,
+            landed_at: 100,
+            value: 0,
+        };
+
+        let result = feed.get_value(150, 100, 1, true);
+        assert!(matches!(result, Err(OnDemandError::IllegalFeedValue)));
     }
 }
