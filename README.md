@@ -7,7 +7,7 @@
 > A Rust library for seamless interaction with Switchboard Oracle accounts on the Solana blockchain.
 
 [![Crates.io](https://img.shields.io/crates/v/switchboard-solana.svg?style=flat-square&logo=rust)](https://crates.io/crates/switchboard-solana)
-[![Discord](https://img.shields.io/discord/841525135311634443?label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/switchboardxyz)
+[![Discord](https://img.shields.io/discord/841525135311634443?label=Discord&logo=discord&logoColor=white&style=flat-square)](https://discord.gg/TJAv6ZYvPC)
 [![Twitter Follow](https://img.shields.io/twitter/follow/switchboardxyz?style=social)](https://twitter.com/switchboardxyz)
 
 <h4>
