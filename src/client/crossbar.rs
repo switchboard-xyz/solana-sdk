@@ -16,22 +16,44 @@ use tokio::time::interval;
 use tokio::time::Duration;
 use tokio_stream::wrappers::IntervalStream;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct StoreResponse {
     pub cid: String,
     pub feedHash: String,
     pub queueHex: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FetchSolanaUpdatesResponse {
     pub success: bool,
-    pub pullIx: String,
+    pub pullIxns: Vec<String>,
     pub responses: Vec<Response>,
     pub lookupTables: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+impl FetchSolanaUpdatesResponse {
+    pub fn decode_pull_ixns(
+        &self,
+    ) -> Result<Vec<anchor_client::solana_sdk::instruction::Instruction>, AnyhowError> {
+        self.pullIxns
+            .iter()
+            .enumerate()
+            .map(|(index, ix_hex)| {
+                decode_instruction(ix_hex)
+                    .with_context(|| format!("Failed to decode pullIxns[{index}]"))
+            })
+            .collect()
+    }
+}
+
+fn decode_instruction(
+    ix_hex: &str,
+) -> Result<anchor_client::solana_sdk::instruction::Instruction, AnyhowError> {
+    let bytes = hex::decode(ix_hex).context("Failed to decode instruction hex")?;
+    bincode::deserialize(&bytes).context("Failed to deserialize instruction bytes")
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Response {
     pub oracle: String,
     pub result: Option<Decimal>,
@@ -545,6 +567,9 @@ mod tests {
     use super::*;
     use std::str::FromStr;
 
+    const LIVE_PULL_IX_HEX: &str =
+        "0673bd46f2e47e04f12bd92fb731968ecd9d9757c274da87476f465c040c6573050000000000000089e0fecf1c1b3a11e77b9d1048192288ae1d8ada0e19ff95d737c4e5afb583f70001d284bd424eb258f1f502c95ff334245b64af7df6b14435d1ea46d10fb3ac68b6000086807068432f186a147cf0b13a30067d386204ea9d6c8b04743ac2ef010b075200007752c55e8b0a7079ad51975736764e45f56d61ebd15aa96d55f7ca86d5b5e387010100000000000000000000000000000000000000000000000000000000000000000000310000000000000001020304050607081d3c620d5670b1b26d0d3c7c27cb75a5187d99b8ccf8850d5b79d573b81bff7c030000009600000000";
+
     #[tokio::test]
     async fn test_crossbar_client_default_initialization() {
         let key = Pubkey::from_str("D1MmZ3je8GCjLrTbWXotnZ797k6E56QkdyXyhPXZQocH").unwrap();
@@ -554,5 +579,34 @@ mod tests {
             .await
             .unwrap();
         println!("{:?}", resp);
+    }
+
+    #[test]
+    fn deserializes_current_pull_ixns_shape() {
+        let responses: Vec<FetchSolanaUpdatesResponse> = serde_json::from_str(&format!(
+            r#"[{{"success":true,"pullIxns":["{}"],"responses":[],"lookupTables":[]}}]"#,
+            LIVE_PULL_IX_HEX
+        ))
+        .unwrap();
+
+        assert_eq!(responses[0].pullIxns.len(), 1);
+
+        let decoded = responses[0].decode_pull_ixns().unwrap();
+        assert_eq!(decoded[0].accounts.len(), 5);
+        assert_eq!(
+            hex::encode(decoded[0].program_id.to_bytes()),
+            "0673bd46f2e47e04f12bd92fb731968ecd9d9757c274da87476f465c040c6573"
+        );
+    }
+
+    #[test]
+    fn rejects_legacy_pull_ix_shape() {
+        let err = serde_json::from_str::<Vec<FetchSolanaUpdatesResponse>>(&format!(
+            r#"[{{"success":true,"pullIx":"{}","responses":[],"lookupTables":[]}}]"#,
+            LIVE_PULL_IX_HEX
+        ))
+        .unwrap_err();
+
+        assert!(err.to_string().contains("missing field"));
     }
 }
