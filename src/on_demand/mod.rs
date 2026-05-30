@@ -6,7 +6,9 @@ pub mod accounts;
 pub use accounts::*;
 
 /// Switchboard instruction builders
+#[cfg(any(feature = "cpi", feature = "client", feature = "client-v3"))]
 pub mod instructions;
+#[cfg(any(feature = "cpi", feature = "client", feature = "client-v3"))]
 pub use instructions::*;
 
 /// Oracle quote verification and data extraction
@@ -48,7 +50,9 @@ pub fn get_associated_token_address(
     get_associated_token_address_with_program_id(
         wallet_address,
         token_mint_address,
-        &spl_token::ID.to_bytes().into(),
+        &pubkey!("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+            .to_bytes()
+            .into(),
     )
 }
 

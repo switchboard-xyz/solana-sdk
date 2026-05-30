@@ -1,17 +1,19 @@
 //! Compatibility layer for different AccountInfo types
 //!
 //! This module provides compatibility between different AccountInfo implementations,
-//! using pinocchio AccountInfo internally when the pinocchio feature is enabled,
-//! otherwise falling back to anchor/solana-program AccountInfo types.
+//! using the account model selected by the `anchor`, `pinocchio`, or `native`
+//! feature.
 
 // Use pinocchio AccountInfo when the feature is enabled for better performance
 #[cfg(feature = "pinocchio")]
 pub type AccountInfo = pinocchio::account_info::AccountInfo;
 
-// Otherwise use the appropriate AccountInfo type based on anchor feature
+// Use Anchor's AccountInfo when the anchor feature is enabled.
 #[cfg(all(not(feature = "pinocchio"), feature = "anchor"))]
 pub type AccountInfo<'a> = anchor_lang::prelude::AccountInfo<'a>;
 
+// Use the selected solana_program AccountInfo for native integrations and
+// for the default non-Anchor, non-Pinocchio CPI path.
 #[cfg(all(not(feature = "pinocchio"), not(feature = "anchor")))]
 pub type AccountInfo<'a> = crate::solana_program::account_info::AccountInfo<'a>;
 

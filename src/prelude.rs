@@ -12,6 +12,7 @@ pub use crate::accounts::*;
 #[cfg(feature = "client")]
 pub use crate::client::utils::{ix_to_tx, ix_to_tx_v0};
 pub use crate::decimal::*;
+#[cfg(any(feature = "cpi", feature = "client", feature = "client-v3"))]
 pub use crate::instructions::*;
 // Use solana_program and Pubkey from the compat layer
 pub use crate::solana_compat::{pubkey, solana_program, Pubkey};
