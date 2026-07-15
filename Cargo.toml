@@ -44,7 +44,7 @@ client = ["anchor-lang", "anchor-client", "tokio", "tokio-util", "futures", "arc
 client-v2 = ["client"]
 
 ## Client feature using Solana v3 crates.
-client-v3 = ["tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v3", "dep:solana-client-v3"]
+client-v3 = ["anchor-lang", "tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v3", "dep:solana-client-v3", "dep:solana-sdk-v3", "dep:solana-commitment-config", "dep:solana-address-lookup-table-interface", "dep:solana-compute-budget-interface", "dep:solana-cluster-type"]
 
 ## Configures the crate for Solana devnet deployment.
 devnet = []
@@ -103,10 +103,18 @@ serde = { version = "^1", features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
 sha2 = "0.10.8"
 solana-client-v2 = { package = "solana-client", version = ">=2,<3", optional = true }
-solana-client-v3 = { package = "solana-client", version = ">=3", optional = true }
-solana-commitment-config = "3.0.0"
+solana-client-v3 = { package = "solana-client", version = ">=3,<4", optional = true }
+# Only consumed by the v3 `solana_sdk` compat shim (solana_compat.rs), so keep it optional
+# and off the default/on-chain/v2 build graphs.
+solana-commitment-config = { version = ">=3,<4", optional = true }
 solana-program-v2 = { package = "solana-program", version = ">=2,<3", optional = true }
-solana-program-v3 = { package = "solana-program", version = ">=3", optional = true }
+solana-program-v3 = { package = "solana-program", version = ">=3,<4", optional = true }
+solana-sdk-v3 = { package = "solana-sdk", version = ">=3,<4", features = ["full"], optional = true }
+# Solana v3 split several client modules out of `solana-sdk` into standalone crates.
+# These back the `solana_sdk` compat shim used by the v3 client (see solana_compat.rs).
+solana-address-lookup-table-interface = { version = ">=3,<4", optional = true }
+solana-compute-budget-interface = { version = ">=3,<4", optional = true }
+solana-cluster-type = { version = ">=3,<4", optional = true }
 spl-associated-token-account = { version = ">=3", features = ["no-entrypoint"] }
 spl-token = { version = ">=4", features = ["no-entrypoint"] }
 switchboard-common = { version = "0.11.6", features = [] }

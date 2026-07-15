@@ -4,7 +4,7 @@
 macro_rules! cfg_client {
     ($($item:item)*) => {
         $(
-            #[cfg(all(feature = "client"))]
+            #[cfg(any(feature = "client", feature = "client-v3"))]
             $item
         )*
     };
@@ -152,9 +152,9 @@ macro_rules! blocking_retry {
 #[macro_export]
 macro_rules! impl_account_deserialize {
     ($struct_name:ident) => {
-        use anchor_client::anchor_lang::prelude::{Error, ErrorCode};
+        use anchor_lang::prelude::{Error, ErrorCode};
 
-        impl anchor_client::anchor_lang::AccountDeserialize for $struct_name {
+        impl anchor_lang::AccountDeserialize for $struct_name {
             fn try_deserialize(buf: &mut &[u8]) -> Result<Self, Error> {
                 use $crate::anchor_traits::Discriminator;
                 if buf.len() < $struct_name::discriminator().len() {

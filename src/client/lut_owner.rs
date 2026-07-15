@@ -3,9 +3,9 @@ use crate::*;
 use anyhow::anyhow;
 use anyhow::Error as AnyhowError;
 use crate::solana_compat::solana_client::nonblocking::rpc_client::RpcClient;
-use anchor_client::solana_sdk::address_lookup_table::instruction::derive_lookup_table_address;
-use anchor_client::solana_sdk::address_lookup_table::state::AddressLookupTable;
-use anchor_client::solana_sdk::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::instruction::derive_lookup_table_address;
+use crate::solana_sdk::address_lookup_table::state::AddressLookupTable;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 use crate::Pubkey;
 
 pub trait LutOwner {
@@ -25,7 +25,7 @@ pub async fn load_lookup_table<T: LutOwner + bytemuck::Pod>(
         .map_err(|_| anyhow!("LutOwner.load_lookup_table: Invalid data"))?;
     let lut_slot = data.lut_slot();
     let lut_signer: Pubkey = find_lut_signer(&self_key);
-    let lut_key: anchor_client::solana_sdk::pubkey::Pubkey = derive_lookup_table_address(&lut_signer.to_bytes().into(), lut_slot).0;
+    let lut_key: crate::solana_sdk::pubkey::Pubkey = derive_lookup_table_address(&lut_signer.to_bytes().into(), lut_slot).0;
     let lut_account = client
         .get_account_data(&lut_key.to_bytes().into())
         .await

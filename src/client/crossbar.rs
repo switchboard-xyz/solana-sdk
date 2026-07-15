@@ -9,7 +9,7 @@ use reqwest::Client;
 use rust_decimal::Decimal;
 use serde::de::Error as DeError;
 use serde::{Deserialize, Deserializer, Serialize};
-use anchor_client::solana_sdk::genesis_config::ClusterType;
+use crate::solana_sdk::genesis_config::ClusterType;
 use crate::Pubkey;
 use switchboard_utils::utils::median;
 use tokio::time::interval;
@@ -34,7 +34,7 @@ pub struct FetchSolanaUpdatesResponse {
 impl FetchSolanaUpdatesResponse {
     pub fn decode_pull_ixns(
         &self,
-    ) -> Result<Vec<anchor_client::solana_sdk::instruction::Instruction>, AnyhowError> {
+    ) -> Result<Vec<crate::solana_sdk::instruction::Instruction>, AnyhowError> {
         self.pullIxns
             .iter()
             .enumerate()
@@ -48,7 +48,7 @@ impl FetchSolanaUpdatesResponse {
 
 fn decode_instruction(
     ix_hex: &str,
-) -> Result<anchor_client::solana_sdk::instruction::Instruction, AnyhowError> {
+) -> Result<crate::solana_sdk::instruction::Instruction, AnyhowError> {
     let bytes = hex::decode(ix_hex).context("Failed to decode instruction hex")?;
     bincode::deserialize(&bytes).context("Failed to deserialize instruction bytes")
 }
@@ -485,7 +485,7 @@ impl CrossbarClient {
     /// Stream the simulation of feed responses from the crossbar gateway for Solana feeds.
     pub fn stream_simulate_solana_feeds<'a>(
         &'a self,
-        network: anchor_client::solana_sdk::genesis_config::ClusterType,
+        network: crate::solana_sdk::genesis_config::ClusterType,
         feed_pubkeys: &'a [Pubkey],
         poll_interval: Duration,
     ) -> impl Stream<Item = Result<Vec<SimulateSolanaFeedsResponse>, AnyhowError>> + 'a {

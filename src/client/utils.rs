@@ -1,26 +1,28 @@
 use crate::prelude::*;
 use anyhow::anyhow;
 use sha2::{Digest, Sha256};
-use anchor_client::solana_sdk::client::SyncClient;
-use anchor_client::solana_sdk::signer::keypair::{keypair_from_seed, read_keypair_file, Keypair};
-use anchor_client::solana_sdk::signer::Signer;
+// `solana_sdk::client::SyncClient` was removed in Solana v3; the sync helpers below are v2-only.
+#[cfg(feature = "client")]
+use crate::solana_sdk::client::SyncClient;
+use crate::solana_sdk::signer::keypair::{keypair_from_seed, read_keypair_file, Keypair};
+use crate::solana_sdk::signer::Signer;
 use std::env;
 use std::result::Result;
 use std::str::FromStr;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use anchor_client::solana_sdk::transaction::Transaction;
+use crate::solana_sdk::transaction::Transaction;
 use crate::anchor_traits::*;
 use crate::Pubkey;
-use anchor_client::anchor_lang::AccountDeserialize;
+use anchor_lang::AccountDeserialize;
 use anyhow::Error as AnyhowError;
-use anchor_client::solana_sdk::message::v0::Message as V0Message;
-use anchor_client::solana_sdk::transaction::VersionedTransaction;
-use anchor_client::solana_sdk::compute_budget::ComputeBudgetInstruction;
+use crate::solana_sdk::message::v0::Message as V0Message;
+use crate::solana_sdk::transaction::VersionedTransaction;
+use crate::solana_sdk::compute_budget::ComputeBudgetInstruction;
 use crate::solana_program::hash::Hash;
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
-use anchor_client::solana_sdk::address_lookup_table::AddressLookupTableAccount;
-use anchor_client::solana_sdk::message::VersionedMessage::V0;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::message::VersionedMessage::V0;
 
 pub async fn ix_to_tx_v0(
     rpc_client: &RpcClient,
@@ -30,7 +32,7 @@ pub async fn ix_to_tx_v0(
     luts: &[AddressLookupTableAccount],
 ) -> Result<VersionedTransaction, OnDemandError> {
     let payer_original = signers[0].pubkey();
-    let payer: anchor_client::solana_sdk::pubkey::Pubkey = payer_original.to_bytes().into();
+    let payer: crate::solana_sdk::pubkey::Pubkey = payer_original.to_bytes().into();
 
     // Auto-detect Compute Unit Limit
     let compute_unit_limit = estimate_compute_units(rpc_client, ixs, luts, blockhash, signers).await.unwrap_or(1_400_000); // Default to 1.4M units if estimate fails
@@ -69,18 +71,18 @@ pub async fn ix_to_tx_v0(
     final_ixs.extend_from_slice(ixs);
 
     // Convert AddressLookupTableAccount types
-    let converted_luts: Vec<anchor_client::solana_sdk::message::AddressLookupTableAccount> = luts.iter().map(|lut| {
-        anchor_client::solana_sdk::message::AddressLookupTableAccount {
+    let converted_luts: Vec<crate::solana_sdk::message::AddressLookupTableAccount> = luts.iter().map(|lut| {
+        crate::solana_sdk::message::AddressLookupTableAccount {
             key: lut.key.to_bytes().into(),
             addresses: lut.addresses.iter().map(|addr| addr.to_bytes().into()).collect(),
         }
     }).collect();
 
     // Convert instructions to anchor-client types
-    let converted_ixs: Vec<anchor_client::solana_sdk::instruction::Instruction> = final_ixs.iter().map(|ix| {
-        anchor_client::solana_sdk::instruction::Instruction {
+    let converted_ixs: Vec<crate::solana_sdk::instruction::Instruction> = final_ixs.iter().map(|ix| {
+        crate::solana_sdk::instruction::Instruction {
             program_id: ix.program_id.to_bytes().into(),
-            accounts: ix.accounts.iter().map(|acc| anchor_client::solana_sdk::instruction::AccountMeta {
+            accounts: ix.accounts.iter().map(|acc| crate::solana_sdk::instruction::AccountMeta {
                 pubkey: acc.pubkey.to_bytes().into(),
                 is_signer: acc.is_signer,
                 is_writable: acc.is_writable,
@@ -90,7 +92,7 @@ pub async fn ix_to_tx_v0(
     }).collect();
 
     // Create Message with Address Lookup Tables (ALTs)
-    let converted_blockhash: anchor_client::solana_sdk::hash::Hash = blockhash.to_bytes().into();
+    let converted_blockhash: crate::solana_sdk::hash::Hash = blockhash.to_bytes().into();
     let message = V0Message::try_compile(&payer, &converted_ixs, &converted_luts, converted_blockhash)
         .map_err(|_| OnDemandError::SolanaSignError)?;
 
@@ -112,7 +114,7 @@ pub async fn ix_to_tx_v0(
 /// Estimates Compute Unit Limit for Instructions
 async fn estimate_compute_units(rpc_client: &RpcClient, ixs: &[Instruction], luts: &[AddressLookupTableAccount], blockhash: Hash, signers: &[&Keypair]) -> Result<u32, AnyhowError> {
     let payer_original = signers[0].pubkey();
-    let payer: anchor_client::solana_sdk::pubkey::Pubkey = payer_original.to_bytes().into();
+    let payer: crate::solana_sdk::pubkey::Pubkey = payer_original.to_bytes().into();
     let mut ixs = ixs.to_vec();
     let compute_limit_ix = ComputeBudgetInstruction::set_compute_unit_limit(1_400_000);
     let compute_limit_ix_converted = Instruction {
@@ -127,18 +129,18 @@ async fn estimate_compute_units(rpc_client: &RpcClient, ixs: &[Instruction], lut
     ixs.insert(0, compute_limit_ix_converted);
 
     // Convert AddressLookupTableAccount types for this function too
-    let converted_luts: Vec<anchor_client::solana_sdk::message::AddressLookupTableAccount> = luts.iter().map(|lut| {
-        anchor_client::solana_sdk::message::AddressLookupTableAccount {
+    let converted_luts: Vec<crate::solana_sdk::message::AddressLookupTableAccount> = luts.iter().map(|lut| {
+        crate::solana_sdk::message::AddressLookupTableAccount {
             key: lut.key.to_bytes().into(),
             addresses: lut.addresses.iter().map(|addr| addr.to_bytes().into()).collect(),
         }
     }).collect();
 
     // Convert instructions to anchor-client types
-    let converted_ixs: Vec<anchor_client::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
-        anchor_client::solana_sdk::instruction::Instruction {
+    let converted_ixs: Vec<crate::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
+        crate::solana_sdk::instruction::Instruction {
             program_id: ix.program_id.to_bytes().into(),
-            accounts: ix.accounts.iter().map(|acc| anchor_client::solana_sdk::instruction::AccountMeta {
+            accounts: ix.accounts.iter().map(|acc| crate::solana_sdk::instruction::AccountMeta {
                 pubkey: acc.pubkey.to_bytes().into(),
                 is_signer: acc.is_signer,
                 is_writable: acc.is_writable,
@@ -146,7 +148,7 @@ async fn estimate_compute_units(rpc_client: &RpcClient, ixs: &[Instruction], lut
             data: ix.data.clone(),
         }
     }).collect();
-    let converted_blockhash: anchor_client::solana_sdk::hash::Hash = blockhash.to_bytes().into();
+    let converted_blockhash: crate::solana_sdk::hash::Hash = blockhash.to_bytes().into();
 
     let message = V0Message::try_compile(&payer, &converted_ixs, &converted_luts, converted_blockhash)
         .map_err(|_| OnDemandError::SolanaSignError)?;
@@ -172,10 +174,10 @@ pub fn ix_to_tx(
     blockhash: crate::solana_program::hash::Hash,
 ) -> Result<Transaction, OnDemandError> {
     // Convert instructions to compatible type for solana_sdk
-    let converted_ixs: Vec<anchor_client::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
-        anchor_client::solana_sdk::instruction::Instruction {
+    let converted_ixs: Vec<crate::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
+        crate::solana_sdk::instruction::Instruction {
             program_id: ix.program_id.to_bytes().into(),
-            accounts: ix.accounts.iter().map(|acc| anchor_client::solana_sdk::instruction::AccountMeta {
+            accounts: ix.accounts.iter().map(|acc| crate::solana_sdk::instruction::AccountMeta {
                 pubkey: acc.pubkey.to_bytes().into(),
                 is_signer: acc.is_signer,
                 is_writable: acc.is_writable,
@@ -184,9 +186,9 @@ pub fn ix_to_tx(
         }
     }).collect();
 
-    let converted_msg = anchor_client::solana_sdk::message::Message::new(&converted_ixs, Some(&signers[0].pubkey().to_bytes().into()));
+    let converted_msg = crate::solana_sdk::message::Message::new(&converted_ixs, Some(&signers[0].pubkey().to_bytes().into()));
     let mut tx = Transaction::new_unsigned(converted_msg);
-    let converted_blockhash: anchor_client::solana_sdk::hash::Hash = blockhash.to_bytes().into();
+    let converted_blockhash: crate::solana_sdk::hash::Hash = blockhash.to_bytes().into();
     tx.try_sign(&signers.to_vec(), converted_blockhash)
         .map_err(|_e| OnDemandError::SolanaSignError)?;
     Ok(tx)
@@ -382,6 +384,7 @@ pub async fn fetch_zerocopy_account<T: bytemuck::Pod + Discriminator + Owner>(
 /// # Returns
 ///
 /// Returns a `Result` containing the fetched account data of type `T` if successful, or an `OnDemandError` if an error occurs.
+#[cfg(feature = "client")]
 pub fn fetch_zerocopy_account_sync<C: SyncClient, T: bytemuck::Pod + Discriminator + Owner>(
     client: &C,
     pubkey: Pubkey,
@@ -418,6 +421,7 @@ pub async fn fetch_borsh_account<T: Discriminator + Owner + AccountDeserialize>(
         .map_err(|_| OnDemandError::AnchorParseError)
 }
 
+#[cfg(feature = "client")]
 pub fn fetch_borsh_account_sync<C: SyncClient, T: Discriminator + Owner + AccountDeserialize>(
     client: &C,
     pubkey: Pubkey,

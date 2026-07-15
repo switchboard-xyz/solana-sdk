@@ -85,12 +85,12 @@ impl ToAccountMetas for QueueResetLutAccounts {
 }
 
 cfg_client! {
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
 // use crate::get_sb_program_id; // Commented out due to unused import
 #[cfg(not(feature = "anchor"))]
-use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 #[cfg(feature = "anchor")]
-use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 
 // fn derive_lookup_table_address(authority_address: &Pubkey, recent_block_slot: u64) -> (Pubkey, u8) {
 //     Pubkey::find_program_address(

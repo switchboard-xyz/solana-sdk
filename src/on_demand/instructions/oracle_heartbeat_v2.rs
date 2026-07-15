@@ -62,7 +62,7 @@ impl ToAccountMetas for OracleHeartbeatV2Accounts {
 }
 
 cfg_client! {
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
 use crate::get_sb_program_id;
 
 impl OracleHeartbeatV2 {

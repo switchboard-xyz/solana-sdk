@@ -9,7 +9,7 @@ pub use solana_program::program::{invoke, invoke_signed};
 
 pub use crate::accounts::*;
 // Client utility functions
-#[cfg(feature = "client")]
+#[cfg(any(feature = "client", feature = "client-v3"))]
 pub use crate::client::utils::{ix_to_tx, ix_to_tx_v0};
 pub use crate::decimal::*;
 pub use crate::instructions::*;

@@ -51,8 +51,8 @@ crate::cfg_client! {
     use futures::TryFutureExt;
     pub async fn fetch_async(
         client: &crate::RpcClient,
-    ) -> std::result::Result<anchor_client::solana_sdk::sysvar::clock::Clock, crate::OnDemandError> {
-        let pubkey = anchor_client::solana_sdk::sysvar::clock::id();
+    ) -> std::result::Result<crate::solana_sdk::sysvar::clock::Clock, crate::OnDemandError> {
+        let pubkey = crate::solana_sdk::sysvar::clock::id();
         let data = client
             .get_account_data(&pubkey)
             .map_err(|_| OnDemandError::AccountNotFound)

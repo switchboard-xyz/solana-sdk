@@ -2,7 +2,7 @@ use borsh::BorshSerialize;
 use solana_program::instruction::AccountMeta;
 
 use crate::anchor_traits::*;
-#[cfg(feature = "client")]
+#[cfg(any(feature = "client", feature = "client-v3"))]
 use crate::prelude::*;
 use crate::{cfg_client, solana_program, Pubkey};
 
@@ -53,7 +53,7 @@ impl ToAccountMetas for OracleSetConfigsAccounts {
 }
 
 cfg_client! {
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
 use crate::get_sb_program_id;
 
 impl OracleSetConfigs {

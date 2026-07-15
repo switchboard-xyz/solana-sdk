@@ -89,8 +89,8 @@ impl ToAccountMetas for OracleSyncLutAccounts {
 }
 
 cfg_client! {
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
-use spl_associated_token_account::solana_program::address_lookup_table::instruction::derive_lookup_table_address;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_sdk::address_lookup_table::instruction::derive_lookup_table_address;
 use crate::get_sb_program_id;
 use crate::find_lut_signer;
 

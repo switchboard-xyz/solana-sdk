@@ -14,8 +14,8 @@ use crate::AccountInfo;
 use crate::{cfg_client, get_sb_program_id, OnDemandError, Quote};
 cfg_client! {
     use crate::address_lookup_table;
-    use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
-    use spl_associated_token_account::solana_program::address_lookup_table::instruction::derive_lookup_table_address;
+    use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
+    use crate::solana_sdk::address_lookup_table::instruction::derive_lookup_table_address;
     use crate::find_lut_signer;
 }
 
@@ -344,7 +344,7 @@ impl OracleAccountData {
             client: &crate::RpcClient,
             oracles: &[Pubkey],
         ) -> std::result::Result<Vec<OracleAccountData>, crate::OnDemandError> {
-            let converted_oracles: Vec<anchor_client::solana_sdk::pubkey::Pubkey> = oracles.iter().map(|pk| pk.to_bytes().into()).collect();
+            let converted_oracles: Vec<crate::solana_sdk::pubkey::Pubkey> = oracles.iter().map(|pk| pk.to_bytes().into()).collect();
             Ok(client
                 .get_multiple_accounts(&converted_oracles)
                 .await
