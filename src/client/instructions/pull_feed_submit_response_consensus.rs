@@ -2,7 +2,7 @@ use super::get_discriminator;
 use borsh::{BorshDeserialize, BorshSerialize};
 use crate::AccountMeta;
 use crate::Pubkey;
-use anchor_client::solana_sdk::sysvar::instructions;
+use crate::solana_sdk::sysvar::instructions;
 
 #[derive(Clone, Debug)]
 pub struct PullFeedSubmitResponseConsensus {

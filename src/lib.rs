@@ -145,9 +145,13 @@ pub mod solana_compat;
 // Re-export everything from solana_compat for internal use
 pub use solana_compat::{solana_program, AccountMeta, Instruction, Pubkey, SYSTEM_PROGRAM_ID};
 
-// Re-export solana_sdk for client code (when client feature is enabled)
-#[cfg(feature = "client")]
+// Re-export solana_sdk for client code (v2 client or v3 client)
+#[cfg(any(feature = "client", feature = "client-v3"))]
 pub use solana_compat::solana_sdk;
+
+// Re-export solana_client for client code (v2 client or v3 client)
+#[cfg(any(feature = "client", feature = "client-v3"))]
+pub use solana_compat::solana_client;
 
 /// Solana sysvar utilities
 pub mod sysvar;
@@ -158,9 +162,13 @@ mod account_info_compat;
 pub use account_info_compat::{AccountInfo, AsAccountInfo};
 
 cfg_client! {
-    use anchor_client::solana_sdk::signer::keypair::Keypair;
+    // `anchor-client`'s high-level `Client` wrapper is only available on the v2 client
+    // (anchor-client depends on Solana v2). The v3 client uses `RpcClient` directly.
+    #[cfg(feature = "client")]
+    use crate::solana_sdk::signer::keypair::Keypair;
+    #[cfg(feature = "client")]
     pub type AnchorClient = anchor_client::Client<Arc<Keypair>>;
-    pub type RpcClient = anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
+    pub type RpcClient = crate::solana_client::nonblocking::rpc_client::RpcClient;
 
     /// Client functionality for off-chain interactions with Switchboard On-Demand
     ///
@@ -180,9 +188,10 @@ cfg_client! {
 
     /// Returns the appropriate Switchboard On-Demand program ID for the current network.
     ///
-    /// This client-compatible version returns anchor_lang::prelude::Pubkey type.
-    pub fn get_switchboard_on_demand_program_id() -> anchor_lang::prelude::Pubkey {
-        use anchor_lang::prelude::Pubkey;
+    /// Returns the crate's re-exported `crate::Pubkey`, whose concrete type follows the active
+    /// Solana feature (anchor's v2 Pubkey under `client`, or the Solana v3 Pubkey under `client-v3`).
+    pub fn get_switchboard_on_demand_program_id() -> crate::Pubkey {
+        use crate::Pubkey;
         if is_devnet() {
             Pubkey::from(crate::ON_DEMAND_DEVNET_PID.to_bytes())
         } else {

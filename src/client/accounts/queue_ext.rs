@@ -19,7 +19,7 @@ impl LutOwner for QueueAccountData {
 impl QueueAccountData {
     /// Loads queue data from on-chain
     pub async fn load(client: &RpcClient, key: &Pubkey) -> Result<QueueAccountData, AnyhowError> {
-        let key_anchor: anchor_client::solana_sdk::pubkey::Pubkey = key.to_bytes().into();
+        let key_anchor: crate::solana_sdk::pubkey::Pubkey = key.to_bytes().into();
         let account = client
             .get_account_data(&key_anchor)
             .await

@@ -2,18 +2,18 @@ use crate::*;
 
 use crate::Pubkey;
 use crate::solana_program::instruction::{Instruction, AccountMeta};
-use anchor_client::solana_sdk::address_lookup_table::state::AddressLookupTable;
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
-use anchor_client::solana_sdk::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::state::AddressLookupTable;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 use crate::solana_program::hash::Hash;
-use anchor_client::solana_sdk::compute_budget::ComputeBudgetInstruction;
-use anchor_client::solana_sdk::signer::Signer;
-use anchor_client::solana_sdk::transaction::VersionedTransaction;
+use crate::solana_sdk::compute_budget::ComputeBudgetInstruction;
+use crate::solana_sdk::signer::Signer;
+use crate::solana_sdk::transaction::VersionedTransaction;
 use tokio::sync::RwLockReadGuard;
 use std::ops::Deref;
 use std::sync::Arc;
-use anchor_client::solana_sdk::transaction::Transaction;
-pub use anchor_client::solana_sdk::signer::keypair::Keypair;
+use crate::solana_sdk::transaction::Transaction;
+pub use crate::solana_sdk::signer::keypair::Keypair;
 
 /// A trait for types that can act as signers for transactions.
 pub trait AsSigner: Send + Sync {
@@ -137,8 +137,8 @@ impl<'a> AsSigner for &Arc<RwLockReadGuard<'a, Keypair>> {
 /// Creating a new transaction object with a payer:
 ///
 /// ```rust
-/// use anchor_client::solana_sdk::pubkey::Pubkey;
-/// use anchor_client::solana_sdk::instruction::Instruction;
+/// use crate::solana_sdk::pubkey::Pubkey;
+/// use crate::solana_sdk::instruction::Instruction;
 /// use std::sync::Arc;
 ///
 /// let payer = Pubkey::new_unique();
@@ -148,8 +148,8 @@ impl<'a> AsSigner for &Arc<RwLockReadGuard<'a, Keypair>> {
 /// Adding an instruction to the transaction:
 ///
 /// ```rust
-/// use anchor_client::solana_sdk::pubkey::Pubkey;
-/// use anchor_client::solana_sdk::instruction::Instruction;
+/// use crate::solana_sdk::pubkey::Pubkey;
+/// use crate::solana_sdk::instruction::Instruction;
 /// use std::sync::Arc;
 ///
 /// let payer = Pubkey::new_unique();
@@ -161,8 +161,8 @@ impl<'a> AsSigner for &Arc<RwLockReadGuard<'a, Keypair>> {
 /// Converting the transaction object to a legacy transaction:
 ///
 /// ```rust
-/// use anchor_client::solana_sdk::pubkey::Pubkey;
-/// use anchor_client::solana_sdk::instruction::Instruction;
+/// use crate::solana_sdk::pubkey::Pubkey;
+/// use crate::solana_sdk::instruction::Instruction;
 /// use std::sync::Arc;
 ///
 /// let payer = Pubkey::new_unique();
@@ -436,10 +436,10 @@ impl TransactionBuilder {
         recent_blockhash: Hash,
     ) -> Result<Transaction, OnDemandError> {
         // Convert to anchor-client types
-        let converted_ixs: Vec<anchor_client::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
-            anchor_client::solana_sdk::instruction::Instruction {
+        let converted_ixs: Vec<crate::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
+            crate::solana_sdk::instruction::Instruction {
                 program_id: ix.program_id.to_bytes().into(),
-                accounts: ix.accounts.iter().map(|acc| anchor_client::solana_sdk::instruction::AccountMeta {
+                accounts: ix.accounts.iter().map(|acc| crate::solana_sdk::instruction::AccountMeta {
                     pubkey: acc.pubkey.to_bytes().into(),
                     is_signer: acc.is_signer,
                     is_writable: acc.is_writable,
@@ -447,8 +447,8 @@ impl TransactionBuilder {
                 data: ix.data.clone(),
             }
         }).collect();
-        let converted_payer: anchor_client::solana_sdk::pubkey::Pubkey = payer.to_bytes().into();
-        let converted_blockhash: anchor_client::solana_sdk::hash::Hash = recent_blockhash.to_bytes().into();
+        let converted_payer: crate::solana_sdk::pubkey::Pubkey = payer.to_bytes().into();
+        let converted_blockhash: crate::solana_sdk::hash::Hash = recent_blockhash.to_bytes().into();
 
         let mut tx = Transaction::new_with_payer(&converted_ixs, Some(&converted_payer));
         tx.try_sign(&signers, converted_blockhash).map_err(|_| OnDemandError::SolanaSignError)?;
@@ -514,7 +514,7 @@ impl TransactionBuilder {
         rpc: &RpcClient,
         address_lookup_table_pubkey: Pubkey,
     ) -> Result<AddressLookupTableAccount, OnDemandError> {
-        let converted_pubkey: anchor_client::solana_sdk::pubkey::Pubkey = address_lookup_table_pubkey.to_bytes().into();
+        let converted_pubkey: crate::solana_sdk::pubkey::Pubkey = address_lookup_table_pubkey.to_bytes().into();
         let account = rpc
             .get_account(&converted_pubkey)
             .await
@@ -536,7 +536,7 @@ impl TransactionBuilder {
             if address_lookup_pubkeys.is_empty() {
                 vec![]
             } else {
-                let converted_pubkeys: Vec<anchor_client::solana_sdk::pubkey::Pubkey> = address_lookup_pubkeys.iter().map(|pk| pk.to_bytes().into()).collect();
+                let converted_pubkeys: Vec<crate::solana_sdk::pubkey::Pubkey> = address_lookup_pubkeys.iter().map(|pk| pk.to_bytes().into()).collect();
                 let accounts = rpc
                     .get_multiple_accounts(&converted_pubkeys)
                     .await
@@ -568,11 +568,11 @@ impl TransactionBuilder {
         recent_blockhash: Hash,
     ) -> Result<VersionedTransaction, OnDemandError> {
         // Convert types directly for solana_sdk compatibility
-        let converted_payer: anchor_client::solana_sdk::pubkey::Pubkey = payer.to_bytes().into();
-        let converted_ixs: Vec<anchor_client::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
-            anchor_client::solana_sdk::instruction::Instruction {
+        let converted_payer: crate::solana_sdk::pubkey::Pubkey = payer.to_bytes().into();
+        let converted_ixs: Vec<crate::solana_sdk::instruction::Instruction> = ixs.iter().map(|ix| {
+            crate::solana_sdk::instruction::Instruction {
                 program_id: ix.program_id.to_bytes().into(),
-                accounts: ix.accounts.iter().map(|acc| anchor_client::solana_sdk::instruction::AccountMeta {
+                accounts: ix.accounts.iter().map(|acc| crate::solana_sdk::instruction::AccountMeta {
                     pubkey: acc.pubkey.to_bytes().into(),
                     is_signer: acc.is_signer,
                     is_writable: acc.is_writable,
@@ -580,22 +580,22 @@ impl TransactionBuilder {
                 data: ix.data.clone(),
             }
         }).collect();
-        let converted_lookup_accounts: Vec<anchor_client::solana_sdk::message::AddressLookupTableAccount> = address_lookup_accounts.iter().map(|lut| {
-            anchor_client::solana_sdk::message::AddressLookupTableAccount {
+        let converted_lookup_accounts: Vec<crate::solana_sdk::message::AddressLookupTableAccount> = address_lookup_accounts.iter().map(|lut| {
+            crate::solana_sdk::message::AddressLookupTableAccount {
                 key: lut.key.to_bytes().into(),
                 addresses: lut.addresses.iter().map(|addr| addr.to_bytes().into()).collect(),
             }
         }).collect();
-        let converted_blockhash: anchor_client::solana_sdk::hash::Hash = anchor_client::solana_sdk::hash::Hash::new_from_array(recent_blockhash.to_bytes());
+        let converted_blockhash: crate::solana_sdk::hash::Hash = crate::solana_sdk::hash::Hash::new_from_array(recent_blockhash.to_bytes());
 
-        let v0_message = anchor_client::solana_sdk::message::v0::Message::try_compile(
+        let v0_message = crate::solana_sdk::message::v0::Message::try_compile(
             &converted_payer,
             &converted_ixs,
             &converted_lookup_accounts,
             converted_blockhash
         ).unwrap();
 
-        let v0_tx = VersionedTransaction::try_new(anchor_client::solana_sdk::message::VersionedMessage::V0(v0_message), &signers)
+        let v0_tx = VersionedTransaction::try_new(crate::solana_sdk::message::VersionedMessage::V0(v0_message), &signers)
             .unwrap();
 
         Ok(v0_tx)
@@ -689,7 +689,7 @@ impl TryFrom<TransactionBuilder> for VersionedTransaction {
 mod tests {
     use super::*;
     use ::solana_program::instruction::AccountMeta;
-    use anchor_client::solana_sdk::signer::keypair::Keypair;
+    use crate::solana_sdk::signer::keypair::Keypair;
     use tokio::sync::{OnceCell, RwLock};
 
     // #[test]

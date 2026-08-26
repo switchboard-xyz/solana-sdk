@@ -4,7 +4,7 @@
 //! between Solana SDK v2 types (used by on-chain code) and Solana SDK v3 types
 //! (used by anchor-client).
 
-use anchor_client::solana_sdk;
+use crate::solana_sdk;
 
 /// Convert v3 Instruction to v2 Instruction
 ///

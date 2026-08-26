@@ -1,5 +1,5 @@
-use anchor_client::solana_sdk::instruction::Instruction;
-use anchor_client::solana_sdk::secp256k1_program;
+use crate::solana_sdk::instruction::Instruction;
+use crate::solana_sdk::secp256k1_program;
 
 // Constants per Solana's secp256k1 instruction specification:
 const SIGNATURE_SERIALIZED_SIZE: usize = 64;

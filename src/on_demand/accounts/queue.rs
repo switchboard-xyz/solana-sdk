@@ -15,7 +15,7 @@ use crate::AccountInfo;
 use crate::OracleAccountData;
 use crate::{cfg_client, get_sb_program_id, OnDemandError};
 cfg_client! {
-    use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+    use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 }
 use crate::Pubkey;
 
@@ -302,7 +302,7 @@ impl QueueAccountData {
             client: &crate::RpcClient,
         ) -> std::result::Result<Vec<(Pubkey, OracleAccountData)>, crate::OnDemandError> {
             let oracles = &self.oracle_keys[..self.oracle_keys_len as usize];
-            let converted_oracles: Vec<anchor_client::solana_sdk::pubkey::Pubkey> = oracles.iter().map(|pk| pk.to_bytes().into()).collect();
+            let converted_oracles: Vec<crate::solana_sdk::pubkey::Pubkey> = oracles.iter().map(|pk| pk.to_bytes().into()).collect();
             let datas: Vec<_> = client
                 .get_multiple_accounts(&converted_oracles)
                 .await
@@ -325,7 +325,7 @@ impl QueueAccountData {
             pubkey: &Pubkey,
             client: &crate::RpcClient,
         ) -> std::result::Result<AddressLookupTableAccount, crate::OnDemandError> {
-            use spl_associated_token_account::solana_program::address_lookup_table::instruction::derive_lookup_table_address;
+            use crate::solana_sdk::address_lookup_table::instruction::derive_lookup_table_address;
             let lut_slot = self.lut_slot;
             let lut_signer: Pubkey = crate::find_lut_signer(pubkey);
             let lut = derive_lookup_table_address(&lut_signer.to_bytes().into(), lut_slot).0;

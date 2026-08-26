@@ -17,12 +17,12 @@ pub fn find_lut_signer<K: AsRef<[u8]>, P: From<[u8; 32]>>(k: &K) -> P {
 
 cfg_client! {
     use crate::OnDemandError;
-    use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
-    use spl_associated_token_account::solana_program::address_lookup_table::state::AddressLookupTable;
-    use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+    use crate::solana_client::nonblocking::rpc_client::RpcClient;
+    use crate::solana_sdk::address_lookup_table::state::AddressLookupTable;
+    use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 
     pub async fn fetch(client: &RpcClient, address: &Pubkey) -> Result<AddressLookupTableAccount, OnDemandError> {
-        let converted_address: anchor_client::solana_sdk::pubkey::Pubkey = address.to_bytes().into();
+        let converted_address: crate::solana_sdk::pubkey::Pubkey = address.to_bytes().into();
         let account = client.get_account_data(&converted_address)
             .await
             .map_err(|_| OnDemandError::AddressLookupTableFetchError)?;

@@ -75,12 +75,12 @@ impl ToAccountMetas for QueuePayRewardAccounts {
 }
 
 cfg_client! {
-use anchor_client::solana_client::nonblocking::rpc_client::RpcClient;
+use crate::solana_client::nonblocking::rpc_client::RpcClient;
 use crate::get_sb_program_id;
 #[cfg(not(feature = "anchor"))]
-use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 #[cfg(feature = "anchor")]
-use spl_associated_token_account::solana_program::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
 
 impl QueuePayReward {
     pub async fn build_ix(client: &RpcClient, args: QueuePayRewardArgs) -> Result<Instruction, OnDemandError> {

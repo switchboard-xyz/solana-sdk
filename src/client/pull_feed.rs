@@ -24,8 +24,8 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use crate::solana_compat::solana_client::nonblocking::rpc_client::RpcClient;
-use anchor_client::solana_sdk::address_lookup_table::AddressLookupTableAccount;
-use anchor_client::solana_sdk::instruction::Instruction;
+use crate::solana_sdk::address_lookup_table::AddressLookupTableAccount;
+use crate::solana_sdk::instruction::Instruction;
 use crate::{Pubkey, SYSTEM_PROGRAM_ID};
 use std::result::Result;
 use std::sync::Arc;
@@ -186,11 +186,11 @@ impl PullFeed {
         }
         let mut remaining_accounts = Vec::new();
         for resp in &responses {
-            remaining_accounts.push(anchor_client::solana_sdk::instruction::AccountMeta::new_readonly(resp.oracle.to_bytes().into(), false));
+            remaining_accounts.push(crate::solana_sdk::instruction::AccountMeta::new_readonly(resp.oracle.to_bytes().into(), false));
         }
         for resp in responses {
             let stats_key = OracleAccountData::stats_key(&resp.oracle);
-            remaining_accounts.push(anchor_client::solana_sdk::instruction::AccountMeta::new(stats_key.to_bytes().into(), false));
+            remaining_accounts.push(crate::solana_sdk::instruction::AccountMeta::new(stats_key.to_bytes().into(), false));
         }
         let mut submit_ix = Instruction {
             program_id: get_switchboard_on_demand_program_id(),
@@ -208,7 +208,7 @@ impl PullFeed {
             }
             .to_account_metas(None)
             .into_iter()
-            .map(|meta| anchor_client::solana_sdk::instruction::AccountMeta {
+            .map(|meta| crate::solana_sdk::instruction::AccountMeta {
                 pubkey: meta.pubkey.to_bytes().into(),
                 is_signer: meta.is_signer,
                 is_writable: meta.is_writable,
@@ -541,12 +541,12 @@ impl PullFeed {
 
         // Attach feed accounts and oracle accounts (plus their stats accounts) as remaining accounts.
         for feed in &feed_pubkeys {
-            remaining_accounts.push(anchor_client::solana_sdk::instruction::AccountMeta::new(feed.to_bytes().into(), false));
+            remaining_accounts.push(crate::solana_sdk::instruction::AccountMeta::new(feed.to_bytes().into(), false));
         }
         for oracle in oracle_keys.iter() {
-            remaining_accounts.push(anchor_client::solana_sdk::instruction::AccountMeta::new_readonly(oracle.to_bytes().into(), false));
+            remaining_accounts.push(crate::solana_sdk::instruction::AccountMeta::new_readonly(oracle.to_bytes().into(), false));
             let stats_key = OracleAccountData::stats_key(oracle);
-            remaining_accounts.push(anchor_client::solana_sdk::instruction::AccountMeta::new(stats_key.to_bytes().into(), false));
+            remaining_accounts.push(crate::solana_sdk::instruction::AccountMeta::new(stats_key.to_bytes().into(), false));
         }
         // Load lookup tables for oracle, feed, and queue accounts concurrently.
         let queue_key = [queue];
@@ -581,7 +581,7 @@ impl PullFeed {
             }
             .to_account_metas(None)
             .into_iter()
-            .map(|meta| anchor_client::solana_sdk::instruction::AccountMeta {
+            .map(|meta| crate::solana_sdk::instruction::AccountMeta {
                 pubkey: meta.pubkey.to_bytes().into(),
                 is_signer: meta.is_signer,
                 is_writable: meta.is_writable,
