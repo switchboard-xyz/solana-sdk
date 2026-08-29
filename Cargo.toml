@@ -26,7 +26,11 @@ no-entrypoint = []
 
 ## Enables Cross-Program Invocation (CPI) support. Implies `no-entrypoint`.
 ## Use this when you need to call Switchboard from another Solana program.
-cpi = ["no-entrypoint"]
+cpi = ["no-entrypoint", "dep:spl-associated-token-account", "dep:spl-token"]
+
+## Enables native Solana program integration with Solana SDK v3.
+## Use when integrating with non-Anchor, non-Pinocchio programs.
+native = ["solana-v3"]
 
 ## Meta-feature for documentation builds - includes all commonly used features.
 all-features = ["cpi", "no-entrypoint", "client"]
@@ -38,13 +42,13 @@ pid_override = []
 ## Client functionality for off-chain interactions (Gateway, Crossbar, transaction builders).
 ## Uses Solana SDK v2 with anchor-client compatibility.
 ## Includes: RPC client, transaction building, oracle feeds, and Crossbar integration.
-client = ["anchor-lang", "anchor-client", "tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v2", "dep:solana-client-v2"]
+client = ["anchor-lang", "anchor-client", "tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v2", "dep:solana-client-v2", "dep:libsecp256k1", "dep:spl-associated-token-account", "dep:spl-token"]
 
 ## Alias for `client` feature - explicitly uses Solana SDK v2.
 client-v2 = ["client"]
 
 ## Client feature using Solana v3 crates.
-client-v3 = ["tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v3", "dep:solana-client-v3"]
+client-v3 = ["tokio", "tokio-util", "futures", "arc-swap", "reqwest", "prost", "pbjson", "dashmap", "tokio-stream", "base58", "bs58", "lazy_static", "hex", "base64", "serde_json", "switchboard-utils", "solana-v3", "dep:solana-client-v3", "dep:libsecp256k1", "dep:spl-associated-token-account", "dep:spl-token"]
 
 ## Configures the crate for Solana devnet deployment.
 devnet = []
@@ -87,13 +91,13 @@ base64ct = "<1.8"
 bincode = { version = "^1" }
 borsh = { version = "1.5.7" }
 bs58 = { version = "0.4", features = ["alloc"], optional = true }
-bytemuck = "^1"
+bytemuck = { version = "^1", features = ["derive"] }
 dashmap = { version = "6.0.1", optional = true }
 faster-hex = "0.10.0"
 futures = { version = "0.3.31", optional = true }
 hex = { version = "0.4", optional = true }
 lazy_static = { version = "1.5.0", optional = true }
-libsecp256k1 = "0.7.1"
+libsecp256k1 = { version = "0.7.1", optional = true }
 pbjson = { version = "0.7.0", optional = true }
 pinocchio = { version = "0.9.2", features = ["std"], optional = true }
 prost = { version = "0.13.1", optional = true }
@@ -107,11 +111,10 @@ solana-client-v3 = { package = "solana-client", version = ">=3", optional = true
 solana-commitment-config = "3.0.0"
 solana-program-v2 = { package = "solana-program", version = ">=2,<3", optional = true }
 solana-program-v3 = { package = "solana-program", version = ">=3", optional = true }
-spl-associated-token-account = { version = ">=3", features = ["no-entrypoint"] }
-spl-token = { version = ">=4", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = ">=3", features = ["no-entrypoint"], optional = true }
+spl-token = { version = ">=4", features = ["no-entrypoint"], optional = true }
 switchboard-common = { version = "0.11.6", features = [] }
 switchboard-utils = { version = "0.9", optional = true }
 tokio = { version = "^1.41", features = ["full", "tracing"], optional = true }
 tokio-stream = { version = ">=0.1.17", optional = true }
 tokio-util = { version = "0.7.10", features = ["time"], optional = true }
-

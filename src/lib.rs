@@ -60,7 +60,12 @@ compile_error!("Cannot enable both 'solana-v2' and 'solana-v3' features. Choose 
 compile_error!("Cannot enable both 'client' (v2) and 'client-v3' features. Use 'client' for Solana v2 or 'client-v3' for Solana v3.");
 
 #[cfg(all(feature = "client-v2", feature = "client-v3"))]
-compile_error!("Cannot enable both 'client-v2' and 'client-v3' features. Choose one client version.");
+compile_error!(
+    "Cannot enable both 'client-v2' and 'client-v3' features. Choose one client version."
+);
+
+#[cfg(all(feature = "native", any(feature = "anchor", feature = "pinocchio")))]
+compile_error!("Cannot enable 'native' with 'anchor' or 'pinocchio'. Choose one account model.");
 
 // When both solana-v2 and client features are enabled, provide type compatibility layers
 #[cfg(all(feature = "solana-v2", feature = "client"))]
@@ -132,6 +137,7 @@ pub use program_id::*;
 /// Solana account definitions and parsers
 pub mod accounts;
 /// Solana instruction builders and processors
+#[cfg(any(feature = "cpi", feature = "client", feature = "client-v3"))]
 pub mod instructions;
 /// Common type definitions
 pub mod types;

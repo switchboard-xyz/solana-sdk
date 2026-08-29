@@ -300,6 +300,7 @@ impl OracleAccountData {
     }
 
     /// Returns the SECP256K1 signer as a libsecp256k1::PublicKey
+    #[cfg(any(feature = "client", feature = "client-v3"))]
     pub fn libsecp256k1_signer(&self) -> Option<libsecp256k1::PublicKey> {
         let bytes = self.secp256k1_signer()?;
         let tag_full_pubkey: Vec<u8> = vec![4u8];
