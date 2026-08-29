@@ -1,3 +1,16 @@
 !.env
 
 doc
+
+target/
+**/*.rs.bk
+*.pdb
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+.DS_Store
+Thumbs.db

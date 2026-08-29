@@ -219,3 +219,6 @@ cfg_client! {
     /// Seed bytes for deriving reward pool vault account PDAs.
     pub const REWARD_POOL_VAULT_SEED: &[u8] = b"RewardPool";
 }
+/// Surge WebSocket client for real-time price streaming
+#[cfg(feature = "surge")]
+pub mod surge;
