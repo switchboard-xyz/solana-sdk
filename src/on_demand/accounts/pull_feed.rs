@@ -244,8 +244,15 @@ impl OracleSubmission {
 impl PullFeedAccountData {
     /// Returns true if the value in the current result is within
     /// staleness threshold
-    pub fn is_result_vaild(&self, clock_slot: u64) -> bool {
+    pub fn is_result_valid(&self, clock_slot: u64) -> bool {
         self.result.slot >= clock_slot - self.max_staleness as u64
+    }
+
+    /// Returns true if the value in the current result is within
+    /// staleness threshold
+    #[deprecated(note = "use `is_result_valid` instead")]
+    pub fn is_result_vaild(&self, clock_slot: u64) -> bool {
+        self.is_result_valid(clock_slot)
     }
 
     /// Returns the oracle submission that was used for the current result
